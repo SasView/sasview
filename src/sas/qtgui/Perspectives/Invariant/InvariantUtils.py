@@ -43,11 +43,19 @@ WIDGETS = enum(
     "D_HIGH_QSTAR",
     "D_HIGH_QSTAR_ERR",
     #extrapolation tab
-    "W_EX_QMAX_LOWQ",
-    "W_EX_QMIN_HIGHQ",
-    "W_EX_QMAX_HIGHQ",
-    "W_POWER_LOWQ",
-    "W_POWER_HIGHQ",
+    "W_GUINIER_END_EX",
+    "W_POROD_START_EX",
+    "W_POROD_END_EX",
+    "W_LOWQ_POWER_VALUE_EX",
+    "W_HIGHQ_POWER_VALUE_EX",
+    "W_ENABLE_LOWQ_EX",
+    "W_ENABLE_HIGHQ_EX",
+    "W_LOWQ_GUINIER_EX",
+    "W_LOWQ_POWER_EX",
+    "W_LOWQ_FIT_EX",
+    "W_LOWQ_FIX_EX",
+    "W_HIGHQ_FIT_EX",
+    "W_HIGHQ_FIX_EX",
     "W_FILENAME"
 )
 

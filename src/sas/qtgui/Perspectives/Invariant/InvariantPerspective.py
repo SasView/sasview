@@ -1,6 +1,7 @@
 # global
 import copy
 import logging
+import math
 
 import numpy as np
 from PySide6 import QtCore, QtGui, QtWidgets
@@ -62,6 +63,12 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self._volfrac1 = None
         self._volfrac2 = None
 
+        self._qmax_lowq = None
+        self._qmin_highq = None
+        self._qmax_highq = None
+        self._ex_power_lowq = None
+        self._ex_power_highq = None
+
         self.parent = parent
 
         self._manager = parent
@@ -88,6 +95,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
         self.slider = CorfuncSlider()
         self.sliderLayout.insertWidget(1, self.slider)
+        self.extrapolation_parameters = None
 
         # no reason to have this widget resizable
         self.resize(self.minimumSizeHint())
@@ -150,6 +158,18 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.txtPowerLowQ.setValidator(GuiUtils.DoubleValidator())
         self.txtPowerHighQ.setValidator(GuiUtils.DoubleValidator())
 
+        # Start with all Extrapolation options disabled
+        self.rbLowQGuinier_ex.setDisabled(True)
+        self.rbLowQPower_ex.setDisabled(True)
+        self.rbLowQFit_ex.setDisabled(True)
+        self.rbLowQFix_ex.setDisabled(True)
+        self.rbLowQFit_ex.setVisible(False)
+        self.rbLowQFix_ex.setVisible(False)
+        self.rbHighQFit_ex.setDisabled(True)
+        self.rbHighQFix_ex.setDisabled(True)
+        self.txtLowQPower_ex.setDisabled(True)
+        self.txtHighQPower_ex.setDisabled(True)
+
         self.rbContrast.setChecked(True)
         self.allow_calculation()
 
@@ -157,14 +177,22 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
     @property
     def extrapolation_paramameters(self) -> ExtrapolationParameters | None:
-        if self.data is not None:
+        print("extrapolation parameters running sujaya ")
+        if self._data is not None:
             return ExtrapolationParameters(
-                min(self.data.x),
-                safe_float(self.model.item(WIDGETS.W_QMIN).text()),
-                safe_float(self.model.item(WIDGETS.W_QMAX).text()),
-                safe_float(self.model.item(WIDGETS.W_QCUTOFF).text()), 10 * max(self.data.x))
+                safe_float(Q_MINIMUM),
+                safe_float(self.model.item(WIDGETS.W_GUINIER_END_EX).text()),
+                safe_float(self.model.item(WIDGETS.W_POROD_START_EX).text()),
+                safe_float(self.model.item(WIDGETS.W_POROD_END_EX).text()),
+                safe_float(Q_MAXIMUM))
         else:
             return None
+
+    def set_text_enable(self, state: bool):
+        """Enable or disable the text fields in the extrapolation tab"""
+        self.txtGuinierEnd_ex.setEnabled(state)
+        self.txtPorodStart_ex.setEnabled(state)
+        self.txtPorodEnd_ex.setEnabled(state)
 
     def get_low_q_extrapolation_upper_limit(self):
         q_value = self._data.x[int(self.txtNptsLowQ.text()) - 1]
@@ -229,18 +257,35 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         if self.model.item(WIDGETS.W_VOLFRAC2).text() != 'None' and self.model.item(WIDGETS.W_VOLFRAC2).text() != '':
             self._volfrac2 = float(self.model.item(WIDGETS.W_VOLFRAC2).text())
 
-        # Low extrapolating
-        self._low_extrapolate = str(self.model.item(WIDGETS.W_ENABLE_LOWQ).text()) == "true"
-        self._low_points = float(self.model.item(WIDGETS.W_NPTS_LOWQ).text())
-        self._low_guinier = str(self.model.item(WIDGETS.W_LOWQ_GUINIER).text()) == "true"
-        self._low_fit = str(self.model.item(WIDGETS.W_LOWQ_FIT).text()) == "true"
-        self._low_power_value = float(self.model.item(WIDGETS.W_LOWQ_POWER_VALUE).text())
+        # # Low extrapolating
+        # self._low_extrapolate = str(self.model.item(WIDGETS.W_ENABLE_LOWQ).text()) == "true"
+        # self._low_points = float(self.model.item(WIDGETS.W_NPTS_LOWQ).text())
+        # self._low_guinier = str(self.model.item(WIDGETS.W_LOWQ_GUINIER).text()) == "true"
+        # self._low_fit = str(self.model.item(WIDGETS.W_LOWQ_FIT).text()) == "true"
+        # self._low_power_value = float(self.model.item(WIDGETS.W_LOWQ_POWER_VALUE).text())
+
+        self._low_extrapolate = str(self.model.item(WIDGETS.W_ENABLE_LOWQ_EX).text()) == "true"
+        self._low_guinier = str(self.model.item(WIDGETS.W_LOWQ_GUINIER_EX).text()) == "true"
+        self._low_fit = str(self.model.item(WIDGETS.W_LOWQ_FIT_EX).text()) == "true"
+        self._low_power_value = float(self.model.item(WIDGETS.W_LOWQ_POWER_VALUE_EX).text())
 
         # High extrapolating
-        self._high_extrapolate = str(self.model.item(WIDGETS.W_ENABLE_HIGHQ).text()) == "true"
-        self._high_points = float(self.model.item(WIDGETS.W_NPTS_HIGHQ).text())
-        self._high_fit = str(self.model.item(WIDGETS.W_HIGHQ_FIT).text()) == "true"
-        self._high_power_value = float(self.model.item(WIDGETS.W_HIGHQ_POWER_VALUE).text())
+        # self._high_extrapolate = str(self.model.item(WIDGETS.W_ENABLE_HIGHQ).text()) == "true"
+        # self._high_points = float(self.model.item(WIDGETS.W_NPTS_HIGHQ).text())
+        # self._high_fit = str(self.model.item(WIDGETS.W_HIGHQ_FIT).text()) == "true"
+        # self._high_power_value = float(self.model.item(WIDGETS.W_HIGHQ_POWER_VALUE).text())
+
+        self._high_extrapolate = str(self.model.item(WIDGETS.W_ENABLE_HIGHQ_EX).text()) == "true"
+        # self._high_guinier = str(self.model.item(WIDGETS.W_HIGHQ_GUINIER_EX).text()) == "true"
+        self._high_fit = str(self.model.item(WIDGETS.W_HIGHQ_FIT_EX).text()) == "true"
+        self._high_power_value = float(self.model.item(WIDGETS.W_HIGHQ_POWER_VALUE_EX).text())
+
+        # extrapolation tab
+        # self._ex_guinier_end = float(self.model.item(WIDGETS.W_GUINIER_END_EX).text())
+        # self.ex_porod_start = float(self.model.item(WIDGETS.W_POROD_START_EX).text())
+        # self.ex_porod_end = float(self.model.item(WIDGETS.W_POROD_END_EX).text())
+        self.ex_power_low = float(self.model.item(WIDGETS.W_LOWQ_POWER_VALUE_EX).text())
+        self.ex_power_high = float(self.model.item(WIDGETS.W_HIGHQ_POWER_VALUE_EX).text())
 
     def calculate_invariant(self) -> None:
         """Use twisted to thread the calculations away"""
@@ -600,68 +645,212 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         # slots for the Guinier and PowerLaw radio buttons at low Q
         # since they are not auto-exclusive
         self.rbGuinier.toggled.connect(self.lowGuinierAndPowerToggle)
-
         self.rbPowerLawLowQ.toggled.connect(self.lowGuinierAndPowerToggle)
-
         self.rbFitHighQ.toggled.connect(self.hiFitAndFixToggle)
-
         self.rbFitLowQ.toggled.connect(self.lowFitAndFixToggle)
-
-        self.model.itemChanged.connect(self.modelChanged)
+        # self.model.itemChanged.connect(self.modelChanged)
 
         # update model from gui editing by users
         self.txtBackgd.textChanged.connect(self.updateFromGui)
-
         self.txtScale.textChanged.connect(self.updateFromGui)
-
         self.txtContrast.textChanged.connect(self.updateFromGui)
-
         self.txtPorodCst.textChanged.connect(self.updateFromGui)
-
         self.txtVolFrac1.textChanged.connect(self.updateFromGui)
-
         self.txtVolFrac1.editingFinished.connect(self.checkVolFrac)
-
         self.txtVolFrac2.textChanged.connect(self.updateFromGui)
-
         self.txtPowerLowQ.textChanged.connect(self.updateFromGui)
-
         self.txtPowerHighQ.textChanged.connect(self.updateFromGui)
-
         self.txtNptsLowQ.textChanged.connect(self.updateFromGui)
-
         self.txtNptsHighQ.textChanged.connect(self.updateFromGui)
 
         # check values of n_points compared to distribution length
         self.txtNptsLowQ.textChanged.connect(self.checkLength)
-
         self.txtNptsHighQ.textChanged.connect(self.checkLength)
-
         self.txtExtrapolQMin.editingFinished.connect(self.checkQMinRange)
         self.txtExtrapolQMin.textChanged.connect(self.checkQMinRange)
-
         self.txtExtrapolQMax.editingFinished.connect(self.checkQMaxRange)
         self.txtExtrapolQMax.textChanged.connect(self.checkQMaxRange)
-
         self.txtNptsLowQ.editingFinished.connect(self.checkQRange)
         self.txtNptsLowQ.textChanged.connect(self.checkQRange)
-
         self.txtNptsHighQ.editingFinished.connect(self.checkQRange)
         self.txtNptsHighQ.textChanged.connect(self.checkQRange)
 
+        # Extrapolation parameters
+        # Q range fields
+        self.txtGuinierEnd_ex.editingFinished.connect(self.on_extrapolation_text_changed_1)
+        self.txtPorodStart_ex.editingFinished.connect(self.on_extrapolation_text_changed_2)
+        self.txtPorodEnd_ex.editingFinished.connect(self.on_extrapolation_text_changed_3)
+        self.txtGuinierEnd_ex.setValidator(GuiUtils.DoubleValidator())
+        self.txtPorodStart_ex.setValidator(GuiUtils.DoubleValidator())
+        self.txtPorodEnd_ex.setValidator(GuiUtils.DoubleValidator())
+        self.set_text_enable(False)
+
+        # Extrapolation Options
+        self.chkLowQ_ex.stateChanged.connect(self.on_extrapolation_lowq_check_changed)
+        self.chkHighQ_ex.stateChanged.connect(self.on_extrapolation_highq_check_changed)
+
+        self.rbLowQGuinier_ex.toggled.connect(self.lowGuinierAndPowerToggle_ex)
+        self.rbLowQPower_ex.toggled.connect(self.lowGuinierAndPowerToggle_ex)
+        self.rbHighQFix_ex.toggled.connect(self.highFitAndFixToggle_ex)
+        self.rbHighQFit_ex.toggled.connect(self.highFitAndFixToggle_ex)
+        self.rbLowQFix_ex.toggled.connect(self.lowFitAndFixToggle_ex)
+        self.rbLowQFit_ex.toggled.connect(self.lowFitAndFixToggle_ex)
+
+        self.LowQGroup = QtWidgets.QButtonGroup(self)
+        self.LowQGroup.addButton(self.rbLowQGuinier_ex)
+        self.LowQGroup.addButton(self.rbLowQPower_ex)
+        self.LowQPowerGroup = QtWidgets.QButtonGroup(self)
+        self.LowQPowerGroup.addButton(self.rbLowQFix_ex)
+        self.LowQPowerGroup.addButton(self.rbLowQFit_ex)
+        self.HighQGroup = QtWidgets.QButtonGroup(self)
+        self.HighQGroup.addButton(self.rbHighQFix_ex)
+        self.HighQGroup.addButton(self.rbHighQFit_ex)
+
+        # Slider values
         self.slider.valueEdited.connect(self.on_extrapolation_slider_changed)
         self.slider.valueEditing.connect(self.on_extrapolation_slider_changing)
 
+    # Extrapolation Options
+    def on_extrapolation_lowq_check_changed(self):
+        state = self.chkLowQ_ex.isChecked()
+        itemf = QtGui.QStandardItem(str(state).lower())
+        self.model.setItem(WIDGETS.W_ENABLE_LOWQ_EX, itemf)
+        if state:
+            self.rbLowQPower_ex.setEnabled(True)
+            self.rbLowQGuinier_ex.setEnabled(True)
+            if self.rbLowQPower_ex.isChecked():
+                self.rbLowQFix_ex.setEnabled(True)
+                self.rbLowQFit_ex.setEnabled(True)
+                self.txtLowQPower_ex.setEnabled(True) if self.rbLowQFix_ex.isChecked() else self.txtLowQPower_ex.setEnabled(False)
+            else:
+                self.rbLowQFix_ex.setEnabled(False)
+                self.rbLowQFit_ex.setEnabled(False)
+                self.txtLowQPower_ex.setEnabled(False)
+
+        else:
+            self.rbLowQPower_ex.setEnabled(False)
+            self.rbLowQGuinier_ex.setEnabled(False)
+            self.txtLowQPower_ex.setEnabled(False)
+            self.rbLowQFix_ex.setEnabled(False)
+            self.rbLowQFit_ex.setEnabled(False)
+
+    def on_extrapolation_highq_check_changed(self):
+        state = self.chkHighQ_ex.isChecked()
+        itemf = QtGui.QStandardItem(str(state).lower())
+        self.model.setItem(WIDGETS.W_ENABLE_HIGHQ_EX, itemf)
+        if state:
+            self.rbHighQFix_ex.setEnabled(True)
+            self.rbHighQFit_ex.setEnabled(True)
+            if self.rbHighQFix_ex.isChecked():
+                self.txtHighQPower_ex.setEnabled(True)
+            else:
+                self.txtHighQPower_ex.setEnabled(False)
+        else:
+            self.rbHighQFix_ex.setEnabled(False)
+            self.rbHighQFit_ex.setEnabled(False)
+            self.txtHighQPower_ex.setEnabled(False)
+
+    def lowGuinierAndPowerToggle_ex(self):
+            """ If Power is selected, Fit and Fix radio buttons are visible """
+            if self.rbLowQPower_ex.isChecked():
+                self.showLowQPowerOptions(True)
+            else:
+                self.showLowQPowerOptions(False)
+
+    def showLowQPowerOptions(self, state: bool):
+        """ Show and enable the Fit and Fix options if Power is selected """
+        self.rbLowQFit_ex.setVisible(state)
+        self.rbLowQFix_ex.setVisible(state)
+        self.rbLowQFit_ex.setEnabled(state)
+        self.rbLowQFix_ex.setEnabled(state)
+        if self.rbLowQFix_ex.isChecked():
+            self.txtLowQPower_ex.setEnabled(True)
+        else:
+            self.txtLowQPower_ex.setEnabled(False)
+
+    def highFitAndFixToggle_ex(self):
+        """ Enable editing of power exponent if Fix for high Q is checked """
+        if self.rbHighQFix_ex.isChecked():
+            self.txtHighQPower_ex.setEnabled(True)
+        else:
+            self.txtHighQPower_ex.setEnabled(False)
+
+    def lowFitAndFixToggle_ex(self):
+        """ Enable editing of power exponent if Fix for high Q is checked """
+        if self.rbLowQFix_ex.isChecked():
+            self.txtLowQPower_ex.setEnabled(True)
+        else:
+            self.txtLowQPower_ex.setEnabled(False)
+
+    def on_extrapolation_lowq_option_changed(self):
+        pass
+
+    def on_extrapolation_highq_option_changed(self):
+        pass
+    # Extrapolation Options end
+
+    # Extrapolation Slider
     def on_extrapolation_slider_changed(self, state: ExtrapolationParameters):
         format_string = "%.8g"
-        self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem(format_string%state.point_1))
-        self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem(format_string%state.point_2))
-        self.model.setItem(WIDGETS.W_QCUTOFF, QtGui.QStandardItem(format_string%state.point_3))
+        self.model.setItem(WIDGETS.W_GUINIER_END_EX, QtGui.QStandardItem(format_string%state.point_1))
+        self.model.setItem(WIDGETS.W_POROD_START_EX, QtGui.QStandardItem(format_string%state.point_2))
+        self.model.setItem(WIDGETS.W_POROD_END_EX, QtGui.QStandardItem(format_string%state.point_3))
 
     def on_extrapolation_slider_changing(self, state: ExtrapolationInteractionState):
         pass
         #self._q_space_plot.update_lines(state)
         ##SS
+
+    def on_extrapolation_text_changed_1(self):
+        value = self.txtGuinierEnd_ex.text()
+        print("extrapolation_text_changed_1 \n extrapolation_parameters: ", self.extrapolation_parameters)
+        params = self.extrapolation_parameters._replace(point_1=safe_float(value))
+        self.slider.extrapolation_parameters = params
+        # self._q_space_plot.update_lines(ExtrapolationInteractionState(params))
+        self.notify_extrapolation_text_box_validity(params, show_dialog=True)
+
+    def on_extrapolation_text_changed_2(self):
+        value = self.txtPorodStart_ex.text()
+        print("extrapolation_text_changed_2 \n extrapolation_parameters: ", self.extrapolation_parameters)
+        params = self.extrapolation_parameters._replace(point_2=safe_float(value))
+        self.slider.extrapolation_parameters = params
+        # self._q_space_plot.update_lines(ExtrapolationInteractionState(params))
+        self.notify_extrapolation_text_box_validity(params, show_dialog=True)
+
+    def on_extrapolation_text_changed_3(self):
+        value = self.txtPorodEnd_ex.text()
+        print("extrapolation_text_changed_3 \n extrapolation_parameters: ", self.extrapolation_parameters)
+        params = self.extrapolation_parameters._replace(point_3=safe_float(value))
+        self.slider.extrapolation_parameters = params
+        # self._q_space_plot.update_lines(ExtrapolationInteractionState(params))
+        self.notify_extrapolation_text_box_validity(params, show_dialog=True)
+
+    def notify_extrapolation_text_box_validity(self, params, show_dialog=False):
+        # Round values to 8 significant figures to avoid floating point precision issues
+        p1 = float(f"{params.point_1:.7g}")
+        p2 = float(f"{params.point_2:.7g}")
+        p3 = float(f"{params.point_3:.7g}")
+        qmin = float(f"{params.data_q_min:.7g}")
+        qmax = float(f"{params.data_q_max:.7g}")
+
+        # Determine validity flags such that data_q_min < point_1 < point_2 < point_3 < data_q_max
+        invalid_1 = p1 <= qmin or p1 >= p2
+        invalid_2 = p2 <= p1 or p2 >= p3
+        invalid_3 = p3 <= p2 or p3 >= qmax
+
+        # Make the background red if the text box is invalid
+        self.txtGuinierEnd_ex.setStyleSheet(BG_RED if invalid_1 else BG_DEFAULT)
+        self.txtPorodStart_ex.setStyleSheet(BG_RED if invalid_2 else BG_DEFAULT)
+        self.txtPorodEnd_ex.setStyleSheet(BG_RED if invalid_3 else BG_DEFAULT)
+
+        # Show dialog if requested and values are out of range
+        if show_dialog and (p1 < qmin or p3 > qmax):
+            msg = "The slider values are out of range.\n"
+            msg += f"The minimum value is {qmin:.8g} and the maximum value is {qmax:.8g}"
+            dialog = QtWidgets.QMessageBox(self, text=msg)
+            dialog.setWindowTitle("Value out of range")
+            dialog.setStandardButtons(QtWidgets.QMessageBox.Ok)
+            dialog.exec_()
 
     def stateChanged(self):
         """
@@ -707,9 +896,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             self._high_extrapolate = toggle
             self.highQToggle(toggle)
 
-        self.slider.extrapolation_parameters = self.extrapolation_paramameters
-        self.high_extrapolation_plot.draw_data()
-        self.low_extrapolation_plot.draw_data()
+        self.slider.extrapolation_parameters = self.extrapolation_parameters
+        # self.high_extrapolation_plot.draw_data()
+        # self.low_extrapolation_plot.draw_data()
 
     def checkQExtrapolatedData(self):
         """
@@ -829,6 +1018,16 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             "txtPowerHighQ",
             "txtNptsLowQ",
             "txtNptsHighQ",
+            "txtGuinierEnd",
+            "txtPorodStart",
+            "txtPorodEnd",
+            "txtLowQPower",
+            "txtHighQPower",
+            # "txtGuinierEndEx",
+            # "txtPorodStartEx",
+            # "txtPorodEndEx",
+            "txtLowQPowerEx",
+            "txtHighQPowerEx",
         ]
 
         related_widgets = [
@@ -842,6 +1041,11 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             WIDGETS.W_HIGHQ_POWER_VALUE,
             WIDGETS.W_NPTS_LOWQ,
             WIDGETS.W_NPTS_HIGHQ,
+            # WIDGETS.W_GUINIER_END_EX,
+            # WIDGETS.W_POROD_START_EX,
+            # WIDGETS.W_POROD_END_EX,
+            WIDGETS.W_LOWQ_POWER_VALUE_EX,
+            WIDGETS.W_HIGHQ_POWER_VALUE_EX,
         ]
 
         related_internal_values = [
@@ -855,6 +1059,11 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             self._high_power_value,
             self._low_points,
             self._high_points,
+            # self._ex_guinier_end,
+            # self._ex_porod_start,
+            # self._ex_porod_end,
+            self._ex_power_lowq,
+            self._ex_power_highq
         ]
 
         item = QtGui.QStandardItem(self.sender().text())
@@ -881,7 +1090,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             # empty field, just skip
             self.sender().setStyleSheet(BG_RED)
             self.cmdCalculate.setEnabled(False)
-
 
     def contrastToggle(self, toggle):
         """
@@ -924,13 +1132,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.txtPowerLowQ.setEnabled(toggle and (not self._low_fit))
         self.updateFromModel()
 
-    def lowFitAndFixToggle(self, toggle):
-        """Fit and Fix radiobuttons cannot be selected at the same time"""
-        itemt = QtGui.QStandardItem(str(toggle).lower())
-        self.model.setItem(WIDGETS.W_LOWQ_FIT, itemt)
-        self.txtPowerLowQ.setEnabled(not toggle)
-        self.updateFromModel()
-
     def hiFitAndFixToggle(self, toggle):
         """
         Enable editing of power exponent if Fix for high Q is checked
@@ -941,12 +1142,26 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.txtPowerHighQ.setEnabled(not toggle)
         self.updateFromModel()
 
+    def lowFitAndFixToggle(self, toggle):
+        """Fit and Fix radiobuttons cannot be selected at the same time"""
+        itemt = QtGui.QStandardItem(str(toggle).lower())
+        self.model.setItem(WIDGETS.W_LOWQ_FIT, itemt)
+        self.txtPowerLowQ.setEnabled(not toggle)
+        self.updateFromModel()
+
     def highQToggle(self, clicked):
         """Disable/enable High Q extrapolation"""
         self.rbFitHighQ.setEnabled(clicked)
         self.rbFixHighQ.setEnabled(clicked)
         self.txtNptsHighQ.setEnabled(clicked)
         self.txtPowerHighQ.setEnabled(clicked and not self._high_fit)
+
+    def highQToggle_ex(self, clicked):
+        """Disable/enable High Q extrapolation"""
+        self.rbHighQFit_ex.setEnabled(clicked)
+        self.rbHighQFix_ex.setEnabled(clicked)
+        self.txtNptsHighQ_ex.setEnabled(clicked)
+        self.txtHighQPower_ex.setEnabled(clicked and not self._high_fit)
 
     def lowQToggle(self, clicked):
         """Disable / enable Low Q extrapolation"""
@@ -960,6 +1175,19 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.rbFixLowQ.setEnabled(clicked)  # and not self._low_guinier)
 
         self.txtPowerLowQ.setEnabled(clicked and not self._low_guinier and not self._low_fit)
+
+    def lowQToggle_ex(self, clicked):
+        """Disable / enable Low Q extrapolation"""
+        self.rbLowQGuinier_ex.setEnabled(clicked)
+        self.rbLowQPower_ex.setEnabled(clicked)
+        self.txtNptsLowQ_ex.setEnabled(clicked)
+        # Enable subelements
+        self.rbLowQGuinier_ex.setVisible(self.rbLowQPower_ex.isChecked())
+        self.rbLowQPower_ex.setVisible(self.rbLowQPower_ex.isChecked())
+        self.rbLowQGuinier_ex.setEnabled(clicked)
+        self.rbLowQPower_ex.setEnabled(clicked)
+
+        self.txtLowQPower_ex.setEnabled(clicked and not self._low_guinier and not self._low_fit)
 
     def setupModel(self):
         """ """
@@ -1031,6 +1259,21 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         item = QtGui.QStandardItem(str(DEFAULT_POWER_LOW))
         self.model.setItem(WIDGETS.W_HIGHQ_POWER_VALUE, item)
 
+        # Extrapolation elements
+        self.model.setItem(WIDGETS.W_GUINIER_END_EX, QtGui.QStandardItem("0.01"))
+        self.model.setItem(WIDGETS.W_POROD_START_EX, QtGui.QStandardItem("0.20"))
+        self.model.setItem(WIDGETS.W_POROD_END_EX, QtGui.QStandardItem("0.22"))
+        self.model.setItem(WIDGETS.W_LOWQ_POWER_VALUE_EX, QtGui.QStandardItem("0.0"))
+        self.model.setItem(WIDGETS.W_HIGHQ_POWER_VALUE_EX, QtGui.QStandardItem("0.0"))
+        self.model.setItem(WIDGETS.W_ENABLE_LOWQ_EX, QtGui.QStandardItem("false"))
+        self.model.setItem(WIDGETS.W_ENABLE_HIGHQ_EX, QtGui.QStandardItem("false"))
+        self.model.setItem(WIDGETS.W_LOWQ_GUINIER_EX, QtGui.QStandardItem("false"))
+        self.model.setItem(WIDGETS.W_LOWQ_POWER_EX, QtGui.QStandardItem("false"))
+        self.model.setItem(WIDGETS.W_LOWQ_FIT_EX, QtGui.QStandardItem("false"))
+        self.model.setItem(WIDGETS.W_LOWQ_FIX_EX, QtGui.QStandardItem("false"))
+        self.model.setItem(WIDGETS.W_HIGHQ_FIT_EX, QtGui.QStandardItem("false"))
+        self.model.setItem(WIDGETS.W_HIGHQ_FIX_EX, QtGui.QStandardItem("false"))
+
     def setupMapper(self):
         # Set up the mapper.
         self.mapper = QtWidgets.QDataWidgetMapper(self)
@@ -1082,6 +1325,23 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.mapper.addMapping(self.txtInvariantTot, WIDGETS.W_INVARIANT)
         self.mapper.addMapping(self.txtInvariantTotErr, WIDGETS.W_INVARIANT_ERR)
 
+        # Extrapolation tab
+        self.mapper.addMapping(self.txtGuinierEnd_ex, WIDGETS.W_GUINIER_END_EX)
+        self.mapper.addMapping(self.txtPorodStart_ex, WIDGETS.W_POROD_START_EX)
+        self.mapper.addMapping(self.txtPorodEnd_ex, WIDGETS.W_POROD_END_EX)
+        self.mapper.addMapping(self.txtLowQPower_ex, WIDGETS.W_LOWQ_POWER_VALUE_EX)
+        self.mapper.addMapping(self.txtHighQPower_ex, WIDGETS.W_HIGHQ_POWER_VALUE_EX)
+
+        self.mapper.addMapping(self.chkLowQ_ex, WIDGETS.W_ENABLE_LOWQ_EX)
+        self.mapper.addMapping(self.chkHighQ_ex, WIDGETS.W_ENABLE_HIGHQ_EX)
+
+        self.mapper.addMapping(self.rbLowQGuinier_ex, WIDGETS.W_LOWQ_GUINIER_EX)
+        self.mapper.addMapping(self.rbLowQPower_ex, WIDGETS.W_LOWQ_POWER_EX)
+        self.mapper.addMapping(self.rbLowQFit_ex, WIDGETS.W_LOWQ_FIT_EX)
+        self.mapper.addMapping(self.rbLowQFix_ex, WIDGETS.W_LOWQ_FIX_EX)
+        self.mapper.addMapping(self.rbHighQFit_ex, WIDGETS.W_HIGHQ_FIT_EX)
+        self.mapper.addMapping(self.rbHighQFix_ex, WIDGETS.W_HIGHQ_FIX_EX)
+
         self.mapper.toFirst()
 
     def setData(self, data_item: QtGui.QStandardItem = None, is_batch: bool = False):
@@ -1112,9 +1372,29 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
         # Extract data on 1st child - this is the Data1D/2D component
         data = GuiUtils.dataFromItem(self._model_item)
+        # self.data = data
         self.model.item(WIDGETS.W_NAME).setData(self._model_item.text())
+
+        # Enable text boxes in the extrapolation tab
+        self.set_text_enable(True)
+
+        log_data_min = math.log(safe_float(Q_MINIMUM))
+        log_data_max = math.log(safe_float(Q_MAXIMUM))
+
+        def fractional_position(f):
+            return math.exp(f*log_data_max + (1-f)*log_data_min)
+
+        self.model.setItem(WIDGETS.W_GUINIER_END_EX, QtGui.QStandardItem("%.7g"%fractional_position(0.1)))
+        self.model.setItem(WIDGETS.W_POROD_START_EX, QtGui.QStandardItem("%.7g"%fractional_position(0.7)))
+        self.model.setItem(WIDGETS.W_POROD_END_EX, QtGui.QStandardItem("%.7g"%fractional_position(0.9)))
+
         # update GUI and model with info from loaded data
         self.updateGuiFromFile(data=data)
+
+        self.slider.extrapolation_parameters = self.extrapolation_parameters
+        self.slider.setEnabled(True)
+
+        self.tabWidget.setCurrentIndex(0)
 
     def removeData(self, data_list: list = None):
         """Remove the existing data reference from the Invariant Persepective"""
@@ -1243,6 +1523,30 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             "high_power_value": self.txtPowerHighQ.text(),
             "total_q_min": self.txtTotalQMin.text(),
             "total_q_max": self.txtTotalQMax.text(),
+            "qmax_lowq": self.txtGuinierEnd.text(),
+            "qmin_highq": self.txtPorodStart.text(),
+            "qmax_highq": self.txtPorodEnd.text(),
+            "ex_power_lowq": self.txtLowQPower.text(),
+            "ex_power_highq": self.txtHighQPower.text(),
+            "lowQ": self.chkLowQ.isChecked(),
+            "highQ": self.chkHighQ.isChecked(),
+            "lowQGuinier": self.rbGuinier.isChecked(),
+            "lowQPower": self.rbPowerLawLowQ.isChecked(),
+            "highQFit": self.rbFitHighQ.isChecked(),
+            "highQFix": self.rbFixHighQ.isChecked(),
+            "guinier_end_low_q_ex" : self.txtGuinierEnd_ex.text(),
+            "porod_start_high_q_ex" : self.txtPorodStart_ex.text(),
+            "porod_end_high_q_ex" : self.txtPorodEnd_ex.text(),
+            "power_low_q_ex" : self.txtLowQPower_ex.text(),
+            "power_high_q_ex" : self.txtHighQPower_ex.text(),
+            "enable_low_q_ex" : self.chkLowQ_ex.isChecked(),
+            "enable_high_q_ex" : self.chkHighQ_ex.isChecked(),
+            "low_q_guinier_ex" : self.rbLowQGuinier_ex.isChecked(),
+            "low_q_power_ex" : self.rbLowQPower_ex.isChecked(),
+            "low_q_fit_ex" : self.rbLowhQFit_ex.isChecked(),
+            "low_q_fix_ex" : self.rbLowQFix_ex.isChecked(),
+            "high_q_fit_ex" : self.rbHighQFit_ex.isChecked(),
+            "high_q_fix_ex" : self.rbHighQFix_ex.isChecked(),
         }
 
     def updateFromParameters(self, params):
@@ -1284,6 +1588,21 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.txtNptsHighQ.setText(str(params.get("high_points", NPOINTS_Q_INTERP)))
         self.rbFitHighQ.setChecked(params.get("high_fit_rb", True))
         self.txtPowerHighQ.setText(str(params.get("high_power_value", DEFAULT_POWER_LOW)))
+        # Extrapolation tab
+        self.txtGuinierEnd_ex.setText(str(params.get("qmax_lowq", "")))
+        self.txtPorodStart_ex.setText(str(params.get("qmin_highq", "")))
+        self.txtPorodEnd_ex.setText(str(params.get("qmax_highq", "")))
+        self.txtLowQPower_ex.setText(str(params.get("lowQPower", DEFAULT_POWER_LOW)))
+        self.txtHighQPower_ex.setText(str(params.get("highQPower", DEFAULT_POWER_LOW)))
+        self.chkLowQ_ex.setChecked(params.get("lowQ", False))
+        self.chkHighQ_ex.setChecked(params.get("highQ", False))
+        self.rbLowQGuinier_ex.setChecked(params.get("lowQGuinier", False))
+        self.rbLowQPowerLaw_ex.setChecked(params.get("lowQPower", False))
+        self.rbLowQFit_ex.setChecked(params.get("lowQFit", False))
+        self.rbLowQFix_ex.setChecked(params.get("lowQFix", False))
+        self.rbHighQFit_ex.setChecked(params.get("highQFit", False))
+        self.rbHighQFix_ex.setChecked(params.get("highQFix", False))
+
         # Update once all inputs are changed
         self.updateFromModel()
         self.plot_result(self.model)
