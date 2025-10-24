@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>530</width>
+    <width>580</width>
     <height>580</height>
    </rect>
   </property>
@@ -18,7 +18,7 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>530</width>
+    <width>580</width>
     <height>580</height>
    </size>
   </property>
@@ -47,7 +47,7 @@
     </size>
    </property>
    <property name="currentIndex">
-    <number>2</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="tabMain">
     <attribute name="title">
@@ -531,7 +531,7 @@
           <x>10</x>
           <y>33</y>
           <width>431</width>
-          <height>379</height>
+          <height>435</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -813,8 +813,8 @@ while extrapolating the low-Q region</string>
       <rect>
        <x>-1</x>
        <y>9</y>
-       <width>511</width>
-       <height>241</height>
+       <width>531</width>
+       <height>301</height>
       </rect>
      </property>
      <property name="title">
@@ -825,7 +825,7 @@ while extrapolating the low-Q region</string>
        <rect>
         <x>9</x>
         <y>20</y>
-        <width>491</width>
+        <width>511</width>
         <height>31</height>
        </rect>
       </property>
@@ -847,19 +847,19 @@ while extrapolating the low-Q region</string>
        <rect>
         <x>10</x>
         <y>110</y>
-        <width>491</width>
-        <height>22</height>
+        <width>511</width>
+        <height>27</height>
        </rect>
       </property>
       <layout class="QGridLayout" name="gridLayout_4">
        <item row="0" column="5">
-        <widget class="QLineEdit" name="txtPorodEnd"/>
+        <widget class="QLineEdit" name="txtPorodEnd_ex"/>
        </item>
        <item row="0" column="1">
-        <widget class="QLineEdit" name="txtGuinierEnd"/>
+        <widget class="QLineEdit" name="txtGuinierEnd_ex"/>
        </item>
        <item row="0" column="3">
-        <widget class="QLineEdit" name="txtPorodStart"/>
+        <widget class="QLineEdit" name="txtPorodStart_ex"/>
        </item>
        <item row="0" column="4">
         <widget class="QLabel" name="labelPorodEnd">
@@ -896,23 +896,23 @@ while extrapolating the low-Q region</string>
        <rect>
         <x>9</x>
         <y>60</y>
-        <width>491</width>
+        <width>511</width>
         <height>41</height>
        </rect>
       </property>
       <layout class="QHBoxLayout" name="sliderLayout">
-      <property name="leftMargin">
+       <property name="leftMargin">
         <number>5</number>
-        </property>
-        <property name="topMargin">
+       </property>
+       <property name="topMargin">
         <number>10</number>
-        </property>
-        <property name="rightMargin">
+       </property>
+       <property name="rightMargin">
         <number>5</number>
-        </property>
-        <property name="bottomMargin">
+       </property>
+       <property name="bottomMargin">
         <number>10</number>
-        </property>
+       </property>
        <item>
         <widget class="QLabel" name="label_7">
          <property name="text">
@@ -928,48 +928,41 @@ while extrapolating the low-Q region</string>
       <rect>
        <x>9</x>
        <y>150</y>
-       <width>491</width>
-       <height>91</height>
+       <width>511</width>
+       <height>149</height>
       </rect>
      </property>
-     <layout class="QGridLayout" name="gridLayout_9">
+     <layout class="QGridLayout" name="gridLayout_9" rowstretch="0,0,0,0,0">
+      <item row="2" column="1">
+       <widget class="QRadioButton" name="rbLowQPower_ex">
+        <property name="text">
+         <string>Power</string>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="1">
-       <widget class="QCheckBox" name="lowQ">
+       <widget class="QCheckBox" name="chkLowQ_ex">
         <property name="text">
          <string>Low-Q</string>
         </property>
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QRadioButton" name="lowQGuinier">
+       <widget class="QRadioButton" name="rbLowQGuinier_ex">
         <property name="text">
          <string>Guinier</string>
         </property>
        </widget>
       </item>
       <item row="1" column="2">
-       <widget class="QRadioButton" name="highQFit">
+       <widget class="QRadioButton" name="rbHighQFit_ex">
         <property name="text">
          <string>Fit</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="2">
-       <widget class="QCheckBox" name="highQ">
-        <property name="text">
-         <string>High-Q</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QRadioButton" name="lowQPower">
-        <property name="text">
-         <string>Power</string>
-        </property>
-       </widget>
-      </item>
       <item row="2" column="2">
-       <widget class="QRadioButton" name="highQFix">
+       <widget class="QRadioButton" name="rbHighQFix_ex">
         <property name="text">
          <string>Fix</string>
         </property>
@@ -982,18 +975,43 @@ while extrapolating the low-Q region</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="1">
-       <widget class="QLineEdit" name="txtLowQPower"/>
+      <item row="0" column="2">
+       <widget class="QCheckBox" name="chkHighQ_ex">
+        <property name="text">
+         <string>High-Q</string>
+        </property>
+       </widget>
       </item>
-      <item row="3" column="2">
-       <widget class="QLineEdit" name="txtHighQPower"/>
+      <item row="4" column="1">
+       <widget class="QLineEdit" name="txtLowQPower_ex"/>
       </item>
-      <item row="3" column="0">
+      <item row="4" column="0">
        <widget class="QLabel" name="label_15">
         <property name="text">
          <string>Power:</string>
         </property>
        </widget>
+      </item>
+      <item row="4" column="2">
+       <widget class="QLineEdit" name="txtHighQPower_ex"/>
+      </item>
+      <item row="3" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_11">
+        <item>
+         <widget class="QRadioButton" name="rbLowQFit_ex">
+          <property name="text">
+           <string>Fit</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="rbLowQFix_ex">
+          <property name="text">
+           <string>Fix</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </widget>
@@ -1004,7 +1022,7 @@ while extrapolating the low-Q region</string>
     <rect>
      <x>10</x>
      <y>520</y>
-     <width>501</width>
+     <width>521</width>
      <height>32</height>
     </rect>
    </property>
