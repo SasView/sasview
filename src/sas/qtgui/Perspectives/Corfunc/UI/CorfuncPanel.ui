@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1157</width>
+    <width>1250</width>
     <height>885</height>
    </rect>
   </property>
@@ -42,8 +42,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>581</width>
-        <height>871</height>
+        <width>620</width>
+        <height>863</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
@@ -143,6 +143,15 @@
                    <widget class="QRadioButton" name="radTangentInflection">
                     <property name="text">
                      <string>Use Inflection Point</string>
+                    </property>
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="minimumWidth">
+                     <number>150</number>
                     </property>
                     <attribute name="buttonGroup">
                      <string notr="true">buttonGroup_2</string>
@@ -1058,7 +1067,7 @@
       </sizepolicy>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -1141,7 +1150,7 @@
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroup_2"/>
   <buttongroup name="buttonGroup"/>
+  <buttongroup name="buttonGroup_2"/>
  </buttongroups>
 </ui>
