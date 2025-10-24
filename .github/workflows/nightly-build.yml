@@ -35,7 +35,7 @@ jobs:
 
       - name: Bundle up wheels
         run: |
-          cp build-dependency-*-wheel sasview-wheel/
+          cp build-dependency-*-wheel/* sasview-wheel/
           cd sasview-wheel
           zip ../SasView-nightly-wheels.zip *
 
