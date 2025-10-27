@@ -174,7 +174,7 @@ jobs:
           sudo eatmydata apt-get -y install libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils xvfb libegl-dev libcairo2-dev
 
       - name: Fetch wheels of sibling projects
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           path: dist/
           pattern: build-dependency-*-wheel
@@ -470,7 +470,7 @@ jobs:
 
       - name: Retrieve installer (workflow image)
         if: ${{ env.INSTALLER_USE_OLD_IMAGE != 'true' }}
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         id: download
         with:
           name: SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
