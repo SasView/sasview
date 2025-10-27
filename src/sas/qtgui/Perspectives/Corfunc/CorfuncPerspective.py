@@ -433,9 +433,6 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
     def check_extrapolation_entry(self, fits_enabled: list[str]):
         """ Disable Go button if extrapolation ranges empty or invalid """
-        # if fits_enabled == []:
-        #     self.disable_go_button("No fits enabled")
-        #     return
 
         if "background" not in fits_enabled:
             if self.txtBackground.text() == "":
