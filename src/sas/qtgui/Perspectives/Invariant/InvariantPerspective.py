@@ -413,15 +413,31 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
         # Low Q extrapolation calculations
         if self._low_extrapolate:
-            function_low: str = "power_law"
             if self._low_guinier:
                 function_low: str = "guinier"
             if self._low_fit:
                 self._low_power_value: int | None = None
+            if self._low_fix:
+                function_low: str = "power_law"
+
+            try:
+                if self._data and self.txtGuinierEnd_ex.text():
+                    q_end_val = float(self.txtGuinierEnd_ex.text())
+                    # nearest index + 1 -> number of points from start to q_end_val
+                    n_pts = int(np.abs(self._data.x - q_end_val).argmin()) + 1
+                    # keep in bounds
+                    n_pts = max(1, min(n_pts, len(self._data.x)))
+                    self._low_points = n_pts
+                    # update model
+                    self.model.setItem(WIDGETS.W_NPTS_LOWQ, QtGui.QStandardItem(str(self._low_points)))
+                    self.txtNptsLowQ.setText(str(self._low_points))
+            except Exception as ex:
+                logger.warning(f"Low-q Guinier end calculation failed: {str(ex)}")
 
             self._calculator.set_extrapolation(
                 range="low", npts=int(self._low_points), function=function_low, power=self._low_power_value
             )
+
             try:
                 qmin_ext = float(self.txtExtrapolQMin.text())
                 qmin = None if qmin_ext > self._data.x[0] else qmin_ext
@@ -431,6 +447,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                 logger.warning(f"Low-q calculation failed: {str(ex)}")
                 qstar_low = "ERROR"
                 qstar_low_err = "ERROR"
+
         if self.low_extrapolation_plot and not low_calculation_pass:
             # Remove the existing extrapolation plot
             model_items: list[QtGui.QStandardItem] = GuiUtils.getChildrenFromItem(self._model_item)
@@ -447,10 +464,30 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         if self._high_extrapolate:
             function_high: str = "power_law"
             if self._high_fit:
-                self._high_power_value: int | None = None
+                self._high_power_value: int | None = 4
+            else:
+                self._high_power_value = int(self.model.item(WIDGETS.W_HIGHQ_POWER_VALUE_EX).text())
+
+            # Convert slider/q-value (Porod start) to number of points if available
+            try:
+                if self._data and self.txtPorodStart_ex.text():
+                    q_start_val = float(self.txtPorodStart_ex.text())
+                    # find nearest index, compute number of points from that index to the end
+                    idx = int((np.abs(self._data.x - q_start_val)).argmin())
+                    n_pts_high: int = len(self._data.x) - idx
+                    n_pts_high = max(1, min(n_pts_high, len(self._data.x)))
+                    if n_pts_high != self._high_points:
+                        self._high_points = n_pts_high
+                        # update model/UI to reflect converted number-of-points
+                        self.model.setItem(WIDGETS.W_NPTS_HIGHQ, QtGui.QStandardItem(str(self._high_points)))
+                        self.txtNptsHighQ.setText(str(self._high_points))
+            except Exception as ex:
+                logger.debug(f"Could not convert Porod start to n_pts_high: {ex}")
+
             self._calculator.set_extrapolation(
                 range="high", npts=int(self._high_points), function=function_high, power=self._high_power_value
             )
+
             try:
                 qmax_ext: float = float(self.txtExtrapolQMax.text())
                 qmax: float | None = None if qmax_ext < self._data.x[int(len(self._data.x) - 1)] else qmax_ext
@@ -1023,9 +1060,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             "txtPowerHighQ",
             "txtNptsLowQ",
             "txtNptsHighQ",
-            # "txtGuinierEnd",
-            # "txtPorodStart",
-            # "txtPorodEnd",
             "txtLowQPower_ex",
             "txtHighQPower_ex",
         ]
@@ -1041,9 +1075,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             WIDGETS.W_HIGHQ_POWER_VALUE,
             WIDGETS.W_NPTS_LOWQ,
             WIDGETS.W_NPTS_HIGHQ,
-            # WIDGETS.W_GUINIER_END_EX,
-            # WIDGETS.W_POROD_START_EX,
-            # WIDGETS.W_POROD_END_EX,
             WIDGETS.W_LOWQ_POWER_VALUE_EX,
             WIDGETS.W_HIGHQ_POWER_VALUE_EX,
         ]
@@ -1058,10 +1089,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             self._low_power_value,
             self._high_power_value,
             self._low_points,
-            self._high_points,
-            # self._guinier_end_ex,
-            # self._porod_start_ex,
-            # self._porod_end_ex,
             self._ex_power_lowq,
             self._ex_power_highq
         ]
