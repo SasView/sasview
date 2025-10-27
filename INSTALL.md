@@ -10,8 +10,8 @@ A `venv` or a `conda` are both popular choices.
 
 ## Installing SasView as a User
 
-Installers for SasView can be found at [https://www.sasview.org/](https://www.sasview.org/), for various operating systems. You will also find
-walk through tutorials on how to install and use SasView.
+Installers for SasView can be found at [https://www.sasview.org/](https://www.sasview.org/),
+for various operating systems. You will also find walk through tutorials on how to install and use SasView.
 
 You can also install SasView using standard Python installation tools,
 such as `pipx install sasview` to install it into its own standalone
@@ -52,14 +52,13 @@ Step by step, that is:
     if you use `cmd` or PowerShell under windows, there are
     [different ways](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#create-and-use-virtual-environments)
     to activate the virtual environment.
- 1. Install the necessary modules for building and running SasView.
+ 1. Install the necessary modules for building and running SasView, including the documentation and GUI.
     It will take a while to download and unpack all the dependencies.
     The `pip install -e` command says to install the package in development mode
     so that any changes you make in the source tree will be available the
     next time you run the program. The `.[dev,test]` syntax says to install
     the current directory (sasview) with test and dev dependencies.
- 1. Build the GUI and the documentation using the `hatchling` builder.
- 1. Run SasView!
+ 1. Run SasView! As an alternative to typing `python -m sas`, you can simply type `sasview`.
 
 Almost all the modules that SasView needs are available as precompiled modules
 on PyPI, including numpy, scipy, h5py, pyside6. A handful of Python-only
@@ -84,7 +83,7 @@ debugging software, e.g.:
  - [PyCharm](https://www.jetbrains.com/help/pycharm/creating-virtual-environment.html)
 
 If you've altered the user interface or want the documentation to be rebuilt,
-then the `hatchling` step can be repeated.
+then the `pip install -e .[dev,test]` step can be repeated.
 
 
 More information can be found at:
