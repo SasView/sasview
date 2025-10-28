@@ -3,17 +3,16 @@ import textwrap
 from pathlib import Path
 
 #Global SasView
-from sas.sascalc.fit import models
-
 #Local Perspectives
 from sas.sascalc.shape2sas.Shape2SAS import ModelProfile
+from sas.system.user import find_plugins_dir
 
 
 def generatePlugin(prof: ModelProfile, constrainParameters: (str), fitPar: [str],
                    Npoints: int, pr_points: int, file_name: str) -> (str, Path):
     """Generates a theoretical scattering plugin model"""
 
-    plugin_location = Path(models.find_plugins_dir())
+    plugin_location = Path(find_plugins_dir())
     full_path = plugin_location / file_name
     full_path = full_path.with_suffix('.py')
 

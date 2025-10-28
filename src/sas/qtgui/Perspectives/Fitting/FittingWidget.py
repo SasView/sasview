@@ -38,7 +38,7 @@ from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
 from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
 from sas.sascalc.fit import models
 from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
-from sas.system.user import HELP_DIRECTORY_LOCATION
+from sas.system.user import HELP_DIRECTORY_LOCATION, find_plugins_dir
 
 TAB_MAGNETISM = 4
 TAB_POLY = 3
@@ -2397,7 +2397,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         kernel_module = None
         if self.cbCategory.currentText() == CATEGORY_CUSTOM:
             # custom kernel load requires full path
-            name = os.path.join(models.find_plugins_dir(), model_name+".py")
+            name = os.path.join(find_plugins_dir(), model_name+".py")
         try:
             kernel_module = generate.load_kernel_module(name)
         except ModuleNotFoundError:

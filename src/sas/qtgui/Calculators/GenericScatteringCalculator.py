@@ -26,7 +26,7 @@ from sas.qtgui.Utilities.GenericReader import GenReader
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor
 from sas.sascalc.calculator import sas_gen
 from sas.sascalc.calculator.geni import create_beta_plot, f_of_q, radius_of_gyration
-from sas.sascalc.fit import models
+from sas.system.user import find_plugins_dir
 
 # Local UI
 from .UI.GenericScatteringCalculator import Ui_GenericScatteringCalculator
@@ -1535,7 +1535,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtFileName.setEnabled(False)
 
     def getFileName(self):
-        plugin_location = models.find_plugins_dir()
+        plugin_location = find_plugins_dir()
         i = 0
         while True:
             full_path = os.path.join(plugin_location, "custom_gsc" + str(i))
