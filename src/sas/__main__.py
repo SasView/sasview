@@ -5,7 +5,7 @@
 
 import sys
 
-from . import cli
+from sas import cli
 
 __doc__ = cli.__doc__
 
