@@ -133,10 +133,10 @@ to use nuclear SLDs of:
 
 Alternatively the generated files can be downloaded here:
 
-| :download:`Sphere with R=0.0025 <gsc_ex_magnetic_spheres_assets/sphere_R=0_0025.vtk>`
-| :download:`Sphere with R=0.2025 <gsc_ex_magnetic_spheres_assets/sphere_R=0_2025.vtk>`
-| :download:`Sphere with R=4 <gsc_ex_magnetic_spheres_assets/sphere_R=4.vtk>`
-| :download:`Sphere with R=2500 <gsc_ex_magnetic_spheres_assets/sphere_R=2500.vtk>`
+| :download:`Sphere with R=0.0025 <https://github.com/SasView/sasview/raw/refs/heads/release_6.0.1/src/sas/qtgui/Calculators/media/gsc_ex_magnetic_spheres_assets/sphere_R=0_0025.vtk>`
+| :download:`Sphere with R=0.2025 <https://github.com/SasView/sasview/raw/refs/heads/release_6.0.1/src/sas/qtgui/Calculators/media/gsc_ex_magnetic_spheres_assets/sphere_R=0_2025.vtk>`
+| :download:`Sphere with R=4 <https://github.com/SasView/sasview/raw/refs/heads/release_6.0.1/src/sas/qtgui/Calculators/media/gsc_ex_magnetic_spheres_assets/sphere_R=4.vtk>`
+| :download:`Sphere with R=2500 <https://github.com/SasView/sasview/raw/refs/heads/release_6.0.1/src/sas/qtgui/Calculators/media/gsc_ex_magnetic_spheres_assets/sphere_R=2500.vtk>`
 
 We load each of these datafiles into the generic scattering calculator and set the following settings:
 
