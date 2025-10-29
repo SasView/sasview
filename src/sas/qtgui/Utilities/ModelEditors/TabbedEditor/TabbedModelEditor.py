@@ -15,7 +15,6 @@ from sas.qtgui.Utilities.CustomGUI.CodeEditor import QCodeEditor
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.ModelEditor import ModelEditor
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.PluginDefinition import PluginDefinition
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.UI.TabbedModelEditor import Ui_TabbedModelEditor
-from sas.sascalc.fit import models
 from sas.system.user import MAIN_DOC_SRC, find_plugins_dir
 
 logger = logging.getLogger(__name__)
@@ -352,7 +351,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             return
 
         # check if file exists
-        plugin_location = models.find_plugins_dir()
+        plugin_location = find_plugins_dir()
 
         # Generate the full path of the python path for the model and ensure the extension is .py
         full_path = Path(plugin_location) / filename
@@ -512,7 +511,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.writeFile(filename, model_str)
 
         # Get model filepath
-        plugin_location = models.find_plugins_dir()
+        plugin_location = find_plugins_dir()
         full_path = Path(plugin_location) / filename
 
         error_line = self.findFirstError(full_path.with_suffix(".py"))
