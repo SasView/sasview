@@ -23,6 +23,8 @@ SASVIEW_MEDIA_SOURCE = SASVIEW_SRC / "sas"
 SASMODELS_DOCS = BASE / "tmp" / "sasmodels" / "docs"
 SASMODELS_MODEL_SOURCE = SASMODELS_DOCS / "model"
 SASMODELS_MODEL_TARGET = SPHINX_SOURCE / "user" / "models"
+SASMODELS_API_SOURCE = SASMODELS_DOCS / "api"
+SASMODELS_API_TARGET = SPHINX_SOURCE / "dev" / "sasmodels-api"
 SASMODELS_DEV_SOURCE = SASMODELS_DOCS / "developer"
 SASMODELS_DEV_TARGET = SPHINX_SOURCE / "dev" / "sasmodels-dev"
 SASMODELS_GUIDE_SOURCE = SASMODELS_DOCS / "guide"
@@ -112,6 +114,7 @@ def retrieve_user_docs():
     print("=== Sasmodels Docs ===")
     shutil.copy(SASMODELS_DOCS / "rst_prolog", SPHINX_SOURCE)
     shutil.copytree(SASMODELS_MODEL_SOURCE, SASMODELS_MODEL_TARGET, dirs_exist_ok=True)
+    shutil.copytree(SASMODELS_API_SOURCE, SASMODELS_API_TARGET, dirs_exist_ok=True)
     shutil.copytree(SASMODELS_DEV_SOURCE, SASMODELS_DEV_TARGET, dirs_exist_ok=True)
     shutil.copytree(SASMODELS_GUIDE_SOURCE, SASMODELS_GUIDE_TARGET, dirs_exist_ok=True)
     for filename in SASMODELS_GUIDE_EXCLUDE:
