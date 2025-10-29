@@ -118,7 +118,6 @@ artifacts = [
 
 [tool.hatch.build.targets.wheel.force-include]
 "build/doc/html/" = "sas/docs"
-"docs/sphinx-docs/source-temp/" = "sas/docs-source"
 "src/sas/sasview/media/" = "sas/sasview/media"
 "src/sas/example_data/" = "sas/example_data"
 

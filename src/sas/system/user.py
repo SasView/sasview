@@ -181,14 +181,13 @@ def module_copytree(module: str, src: PATH_LIKE, dest: PATH_LIKE) -> None:
 
 
 def is_copy_successful() -> bool:
-    """Obtain the source and build output from within the installed sas module"""
+    """Obtain the docs from within the installed sas module"""
 
-    # Look in the module for the resources. We know that there is a conf.py
-    # for sphinx so check that it exists; checking that the file exists and
+    # Look in the module for the resources. We know that there is a index.html
+    # from sphinx so check that it exists; checking that the file exists and
     # not just the directory protects against empty directories
-    if importlib.resources.files("sas").joinpath("docs-source/conf.py").is_file():
+    if importlib.resources.files("sas").joinpath("docs/index.html").is_file():
         logger.info("Extracting docs from sas module")
-        module_copytree("sas", "docs-source", MAIN_DOC_SRC)
         module_copytree("sas", "docs", MAIN_BUILD_SRC / "html")
         module_copytree("sas", "example_data", EXAMPLE_DATA_DIR)
         return True
