@@ -11,7 +11,6 @@ try:
         excludes=[
             # handle the documentation trees manually
             'docs/',
-            'docs-source/',
             ],
         )
 
@@ -52,7 +51,6 @@ try:
                 dst = src.relative_to(base).parent
                 datas.append((str(src), str(dst)))
 
-    append_data_files("sas/docs-source")
     append_data_files("sas/docs")
 
     datas.sort()
