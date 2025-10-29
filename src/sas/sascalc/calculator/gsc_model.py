@@ -6,7 +6,7 @@ from pathlib import Path
 
 import numpy as np
 
-from sas.sascalc.fit import models
+from sas.system.user import find_plugins_dir
 
 
 def generate_plugin(f_name: str, data_to_plot: np.ndarray, x_values: np.ndarray, f_q: list,
@@ -20,7 +20,7 @@ def generate_plugin(f_name: str, data_to_plot: np.ndarray, x_values: np.ndarray,
     :param mass: The mass associated with the Rg calculation
     """
     # check if file exists & assign filename
-    plugin_location = Path(models.find_plugins_dir())
+    plugin_location = Path(find_plugins_dir())
     if not f_name.endswith('.py'):
         f_name += '.py'
     full_path = plugin_location / f_name

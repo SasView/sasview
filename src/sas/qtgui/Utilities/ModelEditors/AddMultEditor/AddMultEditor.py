@@ -17,7 +17,7 @@ from sas.qtgui.Perspectives.Fitting.FittingWidget import SUPPRESSED_MODELS
 
 # Local UI
 from sas.qtgui.Utilities.ModelEditors.AddMultEditor.UI.AddMultEditorUI import Ui_AddMultEditorUI
-from sas.sascalc.fit import models
+from sas.system.user import find_plugins_dir
 
 # Template for the output plugin file
 SUM_TEMPLATE = """
@@ -83,7 +83,7 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
 
         # Name and directory for saving new plugin model
         self.plugin_filename = None
-        self.plugin_dir = models.find_plugins_dir()
+        self.plugin_dir = find_plugins_dir()
 
         # Validators
         rx = QtCore.QRegularExpression("^[A-Za-z0-9_]*$")
