@@ -162,10 +162,17 @@
           <item row="0" column="1">
            <widget class="QLineEdit" name="txtBackgd"/>
           </item>
-          <item row="0" column="2">
-           <widget class="QLabel" name="lblBackgroundUnits">
+          <item row="1" column="2">
+           <widget class="QLabel" name="lblPorodCstUnits">
             <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;cm&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;(cm Å&lt;span style=&quot; vertical-align:super;&quot;&gt;4&lt;/span&gt;)&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="txtPorodCst">
+            <property name="toolTip">
+             <string>Porod constant (optional)</string>
             </property>
            </widget>
           </item>
@@ -185,21 +192,11 @@
           <item row="1" column="3">
            <widget class="QLabel" name="lblVF1">
             <property name="text">
-             <string>Volume Fraction 1:</string>
+             <string>Scale:</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="4">
-           <widget class="QLineEdit" name="txtVolFrac1"/>
-          </item>
-          <item row="0" column="5">
-           <widget class="QLabel" name="lblContrastUnits">
-            <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-2&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
+          <item row="0" column="4">
            <widget class="QLineEdit" name="txtScale"/>
           </item>
           <item row="2" column="3">
@@ -210,41 +207,68 @@
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="lblScale">
-            <property name="text">
-             <string>Scale:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="lblPorodCst">
+           <widget class="QLabel" name="label_10">
             <property name="text">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Porod constant:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="2">
-           <widget class="QLabel" name="lblPorodCstUnits">
+         </layout>
+        </item>
+        <item>
+         <layout class="QGridLayout" name="gridLayout_10">
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="txtContrast"/>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLabel" name="label">
             <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;(cm Å&lt;span style=&quot; vertical-align:super;&quot;&gt;4&lt;/span&gt;)&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string>+/-</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="txtPorodCst">
-            <property name="toolTip">
-             <string>Porod constant (optional)</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="6">
-           <widget class="QRadioButton" name="rbContrast">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_6">
             <property name="text">
-             <string>Use Contrast</string>
+             <string>Contrast:</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="6" rowspan="2">
+          <item row="0" column="4">
+           <widget class="QLabel" name="lblContrastUnits">
+            <property name="text">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-2&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_33">
+            <property name="text">
+             <string>Volume Fraction 1:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>+/-</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <widget class="QLineEdit" name="txtContrastErr"/>
+          </item>
+          <item row="1" column="3">
+           <widget class="QLineEdit" name="txtVolFrac1Err"/>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="txtVolFrac1"/>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_9">
+          <item>
            <widget class="QRadioButton" name="rbVolFrac">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
@@ -863,7 +887,7 @@
   <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
-     <x>20</x>
+     <x>10</x>
      <y>531</y>
      <width>611</width>
      <height>31</height>
