@@ -170,6 +170,8 @@ jobs:
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
           sudo eatmydata apt-get update
           # libcairo2-dev is for building a wheel for pycairo if not cached
           # rest are for loading Qt widgets
@@ -560,6 +562,8 @@ jobs:
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
           sudo eatmydata apt-get update
           sudo eatmydata apt-get -y install --no-install-recommends libegl1 libopengl0 libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils xvfb libxcb-cursor0
 
