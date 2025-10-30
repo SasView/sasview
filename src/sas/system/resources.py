@@ -37,7 +37,7 @@ import importlib.metadata
 import importlib.resources
 import itertools
 import logging
-from pathlib import Path
+from pathlib import Path, PurePath
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +61,7 @@ class ModuleResources:
         """
         self.module = module
 
-    def extract_resource(self, src: str, dest: Path | str) -> bool:
+    def extract_resource(self, src: str | PurePath, dest: Path | str) -> bool:
         """Extract a single resource from the module.
 
         Parameters:
@@ -71,6 +71,7 @@ class ModuleResources:
         Returns: True if resource was extracted
         """
         dest = Path(dest)
+        src = _clean_path(src)
         if dest.exists() and dest.is_dir():
             raise ValueError(f"Specified destination path must include the filename: {dest}")
 
@@ -82,7 +83,7 @@ class ModuleResources:
 
         raise FileNotFoundError(f"Resource {src} not found in module {self.module}")
 
-    def extract_resource_tree(self, src: str, dest: Path | str) -> bool:
+    def extract_resource_tree(self, src: str | PurePath, dest: Path | str) -> bool:
         """Extract a tree of resources from the module.
 
         Parameters:
@@ -91,6 +92,7 @@ class ModuleResources:
             dest: The destination path to which the resources will be copied recursively.
         """
         dest = Path(dest)
+        src = _clean_path(src)
         if self._extract_resource_tree_recorded(src, dest):
             return True
 
@@ -99,7 +101,7 @@ class ModuleResources:
 
         raise NotADirectoryError(f"Resource tree {src} not found in module {self.module}")
 
-    def path_to_resource(self, src: str) -> Path:
+    def path_to_resource(self, src: str | PurePath) -> Path:
         """Provide the filesystem path to a file resource
 
         If the resource is already available on the filesystem, then provide
@@ -107,6 +109,7 @@ class ModuleResources:
         is raised and the caller should extract into a filesystem location that
         they can clean up after use.
         """
+        src = _clean_path(src)
         path = self._path_to_resource_recorded(src) or self._path_to_resource_adjacent(src)
 
         if path:
@@ -114,7 +117,7 @@ class ModuleResources:
 
         raise FileNotFoundError(f"Resource {src} not found in module {self.module}")
 
-    def path_to_resource_directory(self, src: str) -> Path:
+    def path_to_resource_directory(self, src: str | PurePath) -> Path:
         """Provide the filesystem path to a file resource directory
 
         If the resource is already available on the filesystem, then provide
@@ -125,7 +128,7 @@ class ModuleResources:
         Note that completely empty directories might not be found by this method
         as they are not recorded in the dist-info/RECORD.
         """
-        src = str(src).rstrip("/")
+        src = _clean_path(src).rstrip("/")
         path = self._path_to_resource_recorded(src + "/**")
         if path:
             # this will be a entry within the directory or possibly even a subdirectory
@@ -188,8 +191,6 @@ class ModuleResources:
         dest must be a directory
         """
         # normalise the representation
-        spth = Path(src)
-        src = str(spth)
         dpth = Path(dest)
         dpth.mkdir(exist_ok=True, parents=True)
 
@@ -300,6 +301,13 @@ class ModuleResources:
             return False
 
         return found
+
+
+def _clean_path(src: str | PurePath) -> str:
+    if isinstance(src, PurePath):
+        return src.as_posix()
+    else:
+        return src
 
 
 @functools.cache
