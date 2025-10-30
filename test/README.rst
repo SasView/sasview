@@ -14,10 +14,3 @@ or the entire test name on the commandline::
 
   python -m pytest -v -s test/config/utest_config.py
   python -m pytest -v -s test/config/utest_config.py::TestConfig::test_bad_config_file_structure
-
-Tests can be run in Eclipse (or other IDE) by selecting *utest_sasview.py*
-and selecting run. This will run all of the tests. To run tests for one
-one package, edit the *utest_sasview.py* run command and add the package
-directory to the command arguments. To run an individual test,
-select *run_one.py* and edit the command arguments to include the path to
-the desired test file.

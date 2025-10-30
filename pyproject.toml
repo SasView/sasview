@@ -195,7 +195,6 @@ python_classes = [
 ]
 qt_api = "pyside6"
 addopts = [
-    "--ignore", "test/utest_sasview.py",
     "-v",
     "-rsx",
 ]
