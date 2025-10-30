@@ -150,18 +150,29 @@ class ModuleResources:
     # ### Methods for "Recorded" files
 
     @property
-    def _dist_name(self) -> str:
+    def _dist_name(self) -> str | None:
         return _dist_name(self.module)
 
     @property
     def _distribution(self) -> importlib.metadata.Distribution:
         return _distribution(self._dist_name)
 
+    @property
+    def _is_zip_distribution(self) -> bool:
+        return _is_zip_distribution(self._dist_name)
+
+    @property
+    def _incompatible_with_recorded(self) -> bool:
+        return not self._dist_name or self._is_zip_distribution
+
     def _distribution_files(self) -> list[importlib.metadata.PackagePath] | None:
-        return _distribution_files(self.module)
+        return _distribution_files(self._dist_name)
 
     def _path_to_resource_recorded(self, src: str) -> Path | None:
         """calculate the filesystem path to the recorded resource if it exists"""
+        if self._incompatible_with_recorded:
+            return None
+
         pth = self._locate_resource_recorded(src)
         return Path(pth.locate()) if pth else None
 
@@ -179,6 +190,9 @@ class ModuleResources:
 
         dest must be a file path including the target filename
         """
+        if self._incompatible_with_recorded:
+            return False
+
         resource = self._locate_resource_recorded(src)
         if resource:
             self._copy_resource_recorded(resource, dest)
@@ -190,6 +204,9 @@ class ModuleResources:
 
         dest must be a directory
         """
+        if self._incompatible_with_recorded:
+            return False
+
         # normalise the representation
         dpth = Path(dest)
         dpth.mkdir(exist_ok=True, parents=True)
@@ -311,18 +328,30 @@ def _clean_path(src: str | PurePath) -> str:
 
 
 @functools.cache
-def _dist_name(module: str) -> str:
-    return importlib.metadata.packages_distributions()[module][0]
+def _dist_name(module: str) -> str | None:
+    try:
+        return importlib.metadata.packages_distributions()[module][0]
+    except KeyError:
+        # In strange environments like pyinstaller, the module might not be found
+        return None
 
 
 @functools.cache
-def _distribution(module: str) -> importlib.metadata.Distribution:
-    return importlib.metadata.distribution(_dist_name(module))
+def _distribution(dist_name: str) -> importlib.metadata.Distribution:
+    return importlib.metadata.distribution(dist_name)
 
 
 @functools.cache
-def _distribution_files(module: str) -> list[importlib.metadata.PackagePath] | None:
-    return _distribution(module).files
+def _distribution_files(dist_name: str) -> list[importlib.metadata.PackagePath] | None:
+    return _distribution(dist_name).files
+
+
+@functools.cache
+def _is_zip_distribution(dist_name: str) -> bool:
+    """identify whether the module is inside a zip bundle or whl"""
+    dist = _distribution(dist_name)
+    dummy_file = dist.locate_file("")
+    return dummy_file.__class__.__module__.startswith("zipfile")
 
 
 # ### Command line interface for extracting module data
@@ -345,12 +374,10 @@ def main(argv: list[str]) -> bool:
     - resources that are still adjacent to the code and not in site-packages,
       such as in an editable install.
 
-    The following should also work but are untested:
-
     - resources that are inside a wheel file (whl) that has been added to
       PYTHONPATH
 
-    - resources that are inside a module shipped in zip form
+    - resources that are inside a module shipped in zip-bundle form
     """
     import argparse
     import textwrap
