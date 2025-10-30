@@ -60,8 +60,8 @@ from sas.qtgui.Utilities.ResultPanel import ResultPanel
 # General SAS imports
 from sas.qtgui.Utilities.SasviewLogger import setup_qt_logging
 from sas.qtgui.Utilities.WhatsNew.WhatsNew import WhatsNew
-from sas.system import web
-from sas.system.user import HELP_DIRECTORY_LOCATION, create_user_files_if_needed
+from sas.system import HELP_SYSTEM, web
+from sas.system.user import create_user_files_if_needed
 from sas.system.version import __release_date__ as SASVIEW_RELEASE_DATE
 from sas.system.version import __version__ as SASVIEW_VERSION
 
@@ -124,9 +124,7 @@ class GuiManager:
         self.statusBarSetup()
 
         # Current tutorial location
-        self._tutorialLocation = os.path.abspath(os.path.join(HELP_DIRECTORY_LOCATION,
-                                              "_downloads",
-                                              "Tutorial.pdf"))
+        self._tutorialLocation: str = str((HELP_SYSTEM.path /                                               "_downloads" / "Tutorial.pdf").absolute())
 
         if self.WhatsNew.has_new_messages(): # Not a static method
             self.WhatsNew.show()
@@ -368,8 +366,8 @@ class GuiManager:
         if isinstance(url, str):
             url = url.lstrip("//")
         url = Path(url)
-        if str(HELP_DIRECTORY_LOCATION.resolve()) not in str(url.absolute()):
-            url_abs = HELP_DIRECTORY_LOCATION / url
+        if str(HELP_SYSTEM.path.resolve()) not in str(url.absolute()):
+            url_abs = HELP_SYSTEM.path / url
         else:
             url_abs = Path(url)
         try:

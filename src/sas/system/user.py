@@ -7,11 +7,9 @@ from packaging.version import Version
 from platformdirs import PlatformDirs
 
 from sas.system.version import __version__
-from .resources import ModuleResources
 
-# Common resource extractor for all
-SAS_RESOURCES = ModuleResources("sas")
-
+from ._help import HELP_SYSTEM as _HELP_SYSTEM
+from ._resources import SAS_RESOURCES as _SAS_RESOURCES
 
 logger = logging.getLogger(__name__)
 
@@ -152,20 +150,20 @@ def copy_old_files_to_new_location():
 
 
 def _copy_example_data() -> None:
-    SAS_RESOURCES.extract_resource_tree("example_data", EXAMPLE_DATA_DIR)
+    _SAS_RESOURCES.extract_resource_tree("example_data", EXAMPLE_DATA_DIR)
 
 
 def _copy_documentation() -> Path:
     """Extract the module documentation and copy it to a configured location"""
-    SAS_RESOURCES.extract_resource_tree("docs", HELP_SYSTEM.path)
-    return HELP_SYSTEM.path
+    _SAS_RESOURCES.extract_resource_tree("docs", _HELP_SYSTEM.path)
+    return _HELP_SYSTEM.path
 
 
 def _locate_module_documentation_path() -> Path | None:
     """Attempt to find a filesystem path directly to the sasview module's documentation"""
     path = None
     try:
-        path = SAS_RESOURCES.path_to_resource_directory("docs")
+        path = _SAS_RESOURCES.path_to_resource_directory("docs")
     except NotADirectoryError:
         pass
     return path
@@ -183,7 +181,7 @@ def _setup_module_documentation() -> None:
     """
     path = _locate_module_documentation_path()
     if path:
-        HELP_SYSTEM.path = path
+        _HELP_SYSTEM.path = path
         logger.info("Using documentation found at %s", path)
         return
 
@@ -192,17 +190,7 @@ def _setup_module_documentation() -> None:
 
 
 def copy_resources() -> None:
-    """Find the original documentation location (source and built)
-
-    The source and built docs for SasView could be in a number of locations.
-    Search for them in the following locations:
-    1. installed within the module
-    2. unpacked next to the source
-    3. in legacy paths from older installation approaches
-
-    Installed versions are prioritised over uninstalled versions to make sure
-    that inconveniently named local directories don't cause issues.
-    """
+    """Set up user environment with resource files"""
     _copy_example_data()
     _setup_module_documentation()
 
@@ -213,14 +201,6 @@ def create_user_files_if_needed() -> None:
     copy_resources()
 
 
-# Path constants related to the directories and files used in documentation regeneration processes
-class _HelpSystem:
-    """Extensible storage for help-system-related paths and configuration"""
-
-    def __init__(self) -> None:
-        self.path: Path
-        #self.example_data: Path   # perhaps?
-
-
-HELP_SYSTEM = _HelpSystem()
-HELP_SYSTEM.path = Path(get_app_dir_versioned()) / "doc" / "build" / "html"
+# Configure the help system with the calculated path constants
+_HELP_SYSTEM.path = Path(get_app_dir_versioned()) / "doc" / "build" / "html"
+# HELP_SYSTEM.example_data = _EXAMPLE_DATA_DIR
