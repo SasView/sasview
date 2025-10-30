@@ -48,8 +48,8 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
 
     def initializeSignals(self):
         """Initialize all external signals that will trigger events for the window."""
-        self.closeButton.clicked.connect(self.closeEvent)
-        self.communicate.closeSignal.connect(self.closeEvent)
+        self.closeButton.clicked.connect(self.onCloseButtonClicked)
+        self.communicate.closeSignal.connect(self.onCloseButtonClicked)
         self.webEngineViewer.urlChanged.connect(self.updateTitle)
         self.webEngineViewer.page().profile().downloadRequested.connect(self.onDownload)
 
@@ -59,6 +59,13 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         Keep as a separate method to allow for additional functionality when closing
         """
         self.accept()
+
+    def onCloseButtonClicked(self):
+        """
+        Close window
+        Keep as a separate method to allow for additional functionality when closing
+        """
+        self.close()
 
     def onShow(self):
         """
