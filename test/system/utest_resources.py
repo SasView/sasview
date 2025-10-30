@@ -50,6 +50,7 @@ class TestRecorded:
         assert pth.is_absolute()
         assert Path(str(pth)).exists()
         assert Path(str(pth)).is_file()
+        assert pth.as_posix().endswith(source)
         assert pth.stat().st_size > 1000
 
     def test_path_to_resource_directory(self, input_type):
@@ -115,7 +116,7 @@ class TestAdjacent:
         assert pth.is_absolute()
         assert Path(str(pth)).exists()
         assert Path(str(pth)).is_file()
-        assert str(pth).endswith(source)
+        assert pth.as_posix().endswith(source)
         assert pth.stat().st_size > 1000
 
     def test_path_to_resource_directory(self, input_type):
