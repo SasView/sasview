@@ -38,7 +38,7 @@ from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
 from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
 from sas.sascalc.fit import models
 from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
-from sas.system.user import HELP_DIRECTORY_LOCATION, find_plugins_dir
+from sas.system import HELP_SYSTEM
 
 TAB_MAGNETISM = 4
 TAB_POLY = 3
@@ -1662,7 +1662,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Show the "Fitting" section of help
         """
-        help_location = self.getHelpLocation(HELP_DIRECTORY_LOCATION)
+        help_location = self.getHelpLocation(HELP_SYSTEM.path)
         self.parent.showHelp(help_location)
 
     def getHelpLocation(self, tree_base: Path) -> Path:

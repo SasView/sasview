@@ -165,8 +165,8 @@ class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
         Display related help section
         """
         try:
-            help_location = GuiUtils.HELP_DIRECTORY_LOCATION + \
-            "/user/qtgui/Perspectives/Fitting/fitting_help.html#simultaneous-fits-with-constraints"
+            help_location = (GuiUtils.HELP_SYSTEM.path /
+            "/user/qtgui/Perspectives/Fitting/fitting_help.html#simultaneous-fits-with-constraints")
             webbrowser.open('file://' + os.path.realpath(help_location))
         except AttributeError:
             # No manager defined - testing and standalone runs
