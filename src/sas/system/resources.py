@@ -92,6 +92,21 @@ class ModuleResources:
 
         raise NotADirectoryError(f"Resource tree {src} not found in module {self.module}")
 
+    def path_to_resource(self, src: str) -> Path:
+        """Provide the filesystem path to a resource
+
+        If the resource is already available on the filesystem, then provide
+        the path to it directly; if it is not available, then a FileNotFoundError
+        is raised and the caller should extract into a filesystem location that
+        they can clean up after use.
+        """
+        path = self._path_to_resource_recorded(src) or self._path_to_resource_adjacent(src)
+
+        if path:
+            return path
+
+        raise FileNotFoundError(f"Resource {src} not found in module {self.module}")
+
     # ### Methods for "Recorded" files
 
     @property
@@ -105,17 +120,36 @@ class ModuleResources:
     def _distribution_files(self) -> list[importlib.metadata.PackagePath] | None:
         return _distribution_files(self.module)
 
-    def _extract_resource_recorded(self, src: str, dest: Path) -> bool:
+    def _path_to_resource_recorded(self, src: str) -> Path | None:
+        """calculate the filesystem path to the recorded resource if it exists"""
+        pth = self._locate_resource_recorded(src)
+        return Path(pth.locate()) if pth else None
+
+    def _locate_resource_recorded(self, src: str) -> importlib.metadata.PackagePath | None:
+        """obtain the PackagePath record for the resource if it exists"""
         resources = self._distribution_files()
         search = f"{self.module}/{src}"
         for resource in resources or ():
             if resource.full_match(search):
-                self._copy_resource_recorded(resource, dest)
-                return True
+                return resource
+        return None
 
+    def _extract_resource_recorded(self, src: str, dest: Path) -> bool:
+        """extract the recorded resource (if it exists) to the destination filename
+
+        dest must be a file path including the target filename
+        """
+        resource = self._locate_resource_recorded(src)
+        if resource:
+            self._copy_resource_recorded(resource, dest)
+            return True
         return False
 
     def _extract_resource_tree_recorded(self, src: str, dest: Path) -> bool:
+        """extract the recorded resource tree (if it exists) to the destination directory
+
+        dest must be a directory
+        """
         # normalise the representation
         spth = Path(src)
         src = str(spth)
@@ -138,7 +172,7 @@ class ModuleResources:
     def _copy_resource_recorded(self, resource: importlib.metadata.PackagePath, dest: Path) -> None:
         """copy the resource to the filesystem
 
-        dest needs to be the full path and filename
+        dest needs to be the file path including the filename
         """
         src = resource.locate()
 
@@ -152,7 +186,29 @@ class ModuleResources:
 
     # ### Methods for "Adjacent" files
 
+    def _path_to_resource_adjacent(self, src: str) -> Path | None:
+        """calculate the filesystem path to the recorded resource if it exists"""
+        resource = importlib.resources.files(self.module) / src
+
+        # importlib.resources will always return something... but it might
+        # not exist, so the is_file() check is needed.
+        # If the resource is on disk, then importlib.resources.readers.FileReader
+        # will return a pathlib.Path object directly to the resource which is
+        # all that is needed here
+
+        if resource.is_file() and isinstance(resource, Path):
+            logger.debug("Found adjacent: %s", resource)
+            return resource
+
+        return None
+
     def _extract_resource_adjacent(self, src: str, dest: Path) -> bool:
+        """extract the adjacent resource (if it exists) to the destination filename
+
+        dest must be a file path including the target filename
+
+        This method should should transparently access resources in zip bundles
+        """
         resource_path = importlib.resources.files(self.module) / src
         if not resource_path.is_file():
             return False
@@ -166,7 +222,11 @@ class ModuleResources:
         return True
 
     def _extract_resource_tree_adjacent(self, src: str | Path, dest: Path) -> bool:
-        # normalise paths
+        """extract the adjacent resource tree (if it exists) to the destination directory
+
+        dest must be a directory
+        """
+        # normalise the representation
         spth = Path(src)
         src = str(spth)
 
