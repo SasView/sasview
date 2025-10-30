@@ -31,13 +31,20 @@ This module is extensible for future work to
    - deduplicate some resources across the codebase
 """
 
+import enum
 import functools
 import importlib.metadata
 import importlib.resources
+import itertools
 import logging
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
+
+
+class _ResType(enum.Flag):
+    FILE = enum.auto()
+    DIR = enum.auto()
 
 
 class ModuleResources:
@@ -93,7 +100,7 @@ class ModuleResources:
         raise NotADirectoryError(f"Resource tree {src} not found in module {self.module}")
 
     def path_to_resource(self, src: str) -> Path:
-        """Provide the filesystem path to a resource
+        """Provide the filesystem path to a file resource
 
         If the resource is already available on the filesystem, then provide
         the path to it directly; if it is not available, then a FileNotFoundError
@@ -106,6 +113,36 @@ class ModuleResources:
             return path
 
         raise FileNotFoundError(f"Resource {src} not found in module {self.module}")
+
+    def path_to_resource_directory(self, src: str) -> Path:
+        """Provide the filesystem path to a file resource directory
+
+        If the resource is already available on the filesystem, then provide
+        the path to it directly; if it is not available, then a NotADirectoryError
+        is raised and the caller should extract into a filesystem location that
+        they can clean up after use.
+
+        Note that completely empty directories might not be found by this method
+        as they are not recorded in the dist-info/RECORD.
+        """
+        src = str(src).rstrip("/")
+        path = self._path_to_resource_recorded(src + "/**")
+        if path:
+            # this will be a entry within the directory or possibly even a subdirectory
+            # need to walk up to find the entry we really want
+            match = f"/{self.module}/{src}"   # pathlib.Path directories don't end in /
+            for part in itertools.chain([path], path.parents):
+                if str(part).endswith(match):
+                    return part
+            # if the upwards search falls through to here, then something went wrong
+            # with the original filtering of the RECORD data, but allow it to try
+            # importlib.resources before raising the exception
+
+        path = self._path_to_resource_adjacent(src, accept=_ResType.DIR)
+        if path:
+            return path
+
+        raise NotADirectoryError(f"Resource directory {src} not found in module {self.module}")
 
     # ### Methods for "Recorded" files
 
@@ -186,7 +223,7 @@ class ModuleResources:
 
     # ### Methods for "Adjacent" files
 
-    def _path_to_resource_adjacent(self, src: str) -> Path | None:
+    def _path_to_resource_adjacent(self, src: str, accept: _ResType = _ResType.FILE) -> Path | None:
         """calculate the filesystem path to the recorded resource if it exists"""
         resource = importlib.resources.files(self.module) / src
 
@@ -196,11 +233,16 @@ class ModuleResources:
         # will return a pathlib.Path object directly to the resource which is
         # all that is needed here
 
-        if resource.is_file() and isinstance(resource, Path):
-            logger.debug("Found adjacent: %s", resource)
-            return resource
+        result = None
 
-        return None
+        if isinstance(resource, Path):
+            if (resource.is_file() and _ResType.FILE in accept) or (resource.is_dir() and _ResType.DIR in accept):
+                result = resource
+
+        if result:
+            logger.debug("Found adjacent: %s", resource)
+
+        return result
 
     def _extract_resource_adjacent(self, src: str, dest: Path) -> bool:
         """extract the adjacent resource (if it exists) to the destination filename
