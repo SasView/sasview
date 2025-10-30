@@ -15,7 +15,7 @@ from sas.qtgui.Utilities.CustomGUI.CodeEditor import QCodeEditor
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.ModelEditor import ModelEditor
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.PluginDefinition import PluginDefinition
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.UI.TabbedModelEditor import Ui_TabbedModelEditor
-from sas.system.user import MAIN_DOC_SRC, find_plugins_dir
+from sas.system.user import find_plugins_dir
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +49,6 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.is_modified = False
         self.showNoCompileWarning = True
         self.label = None
-        self.file_to_regenerate = ""
         self.include_polydisperse = False
 
         self.addWidgets()
@@ -154,16 +153,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         # the documentation viewer into the filepath for its corresponding RST
         if at_launch:
             user_models = find_plugins_dir()
-            user_model_name = user_models + self.load_file + ".py"
-
-            if self.model is True:
-                # Find location of model .py files and load from that location
-                filename = user_model_name if os.path.isfile(user_model_name) \
-                    else MAIN_DOC_SRC / "user" / "models" / "src" / (self.load_file + ".py")
-            else:
-                filename = MAIN_DOC_SRC / self.load_file.replace(".html", ".rst")
-                self.is_python = False
-                self.is_documentation = True
+            filename = user_models + self.load_file + ".py"
         else:
             plugin_location = find_plugins_dir()
             filename = QtWidgets.QFileDialog.getOpenFileName(
@@ -181,7 +171,6 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         # remove c-plugin tab, if present.
         if self.tabWidget.count() > 1:
             self.tabWidget.removeTab(1)
-        self.file_to_regenerate = filename
         self.loadFile(str(filename))
 
     def allBuiltinModels(self) -> [str]:
@@ -551,18 +540,6 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         msg = f"{str(filename)} successfully saved."
         self.parent.communicate.statusBarUpdateSignal.emit(msg)
         logger.info(msg)
-        if self.is_documentation:
-            self.regenerateDocumentation()
-
-    def regenerateDocumentation(self):
-        """
-        Defer to subprocess the documentation regeneration process
-        """
-        # TODO: Move the doc regen methods out of the documentation window - this forces the window to remain open
-        #  in order for the documentation regeneration process to run.
-        # The regen method is part of the documentation window. If the window is closed, the method no longer exists.
-        if hasattr(self.parent, "helpWindow"):
-            self.parent.helpWindow.regenerateHtml(self.filename_py)
 
     def noModelCheckWarning(self):
         """

@@ -42,7 +42,6 @@ from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionPerspective import 
 from sas.qtgui.Utilities.About.About import About
 
 # from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
-from sas.qtgui.Utilities.DocRegenInProgess import DocRegenProgress
 from sas.qtgui.Utilities.FileConverter import FileConverterWidget
 from sas.qtgui.Utilities.GridPanel import BatchOutputPanel
 from sas.qtgui.Utilities.HidableDialog import hidable_dialog
@@ -61,7 +60,6 @@ from sas.qtgui.Utilities.ResultPanel import ResultPanel
 # General SAS imports
 from sas.qtgui.Utilities.SasviewLogger import setup_qt_logging
 from sas.qtgui.Utilities.WhatsNew.WhatsNew import WhatsNew
-from sas.sascalc.doc_regen.makedocumentation import HELP_DIRECTORY_LOCATION, create_user_files_if_needed
 from sas.system import web
 from sas.system.user import HELP_DIRECTORY_LOCATION, create_user_files_if_needed
 from sas.system.version import __release_date__ as SASVIEW_RELEASE_DATE
@@ -87,7 +85,7 @@ class GuiManager:
         # Redefine exception hook to not explicitly crash the app.
         sys.excepthook = self.info
 
-        # Ensure the user directory has all required documentation files for future doc regen purposes
+        # Ensure the user directory has all required layout and files
         create_user_files_if_needed()
 
         # Add signal callbacks
@@ -201,7 +199,6 @@ class GuiManager:
         self.DataOperation = DataOperationUtilityPanel(self)
         self.FileConverter = FileConverterWidget(self)
         self.WhatsNew = WhatsNew(self._parent)
-        self.regenProgress = DocRegenProgress(self)
 
     def loadAllPerspectives(self):
         """ Load all the perspectives"""
