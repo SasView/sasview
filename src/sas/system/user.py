@@ -157,8 +157,8 @@ def _copy_example_data() -> None:
 
 def _copy_documentation() -> Path:
     """Extract the module documentation and copy it to a configured location"""
-    SAS_RESOURCES.extract_resource_tree("docs", HELP_DIRECTORY_LOCATION)
-    return HELP_DIRECTORY_LOCATION
+    SAS_RESOURCES.extract_resource_tree("docs", HELP_SYSTEM.path)
+    return HELP_SYSTEM.path
 
 
 def _locate_module_documentation_path() -> Path | None:
@@ -181,11 +181,11 @@ def _setup_module_documentation() -> None:
     2.  extract the documentation from the sas module to the configured doc
         location and use that.
     """
-    # path = _locate_module_documentation_path()
-    # if path:
-    #     HELP_DIRECTORY_LOCATION = path
-    #     logger.info("Using documentation found at %s", path)
-    #     return
+    path = _locate_module_documentation_path()
+    if path:
+        HELP_SYSTEM.path = path
+        logger.info("Using documentation found at %s", path)
+        return
 
     path = _copy_documentation()
     logger.info("Using documentation copied to %s", path)
@@ -206,12 +206,6 @@ def copy_resources() -> None:
     _copy_example_data()
     _setup_module_documentation()
 
-    # if not MAIN_BUILD_SRC.exists():
-    #     if build_dir.exists():
-    #         shutil.copytree(build_dir, MAIN_BUILD_SRC)
-    #     else:
-    #         logger.error("Could not find pre-built documentation")
-
 
 def create_user_files_if_needed() -> None:
     """Create user documentation directories if necessary and copy built docs there."""
@@ -220,6 +214,13 @@ def create_user_files_if_needed() -> None:
 
 
 # Path constants related to the directories and files used in documentation regeneration processes
-USER_DOC_BASE = Path(get_app_dir_versioned()) / "doc"
+class _HelpSystem:
+    """Extensible storage for help-system-related paths and configuration"""
 
-HELP_DIRECTORY_LOCATION = USER_DOC_BASE / "build" / "html"
+    def __init__(self) -> None:
+        self.path: Path
+        #self.example_data: Path   # perhaps?
+
+
+HELP_SYSTEM = _HelpSystem()
+HELP_SYSTEM.path = Path(get_app_dir_versioned()) / "doc" / "build" / "html"
