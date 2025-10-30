@@ -1,14 +1,17 @@
-import importlib.resources
 import logging
 import os
 import shutil
-import sys
 from pathlib import Path
 
 from packaging.version import Version
 from platformdirs import PlatformDirs
 
 from sas.system.version import __version__
+from .resources import ModuleResources
+
+# Common resource extractor for all
+SAS_RESOURCES = ModuleResources("sas")
+
 
 logger = logging.getLogger(__name__)
 
@@ -148,82 +151,44 @@ def copy_old_files_to_new_location():
                 logger.error(f"Failed to remove {old_path}: {e}")
 
 
-def module_copytree(module: str, src: PATH_LIKE, dest: PATH_LIKE) -> None:
-    """Copy the tree from a module to the specified directory
+def _copy_example_data() -> None:
+    SAS_RESOURCES.extract_resource_tree("example_data", EXAMPLE_DATA_DIR)
 
-    module: name of the Python module (the "anchor" for importlib.resources)
-    src: source name of the resource inside the module
-    dest: destination directory for the resources to be copied into; will be
-        created if it doesn't exist
+
+def _copy_documentation() -> Path:
+    """Extract the module documentation and copy it to a configured location"""
+    SAS_RESOURCES.extract_resource_tree("docs", HELP_DIRECTORY_LOCATION)
+    return HELP_DIRECTORY_LOCATION
+
+
+def _locate_module_documentation_path() -> Path | None:
+    """Attempt to find a filesystem path directly to the sasview module's documentation"""
+    path = None
+    try:
+        path = SAS_RESOURCES.path_to_resource_directory("docs")
+    except NotADirectoryError:
+        pass
+    return path
+
+
+def _setup_module_documentation() -> None:
+    """Get the documentation tree ready for the user
+
+    The first of these to succeed is what is used:
+
+    1.  look for the documentation inside the sas module and if it is
+        available on disk, then directly use that
+    2.  extract the documentation from the sas module to the configured doc
+        location and use that.
     """
-    spth = Path(src)
-    src = str(spth)
+    # path = _locate_module_documentation_path()
+    # if path:
+    #     HELP_DIRECTORY_LOCATION = path
+    #     logger.info("Using documentation found at %s", path)
+    #     return
 
-    dpth = Path(dest)
-    dpth.mkdir(exist_ok=True, parents=True)
-
-    for resource in importlib.resources.files(module).joinpath(src).iterdir():
-        f_name = dpth / resource.name
-        s_name = spth / resource.name
-        if "__pycache__" in resource.name:
-            continue
-
-        if resource.is_dir():
-            # recurse into the directory
-            module_copytree(module, s_name, f_name)
-        elif resource.is_file():
-            if not f_name.exists():
-                logger.debug("Copied: %s", s_name)
-                with open(f_name, "wb") as dh:
-                    dh.write(resource.read_bytes())
-        else:
-            logger.warning("Skipping %s (unknown type)", str(s_name))
-
-
-def is_copy_successful() -> bool:
-    """Obtain the docs from within the installed sas module"""
-
-    # Look in the module for the resources. We know that there is a index.html
-    # from sphinx so check that it exists; checking that the file exists and
-    # not just the directory protects against empty directories
-    if importlib.resources.files("sas").joinpath("docs/index.html").is_file():
-        logger.info("Extracting docs from sas module")
-        module_copytree("sas", "docs", MAIN_BUILD_SRC / "html")
-        module_copytree("sas", "example_data", EXAMPLE_DATA_DIR)
-        return True
-
-    return False
-
-
-def locate_unpacked_resources() -> tuple[Path, Path]:
-    """Locate the resources unpacked on disk"""
-    # Look near where sasview executable sits - if it's from the pyinstaller
-    # bundle or from run.py then the doc source will be close by. Note that
-    # this won't be true for POSIX-like installations where the executable
-    # is in /usr/bin, ~/.local/bin, or .../venv/bin.
-    exe_dir = Path(sys.argv[0]).parent
-
-    if (exe_dir / "doc").exists():
-        # This is the directory structure for the installed version of SasView
-        # such as when installed from the pyinstaller bundle prior to v6.1
-        source_dir = exe_dir / "doc" / "source"
-        build_dir = exe_dir / "doc" / "build"
-
-    elif (exe_dir.parent / "Frameworks" / "doc").exists():
-        # In the MacOS bundle, the executable and packages are in parallel directories
-        source_dir = exe_dir.parent / "Frameworks" / "doc" / "source"
-        build_dir = exe_dir.parent / "Frameworks" / "doc" / "build"
-
-    else:
-        # This is the directory structure for developers
-        source_dir = exe_dir / "docs" / "sphinx-docs" / "source-temp"
-        build_dir = exe_dir / "build" / "doc"
-
-    logger.info(
-        "Extracting docs from on-disk locations: source=%s, build=%s",
-        source_dir, build_dir
-    )
-    return source_dir, build_dir
+    path = _copy_documentation()
+    logger.info("Using documentation copied to %s", path)
 
 
 def copy_resources() -> None:
@@ -238,44 +203,23 @@ def copy_resources() -> None:
     Installed versions are prioritised over uninstalled versions to make sure
     that inconveniently named local directories don't cause issues.
     """
-    if is_copy_successful():
-        return
+    _copy_example_data()
+    _setup_module_documentation()
 
-    source_dir, build_dir = locate_unpacked_resources()
-    if not MAIN_DOC_SRC.exists():
-        if source_dir.exists():
-            shutil.copytree(source_dir, MAIN_DOC_SRC)
-        else:
-            logger.error("Could not find source for documentation")
-
-    if not MAIN_BUILD_SRC.exists():
-        if build_dir.exists():
-            shutil.copytree(build_dir, MAIN_BUILD_SRC)
-        else:
-            logger.error("Could not find pre-built documentation")
+    # if not MAIN_BUILD_SRC.exists():
+    #     if build_dir.exists():
+    #         shutil.copytree(build_dir, MAIN_BUILD_SRC)
+    #     else:
+    #         logger.error("Could not find pre-built documentation")
 
 
 def create_user_files_if_needed() -> None:
     """Create user documentation directories if necessary and copy built docs there."""
-    USER_DOC_BASE.mkdir(exist_ok=True)
-    USER_DOC_SRC.mkdir(exist_ok=True)
-    USER_DOC_LOG.mkdir(exist_ok=True)
     EXAMPLE_DATA_DIR.mkdir(exist_ok=True)
-    with open(DOC_LOG, "wb"):
-        # If the file doesn't exist, write an empty file to eliminate any potential future file creation conflicts
-        pass
     copy_resources()
 
 
 # Path constants related to the directories and files used in documentation regeneration processes
 USER_DOC_BASE = Path(get_app_dir_versioned()) / "doc"
-USER_DOC_SRC = USER_DOC_BASE
-USER_DOC_LOG = USER_DOC_SRC / 'log'
-DOC_LOG = USER_DOC_LOG / 'output.log'
-MAIN_DOC_SRC = USER_DOC_SRC / "source-temp"
-MAIN_BUILD_SRC = USER_DOC_SRC / "build"
-MAIN_PY_SRC = MAIN_DOC_SRC / "user" / "models" / "src"
-ABSOLUTE_TARGET_MAIN = Path(MAIN_DOC_SRC)
 
-HELP_DIRECTORY_LOCATION = MAIN_BUILD_SRC / "html"
-IMAGES_DIRECTORY_LOCATION = HELP_DIRECTORY_LOCATION / "_images"
+HELP_DIRECTORY_LOCATION = USER_DOC_BASE / "build" / "html"
