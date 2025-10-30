@@ -6,7 +6,7 @@ from pathlib import Path
 from PySide6 import QtCore, QtWebEngineCore, QtWidgets
 from PySide6.QtGui import QCloseEvent
 
-from sas.system.user import HELP_DIRECTORY_LOCATION
+from sas.system import HELP_SYSTEM
 
 from .UI.DocViewWidgetUI import Ui_DocViewerWindow
 
@@ -92,8 +92,9 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         """
         Undertake preflight checks and if OK, load the requested page
         """
-        if not HELP_DIRECTORY_LOCATION.exists():
+        if not HELP_SYSTEM.path.exists():
             # The docs can't be found - display a 404 message
+            logger.error("Documentation could not be found at configured location: %s", HELP_SYSTEM.path)
             self.load404()
             return
 
@@ -140,7 +141,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         url = self.source
         # Check to see if path is absolute or relative, accommodating urls from many different places
         if not os.path.exists(url):
-            location = HELP_DIRECTORY_LOCATION / url
+            location = HELP_SYSTEM.path / url
             sas_path = Path(os.path.dirname(sys.argv[0]))
             url = sas_path / location
 
