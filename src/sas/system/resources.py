@@ -30,6 +30,10 @@ This module is extensible for future work to
    - provide filehandles to resources rather than copies of resources
    - deduplicate some resources across the codebase
 """
+# TODO:
+#   - CRUFT: python 3.13 introduced pathlib.Path.full_match for recursive
+#     glob matching; until we're using that, we have some messier regular
+#     expressions in the code below.
 
 import enum
 import functools
@@ -37,6 +41,7 @@ import importlib.metadata
 import importlib.resources
 import itertools
 import logging
+import re
 from pathlib import Path, PurePath
 
 logger = logging.getLogger(__name__)
@@ -179,9 +184,12 @@ class ModuleResources:
     def _locate_resource_recorded(self, src: str) -> importlib.metadata.PackagePath | None:
         """obtain the PackagePath record for the resource if it exists"""
         resources = self._distribution_files()
-        search = f"{self.module}/{src}"
+        # CRUFT: the regex can be replaced with the glob in Python 3.13
+        # search = f"{self.module}/{src}"
+        search_re = re.compile(rf"^{self.module}/{src.replace('**', '.*')}/?")
         for resource in resources or ():
-            if resource.full_match(search):
+            if search_re.fullmatch(str(resource)):
+            # if resource.full_match(search):
                 return resource
         return None
 
@@ -213,12 +221,15 @@ class ModuleResources:
 
         resources = self._distribution_files()
         base = f"{self.module}/{src}"
-        search = f"{base}/**"
+        # CRUFT: the regex can be replaced with the glob in Python 3.13
+        # search = f"{base}/**"
+        search_re = re.compile(rf"^{base}/.*/?")
         found = False
         for resource in resources or ():
             if "__pycache__" in str(resource):
                 continue
-            if resource.full_match(search):
+            if search_re.fullmatch(str(resource)):
+            # if resource.full_match(search):
                 dest_name = dpth / resource.relative_to(base)
                 self._copy_resource_recorded(resource, dest_name)
                 found = True
