@@ -135,13 +135,13 @@ artifacts = [
 
 [[tool.hatch.build.targets.wheel.hooks.sphinx.tools]]
 tool = "custom"
-doc_dir = "docs/sphinx-docs"
+doc_dir = "."
 out_dir = "tmp"
 commands = [
   # sphinx commands work within the "doc_dir" directory
-  "{python} extract-module-resource.py sasmodels docs-source tmp/sasmodels/docs",
-  "{python} extract-module-resource.py sasdata docs-source tmp/sasdata/docs",
-  "{python} extract-module-resource.py sasdata example_data ../../src/sas/example_data/",
+  "{python} src/sas/system/resources.py -r sasmodels docs-source docs/sphinx-docs/tmp/sasmodels/docs",
+  "{python} src/sas/system/resources.py -r sasdata docs-source docs/sphinx-docs/tmp/sasdata/docs",
+  "{python} src/sas/system/resources.py -r sasdata example_data src/sas/example_data/",
 ]
 
 
