@@ -29,7 +29,9 @@ jobs:
       - uses: astral-sh/ruff-action@v3
         with:
           version: "latest"
-          args: "check --fix-only --exit-non-zero-on-fix"
+          args: "--version"
+      - run: ruff check --diff --exit-zero
+      - run: ruff check --fix-only --exit-non-zero-on-fix
       - uses: pre-commit-ci/lite-action@v1.1.0
         if: always()
         with:
