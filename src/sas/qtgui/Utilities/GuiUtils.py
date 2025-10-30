@@ -173,11 +173,6 @@ class Communicate(QtCore.QObject):
     # Update the masked ranges in fitting
     updateMaskedDataSignal = QtCore.Signal()
 
-    # Triggers to refresh documentation
-    documentationRegenInProgressSignal = QtCore.Signal()
-    documentationRegeneratedSignal = QtCore.Signal()
-    documentationUpdateLogSignal = QtCore.Signal()
-
     # Global close to help kill active threads
     closeSignal = QtCore.Signal()
 
