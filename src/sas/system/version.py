@@ -5,3 +5,5 @@ except ImportError:
 
 __release_date__ = "2025"
 __build__ = "GIT_COMMIT"
+
+__all__ = ["__build__", "__release_date__", "__version__"]
