@@ -27,7 +27,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
     Instantiates a window to view documentation using a QWebEngineViewer widget
     """
 
-    def __init__(self, source: Path = None):
+    def __init__(self, source: Path):
         """The DocViewWindow class is an HTML viewer built into SasView.
 
         :param parent: Any Qt object with a communicator that can trigger events.
