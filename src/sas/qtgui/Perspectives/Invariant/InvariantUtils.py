@@ -9,6 +9,7 @@ WIDGETS = enum(
     "W_CONTRAST",
     "W_CONTRAST_ERR",
     "W_POROD_CST",
+    "W_POROD_CST_ERR",
     "W_VOLFRAC1",
     "W_VOLFRAC1_ERR",
     "W_VOLFRAC2",

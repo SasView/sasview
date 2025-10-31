@@ -80,6 +80,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self._contrast: float | None = None
         self._contrast_err: float | None = None
         self._porod: float | None = None
+        self._porod_err: float | None = None
         self._volfrac1: float | None = None
         self._volfrac1_err: float | None = None
 
@@ -248,6 +249,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self._scale = float(self.model.item(WIDGETS.W_SCALE).text())
         if self.model.item(WIDGETS.W_POROD_CST).text() != "None" and self.model.item(WIDGETS.W_POROD_CST).text() != "":
             self._porod = float(self.model.item(WIDGETS.W_POROD_CST).text())
+        if self.model.item(WIDGETS.W_POROD_CST_ERR).text() != "None" and self.model.item(WIDGETS.W_POROD_CST_ERR).text() != "":
+            self._porod_err = float(self.model.item(WIDGETS.W_POROD_CST_ERR).text())
         if self.model.item(WIDGETS.W_VOLFRAC1).text() != "None" and self.model.item(WIDGETS.W_VOLFRAC1).text() != "":
             self._volfrac1 = float(self.model.item(WIDGETS.W_VOLFRAC1).text())
         if (
@@ -1004,6 +1007,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             "txtContrast",
             "txtContrastErr",
             "txtPorodCst",
+            "txtPorodCstErr",
             "txtScale",
             "txtVolFrac1",
             "txtVolFrac1Err",
@@ -1020,6 +1024,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             WIDGETS.W_CONTRAST,
             WIDGETS.W_CONTRAST_ERR,
             WIDGETS.W_POROD_CST,
+            WIDGETS.W_POROD_CST_ERR,
             WIDGETS.W_SCALE,
             WIDGETS.W_VOLFRAC1,
             WIDGETS.W_VOLFRAC1_ERR,
@@ -1207,6 +1212,10 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         )
         self.model.setItem(WIDGETS.W_POROD_CST, item)
         item: QtGui.QStandardItem = (
+            QtGui.QStandardItem(str(self._porod_err)) if self._porod_err is not None else QtGui.QStandardItem("")
+        )
+        self.model.setItem(WIDGETS.W_POROD_CST_ERR, item)
+        item: QtGui.QStandardItem = (
             QtGui.QStandardItem(str(self._contrast)) if self._contrast is not None else QtGui.QStandardItem("")
         )
         self.model.setItem(WIDGETS.W_CONTRAST, item)
@@ -1274,6 +1283,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
         # Porod constant
         self.mapper.addMapping(self.txtPorodCst, WIDGETS.W_POROD_CST)
+        self.mapper.addMapping(self.txtPorodCstErr, WIDGETS.W_POROD_CST_ERR)
 
         # Output
         self.mapper.addMapping(self.txtVolFract, WIDGETS.W_VOLUME_FRACTION)
@@ -1379,6 +1389,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.txtName.setText("")
         self.txtFileName.setText("")
         self._porod = None
+        self._porod_err = None
         # Pass an empty dictionary to set all inputs to their default values
         self.updateFromParameters({})
         # Disable buttons to return to base state
