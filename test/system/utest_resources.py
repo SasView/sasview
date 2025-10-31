@@ -67,7 +67,19 @@ class TestRecorded:
         assert Path(str(pth)).is_dir()
         assert len(list(pth.iterdir())) > 10
 
-    def test_resource(self, tmp_path, input_type):
+    def test_resource(self, input_type):
+        """Test extracting single resource recorded by installed module"""
+        resources = sas.system.resources.ModuleResources("sas")
+
+        source = Path("docs/index.html")
+        src = input_type(source)
+
+        with resources.resource(src) as dest:
+            assert dest.exists()
+            assert dest.as_posix().endswith(source.name)
+            assert dest.stat().st_size > 1000
+
+    def test_extract_resource(self, tmp_path, input_type):
         """Test extracting single resource recorded by installed module"""
         resources = sas.system.resources.ModuleResources("sas")
 
@@ -83,7 +95,7 @@ class TestRecorded:
         assert resources.extract_resource(src, dest)
         assert dest.stat().st_size > 1000
 
-    def test_resource_tree(self, tmp_path, input_type):
+    def test_extract_resource_tree(self, tmp_path, input_type):
         """Test extracting resource tree recorded by installed module"""
         resources = sas.system.resources.ModuleResources("sas")
 
@@ -133,7 +145,19 @@ class TestAdjacent:
         assert Path(str(pth)).is_dir()
         assert len(list(pth.iterdir())) > 10
 
-    def test_resource(self, tmp_path, input_type):
+    def test_resource(self, input_type):
+        """Test extracting single resource recorded by installed module"""
+        resources = sas.system.resources.ModuleResources("sas")
+
+        source = Path("qtgui/images/ball.ico")
+        src = input_type(source)
+
+        with resources.resource(src) as dest:
+            assert dest.exists()
+            assert dest.as_posix().endswith(source.name)
+            assert dest.stat().st_size > 1000
+
+    def test_extract_resource(self, tmp_path, input_type):
         """Test extracting single resource adjacent to code in module"""
         resources = sas.system.resources.ModuleResources("sas")
 
@@ -149,7 +173,7 @@ class TestAdjacent:
         assert resources.extract_resource(src, dest)
         assert dest.stat().st_size > 1000
 
-    def test_resource_tree(self, tmp_path, input_type):
+    def test_extract_resource_tree(self, tmp_path, input_type):
         """Test extracting resource tree adjacent to code in module"""
         resources = sas.system.resources.ModuleResources("sas")
 
@@ -183,7 +207,7 @@ class TestExceptions:
         for pth in self.check_paths:
             with pytest.raises(FileNotFoundError):
                 src = input_type(pth)
-                assert resources.path_to_resource(src)
+                resources.path_to_resource(src)
 
     def test_nonexisting_extract_resource(self, tmp_path, input_type):
         """Test exception raised for extracting non-existent resource"""
@@ -193,7 +217,17 @@ class TestExceptions:
         for pth in self.check_paths:
             with pytest.raises(FileNotFoundError):
                 src = input_type(pth)
-                assert resources.extract_resource(src, dest)
+                resources.extract_resource(src, dest)
+
+    def test_nonexisting_resource(self, input_type):
+        """Test exception raised for extracting non-existent resource"""
+        resources = sas.system.resources.ModuleResources("sas")
+
+        for pth in self.check_paths:
+            with pytest.raises(FileNotFoundError):
+                src = input_type(pth)
+                with resources.resource(src):
+                    pass
 
     def test_nonexisting_extract_resource_tree(self, tmp_path, input_type):
         """Test exception raised for extracting non-existent resource tree"""
@@ -203,4 +237,4 @@ class TestExceptions:
         for pth in self.check_paths + ["sas/docs/"]:
             with pytest.raises(NotADirectoryError):
                 src = input_type(pth)
-                assert resources.extract_resource_tree(src, dest)
+                resources.extract_resource_tree(src, dest)
