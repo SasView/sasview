@@ -80,3 +80,4 @@ tests.log
 /installers/build
 /installers/dist
 *.exe
+installers/credits.html
