@@ -63,7 +63,7 @@ def generate_toc(model_files: list[PATH_LIKE]):
     category: dict[str, list[str]] = {}
     for item in model_files:
         # assume model is in sasmodels/models/name.py, and ignore the full path
-        # NOTE: No longer use shortened pathname for model because we also pull in models from .sasview/plugin_models
+        # NOTE: No longer use shortened pathname for model because we also pull in models from ~/AppData/Local/sasview/SasView/plugin_models
         model_name = basename(item)[:-3]
         if model_name.startswith('_'):
             continue

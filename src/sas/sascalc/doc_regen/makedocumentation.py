@@ -71,7 +71,8 @@ def get_main_docs() -> list[Path]:
     in the user plugin model directory.
 
     :return: A list of python files """
-    # The order in which these are added is important. if ABSOLUTE_TARGET_PLUGINS goes first, then we're not compiling the .py file stored in .sasview/plugin_models
+    # The order in which these are added is important. if ABSOLUTE_TARGET_PLUGINS goes first,
+    # then we're not compiling the .py file stored in ~/AppData/Local/sasview/SasView/plugin_models
     targets = get_py(MAIN_PY_SRC) + get_py(PLUGIN_PY_SRC)
     base_targets = [p.name for p in targets]
 
