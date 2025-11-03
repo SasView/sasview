@@ -151,7 +151,7 @@ class PluginManager(QtWidgets.QDialog, Ui_PluginManagerUI):
                 # cancel copy
                 return
 
-        # Copy from origin to ~/.sasview/plugin_models
+        # Copy from origin to ~/AppData/Local/sasview/SasView/plugin_models
         from shutil import copy
 
         # no check on clash
