@@ -104,6 +104,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         # Define plots
         self.high_extrapolation_plot: PlotterData | None = None
         self.low_extrapolation_plot: PlotterData | None = None
+        self.no_extrapolation_plot: PlotterData | None = None
 
         # Slider
         self.slider: CorfuncSlider = CorfuncSlider()
@@ -346,6 +347,33 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self._data = GuiUtils.dataFromItem(self._model_item)
         # Send the modified model item to DE for keeping in the model
         plots = [self._model_item]
+
+        if not(self.high_extrapolation_plot or self.low_extrapolation_plot):
+            # Convert the data into plottable
+            self.no_extrapolation_plot = self._manager.createGuiData(self._data)
+
+            self.no_extrapolation_plot.name = self._model_item.text()
+            self.no_extrapolation_plot.title = self._model_item.text()
+            self.no_extrapolation_plot.symbol = "Line"
+            self.no_extrapolation_plot.has_errors = False
+
+            # copy labels and units of axes for plotting
+            self.no_extrapolation_plot._xaxis = self._data._xaxis
+            self.no_extrapolation_plot._xunit = self._data._xunit
+            self.no_extrapolation_plot._yaxis = self._data._yaxis
+            self.no_extrapolation_plot._yunit = self._data._yunit
+
+            self.no_extrapolation_plot.plot_role = DataRole.ROLE_DEFAULT
+            self.no_extrapolation_plot.symbol = "Line"
+            self.no_extrapolation_plot.show_errors = False
+            self.no_extrapolation_plot.show_q_range_sliders = False
+            self.no_extrapolation_plot.slider_update_on_move = False
+            self.no_extrapolation_plot.slider_perspective_name = self.name
+            GuiUtils.updateModelItemWithPlot(
+                self._model_item, self.no_extrapolation_plot, self.no_extrapolation_plot.title
+            )
+            plots.append(self.no_extrapolation_plot)
+
         if self.high_extrapolation_plot:
             self.high_extrapolation_plot.plot_role = DataRole.ROLE_DEFAULT
             self.high_extrapolation_plot.symbol = "Line"
@@ -1380,6 +1408,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         # Reset plots on data change
         self.low_extrapolation_plot = None
         self.high_extrapolation_plot = None
+        self.no_extrapolation_plot = None
+        self.plot_result(self.model)
 
         # Extract data on 1st child - this is the Data1D/2D component
         data = GuiUtils.dataFromItem(self._model_item)
@@ -1415,6 +1445,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self._model_item = None
         self.low_extrapolation_plot = None
         self.high_extrapolation_plot = None
+        self.no_extrapolation_plot = None
         self._path = ""
         self.txtName.setText("")
         self._porod = None
@@ -1602,7 +1633,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.chkLowQ_ex.setChecked(params.get("lowQ", False))
         self.chkHighQ_ex.setChecked(params.get("highQ", False))
         self.rbLowQGuinier_ex.setChecked(params.get("lowQGuinier", False))
-        self.rbLowQPowerLaw_ex.setChecked(params.get("lowQPower", False))
+        self.rbLowQPower_ex.setChecked(params.get("lowQPower", False))
         self.rbLowQFit_ex.setChecked(params.get("lowQFit", False))
         self.rbLowQFix_ex.setChecked(params.get("lowQFix", False))
         self.rbHighQFit_ex.setChecked(params.get("highQFit", False))
