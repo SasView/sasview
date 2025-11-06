@@ -357,6 +357,10 @@ class GuiManager:
         """
         Open a local url in the default browser
         """
+        if not HELP_SYSTEM.path:
+            logger.error("Help documentation was not found.")
+            return
+
         counter = 1
         window_name = "help_window"
         # Remove leading forward slashes from relative paths to allow easy Path building

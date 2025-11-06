@@ -1662,6 +1662,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Show the "Fitting" section of help
         """
+        if not HELP_SYSTEM.path:
+            logger.error("Help documentation was not found.")
+            return
         help_location = self.getHelpLocation(HELP_SYSTEM.path)
         self.parent.showHelp(help_location)
 

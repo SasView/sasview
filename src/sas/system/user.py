@@ -153,9 +153,14 @@ def _copy_example_data() -> None:
     _SAS_RESOURCES.extract_resource_tree("example_data", EXAMPLE_DATA_DIR)
 
 
-def _copy_documentation() -> Path:
+def _copy_documentation() -> Path | None:
     """Extract the module documentation and copy it to a configured location"""
-    _SAS_RESOURCES.extract_resource_tree("docs", _HELP_SYSTEM.path)
+    if not _HELP_SYSTEM.path:
+        return None
+    try:
+        _SAS_RESOURCES.extract_resource_tree("docs", _HELP_SYSTEM.path)
+    except NotADirectoryError:
+        _HELP_SYSTEM.path = None
     return _HELP_SYSTEM.path
 
 
@@ -186,7 +191,11 @@ def _setup_module_documentation() -> None:
         return
 
     path = _copy_documentation()
-    logger.info("Using documentation copied to %s", path)
+    if path:
+        logger.info("Using documentation copied to %s", path)
+        return
+
+    logger.error("Documentation could not be found! Help documentation will not be available in SasView.")
 
 
 def copy_resources() -> None:
