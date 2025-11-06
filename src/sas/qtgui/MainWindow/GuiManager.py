@@ -123,9 +123,6 @@ class GuiManager:
         # Set up the status bar
         self.statusBarSetup()
 
-        # Current tutorial location
-        self._tutorialLocation: str = str((HELP_SYSTEM.path / "_downloads" / "Tutorial.pdf").absolute())
-
         if self.WhatsNew.has_new_messages(): # Not a static method
             self.WhatsNew.show()
 

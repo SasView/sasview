@@ -1,5 +1,4 @@
 import logging
-import subprocess
 import sys
 import webbrowser
 
@@ -283,28 +282,6 @@ class GuiManagerTest:
 
         # see that webbrowser open was attempted
         webbrowser.open.assert_called_once()
-
-
-    def skip_testActionTutorial(self, manager, mocker):
-        """
-        Menu Help/Tutorial
-        """
-        # Mock subprocess.Popen
-        mocker.patch.object(subprocess, 'Popen')
-
-        tested_location = manager._tutorialLocation
-
-        # Assure the filename is correct
-        assert "Tutorial.pdf" in tested_location
-
-        # Invoke the action
-        manager.actionTutorial()
-
-        # Check if popen() got called
-        assert subprocess.Popen.called
-
-        #Check the popen() call arguments
-        subprocess.Popen.assert_called_with([tested_location], shell=True)
 
     def testActionAcknowledge(self, manager):
         """
