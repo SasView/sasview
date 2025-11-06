@@ -1,7 +1,6 @@
 # Quick Intro for Building SasView
 
-Note - at the current time SasView will only run in gui form under Python 3.12
-and later.
+Note - at the current time SasView will only run in gui form under Python 3.12 and later.
 
 Whether you're installing SasView to use as a tool for your research or
 because you're wanting to work on the code, it is recommended that you
@@ -15,14 +14,12 @@ for various operating systems. You will also find walk through tutorials on how 
 
 You can also install SasView using standard Python installation tools,
 such as `pipx install sasview` to install it into its own standalone
-environment (or `pip install sasview` to install it into your current Python
-environment).
+environment (or `pip install sasview` to install it into your current Python environment).
 
 
 ## Making a SasView Development Environment
 
-If you're familiar with working with developing in Python, then the
-very quick version is:
+If you're familiar with working with developing in Python, then the very quick version is:
 
 ```shell
 git clone https://github.com/sasview/sasdata/
@@ -81,10 +78,6 @@ debugging software, e.g.:
 
  - [VS Code](https://code.visualstudio.com/docs/python/environments)
  - [PyCharm](https://www.jetbrains.com/help/pycharm/creating-virtual-environment.html)
-
-If you've altered the user interface or want the documentation to be rebuilt,
-then the `pip install -e .[dev,test]` step can be repeated.
-
 
 More information can be found at:
 
