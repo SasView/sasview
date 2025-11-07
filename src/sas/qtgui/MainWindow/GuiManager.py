@@ -123,9 +123,6 @@ class GuiManager:
         # Set up the status bar
         self.statusBarSetup()
 
-        # Current tutorial location
-        self._tutorialLocation: str = str((HELP_SYSTEM.path / "_downloads" / "Tutorial.pdf").absolute())
-
         if self.WhatsNew.has_new_messages(): # Not a static method
             self.WhatsNew.show()
 
@@ -360,6 +357,10 @@ class GuiManager:
         """
         Open a local url in the default browser
         """
+        if not HELP_SYSTEM.path:
+            logger.error("Help documentation was not found.")
+            return
+
         counter = 1
         window_name = "help_window"
         # Remove leading forward slashes from relative paths to allow easy Path building

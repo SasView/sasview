@@ -5,7 +5,7 @@ class _HelpSystem:
     """Extensible storage for help-system-related paths and configuration"""
 
     def __init__(self) -> None:
-        self.path: Path
+        self.path: Path | None
         # self.example_data: Path   # perhaps?
 
 
