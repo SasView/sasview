@@ -515,7 +515,7 @@
      </item>
     </layout>
    </widget>
-   <widget class="QWidget" name="tabOptions">
+   <!-- <widget class="QWidget" name="tabOptions">
     <attribute name="title">
      <string>Options</string>
     </attribute>
@@ -803,7 +803,7 @@ while extrapolating the low-Q region</string>
       </widget>
      </item>
     </layout>
-   </widget>
+   </widget> -->
    <widget class="QWidget" name="tabExtrapolation">
     <attribute name="title">
      <string>Page</string>
@@ -1090,6 +1090,7 @@ while extrapolating the low-Q region</string>
   <tabstop>cmdCalculate</tabstop>
   <tabstop>cmdStatus</tabstop>
   <tabstop>cmdHelp</tabstop>
+  <!-- 
   <tabstop>txtExtrapolQMin</tabstop>
   <tabstop>txtExtrapolQMax</tabstop>
   <tabstop>chkLowQ</tabstop>
@@ -1104,6 +1105,7 @@ while extrapolating the low-Q region</string>
   <tabstop>rbFixHighQ</tabstop>
   <tabstop>txtPowerLowQ</tabstop>
   <tabstop>txtPowerHighQ</tabstop>
+  -->
  </tabstops>
  <resources/>
  <connections/>
