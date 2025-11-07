@@ -56,7 +56,10 @@ WIDGETS = enum(
     "W_LOWQ_FIX_EX",
     "W_HIGHQ_FIT_EX",
     "W_HIGHQ_FIX_EX",
-    "W_FILENAME"
+    "W_FILENAME",
+    "D_PROGRESS_LOW_QSTAR",
+    "D_PROGRESS_DATA_QSTAR",
+    "D_PROGRESS_HIGH_QSTAR"
 )
 
 def safe_float(x: str):

@@ -47,7 +47,7 @@
     </size>
    </property>
    <property name="currentIndex">
-    <number>2</number>
+    <number>1</number>
    </property>
    <widget class="QWidget" name="tabMain">
     <attribute name="title">
@@ -515,295 +515,6 @@
      </item>
     </layout>
    </widget>
-   <!-- <widget class="QWidget" name="tabOptions">
-    <attribute name="title">
-     <string>Options</string>
-    </attribute>
-    <layout class="QGridLayout" name="gridLayout_6">
-     <item row="0" column="0">
-      <widget class="QGroupBox" name="groupBox_4">
-       <property name="title">
-        <string>Extrapolation</string>
-       </property>
-       <widget class="QWidget" name="layoutWidget">
-        <property name="geometry">
-         <rect>
-          <x>10</x>
-          <y>33</y>
-          <width>431</width>
-          <height>435</height>
-         </rect>
-        </property>
-        <layout class="QVBoxLayout" name="verticalLayout_4">
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_2">
-           <item>
-            <widget class="QLabel" name="label_12">
-             <property name="text">
-              <string>Q Range:</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_14">
-             <property name="text">
-              <string>Min</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="txtExtrapolQMin">
-             <property name="enabled">
-              <bool>true</bool>
-             </property>
-             <property name="toolTip">
-              <string>The minimum extrapolated q value.</string>
-             </property>
-             <property name="readOnly">
-              <bool>false</bool>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_13">
-             <property name="text">
-              <string>Max</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="txtExtrapolQMax">
-             <property name="enabled">
-              <bool>true</bool>
-             </property>
-             <property name="readOnly">
-              <bool>false</bool>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="lblExtrapolQUnits">
-             <property name="text">
-              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <widget class="QGroupBox" name="groupBox_lowQ">
-           <property name="title">
-            <string>Low Q</string>
-           </property>
-           <layout class="QGridLayout" name="gridLayout_7">
-            <item row="1" column="0" colspan="2">
-             <layout class="QHBoxLayout" name="horizontalLayout_3">
-              <item>
-               <widget class="QLabel" name="label_16">
-                <property name="text">
-                 <string>Npts:</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLineEdit" name="txtNptsLowQ">
-                <property name="toolTip">
-                 <string>Number of Q points to consider
-while extrapolating the low-Q region</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item row="2" column="0">
-             <layout class="QVBoxLayout" name="verticalLayout_2">
-              <item>
-               <widget class="QRadioButton" name="rbGuinier">
-                <property name="text">
-                 <string>Guinier</string>
-                </property>
-                <property name="checked">
-                 <bool>true</bool>
-                </property>
-                <property name="autoExclusive">
-                 <bool>false</bool>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QRadioButton" name="rbPowerLawLowQ">
-                <property name="text">
-                 <string>Power law</string>
-                </property>
-                <property name="checked">
-                 <bool>false</bool>
-                </property>
-                <property name="autoExclusive">
-                 <bool>false</bool>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item row="3" column="0" colspan="2">
-             <layout class="QHBoxLayout" name="horizontalLayout_6">
-              <item>
-               <widget class="QLabel" name="label_17">
-                <property name="text">
-                 <string>Power:</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLineEdit" name="txtPowerLowQ">
-                <property name="toolTip">
-                 <string>Exponent to apply to the Power_law function.</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item row="0" column="0" colspan="2">
-             <widget class="QCheckBox" name="chkLowQ">
-              <property name="toolTip">
-               <string>Check to extrapolate data at low-Q</string>
-              </property>
-              <property name="text">
-               <string>Enable Low-Q extrapolation</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="1">
-             <layout class="QVBoxLayout" name="verticalLayout">
-              <item>
-               <widget class="QRadioButton" name="rbFitLowQ">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="text">
-                 <string>Fit</string>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-                <property name="checked">
-                 <bool>true</bool>
-                </property>
-                <property name="autoExclusive">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QRadioButton" name="rbFixLowQ">
-                <property name="text">
-                 <string>Fix</string>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-                <property name="checked">
-                 <bool>false</bool>
-                </property>
-                <property name="autoExclusive">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-           </layout>
-          </widget>
-         </item>
-         <item>
-          <widget class="QGroupBox" name="groupBox_highQ">
-           <property name="title">
-            <string>High Q</string>
-           </property>
-           <layout class="QGridLayout" name="gridLayout_8">
-            <item row="0" column="0">
-             <widget class="QCheckBox" name="chkHighQ">
-              <property name="toolTip">
-               <string>Check to extrapolate data at high-Q</string>
-              </property>
-              <property name="text">
-               <string>Enable High-Q extrapolation</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0">
-             <layout class="QHBoxLayout" name="horizontalLayout_5">
-              <item>
-               <widget class="QLabel" name="label_18">
-                <property name="text">
-                 <string>Npts:</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLineEdit" name="txtNptsHighQ">
-                <property name="toolTip">
-                 <string>Number of Q points to consider
- while extrapolating the high-Q region</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item row="2" column="0">
-             <layout class="QGridLayout" name="gridLayout_13">
-              <item row="0" column="0">
-               <widget class="QRadioButton" name="rbFitHighQ">
-                <property name="text">
-                 <string>Fit</string>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-                <property name="checked">
-                 <bool>false</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="0">
-               <widget class="QRadioButton" name="rbFixHighQ">
-                <property name="text">
-                 <string>Fix</string>
-                </property>
-                <property name="checked">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item row="3" column="0">
-             <layout class="QHBoxLayout" name="horizontalLayout_7">
-              <item>
-               <widget class="QLabel" name="label_19">
-                <property name="text">
-                 <string>Power:</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLineEdit" name="txtPowerHighQ">
-                <property name="toolTip">
-                 <string>Exponent to apply to the Power_law function.</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-           </layout>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </widget>
-     </item>
-    </layout>
-   </widget> -->
    <widget class="QWidget" name="tabExtrapolation">
     <attribute name="title">
      <string>Page</string>
@@ -1015,6 +726,63 @@ while extrapolating the low-Q region</string>
       </item>
      </layout>
     </widget>
+    <widget class="QGroupBox" name="groupBox_4">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>318</y>
+       <width>521</width>
+       <height>121</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Invariant chart</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_6">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_12">
+        <property name="text">
+         <string>Q* from Low-Q</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QProgressBar" name="progressBarLowQ">
+        <property name="value">
+         <number>24</number>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_13">
+        <property name="text">
+         <string>Q* from Data</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QProgressBar" name="progressBarData">
+        <property name="value">
+         <number>24</number>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_14">
+        <property name="text">
+         <string>Q* from High-Q</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QProgressBar" name="progressBarHighQ">
+        <property name="value">
+         <number>24</number>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
    </widget>
   </widget>
   <widget class="QWidget" name="layoutWidget">
@@ -1090,22 +858,6 @@ while extrapolating the low-Q region</string>
   <tabstop>cmdCalculate</tabstop>
   <tabstop>cmdStatus</tabstop>
   <tabstop>cmdHelp</tabstop>
-  <!-- 
-  <tabstop>txtExtrapolQMin</tabstop>
-  <tabstop>txtExtrapolQMax</tabstop>
-  <tabstop>chkLowQ</tabstop>
-  <tabstop>txtNptsLowQ</tabstop>
-  <tabstop>chkHighQ</tabstop>
-  <tabstop>txtNptsHighQ</tabstop>
-  <tabstop>rbGuinier</tabstop>
-  <tabstop>rbFitLowQ</tabstop>
-  <tabstop>rbFitHighQ</tabstop>
-  <tabstop>rbPowerLawLowQ</tabstop>
-  <tabstop>rbFixLowQ</tabstop>
-  <tabstop>rbFixHighQ</tabstop>
-  <tabstop>txtPowerLowQ</tabstop>
-  <tabstop>txtPowerHighQ</tabstop>
-  -->
  </tabstops>
  <resources/>
  <connections/>

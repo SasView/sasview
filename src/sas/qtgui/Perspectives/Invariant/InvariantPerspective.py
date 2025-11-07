@@ -166,6 +166,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         # Start with all Extrapolation options disabled
         self.enable_extrapolation_options(False)
 
+        # Set progress bars to 0
+        self.update_progress_bars()
+
         # Default to using contrast for volume fraction
         self.rbContrast.setChecked(True)
 
@@ -287,8 +290,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             self._volfrac2 = float(self.model.item(WIDGETS.W_VOLFRAC2).text())
 
         self._low_extrapolate = str(self.model.item(WIDGETS.W_ENABLE_LOWQ_EX).text()) == "true"
-        self._low_guinier = str(self.rbLowQGuinier_ex.isChecked())
-        self._low_guinier = str(self.model.item(WIDGETS.W_LOWQ_GUINIER_EX).text()) == "true"
+        self._low_guinier = self.rbLowQGuinier_ex.isChecked()
         self._low_power = str(self.model.item(WIDGETS.W_LOWQ_POWER_EX).text()) == "true"
         self._low_fit = str(self.model.item(WIDGETS.W_LOWQ_FIT_EX).text()) == "true"
         self._low_fix = str(self.model.item(WIDGETS.W_LOWQ_FIX_EX).text()) == "true"
@@ -298,7 +300,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self._high_fit = str(self.model.item(WIDGETS.W_HIGHQ_FIT_EX).text()) == "true"
         self._high_fix = str(self.model.item(WIDGETS.W_HIGHQ_FIX_EX).text()) == "true"
         self._high_power_value = int(self.model.item(WIDGETS.W_HIGHQ_POWER_VALUE_EX).text())
-
 
     def calculate_invariant(self) -> None:
         """Use twisted to thread the calculations away"""
@@ -324,7 +325,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
     def on_calculation_failed(self, reason: Exception) -> None:
         """Handle calculation failure"""
-        logger.error("calculation failed: ", reason)
+        logger.error(f"calculation failed: {reason}")
         self.allow_calculation()
 
     def deferredPlot(self, model: QtGui.QStandardItemModel) -> None:
@@ -338,6 +339,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             self.cmdCalculate.setEnabled(False)
             self.cmdCalculate.setText("Calculate (No data)")
             return
+
         if self.rbVolFrac.isChecked() and self.txtVolFrac1.text() != "":
             self.cmdCalculate.setEnabled(True)
             self.cmdCalculate.setText("Calculate")
@@ -418,6 +420,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         # Update the details dialog in case it is open
         self.update_details_widget()
 
+        # Update progress bars
+        self.update_progress_bars()
+
     def update_details_widget(self) -> None:
         """On demand update of the details widget"""
         if self.detailsDialog.isVisible():
@@ -478,12 +483,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             except Exception as ex:
                 logger.warning(f"Low-q Guinier end calculation failed: {str(ex)}")
 
-            print("Low Q extrapolation parameters:")
-            print("Range: low")
-            print(f"Number of points: {self._low_points}")
-            print(f"Function: {function_low}")
-            print(f"Power: {self._low_power_value}")
-
             self._calculator.set_extrapolation(
                 range="low", npts=int(self._low_points), function=function_low, power=self._low_power_value
             )
@@ -539,11 +538,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             except Exception as ex:
                 logger.debug(f"Could not convert Porod start to n_pts_high: {ex}")
 
-            print("High Q extrapolation parameters:")
-            print("Range: high")
-            print(f"Number of points: {self._high_points}")
-            print(f"Function: {function_high}")
-            print(f"Power: {self._high_power_value}")
+            self._calculator.set_extrapolation(
+                range="high", npts=int(self._high_points), function=function_high, power=self._high_power_value
+            )
 
             self._calculator.set_extrapolation(
                 range="high", npts=int(self._high_points), function=function_high, power=self._high_power_value
@@ -713,6 +710,10 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         item = QtGui.QStandardItem(formatted_value)
         self.model.setItem(row, item)
         self.mapper.toLast()
+
+        # Update progress bars if we're updating Q* values
+        if row in [WIDGETS.D_DATA_QSTAR, WIDGETS.D_LOW_QSTAR, WIDGETS.D_HIGH_QSTAR]:
+            self.update_progress_bars()
 
     def onStatus(self):
         """Display Invariant Details panel when clicking on Status button"""
@@ -1200,6 +1201,52 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.txtVolFrac1.setEnabled(toggle)
         self.txtVolFrac2.setEnabled(toggle)
 
+    def update_progress_bars(self) -> None:
+        """Update progress bars based on Q* values"""
+        try:
+            if not self._calculator:
+                return
+
+            qstar_data = 0.0
+            qstar_low = 0.0
+            qstar_high = 0.0
+
+            try:
+            # Get values from calculator if available
+                if hasattr(self._calculator, '_qstar'):
+                    qstar_data = self._calculator._qstar
+                if hasattr(self._calculator, '_qstar_low'):
+                    qstar_low = self._calculator._qstar_low
+                if hasattr(self._calculator, '_qstar_high'):
+                    qstar_high = self._calculator._qstar_high
+
+            except (AttributeError, TypeError):
+                # Values not yet calculated
+                return
+
+            # Calculate total
+            qstar_total = qstar_data + qstar_low + qstar_high
+
+            if qstar_total > 0:
+                # Calculate percentages
+                data_percent = int((qstar_data / qstar_total) * 100)
+                low_percent = int((qstar_low / qstar_total) * 100)
+                high_percent = int((qstar_high / qstar_total) * 100)
+
+                # Update progress bars
+                self.progressBarData.setValue(data_percent)
+                self.progressBarLowQ.setValue(low_percent)
+                self.progressBarHighQ.setValue(high_percent)
+
+            else:
+                # Reset if no valid data
+                self.progressBarData.setValue(0)
+                self.progressBarLowQ.setValue(0)
+                self.progressBarHighQ.setValue(0)
+
+        except (ValueError, TypeError, AttributeError):
+            pass
+
     # def lowGuinierAndPowerToggle(self, toggle: bool) -> None:
     #     """
     #     Guinier and Power radio buttons cannot be selected at the same time
@@ -1414,6 +1461,11 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.mapper.addMapping(self.rbHighQFit_ex, WIDGETS.W_HIGHQ_FIT_EX)
         self.mapper.addMapping(self.rbHighQFix_ex, WIDGETS.W_HIGHQ_FIX_EX)
 
+        # Map progress bars to the detail dialog widgets
+        # self.mapper.addMapping(self.progressBarLowQ, WIDGETS.D_LOW_QSTAR)
+        # self.mapper.addMapping(self.progressBarData, WIDGETS.D_DATA_QSTAR)
+        # self.mapper.addMapping(self.progressBarHighQ, WIDGETS.D_HIGH_QSTAR)
+
         self.mapper.toFirst()
 
     def setData(self, data_item: QtGui.QStandardItem = None, is_batch: bool = False) -> None:
@@ -1467,7 +1519,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.slider.extrapolation_parameters = self.extrapolation_parameters
         self.slider.setEnabled(True)
 
-        self.plot_result(self.model)
+        # self.plot_result(self.model)
 
         self.tabWidget.setCurrentIndex(0)
 
@@ -1612,7 +1664,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             "enable_high_q_ex" : self.chkHighQ_ex.isChecked(),
             "low_q_guinier_ex" : self.rbLowQGuinier_ex.isChecked(),
             "low_q_power_ex" : self.rbLowQPower_ex.isChecked(),
-            "low_q_fit_ex" : self.rbLowhQFit_ex.isChecked(),
+            "low_q_fit_ex" : self.rbLowQFit_ex.isChecked(),
             "low_q_fix_ex" : self.rbLowQFix_ex.isChecked(),
             "high_q_fit_ex" : self.rbHighQFit_ex.isChecked(),
             "high_q_fix_ex" : self.rbHighQFix_ex.isChecked(),
