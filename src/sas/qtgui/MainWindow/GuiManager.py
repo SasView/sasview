@@ -245,7 +245,7 @@ class GuiManager:
             CategoryInstaller.check_install(model_list=model_list)
         except Exception:
             import traceback
-            logger.error("%s: could not load SasView models")
+            logger.error("Category manager: could not load SasView models")
             logger.error(traceback.format_exc())
 
     def updatePlotItems(self, graphs):
