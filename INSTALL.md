@@ -18,48 +18,59 @@ such as `pipx install sasview` to install it into its own standalone
 environment (or `pip install sasview` to install it into your current Python
 environment).
 
-
 ## Making a SasView Development Environment
 
 If you're familiar with working with developing in Python, then the
 very quick version is:
 
 ```shell
+# pull the repository
 git clone https://github.com/sasview/sasdata/
 git clone https://github.com/sasview/sasmodels/
 git clone https://github.com/sasview/sasview/
+
 cd sasview
+
+#create the virtual environment
 python -m venv venv
 # venv\Scripts\activate & REM Windows: activate environment
 . venv/bin/activate  # Linux/Mac: activate environment
-pip install -e ../sasdata
-pip install -e ../sasmodels
-pip install -e .[dev,test]
+
+# optional to check that pip is indeed installed
+python -m ensurepip --default-pip
+
+# install repositories in editable/devloper mode in the venv
+python -m pip install -e ../sasdata # use "python -m ..." to ensure the correct python version is used
+python -m pip install -e ../sasmodels
+python -m pip install -e .[dev,test]
+
+# test if sasview launches
 python -m sas
 ```
 
 Step by step, that is:
 
- 1. Obtain the SasView source using `git`. You will likely need to coordinate
+1.  Obtain the SasView source using `git`. You will likely need to coordinate
     updates to `sasdata` and `sasmodels`. The
     `bumps` (https://github.com/bumps/bumps) and
     `periodictable` (https://github.com/python-periodictable/periodictable)
     packages are far more loosely coupled, but depending on what you are
     doing you may also want them as development packages.
- 1. Create a Python virtual environment in the `venv` directory.
- 1. Activate the `venv` so that Python and its modules from the venv are used.
+1.  Create a Python virtual environment in the `venv` directory.
+1.  Activate the `venv` so that Python and its modules from the venv are used.
     Note that the particular syntax above works for the `bash` and `zsh` shells under Linux, Windows and macOS;
     if you use `cmd` or PowerShell under windows, there are
     [different ways](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#create-and-use-virtual-environments)
     to activate the virtual environment.
- 1. Install the necessary modules for building and running SasView.
+1.  Check that `pip` is installed in the current virtual environment with `python -m ensurepip --default-pip`.
+1.  Install the necessary modules for building and running SasView.
     It will take a while to download and unpack all the dependencies.
-    The `pip install -e` command says to install the package in development mode
+    The`pip install -e` command says to install the package in development mode
     so that any changes you make in the source tree will be available the
     next time you run the program. The `.[dev,test]` syntax says to install
     the current directory (sasview) with test and dev dependencies.
- 1. Build the GUI and the documentation using the `hatchling` builder.
- 1. Run SasView!
+1.  Build the GUI and the documentation using the `hatchling` builder.
+1.  Run SasView!
 
 Almost all the modules that SasView needs are available as precompiled modules
 on PyPI, including numpy, scipy, h5py, pyside6. A handful of Python-only
@@ -80,15 +91,14 @@ Note that many Python-focused integrated development environment programs have t
 ability to activate the venv for you as part of the process of starting and
 debugging software, e.g.:
 
- - [VS Code](https://code.visualstudio.com/docs/python/environments)
- - [PyCharm](https://www.jetbrains.com/help/pycharm/creating-virtual-environment.html)
+- [VS Code](https://code.visualstudio.com/docs/python/environments)
+- [PyCharm](https://www.jetbrains.com/help/pycharm/creating-virtual-environment.html)
 
 If you've altered the user interface or want the documentation to be rebuilt,
 then the `hatchling` step can be repeated.
 
-
 More information can be found at:
 
- - http://www.sasview.org/help
- - http://www.sasview.org/faq
- - https://github.com/SasView/sasview/wiki/DevNotes
+- http://www.sasview.org/help
+- http://www.sasview.org/faq
+- https://github.com/SasView/sasview/wiki/DevNotes
