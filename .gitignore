@@ -41,6 +41,7 @@ default_categories.json
 !**/UI/__init__.py
 config.json
 **/db.sqlite3
+Thumbs.db
 # INSTALL.md recommends a venv that should not be committed
 venv
 .venv
