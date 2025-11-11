@@ -1379,18 +1379,18 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         # timings for an i7-1165G7 4-core CPU from 2020:
         # 50k: 1.8s | 100k: 6.3s | 200k: 28.7s | 300k: 65.6s | 400k: 117.2s | 500k: 181.2s
         # multiply by 2 & round to get a conservative estimate
-        thresholds = [  
-            (100_000,      50_000,  "30 seconds"),  
-            (200_000,      100_000, "a minute"),  
-            (300_000,      200_000, "a couple of minutes"),  
-            (400_000,      300_000, "around 5 minutes"),  
-            (500_000,      400_000, "around 10 minutes"),  
-            (float('inf'), 500_000, "more than an hour")  
-        ]  
+        thresholds = [
+            (100_000,      50_000,  "30 seconds"),
+            (200_000,      100_000, "a minute"),
+            (300_000,      200_000, "a couple of minutes"),
+            (400_000,      300_000, "around 5 minutes"),
+            (500_000,      400_000, "around 10 minutes"),
+            (float('inf'), 500_000, "more than an hour")
+        ]
 
-        # find the appropriate threshold and time estimate  
-        for limit, exceeded_threshold, time_estimate in thresholds:  
-            if num_points < limit:  
+        # find the appropriate threshold and time estimate
+        for limit, exceeded_threshold, time_estimate in thresholds:
+            if num_points < limit:
                 msg = (f"The number of atoms exceeds {exceeded_threshold:,}.\n"
                        f"This calculation may take {time_estimate} to complete. "
                        "Do you wish to proceed?")
