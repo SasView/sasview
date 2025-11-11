@@ -38,6 +38,8 @@ runs:
         DEBIAN_FRONTEND: noninteractive
       shell: bash
       run: |
+        echo "set man-db/auto-update false" | sudo debconf-communicate
+        sudo dpkg-reconfigure man-db
         sudo eatmydata apt-get update
         # libcairo2-dev is for building a wheel for pycairo if not cached
         # rest are for loading Qt widgets
