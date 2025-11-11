@@ -1,7 +1,6 @@
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from matplotlib import rcParams
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from packaging import version

@@ -39,6 +39,7 @@ from sas.qtgui.Perspectives.Invariant.InvariantPerspective import InvariantWindo
 from sas.qtgui.Perspectives.Inversion.InversionPerspective import InversionWindow
 from sas.qtgui.Perspectives.perspective import Perspective
 from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionPerspective import SizeDistributionWindow
+from sas.qtgui.Plotting.TabbedPlotWidget import TabbedPlotWidget
 from sas.qtgui.Utilities.About.About import About
 
 # from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
@@ -64,8 +65,6 @@ from sas.system import HELP_SYSTEM, web
 from sas.system.user import create_user_files_if_needed
 from sas.system.version import __release_date__ as SASVIEW_RELEASE_DATE
 from sas.system.version import __version__ as SASVIEW_VERSION
-from sas.qtgui.Plotting.TabbedPlotWidget import TabbedPlotWidget
-
 
 logger = logging.getLogger(__name__)
 
