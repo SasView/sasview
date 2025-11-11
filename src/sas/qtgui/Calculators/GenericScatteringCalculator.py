@@ -1532,9 +1532,6 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         chunk_size = 32 if self.is_avg else 256
         out = []
 
-        import time
-        time_start = time.time()
-
         # the 1D AUSAXS calculator cannot be chunked
         if self.is_avg and not len(input[1]):
             self.data_to_plot = self.model.runXY(input)
@@ -1565,9 +1562,6 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 out = numpy.hstack(out)
                 self.data_to_plot = out
                 logger.info('Gen computation completed.')
-
-        time_end = time.time()
-        print(f"Computation time without chunking: {time_end - time_start} seconds")
 
         # if Beta(Q) Calculation has been requested, run calculation
         if self.is_beta:
