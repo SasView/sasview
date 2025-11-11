@@ -1,0 +1,95 @@
+@startuml SasView_Architecture
+
+title SasView High-Level Architecture and Dependencies
+
+top to bottom direction
+
+' Define packages and components
+package "SasView Application" #FFE5E5 {
+  component "SasView CLI/Main" as app
+  
+  package "QtGUI Module" #FFE5CC {
+    component "MainWindow"
+    component "Perspectives"
+    component "Plotting"
+    component "Calculators"
+    component "Utilities"
+  }
+  
+  package "SasCalc Module" #E5CCFF {
+    component "fit (Fitting)"
+    component "corfunc (Correlation)"
+    component "invariant"
+    component "realspace"
+    component "data_util"
+  }
+  
+  package "System Module" #CCFFCC {
+    component "config"
+    component "version"
+    component "resources"
+    component "logger"
+  }
+}
+
+package "External Dependencies" #E5E5FF {
+  component "sasdata" #CCE5FF {
+    note right
+      - Dataset representation
+      - File I/O (HDF5, ASCII)
+      - Metadata management
+    end note
+  }
+  
+  component "sasmodels" #CCE5FF {
+    note right
+      - Model definitions
+      - Form factors
+      - Structure factors
+    end note
+  }
+  
+  component "bumps" #CCE5FF {
+    note right
+      - Optimization algorithms
+      - Parameter fitting
+      - Uncertainty analysis
+    end note
+  }
+}
+
+' Define relationships
+app --> MainWindow : uses
+app --> Perspectives : uses
+app --> "fit (Fitting)" : uses
+
+MainWindow --> Perspectives : contains
+MainWindow --> Plotting : uses
+MainWindow --> Calculators : uses
+MainWindow --> Utilities : uses
+
+Perspectives --> "fit (Fitting)" : uses
+Perspectives --> "corfunc (Correlation)" : uses
+Perspectives --> Plotting : uses
+
+"fit (Fitting)" --> bumps : uses
+"fit (Fitting)" --> sasmodels : uses
+
+"corfunc (Correlation)" --> sasdata : uses
+"corfunc (Correlation)" --> invariant : uses
+
+Calculators --> "data_util" : uses
+Calculators --> sasmodels : uses
+
+config --> resources : references
+logger --> config : uses
+
+MainWindow --> sasdata : uses
+MainWindow --> config : uses
+MainWindow --> version : uses
+
+"data_util" --> sasdata : uses
+
+MainWindow --> Plotting : uses
+
+@enduml
