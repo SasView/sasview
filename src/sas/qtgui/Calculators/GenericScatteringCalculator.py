@@ -1374,7 +1374,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         Generate a popup warning the user about a large calculation
         :return True if the calculation should continue, False otherwise.
         """
-        
+
         if self.warned_user_large_calc or num_points < 50_000: return True
         # timings for an i7-1165G7 4-core CPU from 2020:
         #  50k:   1.8s
@@ -1535,7 +1535,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         # the 1D AUSAXS calculator cannot be chunked
         if self.is_avg and not len(input[1]):
             self.data_to_plot = self.model.runXY(input)
-        
+
         # chunk the other calculations to allow cancellation
         else:
             for ind in range(0, nq, chunk_size):
