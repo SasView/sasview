@@ -1,12 +1,9 @@
-from PySide6 import QtWidgets
-from PySide6 import QtCore
-
-from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 import matplotlib.pyplot as plt
-
-from sas.qtgui.Utilities import GuiUtils
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
+from PySide6 import QtCore, QtWidgets
 
 from sas.qtgui.Plotting import TabbedPlotWidget
+
 
 class SubTabs(QtWidgets.QTabWidget):
     """
@@ -82,9 +79,8 @@ class SubTabs(QtWidgets.QTabWidget):
         This method is called after plotting the results for this tab. It arranges the plots in two columns with the
         big plot on the left side and all the other plots on the right side.
         """
-        print("rearrange_plots")
         axes = self.figure.get_axes()
-        if len(axes) > 2:
+        if len(axes) < 2:
             pass # nothing to do, just one plot needs to be shown in the middle
         elif len(axes) == 2:
             # two column gridspec needs to be applied
@@ -100,7 +96,7 @@ class SubTabs(QtWidgets.QTabWidget):
 
             axes[0].set_position(self.gs[0].get_position(self.figure))
             for i in range(len(axes)-1):
-                axes[i+1].set_position(self.gs[i].get_position(self.figure))
+                axes[i+1].set_position(self.sub_gs[i].get_position(self.figure))
 
 
 class DockContainer(QtWidgets.QMainWindow):
