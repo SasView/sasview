@@ -12,6 +12,7 @@ from mpl_toolkits.mplot3d.axes3d import Axes3D
 from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtCore import QSize
 from PySide6.QtGui import QIcon
+from PySide6.QtWidgets import QMessageBox
 from scipy.spatial.transform import Rotation
 from twisted.internet import threads
 
@@ -1375,7 +1376,6 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         """
         
         if self.warned_user_large_calc or num_points < 50_000: return True
-        from PySide6.QtWidgets import QMessageBox
         # timings for an i7-1165G7 4-core CPU from 2020:
         #  50k:   1.8s
         # 100k:   6.3s
