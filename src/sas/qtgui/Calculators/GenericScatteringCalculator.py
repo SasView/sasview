@@ -1415,7 +1415,6 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         try:
             # create the combined sld data and update from gui
             sld_data = self.create_full_sld_data()
-            print(f"Data size: {sld_data.data_length}")
             if not self.check_large_calculation(sld_data.data_length): return
 
             # TODO: implement fourier transform for meshes with multiple element or face types
