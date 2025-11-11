@@ -39,6 +39,7 @@ from sas.qtgui.Perspectives.Invariant.InvariantPerspective import InvariantWindo
 from sas.qtgui.Perspectives.Inversion.InversionPerspective import InversionWindow
 from sas.qtgui.Perspectives.perspective import Perspective
 from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionPerspective import SizeDistributionWindow
+from sas.qtgui.Plotting.TabbedPlotWidget import TabbedPlotWidget
 from sas.qtgui.Utilities.About.About import About
 
 # from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
@@ -194,6 +195,8 @@ class GuiManager:
         self.DataOperation = DataOperationUtilityPanel(self)
         self.FileConverter = FileConverterWidget(self)
         self.WhatsNew = WhatsNew(self._parent)
+
+        self.tabbedPlotWidget = TabbedPlotWidget(self)
 
     def loadAllPerspectives(self):
         """ Load all the perspectives"""

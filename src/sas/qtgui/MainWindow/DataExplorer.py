@@ -1099,14 +1099,14 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 # Residuals get their own plot
                 if plot.plot_role in [DataRole.ROLE_RESIDUAL, DataRole.ROLE_STAND_ALONE]:
                     plot.yscale = 'linear'
-                    self.plotData([(item, plot)])
+                    self.plotData([(item, plot)], id)
                 else:
                     new_plots.append((item, plot))
 
         if new_plots:
-            self.plotData(new_plots)
+            self.plotData(new_plots, id)
 
-    def displayData(self, data_list, id=None):
+    def displayData(self, data_list, id):
         """
         Forces display of charts for the given data set
         """
@@ -1132,7 +1132,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 if self.isPlotShown(main_data):
                     self.active_plots[main_data.name].showNormal()
                 else:
-                    self.plotData([(plot_item, main_data)])
+                    self.plotData([(plot_item, main_data)], id)
 
         append = False
         plot_to_append_to = None
@@ -1158,7 +1158,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 continue
             elif role in stand_alone_types:
                 # Stand-alone plots should always be separate
-                self.plotData([(plot_item, plot_to_show)])
+                self.plotData([(plot_item, plot_to_show)], id)
             elif append:
                 # Assume all other plots sent together should be on the same chart if a previous plot exists
                 if not plot_to_append_to:
@@ -1187,7 +1187,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             new_plots = []
 
         if new_plots:
-            self.plotData(new_plots)
+            self.plotData(new_plots, id)
+
+        self.parent.tabbedPlotWidget.show_or_activate()
 
     def isPlotShown(self, plot):
         """
@@ -1223,16 +1225,23 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # sv.show()
         # ============================================
 
-    def plotData(self, plots, transform=True):
+    def plotData(self, plots, tab_id, transform=True):
         """
         Takes 1D/2D data and generates a single plot (1D) or multiple plots (2D)
         """
+        tab_index = self.parent.tabbedPlotWidget.tab_fitpage_dict[tab_id]
+        print("plotData")
         # Call show on requested plots
         # All same-type charts in one plot
         for item, plot_set in plots:
             if isinstance(plot_set, Data1D):
                 if 'new_plot' not in locals():
-                    new_plot = PlotterWidget(manager=self, parent=self)
+                    # Create only one PlotterWidget(QWidget) for a number of datasets that are supposed to be shown in
+                    # the same Widget
+                    self.parent.tabbedPlotWidget.widget(tab_index).add_more_axes()
+                    tpw_ax = self.parent.tabbedPlotWidget.widget(tab_index).last_axes()
+
+                    new_plot = PlotterWidget(manager=self, parent=self, tpw_ax=tpw_ax)
                     new_plot.item = item
                 # Ensure new plots use the default transform, not the transform of any previous plots the data were in
                 # TODO: The transform should be part of the PLOT, NOT the data
@@ -1257,6 +1266,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             else:
                 msg = "Incorrect data type passed to Plotting"
                 raise AttributeError(msg)
+
 
         if 'new_plot' in locals() and \
             hasattr(new_plot, 'data') and \
@@ -1332,6 +1342,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
     @staticmethod
     def appendOrUpdatePlot(self, data, plot):
         name = data.name
+        print("append or update plot")
         if isinstance(plot, Plotter2DWidget) or name in plot.plot_dict.keys():
             plot.replacePlot(name, data)
         else:

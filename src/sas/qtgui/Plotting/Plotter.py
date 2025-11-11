@@ -27,8 +27,8 @@ class PlotterWidget(PlotterBase):
     """
     1D Plot widget for use with a QDialog
     """
-    def __init__(self, parent=None, manager=None, quickplot=False):
-        super().__init__(parent, manager=manager, quickplot=quickplot)
+    def __init__(self, parent=None, manager=None, quickplot=False, tpw_ax=None):
+        super().__init__(parent, manager=manager, quickplot=quickplot, tpw_ax=tpw_ax)
 
         self.parent = parent
 
@@ -140,109 +140,111 @@ class PlotterWidget(PlotterBase):
 
         # Shortcuts
         ax = self.ax
+        tpw_ax = self.tpw_ax
         x = data.view.x
         y = data.view.y
         label = data.name # was self._title
 
-        # Marker symbol. Passed marker is one of matplotlib.markers characters
-        # Alternatively, picked up from Data1D as an int index of PlotUtilities.SHAPES dict
-        if marker is None:
-            marker = data.symbol
-            # Try name first
-            try:
-                marker = dict(PlotUtilities.SHAPES)[marker]
-            except KeyError:
-                marker = list(PlotUtilities.SHAPES.values())[marker]
+        for ax in [self.ax, self.tpw_ax]:
+            # Marker symbol. Passed marker is one of matplotlib.markers characters
+            # Alternatively, picked up from Data1D as an int index of PlotUtilities.SHAPES dict
+            if marker is None:
+                marker = data.symbol
+                # Try name first
+                try:
+                    marker = dict(PlotUtilities.SHAPES)[marker]
+                except KeyError:
+                    marker = list(PlotUtilities.SHAPES.values())[marker]
 
-        assert marker is not None
-        # Plot name
-        if data.title:
-            self.title(title=data.title)
-        else:
-            self.title(title=data.name)
-
-        # Error marker toggle
-        if hide_error is None:
-            hide_error = data.hide_error
-
-        # Plot color
-        if color is None:
-            color = data.custom_color
-
-        # grid on/off, stored on self
-        ax.grid(self.grid_on)
-
-        color = PlotUtilities.getValidColor(color)
-        data.custom_color = color
-
-        markersize = data.markersize
-
-        # Include scaling (log vs. linear)
-        ax.set_xscale(self.xscale, nonpositive='clip') if self.xscale != 'linear' else self.ax.set_xscale(self.xscale)
-        ax.set_yscale(self.yscale, nonpositive='clip') if self.yscale != 'linear' else self.ax.set_yscale(self.yscale)
-
-        # Draw non-standard markers
-        l_width = markersize * 0.4
-        if marker == '-' or marker == '--':
-            line = self.ax.plot(x, y, color=color, lw=l_width, marker='',
-                             linestyle=marker, label=label, zorder=10)[0]
-
-        elif marker == 'vline':
-            y_min = min(y)*9.0/10.0 if min(y) < 0 else 0.0
-            line = self.ax.vlines(x=x, ymin=y_min, ymax=y, color=color,
-                            linestyle='-', label=label, lw=l_width, zorder=1)
-
-        elif marker == 'step':
-            line = self.ax.step(x, y, color=color, marker='', linestyle='-',
-                                label=label, lw=l_width, zorder=1)[0]
-
-        else:
-            # plot data with/without errorbars
-            if hide_error:
-                line = ax.plot(x, y, marker=marker, color=color, markersize=markersize,
-                        linestyle='', label=label, picker=True)
+            assert marker is not None
+            # Plot name
+            if data.title:
+                self.title(title=data.title)
             else:
-                dy = data.view.dy
-                # Convert tuple (lo,hi) to array [(x-lo),(hi-x)]
-                if dy is not None and isinstance(dy, tuple):
-                    dy = np.vstack((y - dy[0], dy[1] - y)).transpose()
+                self.title(title=data.name)
 
-                line = ax.errorbar(x, y,
-                            yerr=dy,
-                            xerr=None,
-                            capsize=2, linestyle='',
-                            barsabove=False,
-                            color=color,
-                            marker=marker,
-                            markersize=markersize,
-                            lolims=False, uplims=False,
-                            xlolims=False, xuplims=False,
-                            label=label,
-                            zorder=1,
-                            picker=True)
+            # Error marker toggle
+            if hide_error is None:
+                hide_error = data.hide_error
 
-        # Display horizontal axis if requested
-        if data.show_yzero:
-            ax.axhline(color='black', linewidth=1)
+            # Plot color
+            if color is None:
+                color = data.custom_color
 
-        # Display +/- 3 sigma and +/- 1 sigma lines for residual plots
-        if data.plot_role in [DataRole.ROLE_RESIDUAL, DataRole.ROLE_RESIDUAL_SESANS]:
-            ax.axhline(y=3, color='red', linestyle='-')
-            ax.axhline(y=-3, color='red', linestyle='-')
-            ax.axhline(y=1, color='gray', linestyle='--')
-            ax.axhline(y=-1, color='gray', linestyle='--')
-        # Update the list of data sets (plots) in chart
-        self.plot_dict[data.name] = data
+            # grid on/off, stored on self
+            ax.grid(self.grid_on)
 
-        self.plot_lines[data.name] = line
+            color = PlotUtilities.getValidColor(color)
+            data.custom_color = color
 
-        # Now add the legend with some customizations.
-        if self.showLegend:
-            max_legend_width = config.FITTING_PLOT_LEGEND_MAX_LINE_LENGTH
-            handles, labels = ax.get_legend_handles_labels()
-            newhandles = []
-            newlabels = []
-            for h,l in zip(handles,labels):
+            markersize = data.markersize
+
+            # Include scaling (log vs. linear)
+            ax.set_xscale(self.xscale, nonpositive='clip') if self.xscale != 'linear' else self.ax.set_xscale(self.xscale)
+            ax.set_yscale(self.yscale, nonpositive='clip') if self.yscale != 'linear' else self.ax.set_yscale(self.yscale)
+
+            # Draw non-standard markers
+            l_width = markersize * 0.4
+            if marker == '-' or marker == '--':
+                line = self.ax.plot(x, y, color=color, lw=l_width, marker='',
+                                 linestyle=marker, label=label, zorder=10)[0]
+
+            elif marker == 'vline':
+                y_min = min(y)*9.0/10.0 if min(y) < 0 else 0.0
+                line = self.ax.vlines(x=x, ymin=y_min, ymax=y, color=color,
+                                linestyle='-', label=label, lw=l_width, zorder=1)
+
+            elif marker == 'step':
+                line = self.ax.step(x, y, color=color, marker='', linestyle='-',
+                                    label=label, lw=l_width, zorder=1)[0]
+
+            else:
+                # plot data with/without errorbars
+                if hide_error:
+                    line = ax.plot(x, y, marker=marker, color=color, markersize=markersize,
+                            linestyle='', label=label, picker=True)
+                else:
+                    dy = data.view.dy
+                    # Convert tuple (lo,hi) to array [(x-lo),(hi-x)]
+                    if dy is not None and isinstance(dy, tuple):
+                        dy = np.vstack((y - dy[0], dy[1] - y)).transpose()
+
+                    line = ax.errorbar(x, y,
+                                yerr=dy,
+                                xerr=None,
+                                capsize=2, linestyle='',
+                                barsabove=False,
+                                color=color,
+                                marker=marker,
+                                markersize=markersize,
+                                lolims=False, uplims=False,
+                                xlolims=False, xuplims=False,
+                                label=label,
+                                zorder=1,
+                                picker=True)
+
+            # Display horizontal axis if requested
+            if data.show_yzero:
+                ax.axhline(color='black', linewidth=1)
+
+            # Display +/- 3 sigma and +/- 1 sigma lines for residual plots
+            if data.plot_role in [DataRole.ROLE_RESIDUAL, DataRole.ROLE_RESIDUAL_SESANS]:
+                ax.axhline(y=3, color='red', linestyle='-')
+                ax.axhline(y=-3, color='red', linestyle='-')
+                ax.axhline(y=1, color='gray', linestyle='--')
+                ax.axhline(y=-1, color='gray', linestyle='--')
+            # Update the list of data sets (plots) in chart
+            self.plot_dict[data.name] = data
+
+            self.plot_lines[data.name] = line
+
+            # Now add the legend with some customizations.
+            if self.showLegend:
+                max_legend_width = config.FITTING_PLOT_LEGEND_MAX_LINE_LENGTH
+                handles, labels = ax.get_legend_handles_labels()
+                newhandles = []
+                newlabels = []
+                for h,l in zip(handles,labels):
                     if config.FITTING_PLOT_LEGEND_TRUNCATE:
                         if len(l)> config.FITTING_PLOT_LEGEND_MAX_LINE_LENGTH:
                             half_legend_width = math.floor(max_legend_width/2)
@@ -253,67 +255,67 @@ class PlotterWidget(PlotterBase):
                         newlabels.append(textwrap.fill(l,max_legend_width))
                     newhandles.append(h)
 
-            if config.FITTING_PLOT_FULL_WIDTH_LEGENDS:
-                self.legend = ax.legend(newhandles,newlabels,loc='best', mode='expand')
+                if config.FITTING_PLOT_FULL_WIDTH_LEGENDS:
+                    self.legend = ax.legend(newhandles,newlabels,loc='best', mode='expand')
+                else:
+                    self.legend = ax.legend(newhandles,newlabels,loc='best', shadow=True)
+                self.legend.set_picker(True)
+                self.legend.set_visible(self.legendVisible)
+
+            # Current labels for axes
+            if self.yLabel and not is_fit:
+                ax.set_ylabel(self.yLabel)
+            if self.xLabel and not is_fit:
+                ax.set_xlabel(self.xLabel)
+
+            # define the ranges
+            if isinstance(self.setRange, SetGraphRange) and self.setRange.rangeModified:
+                # Assume the range has changed and retain the current and default ranges for future use
+                modified = self.setRange.rangeModified
+                default_x_range = self.setRange.defaultXRange
+                default_y_range = self.setRange.defaultYRange
+                x_range = self.setRange.xrange()
+                y_range = self.setRange.yrange()
+
+            elif isinstance(data, Data1D):
+                # Get default ranges from data
+
+                if self.has_nonempty_plots():
+                    x_range, y_range = self._plot_bounds()
+
+                else:
+
+                    x_range = self.ax.get_xlim()
+                    y_range = self.ax.get_ylim()
+
+                default_x_range, default_y_range = x_range, y_range
+
+                modified = False
             else:
-                self.legend = ax.legend(newhandles,newlabels,loc='best', shadow=True)
-            self.legend.set_picker(True)
-            self.legend.set_visible(self.legendVisible)
+                # Use default ranges given by matplotlib
+                default_x_range = self.ax.get_xlim()
+                default_y_range = self.ax.get_ylim()
+                x_range = default_x_range
+                y_range = default_y_range
+                modified = False
 
-        # Current labels for axes
-        if self.yLabel and not is_fit:
-            ax.set_ylabel(self.yLabel)
-        if self.xLabel and not is_fit:
-            ax.set_xlabel(self.xLabel)
+            self.setRange = SetGraphRange(parent=self, x_range=x_range, y_range=y_range)
+            self.setRange.rangeModified = modified
+            self.setRange.defaultXRange = default_x_range
+            self.setRange.defaultYRange = default_y_range
+            # Go to expected range
+            self.ax.set_xbound(x_range[0], x_range[1])
+            self.ax.set_ybound(y_range[0], y_range[1])
 
-        # define the ranges
-        if isinstance(self.setRange, SetGraphRange) and self.setRange.rangeModified:
-            # Assume the range has changed and retain the current and default ranges for future use
-            modified = self.setRange.rangeModified
-            default_x_range = self.setRange.defaultXRange
-            default_y_range = self.setRange.defaultYRange
-            x_range = self.setRange.xrange()
-            y_range = self.setRange.yrange()
-
-        elif isinstance(data, Data1D):
-            # Get default ranges from data
-
-            if self.has_nonempty_plots():
-                x_range, y_range = self._plot_bounds()
-
-            else:
-
-                x_range = self.ax.get_xlim()
-                y_range = self.ax.get_ylim()
-
-            default_x_range, default_y_range = x_range, y_range
-
-            modified = False
-        else:
-            # Use default ranges given by matplotlib
-            default_x_range = self.ax.get_xlim()
-            default_y_range = self.ax.get_ylim()
-            x_range = default_x_range
-            y_range = default_y_range
-            modified = False
-
-        self.setRange = SetGraphRange(parent=self, x_range=x_range, y_range=y_range)
-        self.setRange.rangeModified = modified
-        self.setRange.defaultXRange = default_x_range
-        self.setRange.defaultYRange = default_y_range
-        # Go to expected range
-        self.ax.set_xbound(x_range[0], x_range[1])
-        self.ax.set_ybound(y_range[0], y_range[1])
-
-        # Add q-range sliders
-        if data.show_q_range_sliders:
-            # Grab existing slider if it exists
-            existing_slider = self.sliders.pop(data.name, None)
-            sliders = QRangeSlider(self, self.ax, data=data)
-            # New sliders should be visible but existing sliders that were turned off should remain off
-            if existing_slider is not None and not existing_slider.is_visible:
-                sliders.toggle()
-            self.sliders[data.name] = sliders
+            # Add q-range sliders
+            if data.show_q_range_sliders:
+                # Grab existing slider if it exists
+                existing_slider = self.sliders.pop(data.name, None)
+                sliders = QRangeSlider(self, ax, data=data)
+                # New sliders should be visible but existing sliders that were turned off should remain off
+                if existing_slider is not None and not existing_slider.is_visible:
+                    sliders.toggle()
+                self.sliders[data.name] = sliders
 
         # refresh canvas
         self.canvas.draw_idle()

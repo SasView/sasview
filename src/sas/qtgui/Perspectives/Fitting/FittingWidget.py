@@ -90,7 +90,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         super(FittingWidget, self).__init__()
 
         # Necessary globals
-        self.parent  = parent
+        self.parent = parent
         self.process = None    # Default empty value
 
         # Which tab is this widget displayed in?
@@ -2184,15 +2184,21 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Emits plotRequestedSignal for all plots found in the given model under the provided item name.
         """
         fitpage_name = self.logic.kernel_module.name
+
+        # send this information to the TabbedPlotWidget so that it can unpack and show the plots as well
+        self.parent.tabbedPlotWidget.add_tab(item_name, item_model, self.tab_id)
         plots = GuiUtils.plotsFromDisplayName(item_name, item_model)
         # Has the fitted data been shown?
         data_shown = False
         item = None
-        for item, plot in plots.items():
+        for i, item_plot in enumerate(plots.items()):
+            item, plot = item_plot
             if plot.plot_role != DataRole.ROLE_DATA and fitpage_name in plot.name:
                 data_shown = True
                 self.communicate.plotRequestedSignal.emit([item, plot], self.tab_id)
         # return the last data item seen, if nothing was plotted; supposed to be just data)
+        tab_index = self.parent.tabbedPlotWidget.tab_fitpage_dict[self.tab_id]
+        self.parent.tabbedPlotWidget.widget(tab_index).rearrange_plots()
         return None if data_shown else item
 
     def onOptionsUpdate(self) -> None:
