@@ -1377,63 +1377,33 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
         if self.warned_user_large_calc or num_points < 50_000: return True
         # timings for an i7-1165G7 4-core CPU from 2020:
-        #  50k:   1.8s
-        # 100k:   6.3s
-        # 200k:  28.7s
-        # 300k:  65.6s
-        # 400k: 117.2s
-        # 500k: 181.2s
+        # 50k: 1.8s | 100k: 6.3s | 200k: 28.7s | 300k: 65.6s | 400k: 117.2s | 500k: 181.2s
         # multiply by 2 & round to get a conservative estimate
-        msg_100k_or_less = \
-            "The number of atoms exceeds 50 000.\n" \
-            "This calculation may take up to 30 seconds to complete. " \
-            "Do you wish to proceed?"
-        msg_200k_or_less = \
-            "The number of atoms exceeds 100 000.\n" \
-            "This calculation may take up to a minute to complete. " \
-            "Do you wish to proceed?"
-        msg_300k_or_less = \
-            "The number of atoms exceeds 200 000.\n" \
-            "This calculation may take a couple of minutes to complete. " \
-            "Do you wish to proceed?"
-        msg_400k_or_less = \
-            "The number of atoms exceeds 300 000.\n" \
-            "This calculation is expected to take around 5 minutes to complete. " \
-            "Do you wish to proceed?"
-        msg_500k_or_less = \
-            "The number of atoms exceeds 400 000.\n" \
-            "This calculation is expected to take around 10 minutes to complete. " \
-            "Do you wish to proceed?"
-        msg_higher = \
-            "The number of atoms exceeds 500 000.\n" \
-            "This calculation may take more than an hour to complete. " \
-            "Do you wish to proceed?"
-        if 50_000 < num_points < 100_000:
-            msg = msg_100k_or_less
-        if num_points < 200_000:
-            msg = msg_200k_or_less
-        elif num_points < 300_000:
-            msg = msg_300k_or_less
-        elif num_points < 400_000:
-            msg = msg_400k_or_less
-        elif num_points < 500_000:
-            msg = msg_500k_or_less
-        else:
-            msg = msg_higher
+        thresholds = [  
+            (100_000,      50_000,  "30 seconds"),  
+            (200_000,      100_000, "a minute"),  
+            (300_000,      200_000, "a couple of minutes"),  
+            (400_000,      300_000, "around 5 minutes"),  
+            (500_000,      400_000, "around 10 minutes"),  
+            (float('inf'), 500_000, "more than an hour")  
+        ]  
+
+        # find the appropriate threshold and time estimate  
+        for limit, exceeded_threshold, time_estimate in thresholds:  
+            if num_points < limit:  
+                msg = (f"The number of atoms exceeds {exceeded_threshold:,}.\n"
+                       f"This calculation may take {time_estimate} to complete. "
+                       "Do you wish to proceed?")
+                break
 
         flag_continue = False
-        def listener(btn):
-            nonlocal flag_continue
-            flag_continue = btn == popup.button(QMessageBox.Ok)
-
         popup = QMessageBox(standardButtons = QMessageBox.Ok | QMessageBox.Cancel)
         popup.setIcon(QMessageBox.Warning)
         popup.setText(msg)
         popup.setWindowTitle("Large input structure")
         popup.setDefaultButton(QMessageBox.Cancel)
-        popup.buttonClicked.connect(listener)
-        popup.exec_()
-        print(f"User chose to {'continue' if flag_continue else 'cancel'} large calculation.")
+        result = popup.exec_()
+        flag_continue = (result == QMessageBox.Ok)
         self.warned_user_large_calc = flag_continue
         return flag_continue
 
