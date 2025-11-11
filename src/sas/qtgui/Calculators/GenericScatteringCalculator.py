@@ -82,6 +82,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.data_betaQ = None
         self.fQ = []
         self.graph_num = 1      # index for name of graph
+        self.warned_user_large_calc = False
 
         # finish UI setup - install qml window
         self.setup_display()
@@ -1367,6 +1368,75 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                                              numpy.radians(float(self.txtSampleRoll.text()))])
         return env, sample*env
 
+    def check_large_calculation(self, num_points):
+        """
+        Generate a popup warning the user about a large calculation
+        :return True if the calculation should continue, False otherwise.
+        """
+        
+        if self.warned_user_large_calc or num_points < 50_000: return True
+        from PySide6.QtWidgets import QMessageBox
+        # timings for an i7-1165G7 4-core CPU from 2020:
+        #  50k:   1.8s
+        # 100k:   6.3s
+        # 200k:  28.7s
+        # 300k:  65.6s
+        # 400k: 117.2s
+        # 500k: 181.2s
+        # multiply by 2 & round to get a conservative estimate
+        msg_100k_or_less = \
+            "The number of atoms exceeds 50 000.\n" \
+            "This calculation may take up to 30 seconds to complete. " \
+            "Do you wish to proceed?"
+        msg_200k_or_less = \
+            "The number of atoms exceeds 100 000.\n" \
+            "This calculation may take up to a minute to complete. " \
+            "Do you wish to proceed?"
+        msg_300k_or_less = \
+            "The number of atoms exceeds 200 000.\n" \
+            "This calculation may take a couple of minutes to complete. " \
+            "Do you wish to proceed?"
+        msg_400k_or_less = \
+            "The number of atoms exceeds 300 000.\n" \
+            "This calculation is expected to take around 5 minutes to complete. " \
+            "Do you wish to proceed?"
+        msg_500k_or_less = \
+            "The number of atoms exceeds 400 000.\n" \
+            "This calculation is expected to take around 10 minutes to complete. " \
+            "Do you wish to proceed?"
+        msg_higher = \
+            "The number of atoms exceeds 500 000.\n" \
+            "This calculation may take more than an hour to complete. " \
+            "Do you wish to proceed?"
+        if 50_000 < num_points < 100_000:
+            msg = msg_100k_or_less
+        if num_points < 200_000:
+            msg = msg_200k_or_less
+        elif num_points < 300_000:
+            msg = msg_300k_or_less
+        elif num_points < 400_000:
+            msg = msg_400k_or_less
+        elif num_points < 500_000:
+            msg = msg_500k_or_less
+        else:
+            msg = msg_higher
+
+        flag_continue = False
+        def listener(btn):
+            nonlocal flag_continue
+            flag_continue = btn == popup.button(QMessageBox.Ok)
+
+        popup = QMessageBox(standardButtons = QMessageBox.Ok | QMessageBox.Cancel)
+        popup.setIcon(QMessageBox.Warning)
+        popup.setText(msg)
+        popup.setWindowTitle("Large input structure")
+        popup.setDefaultButton(QMessageBox.Cancel)
+        popup.buttonClicked.connect(listener)
+        popup.exec_()
+        print(f"User chose to {'continue' if flag_continue else 'cancel'} large calculation.")
+        self.warned_user_large_calc = flag_continue
+        return flag_continue
+
     def onCompute(self):
         """Execute the computation of I(qx, qy)
 
@@ -1375,6 +1445,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         try:
             # create the combined sld data and update from gui
             sld_data = self.create_full_sld_data()
+            print(f"Data size: {sld_data.data_length}")
+            if not self.check_large_calculation(sld_data.data_length): return
+
             # TODO: implement fourier transform for meshes with multiple element or face types
             # The easy option is to simply convert all elements to tetrahedra - but this could rapidly
             # increase the calculation time.
@@ -1458,10 +1531,14 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         nq = len(input[0])
         chunk_size = 32 if self.is_avg else 256
         out = []
+
+        import time
+        time_start = time.time()
+
         # the 1D AUSAXS calculator cannot be chunked
         if self.is_avg and not len(input[1]):
             self.data_to_plot = self.model.runXY(input)
-
+        
         # chunk the other calculations to allow cancellation
         else:
             for ind in range(0, nq, chunk_size):
@@ -1488,6 +1565,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 out = numpy.hstack(out)
                 self.data_to_plot = out
                 logger.info('Gen computation completed.')
+
+        time_end = time.time()
+        print(f"Computation time without chunking: {time_end - time_start} seconds")
 
         # if Beta(Q) Calculation has been requested, run calculation
         if self.is_beta:
