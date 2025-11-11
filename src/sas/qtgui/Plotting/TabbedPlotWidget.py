@@ -1,10 +1,8 @@
-from PySide6 import QtWidgets
-from PySide6 import QtCore
-from PySide6 import QtGui
+from PySide6 import QtCore, QtGui, QtWidgets
 
 from sas.qtgui.Plotting.SubTabs import SubTabs
-
 from sas.qtgui.Utilities import GuiUtils
+
 
 class TabbedPlotWidget(QtWidgets.QTabWidget):
     """
@@ -37,7 +35,7 @@ class TabbedPlotWidget(QtWidgets.QTabWidget):
         Set the icon of the window
         """
         icon = QtGui.QIcon()
-        icon.addFile(u":/res/ball.ico", QtCore.QSize(), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addFile(":/res/ball.ico", QtCore.QSize(), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.setWindowIcon(icon)
 
     def show_or_activate(self):
