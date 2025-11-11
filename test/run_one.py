@@ -21,7 +21,7 @@ if len(sys.argv) < 2:
     logger.error("Use %s <filename to test>",sys.argv[0])
     sys.exit(-1)
 
-run_py = joinpath(dirname(dirname(abspath(__file__))), 'run.py')
+run_py = joinpath(dirname(dirname(abspath(__file__))), 'src', 'sas', '__main__.py')
 run = SourceFileLoader('sasview_run', run_py).load_module()
 run.prepare()
 
