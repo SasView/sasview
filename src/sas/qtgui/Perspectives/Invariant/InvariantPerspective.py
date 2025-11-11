@@ -171,6 +171,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
         # Default to using contrast for volume fraction
         self.rbContrast.setChecked(True)
+        self.contrastToggle(True)
 
         self.tabWidget.setCurrentIndex(0)
 
@@ -208,15 +209,15 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.rbHighQFix_ex.setEnabled(state)
 
         if self.rbLowQPower_ex.isChecked():
-            self.rbLowQFit_ex.setVisible(not state)
-            self.rbLowQFix_ex.setVisible(not state)
+            # self.rbLowQFit_ex.setVisible(not state)
+            # self.rbLowQFix_ex.setVisible(not state)
             if (state and self.rbLowQFix_ex.isChecked()):
                 self.txtLowQPower_ex.setEnabled(True)
             else:
                 self.txtLowQPower_ex.setDisabled(True)
         else:
-            self.rbLowQFit_ex.setVisible(state)
-            self.rbLowQFix_ex.setVisible(state)
+            # self.rbLowQFit_ex.setVisible(state)
+            # self.rbLowQFix_ex.setVisible(state)
             if (state and self.rbLowQFix_ex.isChecked()):
                 self.txtLowQPower_ex.setEnabled(True)
             else:
@@ -348,7 +349,40 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             self.cmdCalculate.setText("Calculate")
         else:
             self.cmdCalculate.setEnabled(False)
-            self.cmdCalculate.setText("Calculate (No options selected)")
+            self.cmdCalculate.setText("Calculate (Enter volume fraction or contrast)")
+
+    def plot_initial(self, model: QtGui.QStandardItemModel) -> None:
+        """Plot initial data"""
+        self.model = model
+        self._data = GuiUtils.dataFromItem(self._model_item)
+        # Send the modified model item to DE for keeping in the model
+        plots = [self._model_item]
+
+        self.no_extrapolation_plot = self._manager.createGuiData(self._data)
+        self.no_extrapolation_plot.name = self._model_item.text()
+        self.no_extrapolation_plot.title = self._model_item.text()
+        self.no_extrapolation_plot.symbol = 0
+        self.no_extrapolation_plot.has_errors = False
+
+        # copy labels and units of axes for plotting
+        self.no_extrapolation_plot._xaxis = self._data._xaxis
+        self.no_extrapolation_plot._xunit = self._data._xunit
+        self.no_extrapolation_plot._yaxis = self._data._yaxis
+        self.no_extrapolation_plot._yunit = self._data._yunit
+
+        self.no_extrapolation_plot.plot_role = DataRole.ROLE_DEFAULT
+        self.no_extrapolation_plot.show_errors = False
+        self.no_extrapolation_plot.show_q_range_sliders = True
+        self.no_extrapolation_plot.slider_update_on_move = False
+        self.no_extrapolation_plot.slider_perspective_name = self.name
+        self.no_extrapolation_plot.slider_low_q_input = self.txtGuinierEnd_ex.text()
+        self.no_extrapolation_plot.slider_high_q_input = self.txtPorodStart_ex.text()
+        GuiUtils.updateModelItemWithPlot(
+            self._model_item, self.no_extrapolation_plot, self.no_extrapolation_plot.title
+        )
+        plots.append(self.no_extrapolation_plot)
+
+        self.communicate.plotRequestedSignal.emit(plots, None)
 
     def plot_result(self, model: QtGui.QStandardItemModel) -> None:
         """Plot result of calculation"""
@@ -357,32 +391,32 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         # Send the modified model item to DE for keeping in the model
         plots = [self._model_item]
 
-        if not(self.high_extrapolation_plot or self.low_extrapolation_plot):
-            # Convert the data into plottable
-            self.no_extrapolation_plot = self._manager.createGuiData(self._data)
+        # if not(self.high_extrapolation_plot or self.low_extrapolation_plot):
+        #     # Convert the data into plottable
+        #     self.no_extrapolation_plot = self._manager.createGuiData(self._data)
 
-            self.no_extrapolation_plot.name = self._model_item.text()
-            self.no_extrapolation_plot.title = self._model_item.text()
-            self.no_extrapolation_plot.symbol = 0
-            self.no_extrapolation_plot.has_errors = False
+        #     self.no_extrapolation_plot.name = self._model_item.text()
+        #     self.no_extrapolation_plot.title = self._model_item.text()
+        #     self.no_extrapolation_plot.symbol = 0
+        #     self.no_extrapolation_plot.has_errors = False
 
-            # copy labels and units of axes for plotting
-            self.no_extrapolation_plot._xaxis = self._data._xaxis
-            self.no_extrapolation_plot._xunit = self._data._xunit
-            self.no_extrapolation_plot._yaxis = self._data._yaxis
-            self.no_extrapolation_plot._yunit = self._data._yunit
+        #     # copy labels and units of axes for plotting
+        #     self.no_extrapolation_plot._xaxis = self._data._xaxis
+        #     self.no_extrapolation_plot._xunit = self._data._xunit
+        #     self.no_extrapolation_plot._yaxis = self._data._yaxis
+        #     self.no_extrapolation_plot._yunit = self._data._yunit
 
-            self.no_extrapolation_plot.plot_role = DataRole.ROLE_DEFAULT
-            self.no_extrapolation_plot.show_errors = False
-            self.no_extrapolation_plot.show_q_range_sliders = False
-            self.no_extrapolation_plot.slider_update_on_move = False
-            self.no_extrapolation_plot.slider_perspective_name = self.name
-            self.no_extrapolation_plot.slider_low_q_input = self.txtGuinierEnd_ex.text()
-            self.no_extrapolation_plot.slider_high_q_input = self.txtPorodStart_ex.text()
-            GuiUtils.updateModelItemWithPlot(
-                self._model_item, self.no_extrapolation_plot, self.no_extrapolation_plot.title
-            )
-            plots.append(self.no_extrapolation_plot)
+        #     self.no_extrapolation_plot.plot_role = DataRole.ROLE_DEFAULT
+        #     self.no_extrapolation_plot.show_errors = False
+        #     self.no_extrapolation_plot.show_q_range_sliders = False
+        #     self.no_extrapolation_plot.slider_update_on_move = False
+        #     self.no_extrapolation_plot.slider_perspective_name = self.name
+        #     self.no_extrapolation_plot.slider_low_q_input = self.txtGuinierEnd_ex.text()
+        #     self.no_extrapolation_plot.slider_high_q_input = self.txtPorodStart_ex.text()
+        #     GuiUtils.updateModelItemWithPlot(
+        #         self._model_item, self.no_extrapolation_plot, self.no_extrapolation_plot.title
+        #     )
+        #     plots.append(self.no_extrapolation_plot)
 
         if self.high_extrapolation_plot:
             self.high_extrapolation_plot.plot_role = DataRole.ROLE_DEFAULT
@@ -739,8 +773,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         # self.chkHighQ.stateChanged.connect(self.checkQExtrapolatedData)
 
         # slots for the volume fraction and contrast radio buttons
-        # self.rbVolFrac.toggled.connect(self.volFracToggle)
-        # self.rbContrast.toggled.connect(self.contrastToggle)
+        self.rbVolFrac.toggled.connect(self.volFracToggle)
+        self.rbContrast.toggled.connect(self.contrastToggle)
 
         # slots for the Guinier and PowerLaw radio buttons at low Q
         # since they are not auto-exclusive
@@ -871,6 +905,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         """ If Power is selected, Fit and Fix radio buttons are visible """
         if self.rbLowQPower_ex.isChecked():
             self.showLowQPowerOptions(True)
+            # Set default to Fit
+            self.rbLowQFit_ex.setChecked(True)
         else:
             self.showLowQPowerOptions(False)
 
@@ -878,8 +914,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
     def showLowQPowerOptions(self, state: bool) -> None:
         """ Show and enable the Fit and Fix options if Power is selected """
-        self.rbLowQFit_ex.setVisible(state)
-        self.rbLowQFix_ex.setVisible(state)
         self.rbLowQFit_ex.setEnabled(state)
         self.rbLowQFix_ex.setEnabled(state)
         if self.rbLowQFix_ex.isChecked():
@@ -1519,9 +1553,11 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.slider.extrapolation_parameters = self.extrapolation_parameters
         self.slider.setEnabled(True)
 
-        # self.plot_result(self.model)
+        self.allow_calculation()
 
         self.tabWidget.setCurrentIndex(0)
+
+        self.plot_initial(self.model)
 
     def removeData(self, data_list: list = None) -> None:
         """Remove the existing data reference from the Invariant Persepective"""
