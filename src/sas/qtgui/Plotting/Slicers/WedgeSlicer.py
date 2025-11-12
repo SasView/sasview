@@ -40,7 +40,6 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         self.qmax = max(self.data.xmax, np.fabs(self.data.xmin), self.data.ymax, np.fabs(self.data.ymin))
         self.dqmin = min(np.fabs(self.data.qx_data))
         self.connect = self.base.connect
-        
 
         # Number of points on the plot
         self.nbins = 100
