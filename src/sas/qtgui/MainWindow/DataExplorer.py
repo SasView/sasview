@@ -24,7 +24,10 @@ from sas.qtgui.MainWindow.NameChanger import ChangeName
 from sas.qtgui.Plotting.MaskEditor import MaskEditor
 
 # DO NOT REMOVE THE IMPORT BELOW - used in dynamic plotter creation
-from sas.qtgui.Plotting.Plotter import PlotterWidget
+from sas.qtgui.Plotting.Plotter import (
+    Plotter,  # noqa: F401
+    PlotterWidget,
+)
 from sas.qtgui.Plotting.Plotter2D import Plotter2D, Plotter2DWidget
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
 
