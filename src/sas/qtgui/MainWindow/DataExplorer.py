@@ -1106,7 +1106,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if new_plots:
             self.plotData(new_plots)
 
-    def displayData(self, data_list, id=None):
+    def displayData(self, data_list):
         """
         Forces display of charts for the given data set
         """
