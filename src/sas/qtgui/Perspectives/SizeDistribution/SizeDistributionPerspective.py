@@ -519,7 +519,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             GuiUtils.updateModelItemWithPlot(self._model_item, self.fit_plot, title)
             plots.append(self.fit_plot)
 
-        self.communicate.plotRequestedSignal.emit(plots, None)
+        self.communicate.plotRequestedSignal.emit(plots, 0) # assumes that default plot is the first one
 
     def getState(self):
         """
@@ -695,7 +695,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             title = self.trust_plot.name
             GuiUtils.updateModelItemWithPlot(self._model_item, self.trust_plot, title)
             plots.append(self.trust_plot)
-        self.communicate.plotRequestedSignal.emit(plots, None)
+        self.communicate.plotRequestedSignal.emit(plots, 1) # assumes that default plot is the first one
 
         # add fit to data plot
         if isinstance(result.data_max_ent, LoadData1D):

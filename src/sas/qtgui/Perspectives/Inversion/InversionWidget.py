@@ -369,7 +369,7 @@ class InversionWidget(QWidget, Ui_PrInversion):
         for plot in plots:
             if plot is not None:
                 updateModelItemWithPlot(result.logic._data_item, plot, plot.name)
-                self.communicator.plotRequestedSignal.emit([result.logic._data_item, plot], None)
+                self.communicator.plotRequestedSignal.emit([result.logic._data_item, plot], self.tab_id)
 
     def showCurrentPlots(self):
         self.showPlots(self.currentResult)
