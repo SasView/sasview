@@ -292,7 +292,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             )
             plots.append(self.low_extrapolation_plot)
         if len(plots) > 1:
-            self.communicate.plotRequestedSignal.emit(plots, 0) # assumes that default plot is the first one
+            self.communicate.plotRequestedSignal.emit(plots)
 
         # Update the details dialog in case it is open
         self.update_details_widget()

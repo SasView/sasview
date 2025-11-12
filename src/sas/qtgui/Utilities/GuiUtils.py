@@ -103,7 +103,7 @@ class Communicate(QtCore.QObject):
 
     # New plot requested from the GUI manager
     # Old "NewPlotEvent"
-    plotRequestedSignal = QtCore.Signal(list, int)
+    plotRequestedSignal = QtCore.Signal(list)
 
     # Plot from file names
     plotFromNameSignal = QtCore.Signal(str)
