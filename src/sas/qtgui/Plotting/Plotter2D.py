@@ -704,19 +704,18 @@ class Plotter2DWidget(PlotterBase):
             data_x, data_y = numpy.meshgrid(self.data0.x_bins[0:-1],
                                             self.data0.y_bins[0:-1])
 
-            ax = Axes3D(self.figure)
+            self.ax = self.figure.add_subplot(111, projection='3d')
 
             # Disable rotation for large sets.
             # TODO: Define "large" for a dataset
             SET_TOO_LARGE = 500
             if len(data_x) > SET_TOO_LARGE:
-                ax.disable_mouse_rotation()
+                self.ax.disable_mouse_rotation()
 
             self.figure.canvas.resizing = False
-            im = ax.plot_surface(data_x, data_y, output, rstride=1,
-                                 cstride=1, cmap=cmap,
-                                 linewidth=0, antialiased=False)
-            self.ax.set_axis_off()
+            im = self.ax.plot_surface(data_x, data_y, output, rstride=1,
+                                     cstride=1, cmap=cmap,
+                                     linewidth=0, antialiased=False)
 
         if self.dimension != 3:
             self.figure.canvas.draw_idle()
