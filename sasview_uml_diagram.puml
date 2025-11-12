@@ -17,17 +17,15 @@ package "SasView Application" #FFE5E5 {
   }
   
   package "SasCalc Module" #E5CCFF {
-    component "fit (Fitting)"
-    component "corfunc (Correlation)"
-    component "invariant"
-    component "realspace"
-    component "data_util"
+    component "Fit (Fitting)"
+    component "Corfunc (Correlation)"
+    component "Invariant"
+    component "Inversion (Realspace)"
   }
   
   package "System Module" #CCFFCC {
     component "config"
     component "version"
-    component "resources"
     component "logger"
   }
 }
@@ -59,37 +57,33 @@ package "External Dependencies" #E5E5FF {
 }
 
 ' Define relationships
-app --> MainWindow : uses
-app --> Perspectives : uses
-app --> "fit (Fitting)" : uses
+app --> MainWindow
+app --> Perspectives
 
-MainWindow --> Perspectives : contains
-MainWindow --> Plotting : uses
-MainWindow --> Calculators : uses
-MainWindow --> Utilities : uses
+MainWindow --> Perspectives
+MainWindow --> Plotting
+MainWindow --> Calculators
+MainWindow --> Utilities
 
-Perspectives --> "fit (Fitting)" : uses
-Perspectives --> "corfunc (Correlation)" : uses
-Perspectives --> Plotting : uses
+Perspectives --> "Fit (Fitting)"
+Perspectives --> "Corfunc (Correlation)"
+Perspectives --> "Invariant"
+Perspectives --> "Inversion (Realspace)"
 
-"fit (Fitting)" --> bumps : uses
-"fit (Fitting)" --> sasmodels : uses
+"Fit (Fitting)" --> sasmodels
+"Fit (Fitting)" --> sasdata
 
-"corfunc (Correlation)" --> sasdata : uses
-"corfunc (Correlation)" --> invariant : uses
+"Corfunc (Correlation)" --> sasdata
+"Invariant" --> sasdata
+"Inversion (Realspace)" --> sasdata
 
-Calculators --> "data_util" : uses
-Calculators --> sasmodels : uses
+Calculators --> sasmodels
 
-config --> resources : references
-logger --> config : uses
+logger --> config
 
-MainWindow --> sasdata : uses
-MainWindow --> config : uses
-MainWindow --> version : uses
+MainWindow --> sasdata
+MainWindow --> config
+MainWindow --> version
 
-"data_util" --> sasdata : uses
-
-MainWindow --> Plotting : uses
 
 @enduml

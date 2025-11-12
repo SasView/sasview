@@ -15,7 +15,7 @@ The SasView module (`src/sas/`) is organized into several main subdirectories, e
   - `Plotting/` - Plotting and visualization functionality
   - `MainWindow/` - Main application window components
   - `UI/` - User interface definition files
-  - `UnitTesting/` - GUI unit tests
+  - `UnitTesting/` - GUI unit tests ** OBSOLETE **
   - `Utilities/` - Helper utilities for the GUI
   - `GL/` - OpenGL-related graphics functionality
   - `images/` - Image assets and icons
@@ -32,7 +32,7 @@ The SasView module (`src/sas/`) is organized into several main subdirectories, e
     - Scattering length density (SLD) calculator
     - Kiessig thickness calculator
     - GENI/GSC model utilities
-    - ausaxs - Anomalous USAXS module
+    - ausaxs - SAXS profiles from atomic structures
   - `fit/` - Fitting engine and model management
     - Abstract fit engine base classes
     - Bumps fitting framework integration
