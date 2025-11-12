@@ -3,7 +3,6 @@ import functools
 
 import matplotlib as mpl
 import numpy
-from mpl_toolkits.mplot3d import Axes3D
 from PySide6 import QtGui, QtWidgets
 
 from sasdata.data_util.manipulations import CircularAverage
