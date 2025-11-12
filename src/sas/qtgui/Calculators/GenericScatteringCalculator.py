@@ -1402,7 +1402,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         popup.setText(msg)
         popup.setWindowTitle("Large input structure")
         popup.setDefaultButton(QMessageBox.Cancel)
-        result = popup.exec_()
+        result = popup.exec()
         flag_continue = (result == QMessageBox.Ok)
         self.warned_user_large_calc = flag_continue
         return flag_continue
@@ -1415,7 +1415,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         try:
             # create the combined sld data and update from gui
             sld_data = self.create_full_sld_data()
-            if not self.check_large_calculation(sld_data.data_length): return
+            if hasattr(sld_data, 'data_length') and not self.check_large_calculation(sld_data.data_length): return
 
             # TODO: implement fourier transform for meshes with multiple element or face types
             # The easy option is to simply convert all elements to tetrahedra - but this could rapidly
