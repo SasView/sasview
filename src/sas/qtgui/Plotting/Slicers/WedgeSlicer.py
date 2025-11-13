@@ -58,6 +58,8 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         self.fold = True
         # reference of the current data averager
         self.averager = None
+        # Saves plot id so it doesn't get recreated each time a parameter changes
+        self.plot_id = None
 
         self.inner_arc = ArcInteractor(
             self, self.axes, color="black", zorder=zorder, r=self.r1, theta=self.theta, phi=self.phi
@@ -209,10 +211,27 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
             new_plot.xaxis(r"\rm{Q}", "A^{-1}")
         new_plot.yaxis(r"\rm{Intensity} ", "cm^{-1}")
 
-        new_plot.id = "Wedge" + self.averager.__name__ + self.data.name
-        new_plot.type_id = (
-            "Slicer" + self.data.name
-        )  # Used to remove plots after changing slicer so they don't keep showing up after closed
+        # Assign unique id per slicer instance and use it as the display name
+        if self.plot_id is None:
+            base_id = "Wedge" + self.averager.__name__ + self.data.name
+            parent_item = self._item if self._item.parent() is None else self._item.parent()
+            existing = 0
+            for i in range(parent_item.rowCount()):
+                item = parent_item.child(i)
+                data = item.data()
+                if hasattr(data, "id") and isinstance(data.id, str) and data.id.startswith(base_id):
+                    existing += 1
+                for j in range(item.rowCount()):
+                    item2 = item.child(j)
+                    data2 = item2.data()
+                    if hasattr(data2, "id") and isinstance(data2.id, str) and data2.id.startswith(base_id):
+                        existing += 1
+            self.plot_id = base_id if existing == 0 else f"{base_id}_{existing+1}"
+
+        new_plot.id = self.plot_id
+        new_plot.name = new_plot.id
+        new_plot.title = new_plot.id
+        new_plot.type_id = ("Slicer" + self.data.name)
         new_plot.is_data = True
         item = self._item
         if self._item.parent() is not None:

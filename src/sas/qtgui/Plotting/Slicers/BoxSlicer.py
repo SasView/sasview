@@ -66,6 +66,8 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         # currently does a pass. Default to False at initialize anyway
         # (nothing has moved yet) for possible future implementation.
         self.has_move = False
+        # Store the plot ID so it doesn't change when parameters are updated
+        self._plot_id = None
         # Create vertical and horizontal lines for the rectangle
         self.horizontal_lines = HorizontalDoubleLine(
             self,
@@ -257,8 +259,29 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         new_plot = Data1D(x=boxavg.x, y=boxavg.y, dy=boxavg.dy)
         new_plot.dxl = dxl
         new_plot.dxw = dxw
-        new_plot.name = str(self.averager.__name__) + "(" + self.data.name + ")"
-        new_plot.title = str(self.averager.__name__) + "(" + self.data.name + ")"
+
+        # Assign unique id per slicer instance and use it as the display name
+        if self._plot_id is None:
+            base_id = "BoxAverage" + self.data.name
+            parent_item = self._item
+            if self._item.parent() is not None:
+                parent_item = self._item.parent()
+            existing = 0
+            for i in range(parent_item.rowCount()):
+                it = parent_item.child(i)
+                d = it.data()
+                if hasattr(d, "id") and isinstance(d.id, str) and d.id.startswith(base_id):
+                    existing += 1
+                for j in range(it.rowCount()):
+                    it2 = it.child(j)
+                    d2 = it2.data()
+                    if hasattr(d2, "id") and isinstance(d2.id, str) and d2.id.startswith(base_id):
+                        existing += 1
+            self._plot_id = base_id if existing == 0 else f"{base_id}_{existing+1}"
+
+        new_plot.id = self._plot_id
+        new_plot.name = self._plot_id
+        new_plot.title = self._plot_id
         new_plot.source = self.data.source
         new_plot.interactive = True
         new_plot.detector = self.data.detector
@@ -275,10 +298,10 @@ class BoxInteractor(BaseInteractor, SlicerModel):
             new_plot.ytransform = "y"
             new_plot.yaxis("\\rm{Residuals} ", "/")
 
-        new_plot.id = (self.averager.__name__) + self.data.name
+        # new_plot.id = (self.averager.__name__) + self.data.name
         # Create id to remove plots after changing slicer so they don't keep
         # showing up after being closed
-        new_plot.type_id = "Slicer" + self.data.name
+        new_plot.type_id = "Slicer" + new_plot.id
         new_plot.is_data = True
         item = self._item
         if self._item.parent() is not None:
