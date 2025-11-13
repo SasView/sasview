@@ -16,8 +16,8 @@ class RadiusInteractor(BaseInteractor):
     :param theta: average angle of the lines from the x-axis
     :param phi: angular displacement of the lines either side of theta
     """
-    def __init__(self, base, axes, color='black', zorder=5, r1=1.0, r2=2.0,
-                 theta=np.pi / 3, phi=np.pi / 8):
+
+    def __init__(self, base, axes, color="black", zorder=5, r1=1.0, r2=2.0, theta=np.pi / 3, phi=np.pi / 8):
         BaseInteractor.__init__(self, base, axes, color=color)
         self.markers = []
         self.axes = axes
@@ -40,27 +40,42 @@ class RadiusInteractor(BaseInteractor):
         r_x2 = self.r2 * np.cos(self.theta - self.phi)
         r_y2 = self.r2 * np.sin(self.theta - self.phi)
         # Define the left and right markers
-        self.l_marker = self.axes.plot([(l_x1+l_x2)/2], [(l_y1+l_y2)/2],
-                                       linestyle='', marker='s', markersize=10,
-                                       color=self.color, alpha=0.6,
-                                       pickradius=5, label='pick',
-                                       zorder=zorder, visible=True)[0]
-        self.r_marker = self.axes.plot([(r_x1+r_x2)/2], [(r_y1+r_y2)/2],
-                                       linestyle='', marker='s', markersize=10,
-                                       color=self.color, alpha=0.6,
-                                       pickradius=5, label='pick',
-                                       zorder=zorder, visible=True)[0]
+        self.l_marker = self.axes.plot(
+            [(l_x1 + l_x2) / 2],
+            [(l_y1 + l_y2) / 2],
+            linestyle="",
+            marker="s",
+            markersize=10,
+            color=self.color,
+            alpha=0.6,
+            pickradius=5,
+            label="pick",
+            zorder=zorder,
+            visible=True,
+        )[0]
+        self.r_marker = self.axes.plot(
+            [(r_x1 + r_x2) / 2],
+            [(r_y1 + r_y2) / 2],
+            linestyle="",
+            marker="s",
+            markersize=10,
+            color=self.color,
+            alpha=0.6,
+            pickradius=5,
+            label="pick",
+            zorder=zorder,
+            visible=True,
+        )[0]
         # Define the left and right lines
-        self.l_line = self.axes.plot([l_x1, l_x2], [l_y1, l_y2],
-                                     linestyle='-', marker='',
-                                     color=self.color, visible=True)[0]
-        self.r_line = self.axes.plot([r_x1, r_x2], [r_y1, r_y2],
-                                     linestyle='-', marker='',
-                                     color=self.color, visible=True)[0]
+        self.l_line = self.axes.plot(
+            [l_x1, l_x2], [l_y1, l_y2], linestyle="-", marker="", color=self.color, visible=True
+        )[0]
+        self.r_line = self.axes.plot(
+            [r_x1, r_x2], [r_y1, r_y2], linestyle="-", marker="", color=self.color, visible=True
+        )[0]
         # Flag to keep track of motion
         self.has_move = False
-        self.connect_markers([self.l_marker, self.l_line,
-                              self.r_marker, self.r_line])
+        self.connect_markers([self.l_marker, self.l_line, self.r_marker, self.r_line])
         self.update()
 
     def set_layer(self, n):
@@ -107,9 +122,9 @@ class RadiusInteractor(BaseInteractor):
         r_x2 = self.r2 * np.cos(self.theta - self.phi)
         r_y2 = self.r2 * np.sin(self.theta - self.phi)
         # Draw the updated markers and lines
-        self.l_marker.set(xdata=[(l_x1+l_x2)/2], ydata=[(l_y1+l_y2)/2])
+        self.l_marker.set(xdata=[(l_x1 + l_x2) / 2], ydata=[(l_y1 + l_y2) / 2])
         self.l_line.set(xdata=[l_x1, l_x2], ydata=[l_y1, l_y2])
-        self.r_marker.set(xdata=[(r_x1+r_x2)/2], ydata=[(r_y1+r_y2)/2])
+        self.r_marker.set(xdata=[(r_x1 + r_x2) / 2], ydata=[(r_y1 + r_y2) / 2])
         self.r_line.set(xdata=[r_x1, r_x2], ydata=[r_y1, r_y2])
 
     def save(self, ev):
@@ -149,4 +164,3 @@ class RadiusInteractor(BaseInteractor):
     def set_cursor(self, x, y):
         self.move(x, y, None)
         self.update()
-

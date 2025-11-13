@@ -1,12 +1,12 @@
-
-interface_color = 'black'
-disable_color = 'gray'
-active_color = 'red'
-rho_color = 'black'
-mu_color = 'green'
-P_color = 'blue'
-theta_color = 'orange'
+interface_color = "black"
+disable_color = "gray"
+active_color = "red"
+rho_color = "black"
+mu_color = "green"
+P_color = "blue"
+theta_color = "orange"
 profile_colors = [rho_color, mu_color, P_color, theta_color]
+
 
 class BaseInteractor:
     """
@@ -40,9 +40,9 @@ class BaseInteractor:
         markers - list of handles for the interactor
 
     """
-    def __init__(self, base, axes, color='black'):
-        """
-        """
+
+    def __init__(self, base, axes, color="black"):
+        """ """
         self.base = base
         self.axes = axes
         self.color = color
@@ -66,23 +66,19 @@ class BaseInteractor:
         self.markers = []
 
     def save(self, ev):
-        """
-        """
+        """ """
         pass
 
     def restore(self, ev):
-        """
-        """
+        """ """
         pass
 
     def move(self, x, y, ev):
-        """
-        """
+        """ """
         pass
 
     def moveend(self, ev):
-        """
-        """
+        """ """
         pass
 
     def connect_markers(self, markers):
@@ -92,12 +88,12 @@ class BaseInteractor:
 
         for h in markers:
             connect = self.base.connect
-            connect('enter', h, self.onHilite)
-            connect('leave', h, self.onLeave)
-            connect('click', h, self.onClick)
-            connect('release', h, self.onRelease)
-            connect('drag', h, self.onDrag)
-            connect('key', h, self.onKey)
+            connect("enter", h, self.onHilite)
+            connect("leave", h, self.onLeave)
+            connect("click", h, self.onClick)
+            connect("release", h, self.onRelease)
+            connect("drag", h, self.onDrag)
+            connect("key", h, self.onKey)
 
     def onHilite(self, ev):
         """
@@ -126,8 +122,7 @@ class BaseInteractor:
         return True
 
     def onRelease(self, ev):
-        """
-        """
+        """ """
         self.moveend(ev)
         return True
 
@@ -149,15 +144,15 @@ class BaseInteractor:
 
         Calls move() to update the state.  Calls restore() on escape.
         """
-        if ev.key == 'escape':
+        if ev.key == "escape":
             self.restore(ev)
-        elif ev.key in ['up', 'down', 'right', 'left']:
+        elif ev.key in ["up", "down", "right", "left"]:
             dx, dy = self.dpixel(self.clickx, self.clicky, nudge=ev.control)
-            if ev.key == 'up':
+            if ev.key == "up":
                 self.clicky += dy
-            elif ev.key == 'down':
+            elif ev.key == "down":
                 self.clicky -= dy
-            elif ev.key == 'right':
+            elif ev.key == "right":
                 self.clickx += dx
             else:
                 self.clickx -= dx
@@ -182,4 +177,3 @@ class BaseInteractor:
             nx, ny = ax.transData.xy_tup((px + 1.0, py + 1.0))
         dx, dy = nx - x, ny - y
         return dx, dy
-
