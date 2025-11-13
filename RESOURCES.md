@@ -30,7 +30,7 @@ Other places to look for help are:
 
 ## Model Marketplace
 
-In case you are want to use models not provided in Sasview by default or you want to share your models with others please check out our model Marketplace.
+In case you are want to use models not provided in Sasview by default or you want to share your models with others please check out our model [Marketplace](https://marketplace.sasview.org/).
 
 ## Contributing
 
