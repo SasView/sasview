@@ -11,6 +11,7 @@ Both the User and Developer Documentation can be found in the [Sphinx](https://w
   - “Modifying Weights in SasView” ([PDF](https://www.sasview.org/downloads/modifying_weights_in_sasview_v6.pdf))
 
 - Web-based Tutorials:
+  - Our [tutorial repo](https://github.com/SasView/tutorials)
   - ["Tutorials on Small-Angle Scattering"](https://sastutorials.org/) - using Shape2SAS & SasView
   - ["Advanced SAS Training Course"](https://github.com/timsnow/advanced_sas_training_course) - using Jupyter & SasView
   - ["Jupyter notebooks by Cait Wolf"](https://github.com/caitwolf/sas-torials/blob/main/getting_started/1_sasmodels_data.ipynb) - using Jupyter & SasView
