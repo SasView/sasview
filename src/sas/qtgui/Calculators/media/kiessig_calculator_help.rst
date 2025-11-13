@@ -10,7 +10,7 @@ Description
 -----------
 
 This tool estimates real space dimensions from the position or spacing of
-features in recipricol space.  In particular a particle of size $d$ will
+features in reciprocal space.  In particular a particle of size $d$ will
 give rise to Bragg peaks with spacing $\Delta q$ according to the relation
 
 .. math::
@@ -30,4 +30,4 @@ position (in units of 1/|Ang|\) and click on the *Compute* button.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Paul Kienzle, 05Apr2017
+.. note::  This help document was last changed by Romain Conan, 12Nov2025
