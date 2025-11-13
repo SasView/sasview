@@ -1,9 +1,11 @@
 
+import re
 from matplotlib.backends.qt_compat import QtWidgets
 
 # The Figure object is used to create backend-independent plot representations.
 from matplotlib.figure import Figure
-from PySide6.QtWidgets import QComboBox, QLabel
+from PySide6.QtWidgets import QComboBox, QLabel, QTableWidget, QTableWidgetItem, QHeaderView
+from PySide6.QtCore import Qt
 
 
 class FitResultView(QtWidgets.QWidget):
@@ -71,18 +73,85 @@ class CorrelationView(FitResultView):
         plot_corrmatrix(draw=draw, fig=self.figure)
         self.canvas.draw_idle()
 
+class CorrelationTable(QtWidgets.QWidget):
+    def __init__(self, **kw):
+        QtWidgets.QWidget.__init__(self, **kw)
+        if 'title' in kw:
+            self.title = kw['title']
+        self.state = None
+        self.table = QTableWidget()
+        self.table.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        self.table.setShowGrid(True)
+        self.table.setStyleSheet("""
+            QTableWidget {
+                gridline-color: #a0a0a0;
+                border: 1px solid #a0a0a0;
+            }
+            QTableWidget::item {
+                border: 1px solid #c0c0c0;
+                padding: 5px;
+            }
+        """)
+        layout = QtWidgets.QVBoxLayout()
+        layout.addWidget(self.table)
+        self.setLayout(layout)
+
+    def update(self, state):
+        self.state = state
+        self.plot()
+
+    def plot(self):
+        """Parse and display correlation statistics in a table format."""
+        from bumps.dream.stats import var_stats
+        from bumps.dream.stats import format_vars
+
+        # Get formatted statistics from the uncertainty state
+        draw = self.state.uncertainty_state.draw()
+        stats = var_stats(draw)
+        formatted_output = format_vars(stats)
+
+        # Parse the formatted string into table data
+        lines = [line.strip() for line in formatted_output.split('\n') if line.strip()]
+        if not lines:
+            return
+
+        # Define column headers
+        headers = ["Parameter", "mean", "median", "best", "[ 68% interval ]", "[ 95% interval ]"]
+
+        # Extract data rows, skipping the header line
+        data_rows = []
+        for line in lines[1:]:
+            # Use regex to capture bracketed intervals and other tokens
+            tokens = re.findall(r'\[.*?\]|\S+', line)
+            # Skip the first token (row number) and normalize spaces in brackets
+            row_data = [re.sub(r'\s+', ' ', token) for token in tokens[1:]]
+            data_rows.append(row_data)
+
+        # Configure table dimensions
+        self.table.setRowCount(len(data_rows))
+        self.table.setColumnCount(len(headers))
+        self.table.setHorizontalHeaderLabels(headers)
+
+        # Populate table cells with left-aligned text
+        for row_idx, row_data in enumerate(data_rows):
+            for col_idx, cell_value in enumerate(row_data):
+                item = QTableWidgetItem(cell_value)
+                item.setTextAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+                self.table.setItem(row_idx, col_idx, item)
+
+        # Make columns stretch to fill available width
+        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
 
 class UncertaintyView(FitResultView):
+
     def plot(self):
         from bumps.dream.stats import var_stats
         from bumps.dream.varplot import plot_vars
-
         draw = self.state.uncertainty_state.draw()
         stats = var_stats(draw)
         self.figure.clear()
         plot_vars(draw, stats, fig=self.figure)
         self.canvas.draw_idle()
-
 
 class TraceView(FitResultView):
     show_plot_selector = True

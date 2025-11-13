@@ -27,9 +27,11 @@ class ResultPanel(QtWidgets.QTabWidget):
         self.data_id = None
 
         from .PlotView import ConvergenceView, CorrelationView, TraceView, UncertaintyView
+        from .PlotView import CorrelationTable
         self.convergenceView = ConvergenceView()
         self.correlationView = CorrelationView()
         self.uncertaintyView = UncertaintyView()
+        self.correlationTable = CorrelationTable()
         self.traceView = TraceView()
         self.show()
 
@@ -56,6 +58,11 @@ class ResultPanel(QtWidgets.QTabWidget):
             self.uncertaintyView.update(result)
             self.uncertaintyView.show()
             self.addTab(self.uncertaintyView, "Uncertainty")
+
+            self.correlationTable.update(result)
+            self.correlationTable.show()
+            self.addTab(self.correlationTable, "Correlation Table")
+
 
             self.traceView.update(result)
             self.traceView.show()
