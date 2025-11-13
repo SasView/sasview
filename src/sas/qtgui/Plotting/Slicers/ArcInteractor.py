@@ -12,8 +12,8 @@ class ArcInteractor(BaseInteractor):
     param theta: angle from x-axis of the central point on the arc
     param phi: angle from the centre point on the arc to each of its edges
     """
-    def __init__(self, base, axes, color='black', zorder=5, r=1.0,
-                 theta=np.pi / 3, phi=np.pi / 8):
+
+    def __init__(self, base, axes, color="black", zorder=5, r=1.0, theta=np.pi / 3, phi=np.pi / 8):
         BaseInteractor.__init__(self, base, axes, color=color)
         self.markers = []
         self.axes = axes
@@ -30,13 +30,21 @@ class ArcInteractor(BaseInteractor):
         self.phi = phi
         self.radius = r
         # Calculate the marker coordinates and define the marker
-        self.marker = self.axes.plot([], [], linestyle='',
-                                     marker='s', markersize=10,
-                                     color=self.color, alpha=0.6, pickradius=5,
-                                     label='pick', zorder=zorder,
-                                     visible=True)[0]
+        self.marker = self.axes.plot(
+            [],
+            [],
+            linestyle="",
+            marker="s",
+            markersize=10,
+            color=self.color,
+            alpha=0.6,
+            pickradius=5,
+            label="pick",
+            zorder=zorder,
+            visible=True,
+        )[0]
         # Define the arc
-        self.arc = self.axes.plot([], [], linestyle='-', marker='', color=self.color)[0]
+        self.arc = self.axes.plot([], [], linestyle="-", marker="", color=self.color)[0]
         # The number of points that make the arc line
         self.npts = 40
         # Flag to keep track of motion
@@ -114,8 +122,7 @@ class ArcInteractor(BaseInteractor):
         """
         self._mouse_x = x
         self._mouse_y = y
-        self.radius = np.sqrt(np.power(self._mouse_x, 2) + \
-                              np.power(self._mouse_y, 2))
+        self.radius = np.sqrt(np.power(self._mouse_x, 2) + np.power(self._mouse_y, 2))
         self.has_move = True
         self.base.update()
         self.base.draw()
