@@ -1,11 +1,12 @@
 
 import re
+
 from matplotlib.backends.qt_compat import QtWidgets
 
 # The Figure object is used to create backend-independent plot representations.
 from matplotlib.figure import Figure
-from PySide6.QtWidgets import QComboBox, QLabel, QTableWidget, QTableWidgetItem, QHeaderView
 from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QComboBox, QHeaderView, QLabel, QTableWidget, QTableWidgetItem
 
 
 class FitResultView(QtWidgets.QWidget):
@@ -102,8 +103,7 @@ class CorrelationTable(QtWidgets.QWidget):
 
     def plot(self):
         """Parse and display correlation statistics in a table format."""
-        from bumps.dream.stats import var_stats
-        from bumps.dream.stats import format_vars
+        from bumps.dream.stats import format_vars, var_stats
 
         # Get formatted statistics from the uncertainty state
         draw = self.state.uncertainty_state.draw()

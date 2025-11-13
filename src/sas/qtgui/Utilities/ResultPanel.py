@@ -26,8 +26,7 @@ class ResultPanel(QtWidgets.QTabWidget):
         self.setMinimumSize(400, 400)
         self.data_id = None
 
-        from .PlotView import ConvergenceView, CorrelationView, TraceView, UncertaintyView
-        from .PlotView import CorrelationTable
+        from .PlotView import ConvergenceView, CorrelationTable, CorrelationView, TraceView, UncertaintyView
         self.convergenceView = ConvergenceView()
         self.correlationView = CorrelationView()
         self.uncertaintyView = UncertaintyView()
