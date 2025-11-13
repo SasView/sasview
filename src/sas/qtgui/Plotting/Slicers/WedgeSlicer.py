@@ -96,11 +96,26 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         """
         self.averager = None
         self.clear_markers()
-        self.outer_arc.clear()
-        self.inner_arc.clear()
-        self.radial_lines.clear()
-        self.central_line.clear()
-        self.base.connect.clearall()
+        try:
+            self.outer_arc.clear()
+        except (ValueError, AttributeError):
+            pass
+        try:
+            self.inner_arc.clear()
+        except (ValueError, AttributeError):
+            pass
+        try:
+            self.radial_lines.clear()
+        except (ValueError, AttributeError):
+            pass
+        try:
+            self.central_line.clear()
+        except (ValueError, AttributeError):
+            pass
+        try:
+            self.base.connect.clearall()
+        except (ValueError, AttributeError):
+            pass
 
     def update(self):
         """

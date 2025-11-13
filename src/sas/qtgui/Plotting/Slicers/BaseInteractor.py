@@ -59,11 +59,14 @@ class BaseInteractor:
         """
         Clear old markers and interfaces.
         """
-        for h in self.markers:
-            h.remove()
-        if self.markers:
-            self.base.connect.clear(*self.markers)
-        self.markers = []
+        try:
+            for h in self.markers:
+                h.remove()
+            if self.markers:
+                self.base.connect.clear(*self.markers)
+            self.markers = []
+        except (ValueError, AttributeError):
+            pass
 
     def save(self, ev):
         """ """

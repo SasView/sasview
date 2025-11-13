@@ -126,11 +126,26 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         Clear the slicer and all connected events related to this slicer
         """
         self.averager = None
-        self.clear_markers()
-        self.horizontal_lines.clear()
-        self.vertical_lines.clear()
-        self.base.connect.clearall()
-        self.center.clear()
+        try:
+            self.clear_markers()
+        except (ValueError, AttributeError):
+            pass
+        try:
+            self.horizontal_lines.clear()
+        except (ValueError, AttributeError):
+            pass
+        try:
+            self.vertical_lines.clear()
+        except (ValueError, AttributeError):
+            pass
+        try:
+            self.base.connect.clearall()
+        except (ValueError, AttributeError):
+            pass
+        try:
+            self.center.clear()
+        except (ValueError, AttributeError):
+            pass
 
     def update(self):
         """
