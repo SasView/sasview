@@ -20,26 +20,26 @@
 
 # Acknowledgement
 
-This project was initiated by the NSF funded DANSE project, DMR-0520547, SANS sub-project at the University of Tennessee Knoxville. Acknowledgement of that original funding would be appreciated in any publications that make use of the software.
+This project was initiated by the NSF-funded DANSE project, DMR-0520547, a SANS sub-project at the University of Tennessee. Acknowledgement of that original funding would be appreciated in any publications that make use of the software.
 
-This project receives funding from the European Union’s Horizon 2020 research and innovation programme under grant agreement No 654000
+This project received funding from the European Union’s Horizon 2020 research and innovation programme under the SINE2020 project, grant agreement No 654000.
 
 [SasView website](http://www.sasview.org)
 
-The latest stable releases of sasview can be found on the website.
-The following instructions will focus on providing the materials for scripting, developing and lead you to the most important resources.
+The latest stable releases of SasView can be found on the website.
+The following instructions will focus on providing materials for scripting, developing and would lead you to the most important resources.
 
 # Install instructions
 
 ## Users
 
-The packages can currently be installed
+The required packages can currently be installed
 
 ### Install using `pip` inside the working directory:
 
 ```shell
 python -m venv .venv # create the environment
-source .venv/bin/activate # activate the environment
+source .venv/bin/activate # activate the Linux environment
 
 python -m pip install sasview
 
@@ -52,23 +52,23 @@ python -m sasview # launch gui
 uv init
 uv add sasview
 
-uv run sasview # lauch the gui
+uv run sasview # launch the gui
 ```
 
 `Note:` Currently to have the python package as an executable model (launch the gui using `python -m sas` or `uv run sas`) it requires to be installed from source.
 
-## Devlopers
+## Developers
 
-The `pip` installation instructions for devlopers can be found [here](INSTALL.md).
-Installing the dev-verion of sasview with conda is currently not supported.
-`NOTE:` In case you want to contribute please also checkout the [DevlopersNotes](https://github.com/SasView/sasview/wiki/DevNotes_DevGuide_GettingStarted).
+The `pip` installation instructions for developers can be found [here](INSTALL.md).
+Installing the dev-verion of SasView with conda is currently not supported.
+`NOTE:` In case you want to contribute, please also checkout the [DevlopersNotes](https://github.com/SasView/sasview/wiki/DevNotes_DevGuide_GettingStarted).
 
 ## Getting started
 
 ### Hello World
 
-This section is a small `Hello World` example in sasview to check your installation.
-We will fit a simple sphere model. For this first lets synthsies input data.
+This section is a small `Hello World` example in SasView to check your installation.
+We will fit a simple sphere model. For this first lets synthesize input data.
 
 ```python
 import numpy as np
@@ -113,7 +113,7 @@ header += "Q\t counts\t error"
 np.savetxt("scattering.txt", dataset, fmt="%12.6e", delimiter="\t", header=header)
 ```
 
-...and now let's do the fitting. We will optimize the scale, radius and background starting from an inital position close to the ground truth.
+...and now let's do the fitting. We will optimize the scale, radius and background starting from an inital values close to the ground truth.
 
 ```python
 import matplotlib.pyplot as plt
@@ -123,7 +123,7 @@ from sasmodels.data import load_data
 from bumps.fitters import fit
 from bumps.names import FitProblem
 
-# defining the  modal to fit
+# defining the  model to fit
 fit_pars = {
     "radius": 80,
     "sld": 1,
@@ -139,7 +139,7 @@ fit_model.radius.range(10, 1000)
 fit_model.scale.range(1e-3, 10)
 fit_model.background.range(1e-9, 0.1)
 
-# load the data we synthsised above
+# load the data we synthesized above
 exp_data = load_data("scattering.txt")
 
 # Setup the experiments, sharing the same model across all datasets.
