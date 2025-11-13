@@ -560,6 +560,11 @@ class Plotter2DWidget(PlotterBase):
         if self.slicer_widget:
             self.slicer_widget.setModel(self.param_model)
 
+    def setParamOnModel(self):
+        """ Set the model on the slicer widget """
+        if self.slicer_widget:
+            self.slicer_widget.setModel(self.param_model)
+
     def onAnnulusView(self):
         """
         Perform sector averaging on Phi and draw annulus slicer
