@@ -85,7 +85,6 @@ class BaseInteractor:
         """
         Connect markers to callbacks
         """
-
         for h in markers:
             connect = self.base.connect
             connect("enter", h, self.onHilite)
@@ -94,6 +93,7 @@ class BaseInteractor:
             connect("release", h, self.onRelease)
             connect("drag", h, self.onDrag)
             connect("key", h, self.onKey)
+        self.markers.extend(markers)
 
     def onHilite(self, ev):
         """
