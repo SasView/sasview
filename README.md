@@ -1,4 +1,4 @@
-<div>
+<div align='center'>
     <a href="https://github.com/SasView/sasview/releases/latest">
         <img src="https://img.shields.io/github/v/release/SasView/sasview" alt="Latest Release" />
     </a>
@@ -6,7 +6,10 @@
         <img src="https://img.shields.io/github/last-commit/SasView/sasview" alt="Last Commit" />
     </a>
     <a href="https://github.com/SasView/sasview/actions">
-        <img src="https://github.com/SasView/sasview/workflows/Build/badge.svg" alt="CI Status" />
+        <img src="https://img.shields.io/github/workflow/status/SasView/sasview/Build" alt="CI Status" />
+    </a>
+    <a href="https://sasview.org">
+        <img src="https://img.shields.io/website-up-down-green-red/http/sasview.org.svg" alt="Website Status" />
     </a>
 </div>
 
