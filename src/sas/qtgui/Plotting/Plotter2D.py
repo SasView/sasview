@@ -674,7 +674,10 @@ class Plotter2DWidget(PlotterBase):
 
             # Title only for regular charts
             if not self.quickplot:
-                self.ax.set_title(label=self._title)
+                if self.ax.get_title() != '':
+                    self.ax.set_title(label=self.ax.get_title())
+                else:
+                    self.ax.set_title(label=self._title)
 
             # remove color bar in case we have it on screen
             if self.cb is not None:
