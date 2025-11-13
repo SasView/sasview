@@ -36,9 +36,6 @@ python -m venv venv
 # venv\Scripts\activate & REM Windows: activate environment
 . venv/bin/activate  # Linux/Mac: activate environment
 
-# optional to check that pip is indeed installed
-python -m ensurepip --default-pip
-
 # install repositories in editable/devloper mode in the venv
 python -m pip install -e ../sasdata # use "python -m ..." to ensure the correct python version is used
 python -m pip install -e ../sasmodels
@@ -62,13 +59,13 @@ Step by step, that is:
     if you use `cmd` or PowerShell under windows, there are
     [different ways](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#create-and-use-virtual-environments)
     to activate the virtual environment.
-1.  Check that `pip` is installed in the current virtual environment with `python -m ensurepip --default-pip`.
 1.  Install the necessary modules for building and running SasView.
     It will take a while to download and unpack all the dependencies.
     The`pip install -e` command says to install the package in development mode
     so that any changes you make in the source tree will be available the
     next time you run the program. The `.[dev,test]` syntax says to install
     the current directory (sasview) with test and dev dependencies.
+    `Note:` In case you see an error telling you `.venv/bin/python: No module named pip`. You can install `pip` in the current virtual environment using `python -m ensurepip --default-pip`.
 1.  Build the GUI and the documentation using the `hatchling` builder.
 1.  Run SasView!
 
