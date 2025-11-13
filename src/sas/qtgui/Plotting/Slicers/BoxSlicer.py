@@ -289,7 +289,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
 
         # Create id to remove plots after changing slicer so they don't keep
         # showing up after being closed
-        new_plot.type_id = "Slicer" + self.data.name
+        new_plot.type_id = "Slicer" + new_plot.id
         new_plot.is_data = True
         item = self._item
         if self._item.parent() is not None:
