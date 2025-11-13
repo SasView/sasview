@@ -1365,12 +1365,12 @@ class GuiManager:
         if hasattr(self, "filesWidget"):
             self.filesWidget.displayDataByName(name=name, is_data=True)
 
-    def showPlot(self, plot, id):
+    def showPlot(self, plot):
         """
         Pass the show plot request to the data explorer
         """
         if hasattr(self, "filesWidget"):
-            self.filesWidget.displayData(plot, id)
+            self.filesWidget.displayData(plot)
             # update windows menu
             self.addPlotItemsInWindowsMenu(plot)
 

@@ -2177,7 +2177,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         item = self._requestPlots(self.data.name, current_index.model())
         if item:
             # fit+data has not been shown - show just data
-            self.communicate.plotRequestedSignal.emit([item, data_to_show], self.tab_id)
+            self.communicate.plotRequestedSignal.emit([item, data_to_show])
 
     def _requestPlots(self, item_name: str, item_model: Any) -> Any | None:
         """
@@ -2191,7 +2191,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         for item, plot in plots.items():
             if plot.plot_role != DataRole.ROLE_DATA and fitpage_name in plot.name:
                 data_shown = True
-                self.communicate.plotRequestedSignal.emit([item, plot], self.tab_id)
+                self.communicate.plotRequestedSignal.emit([item, plot])
         # return the last data item seen, if nothing was plotted; supposed to be just data)
         return None if data_shown else item
 
