@@ -48,7 +48,7 @@ Using the tool
 *NOTE! Any errors and warnings will be displayed at the bottom of the SasView
 window.*
 
-.. image:: data_oper_pic.png
+.. image:: data_oper_pic_2.png
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
