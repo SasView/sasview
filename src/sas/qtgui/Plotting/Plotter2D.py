@@ -253,17 +253,16 @@ class Plotter2DWidget(PlotterBase):
         """
         Remove all sclicers from the chart
         """
-        if (not hasattr(self, 'slicers') or len(self.slicers) == 0) and self.slicer is None:
+        if len(self.slicers) == 0:
             return
 
         # Clear all existing slicers
-        if hasattr(self, 'slicers'):
-            for slicer in self.slicers:
-                try:
-                    slicer.clear()
-                except (ValueError, AttributeError) as e:
-                    logger.debug(f"Error clearing slicer: {e}")
-            self.slicers = []
+        for slicer in self.slicers:
+            try:
+                slicer.clear()
+            except (ValueError, AttributeError) as e:
+                logger.debug(f"Error clearing slicer: {e}")
+        self.slicers = []
 
         self.slicer = None
         try:

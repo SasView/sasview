@@ -66,9 +66,18 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
         Clear the slicer and all connected events related to this slicer
         """
         self.clear_markers()
-        self.outer_circle.clear()
-        self.inner_circle.clear()
-        self.base.connect.clearall()
+        try:
+            self.outer_circle.clear()
+        except (ValueError, AttributeError):
+            pass
+        try:
+            self.inner_circle.clear()
+        except (ValueError, AttributeError):
+            pass
+        try:
+            self.base.connect.clearall()
+        except (ValueError, AttributeError):
+            pass
 
     def update(self):
         """
@@ -325,8 +334,18 @@ class RingInteractor(BaseInteractor):
         Clear the slicer and all connected events related to this slicer
         """
         self.clear_markers()
-        self.inner_marker.remove()
-        self.inner_circle.remove()
+        try:
+            self.inner_marker.remove()
+        except (ValueError, AttributeError):
+            pass
+        try:
+            self.inner_circle.remove()
+        except (ValueError, AttributeError):
+            pass
+        try:
+            self.base.connect.clearall()
+        except (ValueError, AttributeError):
+            pass
 
     def get_radius(self):
         """

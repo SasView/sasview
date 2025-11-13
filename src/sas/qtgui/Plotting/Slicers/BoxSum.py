@@ -170,10 +170,22 @@ class BoxSumCalculator(BaseInteractor):
         Clear the slicer and all connected events related to this slicer
         """
         self.clear_markers()
-        self.horizontal_lines.clear()
-        self.vertical_lines.clear()
-        self.center.clear()
-        self.base.connect.clearall()
+        try:
+            self.horizontal_lines.clear()
+        except (ValueError, AttributeError):
+            pass
+        try:
+            self.vertical_lines.clear()
+        except (ValueError, AttributeError):
+            pass
+        try:
+            self.center.clear()
+        except (ValueError, AttributeError):
+            pass
+        try:
+            self.base.connect.clearall()
+        except (ValueError, AttributeError):
+            pass
 
     def update(self):
         """
@@ -644,9 +656,18 @@ class HorizontalDoubleLine(BaseInteractor):
         Clear this figure and its markers
         """
         self.clear_markers()
-        self.top_marker.remove()
-        self.bottom_line.remove()
-        self.top_line.remove()
+        try:
+            self.top_marker.remove()
+        except (ValueError, AttributeError):
+            pass
+        try:
+            self.bottom_line.remove()
+        except (ValueError, AttributeError):
+            pass
+        try:
+            self.top_line.remove()
+        except (ValueError, AttributeError):
+            pass
 
     def update(self, x1=None, x2=None, y1=None, y2=None, width=None, height=None, center=None):
         """

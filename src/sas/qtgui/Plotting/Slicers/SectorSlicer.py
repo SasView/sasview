@@ -86,10 +86,22 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         Clear the slicer and all connected events related to this slicer
         """
         self.clear_markers()
-        self.main_line.clear()
-        self.left_line.clear()
-        self.right_line.clear()
-        self.base.connect.clearall()
+        try:
+            self.main_line.clear()
+        except (ValueError, AttributeError):
+            pass
+        try:
+            self.left_line.clear()
+        except (ValueError, AttributeError):
+            pass
+        try:
+            self.right_line.clear()
+        except (ValueError, AttributeError):
+            pass
+        try:
+            self.base.connect.clearall()
+        except (ValueError, AttributeError):
+            pass
 
     def update(self):
         """
