@@ -649,8 +649,18 @@ class HorizontalDoubleLine(BaseInteractor):
         Clear this figure and its markers
         """
         self.clear_markers()
-        self.bottom_line.remove()
-        self.top_line.remove()
+        try:
+            self.top_marker.remove()
+        except (ValueError, AttributeError):
+            pass
+        try:
+            self.bottom_line.remove()
+        except (ValueError, AttributeError):
+            pass
+        try:
+            self.top_line.remove()
+        except (ValueError, AttributeError):
+            pass
 
     def update(self, x1=None, x2=None, y1=None, y2=None, width=None, height=None, center=None):
         """
