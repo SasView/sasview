@@ -32,6 +32,8 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
 
         # Number of points on the plot
         self.nbins = 100
+        # Store the plot ID so it doesn't change when parameters are updated
+        self._plot_id = None
         # Cursor position of Rings (Left(-1) or Right(1))
         self.xmaxd = self.data.xmax
         self.xmind = self.data.xmin
@@ -118,8 +120,8 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
         new_plot = Data1D(x=(sector.x - numpy.pi) * 180 / numpy.pi, y=sector.y, dy=sector.dy)
         new_plot.dxl = dxl
         new_plot.dxw = dxw
-        new_plot.name = "AnnulusPhi" + "(" + self.data.name + ")"
-        new_plot.title = "AnnulusPhi" + "(" + self.data.name + ")"
+        # new_plot.name = "AnnulusPhi" + "(" + self.data.name + ")"
+        # new_plot.title = "AnnulusPhi" + "(" + self.data.name + ")"
 
         new_plot.source = self.data.source
         new_plot.interactive = True
@@ -132,10 +134,28 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
             new_plot.ytransform = "y"
             new_plot.yaxis(r"\rm{Residuals} ", "/")
 
-        new_plot.id = "AnnulusPhi" + self.data.name
-        new_plot.type_id = (
-            "Slicer" + self.data.name
-        )  # Used to remove plots after changing slicer so they don't keep showing up after closed
+        # Assign unique id per slicer instance and use it as the display name
+        if self._plot_id is None:
+            base_id = "AnnulusPhi" + self.data.name
+            parent_item = self._item
+            if self._item.parent() is not None:
+                parent_item = self._item.parent()
+            existing = 0
+            for i in range(parent_item.rowCount()):
+                it = parent_item.child(i)
+                d = it.data()
+                if hasattr(d, "id") and isinstance(d.id, str) and d.id.startswith(base_id):
+                    existing += 1
+                for j in range(it.rowCount()):
+                    it2 = it.child(j)
+                    d2 = it2.data()
+                    if hasattr(d2, "id") and isinstance(d2.id, str) and d2.id.startswith(base_id):
+                        existing += 1
+                self._plot_id = base_id if existing == 0 else f"{base_id}_{existing+1}"
+
+        new_plot.id = self._plot_id
+        new_plot.name = new_plot.id
+        new_plot.title = new_plot.id
         new_plot.is_data = True
         new_plot.xtransform = "x"
         new_plot.ytransform = "y"

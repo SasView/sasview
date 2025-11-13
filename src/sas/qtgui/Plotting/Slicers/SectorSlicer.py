@@ -64,6 +64,8 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         )
         self.left_line.update(left=True)
         self.left_line.qmax = self.qmax
+        # Store the plot ID so it doesn't change when parameters are updated
+        self._plot_id = None
         # draw the sector
         self.update()
         self._post_data()
@@ -155,8 +157,6 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         new_plot = Data1D(x=sector.x, y=sector.y, dy=sector.dy, dx=sector.dx)
         new_plot.dxl = dxl
         new_plot.dxw = dxw
-        new_plot.name = "SectorQ" + "(" + self.data.name + ")"
-        new_plot.title = "SectorQ" + "(" + self.data.name + ")"
         new_plot.source = self.data.source
         new_plot.interactive = True
         new_plot.detector = self.data.detector
@@ -167,8 +167,26 @@ class SectorInteractor(BaseInteractor, SlicerModel):
             new_plot.ytransform = "y"
             new_plot.yaxis("\\rm{Residuals} ", "/")
 
-        new_plot.group_id = "2daverage" + self.data.name
-        new_plot.id = "SectorQ" + self.data.name
+        # Assign unique id per slicer instance and use it as the display name
+        if self._plot_id is None:
+            base_id = "SectorQ" + self.data.name
+            parent_item = self._item if self._item.parent() is None else self._item.parent()
+            existing = 0
+            for i in range(parent_item.rowCount()):
+                it = parent_item.child(i)
+                d = it.data()
+                if hasattr(d, "id") and isinstance(d.id, str) and d.id.startswith(self._plot_id):
+                    existing += 1
+                for j in range(it.rowCount()):
+                    it2 = it.child(j)
+                    d2 = it2.data()
+                    if hasattr(d2, "id") and isinstance(d2.id, str) and d2.id.startswith(self._plot_id):
+                        existing += 1
+            self._plot_id = base_id if existing == 0 else f"{base_id}_{existing+1}"
+
+        new_plot.id = self._plot_id
+        new_plot.name = new_plot.id
+        new_plot.title = new_plot.id
         new_plot.is_data = True
 
         item = self._item
