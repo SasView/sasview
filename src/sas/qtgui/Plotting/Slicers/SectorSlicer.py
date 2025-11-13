@@ -347,8 +347,10 @@ class SideInteractor(BaseInteractor):
         """
         self.clear_markers()
         try:
-            self.line.remove()
             self.inner_marker.remove()
+            self.outer_marker.remove()
+            for line in list(self.axes.lines):
+                line.remove()
         except:
             # Old version of matplotlib
             for item in range(len(self.axes.lines)):
@@ -531,11 +533,17 @@ class LineInteractor(BaseInteractor):
         self.clear_markers()
         try:
             self.inner_marker.remove()
-            self.line.remove()
-        except:
-            # Old version of matplotlib
-            for item in range(len(self.axes.lines)):
-                del self.axes.lines[0]
+        except (ValueError, AttributeError):
+            pass
+        try:
+            self.outer_marker.remove()
+        except (ValueError, AttributeError):
+            pass
+        try:
+            for line in list(self.axes.lines):
+                line.remove()
+        except (ValueError, AttributeError):
+            pass
 
     def update(self, theta=None):
         """
