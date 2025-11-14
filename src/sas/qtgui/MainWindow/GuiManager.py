@@ -8,8 +8,7 @@ from pathlib import Path
 from packaging.version import Version
 from PySide6.QtCore import QLocale, Qt
 from PySide6.QtGui import QStandardItem
-from PySide6.QtWidgets import QDockWidget, QLabel, QProgressBar, QTextBrowser
-from PySide6.QtWidgets import QMessageBox
+from PySide6.QtWidgets import QDockWidget, QLabel, QMessageBox, QProgressBar, QTextBrowser
 from twisted.internet import reactor
 
 import sas
