@@ -289,14 +289,31 @@ class BoxInteractor(BaseInteractor, SlicerModel):
 
         # Create id to remove plots after changing slicer so they don't keep
         # showing up after being closed
-        new_plot.type_id = "Slicer" + new_plot.id
+        new_plot.type_id = ("Slicer" + self.data.name)
         new_plot.is_data = True
         item = self._item
         if self._item.parent() is not None:
             item = self._item.parent()
         GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
-        self.base.manager.communicator.plotUpdateSignal.emit([new_plot])
-        self.base.manager.communicator.forcePlotDisplaySignal.emit([item, new_plot])
+        if getattr(self.base, "stackplots", False):
+            anchor = None
+            try:
+                plots = GuiUtils.plotsFromModel("", item)
+                for p in plots:
+                    if isinstance(p, Data1D) and hasattr(p, "type_id") and p.type_id and p.type_id.startswith("Slicer" + self.data.name):
+                        anchor = p
+                        break
+            except Exception:
+                anchor = None
+            if anchor is not None:
+                self.base.manager.communicator.plotUpdateSignal.emit([anchor])
+                self.base.manager.communicator.forcePlotDisplaySignal.emit([item, anchor, new_plot])
+            else:
+                self.base.manager.communicator.plotUpdateSignal.emit([new_plot])
+                self.base.manager.communicator.forcePlotDisplaySignal.emit([item, new_plot])
+        else:
+            self.base.manager.communicator.plotUpdateSignal.emit([new_plot])
+            self.base.manager.communicator.forcePlotDisplaySignal.emit([item, new_plot])
 
         if self.update_model:
             self.setModelFromParams()
