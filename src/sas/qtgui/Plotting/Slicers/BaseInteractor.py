@@ -118,15 +118,29 @@ class BaseInteractor:
     def onClick(self, ev):
         """
         Prepare to move the artist.  Calls save() to preserve the state for
-        later restore().
+        later restore(). Also notify plotter of slicer interaction.
         """
         self.clickx, self.clicky = ev.xdata, ev.ydata
         self.save(ev)
+        try:
+            # Case 1: this interactor is the slicer (base is the plotter)
+            if hasattr(self.base, 'notifySlicerModified'):
+                self.base.notifySlicerModified(self)
+            # Case 2: this interactor is a child of the slicer (base is the slicer)
+            elif hasattr(self.base, 'base') and hasattr(self.base.base, 'notifySlicerModified'):
+                self.base.base.notifySlicerModified(self.base)
+        except Exception:
+            pass
         return True
 
     def onRelease(self, ev):
-        """ """
+        """Notify plotter on end of interaction."""
         self.moveend(ev)
+        try:
+            if hasattr(self.base, 'notifySlicerModified'):
+                self.base.notifySlicerModified(self)
+        except Exception:
+            pass
         return True
 
     def onDrag(self, ev):
