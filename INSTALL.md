@@ -41,7 +41,7 @@ python -m pip install -e ../sasdata # use "python -m ..." to ensure the correct 
 python -m pip install -e ../sasmodels
 python -m pip install -e .[dev,test]
 
-# test if sasview launches
+# test if sasview launchee
 python -m sas
 ```
 
