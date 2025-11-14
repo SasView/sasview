@@ -290,6 +290,9 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         # selecting/deselecting items in lstPlots enables `Apply`
         self.lstPlots.itemChanged.connect(lambda: self.cmdApply.setEnabled(True))
 
+        # Add connection for slicer selection - add this line
+        self.lstSlicers.itemChanged.connect(self.onSlicerSelected)
+
     def onFocus(self, row, column):
         """Set the focus on the cell (row, column)"""
         selection_model = self.lstParams.selectionModel()
@@ -333,6 +336,30 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
                 self.cbSlicerReplace.setCurrentIndex(0)
                 self.cbSlicerReplace.blockSignals(False)
         self.onParamChange()
+
+    def onSlicerSelected(self, item):
+        """
+        Update parameter list when a slicer is selected from lstSlicers
+        """
+        if item.checkState() == QtCore.Qt.Checked:
+            # Uncheck all other items (radio button behavior)
+            for row in range(self.lstSlicers.count()):
+                other_item = self.lstSlicers.item(row)
+                if other_item != item:
+                    other_item.setCheckState(QtCore.Qt.Unchecked)
+
+            # Get the selected slicer name
+            slicer_name = item.text()
+
+            # Update the parameter model to show this slicer's parameters
+            if slicer_name in self.slicer_models:
+                self.setModel(self.slicer_models[slicer_name])
+            elif slicer_name in self.parent.slicers:
+                # Get the model from the slicer object
+                slicer_obj = self.parent.slicers[slicer_name]
+                if hasattr(slicer_obj, '_model'):
+                    self.slicer_models[slicer_name] = slicer_obj._model
+                    self.setModel(slicer_obj._model)
 
     def onGeneratePlots(self, isChecked):
         """

@@ -286,6 +286,16 @@
          </layout>
         </widget>
        </item>
+       <item row="0" column="0">
+        <widget class="QListWidget" name="lstSlicers">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="tab_2">
@@ -467,6 +477,7 @@
  </widget>
  <tabstops>
   <tabstop>tabWidget</tabstop>
+  <tabstop>lstSlicers</tabstop>
   <tabstop>lstParams</tabstop>
   <tabstop>cbSlicerReplace</tabstop>
   <tabstop>cmdApply</tabstop>
