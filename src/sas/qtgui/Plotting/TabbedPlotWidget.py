@@ -1,4 +1,5 @@
 from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6.QtGui import QCloseEvent
 
 from sas.qtgui.Plotting.SubTabs import SubTabs
 from sas.qtgui.Utilities import GuiUtils
@@ -9,7 +10,7 @@ class TabbedPlotWidget(QtWidgets.QTabWidget):
     Central plot widget that holds tabs and subtabs for all existing plots
     """
     def __init__(self, parent=None):
-        super(TabbedPlotWidget, self).__init__()
+        super(TabbedPlotWidget, self).__init__(parent)
 
         # the manager/parent of this class is the GuiManager
         self.manager = parent
@@ -25,7 +26,7 @@ class TabbedPlotWidget(QtWidgets.QTabWidget):
         self.inv_tab_fitpage_dict = {}
 
         self._set_icon()
-        self.setWindowTitle('TabbedPlotWidget')
+        self.setWindowTitle('PlotViewer')
 
         self.setMinimumSize(500, 500)
         self.hide()
@@ -50,7 +51,7 @@ class TabbedPlotWidget(QtWidgets.QTabWidget):
 
     def add_tab_to_dict(self, tab_id: int) -> int:
         """
-        This method handles the bookkeeping for the existing tabs and there respective fitpages.
+        This method handles the bookkeeping for the existing tabs and their respective fitpages.
         Only adds the tab_id to the dict, if it does not already exist in there.
         Returns the tab index of the existing or newly added tab.
         """
@@ -102,4 +103,9 @@ class TabbedPlotWidget(QtWidgets.QTabWidget):
         else:
             return None
 
-
+    def closeEvent(self, event: QCloseEvent):
+        """
+        Overwrite the close event and minimize the window instead of closing it
+        """
+        self.setWindowState(QtCore.Qt.WindowMinimized)
+        event.ignore()

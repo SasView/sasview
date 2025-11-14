@@ -196,7 +196,8 @@ class GuiManager:
         self.FileConverter = FileConverterWidget(self)
         self.WhatsNew = WhatsNew(self._parent)
 
-        self.tabbedPlotWidget = TabbedPlotWidget(self)
+        self.tabbedPlotWidget = TabbedPlotWidget(self._parent)
+        self.tabbedPlotWidgetSubWindow = self._workspace.workspace.addSubWindow(self.tabbedPlotWidget)
 
     def loadAllPerspectives(self):
         """ Load all the perspectives"""
