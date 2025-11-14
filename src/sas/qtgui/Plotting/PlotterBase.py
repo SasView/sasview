@@ -1,4 +1,4 @@
-
+import os
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
@@ -14,9 +14,34 @@ from sas.qtgui.Plotting.Binder import BindArtist
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
 from sas.qtgui.Plotting.WindowTitle import WindowTitle
-
+from PySide6 import QtCore, QtGui, QtWidgets
 DEFAULT_CMAP = mpl.cm.jet
 
+class CustomToolbar(NavigationToolbar):
+    def __init__(self, canvas, parent=None):
+        super().__init__(canvas, parent)
+        self.parent = parent
+        self.addSeparator()
+        self.add_custom_button()
+
+    def add_custom_button(self):
+        custom_icon = QtGui.QIcon()  # You can load an icon here if you want e.g., QtGui.QIcon("path/to/icon.png")
+        custom_action = QtGui.QAction(custom_icon, "Custom", self)
+        custom_action.setToolTip("Click to perform a custom action")
+        custom_action.triggered.connect(self.custom_button_clicked)
+        self.addAction(custom_action)#pushbutton
+        self._actions['custom'] = custom_action
+        self._actions['custom'].setVisible(False)  # Hide
+
+    def custom_button_clicked(self):
+        # TODO: 
+        # 1) Show the 1D data in the DataExplorer -> just what freeze currently does 
+        # 2) followed by triggering the Send Data button with 1D-data as the selected one 
+        print("Custom button clicked!")
+        if self.parent.parent.parent.filesWidget.model.rowCount() >0:
+            data = self.model.item(self.model.rowCount() - 1, 0)  # first item in last row
+            self.parent.parent.parent.filesWidget.sendData(None, [data])
+        
 class PlotterBase(QtWidgets.QWidget):
     #TODO: Describe what this class is
 
@@ -99,7 +124,7 @@ class PlotterBase(QtWidgets.QWidget):
         self.axes = [self.ax]
 
         # Set the background color to white
-        self.canvas.figure.set_facecolor('#FFFFFF')
+        self.canvas.figure.set_facecolor("#FFFFFFFF")
 
         # Canvas event handlers
         self.canvas.mpl_connect('button_release_event', self.onMplMouseUp)
@@ -109,7 +134,8 @@ class PlotterBase(QtWidgets.QWidget):
         self.canvas.mpl_connect('scroll_event', self.onMplWheel)
 
         self.contextMenu = QtWidgets.QMenu(self)
-        self.toolbar = NavigationToolbar(self.canvas, self)
+        self.toolbar = CustomToolbar(self.canvas, self)#NavigationToolbar(self.canvas, self)
+        
         self.canvas.mpl_connect('resize_event', self.onResize)
         self.canvas.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.canvas.customContextMenuRequested.connect(self.showContextMenu)

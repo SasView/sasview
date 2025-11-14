@@ -62,6 +62,7 @@ class PlotterWidget(PlotterBase):
         self.toolbar._actions['forward'].triggered.connect(self._forward)
         self.toolbar._actions['pan'].triggered.connect(self._pan)
         self.toolbar._actions['zoom'].triggered.connect(self._zoom)
+        self.toolbar._actions['custom'].setVisible(True) 
 
         self.legendVisible = True
 

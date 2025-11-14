@@ -72,7 +72,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.cmdDeleteData.clicked.connect(self.deleteFile)
         self.cmdDeleteTheory.clicked.connect(self.deleteTheory)
         self.cmdFreeze.clicked.connect(self.freezeTheory)
-        self.cmdSendTo.clicked.connect(self.sendData)
+        self.cmdSendTo.clicked.connect(lambda data: self.sendData(data))
         self.cmdNew.clicked.connect(self.newPlot)
         self.cmdNew_2.clicked.connect(self.newPlot)
         self.cmdAppend.clicked.connect(self.appendPlot)
@@ -813,12 +813,19 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
             _ = msgbox.exec_()
 
-    def sendData(self, event=None):
+    def sendData(self, event=None, selected_items = None):
         """
         Send selected item data to the current perspective and set the relevant notifiers
         """
-        selected_items = self.selectedItems()
-        if len(selected_items) < 1:
+        
+        if selected_items == None:
+            selected_items = self.selectedItems()
+            print(type(selected_items[0]))
+        else:
+            print('items are selected')
+        
+        
+        if len(selected_items) <1:
             return
 
         # Check that only one item is selected when sending to perspectives that don't support batch mode
