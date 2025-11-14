@@ -15,6 +15,7 @@ from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
 from sas.qtgui.Plotting.WindowTitle import WindowTitle
 from PySide6 import QtCore, QtGui, QtWidgets
+import re
 DEFAULT_CMAP = mpl.cm.jet
 
 class CustomToolbar(NavigationToolbar):
@@ -37,10 +38,37 @@ class CustomToolbar(NavigationToolbar):
         # TODO: 
         # 1) Show the 1D data in the DataExplorer -> just what freeze currently does 
         # 2) followed by triggering the Send Data button with 1D-data as the selected one 
-        print("Custom button clicked!")
-        if self.parent.parent.parent.filesWidget.model.rowCount() >0:
-            data = self.model.item(self.model.rowCount() - 1, 0)  # first item in last row
-            self.parent.parent.parent.filesWidget.sendData(None, [data])
+        current_file_name = self.parent.lable_name
+        print(type(current_file_name))
+        match = re.search(r"\[(.*?)\]", current_file_name)
+        if match:
+            search_name = match.group(1)  
+        else:
+            search_name = current_file_name  
+        def find_row_by_name(model, target_name, column=0):
+            for row in range(model.rowCount()):
+                item = model.item(row, column)
+                if item and target_name in item.text():
+                    return row
+            return -1
+        def find_child_row_by_name(parent_item, target_name, column=0):
+            for row in range(parent_item.rowCount()):
+                child = parent_item.child(row, column)
+                if child and target_name in child.text():
+                    return row
+            return -1
+        model = self.parent.parent.model
+        row_index_parent = find_row_by_name(model, search_name)
+        data_dir = self.parent.parent.model.item(row_index_parent)
+        row_index_child = find_child_row_by_name(data_dir, current_file_name)
+        data = data_dir.child(row_index_child)    
+         
+        new_item = self.parent.parent.parent.filesWidget.cloneTheory(data)
+        model.beginResetModel()
+        model.appendRow(new_item)
+        model.endResetModel()
+        self.parent.parent.parent.filesWidget.sendData(None, [new_item])
+        
         
 class PlotterBase(QtWidgets.QWidget):
     #TODO: Describe what this class is

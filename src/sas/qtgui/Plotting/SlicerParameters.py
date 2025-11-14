@@ -370,6 +370,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
                 self.parent.manager.updateModelFromPerspective(new_item)
 
                 items_for_fit.append(new_item)
+                self.new_item = new_item
         # Send to fitting, if needed
         # We can get away with directly querying the UI, since this is the only
         # place we need that state.

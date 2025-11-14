@@ -96,6 +96,7 @@ class PlotterWidget(PlotterBase):
         """
         Add a new plot of self._data to the chart.
         """
+        self.lable_name = data.name
         if data is None:
             # just refresh
             self.canvas.draw_idle()
