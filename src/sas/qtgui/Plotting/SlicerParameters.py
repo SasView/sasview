@@ -66,6 +66,9 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         # Initially, Apply is disabled
         self.cmdApply.setEnabled(False)
 
+        # Store models for each slicer - add this line
+        self.slicer_models = {}
+
         # Mapping combobox index -> slicer module
         self.callbacks = {
             0: None,
@@ -109,6 +112,9 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         # Set up plots list
         self.setPlotsList()
 
+        # Set up slicers list - add this line
+        self.setSlicersList()
+
     def setParamsList(self):
         """
         Create and initially populate the list of parameters
@@ -127,6 +133,48 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         """ """
         self.active_plots = self.parent.getActivePlots()
         self.setPlotsList()
+
+    def getCurrentSlicerDict(self):
+        """
+        Returns a dictionary of currently shown slicers
+        {slicer_name:checkbox_status}
+        """
+        current_slicers = {}
+        if self.lstSlicers.count() != 0:
+            for row in range(self.lstSlicers.count()):
+                item = self.lstSlicers.item(row)
+                isChecked = item.checkState() != QtCore.Qt.Unchecked
+                slicer = item.text()
+                current_slicers[slicer] = isChecked
+        return current_slicers
+
+    def setSlicersList(self):
+        """
+        Create and initially populate the list of slicers
+        """
+        current_slicers = self.getCurrentSlicerDict()
+        self.lstSlicers.clear()
+
+        # Fill out list of slicers
+        for item in self.parent.slicers:
+            if str(item) in current_slicers.keys():
+                # redo the list
+                checked = QtCore.Qt.Checked if current_slicers[item] else QtCore.Qt.Unchecked
+            else:
+                # create a new list
+                checked = QtCore.Qt.Checked if (self.parent.data[0].name == item) else QtCore.Qt.Unchecked
+
+            rbItem = QtWidgets.QListWidgetItem(str(item))
+            # Change to radio button behavior - only one selected at a time
+            rbItem.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
+            rbItem.setCheckState(checked)
+            self.lstSlicers.addItem(rbItem)
+
+            # Store the slicer's model
+            if item in self.parent.slicers:
+                slicer_obj = self.parent.slicers[item]
+                if hasattr(slicer_obj, '_model'):
+                    self.slicer_models[str(item)] = slicer_obj._model
 
     def getCurrentPlotDict(self):
         """
@@ -197,6 +245,9 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         # selecting/deselecting items in lstPlots enables `Apply`
         self.lstPlots.itemChanged.connect(lambda: self.cmdApply.setEnabled(True))
 
+        # Add connection for slicer selection - add this line
+        self.lstSlicers.itemChanged.connect(self.onSlicerSelected)
+
     def onFocus(self, row, column):
         """Set the focus on the cell (row, column)"""
         selection_model = self.lstParams.selectionModel()
@@ -215,6 +266,30 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
             if self.active_plots.keys():
                 self.parent.setSlicer(slicer=slicer)
         self.onParamChange()
+
+    def onSlicerSelected(self, item):
+        """
+        Update parameter list when a slicer is selected from lstSlicers
+        """
+        if item.checkState() == QtCore.Qt.Checked:
+            # Uncheck all other items (radio button behavior)
+            for row in range(self.lstSlicers.count()):
+                other_item = self.lstSlicers.item(row)
+                if other_item != item:
+                    other_item.setCheckState(QtCore.Qt.Unchecked)
+
+            # Get the selected slicer name
+            slicer_name = item.text()
+
+            # Update the parameter model to show this slicer's parameters
+            if slicer_name in self.slicer_models:
+                self.setModel(self.slicer_models[slicer_name])
+            elif slicer_name in self.parent.slicers:
+                # Get the model from the slicer object
+                slicer_obj = self.parent.slicers[slicer_name]
+                if hasattr(slicer_obj, '_model'):
+                    self.slicer_models[slicer_name] = slicer_obj._model
+                    self.setModel(slicer_obj._model)
 
     def onGeneratePlots(self, isChecked):
         """
@@ -436,6 +511,12 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         """
         url = "/user/qtgui/MainWindow/graph_help.html#d-data-averaging"
         self.manager.parent.showHelp(url)
+
+    def updateSlicersList(self):
+        """
+        Update the slicers list when slicers are added or removed
+        """
+        self.setSlicersList()
 
 
 class ProxyModel(QtCore.QIdentityProxyModel):
