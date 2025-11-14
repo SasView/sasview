@@ -4,12 +4,13 @@ from collections import defaultdict
 from PySide6 import QtWidgets
 from PySide6.QtCore import QSize, QUrl
 from PySide6.QtGui import QIcon, QPixmap
-from PySide6.QtWidgets import QCheckBox, QDialog, QHBoxLayout, QPushButton, QTextBrowser, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QDialog, QTextBrowser, QVBoxLayout
 
 from sas.qtgui.Utilities.WhatsNew.newer import newest, reduced_version, strictly_newer_than
 from sas.system import config
 from sas.system.version import __version__ as sasview_version
 
+from ..UI.WhatsNewUI import Ui_WhatsNewUI
 
 def whats_new_messages(only_recent=True):
     """ Accumulate all files that are newer than the value in the config
@@ -82,18 +83,24 @@ class WhatsNewBrowser(QTextBrowser):
         return super().loadResource(kind, url)
 
 
+class WhatsNewWidget(QDialog, Ui_WhatsNewUI):
 
-class WhatsNew(QDialog):
     """ What's New window: displays messages about what is new in this version of SasView
 
     It will find all files in messages.[version] if [version] is newer than the last time
     the "don't show me again" option was chosen
 
     To add new messages, just dump a (self-contained) html file into the appropriate folder
-
     """
     def __init__(self, parent=None, only_recent=True):
-        super().__init__(parent)
+        """
+        Parent here is the GUI Manager. Required for access to
+        the help location and to the file loader.
+        """
+        super(WhatsNewWidget, self).__init__()
+
+        self.parent = parent
+        self.setupUi(self)
 
         self.setWindowTitle(f"What's New in SasView {sasview_version}")
 
@@ -105,41 +112,18 @@ class WhatsNew(QDialog):
         self.browser.setOpenLinks(True)
         self.browser.setOpenExternalLinks(True)
 
-        # Layout stuff
-        self.mainLayout = QVBoxLayout()
-        self.buttonBar = QWidget()
-        self.buttonLayout = QHBoxLayout()
-
-
-        # Buttons
-        self.buttonBar.setLayout(self.buttonLayout)
-
-        self.closeButton = QPushButton("Close")
-        self.prevButton = QPushButton("Prev")
-        self.nextButton = QPushButton("Next")
-
-        # Only show the show on startup checkbox if we're not up-to-date
-        self.buttonLayout.addWidget(self.closeButton)
-
         if strictly_newer_than(sasview_version, config.LAST_WHATS_NEW_HIDDEN_VERSION):
 
-            self.showAgain = QCheckBox("Show on Startup")
+            self.showAgain.setVisible(True)
             self.showAgain.setChecked(True)
-            self.buttonLayout.addWidget(self.showAgain)
-
         else:
-            self.showAgain = None
-
-        # other buttons
-        self.buttonLayout.addSpacerItem(QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum))
-        self.buttonLayout.addWidget(self.prevButton)
-        self.buttonLayout.addWidget(self.nextButton)
-
+            self.showAgain.setVisible(False)
 
         # Viewer
-        self.setLayout(self.mainLayout)
-        self.mainLayout.addWidget(self.browser)
-        self.mainLayout.addWidget(self.buttonBar)
+        self.groupBox.setLayout(QVBoxLayout())
+        self.groupBox.layout().setContentsMargins(5, 5, 5, 5)
+        self.groupBox.layout().addWidget(self.browser)
+
 
         # Callbacks
         self.closeButton.clicked.connect(self.close_me)
@@ -162,7 +146,8 @@ class WhatsNew(QDialog):
         self.show_file()
         self.set_enable_disable_prev_next()
 
-        self.setFixedSize(800, 600)
+        self.setMinimumSize(800, 400)
+        #self.resize(800, 600)
         self.setModal(True)
 
     def next_file(self):

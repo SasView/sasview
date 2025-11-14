@@ -59,7 +59,7 @@ from sas.qtgui.Utilities.ResultPanel import ResultPanel
 
 # General SAS imports
 from sas.qtgui.Utilities.SasviewLogger import setup_qt_logging
-from sas.qtgui.Utilities.WhatsNew.WhatsNew import WhatsNew
+from sas.qtgui.Utilities.WhatsNew.WhatsNew import WhatsNewWidget
 from sas.system import HELP_SYSTEM, web
 from sas.system.user import create_user_files_if_needed
 from sas.system.version import __release_date__ as SASVIEW_RELEASE_DATE
@@ -193,7 +193,7 @@ class GuiManager:
         self.GENSASCalculator = None
         self.DataOperation = DataOperationUtilityPanel(self)
         self.FileConverter = FileConverterWidget(self)
-        self.WhatsNew = WhatsNew(self._parent)
+        self.WhatsNew = WhatsNewWidget(self._parent)
 
     def loadAllPerspectives(self):
         """ Load all the perspectives"""
@@ -652,7 +652,7 @@ class GuiManager:
         self.welcomePanel.show()
 
     def actionWhatsNew(self):
-        self.WhatsNew = WhatsNew(self._parent, only_recent=False)
+        self.WhatsNew = WhatsNewWidget(self._parent, only_recent=False)
         self.WhatsNew.show()
 
     def showWelcomeMessage(self):
