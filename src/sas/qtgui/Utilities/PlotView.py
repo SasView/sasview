@@ -1,6 +1,3 @@
-
-import re
-
 from matplotlib.backends.qt_compat import QtWidgets
 
 # The Figure object is used to create backend-independent plot representations.
@@ -101,36 +98,66 @@ class CorrelationTable(QtWidgets.QWidget):
         self.state = state
         self.plot()
 
-    def plot(self):
-        """Parse and display correlation statistics in a table format."""
-        from bumps.dream.stats import format_vars, var_stats
+    def _parse_stats(self):
+        """Parse correlation statistics from the uncertainty state.
+
+        Returns:
+            tuple: (headers, data_rows) where headers is a list of column names
+                   and data_rows is a list of lists containing the formatted data.
+        """
+        from bumps.dream.stats import format_vars, parse_var, var_stats
+        import re
 
         # Get formatted statistics from the uncertainty state
         draw = self.state.uncertainty_state.draw()
         stats = var_stats(draw)
         formatted_output = format_vars(stats)
 
-        # Parse the formatted string into table data
+        # Parse the formatted string into table data using parse_var
         lines = [line.strip() for line in formatted_output.split('\n') if line.strip()]
         if not lines:
-            return
+            return [], []
 
-        # Define column headers
-        headers = ["Parameter", "mean", "median", "best", "[ 68% interval ]", "[ 95% interval ]"]
+        # Parse headers from the first line by extracting bracketed intervals and words
+        header_line = lines[0]
+        # Extract column headers, treating bracketed text as single units
+        headers = re.findall(r'\[.*?\]|\S+', header_line)
 
-        # Extract data rows, skipping the header line
+        # Extract data rows using parse_var to parse each line, skipping the header
         data_rows = []
         for line in lines[1:]:
-            # Use regex to capture bracketed intervals and other tokens
-            tokens = re.findall(r'\[.*?\]|\S+', line)
-            # Skip the first token (row number) and normalize spaces in brackets
-            row_data = [re.sub(r'\s+', ' ', token) for token in tokens[1:]]
-            data_rows.append(row_data)
+            parsed = parse_var(line)
+            if parsed:
+                # Use parse_var to extract all values, then format them for display
+                row_data = [
+                    parsed.name,
+                    f"{parsed.mean:.6g}",
+                    f"{parsed.median:.6g}",
+                    f"{parsed.best:.6g}",
+                    f"[ {parsed.p68[0]:.6g} {parsed.p68[1]:.6g} ]",
+                    f"[ {parsed.p95[0]:.6g} {parsed.p95[1]:.6g} ]",
+                ]
+                data_rows.append(row_data)
+
+        return headers, data_rows
+
+    def plot(self):
+        """Display correlation statistics in a table format."""
+        headers, data_rows = self._parse_stats()
+        if not headers or not data_rows:
+            return
 
         # Configure table dimensions
         self.table.setRowCount(len(data_rows))
         self.table.setColumnCount(len(headers))
         self.table.setHorizontalHeaderLabels(headers)
+
+        # Add tooltip to "best" column header
+        if "best" in headers:
+            best_column_index = headers.index("best")
+            best_header_item = self.table.horizontalHeaderItem(best_column_index)
+            if best_header_item is not None:
+                best_header_item.setToolTip("Point estimate")
 
         # Populate table cells with left-aligned text
         for row_idx, row_data in enumerate(data_rows):

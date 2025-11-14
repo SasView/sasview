@@ -60,7 +60,7 @@ class ResultPanel(QtWidgets.QTabWidget):
 
             self.correlationTable.update(result)
             self.correlationTable.show()
-            self.addTab(self.correlationTable, "Correlation Table")
+            self.addTab(self.correlationTable, "Correlation Statistics")
 
 
             self.traceView.update(result)
