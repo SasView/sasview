@@ -12,6 +12,7 @@ from sas.system.version import __version__ as sasview_version
 
 from ..UI.WhatsNewUI import Ui_WhatsNewUI
 
+
 def whats_new_messages(only_recent=True):
     """ Accumulate all files that are newer than the value in the config
 
@@ -132,7 +133,7 @@ class WhatsNewWidget(QDialog, Ui_WhatsNewUI):
 
         # # Gather new files
         new_messages = whats_new_messages(only_recent=only_recent)
-        new_message_directories = [key for key in new_messages.keys()]
+        new_message_directories = [key for key in new_messages]
         new_message_directories.sort(key=reduced_version, reverse=True)
 
         self.all_messages = []
@@ -210,7 +211,7 @@ def main():
 
     app = QtWidgets.QApplication([])
 
-    whats_new_window = WhatsNew()
+    whats_new_window = WhatsNewWidget()
     whats_new_window.show()
 
     app.exec_()
