@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>416</width>
-    <height>468</height>
+    <width>570</width>
+    <height>573</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -90,12 +90,47 @@
           <string>Slicer Parameters </string>
          </property>
          <layout class="QGridLayout" name="gridLayout">
-          <item row="1" column="0">
+          <item row="2" column="0">
+           <widget class="QTableView" name="lstParams">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QGroupBox" name="groupBox_3">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="title">
+          <string>Slicers</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_slicers">
+          <item>
+           <widget class="QListWidget" name="lstSlicers">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item>
            <layout class="QHBoxLayout" name="horizontalLayout_2">
             <item>
              <widget class="QLabel" name="label">
               <property name="text">
-               <string>Slicer type:</string>
+               <string>Create new slicer:</string>
               </property>
              </widget>
             </item>
@@ -159,27 +194,7 @@
             </item>
            </layout>
           </item>
-          <item row="0" column="0">
-           <widget class="QTableView" name="lstParams">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-           </widget>
-          </item>
          </layout>
-        </widget>
-       </item>
-       <item row="0" column="0">
-        <widget class="QListWidget" name="lstSlicers">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
         </widget>
        </item>
       </layout>
@@ -363,7 +378,6 @@
  </widget>
  <tabstops>
   <tabstop>tabWidget</tabstop>
-  <tabstop>lstSlicers</tabstop>
   <tabstop>lstParams</tabstop>
   <tabstop>cbSlicer</tabstop>
   <tabstop>cmdApply</tabstop>

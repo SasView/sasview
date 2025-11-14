@@ -187,7 +187,7 @@ class Plotter2DWidget(PlotterBase):
 
         # Additional items for slicer interaction
         if (self.slicer is not None) or (hasattr(self.slicer, 'slicers') and len(self.slicers) > 0):
-            plot_slicer_menu.actionClearSlicer = plot_slicer_menu.addAction("&Clear Slicer")
+            plot_slicer_menu.actionClearSlicer = plot_slicer_menu.addAction("&Clear Slicers")
             plot_slicer_menu.actionClearSlicer.triggered.connect(self.onClearSlicer)
         plot_slicer_menu.actionEditSlicer = plot_slicer_menu.addAction("&Edit Slicer Parameters")
         plot_slicer_menu.actionEditSlicer.triggered.connect(self.onEditSlicer)
@@ -521,10 +521,24 @@ class Plotter2DWidget(PlotterBase):
 
         # Reset the model on the Edit slicer parameters widget
         self.param_model = self.slicer.model()
-        if self.slicer_widget and reset:
-            self.slicer_widget.setModel(self.param_model)
-            # Update the slicers list
+        if self.slicer_widget:
+            # Update the slicers list and auto-check the newly created slicer
             self.slicer_widget.updateSlicersList()
+            self.slicer_widget.checkSlicerByName(slicer_name)
+            if reset:
+                self.slicer_widget.setModel(self.param_model)
+
+    def notifySlicerModified(self, slicer_obj):
+        """Notify the parameters dialog that a slicer was interacted with."""
+        try:
+            # Find the slicer name from the mapping
+            for name, obj in self.slicers.items():
+                if obj is slicer_obj:
+                    if self.slicer_widget:
+                        self.slicer_widget.checkSlicerByName(name)
+                    break
+        except Exception:
+            pass
 
     def onSectorView(self):
         """

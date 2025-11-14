@@ -518,6 +518,19 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         """
         self.setSlicersList()
 
+    def checkSlicerByName(self, slicer_name):
+        for row in range(self.lstSlicers.count()):
+            item = self.lstSlicers.item(row)
+            if item.text() == slicer_name:
+                self.lstSlicers.blockSignals(True)
+                for i in range(self.lstSlicers.count()):
+                    other_item = self.lstSlicers.item(i)
+                    other_item.setCheckState(QtCore.Qt.Unchecked)
+                item.setCheckState(QtCore.Qt.Checked)
+                self.lstSlicers.blockSignals(False)
+                self.onSlicerSelected(item)
+                break
+
 
 class ProxyModel(QtCore.QIdentityProxyModel):
     """
