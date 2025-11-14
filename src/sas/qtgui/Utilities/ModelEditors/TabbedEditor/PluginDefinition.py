@@ -1,6 +1,5 @@
 import logging
 import os.path
-from typing import Optional
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
@@ -348,7 +347,7 @@ class PluginDefinition(QtWidgets.QDialog, Ui_PluginDefinition):
 
         param_table.blockSignals(False)
 
-    def _findParentTable(self, widget: QtWidgets.QWidget) -> Optional[QtWidgets.QTableWidget]:
+    def _findParentTable(self, widget: QtWidgets.QWidget) -> QtWidgets.QTableWidget | None:
         """Find if a widget is inside one of our parameter tables.
 
         :param widget: The widget to search from
