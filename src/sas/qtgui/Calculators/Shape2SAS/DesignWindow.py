@@ -91,6 +91,9 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         self.plugin.setEnabled(False)
         self.modelTabButtonOptions.horizontalLayout_5.insertWidget(1, self.plugin)
 
+        self.plugin.setHidden(True)
+        self.line2.setHidden(True)
+
         #connect buttons
         self.modelTabButtonOptions.reset.clicked.connect(self.onSubunitTableReset)
         self.modelTabButtonOptions.closePage.clicked.connect(self.onClickingClose)
