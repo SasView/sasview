@@ -813,3 +813,11 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self.txtDiameterMean.setText("")
         self.txtDiameterMode.setText("")
         self.txtDiameterMedian.setText("")
+
+    def reset(self):
+        """
+        Reset the size distribution perspective to an empty state
+        """
+        self.removeData([self._model_item] if self._model_item else None)
+        self.resetWindow()
+        return

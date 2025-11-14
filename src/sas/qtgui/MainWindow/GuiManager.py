@@ -9,6 +9,7 @@ from packaging.version import Version
 from PySide6.QtCore import QLocale, Qt
 from PySide6.QtGui import QStandardItem
 from PySide6.QtWidgets import QDockWidget, QLabel, QProgressBar, QTextBrowser
+from PySide6.QtWidgets import QMessageBox
 from twisted.internet import reactor
 
 import sas
@@ -706,6 +707,7 @@ class GuiManager:
         self._workspace.actionOpen_Analysis.triggered.connect(self.actionOpen_Analysis)
         self._workspace.actionSave.triggered.connect(self.actionSave_Project)
         self._workspace.actionSave_Analysis.triggered.connect(self.actionSave_Analysis)
+        self._workspace.actionClose_Project.triggered.connect(self.actionClose_Project)
         self._workspace.actionPreferences.triggered.connect(self.actionOpen_Preferences)
         self._workspace.actionQuit.triggered.connect(self.actionQuit)
         # Edit
@@ -1319,6 +1321,21 @@ class GuiManager:
         about = About()
         about.exec()
 
+    def actionClose_Project(self):
+        """
+        Menu File/Close Project
+        """
+        # Make sure this is what the user really wants
+        reply = QMessageBox.question(self._parent, 'Close Project',
+                                    "Are you sure you want to close the current project?\n"
+                                    "All unsaved changes will be lost.",
+                                    QMessageBox.Yes | QMessageBox.No,
+                                    QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            self.resetProject()
+        pass
+
+
     def actionCheck_for_update(self):
         """
         Menu Help/Check for Update
@@ -1396,3 +1413,16 @@ class GuiManager:
         Save the config file based on current session values
         """
         config.save()
+
+    def resetProject(self):
+        """
+        Reset the project to an empty state
+        """
+        # file manager
+        self.filesWidget.reset()
+        # perspectives
+        for per in self.loadedPerspectives.values():
+            if hasattr(per, 'reset'):
+                per.reset()
+
+

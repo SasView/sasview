@@ -435,3 +435,10 @@ that in the meantime, these tabs will be excluded from the saved project.""")
         inversion_widget = self.currentWidget()
         if isinstance(inversion_widget, InversionWidget):
             inversion_widget.updateFromParameters(params)
+
+    def reset(self):
+        """
+        Reset the Inversion perspective to an empty state
+        """
+        self.resetTab(self.currentIndex())
+        return
