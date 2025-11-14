@@ -24,7 +24,7 @@ If you're familiar with working with developing in Python, then the
 very quick version is:
 
 ```shell
-# pull the repository
+# clone the repository
 git clone https://github.com/sasview/sasdata/
 git clone https://github.com/sasview/sasmodels/
 git clone https://github.com/sasview/sasview/
@@ -32,8 +32,8 @@ git clone https://github.com/sasview/sasview/
 cd sasview
 
 #create the virtual environment
-python -m venv venv
-# venv\Scripts\activate & REM Windows: activate environment
+python -m venv .venv
+# .venv\Scripts\activate & REM Windows: activate environment
 . venv/bin/activate  # Linux/Mac: activate environment
 
 # install repositories in editable/devloper mode in the venv
@@ -61,9 +61,9 @@ Step by step, that is:
     to activate the virtual environment.
 1.  Install the necessary modules for building and running SasView.
     It will take a while to download and unpack all the dependencies.
-    The`pip install -e` command says to install the package in development mode
+    The `pip install -e` command says to install the package in development mode
     so that any changes you make in the source tree will be available the
-    next time you run the program. The `.[dev,test]` syntax says to install
+    next time you run the program. We execute this using the `python -m` syntax in order to ensure that the virtual environment python is used. The `.[dev,test]` syntax says to install
     the current directory (sasview) with test and dev dependencies.
     `Note:` In case you see an error telling you `.venv/bin/python: No module named pip`. You can install `pip` in the current virtual environment using `python -m ensurepip --default-pip`.
 1.  Build the GUI and the documentation using the `hatchling` builder.

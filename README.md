@@ -39,7 +39,8 @@ The required packages can currently be installed
 
 ```shell
 python -m venv .venv # create the environment
-source .venv/bin/activate # activate the Linux environment
+source .venv/bin/activate # activate the environment
+# .venv\Scripts\activate & REM Windows: activate environment
 
 python -m pip install sasview
 
