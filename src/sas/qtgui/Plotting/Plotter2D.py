@@ -44,7 +44,7 @@ class Plotter2DWidget(PlotterBase):
         self.slicer_z = 5
         # Reference to the current slicer
         self.slicer = None
-        self.slicers = []
+        self.slicers = {}  # Change from list to dict
         self.slicer_widget = None
         self.vmin = None
         self.vmax = None
@@ -257,12 +257,12 @@ class Plotter2DWidget(PlotterBase):
             return
 
         # Clear all existing slicers
-        for slicer in self.slicers:
+        for slicer in self.slicers.values():
             try:
                 slicer.clear()
             except (ValueError, AttributeError) as e:
                 logger.debug(f"Error clearing slicer: {e}")
-        self.slicers = []
+        self.slicers = {}  # Change from list to dict
 
         self.slicer = None
         try:
@@ -430,7 +430,7 @@ class Plotter2DWidget(PlotterBase):
             return
 
         # Now that we've identified the right plot, update the 2D data the slicers uses
-        for slicer in self.slicers:
+        for slicer in self.slicers.values():
             slicer.data = self.data0
             # Replot now that the 2D data is updated
             slicer._post_data()
@@ -507,10 +507,11 @@ class Plotter2DWidget(PlotterBase):
         self.slicer_z += 1
         self.slicer = slicer(self, self.ax, item=self._item, zorder=self.slicer_z)
 
-        if hasattr(self, 'slicer'):
-            self.slicers.append(self.slicer)
-        else:
-            self.slicers = [self.slicer]
+        # Generate a unique name for this slicer
+        slicer_name = f"{slicer.__name__}_{self.data0.name}_{len(self.slicers)}"
+
+        # Store in dictionary with unique name as key
+        self.slicers[slicer_name] = self.slicer
 
         self.ax.set_ylim(self.data0.ymin, self.data0.ymax)
         self.ax.set_xlim(self.data0.xmin, self.data0.xmax)
@@ -522,6 +523,8 @@ class Plotter2DWidget(PlotterBase):
         self.param_model = self.slicer.model()
         if self.slicer_widget and reset:
             self.slicer_widget.setModel(self.param_model)
+            # Update the slicers list
+            self.slicer_widget.updateSlicersList()
 
     def onSectorView(self):
         """
