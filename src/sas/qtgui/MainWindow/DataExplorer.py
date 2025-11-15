@@ -824,7 +824,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
                     if child.text() == targetName:
                         return row, row2
-
             return -1, -1
 
         model = self.model
