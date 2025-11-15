@@ -128,6 +128,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         operator = self.cbOperator.currentText()
         # calculate and send data to DataExplorer
         output = None
+        
         try:
             data1 = self.data1
             data2 = self.data2
@@ -146,7 +147,15 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             # send result to DataExplorer
             self.onPrepareOutputData()
             # plot result
-            self.updatePlot(self.graphOutput, self.layoutOutput, self.output)
+            try:
+                self.updatePlot(self.graphOutput, self.layoutOutput, self.output)
+            except Exception as ex:
+                if str(ex) == 'Axis limits cannot be NaN or Inf':
+                    logger.warning("""Negative or zero values in the output data - 
+                    choose another dataset or change operator.""")
+                else:    
+                    logger.error(ex)
+                return
 
         # Add the new plot to the comboboxes
         self.cbData1.addItem(self.output.name)
@@ -387,6 +396,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         graph.setLayout(layout)
 
     def updatePlot(self, graph, layout, data):
+    
         """ plot data in graph after clearing its layout """
 
         assert isinstance(graph, QtWidgets.QGraphicsView)
@@ -421,16 +431,20 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         elif isinstance(data, Data1D):
             # plot 1D data
             plotter = PlotterWidget(self, quickplot=True)
+            # Set expanding size policy
+            plotter.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+            # ... rest of 1D setup ...
             data.scale = 'linear'
             plotter.showLegend = False
-            graph.setLayout(layout)
-            layout.addWidget(plotter)
 
             plotter.ax.tick_params(axis='x', labelsize=8)
             plotter.ax.tick_params(axis='y', labelsize=8)
 
             plotter.plot(data=data, hide_error=True, marker='.')
 
+            layout.addWidget(plotter)
+            graph.setLayout(layout)
+            
             plotter.show()
 
         elif float(data) and self.cbData2.currentText() == 'Number':
