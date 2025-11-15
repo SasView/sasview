@@ -105,8 +105,9 @@ class CorrelationTable(QtWidgets.QWidget):
             tuple: (headers, data_rows) where headers is a list of column names
                    and data_rows is a list of lists containing the formatted data.
         """
-        from bumps.dream.stats import format_vars, parse_var, var_stats
         import re
+
+        from bumps.dream.stats import format_vars, parse_var, var_stats
 
         # Get formatted statistics from the uncertainty state
         draw = self.state.uncertainty_state.draw()
