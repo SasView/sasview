@@ -62,19 +62,19 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         self.plot_id = None
 
         self.inner_arc = ArcInteractor(
-            self, self.axes, color="black", zorder=zorder, r=self.r1, theta=self.theta, phi=self.phi
+            self, self.axes, color=color, zorder=zorder, r=self.r1, theta=self.theta, phi=self.phi
         )
         self.inner_arc.qmax = self.qmax
         self.outer_arc = ArcInteractor(
-            self, self.axes, color="black", zorder=zorder + 1, r=self.r2, theta=self.theta, phi=self.phi
+            self, self.axes, color=color, zorder=zorder + 1, r=self.r2, theta=self.theta, phi=self.phi
         )
         self.outer_arc.qmax = self.qmax * 1.2
         self.radial_lines = RadiusInteractor(
-            self, self.axes, color="black", zorder=zorder + 1, r1=self.r1, r2=self.r2, theta=self.theta, phi=self.phi
+            self, self.axes, color=color, zorder=zorder + 1, r1=self.r1, r2=self.r2, theta=self.theta, phi=self.phi
         )
         self.radial_lines.qmax = self.qmax * 1.2
         self.central_line = LineInteractor(
-            self, self.axes, color="black", zorder=zorder, r=self.qmax * 1.414, theta=self.theta, half_length=True
+            self, self.axes, color=color, zorder=zorder, r=self.qmax * 1.414, theta=self.theta, half_length=True
         )
         self.central_line.qmax = self.qmax * 1.414
         self.update()

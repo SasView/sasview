@@ -28,6 +28,25 @@ DEFAULT_CMAP = mpl.cm.jet
 # Minimum value of Z for which we will present data.
 MIN_Z = -32
 
+# Color cycle for slicers (colorblind-friendly palette)
+SLICER_COLORS = [
+    '#E69F00',  # orange
+    '#56B4E9',  # sky blue
+    '#009E73',  # bluish green
+    '#F0E442',  # yellow
+    '#0072B2',  # blue
+    '#D55E00',  # vermillion
+    '#CC79A7',  # reddish purple
+    '#000000',  # black
+    '#E31A1C',  # red
+    '#1F78B4',  # light blue
+    '#33A02C',  # green
+    '#FF7F00',  # orange
+    '#6A3D9A',  # purple
+    '#B15928',  # brown
+    '#FDBF6F'   # light orange
+]
+
 
 class Plotter2DWidget(PlotterBase):
     """
@@ -55,6 +74,9 @@ class Plotter2DWidget(PlotterBase):
         self._masked_data = []
 
         self.manager = manager
+
+        # Track color index for slicer color cycling
+        self._slicer_color_index = 0
 
     @property
     def data(self):
@@ -265,6 +287,8 @@ class Plotter2DWidget(PlotterBase):
         self.slicers = {}
 
         self.slicer = None
+        # Reset color index when all slicers are cleared
+        self._slicer_color_index = 0
         try:
             self._removeSlicerPlots()
         except Exception as e:
@@ -435,6 +459,14 @@ class Plotter2DWidget(PlotterBase):
             # Replot now that the 2D data is updated
             slicer._post_data()
 
+    def _get_next_slicer_color(self):
+        """
+        Get the next color for a new slicer and increment the index
+        """
+        color = SLICER_COLORS[self._slicer_color_index % len(SLICER_COLORS)] # so colours don't overflow
+        self._slicer_color_index += 1
+        return color
+
     def _removeSlicerPlots(self):
         """
         Clear the previous slicer plots
@@ -505,7 +537,11 @@ class Plotter2DWidget(PlotterBase):
     def setSlicer(self, slicer, reset=True):
         """ Create a new slicer without removing the old one """
         self.slicer_z += 1
-        self.slicer = slicer(self, self.ax, item=self._item, zorder=self.slicer_z)
+
+        # Get next color for this slicer
+        slicer_color = self._get_next_slicer_color()
+
+        self.slicer = slicer(self, self.ax, item=self._item, color=slicer_color, zorder=self.slicer_z)
 
         # Generate a unique name for this slicer
         slicer_name = f"{slicer.__name__}_{self.data0.name}_{len(self.slicers)}"
@@ -559,7 +595,11 @@ class Plotter2DWidget(PlotterBase):
         """
         self.onClearSlicer()
         self.slicer_z += 1
-        self.slicer = BoxSumCalculator(self, self.ax, zorder=self.slicer_z)
+
+        # Get next color for this slicer
+        slicer_color = self._get_next_slicer_color()
+
+        self.slicer = BoxSumCalculator(self, self.ax, color=slicer_color, zorder=self.slicer_z)
 
         self.ax.set_ylim(self.data0.ymin, self.data0.ymax)
         self.ax.set_xlim(self.data0.xmin, self.data0.xmax)

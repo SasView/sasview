@@ -72,7 +72,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         self.horizontal_lines = HorizontalDoubleLine(
             self,
             self.axes,
-            color="blue",
+            color=color,
             zorder=zorder,
             half_height=self.half_height,
             half_width=self.half_width,
@@ -83,7 +83,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         self.vertical_lines = VerticalDoubleLine(
             self,
             self.axes,
-            color="black",
+            color=color,
             zorder=zorder,
             half_height=self.half_height,
             half_width=self.half_width,
@@ -93,7 +93,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
 
         # PointInteractor determines the center of the box
         self.center = PointInteractor(
-            self, self.axes, color="grey", zorder=zorder, center_x=self.center_x, center_y=self.center_y
+            self, self.axes, color=color, zorder=zorder, center_x=self.center_x, center_y=self.center_y
         )
 
         # draw the rectangle and plot the data 1D resulting
