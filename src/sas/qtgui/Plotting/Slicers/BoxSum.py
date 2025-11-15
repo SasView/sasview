@@ -182,10 +182,6 @@ class BoxSumCalculator(BaseInteractor):
             self.center.clear()
         except (ValueError, AttributeError):
             pass
-        try:
-            self.base.connect.clearall()
-        except (ValueError, AttributeError):
-            pass
 
     def update(self):
         """

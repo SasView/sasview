@@ -333,10 +333,6 @@ class RingInteractor(BaseInteractor):
             self.inner_circle.remove()
         except (ValueError, AttributeError):
             pass
-        try:
-            self.base.connect.clearall()
-        except (ValueError, AttributeError):
-            pass
 
     def get_radius(self):
         """

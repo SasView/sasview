@@ -139,10 +139,6 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         except (ValueError, AttributeError):
             pass
         try:
-            self.base.connect.clearall()
-        except (ValueError, AttributeError):
-            pass
-        try:
             self.center.clear()
         except (ValueError, AttributeError):
             pass
@@ -526,9 +522,18 @@ class PointInteractor(BaseInteractor):
         """
         Clear this figure and its markers
         """
-        self.clear_markers()
-        self.center.remove()
-        self.center_marker.remove()
+        try:
+            self.clear_markers()
+        except (ValueError, AttributeError):
+            pass
+        try:
+            self.center.remove()
+        except (ValueError, AttributeError):
+            pass
+        try:
+            self.center_marker.remove()
+        except (ValueError, AttributeError):
+            pass
 
     def update(self, center_x=None, center_y=None):
         """
@@ -854,10 +859,22 @@ class HorizontalDoubleLine(BaseInteractor):
         """
         Clear this figure and its markers
         """
-        self.clear_markers()
-        self.top_marker.remove()
-        self.bottom_line.remove()
-        self.top_line.remove()
+        try:
+            self.clear_markers()
+        except (ValueError, AttributeError):
+            pass
+        try:
+            self.top_marker.remove()
+        except (ValueError, AttributeError):
+            pass
+        try:
+            self.bottom_line.remove()
+        except (ValueError, AttributeError):
+            pass
+        try:
+            self.top_line.remove()
+        except (ValueError, AttributeError):
+            pass
 
     def update(self, x1=None, x2=None, y1=None, y2=None, half_width=None, half_height=None, center=None):
         """

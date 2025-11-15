@@ -94,10 +94,6 @@ class SectorInteractor(BaseInteractor, SlicerModel):
             self.right_line.clear()
         except (ValueError, AttributeError):
             pass
-        try:
-            self.base.connect.clearall()
-        except (ValueError, AttributeError):
-            pass
 
     def update(self):
         """
@@ -378,12 +374,12 @@ class SideInteractor(BaseInteractor):
         try:
             self.inner_marker.remove()
             self.outer_marker.remove()
-            for line in list(self.axes.lines):
-                line.remove()
-        except:
-            # Old version of matplotlib
-            for item in range(len(self.axes.lines)):
-                del self.axes.lines[0]
+        except (ValueError, AttributeError):
+            pass
+        try:
+            self.line.remove()
+        except (ValueError, AttributeError):
+            pass
 
     def update(self, phi=None, delta=None, mline=None, side=False, left=False, right=False):
         """
@@ -569,8 +565,7 @@ class LineInteractor(BaseInteractor):
         except (ValueError, AttributeError):
             pass
         try:
-            for line in list(self.axes.lines):
-                line.remove()
+            self.line.remove()
         except (ValueError, AttributeError):
             pass
 

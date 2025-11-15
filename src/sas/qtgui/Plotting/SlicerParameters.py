@@ -406,9 +406,9 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         # Remove the slicer from the dictionary
         if slicer_item in self.parent.slicers:
             slicer_obj = self.parent.slicers[slicer_item]
-            # Clear the slicer from the plot
-            if hasattr(slicer_obj, 'clear'):
-                slicer_obj.clear()
+            # Clear only this slicer's markers without affecting other slicers
+            # Use clear_markers() which uses connect.clear(*markers) instead of clearall()
+            self._clear_slicer_markers(slicer_obj)
             # Remove from dictionary
             del self.parent.slicers[slicer_item]
             # Remove from slicer_models cache
@@ -577,6 +577,17 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         """
         url = "/user/qtgui/MainWindow/graph_help.html#d-data-averaging"
         self.manager.parent.showHelp(url)
+
+    def _clear_slicer_markers(self, slicer_obj):
+        """
+        Clear the slicer by calling its clear() method.
+        The slicer's clear() method handles all cleanup for that specific slicer type.
+        """
+        if hasattr(slicer_obj, 'clear'):
+            try:
+                slicer_obj.clear()
+            except (ValueError, AttributeError):
+                pass
 
     def updateSlicersList(self):
         """
