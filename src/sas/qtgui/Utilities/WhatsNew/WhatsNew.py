@@ -6,11 +6,10 @@ from PySide6.QtCore import QSize, QUrl
 from PySide6.QtGui import QIcon, QPixmap
 from PySide6.QtWidgets import QDialog, QTextBrowser, QVBoxLayout
 
+from sas.qtgui.Utilities.UI.WhatsNewUI import Ui_WhatsNewUI
 from sas.qtgui.Utilities.WhatsNew.newer import newest, reduced_version, strictly_newer_than
 from sas.system import config
 from sas.system.version import __version__ as sasview_version
-
-from sas.qtgui.Utilities.UI.WhatsNewUI import Ui_WhatsNewUI
 
 
 def whats_new_messages(only_recent=True):
