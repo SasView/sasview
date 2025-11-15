@@ -1,4 +1,3 @@
-import re
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -25,7 +24,7 @@ class CustomToolbar(NavigationToolbar):
         self.addSeparator()
         self.add_custom_button()
 
-        
+
 
     def add_custom_button(self):
         # I have been told that a Button is better
@@ -43,14 +42,14 @@ class CustomToolbar(NavigationToolbar):
     def sendToFitting(self):
         current_file_name: str = self.parent.lable_name
         search_name = current_file_name
-        
+
         def find_name(model, target_name: str, column: int=0) -> int:
             for row in range(model.rowCount()):
                 for row2 in range(model.item(row, column).rowCount()):
                     tmp = model.item(row, column).child(row2, column)
                     if tmp.text() == target_name:
                             return row, row2
-            
+
         model = self.parent.parent.model
         row_index_parent, row_index_child = find_name(model, search_name)
         data_dir = self.parent.parent.model.item(row_index_parent)
