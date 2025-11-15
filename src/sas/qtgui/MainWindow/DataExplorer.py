@@ -814,24 +814,33 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
             _ = msgbox.exec_()
 
-    def freezeFromName(self, search_name = None):
-        def find_name(model, target_name: str, column: int=0)-> tuple:
+    def freezeFromName(self, searchName = None):
+        def findName(model, targetName: str, column: int = 0) -> tuple:
             for row in range(model.rowCount()):
-                for row2 in range(model.item(row, column).rowCount()):
-                    tmp = model.item(row, column).child(row2, column)
-                    if tmp.text() == target_name:
-                            return row, row2
+                item = model.item(row, column)
+
+                for row2 in range(item.rowCount()):
+                    child = item.child(row2, column)
+
+                    if child.text() == targetName:
+                        return row, row2
+
             return -1, -1
-        
+
         model = self.model
-        row_index_parent, row_index_child = find_name(model, search_name)
-        data_dir = model.item(row_index_parent)
-        data = data_dir.child(row_index_child)
-        new_item = self.cloneTheory(data)
+        rowIndexParent, rowIndexChild = findName(model, searchName)
+
+        dataDir = model.item(rowIndexParent)
+        dataItem = dataDir.child(rowIndexChild)
+
+        newItem = self.cloneTheory(dataItem)
+
         model.beginResetModel()
-        model.appendRow(new_item)
+        model.appendRow(newItem)
         model.endResetModel()
-        self.sendData(None, [new_item])
+
+        self.sendData(None, [newItem])
+
     def sendData(self, event=None, selected_items = None):
         """
         Send selected item data to the current perspective and set the relevant notifiers

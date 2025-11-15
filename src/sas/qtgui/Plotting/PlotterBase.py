@@ -24,8 +24,6 @@ class CustomToolbar(NavigationToolbar):
         self.addSeparator()
         self.add_custom_button()
 
-
-
     def add_custom_button(self):
         # I have been told that a Button is better
         # But all NavitaionToolbar interactions are Actions
