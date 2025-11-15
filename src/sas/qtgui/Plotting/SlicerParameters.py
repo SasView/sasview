@@ -255,6 +255,9 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         # change the slicer type
         self.cbSlicer.currentIndexChanged.connect(self.onSlicerChanged)
 
+        # Replace slicer type
+        self.cbSlicerReplace.currentIndexChanged.connect(self.onSlicerReplaceChanged)
+
         # Updates to the slicer moder must propagate to all plotters
         if self.model is not None:
             self.model.itemChanged.connect(self.onParamChange)
@@ -279,6 +282,21 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
             self.setModel(None)
             self.onGeneratePlots(False)
         else:
+            slicer = self.callbacks[index]
+            if self.active_plots.keys():
+                self.parent.setSlicer(slicer=slicer)
+        self.onParamChange()
+
+    def onSlicerReplaceChanged(self, index):
+        """replace the slicer with the one chosen"""
+        if index == 0:  # No interactor
+            self.parent.onClearSlicer()
+            self.setModel(None)
+            self.onGeneratePlots(False)
+        else:
+            # delete the currently selected slicer
+            self.onDelete()
+            # add the new slicer
             slicer = self.callbacks[index]
             if self.active_plots.keys():
                 self.parent.setSlicer(slicer=slicer)
