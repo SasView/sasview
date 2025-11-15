@@ -88,6 +88,15 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
 
         FittingUtilities.addHeadersToModel(self._magnet_model)
 
+        # Reset delegate column indices to standard (no error column)
+        delegate = self.lstMagnetic.itemDelegate()
+        delegate.mag_parameter = 0
+        delegate.mag_value = 1
+        delegate.mag_min = 2
+        delegate.mag_max = 3
+        delegate.mag_unit = 4
+        delegate.mag_error = -1
+
     def getParamNamesMagnet(self) -> list[str]:
         """
         Return list of magnetic parameters for the current model
