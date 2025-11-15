@@ -46,7 +46,6 @@ class CustomToolbar(NavigationToolbar):
         
         def find_name(model, target_name: str, column: int=0) -> int:
             for row in range(model.rowCount()):
-                print(model.item(row,column).text())
                 for row2 in range(model.item(row, column).rowCount()):
                     tmp = model.item(row, column).child(row2, column)
                     if tmp.text() == target_name:
