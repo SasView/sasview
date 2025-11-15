@@ -150,25 +150,44 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
 
     def setSlicersList(self):
         """
-        Create and initially populate the list of slicers
+        Create and initially populate the list of slicers with radio button behavior
         """
-        current_slicers = self.getCurrentSlicerDict()
+        current_slicer_text = self.getCheckedSlicer()  # Already returns string now
+
         self.lstSlicers.clear()
 
-        # Fill out list of slicers
-        for item in self.parent.slicers:
-            if str(item) in current_slicers.keys():
-                # redo the list
-                checked = QtCore.Qt.Checked if current_slicers[item] else QtCore.Qt.Unchecked
-            else:
-                # create a new list
-                checked = QtCore.Qt.Checked if (self.parent.data[0].name == item) else QtCore.Qt.Unchecked
+        # Create a button group for radio button behavior
+        if not hasattr(self, 'slicerButtonGroup'):
+            self.slicerButtonGroup = QtWidgets.QButtonGroup(self)
+            self.slicerButtonGroup.setExclusive(True)
 
-            rbItem = QtWidgets.QListWidgetItem(str(item))
-            # Change to radio button behavior - only one selected at a time
-            rbItem.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
-            rbItem.setCheckState(checked)
-            self.lstSlicers.addItem(rbItem)
+        # Fill out list of slicers
+        for idx, item in enumerate(self.parent.slicers):
+            # Create a widget to hold the radio button
+            widget = QtWidgets.QWidget()
+            layout = QtWidgets.QHBoxLayout(widget)
+            layout.setContentsMargins(5, 2, 5, 2)
+
+            # Create radio button
+            radio = QtWidgets.QRadioButton(str(item))
+
+            # Check if this should be selected
+            if current_slicer_text == str(item) or (current_slicer_text is None and idx == 0):
+                radio.setChecked(True)
+
+            # Add to button group
+            self.slicerButtonGroup.addButton(radio, idx)
+
+            layout.addWidget(radio)
+            layout.addStretch()
+
+            # Create list item
+            listItem = QtWidgets.QListWidgetItem(self.lstSlicers)
+            listItem.setSizeHint(widget.sizeHint())
+
+            # Add to list
+            self.lstSlicers.addItem(listItem)
+            self.lstSlicers.setItemWidget(listItem, widget)
 
             # Store the slicer's model
             if item in self.parent.slicers:
@@ -176,19 +195,18 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
                 if hasattr(slicer_obj, '_model'):
                     self.slicer_models[str(item)] = slicer_obj._model
 
+            # Connect radio button to update handler
+            radio.toggled.connect(lambda checked, name=str(item): self.onSlicerRadioToggled(checked, name))
+
     def getCheckedSlicer(self):
         """
-        Returns the currently checked slicer
+        Returns the currently checked slicer (radio button)
         """
-        checked_slicer = None
-        if self.lstSlicers.count() != 0:
-            for row in range(self.lstSlicers.count()):
-                item = self.lstSlicers.item(row)
-                isChecked = item.checkState() != QtCore.Qt.Unchecked
-                slicer = item
-                if isChecked:
-                    checked_slicer = slicer
-        return checked_slicer
+        if not hasattr(self, 'slicerButtonGroup'):
+            return None
+
+        checked_button = self.slicerButtonGroup.checkedButton()
+        return checked_button.text() if checked_button else None
 
     def getCurrentPlotDict(self):
         """
@@ -265,9 +283,6 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         # selecting/deselecting items in lstPlots enables `Apply`
         self.lstPlots.itemChanged.connect(lambda: self.cmdApply.setEnabled(True))
 
-        # Add connection for slicer selection - add this line
-        self.lstSlicers.itemChanged.connect(self.onSlicerSelected)
-
     def onFocus(self, row, column):
         """Set the focus on the cell (row, column)"""
         selection_model = self.lstParams.selectionModel()
@@ -301,30 +316,6 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
             if self.active_plots.keys():
                 self.parent.setSlicer(slicer=slicer)
         self.onParamChange()
-
-    def onSlicerSelected(self, item):
-        """
-        Update parameter list when a slicer is selected from lstSlicers
-        """
-        if item.checkState() == QtCore.Qt.Checked:
-            # Uncheck all other items (radio button behavior)
-            for row in range(self.lstSlicers.count()):
-                other_item = self.lstSlicers.item(row)
-                if other_item != item:
-                    other_item.setCheckState(QtCore.Qt.Unchecked)
-
-            # Get the selected slicer name
-            slicer_name = item.text()
-
-            # Update the parameter model to show this slicer's parameters
-            if slicer_name in self.slicer_models:
-                self.setModel(self.slicer_models[slicer_name])
-            elif slicer_name in self.parent.slicers:
-                # Get the model from the slicer object
-                slicer_obj = self.parent.slicers[slicer_name]
-                if hasattr(slicer_obj, '_model'):
-                    self.slicer_models[slicer_name] = slicer_obj._model
-                    self.setModel(slicer_obj._model)
 
     def onGeneratePlots(self, isChecked):
         """
@@ -593,18 +584,34 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         self.setSlicersList()
 
     def checkSlicerByName(self, slicer_name):
-        for row in range(self.lstSlicers.count()):
-            item = self.lstSlicers.item(row)
-            if item.text() == slicer_name:
-                self.lstSlicers.blockSignals(True)
-                for i in range(self.lstSlicers.count()):
-                    other_item = self.lstSlicers.item(i)
-                    other_item.setCheckState(QtCore.Qt.Unchecked)
-                item.setCheckState(QtCore.Qt.Checked)
-                self.lstSlicers.blockSignals(False)
-                self.onSlicerSelected(item)
+        """
+        Check (select) a slicer radio button by name
+        """
+        if not hasattr(self, 'slicerButtonGroup'):
+            return
+
+        # Find and check the radio button with this slicer name
+        for button in self.slicerButtonGroup.buttons():
+            if button.text() == slicer_name:
+                button.setChecked(True)
                 break
 
+    def onSlicerRadioToggled(self, checked, slicer_name):
+        """
+        Update parameter list when a slicer radio button is toggled
+        """
+        if not checked:
+            return
+
+        # Update the parameter model to show this slicer's parameters
+        if slicer_name in self.slicer_models:
+            self.setModel(self.slicer_models[slicer_name])
+        elif slicer_name in self.parent.slicers:
+            # Get the model from the slicer object
+            slicer_obj = self.parent.slicers[slicer_name]
+            if hasattr(slicer_obj, '_model'):
+                self.slicer_models[slicer_name] = slicer_obj._model
+                self.setModel(slicer_obj._model)
 
 class ProxyModel(QtCore.QIdentityProxyModel):
     """
