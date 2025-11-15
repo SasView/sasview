@@ -410,18 +410,13 @@ class PluginDefinition(QtWidgets.QDialog, Ui_PluginDefinition):
             table.editItem(item)
 
     def eventFilter(self, obj: QtCore.QObject, event: QtCore.QEvent) -> bool:
-        """Intercept Enter/Return and Escape key presses while editing table cells.
+        """Intercept Enter/Return key presses while editing table cells.
         Enter/Return moves focus to the next cell (like Tab).
-        Escape is captured to prevent closing the dialog.
         This is installed at the application level so it catches editor
         widgets created while editing table cells.
         """
         if event.type() != QtCore.QEvent.KeyPress:
             return super(PluginDefinition, self).eventFilter(obj, event)
-
-        # Intercept Escape key to prevent dialog from closing
-        if event.key() == QtCore.Qt.Key_Escape:
-            return True
 
         # Handle Enter/Return key press
         if event.key() not in (QtCore.Qt.Key_Return, QtCore.Qt.Key_Enter):

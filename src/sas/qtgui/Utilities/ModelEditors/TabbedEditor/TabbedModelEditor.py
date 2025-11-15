@@ -54,6 +54,11 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.addWidgets()
 
         self.addSignals()
+        # Install an application-level event filter so pressing Esc
+        # doesn't accidentally close the dialog while editing table cells.
+        app = QtWidgets.QApplication.instance()
+        if app is not None:
+            app.installEventFilter(self)
 
         if self.load_file is not None:
             self.onLoad(at_launch=True)
@@ -137,6 +142,18 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         if self.is_modified and self.saveClose():
             return
         event.accept()
+
+    def eventFilter(self, obj: QtCore.QObject, event: QtCore.QEvent) -> bool:
+        """Intercept Escape key press.
+        Escape is captured to prevent closing the dialog.
+        """
+        if event.type() != QtCore.QEvent.KeyPress:
+            return super(TabbedModelEditor, self).eventFilter(obj, event)
+        if event.key() == QtCore.Qt.Key_Escape:
+            if isinstance(obj, QtWidgets.QDialog) and (obj == self or self.isAncestorOf(obj)):
+                return True
+            else:
+                return False
 
     def onLoad(self, at_launch: bool = False):
         """
