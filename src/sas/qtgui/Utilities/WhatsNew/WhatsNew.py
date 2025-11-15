@@ -10,7 +10,7 @@ from sas.qtgui.Utilities.WhatsNew.newer import newest, reduced_version, strictly
 from sas.system import config
 from sas.system.version import __version__ as sasview_version
 
-from ..UI.WhatsNewUI import Ui_WhatsNewUI
+from sas.qtgui.Utilities.UI.WhatsNewUI import Ui_WhatsNewUI
 
 
 def whats_new_messages(only_recent=True):
@@ -201,8 +201,6 @@ class WhatsNewWidget(QDialog, Ui_WhatsNewUI):
     def has_new_messages(self) -> bool:
         """ Should the window be shown? """
         return bool(self.all_messages)
-
-
 
 
 def main():
