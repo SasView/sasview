@@ -124,36 +124,44 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
 
     def onCompute(self):
         """ perform calculation """
-        # set operator to be applied
-        operator = self.cbOperator.currentText()
-        # calculate and send data to DataExplorer
-        output = None   
-        try:
-            data1 = self.data1
-            data2 = self.data2
-            output = eval("data1 %s data2" % operator)
-        except Exception as ex:
-            logger.error(ex)
-            return
+        # prevent user from subtracting the same data
+        if self.data1.__class__.__name__ == 'Data1D'\
+                and str(self.cbData1.currentText()) == str(self.cbData2.currentText()) \
+                    and str(self.cbOperator.currentText()) == '-':
+            self.cbData1.setStyleSheet(BG_RED)
+            self.cbData2.setStyleSheet(BG_RED)
+            logger.error('Cannot subtract the same data. Change dataset or operator.')
+        else:
+            # set operator to be applied
+            operator = self.cbOperator.currentText()
+            # calculate and send data to DataExplorer
+            output = None   
+            try:
+                data1 = self.data1
+                data2 = self.data2
+                output = eval("data1 %s data2" % operator)
+            except Exception as ex:
+                logger.error(ex)
+                return
 
-        self.output = output
+            self.output = output
 
-        # if outputname was unused, write output result to it
-        # and display plot
-        if self.onCheckOutputName():
-            # add outputname to self.filenames
-            self.list_data_items.append(str(self.txtOutputData.text()))
-            # send result to DataExplorer
-            self.onPrepareOutputData()
-            # plot result
-            self.updatePlot(self.graphOutput, self.layoutOutput, self.output)
+            # if outputname was unused, write output result to it
+            # and display plot
+            if self.onCheckOutputName():
+                # add outputname to self.filenames
+                self.list_data_items.append(str(self.txtOutputData.text()))
+                # send result to DataExplorer
+                self.onPrepareOutputData()
+                # plot result
+                self.updatePlot(self.graphOutput, self.layoutOutput, self.output)
 
-        # Add the new plot to the comboboxes
-        self.cbData1.addItem(self.output.name)
-        self.cbData2.addItem(self.output.name)
-        if self.filenames is None:
-            self.filenames = {}
-        self.filenames[self.output.name] = self.output
+            # Add the new plot to the comboboxes
+            self.cbData1.addItem(self.output.name)
+            self.cbData2.addItem(self.output.name)
+            if self.filenames is None:
+                self.filenames = {}
+            self.filenames[self.output.name] = self.output
 
     def onPrepareOutputData(self):
         """ Prepare datasets to be added to DataExplorer and DataManager """
@@ -321,15 +329,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
                 self.cbData2.setStyleSheet(BG_RED)
                 logger.error('Cannot compute 2D data of different lengths')
                 return False
-
-            elif self.data1.__class__.__name__ == 'Data1D'\
-                    and str(self.cbData1.currentText()) == str(self.cbData2.currentText()) \
-                        and str(self.cbOperator.currentText()) == '-':
-                self.cbData1.setStyleSheet(BG_RED)
-                self.cbData2.setStyleSheet(BG_RED)
-                logger.error('Cannot subtract the same data')
-                return False  
-
+                
             else:
                 self.cbData1.setStyleSheet(BG_WHITE)
                 self.cbData2.setStyleSheet(BG_WHITE)
