@@ -176,6 +176,20 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
                 if hasattr(slicer_obj, '_model'):
                     self.slicer_models[str(item)] = slicer_obj._model
 
+    def getCheckedSlicer(self):
+        """
+        Returns the currently checked slicer
+        """
+        checked_slicer = None
+        if self.lstSlicers.count() != 0:
+            for row in range(self.lstSlicers.count()):
+                item = self.lstSlicers.item(row)
+                isChecked = item.checkState() != QtCore.Qt.Unchecked
+                slicer = item
+                if isChecked:
+                    checked_slicer = slicer
+        return checked_slicer
+
     def getCurrentPlotDict(self):
         """
         Returns a dictionary of currently shown plots
@@ -228,6 +242,9 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
 
         # Apply slicer to selected plots
         self.cmdApply.clicked.connect(self.onApply)
+
+        # Delete slicer
+        self.cmdDelete.clicked.connect(self.onDelete)
 
         # Initialize slicer combobox to the current slicer
         current_slicer = type(self.parent.slicer)
@@ -363,6 +380,45 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         if self.isSave and self.model is not None:
             self.save1DPlotsForPlot(plots)
         pass  # debug anchor
+
+    def onDelete(self):
+        """
+        Delete the current slicer
+        """
+        # Pop up a confirmation dialog
+        reply = QtWidgets.QMessageBox.question(self, 'Delete Slicer',
+                                             'Are you sure you want to delete this slicer?',
+                                             QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+                                             QtWidgets.QMessageBox.No)
+        if reply == QtWidgets.QMessageBox.No:
+            return
+        # Get the current slicer name
+        slicer_item = self.getCheckedSlicer()
+        if slicer_item is None:
+            return
+        slicer_name = slicer_item.text()
+        logger.info("Deleting slicer: " + slicer_name)
+        try:
+            # Remove the slicer from the dictionary
+            if slicer_name in self.parent.slicers:
+                slicer_obj = self.parent.slicers[slicer_name]
+                # Clear the slicer from the plot
+                if hasattr(slicer_obj, 'clear'):
+                    slicer_obj.clear()
+                # Remove from dictionary
+                del self.parent.slicers[slicer_name]
+                # If this was the active slicer, clear it
+                if self.parent.slicer is slicer_obj:
+                    self.parent.slicer = None
+                # Remove slicer plots from data explorer
+                self.parent._removeSlicerPlots()
+                # Redraw the canvas
+                self.parent.canvas.draw()
+                # Clear the model to remove parameters display
+                self.setModel(None)
+        except Exception as e:
+            logger.error("Failed to delete slicer: " + str(e))
+        self.setSlicersList()
 
     def applyPlotter(self, plot):
         """

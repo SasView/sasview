@@ -251,7 +251,7 @@ class Plotter2DWidget(PlotterBase):
 
     def onClearSlicer(self):
         """
-        Remove all sclicers from the chart
+        Remove all slicers from the chart
         """
         if len(self.slicers) == 0:
             return
@@ -262,7 +262,7 @@ class Plotter2DWidget(PlotterBase):
                 slicer.clear()
             except (ValueError, AttributeError) as e:
                 logger.debug(f"Error clearing slicer: {e}")
-        self.slicers = {}  # Change from list to dict
+        self.slicers = {}
 
         self.slicer = None
         try:
