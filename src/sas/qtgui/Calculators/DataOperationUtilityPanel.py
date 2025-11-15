@@ -127,7 +127,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         # set operator to be applied
         operator = self.cbOperator.currentText()
         # calculate and send data to DataExplorer
-        output = None        
+        output = None   
         try:
             data1 = self.data1
             data2 = self.data2
@@ -394,7 +394,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
 
         graph.setLayout(layout)
 
-    def updatePlot(self, graph, layout, data):    
+    def updatePlot(self, graph, layout, data):
         """ plot data in graph after clearing its layout """
 
         assert isinstance(graph, QtWidgets.QGraphicsView)
@@ -438,7 +438,6 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             plotter.ax.tick_params(axis='y', labelsize=8)
 
             plotter.plot(data=data, hide_error=True, marker='.')
-                  
             plotter.show()
 
         elif float(data) and self.cbData2.currentText() == 'Number':
