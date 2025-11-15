@@ -127,7 +127,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         # set operator to be applied
         operator = self.cbOperator.currentText()
         # calculate and send data to DataExplorer
-        output = None   
+        output = None
         try:
             data1 = self.data1
             data2 = self.data2
@@ -328,7 +328,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
                 self.cbData1.setStyleSheet(BG_RED)
                 self.cbData2.setStyleSheet(BG_RED)
                 logger.error('Cannot subtract the same data')
-                return False  
+                return False
 
             else:
                 self.cbData1.setStyleSheet(BG_WHITE)
