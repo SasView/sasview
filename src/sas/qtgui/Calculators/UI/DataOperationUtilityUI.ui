@@ -154,7 +154,7 @@
        <enum>QLayout::SetMinimumSize</enum>
       </property>
       <item row="1" column="0">
-       <layout class="QGridLayout" name="gridLayout" columnstretch="0,0,0,0,0,0,0">
+       <layout class="QGridLayout" name="gridLayout" columnstretch="0,1,0,1,0,0,1">
         <property name="horizontalSpacing">
          <number>6</number>
         </property>
