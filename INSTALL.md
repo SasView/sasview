@@ -39,7 +39,7 @@ python -m venv .venv
 # install repositories in editable/devloper mode in the venv
 python -m pip install -e ../sasdata # use "python -m ..." to ensure the correct python version is used
 python -m pip install -e ../sasmodels
-python -m pip install -e .'[dev,test]'
+python -m pip install -e .[dev,test]
 
 # test if sasview launches
 python -m sas
