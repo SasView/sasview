@@ -403,31 +403,32 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
             return
         # Get the current slicer name
         slicer_item = self.getCheckedSlicer()
-        if slicer_item is None:
-            return
-        slicer_name = slicer_item.text()
-        logger.info("Deleting slicer: " + slicer_name)
-        try:
-            # Remove the slicer from the dictionary
-            if slicer_name in self.parent.slicers:
-                slicer_obj = self.parent.slicers[slicer_name]
-                # Clear the slicer from the plot
-                if hasattr(slicer_obj, 'clear'):
-                    slicer_obj.clear()
-                # Remove from dictionary
-                del self.parent.slicers[slicer_name]
-                # If this was the active slicer, clear it
-                if self.parent.slicer is slicer_obj:
-                    self.parent.slicer = None
-                # Remove slicer plots from data explorer
-                self.parent._removeSlicerPlots()
-                # Redraw the canvas
-                self.parent.canvas.draw()
-                # Clear the model to remove parameters display
+        # Remove the slicer from the dictionary
+        if slicer_item in self.parent.slicers:
+            slicer_obj = self.parent.slicers[slicer_item]
+            # Clear the slicer from the plot
+            if hasattr(slicer_obj, 'clear'):
+                slicer_obj.clear()
+            # Remove from dictionary
+            del self.parent.slicers[slicer_item]
+            # Remove from slicer_models cache
+            if slicer_item in self.slicer_models:
+                del self.slicer_models[slicer_item]
+            # update the canvas
+            self.parent.canvas.draw()
+            # update the slicer list
+            self.updateSlicersList()
+            # Select the next remaining slicer if any exist
+            if len(self.parent.slicers) > 0:
+                # Get the first remaining slicer
+                next_slicer_name = next(iter(self.parent.slicers.keys()))
+                # Update self.parent.slicer to point to the remaining slicer
+                self.parent.slicer = self.parent.slicers[next_slicer_name]
+                self.checkSlicerByName(next_slicer_name)
+            else:
+                # No slicers left, clear the model and slicer reference
+                self.parent.slicer = None
                 self.setModel(None)
-        except Exception as e:
-            logger.error("Failed to delete slicer: " + str(e))
-        self.setSlicersList()
 
     def applyPlotter(self, plot):
         """
