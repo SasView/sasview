@@ -147,15 +147,9 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             # send result to DataExplorer
             self.onPrepareOutputData()
             # plot result
-            try:
-                self.updatePlot(self.graphOutput, self.layoutOutput, self.output)
-            except Exception as ex:
-                if str(ex) == 'Axis limits cannot be NaN or Inf':
-                    logger.warning("""Negative or zero values in the output data - 
-                    choose another dataset or change operator.""")
-                else:    
-                    logger.error(ex)
-                return
+            self.updatePlot(self.graphOutput, self.layoutOutput, self.output)
+
+
 
         # Add the new plot to the comboboxes
         self.cbData1.addItem(self.output.name)
@@ -330,6 +324,14 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
                 self.cbData2.setStyleSheet(BG_RED)
                 logger.error('Cannot compute 2D data of different lengths')
                 return False
+
+            elif self.data1.__class__.__name__ == 'Data1D'\
+                    and str(self.cbData1.currentText()) == str(self.cbData2.currentText()) \
+                        and str(self.cbOperator.currentText()) == '-':
+                self.cbData1.setStyleSheet(BG_RED)
+                self.cbData2.setStyleSheet(BG_RED)
+                logger.error('Cannot subtract the same data')
+                return False  
 
             else:
                 self.cbData1.setStyleSheet(BG_WHITE)
