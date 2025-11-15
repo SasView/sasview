@@ -59,14 +59,14 @@ class BaseInteractor:
         """
         Clear old markers and interfaces.
         """
-        try:
-            for h in self.markers:
+        for h in self.markers:
+            try:
                 h.remove()
-            if self.markers:
-                self.base.connect.clear(*self.markers)
-            self.markers = []
-        except (ValueError, AttributeError):
-            pass
+            except (ValueError, AttributeError):
+                pass
+        if self.markers:
+            self.base.connect.clear(*self.markers)
+        self.markers = []
 
     def save(self, ev):
         """ """
@@ -129,7 +129,7 @@ class BaseInteractor:
             # Case 2: this interactor is a child of the slicer (base is the slicer)
             elif hasattr(self.base, 'base') and hasattr(self.base.base, 'notifySlicerModified'):
                 self.base.base.notifySlicerModified(self.base)
-        except Exception:
+        except (ValueError, AttributeError):
             pass
         return True
 
@@ -139,7 +139,7 @@ class BaseInteractor:
         try:
             if hasattr(self.base, 'notifySlicerModified'):
                 self.base.notifySlicerModified(self)
-        except Exception:
+        except (ValueError, AttributeError):
             pass
         return True
 
