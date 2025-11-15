@@ -337,6 +337,21 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
                 self.cbSlicerReplace.blockSignals(False)
         self.onParamChange()
 
+    def onSlicerReplaceChanged(self, index):
+        """replace the slicer with the one chosen"""
+        if index == 0:  # No interactor
+            self.parent.onClearSlicer()
+            self.setModel(None)
+            self.onGeneratePlots(False)
+        else:
+            # delete the currently selected slicer
+            self.onDelete()
+            # add the new slicer
+            slicer = self.callbacks[index]
+            if self.active_plots.keys():
+                self.parent.setSlicer(slicer=slicer)
+        self.onParamChange()
+
     def onSlicerSelected(self, item):
         """
         Update parameter list when a slicer is selected from lstSlicers
