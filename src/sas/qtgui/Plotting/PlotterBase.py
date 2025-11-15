@@ -25,6 +25,8 @@ class CustomToolbar(NavigationToolbar):
         self.addSeparator()
         self.add_custom_button()
 
+        
+
     def add_custom_button(self):
         # I have been told that a Button is better
         # But all NavitaionToolbar are interactions are Actions
@@ -40,33 +42,25 @@ class CustomToolbar(NavigationToolbar):
 
     def sendToFitting(self):
         current_file_name: str = self.parent.lable_name
-        match = re.search(r"\[(.*?)\]", current_file_name)
-        search_name: str = ''
-        if match:
-            search_name = match.group(1)
-        else:
-            search_name = current_file_name
-
-        def find_name(Item, rowCount, target_name: str, column: int=0) -> int:
-            for row in range(rowCount):
-                item = Item(row, column)
-                if item and target_name in item.text():
-                    return row
-            return -1
+        search_name = current_file_name
+        
+        def find_name(model, target_name: str, column: int=0) -> int:
+            for row in range(model.rowCount()):
+                print(model.item(row,column).text())
+                for row2 in range(model.item(row, column).rowCount()):
+                    tmp = model.item(row, column).child(row2, column)
+                    if tmp.text() == target_name:
+                            return row, row2
+            
         model = self.parent.parent.model
-        tmp_1 = lambda a,b: model.item(a, b)
-        row_index_parent: int = find_name(tmp_1, model.rowCount(), search_name)
+        row_index_parent, row_index_child = find_name(model, search_name)
         data_dir = self.parent.parent.model.item(row_index_parent)
-        tmp_2 = lambda a, b: data_dir.child(a, b)
-        row_index_child: int = find_name(tmp_2, data_dir.rowCount(), current_file_name)
         data = data_dir.child(row_index_child)
-
         new_item = self.parent.parent.parent.filesWidget.cloneTheory(data)
         model.beginResetModel()
         model.appendRow(new_item)
         model.endResetModel()
         self.parent.parent.parent.filesWidget.sendData(None, [new_item])
-
 
 class PlotterBase(QtWidgets.QWidget):
     #TODO: Describe what this class is
