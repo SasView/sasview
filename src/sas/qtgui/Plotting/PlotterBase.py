@@ -6,7 +6,6 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from packaging import version
 from PySide6 import QtCore, QtGui, QtPrintSupport, QtWidgets
-
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas import config
@@ -14,8 +13,8 @@ from sas.qtgui.Plotting.Binder import BindArtist
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
 from sas.qtgui.Plotting.WindowTitle import WindowTitle
-from PySide6 import QtCore, QtGui, QtWidgets
 import re
+
 DEFAULT_CMAP = mpl.cm.jet
 
 class CustomToolbar(NavigationToolbar):
@@ -26,41 +25,50 @@ class CustomToolbar(NavigationToolbar):
         self.add_custom_button()
 
     def add_custom_button(self):
+        # I have been told that a Button is better
+        # But all NavitaionToolbar are interactions are Actions 
+        # This way all can be called with:
+        #   self._actions['xxx']
         custom_icon = QtGui.QIcon()  # You can load an icon here if you want e.g., QtGui.QIcon("path/to/icon.png")
-        custom_action = QtGui.QAction(custom_icon, "Custom", self)
-        custom_action.setToolTip("Click to perform a custom action")
-        custom_action.triggered.connect(self.custom_button_clicked)
-        self.addAction(custom_action)#pushbutton
-        self._actions['custom'] = custom_action
-        self._actions['custom'].setVisible(False)  # Hide
+        custom_action = QtGui.QAction(custom_icon, "Fitting", self)
+        custom_action.setToolTip("Click to send data to Fitting")
+        custom_action.triggered.connect(self.sendToFitting)
+        self.addAction(custom_action)
+        self._actions['fitting'] = custom_action
+        self._actions['fitting'].setVisible(False)  
 
-    def custom_button_clicked(self):
-        # TODO: 
-        # 1) Show the 1D data in the DataExplorer -> just what freeze currently does 
-        # 2) followed by triggering the Send Data button with 1D-data as the selected one 
-        current_file_name = self.parent.lable_name
-        print(type(current_file_name))
+    def sendToFitting(self):
+        current_file_name: str = self.parent.lable_name
         match = re.search(r"\[(.*?)\]", current_file_name)
+        search_name: str = ''
         if match:
             search_name = match.group(1)  
         else:
             search_name = current_file_name  
-        def find_row_by_name(model, target_name, column=0):
+        def find_row_by_name(model, target_name: str, column: int=0) -> int: 
             for row in range(model.rowCount()):
                 item = model.item(row, column)
                 if item and target_name in item.text():
                     return row
             return -1
-        def find_child_row_by_name(parent_item, target_name, column=0):
+        def find_child_row_by_name(parent_item, target_name: str, column: int=0) -> int:
             for row in range(parent_item.rowCount()):
                 child = parent_item.child(row, column)
                 if child and target_name in child.text():
                     return row
             return -1
+        def find_name(Item, rowCount, target_name: str, column: int=0) -> int:
+            for row in range(rowCount):
+                item = Item(row, column)
+                if item and target_name in item.text():
+                    return row
+            return -1
         model = self.parent.parent.model
-        row_index_parent = find_row_by_name(model, search_name)
+        tmp_1 = lambda a,b: model.item(a, b)
+        row_index_parent: int = find_name(tmp_1, model.rowCount(), search_name)
         data_dir = self.parent.parent.model.item(row_index_parent)
-        row_index_child = find_child_row_by_name(data_dir, current_file_name)
+        tmp_2 = lambda a, b: data_dir.child(a, b)
+        row_index_child: int = find_name(tmp_2, data_dir.rowCount(), current_file_name)
         data = data_dir.child(row_index_child)    
          
         new_item = self.parent.parent.parent.filesWidget.cloneTheory(data)
