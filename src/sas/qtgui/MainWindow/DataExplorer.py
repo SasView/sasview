@@ -822,7 +822,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     if tmp.text() == target_name:
                             return row, row2
             return -1, -1
-        
+
         model = self.model
         row_index_parent, row_index_child = findName(model, search_name)
         data_dir = model.item(row_index_parent)
