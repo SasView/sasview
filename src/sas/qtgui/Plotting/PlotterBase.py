@@ -40,7 +40,7 @@ class CustomToolbar(NavigationToolbar):
         self._actions['fitting'].setVisible(False)
 
     def sendToFitting(self):
-        current_file_name: str = self.parent.lable_name
+        current_file_name: str = self.parent.label_name
         search_name = current_file_name
 
         def find_name(model, target_name: str, column: int=0) -> int:

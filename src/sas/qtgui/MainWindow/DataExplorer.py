@@ -820,10 +820,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         if selected_items == None:
             selected_items = self.selectedItems()
-            print(type(selected_items[0]))
         else:
             pass
-
 
         if len(selected_items) <1:
             return
