@@ -28,11 +28,11 @@ class CustomToolbar(NavigationToolbar):
 
     def add_custom_button(self):
         # I have been told that a Button is better
-        # But all NavitaionToolbar are interactions are Actions
+        # But all NavitaionToolbar interactions are Actions
         # This way all can be called with:
         #   self._actions['xxx']
         custom_icon = QtGui.QIcon()  # You can load an icon here if you want e.g., QtGui.QIcon("path/to/icon.png")
-        custom_action = QtGui.QAction(custom_icon, "Fitting", self)
+        custom_action = QtGui.QAction(custom_icon, "Send to fitting", self)
         custom_action.setToolTip("Click to send data to Fitting")
         custom_action.triggered.connect(self.sendToFitting)
         self.addAction(custom_action)
@@ -40,25 +40,8 @@ class CustomToolbar(NavigationToolbar):
         self._actions['fitting'].setVisible(False)
 
     def sendToFitting(self):
-        current_file_name: str = self.parent.label_name
-        search_name = current_file_name
-
-        def find_name(model, target_name: str, column: int=0) -> int:
-            for row in range(model.rowCount()):
-                for row2 in range(model.item(row, column).rowCount()):
-                    tmp = model.item(row, column).child(row2, column)
-                    if tmp.text() == target_name:
-                            return row, row2
-
-        model = self.parent.parent.model
-        row_index_parent, row_index_child = find_name(model, search_name)
-        data_dir = self.parent.parent.model.item(row_index_parent)
-        data = data_dir.child(row_index_child)
-        new_item = self.parent.parent.parent.filesWidget.cloneTheory(data)
-        model.beginResetModel()
-        model.appendRow(new_item)
-        model.endResetModel()
-        self.parent.parent.parent.filesWidget.sendData(None, [new_item])
+        search_name: str = self.parent.label_name
+        self.parent.manager.communicator.freezeDataNameSignal.emit(search_name)
 
 class PlotterBase(QtWidgets.QWidget):
     #TODO: Describe what this class is
@@ -142,7 +125,7 @@ class PlotterBase(QtWidgets.QWidget):
         self.axes = [self.ax]
 
         # Set the background color to white
-        self.canvas.figure.set_facecolor("#FFFFFF")
+        self.canvas.figure.set_facecolor('#FFFFFF')
 
         # Canvas event handlers
         self.canvas.mpl_connect('button_release_event', self.onMplMouseUp)
@@ -152,7 +135,7 @@ class PlotterBase(QtWidgets.QWidget):
         self.canvas.mpl_connect('scroll_event', self.onMplWheel)
 
         self.contextMenu = QtWidgets.QMenu(self)
-        self.toolbar = CustomToolbar(self.canvas, self)#NavigationToolbar(self.canvas, self)
+        self.toolbar = CustomToolbar(self.canvas, self)
 
         self.canvas.mpl_connect('resize_event', self.onResize)
         self.canvas.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
