@@ -53,15 +53,11 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         self.main_line = LineInteractor(self, self.axes, color="blue", zorder=zorder, r=self.qmax, theta=self.theta2)
         self.main_line.qmax = self.qmax
         # Right Side line
-        self.right_line = SideInteractor(
-            self, self.axes, color="black", zorder=zorder, r=self.qmax, phi=-1 * self.phi, theta2=self.theta2
-        )
+        self.right_line = SideInteractor(self, self.axes, color=color, zorder=zorder, r=self.qmax, phi=-1 * self.phi, theta2=self.theta2)
         self.right_line.update(right=True)
         self.right_line.qmax = self.qmax
         # Left Side line
-        self.left_line = SideInteractor(
-            self, self.axes, color="black", zorder=zorder, r=self.qmax, phi=self.phi, theta2=self.theta2
-        )
+        self.left_line = SideInteractor(self, self.axes, color=color, zorder=zorder, r=self.qmax, phi=self.phi, theta2=self.theta2)
         self.left_line.update(left=True)
         self.left_line.qmax = self.qmax
         # Store the plot ID so it doesn't change when parameters are updated

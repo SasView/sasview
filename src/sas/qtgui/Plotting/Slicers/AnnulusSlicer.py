@@ -43,9 +43,9 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
         else:
             self.sign = -1
         # Inner circle
-        self.inner_circle = RingInteractor(self, self.axes, zorder=zorder, r=self.qmax / 2.0, sign=self.sign)
+        self.inner_circle = RingInteractor(self, self.axes, color=color, zorder=zorder, r=self.qmax / 2.0, sign=self.sign)
         self.inner_circle.qmax = self.qmax
-        self.outer_circle = RingInteractor(self, self.axes, zorder=zorder + 1, r=self.qmax / 1.8, sign=self.sign)
+        self.outer_circle = RingInteractor(self, self.axes, color=color, zorder=zorder + 1, r=self.qmax / 1.8, sign=self.sign)
         self.outer_circle.qmax = self.qmax * 1.2
         self.update()
         self._post_data()
