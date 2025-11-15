@@ -903,11 +903,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         and copying it to a separate top-level item in Data.
         """
         # Figure out which rows are checked
-        # Use 'while' so the row count is forced at every iteration
-        outer_index = -1
+        indices_to_remove = []
         theories_copied = 0
-        while outer_index < self.theory_model.rowCount():
-            outer_index += 1
+        for outer_index in range(self.theory_model.rowCount()):
             outer_item = self.theory_model.item(outer_index)
             if not outer_item:
                 continue
@@ -917,6 +915,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 new_item = self.cloneTheory(outer_item)
                 self.model.appendRow(new_item)
                 self.model.endResetModel()
+                indices_to_remove.append(outer_index)
+
+        # Remove the copied items from theory_model in reverse order
+        for idx in reversed(indices_to_remove):
+            self.theory_model.removeRow(idx)
 
         freeze_msg = ""
         if theories_copied == 0:

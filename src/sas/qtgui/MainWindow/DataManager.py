@@ -24,6 +24,7 @@ import logging
 import os
 import re
 import time
+import builtins
 from io import BytesIO
 
 import numpy as np
@@ -155,18 +156,29 @@ class DataManager(object):
         """
         receive a list of data items for storage
         """
-        for id, data in data_list.items():
-            if id  in self.stored_data:
+        if isinstance(data_list, dict):
+            items = data_list.items()
+        else:
+            # assume list of data objects
+            items = []
+            for data in data_list:
+                data_id = getattr(data, 'id', None)
+                if data_id is None:
+                    data_id = str(builtins.id(data))
+                items.append((data_id, data))
+        
+        for data_id, data in items:
+            if data_id  in self.stored_data:
                 msg = "Data manager already stores %s" % str(data.name)
                 msg += ""
                 logging.info(msg)
-                data_state = self.stored_data[id]
+                data_state = self.stored_data[data_id]
                 data_state.data = data
             else:
                 data_state = DataState(data)
-                data_state.id = id
+                data_state.id = data_id
                 data_state.path = data.path
-                self.stored_data[id] = data_state
+                self.stored_data[data_id] = data_state
 
     def update_data(self, prev_data, new_data):
         """
