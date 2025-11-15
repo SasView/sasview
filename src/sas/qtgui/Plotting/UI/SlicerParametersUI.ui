@@ -123,7 +123,7 @@
              </spacer>
             </item>
             <item>
-             <widget class="QComboBox" name="cbSlicer">
+             <widget class="QComboBox" name="cbSlicerReplace">
               <property name="sizePolicy">
                <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -468,7 +468,7 @@
  <tabstops>
   <tabstop>tabWidget</tabstop>
   <tabstop>lstParams</tabstop>
-  <tabstop>cbSlicer</tabstop>
+  <tabstop>cbSlicerReplace</tabstop>
   <tabstop>cmdApply</tabstop>
   <tabstop>cmdClose</tabstop>
   <tabstop>cmdHelp</tabstop>
