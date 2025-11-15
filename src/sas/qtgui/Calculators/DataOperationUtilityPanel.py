@@ -402,7 +402,6 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         if isinstance(data, Data2D):
             # plot 2D data
             plotter2D = Plotter2DWidget(self, quickplot=True)
-            print('plot2D')
             plotter2D.scale = 'linear'
             plotter2D.ax.tick_params(axis='x', labelsize=8)
             plotter2D.ax.tick_params(axis='y', labelsize=8)

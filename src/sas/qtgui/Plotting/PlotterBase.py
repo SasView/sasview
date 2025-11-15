@@ -45,18 +45,7 @@ class CustomToolbar(NavigationToolbar):
             search_name = match.group(1)  
         else:
             search_name = current_file_name  
-        def find_row_by_name(model, target_name: str, column: int=0) -> int: 
-            for row in range(model.rowCount()):
-                item = model.item(row, column)
-                if item and target_name in item.text():
-                    return row
-            return -1
-        def find_child_row_by_name(parent_item, target_name: str, column: int=0) -> int:
-            for row in range(parent_item.rowCount()):
-                child = parent_item.child(row, column)
-                if child and target_name in child.text():
-                    return row
-            return -1
+        
         def find_name(Item, rowCount, target_name: str, column: int=0) -> int:
             for row in range(rowCount):
                 item = Item(row, column)
@@ -160,7 +149,7 @@ class PlotterBase(QtWidgets.QWidget):
         self.axes = [self.ax]
 
         # Set the background color to white
-        self.canvas.figure.set_facecolor("#FFFFFFFF")
+        self.canvas.figure.set_facecolor("#FFFFFF")
 
         # Canvas event handlers
         self.canvas.mpl_connect('button_release_event', self.onMplMouseUp)
