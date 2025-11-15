@@ -253,6 +253,8 @@ class InversionWidget(QWidget, Ui_PrInversion):
         self.stopButton.setVisible(self.isCalculating)
         self.regConstantSuggestionButton.setEnabled(self.currentResult.logic.data_is_loaded and not self.isCalculating)
         self.noOfTermsSuggestionButton.setEnabled(self.currentResult.logic.data_is_loaded and not self.isCalculating)
+        self.GraphTab.setVisible(self.currentResult.logic.data_is_loaded
+                                            and not self.isCalculating and not self.is_batch)
 
     def updateGuiValues(self):
         # TODO: This won't work for batch at the moment.

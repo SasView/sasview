@@ -455,8 +455,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.cbFileNames.setVisible(True)
             self.chkChainFit.setEnabled(True)
             self.chkChainFit.setVisible(True)
-            # This panel is not designed to view individual fits, so disable plotting
+            # This panel is not designed to view individual fits, so disable plotting and graphTabs
             self.cmdPlot.setVisible(False)
+            self.GraphTab.setVisible(False)
         # Similarly on other tabs
         self.options_widget.setEnablementOnDataLoad()
         self.onSelectModel()
