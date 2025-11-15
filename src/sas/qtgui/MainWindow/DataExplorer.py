@@ -817,14 +817,14 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Send selected item data to the current perspective and set the relevant notifiers
         """
-        
+
         if selected_items == None:
             selected_items = self.selectedItems()
             print(type(selected_items[0]))
         else:
             pass
-        
-        
+
+
         if len(selected_items) <1:
             return
 

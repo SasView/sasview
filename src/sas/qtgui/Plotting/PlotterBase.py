@@ -1,4 +1,5 @@
-import os
+import re
+
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
@@ -6,6 +7,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from packaging import version
 from PySide6 import QtCore, QtGui, QtPrintSupport, QtWidgets
+
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas import config
@@ -13,7 +15,6 @@ from sas.qtgui.Plotting.Binder import BindArtist
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
 from sas.qtgui.Plotting.WindowTitle import WindowTitle
-import re
 
 DEFAULT_CMAP = mpl.cm.jet
 
@@ -26,7 +27,7 @@ class CustomToolbar(NavigationToolbar):
 
     def add_custom_button(self):
         # I have been told that a Button is better
-        # But all NavitaionToolbar are interactions are Actions 
+        # But all NavitaionToolbar are interactions are Actions
         # This way all can be called with:
         #   self._actions['xxx']
         custom_icon = QtGui.QIcon()  # You can load an icon here if you want e.g., QtGui.QIcon("path/to/icon.png")
@@ -35,17 +36,17 @@ class CustomToolbar(NavigationToolbar):
         custom_action.triggered.connect(self.sendToFitting)
         self.addAction(custom_action)
         self._actions['fitting'] = custom_action
-        self._actions['fitting'].setVisible(False)  
+        self._actions['fitting'].setVisible(False)
 
     def sendToFitting(self):
         current_file_name: str = self.parent.lable_name
         match = re.search(r"\[(.*?)\]", current_file_name)
         search_name: str = ''
         if match:
-            search_name = match.group(1)  
+            search_name = match.group(1)
         else:
-            search_name = current_file_name  
-        
+            search_name = current_file_name
+
         def find_name(Item, rowCount, target_name: str, column: int=0) -> int:
             for row in range(rowCount):
                 item = Item(row, column)
@@ -58,15 +59,15 @@ class CustomToolbar(NavigationToolbar):
         data_dir = self.parent.parent.model.item(row_index_parent)
         tmp_2 = lambda a, b: data_dir.child(a, b)
         row_index_child: int = find_name(tmp_2, data_dir.rowCount(), current_file_name)
-        data = data_dir.child(row_index_child)    
-         
+        data = data_dir.child(row_index_child)
+
         new_item = self.parent.parent.parent.filesWidget.cloneTheory(data)
         model.beginResetModel()
         model.appendRow(new_item)
         model.endResetModel()
         self.parent.parent.parent.filesWidget.sendData(None, [new_item])
-        
-        
+
+
 class PlotterBase(QtWidgets.QWidget):
     #TODO: Describe what this class is
 
@@ -160,7 +161,7 @@ class PlotterBase(QtWidgets.QWidget):
 
         self.contextMenu = QtWidgets.QMenu(self)
         self.toolbar = CustomToolbar(self.canvas, self)#NavigationToolbar(self.canvas, self)
-        
+
         self.canvas.mpl_connect('resize_event', self.onResize)
         self.canvas.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.canvas.customContextMenuRequested.connect(self.showContextMenu)
