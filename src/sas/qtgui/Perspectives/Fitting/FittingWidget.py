@@ -2098,7 +2098,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         #if not self.has_error_column:
             # create top-level error column
         error_column = []
-        self.lstParams.itemDelegate().addErrorColumn()
+        self.lstParams.itemDelegate().addErrorColumn(self.has_error_column)
         self.iterateOverModel(createErrorColumn)
 
         self._model_model.insertColumn(2, error_column)

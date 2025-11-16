@@ -420,7 +420,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         if self.has_poly_error_column:
             self.poly_model.removeColumn(2)
 
-        self.lstPoly.itemDelegate().addErrorColumn()
+        self.lstPoly.itemDelegate().addErrorColumn(present=False)
         error_column = []
         self.iterateOverPolyModel(createErrorColumn)
 

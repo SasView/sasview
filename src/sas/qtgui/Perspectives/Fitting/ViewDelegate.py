@@ -14,27 +14,24 @@ class ModelViewDelegate(QtWidgets.QStyledItemDelegate):
         super(ModelViewDelegate, self).__init__()
 
         # Main parameter table view columns
-        self.param_error=-1
-        self.param_property=0
-        self.param_value=1
-        self.param_min=2
-        self.param_max=3
-        self.param_unit=4
+        self.addErrorColumn(present=False)
+
 
     def fancyColumns(self):
         return [self.param_value, self.param_min, self.param_max, self.param_unit]
 
-    def addErrorColumn(self):
+    def addErrorColumn(self, present: bool):
         """
         Modify local column pointers
         Note: the reverse is never required!
         """
-        self.param_property=0
-        self.param_value=1
-        self.param_error=2
-        self.param_min=3
-        self.param_max=4
-        self.param_unit=5
+        offset = 1 if present else 0
+        self.param_property=0        
+        self.param_error = 2 if present else None
+        self.param_value=1 + offset
+        self.param_min=2 + offset
+        self.param_max=3 + offset
+        self.param_unit=4 + offset            
 
     def paint(self, painter, option, index):
         """
@@ -129,15 +126,7 @@ class PolyViewDelegate(QtWidgets.QStyledItemDelegate):
         """
         super(PolyViewDelegate, self).__init__()
 
-        self.poly_parameter = 0
-        self.poly_pd = 1
-        self.poly_error = None
-        self.poly_min = 2
-        self.poly_max = 3
-        self.poly_npts = 4
-        self.poly_nsigs = 5
-        self.poly_function = 6
-        self.poly_filename = 7
+        self.addErrorColumn(present=False)
 
     def editableParameters(self):
         return [self.poly_pd, self.poly_min, self.poly_max, self.poly_npts, self.poly_nsigs]
@@ -149,20 +138,21 @@ class PolyViewDelegate(QtWidgets.QStyledItemDelegate):
                 self.poly_npts:  'npts',
                 self.poly_nsigs: 'nsigmas'}
 
-    def addErrorColumn(self):
+    def addErrorColumn(self, present: bool):
         """
         Modify local column pointers
         Note: the reverse is never required!
         """
+        offset = 1 if present else 0
         self.poly_parameter = 0
         self.poly_pd = 1
-        self.poly_error = 2
-        self.poly_min = 3
-        self.poly_max = 4
-        self.poly_npts = 5
-        self.poly_nsigs = 6
-        self.poly_function = 7
-        self.poly_filename = 8
+        self.poly_error = 2 if present else None
+        self.poly_min = 2 + offset
+        self.poly_max = 3 + offset
+        self.poly_npts = 4 + offset
+        self.poly_nsigs = 5 + offset
+        self.poly_function = 6 + offset
+        self.poly_filename = 7 + offset
 
     def createEditor(self, widget, option, index):
         # Remember the current choice
@@ -230,27 +220,24 @@ class MagnetismViewDelegate(QtWidgets.QStyledItemDelegate):
         """
         super(MagnetismViewDelegate, self).__init__()
 
-        self.mag_parameter = 0
-        self.mag_value = 1
-        self.mag_min = 2
-        self.mag_max = 3
-        self.mag_unit = 4
-        self.mag_error = -1
+        self.addErrorColumn(present=False)
+
 
     def editableParameters(self):
         return [self.mag_value, self.mag_min, self.mag_max]
 
-    def addErrorColumn(self):
+    def addErrorColumn(self,present: bool):
         """
-        Modify local column pointers
-        Note: the reverse is never required!
+        Configure local column pointers based on whether an error column exists.
+        Use an offset so columns stay in sync when models change.
         """
+        offset = 1 if present else 0
         self.mag_parameter = 0
         self.mag_value = 1
-        self.mag_error = 2
-        self.mag_min = 3
-        self.mag_max = 4
-        self.mag_unit = 5
+        self.mag_error = 2 if present else None
+        self.mag_min = 2 + offset
+        self.mag_max = 3 + offset
+        self.mag_unit = 4 + offset
 
     def createEditor(self, widget, option, index):
         # Remember the current choice

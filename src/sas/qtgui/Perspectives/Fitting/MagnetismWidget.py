@@ -239,7 +239,7 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
         if self.has_magnet_error_column:
             self._magnet_model.removeColumn(2)
 
-        self.lstMagnetic.itemDelegate().addErrorColumn()
+        self.lstMagnetic.itemDelegate().addErrorColumn(present=False)
         error_column = []
         self.iterateOverMagnetModel(createErrorColumn)
 
