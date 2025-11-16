@@ -621,7 +621,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         elif slicer_name in self.parent.slicers:
             # Get the model from the slicer object
             slicer_obj = self.parent.slicers[slicer_name]
-            if hasattr(slicer_obj, '_model'):
+            if hasattr(slicer_obj, '_model') and slicer_name not in self.slicer_models:
                 self.slicer_models[slicer_name] = slicer_obj._model
                 self.setModel(slicer_obj._model)
 
