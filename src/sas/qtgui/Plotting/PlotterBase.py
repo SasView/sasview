@@ -45,7 +45,8 @@ class PlotterBase(QtWidgets.QWidget):
         # Set the layout and place the canvas widget in it.
         layout = QtWidgets.QVBoxLayout()
         # FIXME setMargin -> setContentsMargins in qt5 with 4 args
-        #layout.setContentsMargins(0)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
         layout.addWidget(self.canvas)
 
         # 1D plotter defaults
