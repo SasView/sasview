@@ -33,6 +33,7 @@ from sas.qtgui.Perspectives.Fitting.ReportPageLogic import ReportPageLogic
 from sas.qtgui.Perspectives.Fitting.SmearingWidget import SmearingWidget
 from sas.qtgui.Perspectives.Fitting.UI.FittingWidgetUI import Ui_FittingWidgetUI
 from sas.qtgui.Perspectives.Fitting.ViewDelegate import ModelViewDelegate
+from sas.qtgui.Perspectives.Fitting.InViewWidget import InViewWidget
 from sas.qtgui.Plotting.Plotter import PlotterWidget
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
 from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
@@ -107,6 +108,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Main Data[12]D holders
         # Logics.data contains a single Data1D/Data2D object
         self._logic = [FittingLogic()]
+
+        self._in_view_widget = None
 
         # Main GUI setup up
         self.setupUi(self)
@@ -457,6 +460,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.chkChainFit.setVisible(True)
             # This panel is not designed to view individual fits, so disable plotting
             self.cmdPlot.setVisible(False)
+            self.cmdInView.setEnabled(False)
         # Similarly on other tabs
         self.options_widget.setEnablementOnDataLoad()
         self.onSelectModel()
@@ -536,6 +540,16 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """ Enable/disable the controls dependent on 1D/2D data instance """
         self.chkMagnetism.setEnabled(isChecked)
         self.is2D = isChecked
+        
+        if isChecked:
+            # 2D view is toggled on, therefore disable InView button,
+            # and close InView widget if opened
+            self.cmdInView.setEnabled(False)
+            if getattr(self, '_in_view_widget', None):
+                self._in_view_widget.close()
+        else:
+            # 2D view is toggled off, therefore enable InView button
+            self.cmdInView.setEnabled(True)
         # Reload the current model
         if self.logic.kernel_module:
             self.onSelectModel()
@@ -591,6 +605,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.cmdFit.clicked.connect(self.onFit)
         self.cmdPlot.clicked.connect(self.onPlot)
         self.cmdHelp.clicked.connect(self.onHelp)
+        self.cmdInView.clicked.connect(self.onInView)
 
         # Respond to change in parameters from the UI
         self._model_model.dataChanged.connect(self.onMainParamsChange)
@@ -1657,6 +1672,72 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         models_to_show = [m[0] for m in model_list if m[0] not in SUPPRESSED_MODELS and m[1]]
         self.cbModel.addItems(sorted(models_to_show))
         self.cbModel.blockSignals(False)
+
+    def onInView(self):
+        """
+        Trigers the display of 'InView'
+        """
+        if self._in_view_widget is None:
+            self._in_view_widget = InViewWidget(parent=self)
+            self._in_view_widget.destroyed.connect(lambda: setattr(self, '_in_view_widget', None))
+
+            # When InView is closed, re-enable editing and clear reference
+            def _on_inview_closed():
+                self._in_view_widget = None
+                # Enabling paramters edits
+                self.lstParams.setEnabled(True)
+                self.cbCategory.setEnabled(True)
+                self.cmdFit.setEnabled(True)
+                self.cmdPlot.setEnabled(True)
+
+
+            self._in_view_widget.destroyed.connect(_on_inview_closed)
+        
+        self.lstParams.setEnabled(False)
+        self.cbCategory.setEnabled(False)
+        self.cmdFit.setEnabled(False)
+        self.cmdPlot.setEnabled(False)
+
+        ###
+        # Validate parameter bounds for InView (no +/-inf allowed)
+        params = list(self.main_params_to_fit)
+        if self.chkPolydispersity.isChecked():
+            params += list(self.polydispersity_widget.poly_params_to_fit)
+        has_infinite_bounds = False
+        for p in params:
+            try:
+                details = self.logic.kernel_module.details.get(p)
+                if details is None or len(details) < 3:
+                    continue
+                pmin, pmax = details[1], details[2]
+                # Disallow non-finite bounds
+                if not np.isfinite(pmin) or not np.isfinite(pmax):
+                    has_infinite_bounds = True
+                    break
+            except Exception:
+                # If anything odd, be conservative and flag
+                has_infinite_bounds = True
+                break
+        if has_infinite_bounds:
+            QtWidgets.QMessageBox.warning(self, "InView",
+                "Some parameters have infinite bounds. Please set appropriate min/max ranges.")
+            # Re-enable controls since we are not opening InView
+            self.lstParams.setEnabled(True)
+            self.cbCategory.setEnabled(True)
+            self.cmdFit.setEnabled(True)
+            self.cmdPlot.setEnabled(True)
+            return
+        ###
+
+        # Pushing the 1D data set to InView
+        self._in_view_widget.setData(self.logic.data)
+
+        # Construct sliders from the Fit Page
+        self._in_view_widget.initFromFitPage(self)
+
+        self._in_view_widget.show()
+        self._in_view_widget.raise_()
+        self._in_view_widget.activateWindow()
 
     def onHelp(self):
         """
@@ -3362,6 +3443,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.fit_started = False
         self.setInteractiveElements(True)
 
+        # Re-enable InView button for 1D data
+        if not getattr(self, 'is2D', False):
+            self.cmdInView.setEnabled(True)
+
     def disableInteractiveElements(self) -> None:
         """
         Set button caption on fitting/calculate start
@@ -3373,6 +3458,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.cmdFit.setText('Stop fit')
         self.setInteractiveElements(False)
 
+        # Disable InView button and close the widget if opened
+        self.cmdInView.setEnabled(False)
+        isInView = getattr(self, '_in_inview_widget', None)
+        if isInView is not None:
+            try:
+                isInView.close()
+            except Exception:
+                pass
+
     def disableInteractiveElementsOnCalculate(self) -> None:
         """
         Set button caption on fitting/calculate start
@@ -3383,6 +3477,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.cmdFit.setStyleSheet('QPushButton {color: red;}')
         self.cmdFit.setText('Running...')
         self.setInteractiveElements(False)
+
+        # Disable InView button and close the widget if opened
+        self.cmdInView.setEnabled(False)
+        isInView = getattr(self, '_in_inview_widget', None)
+        if isInView is not None:
+            try:
+                isInView.close()
+            except Exception:
+                pass
 
     def readFitPage(self, fp: FitPage) -> None:
         """
