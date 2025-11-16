@@ -14,7 +14,6 @@ from PySide6 import QtGui
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
-from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
 from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
 
 logger = logging.getLogger(__name__)
@@ -52,9 +51,9 @@ class FittingController:
         return self.widget._logic
 
     def prepareFitters(
-        self, 
-        fitter: Fit | None = None, 
-        fit_id: int = 0, 
+        self,
+        fitter: Fit | None = None,
+        fit_id: int = 0,
         weight_increase: int = 1
     ) -> tuple[list[Fit], int]:
         """
@@ -105,7 +104,7 @@ class FittingController:
 
         # Get the constraints
         constraints = []
-        for model_key in self.widget.model_dict.keys():
+        for model_key in self.widget.model_dict:
             constraints += self.widget.getComplexConstraintsForModel(model_key=model_key)
         if fitter is None:
             # For single fits - check for inter-model constraints
@@ -127,7 +126,7 @@ class FittingController:
 
             try:
                 fitter_single.set_model(
-                    model, fit_id, params_to_fit, 
+                    model, fit_id, params_to_fit,
                     data=weighted_data,
                     constraints=constraints
                 )
@@ -135,7 +134,7 @@ class FittingController:
                 raise ValueError("Setting model parameters failed with: %s" % ex)
 
             fitter_single.set_data(
-                data=weighted_data, id=fit_id, smearer=smearer, 
+                data=weighted_data, id=fit_id, smearer=smearer,
                 qmin=qmin, qmax=qmax
             )
             fitter_single.select_problem_for_fit(id=fit_id, value=1)
@@ -185,7 +184,7 @@ class FittingController:
         param_dict = dict(zip(param_list, params_and_errors))
 
         return param_dict
-    
+
     def updateModelFromList(self, param_dict: dict[str, tuple[float, float]]) -> None:
         """
         Update the model with new parameters and create the errors column.

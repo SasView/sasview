@@ -21,8 +21,8 @@ from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.ConsoleUpdate import ConsoleUpdate
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 from sas.qtgui.Perspectives.Fitting.FitPage import FitPage
-from sas.qtgui.Perspectives.Fitting.FittingController import FittingController
 from sas.qtgui.Perspectives.Fitting.FitThread import FitThread
+from sas.qtgui.Perspectives.Fitting.FittingController import FittingController
 from sas.qtgui.Perspectives.Fitting.FittingLogic import FittingLogic
 from sas.qtgui.Perspectives.Fitting.MagnetismWidget import MagnetismWidget
 from sas.qtgui.Perspectives.Fitting.ModelThread import Calc1D, Calc2D
@@ -40,6 +40,7 @@ from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
 from sas.sascalc.fit import models
 from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
 from sas.system import HELP_SYSTEM
+from sas.system.user import find_plugins_dir
 
 TAB_MAGNETISM = 4
 TAB_POLY = 3
@@ -427,7 +428,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Model category combo setup
         """
-        category_list = sorted(self.master_category_dict.keys())
+        category_list = sorted(self.master_category_dict)
         self.cbCategory.addItem(CATEGORY_DEFAULT)
         self.cbCategory.addItems(category_list)
         if CATEGORY_STRUCTURE not in category_list:
@@ -1102,7 +1103,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Returns a list of all parameter names defined on the current model
         """
         all_params = self.logic.kernel_module._model_info.parameters.kernel_parameters
-        all_params = list(self.logic.kernel_module.details.keys())
+        all_params = list(self.logic.kernel_module.details)
 
         # all_param_names = [param.name for param in all_params]
         # Assure scale and background are always included
@@ -1121,7 +1122,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if param not in self.allParamNames():
             return False
 
-        for model_key in self.model_dict.keys():
+        for model_key in self.model_dict:
             for row in range(self.model_dict[model_key].rowCount()):
                 param_name = self.model_dict[model_key].item(row,0).text()
                 if model_key == 'poly':
@@ -1227,7 +1228,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         e.g. [('sld','5*sld_solvent')]
         """
         params = []
-        for model_key in self.model_dict.keys():
+        for model_key in self.model_dict:
             model = self.model_dict[model_key]
             param_number = model.rowCount()
             if model_key == 'poly':
@@ -1246,7 +1247,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         for a given FitPage
         """
         constraints = []
-        for model_key in self.model_dict.keys():
+        for model_key in self.model_dict:
             constraints += self.getComplexConstraintsForModel(model_key=model_key)
         return constraints
 
@@ -1292,7 +1293,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Returns a list of the constraint object for a given FitPage
         """
         constraints = []
-        for model_key in self.model_dict.keys():
+        for model_key in self.model_dict:
             constraints += self.getConstraintObjectsForModel(model_key=model_key)
         return constraints
 
@@ -1312,7 +1313,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         # Get constraints
         constraints = []
-        for model_key in self.model_dict.keys():
+        for model_key in self.model_dict:
             constraints += self.getComplexConstraintsForModel(model_key=model_key)
         # See if there are any constraints across models
         multi_constraints = [cons for cons in constraints if self.isConstraintMultimodel(cons[1])]
@@ -3017,7 +3018,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # cell 5: SLD button
         item5 = QtGui.QStandardItem()
         button = None
-        for p in self.logic.kernel_module.params.keys():
+        for p in self.logic.kernel_module.params:
             if re.search(r'^[\w]{0,3}sld.*[1-9]$', p):
                 # Only display the SLD Profile button for models with SLD parameters
                 button = QtWidgets.QPushButton()
@@ -3765,7 +3766,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # Utility function for main model update
             # internal so can use closure for param_dict
             param_name = str(self._model_model.item(row, 0).text())
-            if param_name not in list(param_dict.keys()) or row == self._n_shells_row:
+            if param_name not in list(param_dict) or row == self._n_shells_row:
                 # Skip magnetic, polydisperse (.pd), and shell parameters - they are handled elsewhere
                 return
             # checkbox state
