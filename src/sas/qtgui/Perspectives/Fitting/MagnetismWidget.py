@@ -21,6 +21,7 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
     cmdFitSignal = QtCore.Signal()
     updateDataSignal = QtCore.Signal()
     iterateOverModelSignal = QtCore.Signal()
+    toggledSignal = QtCore.Signal(bool)  # Signal when magnetism is enabled/disabled
 
     def __init__(self, parent: QtWidgets.QWidget | None = None, logic: Any | None = None) -> None:
         super(MagnetismWidget, self).__init__()
@@ -148,6 +149,18 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
         if self.isActive and self._magnet_model.rowCount() > 0:
             for key, value in self.magnet_params.items():
                 model.setParam(key, value)
+
+    def toggleMagnetism(self, isChecked: bool) -> None:
+        """
+        Toggle magnetism.
+
+        Args:
+            isChecked: Whether magnetism is enabled
+        """
+        self.isActive = isChecked
+
+        # Emit signal to notify parent that state changed
+        self.toggledSignal.emit(isChecked)
 
     def iterateOverMagnetModel(self, func: Any) -> None:
         """

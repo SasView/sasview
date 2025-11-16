@@ -25,10 +25,13 @@ from sas.qtgui.Perspectives.Fitting.FitPage import FitPage
 from sas.qtgui.Perspectives.Fitting.FitThread import FitThread
 from sas.qtgui.Perspectives.Fitting.FittingController import FittingController
 from sas.qtgui.Perspectives.Fitting.FittingLogic import FittingLogic
+from sas.qtgui.Perspectives.Fitting.FittingState import FittingState
 from sas.qtgui.Perspectives.Fitting.MagnetismWidget import MagnetismWidget
+from sas.qtgui.Perspectives.Fitting.ModelSelectorWidget import ModelSelectorWidget
 from sas.qtgui.Perspectives.Fitting.ModelThread import Calc1D, Calc2D
 from sas.qtgui.Perspectives.Fitting.OptionsWidget import OptionsWidget
 from sas.qtgui.Perspectives.Fitting.OrderWidget import OrderWidget
+from sas.qtgui.Perspectives.Fitting.ParameterListWidget import ParameterListWidget
 from sas.qtgui.Perspectives.Fitting.PolydispersityWidget import PolydispersityWidget
 from sas.qtgui.Perspectives.Fitting.ReportPageLogic import ReportPageLogic
 from sas.qtgui.Perspectives.Fitting.SmearingWidget import SmearingWidget
@@ -116,6 +119,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Constraint manager for constraint handling
         self.constraint_manager = ConstraintManager(self)
 
+        # Shared state object for tab widgets
+        self.fitting_state = FittingState(
+            on_fit_ready_changed=lambda can_fit: self.cmdFit.setEnabled(can_fit)
+        )
+
         # Main GUI setup up
         self.setupUi(self)
         self.setWindowTitle("Fitting")
@@ -125,6 +133,34 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Set up models and views
         self.initializeModels()
+
+        # Initialize ParameterListWidget for main parameter list
+        self.param_list_widget = ParameterListWidget(
+            parent=self,
+            tree_view=self.lstParams,
+            model=self._model_model,
+            model_key="standard"
+        )
+        self.param_list_widget.setCallbacks(
+            rowHasConstraint=self.constraint_manager.rowHasConstraint,
+            rowHasActiveConstraint=self.constraint_manager.rowHasActiveConstraint,
+            isCheckable=self.isCheckable,
+            onAddSimpleConstraint=self.addSimpleConstraint,
+            onDeleteConstraint=self.deleteConstraint,
+            onEditConstraint=self.editConstraint,
+            onShowMultiConstraint=self.showMultiConstraint,
+            onSelectParameters=self.selectParameters,
+            onDeselectParameters=self.deselectParameters,
+            onShowModelDescription=self.showModelDescription
+        )
+
+        # Initialize ModelSelectorWidget for category/model/structure selection
+        self.model_selector = ModelSelectorWidget(
+            parent=self,
+            category_combo=self.cbCategory,
+            model_combo=self.cbModel,
+            structure_combo=self.cbStructureFactor
+        )
 
         # Defaults for the structure factors
         self.setDefaultStructureCombo()
@@ -201,6 +237,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Let others know we're full of data now
         self.data_is_loaded = True
+
+        # Update FittingState
+        self.fitting_state.is2D = self.is2D
+        self.fitting_state.is_batch_fitting = self.is_batch_fitting
+        self.fitting_state.data_is_loaded = True
+
         # Reset the smearer
         self.smearing_widget.resetSmearer()
         if self.data.isSesans:
@@ -524,12 +566,32 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.cmdFit.setEnabled(self.haveParamsToFit())
         self.polydispersity_widget.togglePoly(isChecked)
 
+    def onPolyToggled(self, isChecked: bool) -> None:
+        """
+        Handle polydispersity toggle signal from PolydispersityWidget.
+
+        Updates FittingState and tab enablement.
+        """
+        self.fitting_state.poly_enabled = isChecked
+        self.tabFitting.setTabEnabled(TAB_POLY, isChecked)
+        self.cmdFit.setEnabled(self.haveParamsToFit())
+
     def toggleMagnetism(self, isChecked: bool) -> None:
         """ Enable/disable the magnetism tab """
         self.tabFitting.setTabEnabled(TAB_MAGNETISM, isChecked)
         # Check if any parameters are ready for fitting
         self.cmdFit.setEnabled(self.haveParamsToFit())
         self.magnetism_widget.isActive = isChecked
+
+    def onMagnetismToggled(self, isChecked: bool) -> None:
+        """
+        Handle magnetism toggle signal from MagnetismWidget.
+
+        Updates FittingState and tab enablement.
+        """
+        self.fitting_state.magnetism_enabled = isChecked
+        self.tabFitting.setTabEnabled(TAB_MAGNETISM, isChecked)
+        self.cmdFit.setEnabled(self.haveParamsToFit())
 
     def toggleChainFit(self, isChecked: bool) -> None:
         """ Enable/disable chain fitting """
@@ -622,8 +684,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.polydispersity_widget.cmdFitSignal.connect(lambda: self.cmdFit.setEnabled(self.haveParamsToFit()))
         self.polydispersity_widget.updateDataSignal.connect(lambda: self.updateData())
         self.polydispersity_widget.iterateOverModelSignal.connect(lambda: self.iterateOverModel(self.updateFunctionCaption))
+        self.polydispersity_widget.toggledSignal.connect(self.onPolyToggled)
         self.magnetism_widget.cmdFitSignal.connect(lambda: self.cmdFit.setEnabled(self.haveParamsToFit()))
         self.magnetism_widget.updateDataSignal.connect(lambda: self.updateData())
+        self.magnetism_widget.toggledSignal.connect(self.onMagnetismToggled)
 
         # Communicator signal
         self.communicate.updateModelCategoriesSignal.connect(self.onCategoriesChanged)
