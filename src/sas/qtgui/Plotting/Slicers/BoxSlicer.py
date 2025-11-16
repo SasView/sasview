@@ -6,6 +6,7 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.SlicerModel import SlicerModel
 from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
+from sas.qtgui.Plotting.Slicers.SlicerUtils import generate_unique_plot_id
 
 logger = logging.getLogger(__name__)
 
@@ -262,21 +263,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         # Assign unique id per slicer instance and use it as the display name
         if self._plot_id is None:
             base_id = "BoxAverage" + self.data.name
-            parent_item = self._item
-            if self._item.parent() is not None:
-                parent_item = self._item.parent()
-            existing = 0
-            for i in range(parent_item.rowCount()):
-                it = parent_item.child(i)
-                d = it.data()
-                if hasattr(d, "id") and isinstance(d.id, str) and d.id.startswith(base_id):
-                    existing += 1
-                for j in range(it.rowCount()):
-                    it2 = it.child(j)
-                    d2 = it2.data()
-                    if hasattr(d2, "id") and isinstance(d2.id, str) and d2.id.startswith(base_id):
-                        existing += 1
-            self._plot_id = base_id if existing == 0 else f"{base_id}_{existing+1}"
+            self._plot_id = generate_unique_plot_id(base_id, self._item)
 
         new_plot.id = self._plot_id
         new_plot.name = self._plot_id

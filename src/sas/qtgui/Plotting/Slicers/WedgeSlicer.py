@@ -7,6 +7,7 @@ from sas.qtgui.Plotting.Slicers.ArcInteractor import ArcInteractor
 from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
 from sas.qtgui.Plotting.Slicers.RadiusInteractor import RadiusInteractor
 from sas.qtgui.Plotting.Slicers.SectorSlicer import LineInteractor
+from sas.qtgui.Plotting.Slicers.SlicerUtils import generate_unique_plot_id
 
 
 class WedgeInteractor(BaseInteractor, SlicerModel):
@@ -213,19 +214,7 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         # Assign unique id per slicer instance and use it as the display name
         if self.plot_id is None:
             base_id = "Wedge" + self.averager.__name__ + self.data.name
-            parent_item = self._item if self._item.parent() is None else self._item.parent()
-            existing = 0
-            for i in range(parent_item.rowCount()):
-                item = parent_item.child(i)
-                data = item.data()
-                if hasattr(data, "id") and isinstance(data.id, str) and data.id.startswith(base_id):
-                    existing += 1
-                for j in range(item.rowCount()):
-                    item2 = item.child(j)
-                    data2 = item2.data()
-                    if hasattr(data2, "id") and isinstance(data2.id, str) and data2.id.startswith(base_id):
-                        existing += 1
-            self.plot_id = base_id if existing == 0 else f"{base_id}_{existing+1}"
+            self.plot_id = generate_unique_plot_id(base_id, self._item)
 
         new_plot.id = self.plot_id
         new_plot.name = new_plot.id
