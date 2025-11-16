@@ -234,27 +234,14 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         tab_object = ObjectLibrary.getObject(tab)
 
         # Disconnect all local slots, if connected
-        # None of the methods below seem to work with Qt6.2.4
-        # 1.
-        # if tab_object.receivers(tab_object.newModelSignal) > 0:
-        # 2.
-        # newModelSignal =QtCore.QMetaMethod.fromSignal(tab_object.newModelSignal)
-        # if tab_object.isSignalConnected(newModelSignal):
-        # 3.
-        # m_obj = tab_object.metaObject()
-        # is_connected = m_obj.isSignalConnected(m_obj.method(m_obj.indexOfSignal("newModelSignal()")))
-
-        try:
+        # Using isSignalConnected() with QMetaMethod (works with PySide6 6.9.1+)
+        newModelSignal = QtCore.QMetaMethod.fromSignal(tab_object.newModelSignal)
+        if tab_object.isSignalConnected(newModelSignal):
             tab_object.newModelSignal.disconnect()
-        except RuntimeError:
-            # need to pass here since no known PySide6 method of checking if signal is connected
-            # seems to work here. Need to upgrade to more recent version of PySide6 but this
-            # currently causes other issues.
-            pass
-        try:
+
+        constraintAddedSignal = QtCore.QMetaMethod.fromSignal(tab_object.constraintAddedSignal)
+        if tab_object.isSignalConnected(constraintAddedSignal):
             tab_object.constraintAddedSignal.disconnect()
-        except RuntimeError:
-            pass
 
         # Reconnect tab signals to local slots
         tab_object.constraintAddedSignal.connect(self.initializeFitList)
