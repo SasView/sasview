@@ -20,13 +20,13 @@ from sas import config
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.ConsoleUpdate import ConsoleUpdate
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
+from sas.qtgui.Perspectives.Fitting.ConstraintManager import ConstraintManager
 from sas.qtgui.Perspectives.Fitting.FitPage import FitPage
 from sas.qtgui.Perspectives.Fitting.FitThread import FitThread
 from sas.qtgui.Perspectives.Fitting.FittingController import FittingController
 from sas.qtgui.Perspectives.Fitting.FittingLogic import FittingLogic
 from sas.qtgui.Perspectives.Fitting.MagnetismWidget import MagnetismWidget
 from sas.qtgui.Perspectives.Fitting.ModelThread import Calc1D, Calc2D
-from sas.qtgui.Perspectives.Fitting.MultiConstraint import MultiConstraint
 from sas.qtgui.Perspectives.Fitting.OptionsWidget import OptionsWidget
 from sas.qtgui.Perspectives.Fitting.OrderWidget import OrderWidget
 from sas.qtgui.Perspectives.Fitting.PolydispersityWidget import PolydispersityWidget
@@ -112,6 +112,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Fitting controller for business logic
         self.fitting_controller = FittingController(self)
+
+        # Constraint manager for constraint handling
+        self.constraint_manager = ConstraintManager(self)
 
         # Main GUI setup up
         self.setupUi(self)
@@ -743,55 +746,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def showMultiConstraint(self, current_list: QtWidgets.QTreeView | None = None) -> None:
         """
-        Show the constraint widget and receive the expression
+        Show the constraint widget and receive the expression.
+
+        Delegated to ConstraintManager.
         """
-        if current_list is None:
-            current_list = self.lstParams
-        model = current_list.model()
-        for key, val in self.model_dict.items():
-            if val == model:
-                model_key = key
-
-        selected_rows = current_list.selectionModel().selectedRows()
-        # There have to be only two rows selected. The caller takes care of that
-        # but let's check the correctness.
-        assert len(selected_rows) == 2
-
-        params_list = [s.data() for s in selected_rows]
-        # Create and display the widget for param1 and param2
-        mc_widget = MultiConstraint(self, params=params_list)
-        # Check if any of the parameters are polydisperse
-        if not np.any([FittingUtilities.isParamPolydisperse(p, self.logic.model_parameters, is2D=self.is2D) for p in params_list]):
-            # no parameters are pd - reset the text to not show the warning
-            mc_widget.lblWarning.setText("")
-        if mc_widget.exec_() != QtWidgets.QDialog.Accepted:
-            return
-
-        constraint = Constraint()
-        c_text = mc_widget.txtConstraint.text()
-
-        # widget.params[0] is the parameter we're constraining
-        constraint.param = mc_widget.params[0]
-        # parameter should have the model name preamble
-        model_name = self.logic.kernel_module.name
-        # param_used is the parameter we're using in constraining function
-        param_used = mc_widget.params[1]
-        # Replace param_used with model_name.param_used
-        updated_param_used = model_name + "." + param_used
-        new_func = c_text.replace(param_used, updated_param_used)
-        constraint.func = new_func
-        constraint.value_ex = updated_param_used
-        # Which row is the constrained parameter in?
-        row = self.getRowFromName(constraint.param)
-
-        # what is the parameter to constraint to?
-        constraint.value = param_used
-
-        # Should the new constraint be validated?
-        constraint.validate = mc_widget.validate
-
-        # Create a new item and add the Constraint object as a child
-        self.addConstraintToRow(constraint=constraint, row=row, model_key=model_key)
+        self.constraint_manager.showMultiConstraint(current_list)
 
     def getModelKeyFromName(self, name: str) -> str:
         """
@@ -893,210 +852,51 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def addConstraintToRow(self, constraint: Constraint | None = None, row: int = 0, model_key: str = "standard") -> None:
         """
-        Adds the constraint object to requested row. The constraint is first
-        checked for errors, and a  message box interrupting flow is
-        displayed, with the reason of the failure.
+        Add the constraint object to the requested row.
+
+        Delegated to ConstraintManager.
         """
-        # Create a new item and add the Constraint object as a child
-        assert isinstance(constraint, Constraint)
-        model = self.model_dict[model_key]
-        assert 0 <= row <= model.rowCount()
-        assert self.isCheckable(row, model_key=model_key)
-
-        # Error checking
-        # First, get a list of constraints and symbols
-        constraint_list = self.parent.perspective().getActiveConstraintList()
-        symbol_dict = self.parent.perspective().getSymbolDictForConstraints()
-        if model_key == 'poly' and 'Distribution' in constraint.param:
-            constraint.param = self.polydispersity_widget.polyNameToParam(constraint.param)
-        constraint_list.append((self.modelName() + '.' + constraint.param,
-                                constraint.func))
-        # Call the error checking function
-        errors = FittingUtilities.checkConstraints(symbol_dict, constraint_list)
-        # get the constraint tab
-        constraint_tab = self.parent.perspective().getConstraintTab()
-        if errors:
-            # Display the message box
-            QtWidgets.QMessageBox.critical(
-                self,
-                "Inconsistent constraint",
-                errors,
-                QtWidgets.QMessageBox.Ok)
-            # Check if there is a constraint tab
-            if constraint_tab:
-                # Set the constraint_accepted flag to False to inform the
-                # constraint tab that the constraint was not accepted
-                constraint_tab.constraint_accepted = False
-            return
-
-        item = QtGui.QStandardItem()
-        item.setData(constraint)
-        model.item(row, 1).setChild(0, item)
-        # Set min/max to the value constrained
-        self.constraintAddedSignal.emit([row], model_key)
-        # Show visual hints for the constraint
-        font = QtGui.QFont()
-        font.setItalic(True)
-        brush = QtGui.QBrush(QtGui.QColor('blue'))
-        self.modifyViewOnRow(row, font=font, brush=brush, model_key=model_key)
-        # update the main parameter list so the constrained parameter gets
-        # updated when fitting
-        self.checkboxSelected(model.item(row, 0), model_key=model_key)
-        self.communicate.statusBarUpdateSignal.emit('Constraint added')
-        if constraint_tab:
-            # Set the constraint_accepted flag to True to inform the
-            # constraint tab that the constraint was accepted
-            constraint_tab.constraint_accepted = True
+        self.constraint_manager.addConstraintToRow(constraint, row, model_key)
 
     def addSimpleConstraint(self) -> None:
         """
-        Adds a constraint on a single parameter.
+        Add a constraint on a single parameter.
+
+        Delegated to ConstraintManager.
         """
-        model_key = self.tabToKey[self.tabFitting.currentIndex()]
-        model = self.model_dict[model_key]
-        min_col = self.lstParams.itemDelegate().param_min
-        max_col = self.lstParams.itemDelegate().param_max
-        for row in self.selectedParameters(model_key=model_key):
-            param = model.item(row, 0).text()
-            value = model.item(row, 1).text()
-            min_t = model.item(row, min_col).text()
-            max_t = model.item(row, max_col).text()
-            # Create a Constraint object
-            constraint = Constraint(param=param, value=value, min=min_t, max=max_t)
-            constraint.active = False
-            # Create a new item and add the Constraint object as a child
-            item = QtGui.QStandardItem()
-            item.setData(constraint)
-            model.item(row, 1).setChild(0, item)
-            # Assumed correctness from the validator
-            value = float(value)
-            # BUMPS calculates log(max-min) without any checks, so let's assign minor range
-            min_v = value - (value/10000.0)
-            max_v = value + (value/10000.0)
-            # Set min/max to the value constrained
-            model.item(row, min_col).setText(str(min_v))
-            model.item(row, max_col).setText(str(max_v))
-            self.constraintAddedSignal.emit([row], model_key)
-            # Show visual hints for the constraint
-            font = QtGui.QFont()
-            font.setItalic(True)
-            brush = QtGui.QBrush(QtGui.QColor('blue'))
-            self.modifyViewOnRow(row, font=font, brush=brush, model_key=model_key)
-        self.communicate.statusBarUpdateSignal.emit('Constraint added')
+        self.constraint_manager.addSimpleConstraint()
 
     def editConstraint(self) -> None:
         """
         Edit constraints for selected parameters.
+
+        Delegated to ConstraintManager.
         """
-        current_list = self.tabToList[self.tabFitting.currentIndex()]
-        model_key = self.tabToKey[self.tabFitting.currentIndex()]
-
-        params_list = [s.data() for s in current_list.selectionModel().selectedRows()
-                   if self.isCheckable(s.row(), model_key=model_key)]
-        assert len(params_list) == 1
-        row = current_list.selectionModel().selectedRows()[0].row()
-        constraint = self.getConstraintForRow(row, model_key=model_key)
-        # Create and display the widget for param1 and param2
-        mc_widget = MultiConstraint(self, params=params_list, constraint=constraint)
-        # Check if any of the parameters are polydisperse
-        if not np.any([FittingUtilities.isParamPolydisperse(p, self.logic.model_parameters, is2D=self.is2D) for p in params_list]):
-            # no parameters are pd - reset the text to not show the warning
-            mc_widget.lblWarning.setText("")
-        if mc_widget.exec_() != QtWidgets.QDialog.Accepted:
-            return
-
-        constraint = Constraint()
-        c_text = mc_widget.txtConstraint.text()
-
-        # widget.params[0] is the parameter we're constraining
-        constraint.param = mc_widget.params[0]
-        # parameter should have the model name preamble
-        model_name = self.logic.kernel_module.name
-        # param_used is the parameter we're using in constraining function
-        param_used = mc_widget.params[1]
-        # Replace param_used with model_name.param_used
-        updated_param_used = model_name + "." + param_used
-        # Update constraint with new values
-        constraint.func = c_text
-        constraint.value_ex = updated_param_used
-        constraint.value = param_used
-        # Should the new constraint be validated?
-        constraint.validate = mc_widget.validate
-
-        # Which row is the constrained parameter in?
-        if model_key == 'poly' and 'Distribution' in constraint.param:
-            constraint.param = self.polydispersity_widget.polyNameToParam(constraint.param)
-        row = self.getRowFromName(constraint.param)
-
-        # Create a new item and add the Constraint object as a child
-        self.addConstraintToRow(constraint=constraint, row=row, model_key=model_key)
+        self.constraint_manager.editConstraint()
 
     def deleteConstraint(self) -> None:
         """
         Delete constraints from selected parameters.
+
+        Delegated to ConstraintManager.
         """
-        current_list = self.tabToList[self.tabFitting.currentIndex()]
-        model_key = self.tabToKey[self.tabFitting.currentIndex()]
-        params = [s.data() for s in current_list.selectionModel().selectedRows()
-                   if self.isCheckable(s.row(), model_key=model_key)]
-        for param in params:
-            if model_key == 'poly':
-                param = self.polydispersity_widget.polyNameToParam(param)
-            self.deleteConstraintOnParameter(param=param, model_key=model_key)
+        self.constraint_manager.deleteConstraint()
 
     def deleteConstraintOnParameter(self, param: str | None = None, model_key: str = "standard") -> None:
         """
-        Delete the constraint on model parameter 'param'
-        """
-        param_list = self.lst_dict[model_key]
-        model = self.model_dict[model_key]
-        for row in range(model.rowCount()):
-            if not self.isCheckable(row, model_key=model_key):
-                continue
-            if not self.rowHasConstraint(row, model_key=model_key):
-                continue
-            # Get the Constraint object from of the model item
-            item = model.item(row, 1)
-            constraint = self.getConstraintForRow(row, model_key=model_key)
-            if constraint is None:
-                continue
-            if not isinstance(constraint, Constraint):
-                continue
-            if param and constraint.param != param:
-                continue
-            # Now we got the right row. Delete the constraint and clean up
-            # Retrieve old values and put them on the model
-            if constraint.min is not None:
-                try:
-                    min_col = param_list.itemDelegate().param_min
-                except AttributeError:
-                    min_col = 2
-                model.item(row, min_col).setText(constraint.min)
-            if constraint.max is not None:
-                try:
-                    max_col = param_list.itemDelegate().param_max
-                except AttributeError:
-                    max_col = 3
-                model.item(row, max_col).setText(constraint.max)
-            # Remove constraint item
-            item.removeRow(0)
-            self.constraintAddedSignal.emit([row], model_key)
-            self.modifyViewOnRow(row, model_key=model_key)
+        Delete the constraint on model parameter 'param'.
 
-        self.communicate.statusBarUpdateSignal.emit('Constraint removed')
+        Delegated to ConstraintManager.
+        """
+        self.constraint_manager.deleteConstraintOnParameter(param, model_key)
 
     def getConstraintForRow(self, row: int, model_key: str = "standard") -> Constraint | None:
         """
-        For the given row, return its constraint, if any (otherwise None)
+        For the given row, return its constraint, if any (otherwise None).
+
+        Delegated to ConstraintManager.
         """
-        model = self.model_dict[model_key]
-        if not self.isCheckable(row, model_key=model_key):
-            return None
-        item = model.item(row, 1)
-        try:
-            return item.child(0).data()
-        except AttributeError:
-            return None
+        return self.constraint_manager.getConstraintForRow(row, model_key)
 
     def allParamNames(self) -> list[str]:
         """
@@ -1115,70 +915,35 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def paramHasConstraint(self, param: str | None = None) -> bool:
         """
-        Finds out if the given parameter in all the models has a constraint child
+        Find out if the given parameter in all the models has a constraint child.
+
+        Delegated to ConstraintManager.
         """
-        if param is None:
-            return False
-        if param not in self.allParamNames():
-            return False
-
-        for model_key in self.model_dict:
-            for row in range(self.model_dict[model_key].rowCount()):
-                param_name = self.model_dict[model_key].item(row,0).text()
-                if model_key == 'poly':
-                    param_name = self.polydispersity_widget.polyNameToParam(param_name)
-                if param_name != param:
-                    continue
-                return self.rowHasConstraint(row, model_key=model_key)
-
-        # nothing found
-        return False
+        return self.constraint_manager.paramHasConstraint(param)
 
     def rowHasConstraint(self, row: int, model_key: str = "standard") -> bool:
         """
-        Finds out if row of the main model has a constraint child
-        """
-        model = self.model_dict[model_key]
+        Finds out if row of the main model has a constraint child.
 
-        if not self.isCheckable(row, model_key=model_key):
-            return False
-        item = model.item(row, 1)
-        if not item.hasChildren():
-            return False
-        c = item.child(0).data()
-        if isinstance(c, Constraint):
-            return True
-        return False
+        Delegated to ConstraintManager.
+        """
+        return self.constraint_manager.rowHasConstraint(row, model_key)
 
     def rowHasActiveConstraint(self, row: int, model_key: str = "standard") -> bool:
         """
-        Finds out if row of the main model has an active constraint child
+        Finds out if row of the main model has an active constraint child.
+
+        Delegated to ConstraintManager.
         """
-        model = self.model_dict[model_key]
-        if not self.isCheckable(row, model_key=model_key):
-            return False
-        item = model.item(row, 1)
-        if not item.hasChildren():
-            return False
-        c = item.child(0).data()
-        if isinstance(c, Constraint) and c.active:
-            return True
-        return False
+        return self.constraint_manager.rowHasActiveConstraint(row, model_key)
 
     def rowHasActiveComplexConstraint(self, row: int, model_key: str = "standard") -> bool:
         """
-        Finds out if row of the main model has an active, nontrivial constraint child
+        Finds out if row of the main model has an active, nontrivial constraint child.
+
+        Delegated to ConstraintManager.
         """
-        model = self.model_dict[model_key]
-        if not self.isCheckable(row, model_key=model_key):
-            return False
-        item = model.item(row, 1)
-        if not item.hasChildren():
-            return False
-        c = item.child(0).data()
-        if isinstance(c, Constraint) and c.func and c.active:
-            return True
-        return False
+        return self.constraint_manager.rowHasActiveComplexConstraint(row, model_key)
 
     def selectParameters(self) -> None:
         """
@@ -1226,133 +991,65 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Return a list of tuples. Each tuple contains constraints mapped as
         ('constrained parameter', 'function to constrain')
         e.g. [('sld','5*sld_solvent')]
+
+        Delegated to ConstraintManager.
         """
-        params = []
-        for model_key in self.model_dict:
-            model = self.model_dict[model_key]
-            param_number = model.rowCount()
-            if model_key == 'poly':
-                params += [(self.polydispersity_widget.polyNameToParam(model.item(s, 0).text()),
-                           model.item(s, 1).child(0).data().func)
-                           for s in range(param_number) if self.rowHasActiveConstraint(s, model_key=model_key)]
-            else:
-                params += [(model.item(s, 0).text(),
-                           model.item(s, 1).child(0).data().func)
-                           for s in range(param_number) if self.rowHasActiveConstraint(s, model_key=model_key)]
-        return params
+        return self.constraint_manager.getConstraintsForAllModels()
 
     def getComplexConstraintsForAllModels(self) -> list[tuple[str, str]]:
         """
         Returns a list of tuples containing all the constraints defined
-        for a given FitPage
+        for a given FitPage.
+
+        Delegated to ConstraintManager.
         """
-        constraints = []
-        for model_key in self.model_dict:
-            constraints += self.getComplexConstraintsForModel(model_key=model_key)
-        return constraints
+        return self.constraint_manager.getComplexConstraintsForAllModels()
 
     def getComplexConstraintsForModel(self, model_key: str) -> list[tuple[str, str]]:
         """
         Return a list of tuples. Each tuple contains constraints mapped as
         ('constrained parameter', 'function to constrain')
         e.g. [('sld','5*M2.sld_solvent')].
-        Only for constraints with defined VALUE
+        Only for constraints with defined VALUE.
+
+        Delegated to ConstraintManager.
         """
-        model = self.model_dict[model_key]
-        params = []
-        param_number = model.rowCount()
-        for s in range(param_number):
-            if self.rowHasActiveComplexConstraint(s, model_key):
-                if model.item(s, 0).data(role=QtCore.Qt.UserRole):
-                    parameter_name = str(model.item(s, 0).data(role=QtCore.Qt.UserRole))
-                else:
-                    parameter_name = str(model.item(s, 0).data(0))
-                params.append((parameter_name, model.item(s, 1).child(0).data().func))
-        return params
+        return self.constraint_manager.getComplexConstraintsForModel(model_key)
 
     def getFullConstraintNameListForModel(self, model_key: str) -> list[tuple[str, str]]:
         """
         Return a list of tuples. Each tuple contains constraints mapped as
         ('constrained parameter', 'function to constrain')
         e.g. [('sld','5*M2.sld_solvent')].
-        Returns a list of all constraints, not only active ones
+        Returns a list of all constraints, not only active ones.
+
+        Delegated to ConstraintManager.
         """
-        model = self.model_dict[model_key]
-        param_number = model.rowCount()
-        params = list()
-        for s in range(param_number):
-            if self.rowHasConstraint(s, model_key=model_key):
-                param_name = model.item(s, 0).text()
-                if model_key == 'poly':
-                    param_name = self.polydispersity_widget.polyNameToParam(model.item(s, 0).text())
-                params.append((param_name, model.item(s, 1).child(0).data().func))
-        return params
+        return self.constraint_manager.getFullConstraintNameListForModel(model_key)
 
     def getConstraintObjectsForAllModels(self) -> list[Constraint]:
         """
-        Returns a list of the constraint object for a given FitPage
+        Returns a list of the constraint object for a given FitPage.
+
+        Delegated to ConstraintManager.
         """
-        constraints = []
-        for model_key in self.model_dict:
-            constraints += self.getConstraintObjectsForModel(model_key=model_key)
-        return constraints
+        return self.constraint_manager.getConstraintObjectsForAllModels()
 
     def getConstraintObjectsForModel(self, model_key: str) -> list[Constraint]:
         """
-        Returns Constraint objects present on the whole model
+        Returns Constraint objects present on the whole model.
+
+        Delegated to ConstraintManager.
         """
-        model = self.model_dict[model_key]
-        param_number = model.rowCount()
-        constraints = [model.item(s, 1).child(0).data()
-                       for s in range(param_number) if self.rowHasConstraint(s, model_key=model_key)]
-        return constraints
+        return self.constraint_manager.getConstraintObjectsForModel(model_key)
 
     def getConstraintsForFitting(self) -> list[tuple[str, str]]:
         """
-        Return a list of constraints in format ready for use in fiting
+        Return a list of constraints in format ready for use in fitting.
+
+        Delegated to ConstraintManager.
         """
-        # Get constraints
-        constraints = []
-        for model_key in self.model_dict:
-            constraints += self.getComplexConstraintsForModel(model_key=model_key)
-        # See if there are any constraints across models
-        multi_constraints = [cons for cons in constraints if self.isConstraintMultimodel(cons[1])]
-
-        if multi_constraints:
-            # Let users choose what to do
-            msg = "The current fit contains constraints relying on other fit pages.\n"
-            msg += ("Parameters with those constraints are:\n" +
-                    '\n'.join([cons[0] for cons in multi_constraints]))
-            msg += ("\n\nWould you like to deactivate these constraints or "
-                    "cancel fitting?")
-            msgbox = QtWidgets.QMessageBox(self)
-            msgbox.setIcon(QtWidgets.QMessageBox.Warning)
-            msgbox.setText(msg)
-            msgbox.setWindowTitle("Existing Constraints")
-            # custom buttons
-            button_remove = QtWidgets.QPushButton("Deactivate")
-            msgbox.addButton(button_remove, QtWidgets.QMessageBox.YesRole)
-            button_cancel = QtWidgets.QPushButton("Cancel")
-            msgbox.addButton(button_cancel, QtWidgets.QMessageBox.RejectRole)
-            retval = msgbox.exec_()
-            if retval == QtWidgets.QMessageBox.RejectRole:
-                # cancel fit
-                raise ValueError("Fitting cancelled")
-            else:
-                constraint_tab = self.parent.perspective().getConstraintTab()
-                for cons in multi_constraints:
-                    # deactivate the constraint
-                    row = self.getRowFromName(cons[0])
-                    model_key = self.getModelKeyFromName(cons[0])
-                    self.getConstraintForRow(row, model_key=model_key).active = False
-                    # uncheck in the constraint tab
-                    if constraint_tab:
-                        constraint_tab.uncheckConstraint(
-                            self.logic.kernel_module.name + ':' + cons[0])
-                # re-read the constraints
-                constraints = self.getComplexConstraintsForModel(model_key=model_key)
-
-        return constraints
+        return self.constraint_manager.getConstraintsForFitting()
 
     def showModelDescription(self) -> QtWidgets.QMenu:
         """
