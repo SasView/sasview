@@ -26,12 +26,12 @@ class ModelViewDelegate(QtWidgets.QStyledItemDelegate):
         Note: the reverse is never required!
         """
         offset = 1 if present else 0
-        self.param_property=0        
+        self.param_property=0
         self.param_error = 2 if present else None
         self.param_value=1 + offset
         self.param_min=2 + offset
         self.param_max=3 + offset
-        self.param_unit=4 + offset            
+        self.param_unit=4 + offset
 
     def paint(self, painter, option, index):
         """
