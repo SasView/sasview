@@ -77,7 +77,7 @@ jobs:
         dependency:
           # the ref can be a branch or a tag
           - { name: "sasdata", url: "https://github.com/SasView/sasdata.git", ref: "master" }
-          - { name: "sasmodels",  url: "https://github.com/SasView/sasmodels.git", ref: "master" }
+          - { name: "sasmodels",  url: "https://github.com/SasView/sasmodels.git", ref: "pr-python-fq" }
           # - { name: "bumps", url: "https://github.com/bumps/bumps.git", ref: "v1.0.3" }
 
     name: Build wheel ${{ matrix.dependency.name }}
