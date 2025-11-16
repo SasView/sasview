@@ -1,7 +1,8 @@
-from PySide6 import QtCore, QtWidgets
 import copy
 import logging
-from pathlib import Path
+
+from PySide6 import QtCore, QtWidgets
+
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.ModelThread import Calc1D
 from sas.qtgui.Perspectives.Fitting.UI.InViewWidgetUI import Ui_InViewWidgetUI
@@ -112,7 +113,7 @@ class InViewWidget(QtWidgets.QWidget, Ui_InViewWidgetUI):
             #self._param_info[name] = {'min': float(pmin), 'max': float(pmax), 'value': float(val)}
             ###
         self._build_sliders(list(self._param_info.keys()))
-        self._recompute_model()        
+        self._recompute_model()
 
     def _build_sliders(self, params):
         layout = self.sliderBox.layout()
@@ -173,7 +174,7 @@ class InViewWidget(QtWidgets.QWidget, Ui_InViewWidgetUI):
             self._param_values[name] = val
             slider.valueChanged.connect(lambda v, p=name: self._on_slider_changed(p, v))
             spin.valueChanged.connect(lambda v, p=name: self._on_spin_changed(p, v))
-    
+
     def _display_label_for_param(self, name: str) -> str:
         if name.endswith('.width'):
             try:
@@ -279,7 +280,7 @@ class InViewWidget(QtWidgets.QWidget, Ui_InViewWidgetUI):
             return
         fitted.name = self._plot_name
         fitted.symbol = "Line"
-        
+
         if self._plot_name in self.plotter.plot_dict:
             self.plotter.replacePlot(self._plot_name, fitted)
         else:

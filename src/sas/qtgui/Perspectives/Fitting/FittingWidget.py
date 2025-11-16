@@ -23,6 +23,7 @@ from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 from sas.qtgui.Perspectives.Fitting.FitPage import FitPage
 from sas.qtgui.Perspectives.Fitting.FitThread import FitThread
 from sas.qtgui.Perspectives.Fitting.FittingLogic import FittingLogic
+from sas.qtgui.Perspectives.Fitting.InViewWidget import InViewWidget
 from sas.qtgui.Perspectives.Fitting.MagnetismWidget import MagnetismWidget
 from sas.qtgui.Perspectives.Fitting.ModelThread import Calc1D, Calc2D
 from sas.qtgui.Perspectives.Fitting.MultiConstraint import MultiConstraint
@@ -33,7 +34,6 @@ from sas.qtgui.Perspectives.Fitting.ReportPageLogic import ReportPageLogic
 from sas.qtgui.Perspectives.Fitting.SmearingWidget import SmearingWidget
 from sas.qtgui.Perspectives.Fitting.UI.FittingWidgetUI import Ui_FittingWidgetUI
 from sas.qtgui.Perspectives.Fitting.ViewDelegate import ModelViewDelegate
-from sas.qtgui.Perspectives.Fitting.InViewWidget import InViewWidget
 from sas.qtgui.Plotting.Plotter import PlotterWidget
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
 from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
@@ -540,7 +540,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """ Enable/disable the controls dependent on 1D/2D data instance """
         self.chkMagnetism.setEnabled(isChecked)
         self.is2D = isChecked
-        
+
         if isChecked:
             # 2D view is toggled on, therefore disable InView button,
             # and close InView widget if opened
@@ -1692,7 +1692,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
 
             self._in_view_widget.destroyed.connect(_on_inview_closed)
-        
+
         self.lstParams.setEnabled(False)
         self.cbCategory.setEnabled(False)
         self.cmdFit.setEnabled(False)
