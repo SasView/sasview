@@ -21,6 +21,7 @@ from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.ConsoleUpdate import ConsoleUpdate
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 from sas.qtgui.Perspectives.Fitting.FitPage import FitPage
+from sas.qtgui.Perspectives.Fitting.FittingController import FittingController
 from sas.qtgui.Perspectives.Fitting.FitThread import FitThread
 from sas.qtgui.Perspectives.Fitting.FittingLogic import FittingLogic
 from sas.qtgui.Perspectives.Fitting.MagnetismWidget import MagnetismWidget
@@ -107,6 +108,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Main Data[12]D holders
         # Logics.data contains a single Data1D/Data2D object
         self._logic = [FittingLogic()]
+
+        # Fitting controller for business logic
+        self.fitting_controller = FittingController(self)
 
         # Main GUI setup up
         self.setupUi(self)
@@ -1721,7 +1725,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Prepare the fitter object
         try:
-            fitters, _ = self.prepareFitters()
+            fitters, _ = self.fitting_controller.prepareFitters()
         except ValueError as ex:
             # This should not happen! GUI explicitly forbids this situation
             self.communicate.statusBarUpdateSignal.emit(str(ex))
@@ -1818,7 +1822,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         for res_index, res_list in enumerate(result[0]):
             # results
             res = res_list[0]
-            param_dict = self.paramDictFromResults(res)
+            param_dict = self.fitting_controller.paramDictFromResults(res)
 
             # create local kernel_module
             kernel_module = FittingUtilities.updateKernelWithResults(self.logic.kernel_module, param_dict)
@@ -1838,30 +1842,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def paramDictFromResults(self, results: Any) -> dict[str, tuple[float, float]] | None:
         """
-        Given the fit results structure, pull out optimized parameters and return them as nicely
-        formatted dict
+        Given the fit results structure, pull out optimized parameters.
+
+        Delegated to FittingController.
         """
-        pvec = [float(p) for p in results.pvec]
-        if results.fitness is None or \
-            not np.isfinite(results.fitness) or \
-            np.any(pvec is None) or \
-            not np.all(np.isfinite(pvec)):
-            msg = "Fitting did not converge!"
-            self.communicate.statusBarUpdateSignal.emit(msg)
-            msg += results.mesg
-            logger.error(msg)
-            return
-
-        if results.mesg:
-            logger.warning(results.mesg)
-
-        param_list = results.param_list # ['radius', 'radius.width']
-        param_values = pvec             # array([ 0.36221662,  0.0146783 ])
-        param_stderr = results.stderr   # array([ 1.71293015,  1.71294233])
-        params_and_errors = list(zip(param_values, param_stderr))
-        param_dict = dict(zip(param_list, params_and_errors))
-
-        return param_dict
+        return self.fitting_controller.paramDictFromResults(results)
 
     def fittingCompleted(self, result: tuple | None) -> None:
         """
@@ -1895,7 +1880,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         res_list = result[0][0]
         res = res_list[0]
         self.chi2 = res.fitness
-        param_dict = self.paramDictFromResults(res)
+        param_dict = self.fitting_controller.paramDictFromResults(res)
 
         if param_dict is None:
             return
@@ -1913,7 +1898,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Dictionary of fitted parameter: value, error
         # e.g. param_dic = {"sld":(1.703, 0.0034), "length":(33.455, -0.0983)}
-        self.updateModelFromList(param_dict)
+        self.fitting_controller.updateModelFromList(param_dict)
 
         self.polydispersity_widget.updatePolyModelFromList(param_dict)
 
@@ -1929,66 +1914,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def prepareFitters(self, fitter: Fit | None = None, fit_id: int = 0, weight_increase: int = 1) -> tuple[list[Fit], int]:
         """
-        Prepare the Fitter object for use in fitting
+        Prepare the Fitter object for use in fitting.
+
+        Delegated to FittingController.
         """
-        # fitter = None -> single/batch fitting
-        # fitter = Fit() -> simultaneous fitting
-
-        # Data going in
-        data = self.logic.data
-        model = self.logic.kernel_module
-        qmin = self.q_range_min
-        qmax = self.q_range_max
-
-        params_to_fit = copy.deepcopy(self.main_params_to_fit)
-        if self.chkPolydispersity.isChecked():
-            for p in self.polydispersity_widget.poly_params_to_fit:
-                if "Distribution of" in p:
-                    params_to_fit += [self.polydispersity_widget.polyNameToParam(p)]
-                else:
-                    params_to_fit += [p]
-        if self.chkMagnetism.isChecked() and self.canHaveMagnetism():
-            params_to_fit += self.magnetism_widget.magnet_params_to_fit
-        if not params_to_fit:
-            raise ValueError('Fitting requires at least one parameter to optimize.')
-
-        # Get the constraints.
-        constraints = []
-        for model_key in self.model_dict.keys():
-            constraints += self.getComplexConstraintsForModel(model_key=model_key)
-        if fitter is None:
-            # For single fits - check for inter-model constraints
-            constraints = self.getConstraintsForFitting()
-
-        smearer = self.smearing_widget.smearer()
-
-        fitters = []
-        # order datasets if chain fit
-        order = self.all_data
-        if self.is_chain_fitting:
-            order = self.order_widget.ordering()
-        for fit_index in order:
-            fitter_single = Fit() if fitter is None else fitter
-            data = GuiUtils.dataFromItem(fit_index)
-            # Potential weights added directly to data
-            weighted_data = self.addWeightingToData(data)
-            try:
-                fitter_single.set_model(model, fit_id, params_to_fit, data=weighted_data,
-                             constraints=constraints)
-            except ValueError as ex:
-                raise ValueError("Setting model parameters failed with: %s" % ex)
-
-            fitter_single.set_data(data=weighted_data, id=fit_id, smearer=smearer, qmin=qmin,
-                            qmax=qmax)
-            fitter_single.select_problem_for_fit(id=fit_id, value=1)
-            fitter_single.set_weight_increase(fit_id, weight_increase)
-            if fitter is None:
-                # Assign id to the new fitter only
-                fitter_single.fitter_id = [self.page_id]
-            fit_id += 1
-            fitters.append(fitter_single)
-
-        return fitters, fit_id
+        return self.fitting_controller.prepareFitters(fitter, fit_id, weight_increase)
 
     def iterateOverModel(self, func: Any) -> None:
         """
@@ -2022,100 +1952,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def updateModelFromList(self, param_dict: dict[str, tuple[float, float]]) -> None:
         """
-        Update the model with new parameters, create the errors column
+        Update the model with new parameters and create the errors column.
+
+        Delegated to FittingController.
         """
-        assert isinstance(param_dict, dict)
-
-        def updateFittedValues(row):
-            # Utility function for main model update
-            # internal so can use closure for param_dict
-            param_name = str(self._model_model.item(row, 0).text())
-            if not self.isCheckable(row) or param_name not in list(param_dict.keys()):
-                return
-            # modify the param value
-            param_repr = GuiUtils.formatNumber(param_dict[param_name][0], high=True)
-            self._model_model.item(row, 1).setText(param_repr)
-            self.logic.kernel_module.setParam(param_name, param_dict[param_name][0])
-            if self.has_error_column:
-                error_repr = GuiUtils.formatNumber(param_dict[param_name][1], high=True)
-                self._model_model.item(row, 2).setText(error_repr)
-
-        def updatePolyValues(row):
-            # Utility function for updateof polydispersity part of the main model
-            param_name = str(self._model_model.item(row, 0).text())+'.width'
-            if not self.isCheckable(row) or param_name not in list(param_dict.keys()):
-                return
-            # modify the param value
-            param_repr = GuiUtils.formatNumber(param_dict[param_name][0], high=True)
-            self._model_model.item(row, 0).child(0).child(0,1).setText(param_repr)
-            # modify the param error
-            if self.has_error_column:
-                error_repr = GuiUtils.formatNumber(param_dict[param_name][1], high=True)
-                self._model_model.item(row, 0).child(0).child(0,2).setText(error_repr)
-
-        def createErrorColumn(row):
-            # Utility function for error column update
-            item = QtGui.QStandardItem()
-            def createItem(param_name):
-                if param_name not in self.main_params_to_fit:
-                    error_repr = ""
-                else:
-                    error_repr = GuiUtils.formatNumber(param_dict[param_name][1], high=True)
-                item.setText(error_repr)
-            def curr_param():
-                return str(self._model_model.item(row, 0).text())
-
-            [createItem(param_name) for param_name in list(param_dict.keys()) if curr_param() == param_name]
-
-            error_column.append(item)
-
-        def createPolyErrorColumn(row):
-            # Utility function for error column update in the polydispersity sub-rows
-            # NOTE: only creates empty items; updatePolyValues adds the error value
-            item = self._model_model.item(row, 0)
-            if not item.hasChildren():
-                return
-            poly_item = item.child(0)
-            if not poly_item.hasChildren():
-                return
-            poly_item.insertColumn(2, [QtGui.QStandardItem("")])
-
-        def deletePolyErrorColumn(row):
-            # Utility function for error column removal in the polydispersity sub-rows
-            item = self._model_model.item(row, 0)
-            if not item.hasChildren():
-                return
-            poly_item = item.child(0)
-            if not poly_item.hasChildren():
-                return
-            poly_item.removeColumn(2)
-
-        if self.has_error_column:
-            # remove previous entries
-            self._model_model.removeColumn(2)
-            self.iterateOverModel(deletePolyErrorColumn)
-
-        #if not self.has_error_column:
-            # create top-level error column
-        error_column = []
-        self.lstParams.itemDelegate().addErrorColumn()
-        self.iterateOverModel(createErrorColumn)
-
-        self._model_model.insertColumn(2, error_column)
-
-        FittingUtilities.addErrorHeadersToModel(self._model_model)
-
-        # create error column in polydispersity sub-rows
-        self.iterateOverModel(createPolyErrorColumn)
-
-        self.has_error_column = True
-
-        # block signals temporarily, so we don't end up
-        # updating charts with every single model change on the end of fitting
-        self._model_model.dataChanged.disconnect()
-        self.iterateOverModel(updateFittedValues)
-        self.iterateOverModel(updatePolyValues)
-        self._model_model.dataChanged.connect(self.onMainParamsChange)
+        self.fitting_controller.updateModelFromList(param_dict)
 
     def onPlot(self) -> None:
         """
