@@ -19,6 +19,8 @@ env:
   # The test-installer job can run with the pyinstaller debug bundle
   INSTALLER_USE_DEBUG: false
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+  # Python version to be used in the CI
+  CI_PYTHON_VERSION: 3.12
 
 jobs:
 
@@ -58,7 +60,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: 3.12
+          python-version: ${{ env.CI_PYTHON_VERSION }}
 
       - uses: actions/checkout@v5
 
@@ -86,7 +88,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: 3.12
+          python-version: ${{ env.CI_PYTHON_VERSION }}
 
       ### Check if this wheel is already cached
 
@@ -442,6 +444,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        os: [ windows-latest, macos-latest, ubuntu-22.04 ]
+        python-version: [ 3.12 ]
         include: ${{ fromJson(needs.matrix.outputs.installer-matrix-json) }}
 
     name: Test installer
