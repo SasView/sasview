@@ -126,22 +126,10 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         Clear the slicer and all connected events related to this slicer
         """
         self.averager = None
-        try:
-            self.clear_markers()
-        except (ValueError, AttributeError):
-            pass
-        try:
-            self.horizontal_lines.clear()
-        except (ValueError, AttributeError):
-            pass
-        try:
-            self.vertical_lines.clear()
-        except (ValueError, AttributeError):
-            pass
-        try:
-            self.center.clear()
-        except (ValueError, AttributeError):
-            pass
+        self.clear_markers()
+        self.center.clear()
+        self.horizontal_lines.clear()
+        self.vertical_lines.clear()
 
     def update(self):
         """
@@ -673,9 +661,18 @@ class VerticalDoubleLine(BaseInteractor):
         Clear this slicer  and its markers
         """
         self.clear_markers()
-        self.right_marker.remove()
-        self.right_line.remove()
-        self.left_line.remove()
+        try:
+            self.right_marker.remove()
+        except (ValueError, AttributeError):
+            pass
+        try:
+            self.right_line.remove()
+        except (ValueError, AttributeError):
+            pass
+        try:
+            self.left_line.remove()
+        except (ValueError, AttributeError):
+            pass
 
     def update(self, x1=None, x2=None, y1=None, y2=None, half_width=None, half_height=None, center=None):
         """
@@ -859,20 +856,17 @@ class HorizontalDoubleLine(BaseInteractor):
         """
         Clear this figure and its markers
         """
-        try:
-            self.clear_markers()
-        except (ValueError, AttributeError):
-            pass
+        self.clear_markers()
         try:
             self.top_marker.remove()
         except (ValueError, AttributeError):
             pass
         try:
-            self.bottom_line.remove()
+            self.top_line.remove()
         except (ValueError, AttributeError):
             pass
         try:
-            self.top_line.remove()
+            self.bottom_line.remove()
         except (ValueError, AttributeError):
             pass
 
