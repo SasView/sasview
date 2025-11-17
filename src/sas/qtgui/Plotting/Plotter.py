@@ -1,5 +1,6 @@
 import copy
 import functools
+import logging
 import math
 import textwrap
 
@@ -21,6 +22,8 @@ from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
 from sas.qtgui.Plotting.QRangeSlider import QRangeSlider
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
 from sas.qtgui.Plotting.SetGraphRange import SetGraphRange
+
+logger = logging.getLogger(__name__)
 
 
 class PlotterWidget(PlotterBase):
@@ -304,8 +307,14 @@ class PlotterWidget(PlotterBase):
         self.setRange.defaultXRange = default_x_range
         self.setRange.defaultYRange = default_y_range
         # Go to expected range
-        self.ax.set_xbound(x_range[0], x_range[1])
-        self.ax.set_ybound(y_range[0], y_range[1])
+        try:
+            self.ax.set_xbound(x_range[0], x_range[1])
+            self.ax.set_ybound(y_range[0], y_range[1])
+        except ValueError:
+            logger.error(
+                "The axis ranges cannot be set for this plot. "
+                "It may be possible to plot the data on differently scaled axes."
+            )
 
         # Add q-range sliders
         if data.show_q_range_sliders:
