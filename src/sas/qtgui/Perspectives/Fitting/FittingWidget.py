@@ -20,6 +20,7 @@ from sas import config
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.ConsoleUpdate import ConsoleUpdate
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
+from sas.qtgui.Perspectives.Fitting.EventMediator import EventBridge, EventMediator, FittingEventType
 from sas.qtgui.Perspectives.Fitting.FitPage import FitPage
 from sas.qtgui.Perspectives.Fitting.FitThread import FitThread
 from sas.qtgui.Perspectives.Fitting.FittingLogic import FittingLogic
@@ -39,6 +40,7 @@ from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
 from sas.sascalc.fit import models
 from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
 from sas.system import HELP_SYSTEM
+from sas.system.user import find_plugins_dir
 
 TAB_MAGNETISM = 4
 TAB_POLY = 3
@@ -101,6 +103,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Globals
         self.initializeGlobals()
+
+        # Initialize event mediator for decoupled event handling
+        self.event_mediator = EventMediator(parent=self)
+        self.event_bridge = EventBridge(self.event_mediator)
 
         # data index for the batch set
         self.data_index = 0
@@ -575,54 +581,203 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def initializeSignals(self) -> None:
         """
-        Connect GUI element signals
-        """
-        # Comboboxes
-        self.cbStructureFactor.currentIndexChanged.connect(self.onSelectStructureFactor)
-        self.cbCategory.currentIndexChanged.connect(self.onSelectCategory)
-        self.cbModel.currentIndexChanged.connect(self.onSelectModel)
-        self.cbFileNames.currentIndexChanged.connect(self.onSelectBatchFilename)
-        # Checkboxes
-        self.chk2DView.toggled.connect(self.toggle2D)
-        self.chkPolydispersity.toggled.connect(self.togglePoly)
-        self.chkMagnetism.toggled.connect(self.toggleMagnetism)
-        self.chkChainFit.toggled.connect(self.toggleChainFit)
-        # Buttons
-        self.cmdFit.clicked.connect(self.onFit)
-        self.cmdPlot.clicked.connect(self.onPlot)
-        self.cmdHelp.clicked.connect(self.onHelp)
+        Connect GUI element signals using EventMediator for decoupled event handling.
 
-        # Respond to change in parameters from the UI
-        self._model_model.dataChanged.connect(self.onMainParamsChange)
-        self.lstParams.selectionModel().selectionChanged.connect(self.onSelectionChanged)
+        The EventMediator pattern provides:
+        - Centralized event routing
+        - Type-safe event handling
+        - Easier testing and debugging
+        - Reduced coupling between components
+        """
+        # ========== UI Control Events (routed through mediator) ==========
+
+        # Comboboxes - model selection events
+        self.event_bridge.connect_signal(
+            self.cbStructureFactor.currentIndexChanged,
+            FittingEventType.STRUCTURE_FACTOR_SELECTED
+        )
+        self.event_bridge.connect_signal(
+            self.cbCategory.currentIndexChanged,
+            FittingEventType.CATEGORY_SELECTED
+        )
+        self.event_bridge.connect_signal(
+            self.cbModel.currentIndexChanged,
+            FittingEventType.MODEL_SELECTED
+        )
+        self.event_bridge.connect_signal(
+            self.cbFileNames.currentIndexChanged,
+            FittingEventType.BATCH_FILE_SELECTED
+        )
+
+        # Checkboxes - view toggle events
+        self.event_bridge.connect_signal(
+            self.chk2DView.toggled,
+            FittingEventType.VIEW_2D_TOGGLED
+        )
+        self.event_bridge.connect_signal(
+            self.chkPolydispersity.toggled,
+            FittingEventType.POLYDISPERSITY_TOGGLED
+        )
+        self.event_bridge.connect_signal(
+            self.chkMagnetism.toggled,
+            FittingEventType.MAGNETISM_TOGGLED
+        )
+        self.event_bridge.connect_signal(
+            self.chkChainFit.toggled,
+            FittingEventType.CHAIN_FIT_TOGGLED
+        )
+
+        # Buttons - action events
+        self.event_bridge.connect_action(
+            self.cmdFit.clicked,
+            FittingEventType.FIT_REQUESTED
+        )
+        self.event_bridge.connect_action(
+            self.cmdPlot.clicked,
+            FittingEventType.PLOT_REQUESTED
+        )
+        self.event_bridge.connect_action(
+            self.cmdHelp.clicked,
+            FittingEventType.HELP_REQUESTED
+        )
+
+        # ========== Subscribe to events ==========
+
+        # Model selection handlers
+        self.event_mediator.subscribe(FittingEventType.STRUCTURE_FACTOR_SELECTED, lambda _: self.onSelectStructureFactor())
+        self.event_mediator.subscribe(FittingEventType.CATEGORY_SELECTED, lambda _: self.onSelectCategory())
+        self.event_mediator.subscribe(FittingEventType.MODEL_SELECTED, lambda _: self.onSelectModel())
+        self.event_mediator.subscribe(FittingEventType.BATCH_FILE_SELECTED, lambda idx: self.onSelectBatchFilename(idx))
+
+        # View toggle handlers
+        self.event_mediator.subscribe(FittingEventType.VIEW_2D_TOGGLED, lambda checked: self.toggle2D(checked))
+        self.event_mediator.subscribe(FittingEventType.POLYDISPERSITY_TOGGLED, lambda checked: self.togglePoly(checked))
+        self.event_mediator.subscribe(FittingEventType.MAGNETISM_TOGGLED, lambda checked: self.toggleMagnetism(checked))
+        self.event_mediator.subscribe(FittingEventType.CHAIN_FIT_TOGGLED, lambda checked: self.toggleChainFit(checked))
+
+        # Action handlers
+        self.event_mediator.subscribe(FittingEventType.FIT_REQUESTED, lambda _: self.onFit())
+        self.event_mediator.subscribe(FittingEventType.PLOT_REQUESTED, lambda _: self.onPlot())
+        self.event_mediator.subscribe(FittingEventType.HELP_REQUESTED, lambda _: self.onHelp())
+
+        # Parameter model changes
+        self.event_bridge.connect_signal(
+            self._model_model.dataChanged,
+            FittingEventType.PARAMS_CHANGED
+        )
+        self.event_mediator.subscribe(
+            FittingEventType.PARAMS_CHANGED,
+            lambda args: self.onMainParamsChange(args[0], args[1])  # top, bottom indices
+        )
+
+        # Parameter selection changes
+        # Note: lstParams.selectionModel().selectionChanged needs special handling
+        self.lstParams.selectionModel().selectionChanged.connect(
+            lambda: self.event_mediator.publish(FittingEventType.SELECTION_CHANGED)
+        )
+        self.event_mediator.subscribe(FittingEventType.SELECTION_CHANGED, lambda _: self.onSelectionChanged())
+
+        # Event filter for keyboard events (must stay direct - Qt requirement)
         self.lstParams.installEventFilter(self)
 
-        # Local signals
-        self.batchFittingFinishedSignal.connect(self.batchFitComplete)
-        self.fittingFinishedSignal.connect(self.fitComplete)
-        self.Calc1DFinishedSignal.connect(self.complete1D)
-        self.Calc2DFinishedSignal.connect(self.complete2D)
+        # Calculation completion signals
+        self.event_bridge.connect_signal(
+            self.batchFittingFinishedSignal,
+            FittingEventType.BATCH_FITTING_FINISHED
+        )
+        self.event_bridge.connect_signal(
+            self.fittingFinishedSignal,
+            FittingEventType.FITTING_FINISHED
+        )
+        self.event_bridge.connect_signal(
+            self.Calc1DFinishedSignal,
+            FittingEventType.CALCULATION_1D_FINISHED
+        )
+        self.event_bridge.connect_signal(
+            self.Calc2DFinishedSignal,
+            FittingEventType.CALCULATION_2D_FINISHED
+        )
 
-        # Signals from separate tabs asking for replot
-        self.options_widget.plot_signal.connect(self.onOptionsUpdate)
+        # Subscribe to calculation events
+        self.event_mediator.subscribe(FittingEventType.BATCH_FITTING_FINISHED, lambda result: self.batchFitComplete(result))
+        self.event_mediator.subscribe(FittingEventType.FITTING_FINISHED, lambda result: self.fitComplete(result))
+        self.event_mediator.subscribe(FittingEventType.CALCULATION_1D_FINISHED, lambda data: self.complete1D(data))
+        self.event_mediator.subscribe(FittingEventType.CALCULATION_2D_FINISHED, lambda data: self.complete2D(data))
+
+        # Options widget - route through mediator for consistency
+        self.event_bridge.connect_action(
+            self.options_widget.plot_signal,
+            FittingEventType.OPTIONS_UPDATE_REQUESTED
+        )
+        self.event_mediator.subscribe(FittingEventType.OPTIONS_UPDATE_REQUESTED, lambda _: self.onOptionsUpdate())
+
+        # Options widget internal signals (kept direct - internal widget state)
         self.options_widget.txtMinRange.editingFinished.connect(self.options_widget.updateMinQ)
         self.options_widget.txtMaxRange.editingFinished.connect(self.options_widget.updateMaxQ)
 
-        # Signals from other widgets
-        self.communicate.customModelDirectoryChanged.connect(self.onCustomModelChange)
-        self.smearing_widget.smearingChangedSignal.connect(self.onSmearingOptionsUpdate)
-        self.polydispersity_widget.cmdFitSignal.connect(lambda: self.cmdFit.setEnabled(self.haveParamsToFit()))
-        self.polydispersity_widget.updateDataSignal.connect(lambda: self.updateData())
-        self.polydispersity_widget.iterateOverModelSignal.connect(lambda: self.iterateOverModel(self.updateFunctionCaption))
-        self.magnetism_widget.cmdFitSignal.connect(lambda: self.cmdFit.setEnabled(self.haveParamsToFit()))
-        self.magnetism_widget.updateDataSignal.connect(lambda: self.updateData())
+        # ========== Child widget events (routed through mediator) ==========
 
-        # Communicator signal
-        self.communicate.updateModelCategoriesSignal.connect(self.onCategoriesChanged)
-        self.communicate.updateMaskedDataSignal.connect(self.onMaskedData)
+        # Custom model directory changes
+        self.event_bridge.connect_signal(
+            self.communicate.customModelDirectoryChanged,
+            FittingEventType.CUSTOM_MODEL_CHANGED
+        )
+        self.event_mediator.subscribe(FittingEventType.CUSTOM_MODEL_CHANGED, lambda _: self.onCustomModelChange())
 
-        # Catch all key press events
-        self.keyPressedSignal.connect(self.onKey)
+        # Smearing changes
+        self.event_bridge.connect_signal(
+            self.smearing_widget.smearingChangedSignal,
+            FittingEventType.SMEARING_OPTIONS_UPDATED
+        )
+        self.event_mediator.subscribe(FittingEventType.SMEARING_OPTIONS_UPDATED, lambda _: self.onSmearingOptionsUpdate())
+
+        # Polydispersity widget events
+        self.event_bridge.connect_action(
+            self.polydispersity_widget.cmdFitSignal,
+            FittingEventType.FIT_ENABLEMENT_CHANGED
+        )
+        self.event_bridge.connect_action(
+            self.polydispersity_widget.updateDataSignal,
+            FittingEventType.DATA_UPDATED
+        )
+        self.event_bridge.connect_action(
+            self.polydispersity_widget.iterateOverModelSignal,
+            FittingEventType.MODEL_ITERATION_REQUESTED
+        )
+
+        # Magnetism widget events
+        self.event_bridge.connect_action(
+            self.magnetism_widget.cmdFitSignal,
+            FittingEventType.FIT_ENABLEMENT_CHANGED
+        )
+        self.event_bridge.connect_action(
+            self.magnetism_widget.updateDataSignal,
+            FittingEventType.DATA_UPDATED
+        )
+
+        # Subscribe to aggregated events
+        self.event_mediator.subscribe(FittingEventType.FIT_ENABLEMENT_CHANGED, lambda _: self.cmdFit.setEnabled(self.haveParamsToFit()))
+        self.event_mediator.subscribe(FittingEventType.DATA_UPDATED, lambda _: self.updateData())
+        self.event_mediator.subscribe(FittingEventType.MODEL_ITERATION_REQUESTED, lambda _: self.iterateOverModel(self.updateFunctionCaption))
+
+        # Model categories and masked data updates
+        self.event_bridge.connect_signal(
+            self.communicate.updateModelCategoriesSignal,
+            FittingEventType.MODEL_CATEGORIES_UPDATED
+        )
+        self.event_bridge.connect_signal(
+            self.communicate.updateMaskedDataSignal,
+            FittingEventType.MASKED_DATA_UPDATED
+        )
+        self.event_mediator.subscribe(FittingEventType.MODEL_CATEGORIES_UPDATED, lambda _: self.onCategoriesChanged())
+        self.event_mediator.subscribe(FittingEventType.MASKED_DATA_UPDATED, lambda _: self.onMaskedData())
+
+        # Keyboard events
+        self.event_bridge.connect_signal(
+            self.keyPressedSignal,
+            FittingEventType.KEY_PRESSED
+        )
+        self.event_mediator.subscribe(FittingEventType.KEY_PRESSED, lambda event: self.onKey(event))
 
     def keyPressEvent(self, event: QtGui.QKeyEvent) -> None:
         super(FittingWidget, self).keyPressEvent(event)
@@ -1117,7 +1272,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if param not in self.allParamNames():
             return False
 
-        for model_key in self.model_dict.keys():
+        for model_key in self.model_dict:
             for row in range(self.model_dict[model_key].rowCount()):
                 param_name = self.model_dict[model_key].item(row,0).text()
                 if model_key == 'poly':
@@ -1223,7 +1378,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         e.g. [('sld','5*sld_solvent')]
         """
         params = []
-        for model_key in self.model_dict.keys():
+        for model_key in self.model_dict:
             model = self.model_dict[model_key]
             param_number = model.rowCount()
             if model_key == 'poly':
@@ -1242,7 +1397,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         for a given FitPage
         """
         constraints = []
-        for model_key in self.model_dict.keys():
+        for model_key in self.model_dict:
             constraints += self.getComplexConstraintsForModel(model_key=model_key)
         return constraints
 
@@ -1288,7 +1443,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Returns a list of the constraint object for a given FitPage
         """
         constraints = []
-        for model_key in self.model_dict.keys():
+        for model_key in self.model_dict:
             constraints += self.getConstraintObjectsForModel(model_key=model_key)
         return constraints
 
@@ -1308,7 +1463,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         # Get constraints
         constraints = []
-        for model_key in self.model_dict.keys():
+        for model_key in self.model_dict:
             constraints += self.getComplexConstraintsForModel(model_key=model_key)
         # See if there are any constraints across models
         multi_constraints = [cons for cons in constraints if self.isConstraintMultimodel(cons[1])]
@@ -1954,7 +2109,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Get the constraints.
         constraints = []
-        for model_key in self.model_dict.keys():
+        for model_key in self.model_dict:
             constraints += self.getComplexConstraintsForModel(model_key=model_key)
         if fitter is None:
             # For single fits - check for inter-model constraints
@@ -3176,7 +3331,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # cell 5: SLD button
         item5 = QtGui.QStandardItem()
         button = None
-        for p in self.logic.kernel_module.params.keys():
+        for p in self.logic.kernel_module.params:
             if re.search(r'^[\w]{0,3}sld.*[1-9]$', p):
                 # Only display the SLD Profile button for models with SLD parameters
                 button = QtWidgets.QPushButton()
