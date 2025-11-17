@@ -12,6 +12,7 @@ from mpl_toolkits.mplot3d.axes3d import Axes3D
 from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtCore import QSize
 from PySide6.QtGui import QIcon
+from PySide6.QtWidgets import QMessageBox
 from scipy.spatial.transform import Rotation
 from twisted.internet import threads
 
@@ -82,6 +83,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.data_betaQ = None
         self.fQ = []
         self.graph_num = 1      # index for name of graph
+        self.warned_user_large_calc = False
 
         # finish UI setup - install qml window
         self.setup_display()
@@ -1367,6 +1369,44 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                                              numpy.radians(float(self.txtSampleRoll.text()))])
         return env, sample*env
 
+    def check_large_calculation(self, num_points):
+        """
+        Generate a popup warning the user about a large calculation
+        :return True if the calculation should continue, False otherwise.
+        """
+
+        if self.warned_user_large_calc or num_points < 50_000: return True
+        # timings for an i7-1165G7 4-core CPU from 2020:
+        # 50k: 1.8s | 100k: 6.3s | 200k: 28.7s | 300k: 65.6s | 400k: 117.2s | 500k: 181.2s
+        # multiply by 2 & round to get a conservative estimate
+        thresholds = [
+            (100_000,      50_000,  "30 seconds"),
+            (200_000,      100_000, "a minute"),
+            (300_000,      200_000, "a couple of minutes"),
+            (400_000,      300_000, "around 5 minutes"),
+            (500_000,      400_000, "around 10 minutes"),
+            (float('inf'), 500_000, "more than an hour")
+        ]
+
+        # find the appropriate threshold and time estimate
+        for limit, exceeded_threshold, time_estimate in thresholds:
+            if num_points < limit:
+                msg = (f"The number of atoms exceeds {exceeded_threshold:,}.\n"
+                       f"This calculation may take {time_estimate} to complete. "
+                       "Do you wish to proceed?")
+                break
+
+        flag_continue = False
+        popup = QMessageBox(standardButtons = QMessageBox.Ok | QMessageBox.Cancel)
+        popup.setIcon(QMessageBox.Warning)
+        popup.setText(msg)
+        popup.setWindowTitle("Large input structure")
+        popup.setDefaultButton(QMessageBox.Cancel)
+        result = popup.exec()
+        flag_continue = (result == QMessageBox.Ok)
+        self.warned_user_large_calc = flag_continue
+        return flag_continue
+
     def onCompute(self):
         """Execute the computation of I(qx, qy)
 
@@ -1375,6 +1415,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         try:
             # create the combined sld data and update from gui
             sld_data = self.create_full_sld_data()
+            if hasattr(sld_data, 'data_length') and not self.check_large_calculation(sld_data.data_length): return
+
             # TODO: implement fourier transform for meshes with multiple element or face types
             # The easy option is to simply convert all elements to tetrahedra - but this could rapidly
             # increase the calculation time.
@@ -1458,6 +1500,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         nq = len(input[0])
         chunk_size = 32 if self.is_avg else 256
         out = []
+
         # the 1D AUSAXS calculator cannot be chunked
         if self.is_avg and not len(input[1]):
             self.data_to_plot = self.model.runXY(input)

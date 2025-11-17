@@ -146,7 +146,7 @@ prolate ellipsoid while a value smaller than 1 is for an oblate ellipsoid.
    described below and ensure that the background subtraction is set correctly.
 
 At this point, one can run a fit.  There are two buttons at the bottom of the
-panel: *Qick fit* and *Full fit*. One should always start with the
+panel: *Quick fit* and *Full fit*. One should always start with the
 *Quick fit*. The only difference between the two is that the first will only
 run the calculation once and produce the result.
 

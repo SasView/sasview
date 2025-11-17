@@ -1,7 +1,6 @@
 # Quick Intro for Building SasView
 
-Note - at the current time SasView will only run in gui form under Python 3.12
-and later.
+Note - at the current time SasView will only run in gui form under Python 3.12 and later.
 
 Whether you're installing SasView to use as a tool for your research or
 because you're wanting to work on the code, it is recommended that you
@@ -10,18 +9,16 @@ A `venv` or a `conda` are both popular choices.
 
 ## Installing SasView as a User
 
-Installers for SasView can be found at [https://www.sasview.org/](https://www.sasview.org/), for various operating systems. You will also find
-walk through tutorials on how to install and use SasView.
+Installers for SasView can be found at [https://www.sasview.org/](https://www.sasview.org/),
+for various operating systems. You will also find walk through tutorials on how to install and use SasView.
 
 You can also install SasView using standard Python installation tools,
 such as `pipx install sasview` to install it into its own standalone
-environment (or `pip install sasview` to install it into your current Python
-environment).
+environment (or `pip install sasview` to install it into your current Python environment).
 
 ## Making a SasView Development Environment
 
-If you're familiar with working with developing in Python, then the
-very quick version is:
+If you're familiar with working with developing in Python, then the very quick version is:
 
 ```shell
 # clone the repository
@@ -59,15 +56,13 @@ Step by step, that is:
     if you use `cmd` or PowerShell under windows, there are
     [different ways](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#create-and-use-virtual-environments)
     to activate the virtual environment.
-1.  Install the necessary modules for building and running SasView.
+ 1. Install the necessary modules for building and running SasView, including the documentation and GUI.
     It will take a while to download and unpack all the dependencies.
     The `pip install -e` command says to install the package in development mode
     so that any changes you make in the source tree will be available the
     next time you run the program. We execute this using the `python -m` syntax in order to ensure that the virtual environment python is used. The `.[dev,test]` syntax says to install
     the current directory (sasview) with test and dev dependencies.
-    `Note:` In case you see an error telling you `.venv/bin/python: No module named pip`. You can install `pip` in the current virtual environment using `python -m ensurepip --default-pip`.
-1.  Build the GUI and the documentation using the `hatchling` builder.
-1.  Run SasView!
+ 1. Run SasView! As an alternative to typing `python -m sas`, you can simply type `sasview`.
 
 Almost all the modules that SasView needs are available as precompiled modules
 on PyPI, including numpy, scipy, h5py, pyside6. A handful of Python-only
@@ -90,9 +85,6 @@ debugging software, e.g.:
 
 - [VS Code](https://code.visualstudio.com/docs/python/environments)
 - [PyCharm](https://www.jetbrains.com/help/pycharm/creating-virtual-environment.html)
-
-If you've altered the user interface or want the documentation to be rebuilt,
-then the `hatchling` step can be repeated.
 
 More information can be found at:
 
