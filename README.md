@@ -10,9 +10,6 @@
     <a href="https://sasview.org">
         <img src="https://img.shields.io/website-up-down-green-red/http/sasview.org.svg" alt="Website Status" />
     </a>
-    <a href="https://github.com/SasView/sasview/actions">
-        <img src="https://img.shields.io/github/workflow/status/SasView/sasview/CI" alt="CI Status">
-    </a>
     <a href="https://opensource.org/licenses/bsd-3-clause">
         <img src="https://img.shields.io/badge/License-BSD-brightgreen" alt="License">
     </a>
