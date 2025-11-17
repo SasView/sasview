@@ -1,3 +1,5 @@
+import logging
+
 import numpy
 from PySide6 import QtGui
 
@@ -6,6 +8,7 @@ from sasdata.data_util.manipulations import Boxavg, Boxsum
 from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
 from sas.qtgui.Utilities.GuiUtils import formatNumber, toDouble
 
+logger = logging.getLogger(__name__)
 
 class BoxSumCalculator(BaseInteractor):
     """
@@ -65,7 +68,7 @@ class BoxSumCalculator(BaseInteractor):
         self.horizontal_lines = HorizontalDoubleLine(
             self,
             self.axes,
-            color="blue",
+            color=color,
             zorder=zorder,
             y=self.ymax,
             x=self.xmax,
@@ -77,7 +80,7 @@ class BoxSumCalculator(BaseInteractor):
         self.vertical_lines = VerticalDoubleLine(
             self,
             self.axes,
-            color="black",
+            color=color,
             zorder=zorder,
             y=self.ymax,
             x=self.xmax,
@@ -87,7 +90,7 @@ class BoxSumCalculator(BaseInteractor):
         self.vertical_lines.qmax = self.qmax
 
         self.center = PointInteractor(
-            self, self.axes, color="grey", zorder=zorder, center_x=self.center_x, center_y=self.center_y
+            self, self.axes, color=color, zorder=zorder, center_x=self.center_x, center_y=self.center_y
         )
         # Save the name of the slicer panel associate with this slicer
         self.panel_name = ""
@@ -173,15 +176,15 @@ class BoxSumCalculator(BaseInteractor):
         try:
             self.horizontal_lines.clear()
         except (ValueError, AttributeError):
-            pass
+            logger.debug("Error clearing horizontal lines")
         try:
             self.vertical_lines.clear()
         except (ValueError, AttributeError):
-            pass
+            logger.debug("Error clearing vertical lines")
         try:
             self.center.clear()
         except (ValueError, AttributeError):
-            pass
+            logger.debug("Error clearing center")
 
     def update(self):
         """
@@ -357,9 +360,14 @@ class PointInteractor(BaseInteractor):
         """
         Clear this figure and its markers
         """
-        self.clear_markers()
-        self.center.remove()
-        self.center_marker.remove()
+        try:
+            self.clear_markers()
+        except Exception as e:
+            logger.error("Error clearing markers: %s", e)
+        try:
+            self.center.remove()
+        except Exception as e:
+            logger.error("Error removing center: %s", e)
 
     def update(self, center_x=None, center_y=None):
         """
@@ -484,10 +492,18 @@ class VerticalDoubleLine(BaseInteractor):
         """
         Clear this slicer  and its markers
         """
-        self.clear_markers()
-        self.right_marker.remove()
-        self.right_line.remove()
-        self.left_line.remove()
+        try:
+            self.clear_markers()
+        except Exception as e:
+            logger.error("Error clearing markers: %s", e)
+        try:
+            self.right_line.remove()
+        except Exception as e:
+            logger.error("Error removing right line: %s", e)
+        try:
+            self.left_line.remove()
+        except Exception as e:
+            logger.error("Error removing left line: %s", e)
 
     def update(self, x1=None, x2=None, y1=None, y2=None, width=None, height=None, center=None):
         """
@@ -652,18 +668,8 @@ class HorizontalDoubleLine(BaseInteractor):
         Clear this figure and its markers
         """
         self.clear_markers()
-        try:
-            self.top_marker.remove()
-        except (ValueError, AttributeError):
-            pass
-        try:
-            self.bottom_line.remove()
-        except (ValueError, AttributeError):
-            pass
-        try:
-            self.top_line.remove()
-        except (ValueError, AttributeError):
-            pass
+        self.bottom_line.remove()
+        self.top_line.remove()
 
     def update(self, x1=None, x2=None, y1=None, y2=None, width=None, height=None, center=None):
         """
