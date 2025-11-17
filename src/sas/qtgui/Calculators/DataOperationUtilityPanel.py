@@ -392,7 +392,9 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         # clear layout
         if layout.count() > 0:
             item = layout.takeAt(0)
-            layout.removeItem(item)
+            widget = item.widget()
+            if widget is not None:
+                widget.deleteLater()
 
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self.prepareSubgraphWithData("?"))
@@ -408,7 +410,10 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         # clear layout
         if layout.count() > 0:
             item = layout.takeAt(0)
-            layout.removeItem(item)
+            #layout.removeItem(item)
+            widget = item.widget()
+            if widget is not None:
+                widget.deleteLater()
 
         layout.setContentsMargins(0, 0, 0, 0)
 
@@ -443,8 +448,6 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             plotter.ax.tick_params(axis='y', labelsize=8)
 
             plotter.plot(data=data, hide_error=True, marker='.')
-
-            layout.setContentsMargins(0, 0, 0, 0)
 
             plotter.show()
 
