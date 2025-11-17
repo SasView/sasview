@@ -281,7 +281,10 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         """
         Returns the index of the next available tab
         """
-        return max((tab.tab_id for tab in self.tabs), default=0) + 1
+        # account for ConstraintWidget ids which are >300
+        max_tab = max((tab.tab_id for tab in self.tabs
+                       if not isinstance(tab, ConstraintWidget)), default=0) + 1
+        return max_tab
 
     def addClosedTab(self):
         """
