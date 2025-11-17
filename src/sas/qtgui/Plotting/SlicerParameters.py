@@ -118,6 +118,9 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         # Hide stack plots tab
         self.showPlotsTab(False)
 
+        # Default open to tab_1
+        self.tabWidget.setCurrentIndex(0)
+
     def showPlotsTab(self, show=True):
         """
         Show or hide the plots tab
