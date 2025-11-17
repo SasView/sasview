@@ -15,6 +15,7 @@ from sasdata.file_converter.nxcansas_writer import NXcanSASWriter
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas import config
+from sas.qtgui.Plotting import PlotHelper
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.Slicers.AnnulusSlicer import AnnulusInteractor
 from sas.qtgui.Plotting.Slicers.BoxSlicer import BoxInteractorX, BoxInteractorY
@@ -115,6 +116,9 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         # Set up slicers list
         self.setSlicersList()
 
+        # Set up slicer plots list
+        self.setSlicerPlotsList()
+
         # Default open to tab_1
         self.tabWidget.setCurrentIndex(0)
 
@@ -139,9 +143,8 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
 
     def updateSlicerPlotList(self):
         """ Update the list of slicer plots """
-        self.parent.updateSlicerPlotList()
+        self.active_slicer_plots = self.parent.getActiveSlicerPlots()
         self.setSlicerPlotList()
-        logger.debug("Updated slicer plot list")
 
     def getCurrentSlicerDict(self):
         """
@@ -295,6 +298,31 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
             chkboxItem.setCheckState(checked)
             self.lstSlicerPlots.addItem(chkboxItem)
 
+    def setSlicerPlotsList(self):
+        """
+        Create and initially populate the list of slicer plots
+        """
+        current_slicer_plots = self.getCurrentSlicerPlotDict()
+        self.lstSlicerPlots.clear()
+
+        # Get slicer plots from the parent
+        slicer_plots = getattr(self.parent, 'slicer_plot_dict', {})
+
+        # Fill out list of slicer plots
+        for plot_name, plot_widget in slicer_plots.items():
+            if str(plot_name) in current_slicer_plots.keys():
+                # redo the list
+                checked = QtCore.Qt.Checked if current_slicer_plots[plot_name] else QtCore.Qt.Unchecked
+            else:
+                # create a new list - default to checked
+                checked = QtCore.Qt.Checked
+
+            chkboxItem = QtWidgets.QListWidgetItem(str(plot_name))
+            chkboxItem.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
+            chkboxItem.setCheckState(checked)
+            chkboxItem.setData(QtCore.Qt.UserRole, plot_widget)
+            self.lstSlicerPlots.addItem(chkboxItem)
+
     def setSlots(self):
         """
         define slots for signals from various sources
@@ -335,6 +363,9 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
 
         # selecting/deselecting items in lstPlots enables `Apply`
         self.lstPlots.itemChanged.connect(lambda: self.cmdApply.setEnabled(True))
+
+        # delete slicer plots
+        self.cmdDeleteSlicerPlots.clicked.connect(self.onDeleteSlicerPlots)
 
     def onFocus(self, row, column):
         """Set the focus on the cell (row, column)"""
@@ -479,11 +510,11 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
 
     def onDelete(self):
         """
-        Delete the current slicer and its associated plots
+        Delete the current slicer
         """
         # Pop up a confirmation dialog
         reply = QtWidgets.QMessageBox.question(self, 'Delete Slicer',
-                                             'Are you sure you want to delete this slicer and its plots?',
+                                             'Are you sure you want to delete this slicer?',
                                              QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
                                              QtWidgets.QMessageBox.No)
         if reply == QtWidgets.QMessageBox.No:
@@ -545,6 +576,56 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
             # No slicers left, clear the model and slicer reference
             self.parent.slicer = None
             self.setModel(None)
+
+    def onDeleteSlicerPlots(self):
+        """
+        Delete selected slicer plots
+        """
+        # Pop up a confirmation dialog
+        reply = QtWidgets.QMessageBox.question(self, 'Delete Slicer Plots',
+                                         'Are you sure you want to delete the selected slicer plots?',
+                                         QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+                                         QtWidgets.QMessageBox.No)
+        if reply == QtWidgets.QMessageBox.No:
+            return
+
+        # Iterate over the list and delete checked items
+        for row in range(self.lstSlicerPlots.count()-1, -1, -1):
+            item = self.lstSlicerPlots.item(row)
+            isChecked = item.checkState() != QtCore.Qt.Unchecked
+            if isChecked:
+                plot_name = item.text()
+                plot_widget = item.data(QtCore.Qt.UserRole)
+
+                # Get the plot ID for PlotHelper cleanup
+                plot_id = PlotHelper.idOfPlot(plot_widget)
+
+                # Close the plot window if it exists
+                if hasattr(plot_widget, 'close'):
+                    plot_widget.close()
+
+                # Remove from PlotHelper
+                if plot_id:
+                    PlotHelper.deletePlot(plot_id)
+
+                # Remove from parent's slicer_plot_dict
+                if plot_name in self.parent.slicer_plot_dict:
+                    del self.parent.slicer_plot_dict[plot_name]
+
+                # Remove from active plots if present
+                if plot_name in self.active_plots:
+                    del self.active_plots[plot_name]
+
+                # Remove from the manager's plot_widgets if it exists
+                if hasattr(self.parent.manager, 'plot_widgets') and plot_id in self.parent.manager.plot_widgets:
+                    subwindow = self.parent.manager.plot_widgets[plot_id]
+                    # Remove from workspace
+                    if hasattr(self.parent.manager.parent, 'workspace'):
+                        self.parent.manager.parent.workspace().removeSubWindow(subwindow)
+                    del self.parent.manager.plot_widgets[plot_id]
+
+                # Remove from the list widget
+                self.lstSlicerPlots.takeItem(row)
 
     def applyPlotter(self, plot):
         """

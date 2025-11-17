@@ -251,6 +251,18 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         if self.update_model:
             self.setModelFromParams()
 
+        # Register the plot in parent's dictionary
+        if hasattr(self.base, 'slicer_plot_dict'):
+            plot_name = new_plot.name
+            if plot_name in self.base.manager.active_plots:
+                plot_widget = self.base.manager.active_plots[plot_name]
+                self.base.slicer_plot_dict[plot_name] = plot_widget
+
+                # Update the slicer plots list if the widget is open
+                if self.base.slicer_widget:
+                    self.base.slicer_widget.setSlicerPlotsList()
+
+
     def validate(self, param_name, param_value):
         """
         Validate input from user.

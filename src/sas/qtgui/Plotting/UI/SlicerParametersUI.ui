@@ -513,7 +513,7 @@
        <property name="title">
         <string>Slicer plots</string>
        </property>
-       <widget class="QListWidget" name="lstPlots_2">
+       <widget class="QListWidget" name="lstSlicerPlots">
         <property name="geometry">
          <rect>
           <x>10</x>
@@ -553,7 +553,7 @@
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton">
+          <widget class="QPushButton" name="cmdDeleteSlicerPlots">
            <property name="text">
             <string>Delete</string>
            </property>
