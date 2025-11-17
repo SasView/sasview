@@ -115,19 +115,8 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         # Set up slicers list
         self.setSlicersList()
 
-        # Hide stack plots tab
-        self.showPlotsTab(False)
-
         # Default open to tab_1
         self.tabWidget.setCurrentIndex(0)
-
-    def showPlotsTab(self, show=True):
-        """
-        Show or hide the plots tab
-        """
-        index = self.tabWidget.indexOf(self.tab_3)
-        self.tabWidget.setTabEnabled(index, show)
-        self.tabWidget.setTabVisible(index, show)
 
     def setParamsList(self):
         """
@@ -144,9 +133,15 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         header.setStretchLastSection(True)
 
     def updatePlotList(self):
-        """ """
+        """ Update the list of plots """
         self.active_plots = self.parent.getActivePlots()
         self.setPlotsList()
+
+    def updateSlicerPlotList(self):
+        """ Update the list of slicer plots """
+        self.parent.updateSlicerPlotList()
+        self.setSlicerPlotList()
+        logger.debug("Updated slicer plot list")
 
     def getCurrentSlicerDict(self):
         """
@@ -266,6 +261,40 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
             chkboxItem.setCheckState(checked)
             self.lstPlots.addItem(chkboxItem)
 
+    def getCurrentSlicerPlotDict(self):
+        """
+        Returns a dictionary of currently shown slicer plots
+        {slicer_plot_name:checkbox_status}
+        """
+        current_slicer_plots = {}
+        if self.lstSlicerPlots.count() != 0:
+            for row in range(self.lstSlicerPlots.count()):
+                item = self.lstSlicerPlots.item(row)
+                isChecked = item.checkState() != QtCore.Qt.Unchecked
+                slicer_plot = item.text()
+                current_slicer_plots[slicer_plot] = isChecked
+        return current_slicer_plots
+
+    def setCurrentSlicerPlotList(self):
+        """
+        Create and initially populate the list of slicer plots
+        """
+        current_slicer_plots = self.getCurrentSlicerPlotDict()
+        self.lstSlicerPlots.clear()
+        # Fill out list of slicer plots
+        for item in self.parent.slicer_plots.keys():
+            if str(item) in current_slicer_plots.keys():
+                # redo the list
+                checked = QtCore.Qt.Checked if current_slicer_plots[item] else QtCore.Qt.Unchecked
+            else:
+                # create a new list
+                checked = QtCore.Qt.Checked if (self.parent.data[0].name == item) else QtCore.Qt.Unchecked
+
+            chkboxItem = QtWidgets.QListWidgetItem(str(item))
+            chkboxItem.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
+            chkboxItem.setCheckState(checked)
+            self.lstSlicerPlots.addItem(chkboxItem)
+
     def setSlots(self):
         """
         define slots for signals from various sources
@@ -374,11 +403,6 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
     def onStackChanged(self, checked):
         """change the stack plots setting"""
         self.parent.stackplots = checked
-        logger.info(f"Stack plots: {checked}")
-        if checked:
-            self.showPlotsTab(True)
-        else:
-            self.showPlotsTab(False)
 
     def onGeneratePlots(self, isChecked):
         """
@@ -455,43 +479,72 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
 
     def onDelete(self):
         """
-        Delete the current slicer
+        Delete the current slicer and its associated plots
         """
         # Pop up a confirmation dialog
         reply = QtWidgets.QMessageBox.question(self, 'Delete Slicer',
-                                             'Are you sure you want to delete this slicer?',
+                                             'Are you sure you want to delete this slicer and its plots?',
                                              QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
                                              QtWidgets.QMessageBox.No)
         if reply == QtWidgets.QMessageBox.No:
             return
+
         # Get the current slicer name
         slicer_item = self.getCheckedSlicer()
-        # Remove the slicer from the dictionary
-        if slicer_item in self.parent.slicers:
-            slicer_obj = self.parent.slicers[slicer_item]
-            # Clear only this slicer's markers without affecting other slicers
-            # Use clear_markers() which uses connect.clear(*markers) instead of clearall()
-            self._clear_slicer_markers(slicer_obj)
-            # Remove from dictionary
-            del self.parent.slicers[slicer_item]
-            # Remove from slicer_models cache
-            if slicer_item in self.slicer_models:
-                del self.slicer_models[slicer_item]
-            # update the canvas
-            self.parent.canvas.draw()
-            # update the slicer list
-            self.updateSlicersList()
-            # Select the next remaining slicer if any exist
-            if len(self.parent.slicers) > 0:
-                # Get the first remaining slicer
-                next_slicer_name = next(iter(self.parent.slicers.keys()))
-                # Update self.parent.slicer to point to the remaining slicer
-                self.parent.slicer = self.parent.slicers[next_slicer_name]
-                self.checkSlicerByName(next_slicer_name)
-            else:
-                # No slicers left, clear the model and slicer reference
-                self.parent.slicer = None
-                self.setModel(None)
+
+        if slicer_item not in self.parent.slicers:
+            return
+
+        slicer_obj = self.parent.slicers[slicer_item]
+
+        # Delete associated 1D plots from active_plots
+        plots_to_remove = []
+        for plot_name in list(self.active_plots.keys()):
+            plot = self.active_plots[plot_name]
+            # Check if this plot belongs to the current slicer
+            if hasattr(plot, 'data') and len(plot.data) > 0:
+                data = plot.data[-1]
+                if isinstance(data, Data1D) and slicer_item in data.name:
+                    plots_to_remove.append(plot_name)
+
+        # Remove the plots
+        for plot_name in plots_to_remove:
+            if plot_name in self.active_plots:
+                # Close the plot window if it exists
+                plot_widget = self.active_plots[plot_name]
+                if hasattr(plot_widget, 'close'):
+                    plot_widget.close()
+                # Remove from active plots
+                del self.active_plots[plot_name]
+
+        # Clear the slicer's markers
+        self._clear_slicer_markers(slicer_obj)
+
+        # Remove from dictionary
+        del self.parent.slicers[slicer_item]
+
+        # Remove from slicer_models cache
+        if slicer_item in self.slicer_models:
+            del self.slicer_models[slicer_item]
+
+        # Update the canvas
+        self.parent.canvas.draw()
+
+        # Update the slicer list
+        self.updateSlicersList()
+
+        # Update the plots list to remove deleted plots
+        self.setPlotsList()
+
+        # Select the next remaining slicer if any exist
+        if len(self.parent.slicers) > 0:
+            next_slicer_name = next(iter(self.parent.slicers.keys()))
+            self.parent.slicer = self.parent.slicers[next_slicer_name]
+            self.checkSlicerByName(next_slicer_name)
+        else:
+            # No slicers left, clear the model and slicer reference
+            self.parent.slicer = None
+            self.setModel(None)
 
     def applyPlotter(self, plot):
         """

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>570</width>
-    <height>671</height>
+    <width>676</width>
+    <height>650</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -500,30 +500,42 @@
         <rect>
          <x>10</x>
          <y>9</y>
-         <width>521</width>
-         <height>271</height>
+         <width>631</width>
+         <height>540</height>
         </rect>
        </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="title">
-        <string>Plots</string>
+        <string>Slicer plots</string>
        </property>
        <widget class="QListWidget" name="lstPlots_2">
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>31</y>
-          <width>501</width>
-          <height>191</height>
+          <y>21</y>
+          <width>602</width>
+          <height>378</height>
          </rect>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
         </property>
        </widget>
        <widget class="QWidget" name="horizontalLayoutWidget">
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>230</y>
-          <width>501</width>
-          <height>30</height>
+          <y>409</y>
+          <width>601</width>
+          <height>31</height>
          </rect>
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_6">
