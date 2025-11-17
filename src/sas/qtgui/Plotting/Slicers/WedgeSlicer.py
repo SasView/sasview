@@ -218,7 +218,7 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         new_plot.id = self.plot_id
         new_plot.name = new_plot.id
         new_plot.title = new_plot.id
-        new_plot.type_id = ("Slicer" + self.data.name)
+        new_plot.type_id = ("Slicer" + self.averager.__name__ + self.data.name)
         new_plot.is_data = True
         item = self._item
         if self._item.parent() is not None:
@@ -232,7 +232,7 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
             try:
                 plots = GuiUtils.plotsFromModel("", item)
                 for p in plots:
-                    if isinstance(p, Data1D) and hasattr(p, "type_id") and p.type_id and p.type_id.startswith("Slicer" + self.data.name):
+                    if isinstance(p, Data1D) and hasattr(p, "type_id") and p.type_id and p.type_id.startswith("Slicer" + self.averager.__name__ + self.data.name):
                         anchor = p
                         break
             except Exception:

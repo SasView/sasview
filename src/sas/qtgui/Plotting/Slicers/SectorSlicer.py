@@ -182,14 +182,14 @@ class SectorInteractor(BaseInteractor, SlicerModel):
             item = self._item.parent()
         GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
 
-        new_plot.type_id = ("Slicer" + self.data.name)
+        new_plot.type_id = ("SlicerSectorQ" + self.data.name)
 
         if getattr(self.base, "stackplots", False):
             anchor = None
             try:
                 plots = GuiUtils.plotsFromModel("", item)
                 for p in plots:
-                    if isinstance(p, Data1D) and hasattr(p, "type_id") and p.type_id and p.type_id.startswith("Slicer" + self.data.name):
+                    if isinstance(p, Data1D) and hasattr(p, "type_id") and p.type_id and p.type_id.startswith("SlicerSectorQ" + self.data.name):
                         anchor = p
                         break
             except Exception:
