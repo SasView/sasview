@@ -139,15 +139,16 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
             self._plot_id = generate_unique_plot_id(base_id, self._item)
 
         new_plot.id = self._plot_id
-        new_plot.name = new_plot.id
-        new_plot.title = new_plot.id
+        new_plot.name = self._plot_id
+        new_plot.title = self._plot_id
         new_plot.is_data = True
         new_plot.xtransform = "x"
         new_plot.ytransform = "y"
+        new_plot.type_id = ("SlicerAnnulusPhi" + self.data.name)
 
         item = self._item
-
-        new_plot.type_id = ("Slicer" + self.data.name)
+        if self._item.parent() is not None:
+            item = self._item.parent()
 
         # Handle stacked plots differently
         if getattr(self.base, "stackplots", False):
@@ -156,27 +157,22 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
             try:
                 plots = GuiUtils.plotsFromModel("", item)
                 for p in plots:
-                    if isinstance(p, Data1D) and hasattr(p, "type_id") and p.type_id and p.type_id.startswith("Slicer" + self.data.name):
-                        # Make sure it's the same plot_id (same slicer instance)
-                        if hasattr(p, "id") and p.id == self._plot_id:
-                            anchor = p
-                            break
+                    if isinstance(p, Data1D) and hasattr(p, "type_id") and p.type_id and p.type_id.startswith("SlicerAnnulusPhi" + self.data.name):
+                        anchor = p
+                        break
             except Exception:
                 anchor = None
 
-            # Update existing plot or create new one
-            GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
-
             if anchor is not None:
-                # Update existing plot
-                self.base.manager.communicator.plotUpdateSignal.emit([new_plot])
+                # Stack onto existing plot
+                self.base.manager.communicator.plotUpdateSignal.emit([anchor])
                 self.base.manager.communicator.forcePlotDisplaySignal.emit([item, anchor, new_plot])
             else:
-                # First time creating this plot
+                # First plot for this slicer type - create new plot window
                 self.base.manager.communicator.plotUpdateSignal.emit([new_plot])
                 self.base.manager.communicator.forcePlotDisplaySignal.emit([item, new_plot])
         else:
-            # Non-stacked mode - just update/create the plot
+            # Non-stacked mode - update the model item and create/update plot
             GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
             self.base.manager.communicator.plotUpdateSignal.emit([new_plot])
             self.base.manager.communicator.forcePlotDisplaySignal.emit([item, new_plot])
