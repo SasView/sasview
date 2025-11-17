@@ -50,6 +50,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         self.cmdHelp.clicked.connect(self.onHelp)
         self.cmdCompute.clicked.connect(self.onCompute)
         self.cmdReset.clicked.connect(self.onReset)
+        self.cmdSaveData.clicked.connect(self.onSaveData)
 
         self.cmdCompute.setEnabled(False)
 
@@ -141,13 +142,15 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         # if outputname was unused, write output result to it
         # and display plot
         if self.onCheckOutputName():
-            # add outputname to self.filenames
-            self.list_data_items.append(str(self.txtOutputData.text()))
-            # send result to DataExplorer
-            self.onPrepareOutputData()
             # plot result
             self.updatePlot(self.graphOutput, self.layoutOutput, self.output)
 
+    def onSaveData(self):
+        """ Save current output in data file and add it to the DataExplorer"""
+        # add outputname to self.filenames
+        self.list_data_items.append(str(self.txtOutputData.text()))
+        # send result to DataExplorer
+        self.onPrepareOutputData()
         # Add the new plot to the comboboxes
         self.cbData1.addItem(self.output.name)
         self.cbData2.addItem(self.output.name)
