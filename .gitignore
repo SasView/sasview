@@ -1,0 +1,81 @@
+# It is actually possible to list all the old svn ignore properties:
+#
+# svn pg -R svn:ignore .
+#
+# But there's a whole load of useless stuff in there that is no longer used.
+# Instead I did a clean build including the docs, ran the tests, and then ran
+# sasview for a bit and then did a git status to see what extra stuff was being
+# generated.
+#
+# Feel free to add more stuff to this as and when it becomes an issue.
+
+# stack dumps due to Git Bash internal crashes
+*.stackdump
+
+# Editor files
+*.pyproj
+*.sln
+.*.swp
+.DS_Store
+/.settings
+/.vscode
+/.project
+/.pydevproject
+/.idea
+/.vs
+
+# Build and run files
+/src/sas/system/_version.py
+**/__pycache__
+*.pyc
+*.so
+*.exe
+
+/build
+/dist
+sasview.egg-info
+.mplconfig
+default_categories.json
+/setup.cfg
+**/UI/*.py
+!**/UI/__init__.py
+config.json
+**/db.sqlite3
+# INSTALL.md recommends a venv that should not be committed
+venv
+.venv
+
+# doc build
+/docs/sphinx-docs/build
+/docs/sphinx-docs/source-temp
+/docs/sphinx-docs/source/dev/api
+/docs/sphinx-docs/source/user/guiframe
+/docs/sphinx-docs/source/user/models
+/docs/sphinx-docs/source/user/sasview
+/docs/sphinx-docs/source/user/perspectives
+/docs/sphinx-docs/katex*.zip
+/docs/sphinx-docs/node_modules
+/docs/sphinx-docs/node-package.json
+/docs/tmp
+/docs/sphinx-docs/tmp
+/src/sas/example_data/
+
+# test outputs
+/test/pr_inversion/data/test_output.txt
+/test/sasdataloader/data/test_log.txt
+/test/sasdataloader/data/isis_1_0_write_test.xml
+/test/sasdataloader/data/isis_1_1_write_test.xml
+/test/sasdataloader/data/write_test.xml
+/test/sascalculator/data/write_test.sld
+/test/fileconverter/data/export2d.h5
+**/logs
+tests.log
+
+# Test reports
+/src/sas/qtgui/Utilities/Reports/report_test*
+
+# Installer files
+/sasview-install
+/installers/build
+/installers/dist
+*.exe

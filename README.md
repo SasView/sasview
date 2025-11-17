@@ -13,8 +13,8 @@
     <a href="https://github.com/SasView/sasview/actions">
         <img src="https://img.shields.io/github/workflow/status/SasView/sasview/CI" alt="CI Status">
     </a>
-    <a href="https://opensource.org/licenses/MIT">
-        <img src="https://img.shields.io/badge/License-MIT-brightgreen" alt="License">
+    <a href="https://opensource.org/licenses/bsd-3-clause">
+        <img src="https://img.shields.io/badge/License-BSD-brightgreen" alt="License">
     </a>
 </div>
 
@@ -70,11 +70,11 @@ The `pip` installation instructions for developers can be found [here](INSTALL.m
 Installing the dev-verion of SasView with conda is currently not supported.
 `NOTE:` In case you want to contribute, please also checkout the [DevlopersNotes](https://github.com/SasView/sasview/wiki/DevNotes_DevGuide_GettingStarted).
 
-## Getting started
+## Getting Started
 
-### Hello World
+### Scripting
 
-This section is a small `Hello World` example in SasView to check your installation.
+This section is a small scripting example in SasView to check your installation.
 We will fit a simple sphere model. For this first lets synthesize input data.
 
 ```python
@@ -135,7 +135,7 @@ fit_pars = {
     "radius": 80,
     "sld": 1,
     "sld_solvent": 6,
-    "scale": 0.200,
+    "scale": 0.900,
     "background": 0.05,
 }
 fit_kernel = load_model("sphere")
@@ -158,10 +158,10 @@ plt.figure()
 problem.plot(view=True)
 
 # fit the results
-result = fit(problem, method="lm")
+result = fit(problem, method="dream")
 
 print(f"Final chisq {problem.chisq()}\n")
-problem.plot(view=True)
+problem.plot()
 for k, v, dv in zip(problem.labels(), result.x, result.dx):
     print(f"{k} : {v:.4f} +- {dv:.4f}")
 plt.show()
@@ -169,7 +169,7 @@ plt.show()
 
 This simple fit should results in a $\chi^2$ close to one.
 
-![image](./hello_world.png)
+![image](./simpleexample.png)
 
 # Resources
 
