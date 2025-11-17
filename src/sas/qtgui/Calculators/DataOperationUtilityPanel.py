@@ -54,7 +54,6 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
 
         self.cmdCompute.setEnabled(False)
         self.cmdSaveData.setEnabled(False)
-        
 
         # validator for coefficient
         self.txtNumber.setValidator(GuiUtils.DoubleValidator())
