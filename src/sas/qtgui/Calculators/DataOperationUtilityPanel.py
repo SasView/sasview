@@ -53,6 +53,8 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         self.cmdSaveData.clicked.connect(self.onSaveData)
 
         self.cmdCompute.setEnabled(False)
+        self.cmdSaveData.setEnabled(False)
+        
 
         # validator for coefficient
         self.txtNumber.setValidator(GuiUtils.DoubleValidator())
@@ -147,16 +149,18 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
 
     def onSaveData(self):
         """ Save current output in data file and add it to the DataExplorer"""
-        # add outputname to self.filenames
-        self.list_data_items.append(str(self.txtOutputData.text()))
-        # send result to DataExplorer
-        self.onPrepareOutputData()
-        # Add the new plot to the comboboxes
-        self.cbData1.addItem(self.output.name)
-        self.cbData2.addItem(self.output.name)
-        if self.filenames is None:
-            self.filenames = {}
-        self.filenames[self.output.name] = self.output
+        # if outputname was unused, proceed to save files
+        if self.onCheckOutputName():
+            # add outputname to self.filenames
+            self.list_data_items.append(str(self.txtOutputData.text()))
+            # send result to DataExplorer
+            self.onPrepareOutputData()
+            # Add the new plot to the comboboxes
+            self.cbData1.addItem(self.output.name)
+            self.cbData2.addItem(self.output.name)
+            if self.filenames is None:
+                self.filenames = {}
+            self.filenames[self.output.name] = self.output
 
     def onPrepareOutputData(self):
         """ Prepare datasets to be added to DataExplorer and DataManager """
@@ -187,6 +191,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
 
         self.txtNumber.setEnabled(False)
         self.cmdCompute.setEnabled(False)
+        self.cmdSaveData.setEnabled(False)
 
         self.cbData1.setCurrentIndex(0)
         self.cbData2.setCurrentIndex(0)
@@ -212,6 +217,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             self.data1 = None
             self.data1OK = False
             self.cmdCompute.setEnabled(False) # self.onCheckChosenData())
+            self.cmdSaveData.setEnabled(False)
             return
 
         else:
@@ -223,8 +229,9 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             self.updatePlot(self.graphData1, self.layoutData1, self.data1)
             # plot default for output graph
             self.newPlot(self.graphOutput, self.layoutOutput)
-            # Enable Compute button only if Data2 is defined and data compatible
+            # Enable Compute and SaveData buttons only if Data2 is defined and data compatible
             self.cmdCompute.setEnabled(self.onCheckChosenData())
+            self.cmdSaveData.setEnabled(self.onCheckChosenData())
 
     def onSelectData2(self):
         """ Plot for selection of Data2 """
@@ -237,6 +244,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             self.data2OK = False
             self.onCheckChosenData()
             self.cmdCompute.setEnabled(False)
+            self.cmdSaveData.setEnabled(False)
             return
 
         elif choice_data2 == 'Number':
@@ -244,8 +252,9 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             self.txtNumber.setEnabled(True)
             self.data2 = float(self.txtNumber.text())
 
-            # Enable Compute button only if Data1 defined and compatible data
+            # Enable Compute and SaveData buttons only if Data1 defined and compatible data
             self.cmdCompute.setEnabled(self.onCheckChosenData())
+            self.cmdSaveData.setEnabled(self.onCheckChosenData())
             # Display value of coefficient in graphData2
             self.updatePlot(self.graphData2, self.layoutData2, self.data2)
             # plot default for output graph
@@ -258,6 +267,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             key_id2 = self._findId(choice_data2)
             self.data2 = self._extractData(key_id2)
             self.cmdCompute.setEnabled(self.onCheckChosenData())
+            self.cmdSaveData.setEnabled(self.onCheckChosenData())
 
             # plot Data2
             self.updatePlot(self.graphData2, self.layoutData2, self.data2)
@@ -433,6 +443,8 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             plotter.ax.tick_params(axis='y', labelsize=8)
 
             plotter.plot(data=data, hide_error=True, marker='.')
+
+            layout.setContentsMargins(0, 0, 0, 0)
 
             plotter.show()
 
