@@ -42,8 +42,9 @@ Using the tool
    If two data sets do not match, the operation will fail and the background 
    color of the combo box items will turn to red (WIN only).
 
-6) If the operation is successful, hit the Apply button to make the new dataset.
-   The new dataset will appear in the *Data Explorer*.
+6) If the operation is successful, hit the Compute button to make appear a preview of the new dataset.
+
+7) If you are happy with the preview, you can save the new dataset with the Save button, and it will appear in the *Data Explorer*.
 
 *NOTE! Any errors and warnings will be displayed at the bottom of the SasView
 window.*
