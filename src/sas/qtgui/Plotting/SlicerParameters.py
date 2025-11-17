@@ -300,6 +300,10 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
             slicer = self.callbacks[index]
             if self.active_plots.keys():
                 self.parent.setSlicer(slicer=slicer)
+                # Reset combo box back to "None" after setting slicer
+                self.cbSlicer.blockSignals(True)
+                self.cbSlicer.setCurrentIndex(0)
+                self.cbSlicer.blockSignals(False)
         self.onParamChange()
 
     def onSlicerReplaceChanged(self, index):
@@ -315,6 +319,10 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
             slicer = self.callbacks[index]
             if self.active_plots.keys():
                 self.parent.setSlicer(slicer=slicer)
+                # Reset combo box back to "None" after setting slicer
+                self.cbSlicer.blockSignals(True)
+                self.cbSlicer.setCurrentIndex(0)
+                self.cbSlicer.blockSignals(False)
         self.onParamChange()
 
     def onGeneratePlots(self, isChecked):
