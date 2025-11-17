@@ -21,7 +21,6 @@ class CustomToolbar(NavigationToolbar):
     def __init__(self, canvas, parent=None):
         super().__init__(canvas, parent)
         self.parent = parent
-        self.addSeparator()
         self.add_custom_button()
 
     def add_custom_button(self):
@@ -30,16 +29,21 @@ class CustomToolbar(NavigationToolbar):
         # This way all can be called with:
         #   self._actions['xxx']
         custom_icon = QtGui.QIcon()  # You can load an icon here if you want e.g., QtGui.QIcon("path/to/icon.png")
-        custom_action = QtGui.QAction(custom_icon, "Send to fitting", self)
+        custom_action = QtGui.QAction(custom_icon, "Send to Fitting", self)
         custom_action.setToolTip("Click to send data to Fitting")
         custom_action.triggered.connect(self.sendToFitting)
-        self.addAction(custom_action)
+        self.insertAction(self.actions()[-1], custom_action)
+        #self.addAction(custom_action)
         self._actions['fitting'] = custom_action
         self._actions['fitting'].setVisible(False)
 
     def sendToFitting(self):
         search_name: str = self.parent.label_name
         self.parent.manager.communicator.freezeDataNameSignal.emit(search_name)
+        self._actions["fitting"].setEnabled(False)
+
+        # Re-enable after 3 seconds
+        QtCore.QTimer.singleShot(3000, lambda: self._actions["fitting"].setEnabled(True))
 
 class PlotterBase(QtWidgets.QWidget):
     #TODO: Describe what this class is

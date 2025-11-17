@@ -72,7 +72,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.cmdDeleteData.clicked.connect(self.deleteFile)
         self.cmdDeleteTheory.clicked.connect(self.deleteTheory)
         self.cmdFreeze.clicked.connect(self.freezeTheory)
-        self.cmdSendTo.clicked.connect(lambda data: self.sendData(data))
+        self.cmdSendTo.clicked.connect(self.sendData)
         self.cmdNew.clicked.connect(self.newPlot)
         self.cmdNew_2.clicked.connect(self.newPlot)
         self.cmdAppend.clicked.connect(self.appendPlot)
@@ -817,31 +817,36 @@ class DataExplorerWindow(DroppableDataLoadWidget):
     def freezeFromName(self, search_name = None):
         def findName(model, target_name: str, column: int=0)-> tuple:
             for row in range(model.rowCount()):
+                if model.item(row, column).text() == target_name:
+                    return row, -1
                 for row2 in range(model.item(row, column).rowCount()):
                     tmp = model.item(row, column).child(row2, column)
                     if tmp.text() == target_name:
                             return row, row2
             return -1, -1
-
+        
         model = self.model
         row_index_parent, row_index_child = findName(model, search_name)
-        data_dir = model.item(row_index_parent)
-        data = data_dir.child(row_index_child)
-        new_item = self.cloneTheory(data)
-        model.beginResetModel()
-        model.appendRow(new_item)
-        model.endResetModel()
-        self.sendData(None, [new_item])
+        new_item = model.item(row_index_parent)
+        if row_index_child != -1:
+            data = new_item.child(row_index_child)
+            new_item = self.cloneTheory(data)
+            #new_item.setText(search_name)
+            #new_item.child(0).data().id = search_name
+            model.beginResetModel()
+            model.appendRow(new_item)
+            model.endResetModel()
+        self.sendData([new_item])
 
-    def sendData(self, event=None, selected_items = None):
+    def sendData(self, event=None):
         """
         Send selected item data to the current perspective and set the relevant notifiers
         """
 
-        if selected_items == None:
+        if type(event) == bool:
             selected_items = self.selectedItems()
         else:
-            pass
+            selected_items = event
 
         if len(selected_items) <1:
             return
