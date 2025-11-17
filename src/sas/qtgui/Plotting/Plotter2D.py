@@ -275,8 +275,6 @@ class Plotter2DWidget(PlotterBase):
         """
         Remove all slicers from the chart
         """
-        if len(self.slicers) == 0:
-            return
 
         # Clear all existing slicers
         for slicer in self.slicers.values():
@@ -285,6 +283,16 @@ class Plotter2DWidget(PlotterBase):
             except (ValueError, AttributeError) as e:
                 logger.debug(f"Error clearing slicer: {e}")
         self.slicers = {}
+
+        # Clear box sum which is not stored in the dict
+        if self.slicer is not None:
+            try:
+                self.slicer.clear()
+            except (ValueError, AttributeError) as e:
+                logger.debug(f"Error clearing current slicer: {e}")
+            if self.slicer is BoxSumCalculator:
+                self.boxwidget.close()
+                self.boxwidget_subwindow.close()
 
         self.slicer = None
         # Reset color index when all slicers are cleared
@@ -299,6 +307,11 @@ class Plotter2DWidget(PlotterBase):
         if self.slicer_widget:
             self.slicer_widget.close()
             self.slicer_widget = None
+
+        # Close the box sum widget if it exists
+        if hasattr(self, 'boxwidget') and self.boxwidget is not None:
+            self.boxwidget.close()
+            self.boxwidget = None
 
     def getActivePlots(self):
         ''' utility method for manager query of active plots '''
@@ -534,8 +547,11 @@ class Plotter2DWidget(PlotterBase):
         # Delete the temporary list of plots to remove
         del tempPlotsToRemove
 
-    def setSlicer(self, slicer, reset=True):
+    def setSlicer(self, slicer):
         """ Create a new slicer without removing the old one """
+        if self.slicer is BoxSumCalculator:
+            self.onClearSlicer()
+
         self.slicer_z += 1
 
         # Get next color for this slicer
@@ -561,8 +577,7 @@ class Plotter2DWidget(PlotterBase):
             # Update the slicers list and auto-check the newly created slicer
             self.slicer_widget.updateSlicersList()
             self.slicer_widget.checkSlicerByName(slicer_name)
-            if reset:
-                self.slicer_widget.setModel(self.param_model)
+            self.setParamOnModel()
 
     def notifySlicerModified(self, slicer_obj):
         """Notify the parameters dialog that a slicer was interacted with."""
@@ -573,14 +588,19 @@ class Plotter2DWidget(PlotterBase):
                     if self.slicer_widget:
                         self.slicer_widget.checkSlicerByName(name)
                     break
-        except Exception:
-            pass
+        except Exception as e:
+            logger.error("Error in notifySlicerModified: %s", str(e))
 
     def onSectorView(self):
         """
         Perform sector averaging on Q and draw sector slicer
         """
-        self.setSlicer(slicer=SectorInteractor, reset=False)
+        self.setSlicer(slicer=SectorInteractor)
+
+    def setParamOnModel(self):
+        """ Set the model on the slicer widget """
+        if self.slicer_widget:
+            self.slicer_widget.setModel(self.param_model)
 
     def onAnnulusView(self):
         """
@@ -593,6 +613,15 @@ class Plotter2DWidget(PlotterBase):
         Perform 2D Data averaging Qx and Qy.
         Display box slicer details.
         """
+        if self.slicer is not None or len(self.slicers) > 0:
+            # Pop up a confirmation dialog
+            reply = QtWidgets.QMessageBox.question(self, 'Delete Slicer',
+                                                'Are you sure you want to delete this slicer?',
+                                                QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+                                                QtWidgets.QMessageBox.No)
+            if reply == QtWidgets.QMessageBox.No:
+                return
+
         self.onClearSlicer()
         self.slicer_z += 1
 
