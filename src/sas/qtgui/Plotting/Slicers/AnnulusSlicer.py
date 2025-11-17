@@ -151,6 +151,7 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
         item = self._item
         if self._item.parent() is not None:
             item = self._item.parent()
+        GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
 
         # Handle stacked plots differently
         if getattr(self.base, "stackplots", False):
