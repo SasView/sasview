@@ -340,10 +340,14 @@ and the third is to send all sliced data to a single batch fit window.
 Clicking *Apply* will create a slicer for each selected plot with the parameters entered in the 'Slicer Parameters' window of the 'Slicer' tab.
 Depending on the options selected the data may then be saved, loaded as separate data sets in the data manager panel, and finally sent to fitting.
 
-To remove a 'slicer', bring back the *Dataset menu* and select *Clear Slicers*. Alternatively, you can select *None* in the 'Slicer type' dropdown
-list in the 'Slicer Parameters' dialog.
+To remove a 'slicer', bring back the *Dataset menu* and select *Clear Slicers*.
 
-If a slicer is active, another slicer can be added to the same plot by repeating the process above. *Clear Slicers* will remove all slicers from the plot.
+If a slicer is active, another slicer can be added to the same plot by repeating the process above. *Clear Slicers* will remove all slicers from the plot. 
+Individual slicers can be removed by selecting the slicer and clicking on *Delete* in the Slicer Parameters window. Additional slicers can also be added by selecting a slicer from the drop down list labelled *Create slicer*.
+Changing the slicer on the drop down list labelled *Change slicer* will change the currently selected slicer to the one selected from the drop down list.
+
+.. note::
+    The Delete slicer action cannot be undone.
 
 Unmasked circular average
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -404,4 +408,4 @@ is, the central value of each bin on the x-axis.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last modified by Paul Butler, 05 September, 2016
+.. note::  This help document was last modified by Sujaya Shrestha, 17 November 2025
