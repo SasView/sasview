@@ -145,6 +145,8 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
         new_plot.xtransform = "x"
         new_plot.ytransform = "y"
         new_plot.type_id = ("SlicerAnnulusPhi" + self.data.name)
+        new_plot.custom_color = self.color
+        # new_plot.symbol = self.color
 
         item = self._item
         if self._item.parent() is not None:

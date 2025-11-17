@@ -160,6 +160,7 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         new_plot.source = self.data.source
         new_plot.interactive = True
         new_plot.detector = self.data.detector
+        new_plot.custom_color = self.color
         # If the data file does not tell us what the axes are, just assume them.
         new_plot.xaxis("\\rm{Q}", "A^{-1}")
         new_plot.yaxis("\\rm{Intensity}", "cm^{-1}")

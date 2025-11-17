@@ -274,6 +274,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         new_plot.source = self.data.source
         new_plot.interactive = True
         new_plot.detector = self.data.detector
+        new_plot.custom_color = self.color
         if self.direction == "X":
             new_plot.xaxis("\\rm{Q_x}", "A^{-1}")
         elif self.direction == "Y":
