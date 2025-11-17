@@ -276,7 +276,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         """
         # Get npts/nsigs for current selection
 
-        
+
         # Determine the parameter base name from the polydisp model row label.
         # This ensures we use the expanded shell name (e.g. 'thickness2') instead of a template like 'thickness[n]'.
         try:
@@ -291,7 +291,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
                 logger.exception("Could not determine parameter name for polydisp row %r", row_index)
                 return
 
-        
+
         file_index = self.poly_model.index(row_index, self.lstPoly.itemDelegate().poly_function)
         combo_box = self.lstPoly.indexWidget(file_index)
         try:
