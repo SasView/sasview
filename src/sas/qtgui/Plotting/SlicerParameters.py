@@ -112,8 +112,19 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         # Set up plots list
         self.setPlotsList()
 
-        # Set up slicers list - add this line
+        # Set up slicers list
         self.setSlicersList()
+
+        # Hide stack plots tab
+        self.showPlotsTab(False)
+
+    def showPlotsTab(self, show=True):
+        """
+        Show or hide the plots tab
+        """
+        index = self.tabWidget.indexOf(self.tab_3)
+        self.tabWidget.setTabEnabled(index, show)
+        self.tabWidget.setTabVisible(index, show)
 
     def setParamsList(self):
         """
@@ -283,6 +294,9 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         # Replace slicer type
         self.cbSlicerReplace.currentIndexChanged.connect(self.onSlicerReplaceChanged)
 
+        # Stack plots
+        self.chkStack.toggled.connect(self.onStackChanged)
+
         # Updates to the slicer moder must propagate to all plotters
         if self.model is not None:
             self.model.itemChanged.connect(self.onParamChange)
@@ -353,6 +367,15 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
                 self.cbSlicer.setCurrentIndex(0)
                 self.cbSlicer.blockSignals(False)
         self.onParamChange()
+
+    def onStackChanged(self, checked):
+        """change the stack plots setting"""
+        self.parent.stackplots = checked
+        logger.info(f"Stack plots: {checked}")
+        if checked:
+            self.showPlotsTab(True)
+        else:
+            self.showPlotsTab(False)
 
     def onGeneratePlots(self, isChecked):
         """
