@@ -65,7 +65,7 @@ class Plotter2DWidget(PlotterBase):
         self.slicer = None
         self.slicers = {}
         self.slicer_widget = None
-        self.stackplots = True # Creates individual plots for each data set
+        self.stackplots = False # Creates individual plots for each data set
         self.plot_dict = {}
         self.vmin = None
         self.vmax = None
