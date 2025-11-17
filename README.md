@@ -10,6 +10,12 @@
     <a href="https://sasview.org">
         <img src="https://img.shields.io/website-up-down-green-red/http/sasview.org.svg" alt="Website Status" />
     </a>
+    <a href="https://github.com/SasView/sasview/actions">
+        <img src="https://img.shields.io/github/workflow/status/SasView/sasview/CI" alt="CI Status">
+    </a>
+    <a href="https://opensource.org/licenses/MIT">
+        <img src="https://img.shields.io/badge/License-MIT-brightgreen" alt="License">
+    </a>
 </div>
 
 ---
@@ -39,7 +45,7 @@ The required packages can currently be installed
 
 ```shell
 python -m venv .venv # create the environment
-source .venv/bin/activate # activate the environment
+. .venv/bin/activate # activate the environment on linux and MacOS
 # .venv\Scripts\activate & REM Windows: activate environment
 
 python -m pip install sasview
@@ -133,7 +139,7 @@ fit_pars = {
     "background": 0.05,
 }
 fit_kernel = load_model("sphere")
-fit_model = Model(fit_kernel)
+fit_model = Model(fit_kernel, **fit_pars)
 
 ## setting fitting ranges
 fit_model.radius.range(10, 1000)

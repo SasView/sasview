@@ -34,7 +34,7 @@ cd sasview
 #create the virtual environment
 python -m venv .venv
 # .venv\Scripts\activate & REM Windows: activate environment
-. venv/bin/activate  # Linux/Mac: activate environment
+. .venv/bin/activate  # Linux/Mac: activate environment
 
 # install repositories in editable/devloper mode in the venv
 python -m pip install -e ../sasdata # use "python -m ..." to ensure the correct python version is used
@@ -54,7 +54,7 @@ Step by step, that is:
     packages are far more loosely coupled, but depending on what you are
     doing you may also want them as development packages.
 1.  Create a Python virtual environment in the `venv` directory.
-1.  Activate the `venv` so that Python and its modules from the venv are used.
+1.  Activate the `.venv` so that Python and its modules from the venv are used.
     Note that the particular syntax above works for the `bash` and `zsh` shells under Linux, Windows and macOS;
     if you use `cmd` or PowerShell under windows, there are
     [different ways](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#create-and-use-virtual-environments)
@@ -78,7 +78,7 @@ When you want to work on SasView again at a later date, you can type:
 
 ```shell
 # venv\Scripts\activate  & REM Windows: activate environment
-. venv/bin/activate  # Linux/Mac: activate environment
+. .venv/bin/activate  # Linux/Mac: activate environment
 python -m sas
 ```
 
@@ -96,6 +96,6 @@ then the `hatchling` step can be repeated.
 
 More information can be found at:
 
-- http://www.sasview.org/help
-- http://www.sasview.org/faq
-- https://github.com/SasView/sasview/wiki/DevNotes
+- [http://www.sasview.org/help](http://www.sasview.org/help)
+- [http://www.sasview.org/faq](http://www.sasview.org/faq)
+- [https://github.com/SasView/sasview/wiki/DevNotes](https://github.com/SasView/sasview/wiki/DevNotes)
