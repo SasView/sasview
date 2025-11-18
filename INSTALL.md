@@ -48,8 +48,8 @@ Step by step, that is:
 
 1.  Obtain the SasView source using `git`. You will likely need to coordinate
     updates to `sasdata` and `sasmodels`. The
-    `bumps` (https://github.com/bumps/bumps) and
-    `periodictable` (https://github.com/python-periodictable/periodictable)
+    [`bumps`](https://github.com/bumps/bumps) and
+    [`periodictable`](https://github.com/python-periodictable/periodictable)
     packages are far more loosely coupled, but depending on what you are
     doing you may also want them as development packages.
 1.  Create a Python virtual environment in the `.venv` directory.
