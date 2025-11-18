@@ -11,7 +11,10 @@
 
 # General
 
-[SasView](http://www.sasview.org) is a Small Angle Scattering (SAS) analysis package for the analysis of 1D and 2D scattering data directly in inverse space. The focus was originally on neutron data (SANS) but has been used for X-ray’s as well and includes a tool for determining a slit resolution for the SAXSess instrument. SansView also includes PrView to invert SAS data to P(r), a resolution calculator, and a scattering length density calculator among others tools. A simple plugin mechanism is available for users to add custom models.
+[SasView](http://www.sasview.org) is a Small Angle Scattering (SAS) analysis package for the analysis of 1D and 2D scattering data directly in inverse space.
+The focus was originally on neutron data (SANS) but has been used for X-rays as well and includes a tool for determining a slit resolution for the SAXSess instrument.
+SasView also includes PrView to invert SAS data to P(r), a resolution calculator, and a scattering length density calculator among others tools.
+A simple plugin mechanism is available for users to add custom models.
 
 # Acknowledgement
 
@@ -39,7 +42,7 @@ python -m venv .venv # create the environment
 
 python -m pip install sasview
 
-python -m sasview # launch gui
+python -m sas   # launch the gui
 ```
 
 ### Install using `uv` inside the working directory:
@@ -55,9 +58,9 @@ uv run sasview # launch the gui
 
 ## Developers
 
-The `pip` installation instructions for developers can be found [here](INSTALL.md).
-Installing the dev-verion of SasView with conda is currently not supported.
-`NOTE:` In case you want to contribute, please also checkout the [DevlopersNotes](https://github.com/SasView/sasview/wiki/DevNotes_DevGuide_GettingStarted).
+The installation instructions for developers can be found [here](INSTALL.md).
+Installing the development-version of SasView with conda is currently not supported.
+`NOTE:` In case you want to contribute, please also checkout the [DevelopersNotes](https://github.com/SasView/sasview/wiki/DevNotes_DevGuide_GettingStarted).
 
 ## Getting Started
 
