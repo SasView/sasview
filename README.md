@@ -31,9 +31,11 @@ The following instructions will focus on providing materials for scripting, deve
 
 ## Users
 
-The required packages can currently be installed
+Users can install SasView either from the installers listed on the [SasView website](http://www.sasview.org),
+or directly from the packages distributed by `pip`.
 
-### Install using `pip` inside the working directory:
+### Install using `pip` inside a virtual environment in the current directory:
+
 
 ```shell
 python -m venv .venv # create the environment
@@ -45,16 +47,16 @@ python -m pip install sasview
 python -m sas   # launch the gui
 ```
 
-### Install using `uv` inside the working directory:
+### Install using `uv` for your user:
 
 ```shell
-uv init
-uv add sasview
+uv tool install sasview
 
-uv run sasview # launch the gui
+uvx sasview   # launch the gui
 ```
 
-`Note:` Currently to have the python package as an executable model (launch the gui using `python -m sas` or `uv run sas`) it requires to be installed from source.
+`Note:` To launch SasView, it needs to be installed.
+Running SasView from a source directory is not supported.
 
 ## Developers
 
