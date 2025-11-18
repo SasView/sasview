@@ -55,7 +55,7 @@ uv tool install sasview
 uvx sasview   # launch the gui
 ```
 
-`Note:` To launch SasView, it needs to be installed.
+**Note:** To launch SasView, it needs to be installed.
 Running SasView from a source directory is not supported.
 
 ## Developers
