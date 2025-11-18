@@ -1,18 +1,10 @@
 ![Logo](https://github.com/SasView/sasview.github.io/blob/master/img/sasview_logo.png)
 
 <div align='center'>
-    <a href="https://github.com/SasView/sasview/releases/latest">
-        <img src="https://img.shields.io/github/v/release/SasView/sasview" alt="Latest Release" />
-    </a>
-    <a href="https://github.com/SasView/sasview/commits/main">
-        <img src="https://img.shields.io/github/last-commit/SasView/sasview" alt="Last Commit" />
-    </a>
-    <a href="https://sasview.org">
-        <img src="https://img.shields.io/website-up-down-green-red/http/sasview.org.svg" alt="Website Status" />
-    </a>
-    <a href="https://opensource.org/licenses/bsd-3-clause">
-        <img src="https://img.shields.io/badge/License-BSD-brightgreen" alt="License">
-    </a>
+    <a href="https://github.com/SasView/sasview/releases/latest"><img src="https://img.shields.io/github/v/release/SasView/sasview" alt="Latest Release" /></a>
+    <a href="https://github.com/SasView/sasview/commits/main"><img src="https://img.shields.io/github/last-commit/SasView/sasview" alt="Last Commit" /></a>
+    <a href="https://sasview.org"><img src="https://img.shields.io/website-up-down-green-red/http/sasview.org.svg" alt="Website Status" /></a>
+    <a href="https://opensource.org/licenses/bsd-3-clause"><img src="https://img.shields.io/badge/License-BSD-brightgreen" alt="License"></a>
 </div>
 
 ---
