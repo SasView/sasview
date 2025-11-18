@@ -130,7 +130,7 @@ jobs:
           cp dist/*whl ~/.cache/cache-wheel/
 
       - name: Store wheel of ${{ matrix.dependency.name }} for use
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: build-dependency-${{ matrix.dependency.name }}-wheel
           path: |
@@ -199,7 +199,7 @@ jobs:
           python -m build --no-isolation --sdist --wheel
 
       - name: Publish sdist
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: sasview-sdist
           path: |
@@ -207,7 +207,7 @@ jobs:
           if-no-files-found: error
 
       - name: Publish wheel package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: sasview-wheel
           path: |
@@ -330,7 +330,7 @@ jobs:
 
       - name: Collect a debug tarball of the installer package
         if: ${{ matrix.installer }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: Debug-SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
           path: |
@@ -426,7 +426,7 @@ jobs:
         shell: cmd
 
       - name: Publish installer package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
           path: |
