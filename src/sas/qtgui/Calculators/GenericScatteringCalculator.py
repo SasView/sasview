@@ -20,6 +20,7 @@ from sasdata.dataloader.data_info import Detector, Source
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.sascalc.calculator.gsc_model as gsc_model
+from sas.sascalc.calculator.sas_gen import ComputationType
 from sas.qtgui.Plotting.Arrow3D import Arrow3D
 from sas.qtgui.Plotting.PlotterBase import PlotterBase
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
@@ -89,7 +90,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.setup_display()
 
         # combox box
-        self.cbOptionsCalc.currentIndexChanged.connect(self.change_is_avg)
+        self.cbOptionsCalc.currentIndexChanged.connect(self.change_computation_type)
         # prevent layout shifting when widget hidden
         # TODO: Is there a way to lcoate this policy in the ui file?
         sizePolicy = self.cbOptionsCalc.sizePolicy()
@@ -621,7 +622,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.cbOptionsCalc.setVisible(allow)
         if (allow):
             # A helper function to set up the averaging system
-            self.change_is_avg()
+            self.change_computation_type()
         else:
             # If magnetic data present then no averaging is allowed
             self.is_avg = False
@@ -633,7 +634,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.checkboxLogSpace.setEnabled(not self.is_mag)
 
 
-    def change_is_avg(self):
+    def change_computation_type(self):
         """Adjusts the GUI for whether 1D averaging is enabled
 
         If the user has chosen to carry out Debye full averaging then the magnetic sld
@@ -658,6 +659,24 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.checkboxLogSpace.setEnabled(self.is_avg)
         self.checkboxPluginModel.setEnabled(self.is_avg)
 
+        # set the type of calculation
+        match self.cbOptionsCalc.currentIndex():
+            case 0:
+                self.model.set_calculation_type(ComputationType.SANS_2D)
+            case 1:
+                self.model.set_calculation_type(ComputationType.SANS_1D)
+            case 2:
+                self.model.set_calculation_type(ComputationType.SANS_1D_BETA)
+            case 3:
+                self.model.set_calculation_type(ComputationType.SAXS)
+                self.checkboxPluginModel.setEnabled(False)
+                self.checkboxPluginModel.setChecked(True)
+                self.txtFileName.setText("saxs_fitting")
+                self.txtFileName.setEnabled(False)
+                self.cmdCompute.setText("Generate plugin model")
+                return
+
+        self.cmdCompute.setText("Compute")
         if self.is_avg:
             self.txtMx.setText("0.0")
             self.txtMy.setText("0.0")
@@ -704,13 +723,20 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             load_nuc = self.sender() == self.cmdNucLoad
             # request a file from the user
             if load_nuc:
-                f_type = """
-                    All supported files (*.SLD *.sld *.pdb *.PDB, *.vtk, *.VTK);;
-                        SLD files (*.SLD *.sld);;
-                        PDB files (*.pdb *.PDB);;
-                        VTK files (*.vtk *.VTK);;
-                        All files (*.*)
-                """
+                if self.model.type is ComputationType.SAXS:
+                    f_type = """
+                        All supported files (*.CIF *.cif *.pdb *.PDB);;
+                            CIF files (*.SLD *.sld);;
+                            PDB files (*.pdb *.PDB);;
+                    """
+                else:
+                    f_type = """
+                        All supported files (*.SLD *.sld *.pdb *.PDB, *.vtk, *.VTK);;
+                            SLD files (*.SLD *.sld);;
+                            PDB files (*.pdb *.PDB);;
+                            VTK files (*.vtk *.VTK);;
+                            All files (*.*)
+                    """
             else:
                 f_type = """
                     All supported files (*.OMF *.omf *.SLD *.sld, *.vtk, *.VTK);;
@@ -720,6 +746,10 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                         All files (*.*)
                 """
             self.datafile = QtWidgets.QFileDialog.getOpenFileName(self, "Choose a file", "", f_type)[0]
+
+            if self.model.type is ComputationType.SAXS:
+                return
+
             # If a file has been sucessfully chosen
             if self.datafile:
                 # set basic data about the file
@@ -1412,6 +1442,16 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
         Copied from previous version
         """
+
+        if self.model.type is ComputationType.SAXS:
+            if self.datafile is None:
+                raise RuntimeError("No structure file is loaded! SAXS calculations require a structure file.")
+            from sas.qtgui.Calculators.SAXSPluginModelGenerator import write_plugin_model
+            write_plugin_model(self.datafile)
+            self.manager.communicator().customModelDirectoryChanged.emit()
+            # automatically select the new model & focus on the fitting panel?
+            return
+
         try:
             # create the combined sld data and update from gui
             sld_data = self.create_full_sld_data()
@@ -1594,7 +1634,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
     def onSaveFile(self):
         """Save data as .sld file"""
-        path = os.path.dirname(str(self.datafile))
+        path = os.path.dirname(str(self.nuc_filename if self.nuc_filename else self.mag_filename))
         default_name = os.path.join(path, 'sld_file')
         parent = self
         directory =  default_name
