@@ -1157,4 +1157,3 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         Reset the fitting perspective to an empty state
         """
         self.removeData([self._model_item] if self._model_item else None)
-        return

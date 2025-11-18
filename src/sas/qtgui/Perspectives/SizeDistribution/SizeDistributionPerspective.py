@@ -820,4 +820,3 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         """
         self.removeData([self._model_item] if self._model_item else None)
         self.resetWindow()
-        return
