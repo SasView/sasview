@@ -126,7 +126,6 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
             # The tab might have already been deleted previously
             pass
 
-
     def closeTabByName(self, tab_name):
         """
         Given name of the tab - close it
@@ -440,5 +439,7 @@ that in the meantime, these tabs will be excluded from the saved project.""")
         """
         Reset the Inversion perspective to an empty state
         """
-        self.resetTab(self.currentIndex())
-        return
+        self.tabs.clear()
+        self.clear()
+        self.maxIndex = 1
+        self.addData(None)

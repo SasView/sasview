@@ -1326,14 +1326,16 @@ class GuiManager:
         """
         # Make sure this is what the user really wants
         reply = QMessageBox.question(self._parent, 'Close Project',
-                                    "Are you sure you want to close the current project?\n"
-                                    "All unsaved changes will be lost.",
-                                    QMessageBox.Yes | QMessageBox.No,
-                                    QMessageBox.No)
-        if reply == QMessageBox.Yes:
+                                    "Do you want to save the project before closing?\n"
+                                    "All unsaved changes will be lost if you don't save.",
+                                    QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel,
+                                    QMessageBox.Cancel)
+        if reply == QMessageBox.Save:
+            self.actionSave_Project()
             self.resetProject()
-        pass
-
+        elif reply == QMessageBox.Discard:
+            self.resetProject()
+        # else Cancel, do nothing
 
     def actionCheck_for_update(self):
         """
@@ -1417,11 +1419,10 @@ class GuiManager:
         """
         Reset the project to an empty state
         """
-        # file manager
-        self.filesWidget.reset()
         # perspectives
         for per in self.loadedPerspectives.values():
             if hasattr(per, 'reset'):
                 per.reset()
-
+        # file manager
+        self.filesWidget.reset()
 
