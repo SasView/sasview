@@ -12,9 +12,10 @@ A `venv` or a `conda` are both popular choices.
 Installers for SasView can be found at [https://www.sasview.org/](https://www.sasview.org/),
 for various operating systems. You will also find walk through tutorials on how to install and use SasView.
 
-You can also install SasView using standard Python installation tools,
-such as `pipx install sasview` to install it into its own standalone
-environment (or `pip install sasview` to install it into your current Python environment).
+You can also install SasView using standard Python installation tools, such as
+- `uv tool install sasview` (or `pipx install sasview`) to install it into its own standalone
+environment
+- or `uv pip install sasview` (or `pip install sasview`) to install it into your current Python environment.
 
 ## Making a SasView Development Environment
 
