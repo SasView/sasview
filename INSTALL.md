@@ -29,13 +29,14 @@ git clone https://github.com/sasview/sasview/
 
 cd sasview
 
-#create the virtual environment
+# create the virtual environment
 python -m venv .venv
 # .venv\Scripts\activate & REM Windows: activate environment
 . .venv/bin/activate  # Linux/Mac: activate environment
 
-# install repositories in editable/devloper mode in the venv
-python -m pip install -e ../sasdata # use "python -m ..." to ensure the correct python version is used
+# install repositories in editable/developer mode in the venv
+# use "python -m ..." to ensure the venv's pip is used
+python -m pip install -e ../sasdata
 python -m pip install -e ../sasmodels
 python -m pip install -e .[dev,test]
 
