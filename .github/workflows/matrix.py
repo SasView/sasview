@@ -27,24 +27,25 @@ installer_jobs = []
 #   dynamically linked by pyinstaller.
 #   https://pyinstaller.readthedocs.io/en/stable/usage.html#making-gnu-linux-apps-forward-compatible
 os_release_list = [
-    'ubuntu-22.04',
-    'windows-latest',
-    'macos-latest',
+    "ubuntu-22.04",
+    "windows-latest",
+    "macos-latest",
 ]
 
 # List of OS images to use for release tests
 os_test_list = os_release_list + [
-    'ubuntu-latest',
+    "ubuntu-latest",
 ]
 
 # List of python versions to use for release builds
 python_release_list = [
-    '3.12',
+    "3.13",
 ]
 
 # List of python versions to use for tests
 python_test_list = python_release_list + [
     # No additional test versions - add more to this list as needed
+    "3.12",
 ]
 
 
@@ -61,11 +62,11 @@ def entry(job_name="Job", os=None, pyver=None, tests=None, docs=None, installer=
     # job so that validating the matrix or fallbacks for missing keys are
     # not needed in the yml file.
     return {
-        'job_name': job_name,
-        'os': os or os_release_list[0],
-        'python-version': pyver or python_release_list[0],
-        'tests': truthy(tests),
-        'installer': truthy(installer),
+        "job_name": job_name,
+        "os": os or os_release_list[0],
+        "python-version": pyver or python_release_list[0],
+        "tests": truthy(tests),
+        "installer": truthy(installer),
     }
 
 
@@ -77,11 +78,11 @@ for os in os_test_list:
     for pyver in python_test_list:
         test_jobs.append(
             entry(
-                job_name = f"Test ({os}, {pyver})",
-                os = os,
-                pyver = pyver,
-                tests = True,
-                installer = False,
+                job_name=f"Test ({os}, {pyver})",
+                os=os,
+                pyver=pyver,
+                tests=True,
+                installer=False,
             )
         )
 
@@ -94,20 +95,20 @@ for os in os_release_list:
     for pyver in python_release_list:
         installer_jobs.append(
             entry(
-                job_name = f"Installer ({os}, {pyver})",
-                os = os,
-                pyver = pyver,
-                tests = False,
-                installer = True,
+                job_name=f"Installer ({os}, {pyver})",
+                os=os,
+                pyver=pyver,
+                tests=False,
+                installer=True,
             )
         )
 
 if not pretty:
-    print("test_matrix=", end='')
+    print("test_matrix=", end="")
 
 print(json.dumps(test_jobs, indent=4 if pretty else None))
 
 if not pretty:
-    print("installer_matrix=", end='')
+    print("installer_matrix=", end="")
 
 print(json.dumps(installer_jobs, indent=4 if pretty else None))
