@@ -29,7 +29,14 @@ defaults:
     shell: bash
 
 env:
-  RELEASE: ${{ github.event_name == 'push' && contains(github.ref, 'refs/tags/test-v') }}
+  # Determine if this CI is being done during the release polishing steps
+  RELEASE_BRANCH_BUILD: ${{
+      (
+        (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/release')) ||
+        (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
+        (github.event_name == 'pull_request' && startsWith(github.base_ref, 'refs/heads/release'))
+      ) && 'true' || '' }}
+
   # The test-installer job can use an old existing image rather than the most
   # recently built image; the 'needs' can be commented out to allow the
   # test-installer job to run independently (and therefore faster)
@@ -37,7 +44,6 @@ env:
   INSTALLER_OLD_RUNID: 3204825457
   # The test-installer job can run with the pyinstaller debug bundle
   INSTALLER_USE_DEBUG: false
-  BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
 
 jobs:
 
@@ -278,12 +284,6 @@ jobs:
       matrix:
         include: ${{ fromJson(needs.matrix.outputs.test-matrix-json) }}
     env:
-      RELEASE_BRANCH_BUILD: ${{
-          (
-            (github.event_name == 'push' && contains(github.ref, 'release')) ||
-            (github.event_name == 'push' && contains(github.ref, 'tags/v6.1')) ||
-            (github.event_name == 'pull_request' && contains(github.base_ref, 'release-6.1'))
-          ) && 'true' || '' }}
       UV_SYSTEM_PYTHON: 1
 
     name: "${{ matrix.job_name }}"
@@ -336,16 +336,15 @@ jobs:
         include: ${{ fromJson(needs.matrix.outputs.installer-matrix-json) }}
     env:
       MACOS_DMG_NAME: SasView6-${{ matrix.os }}.dmg
-      # Be strict about version pinning during the release freeze
-      RELEASE_BRANCH_BUILD: ${{
-          (
-            (github.event_name == 'push' && contains(github.ref, 'release')) ||
-            (github.event_name == 'push' && contains(github.ref, 'tags/v6.1')) ||
-            (github.event_name == 'pull_request' && contains(github.base_ref, 'release-6.1'))
-          ) && 'true' || '' }}
 
-      # Only sign the installer if non-forked repo
-      SIGN_INSTALLER: ${{ (! github.event.repository.fork && ! github.event.pull_request.head.repo.fork ) && 'true' || '' }}
+      # Only sign the installer if non-forked repo and the build is important enough to sign
+      SIGN_INSTALLER: ${{
+        (
+          (! github.event.repository.fork) &&
+          (! github.event.pull_request.head.repo.fork) &&
+          (startsWith(github.ref, 'refs/tags/v') ||
+          startsWith(github.ref, 'refs/heads/release'))
+        ) && 'true' || '' }}
 
       UV_SYSTEM_PYTHON: 1
 
@@ -476,7 +475,7 @@ jobs:
         shell: bash
 
       - name: Sign the binary using keypair alias
-        if: ${{ startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER && env.RELEASE_BRANCH_BUILD }}
+        if: ${{ startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
         run: |
            smctl sign --keypair-alias key_911959544 --input installers/dist/setupSasView.exe
         shell: cmd
