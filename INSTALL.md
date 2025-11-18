@@ -51,7 +51,7 @@ Step by step, that is:
     `periodictable` (https://github.com/python-periodictable/periodictable)
     packages are far more loosely coupled, but depending on what you are
     doing you may also want them as development packages.
-1.  Create a Python virtual environment in the `venv` directory.
+1.  Create a Python virtual environment in the `.venv` directory.
 1.  Activate the `.venv` so that Python and its modules from the venv are used.
     Note that the particular syntax above works for the `bash` and `zsh` shells under Linux, Windows and macOS;
     if you use `cmd` or PowerShell under windows, there are
@@ -73,7 +73,7 @@ dependencies should be a one-off task.
 When you want to work on SasView again at a later date, you can type:
 
 ```shell
-# venv\Scripts\activate  & REM Windows: activate environment
+# .venv\Scripts\activate  & REM Windows: activate environment
 . .venv/bin/activate  # Linux/Mac: activate environment
 python -m sas
 ```
