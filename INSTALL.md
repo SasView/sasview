@@ -1,6 +1,6 @@
 # Quick Intro for Building SasView
 
-Note - at the current time SasView will only run in gui form under Python 3.12 and later.
+Note - at the current time SasView requires Python 3.12 or Python 3.13.
 
 Whether you're installing SasView to use as a tool for your research or
 because you're wanting to work on the code, it is recommended that you
