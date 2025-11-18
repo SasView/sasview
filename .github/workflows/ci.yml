@@ -2,6 +2,25 @@ name: CI
 
 on:
   workflow_call:
+    inputs:
+      sasmodels_ref:
+        description: 'Branch or tag for sasmodels (default: master)'
+        required: false
+        type: string
+      sasdata_ref:
+        description: 'Branch or tag for sasdata (default: master)'
+        required: false
+        type: string
+  workflow_dispatch:
+    inputs:
+      sasmodels_ref:
+        description: 'Branch or tag for sasmodels (default: master)'
+        required: false
+        type: string
+      sasdata_ref:
+        description: 'Branch or tag for sasdata (default: master)'
+        required: false
+        type: string
   pull_request:
   push:
 
@@ -37,6 +56,47 @@ jobs:
         with:
           msg: '[pre-commit.ci lite] apply automatic fixes for ruff linting errors'
 
+  set-dependency-refs:
+    needs: [ruff]
+    name: Set dependency refs
+    runs-on: ubuntu-latest
+    outputs:
+      dependency-matrix-json: ${{ steps.set-refs.outputs.dependency_matrix }}
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: 3.12
+
+      - name: Set dependency refs and generate matrix
+        id: set-refs
+        run: |
+          # Get refs from inputs (workflow_call or workflow_dispatch) or default to master
+          SASMODELS_REF="${{ inputs.sasmodels_ref || 'master' }}"
+          SASDATA_REF="${{ inputs.sasdata_ref || 'master' }}"
+          echo "Using sasmodels ref: $SASMODELS_REF"
+          echo "Using sasdata ref: $SASDATA_REF"
+          
+          # Generate dependency matrix as JSON using Python for proper escaping
+          python3 << 'PYTHON_SCRIPT'
+          import json
+          import os
+          
+          sasmodels_ref = os.environ.get('SASMODELS_REF', 'master')
+          sasdata_ref = os.environ.get('SASDATA_REF', 'master')
+          
+          dependency_matrix = [
+              {"name": "sasdata", "url": "https://github.com/SasView/sasdata.git", "ref": sasdata_ref},
+              {"name": "sasmodels", "url": "https://github.com/SasView/sasmodels.git", "ref": sasmodels_ref}
+          ]
+          
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write(f"dependency_matrix={json.dumps(dependency_matrix)}\n")
+          PYTHON_SCRIPT
+        env:
+          SASMODELS_REF: ${{ inputs.sasmodels_ref || 'master' }}
+          SASDATA_REF: ${{ inputs.sasdata_ref || 'master' }}
+
   matrix:
     needs: [ruff]
     name: Generate test matrix
@@ -68,17 +128,13 @@ jobs:
 
 
   build-dependencies:
-    needs: [ruff]
+    needs: [ruff, set-dependency-refs]
     runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
       matrix:
-        dependency:
-          # the ref can be a branch or a tag
-          - { name: "sasdata", url: "https://github.com/SasView/sasdata.git", ref: "master" }
-          - { name: "sasmodels",  url: "https://github.com/SasView/sasmodels.git", ref: "master" }
-          # - { name: "bumps", url: "https://github.com/bumps/bumps.git", ref: "v1.0.3" }
+        dependency: ${{ fromJson(needs.set-dependency-refs.outputs.dependency-matrix-json) }}
 
     name: Build wheel ${{ matrix.dependency.name }}
 
