@@ -22,6 +22,13 @@ html_template = Template(
         pre { background-color: #f4f4f4; padding: 0.8em; white-space: pre-wrap; }
         ul { line-height: 1.6; }
         a { text-decoration: none; color: #0645ad; }
+
+        /* Dark mode adjustments */
+        @media (prefers-color-scheme: dark) {
+            body { background-color: #000000; color: #e0e0e0; }
+            pre { background-color: #2b2b2b; color: #f4f4f4; }
+            a { color: #4da3ff; }
+        }
     </style>
 </head>
 <body>
