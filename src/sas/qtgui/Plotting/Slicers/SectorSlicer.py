@@ -4,6 +4,7 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.SlicerModel import SlicerModel
 from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
+from sas.qtgui.Plotting.Slicers.SlicerUtils import generate_unique_plot_id
 
 MIN_PHI = 0.05
 
@@ -53,17 +54,15 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         self.main_line = LineInteractor(self, self.axes, color="blue", zorder=zorder, r=self.qmax, theta=self.theta2)
         self.main_line.qmax = self.qmax
         # Right Side line
-        self.right_line = SideInteractor(
-            self, self.axes, color="black", zorder=zorder, r=self.qmax, phi=-1 * self.phi, theta2=self.theta2
-        )
+        self.right_line = SideInteractor(self, self.axes, color=color, zorder=zorder, r=self.qmax, phi=-1 * self.phi, theta2=self.theta2)
         self.right_line.update(right=True)
         self.right_line.qmax = self.qmax
         # Left Side line
-        self.left_line = SideInteractor(
-            self, self.axes, color="black", zorder=zorder, r=self.qmax, phi=self.phi, theta2=self.theta2
-        )
+        self.left_line = SideInteractor(self, self.axes, color=color, zorder=zorder, r=self.qmax, phi=self.phi, theta2=self.theta2)
         self.left_line.update(left=True)
         self.left_line.qmax = self.qmax
+        # Store the plot ID so it doesn't change when parameters are updated
+        self._plot_id = None
         # draw the sector
         self.update()
         self._post_data()
@@ -84,10 +83,18 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         Clear the slicer and all connected events related to this slicer
         """
         self.clear_markers()
-        self.main_line.clear()
-        self.left_line.clear()
-        self.right_line.clear()
-        self.base.connect.clearall()
+        try:
+            self.main_line.clear()
+        except (ValueError, AttributeError):
+            pass
+        try:
+            self.left_line.clear()
+        except (ValueError, AttributeError):
+            pass
+        try:
+            self.right_line.clear()
+        except (ValueError, AttributeError):
+            pass
 
     def update(self):
         """
@@ -155,8 +162,6 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         new_plot = Data1D(x=sector.x, y=sector.y, dy=sector.dy, dx=sector.dx)
         new_plot.dxl = dxl
         new_plot.dxw = dxw
-        new_plot.name = "SectorQ" + "(" + self.data.name + ")"
-        new_plot.title = "SectorQ" + "(" + self.data.name + ")"
         new_plot.source = self.data.source
         new_plot.interactive = True
         new_plot.detector = self.data.detector
@@ -167,8 +172,14 @@ class SectorInteractor(BaseInteractor, SlicerModel):
             new_plot.ytransform = "y"
             new_plot.yaxis("\\rm{Residuals} ", "/")
 
-        new_plot.group_id = "2daverage" + self.data.name
-        new_plot.id = "SectorQ" + self.data.name
+        # Assign unique id per slicer instance and use it as the display name
+        if self._plot_id is None:
+            base_id = "SectorQ" + self.data.name
+            self._plot_id = generate_unique_plot_id(base_id, self._item)
+
+        new_plot.id = self._plot_id
+        new_plot.name = new_plot.id
+        new_plot.title = new_plot.id
         new_plot.is_data = True
 
         item = self._item
@@ -347,12 +358,14 @@ class SideInteractor(BaseInteractor):
         """
         self.clear_markers()
         try:
-            self.line.remove()
             self.inner_marker.remove()
-        except:
-            # Old version of matplotlib
-            for item in range(len(self.axes.lines)):
-                del self.axes.lines[0]
+            self.outer_marker.remove()
+        except (ValueError, AttributeError):
+            pass
+        try:
+            self.line.remove()
+        except (ValueError, AttributeError):
+            pass
 
     def update(self, phi=None, delta=None, mline=None, side=False, left=False, right=False):
         """
@@ -531,11 +544,16 @@ class LineInteractor(BaseInteractor):
         self.clear_markers()
         try:
             self.inner_marker.remove()
+        except (ValueError, AttributeError):
+            pass
+        try:
+            self.outer_marker.remove()
+        except (ValueError, AttributeError):
+            pass
+        try:
             self.line.remove()
-        except:
-            # Old version of matplotlib
-            for item in range(len(self.axes.lines)):
-                del self.axes.lines[0]
+        except (ValueError, AttributeError):
+            pass
 
     def update(self, theta=None):
         """

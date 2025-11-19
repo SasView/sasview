@@ -1,5 +1,6 @@
 import copy
 import functools
+import logging
 
 import matplotlib as mpl
 import numpy
@@ -20,10 +21,31 @@ from sas.qtgui.Plotting.Slicers.BoxSum import BoxSumCalculator
 from sas.qtgui.Plotting.Slicers.SectorSlicer import SectorInteractor
 from sas.qtgui.Plotting.Slicers.WedgeSlicer import WedgeInteractorPhi, WedgeInteractorQ
 
+logger = logging.getLogger(__name__)
+
 DEFAULT_CMAP = mpl.cm.jet
 
 # Minimum value of Z for which we will present data.
 MIN_Z = -32
+
+# Color cycle for slicers (colorblind-friendly palette)
+SLICER_COLORS = [
+    '#E69F00',  # orange
+    '#56B4E9',  # sky blue
+    '#009E73',  # bluish green
+    '#F0E442',  # yellow
+    '#0072B2',  # blue
+    '#D55E00',  # vermillion
+    '#CC79A7',  # reddish purple
+    '#000000',  # black
+    '#E31A1C',  # red
+    '#1F78B4',  # light blue
+    '#33A02C',  # green
+    '#FF7F00',  # orange
+    '#6A3D9A',  # purple
+    '#B15928',  # brown
+    '#FDBF6F'   # light orange
+]
 
 
 class Plotter2DWidget(PlotterBase):
@@ -41,6 +63,7 @@ class Plotter2DWidget(PlotterBase):
         self.slicer_z = 5
         # Reference to the current slicer
         self.slicer = None
+        self.slicers = {}  # Change from list to dict
         self.slicer_widget = None
         self.vmin = None
         self.vmax = None
@@ -51,6 +74,9 @@ class Plotter2DWidget(PlotterBase):
         self._masked_data = []
 
         self.manager = manager
+
+        # Track color index for slicer color cycling
+        self._slicer_color_index = 0
 
     @property
     def data(self):
@@ -182,8 +208,8 @@ class Plotter2DWidget(PlotterBase):
         plot_slicer_menu.addSeparator()
 
         # Additional items for slicer interaction
-        if self.slicer:
-            plot_slicer_menu.actionClearSlicer = plot_slicer_menu.addAction("&Clear Slicer")
+        if (self.slicer is not None) or (hasattr(self.slicer, 'slicers') and len(self.slicers) > 0):
+            plot_slicer_menu.actionClearSlicer = plot_slicer_menu.addAction("&Clear Slicers")
             plot_slicer_menu.actionClearSlicer.triggered.connect(self.onClearSlicer)
         plot_slicer_menu.actionEditSlicer = plot_slicer_menu.addAction("&Edit Slicer Parameters")
         plot_slicer_menu.actionEditSlicer.triggered.connect(self.onEditSlicer)
@@ -247,16 +273,32 @@ class Plotter2DWidget(PlotterBase):
 
     def onClearSlicer(self):
         """
-        Remove all sclicers from the chart
+        Remove all slicers from the chart
         """
-        if self.slicer is None:
+        if len(self.slicers) == 0:
             return
 
-        self.slicer.clear()
-        self.canvas.draw()
+        # Clear all existing slicers
+        for slicer in self.slicers.values():
+            try:
+                slicer.clear()
+            except (ValueError, AttributeError) as e:
+                logger.debug(f"Error clearing slicer: {e}")
+        self.slicers = {}
+
         self.slicer = None
+        # Reset color index when all slicers are cleared
+        self._slicer_color_index = 0
+        try:
+            self._removeSlicerPlots()
+        except Exception as e:
+            logger.error(f"Failed to clear slicer: {e}")
+
+        self.canvas.draw()
+
         if self.slicer_widget:
-            self.slicer_widget.setModel(None)
+            self.slicer_widget.close()
+            self.slicer_widget = None
 
     def getActivePlots(self):
         ''' utility method for manager query of active plots '''
@@ -411,81 +453,102 @@ class Plotter2DWidget(PlotterBase):
         if not has_plot:
             return
 
-        # Now that we've identified the right plot, update the 2D data the slicer uses
-        self.slicer.data = self.data0
-        # Replot now that the 2D data is updated
-        self.slicer._post_data()
+        # Now that we've identified the right plot, update the 2D data the slicers uses
+        for slicer in self.slicers.values():
+            slicer.data = self.data0
+            # Replot now that the 2D data is updated
+            slicer._post_data()
 
-    def setSlicer(self, slicer, reset=True):
+    def _get_next_slicer_color(self):
         """
-        Clear the previous slicer and create a new one.
-        slicer: slicer class to create
+        Get the next color for a new slicer and increment the index
+        """
+        color = SLICER_COLORS[self._slicer_color_index % len(SLICER_COLORS)] # so colours don't overflow
+        self._slicer_color_index += 1
+        return color
+
+    def _removeSlicerPlots(self):
+        """
+        Clear the previous slicer plots
         """
         # Clear current slicer
-        if self.slicer is not None:
-            self.slicer.clear()
+        # if self.slicer is not None:
+            # self.slicer.clear()
 
         # Clear the old slicer plots so they don't reappear later
-        if hasattr(self, '_item'):
-            item = self._item
-            if self._item.parent() is not None:
-                item = self._item.parent()
+        if not hasattr(self, '_item'):
+            return
+        item = self._item
+        if self._item.parent() is not None:
+            item = self._item.parent()
 
-            # Go through all items and see if they are a plot. The checks done here are not as thorough
-            # as GuiUtils.deleteRedundantPlots (which this takes a lot from). Will this cause problems?
-            # Primary concern is the check (plot_data.plot_role == DataRole.ROLE_DELETABLE) as I don't
-            # know what it does. The other checks seem to be related to keeping the new plots for that function
-            # TODO: generalize this and put it in GuiUtils so that we can use it elsewhere
-            tempPlotsToRemove = []
-            slicer_type_id = 'Slicer' + self.data0.name
-            for itemIndex in range(item.rowCount()):
-                # GuiUtils.plotsFromModel tests if the data is of type Data1D or Data2D to determine
-                # if it is a plot, so let's try that
-                if isinstance(item.child(itemIndex).data(), (Data1D, Data2D)):
-                    # First take care of this item, then we'll take care of its children
-                    if hasattr(item.child(itemIndex).data(), 'type_id'):
-                        if slicer_type_id in item.child(itemIndex).data().type_id:
-                            # At the time of writing, this should never be the case, but at some point the slicers may
-                            # have relevant children (e.g. plots). We don't want to delete these slicers.
+        # Go through all items and see if they are a plot. The checks done here are not as thorough
+        # as GuiUtils.deleteRedundantPlots (which this takes a lot from). Will this cause problems?
+        # Primary concern is the check (plot_data.plot_role == DataRole.ROLE_DELETABLE) as I don't
+        # know what it does. The other checks seem to be related to keeping the new plots for that function
+        # TODO: generalize this and put it in GuiUtils so that we can use it elsewhere
+        tempPlotsToRemove = []
+        slicer_type_id = 'Slicer' + self.data0.name
+        for itemIndex in range(item.rowCount()):
+            # GuiUtils.plotsFromModel tests if the data is of type Data1D or Data2D to determine
+            # if it is a plot, so let's try that
+            if isinstance(item.child(itemIndex).data(), (Data1D, Data2D)):
+                # First take care of this item, then we'll take care of its children
+                if hasattr(item.child(itemIndex).data(), 'type_id'):
+                    if slicer_type_id in item.child(itemIndex).data().type_id:
+                        # At the time of writing, this should never be the case, but at some point the slicers may
+                        # have relevant children (e.g. plots). We don't want to delete these slicers.
+                        tempHasImportantChildren = False
+                        for tempChildCheck in range(item.child(itemIndex).rowCount()):
+                            # The data explorer uses the "text" attribute to set the name. If this has text='' then
+                            # it can be deleted.
+                            if item.child(itemIndex).child(tempChildCheck).text():
+                                tempHasImportantChildren = True
+                        if not tempHasImportantChildren:
+                            # Store this plot to be removed later. Removing now
+                            # will cause the next plot to be skipped
+                            tempPlotsToRemove.append(item.child(itemIndex))
+            # It looks like the slicers are children of items that do not have data of instance Data1D or Data2D.
+            # Now do the children (1 level deep as is done in GuiUtils.plotsFromModel). Note that the slicers always
+            # seem to be the first entry (index2 == 0)
+            for itemIndex2 in range(item.child(itemIndex).rowCount()):
+                # Repeat what we did above (these if statements could probably be combined
+                # into one, but I'm not confident enough with how these work to say it wouldn't
+                # have issues if combined)
+                if isinstance(item.child(itemIndex).child(itemIndex2).data(), (Data1D, Data2D)):
+                    if hasattr(item.child(itemIndex).child(itemIndex2).data(), 'type_id'):
+                        if slicer_type_id in item.child(itemIndex).child(itemIndex2).data().type_id:
+                            # Check for children we might want to keep (see the above loop)
                             tempHasImportantChildren = False
-                            for tempChildCheck in range(item.child(itemIndex).rowCount()):
-                                # The data explorer uses the "text" attribute to set the name. If this has text='' then
-                                # it can be deleted.
-                                if item.child(itemIndex).child(tempChildCheck).text():
+                            for tempChildCheck in range(item.child(itemIndex).child(itemIndex2).rowCount()):
+                                # The data explorer uses the "text" attribute to set the name. If this has text=''
+                                # then it can be deleted.
+                                if item.child(itemIndex).child(itemIndex2).child(tempChildCheck).text():
                                     tempHasImportantChildren = True
                             if not tempHasImportantChildren:
-                                # Store this plot to be removed later. Removing now
-                                # will cause the next plot to be skipped
+                                # Remove the parent since each slicer seems to generate a new entry in item
                                 tempPlotsToRemove.append(item.child(itemIndex))
-                # It looks like the slicers are children of items that do not have data of instance Data1D or Data2D.
-                # Now do the children (1 level deep as is done in GuiUtils.plotsFromModel). Note that the slicers always
-                # seem to be the first entry (index2 == 0)
-                for itemIndex2 in range(item.child(itemIndex).rowCount()):
-                    # Repeat what we did above (these if statements could probably be combined
-                    # into one, but I'm not confident enough with how these work to say it wouldn't
-                    # have issues if combined)
-                    if isinstance(item.child(itemIndex).child(itemIndex2).data(), (Data1D, Data2D)):
-                        if hasattr(item.child(itemIndex).child(itemIndex2).data(), 'type_id'):
-                            if slicer_type_id in item.child(itemIndex).child(itemIndex2).data().type_id:
-                                # Check for children we might want to keep (see the above loop)
-                                tempHasImportantChildren = False
-                                for tempChildCheck in range(item.child(itemIndex).child(itemIndex2).rowCount()):
-                                    # The data explorer uses the "text" attribute to set the name. If this has text=''
-                                    # then it can be deleted.
-                                    if item.child(itemIndex).child(itemIndex2).child(tempChildCheck).text():
-                                        tempHasImportantChildren = True
-                                if not tempHasImportantChildren:
-                                    # Remove the parent since each slicer seems to generate a new entry in item
-                                    tempPlotsToRemove.append(item.child(itemIndex))
-            # Remove all the parent plots with matching criteria
-            for plot in tempPlotsToRemove:
-                item.removeRow(plot.row())
-            # Delete the temporary list of plots to remove
-            del tempPlotsToRemove
+        # Remove all the parent plots with matching criteria
+        for plot in tempPlotsToRemove:
+            item.removeRow(plot.row())
+        # Delete the temporary list of plots to remove
+        del tempPlotsToRemove
 
-        # Create a new slicer
+    def setSlicer(self, slicer, reset=True):
+        """ Create a new slicer without removing the old one """
         self.slicer_z += 1
-        self.slicer = slicer(self, self.ax, item=self._item, zorder=self.slicer_z)
+
+        # Get next color for this slicer
+        slicer_color = self._get_next_slicer_color()
+
+        self.slicer = slicer(self, self.ax, item=self._item, color=slicer_color, zorder=self.slicer_z)
+
+        # Generate a unique name for this slicer
+        slicer_name = f"{slicer.__name__}_{self.data0.name}_{len(self.slicers)}"
+
+        # Store in dictionary with unique name as key
+        self.slicers[slicer_name] = self.slicer
+
         self.ax.set_ylim(self.data0.ymin, self.data0.ymax)
         self.ax.set_xlim(self.data0.xmin, self.data0.xmax)
         # Draw slicer
@@ -494,14 +557,30 @@ class Plotter2DWidget(PlotterBase):
 
         # Reset the model on the Edit slicer parameters widget
         self.param_model = self.slicer.model()
-        if self.slicer_widget and reset:
-            self.slicer_widget.setModel(self.param_model)
+        if self.slicer_widget:
+            # Update the slicers list and auto-check the newly created slicer
+            self.slicer_widget.updateSlicersList()
+            self.slicer_widget.checkSlicerByName(slicer_name)
+            if reset:
+                self.slicer_widget.setModel(self.param_model)
+
+    def notifySlicerModified(self, slicer_obj):
+        """Notify the parameters dialog that a slicer was interacted with."""
+        try:
+            # Find the slicer name from the mapping
+            for name, obj in self.slicers.items():
+                if obj is slicer_obj:
+                    if self.slicer_widget:
+                        self.slicer_widget.checkSlicerByName(name)
+                    break
+        except Exception:
+            pass
 
     def onSectorView(self):
         """
         Perform sector averaging on Q and draw sector slicer
         """
-        self.setSlicer(slicer=SectorInteractor)
+        self.setSlicer(slicer=SectorInteractor, reset=False)
 
     def onAnnulusView(self):
         """
@@ -516,7 +595,11 @@ class Plotter2DWidget(PlotterBase):
         """
         self.onClearSlicer()
         self.slicer_z += 1
-        self.slicer = BoxSumCalculator(self, self.ax, zorder=self.slicer_z)
+
+        # Get next color for this slicer
+        slicer_color = self._get_next_slicer_color()
+
+        self.slicer = BoxSumCalculator(self, self.ax, color=slicer_color, zorder=self.slicer_z)
 
         self.ax.set_ylim(self.data0.ymin, self.data0.ymax)
         self.ax.set_xlim(self.data0.xmin, self.data0.xmax)
