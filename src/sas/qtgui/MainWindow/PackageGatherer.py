@@ -1,8 +1,8 @@
+import importlib.metadata
 import logging
-import pathlib
+import pkgutil
 import sys
-
-import pkg_resources
+import sysconfig
 
 import sas
 import sas.system.version
@@ -31,13 +31,13 @@ class PackageGatherer:
 
         # Get python modules installed locally
 
-        installed_packages = pkg_resources.working_set
-
+        pkgdetails = []
+        for dist in importlib.metadata.distributions():
+            pkgdetails.append(f"{dist.metadata['Name']}: {dist.version}")
         python_str = f'python:{sys.version}\n'
-        print_str = "\n".join(f"{package.key}: {package.version}" for package in installed_packages)
-        msg = f"Installed packages:\n{python_str+print_str}"
+        print_str = "\n".join(sorted(pkgdetails))
+        msg = f"Installed packages:\n{python_str}{print_str}"
         logger.info(msg)
-
 
     def log_imported_packages(self):
         """ Log version number of python packages imported in this instance of SasView.
@@ -50,16 +50,16 @@ class PackageGatherer:
         """
         imported_packages_dict = self.get_imported_packages()
 
-        res_str = "\n".join(f"{module}: {version_num}" for module, version_num
-                            in imported_packages_dict["results"].items())
-        no_res_str = "\n".join(f"{module}: {version_num}" for module, version_num
-                               in imported_packages_dict["no_results"].items())
-        errs_res_str = "\n".join(f"{module}: {version_num}" for module, version_num
-                                 in imported_packages_dict["errors"].items())
+        def fmt(section):
+            s = []
+            for module in sorted(imported_packages_dict[section]):
+                s.append(f"{module}: {imported_packages_dict[section][module]}")
+            return "\n".join(s)
 
-        msg = f"Imported modules:\n {res_str}\n {no_res_str}\n {errs_res_str}"
+        sections = ("results", "no_results", "errors")
+        msg = f"Imported modules:\n{'\n\n'.join(fmt(s) for s in sections)}"
+
         logger.info(msg)
-
 
     def get_imported_packages(self):
         """ Get a dictionary of imported package version numbers
@@ -76,8 +76,8 @@ class PackageGatherer:
         no_version_list = []
         # Generate a list of standard modules by looking at the local python library
         try:
-            standard_lib = [path.stem.split('.')[0] for path in pathlib.Path(pathlib.__file__)
-                            .parent.absolute().glob('*')]
+            stdlib_path = sysconfig.get_paths()["stdlib"]
+            standard_lib = [name for _, name, _ in pkgutil.iter_modules([stdlib_path])]
         except Exception:
             standard_lib = ['abc', 'aifc', 'antigravity', 'argparse', 'ast', 'asynchat', 'asyncio', 'asyncore',
                             'base64', 'bdb', 'binhex', 'bisect', 'bz2', 'calendar', 'cgi', 'cgitb', 'chunk', 'cmd',
@@ -109,9 +109,17 @@ class PackageGatherer:
         standard_lib.extend(sys.builtin_module_names)
         standard_lib.append("sas")
 
-        for module_name in sys.modules.keys():
+        # extract all module distributions already known
+        dists = importlib.metadata.packages_distributions()
+
+        for module_name in list(sys.modules):
 
             package_name = module_name.split('.')[0]
+
+            # skip modules that start with _ as they are internal implementation details
+            # of the real modules and not interesting.
+            if package_name.startswith("_"):
+                continue
 
             # A built in python module or a local file, which have no version, only the python/SasView version
             if package_name in standard_lib or package_name in package_versions_dict:
@@ -136,12 +144,13 @@ class PackageGatherer:
                                                      f"version using .__version__"
                     pass
 
-            # Retrieving the modules version using the pkg_resources package
+            # Retrieving the modules version from importlib.metadata
             # Unreliable, so second option
             try:
-                package_versions_dict[package_name] = pkg_resources.get_distribution(package_name).version
+                dist_name = dists[package_name][0]
+                package_versions_dict[package_name] = importlib.metadata.distribution(dist_name).version
             except Exception:
-                # Modules that cannot be found by pkg_resources
+                # Modules that cannot be found by importlib.metadata
                 pass
             else:
                 continue
@@ -171,7 +180,6 @@ class PackageGatherer:
 
         return {"results": package_versions_dict, "no_results": no_version_dict, "errors": err_version_dict}
 
-
     def remove_duplicate_modules(self, modules_dict):
         """ Strip duplicate instances of each module
 
@@ -191,7 +199,7 @@ class PackageGatherer:
         """
         output_dict = dict()
 
-        for module_name in modules_dict.keys():
+        for module_name in modules_dict:
             parent_module = module_name.split('.')[0]
             # Save one instance of each module
             if parent_module not in output_dict:
@@ -203,7 +211,6 @@ class PackageGatherer:
                 pass
 
         return output_dict
-
 
     def format_no_version_list(self, modules_dict, no_version_list):
         """ Format module names in the no_version_list list
@@ -229,7 +236,7 @@ class PackageGatherer:
         for module_name in no_version_list:
             parent_module = module_name.split('.')[0]
             # Version number exists for this module
-            if parent_module in modules_dict.keys():
+            if parent_module in modules_dict:
                 pass
             # Module is already in output_list
             elif parent_module in output_dict:
