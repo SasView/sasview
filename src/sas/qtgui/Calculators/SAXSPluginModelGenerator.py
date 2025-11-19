@@ -43,18 +43,18 @@ category = "plugin"
 parameters = [
     # name, units, default, [min, max], type, description
     ['c', '', 1, [0, 100], '', 'Solvent density'],
-    ['d', '', 1, [0, 2], '', 'Excluded volume parameter']
+    #['d', '', 1, [0, 2], '', 'Excluded volume parameter']
 ]
 
 ###
-from pyausaxs.wrapper.IterativeFit import *
+import pyausaxs as ausaxs
 
 structure_path = "{structure_path}"
 mol = ausaxs.create_molecule(structure_path)
 mol.hydrate()
-fit = ausaxs.start_iterative_fit(mol)
+fit = ausaxs.manual_fit(mol)
 
-def Iq(q, c, d):
-    return fit.evaluate([c, d])
+def Iq(q, c):
+    return fit.evaluate([c], q)
 Iq.vectorized = True
 ''')
