@@ -810,13 +810,14 @@ class GuiManager:
         self.filesWidget.loadAnalysis()
 
 
-    def actionSave_Project(self):
+    def actionSave_Project(self) -> bool:
         """
         Menu Save Project
+        return: True if save was successful, False otherwise
         """
         filename = self.filesWidget.saveProject()
         if not filename:
-            return
+            return False
 
         # datasets
         all_data = self.filesWidget.getSerializedData()
@@ -841,6 +842,7 @@ class GuiManager:
 
         with open(filename, 'w') as outfile:
             GuiUtils.saveData(outfile, final_data)
+        return True
 
     def actionSave_Analysis(self):
         """
@@ -1331,8 +1333,9 @@ class GuiManager:
                                     QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel,
                                     QMessageBox.Cancel)
         if reply == QMessageBox.Save:
-            self.actionSave_Project()
-            self.resetProject()
+            saved = self.actionSave_Project()
+            if saved:
+                self.resetProject()
         elif reply == QMessageBox.Discard:
             self.resetProject()
         # else Cancel, do nothing
