@@ -39,12 +39,13 @@ os_test_list = os_release_list + [
 
 # List of python versions to use for release builds
 python_release_list = [
-    "3.13",
+    # The current interpreter, set from ci.yml, is the release version
+    f"{sys.version_info.major}.{sys.version_info.minor}"
 ]
 
 # List of python versions to use for tests
 python_test_list = python_release_list + [
-    # No additional test versions - add more to this list as needed
+    # Additional test versions - add more to this list as needed
     "3.12",
 ]
 

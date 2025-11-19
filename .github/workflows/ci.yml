@@ -29,6 +29,8 @@ defaults:
     shell: bash
 
 env:
+  # Version of Python that will be used in the release builds
+  RELEASE_PYVER: "3.13"
   # Determine if this CI is being done during the release polishing steps
   RELEASE_BRANCH_BUILD: ${{
       (
@@ -72,7 +74,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: 3.12
+          python-version: ${{ env.RELEASE_PYVER }}
 
       - name: Set dependency refs and generate matrix
         id: set-refs
@@ -124,7 +126,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: 3.13
+          python-version: ${{ env.RELEASE_PYVER }}
 
       - uses: actions/checkout@v5
 
@@ -148,7 +150,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: 3.13
+          python-version: ${{ env.RELEASE_PYVER }}
 
       ### Check if this wheel is already cached
 
@@ -218,7 +220,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: 3.13
+          python-version: ${{ env.RELEASE_PYVER }}
 
       - name: Install uv utilities to speed up python module installation
         uses: astral-sh/setup-uv@v7
