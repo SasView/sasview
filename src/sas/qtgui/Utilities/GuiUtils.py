@@ -177,6 +177,8 @@ class Communicate(QtCore.QObject):
     # Global close to help kill active threads
     closeSignal = QtCore.Signal()
 
+    # Notify about a data name to be frozen and send to fitting perspective
+    freezeDataNameSignal = QtCore.Signal(str)
 
 communicate = Communicate()
 

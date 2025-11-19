@@ -107,6 +107,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.communicator.changeDataExplorerTabSignal.connect(self.changeTabs)
         self.communicator.forcePlotDisplaySignal.connect(self.displayData)
         self.communicator.updateModelFromPerspectiveSignal.connect(self.updateModelFromPerspective)
+        self.communicator.freezeDataNameSignal.connect(self.freezeFromName)
 
         # fixing silly naming clash in other managers
         self.communicate = self.communicator
@@ -813,12 +814,41 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
             _ = msgbox.exec_()
 
+    def freezeFromName(self, search_name = None):
+        def findName(model, target_name: str, column: int=0)-> tuple:
+            for row in range(model.rowCount()):
+                if model.item(row, column).text() == target_name:
+                    return row, -1
+                for row2 in range(model.item(row, column).rowCount()):
+                    tmp = model.item(row, column).child(row2, column)
+                    if tmp.text() == target_name:
+                            return row, row2
+            return -1, -1
+
+        model = self.model
+        row_index_parent, row_index_child = findName(model, search_name)
+        new_item = model.item(row_index_parent)
+        if row_index_child != -1:
+            data = new_item.child(row_index_child)
+            new_item = self.cloneTheory(data)
+            #new_item.setText(search_name)
+            #new_item.child(0).data().id = search_name
+            model.beginResetModel()
+            model.appendRow(new_item)
+            model.endResetModel()
+        self.sendData([new_item])
+
     def sendData(self, event=None):
         """
         Send selected item data to the current perspective and set the relevant notifiers
         """
-        selected_items = self.selectedItems()
-        if len(selected_items) < 1:
+
+        if type(event) == bool:
+            selected_items = self.selectedItems()
+        else:
+            selected_items = event
+
+        if len(selected_items) <1:
             return
 
         # Check that only one item is selected when sending to perspectives that don't support batch mode
