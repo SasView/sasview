@@ -1151,3 +1151,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         Tell the caller that we can't swap data
         """
         return False
+
+    def reset(self):
+        """
+        Reset the fitting perspective to an empty state
+        """
+        self.removeData([self._model_item] if self._model_item else None)
