@@ -114,7 +114,7 @@ class GenSAS:
         # fixed parameters
         self.fixed = []
 
-    def set_calculation_type(self, computation_type : ComputationType):
+    def set_computation_type(self, computation_type : ComputationType):
         """
         Set the computation type. This will determine which calculation is performed.
         """

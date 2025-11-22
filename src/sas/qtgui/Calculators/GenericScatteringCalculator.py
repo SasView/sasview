@@ -662,13 +662,13 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         # set the type of calculation
         match self.cbOptionsCalc.currentIndex():
             case 0:
-                self.model.set_calculation_type(ComputationType.SANS_2D)
+                self.model.set_computation_type(ComputationType.SANS_2D)
             case 1:
-                self.model.set_calculation_type(ComputationType.SANS_1D)
+                self.model.set_computation_type(ComputationType.SANS_1D)
             case 2:
-                self.model.set_calculation_type(ComputationType.SANS_1D_BETA)
+                self.model.set_computation_type(ComputationType.SANS_1D_BETA)
             case 3:
-                self.model.set_calculation_type(ComputationType.SAXS)
+                self.model.set_computation_type(ComputationType.SAXS)
                 self.checkboxPluginModel.setEnabled(False)
                 self.checkboxPluginModel.setChecked(True)
                 self.txtFileName.setText("saxs_fitting")
