@@ -1,6 +1,6 @@
 import logging
 
-from pyausaxs import AUSAXS
+import pyausaxs as ausaxs
 
 from sas.sascalc.calculator.ausaxs.sasview_sans_debye import sasview_sans_debye
 
@@ -14,8 +14,7 @@ def evaluate_sans_debye(q, coords, w):
     *w* is the weight associated with each point.
     """
     try:
-        ausaxs = AUSAXS()
-        Iq = ausaxs.debye(q, coords[0,:], coords[1,:], coords[2,:], w)
+        Iq = ausaxs.sasview.debye_no_ff(q, coords[0,:], coords[1,:], coords[2,:], w)
         return Iq
     except Exception as e:
         logging.warning("AUSAXS Debye calculation failed: %s. Falling back to default implementation.", e)
