@@ -3,6 +3,7 @@ from pathlib import Path
 
 from sas.system.user import find_plugins_dir
 
+
 def write_plugin_model(structure_path: str):
     """
     Write the AUSAXS SAXS plugin model to the plugins directory.

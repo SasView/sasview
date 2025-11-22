@@ -38,8 +38,8 @@ from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
 from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
 from sas.sascalc.fit import models
 from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
-from sas.system.user import find_plugins_dir
 from sas.system import HELP_SYSTEM
+from sas.system.user import find_plugins_dir
 
 TAB_MAGNETISM = 4
 TAB_POLY = 3

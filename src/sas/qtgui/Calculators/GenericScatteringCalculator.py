@@ -20,7 +20,6 @@ from sasdata.dataloader.data_info import Detector, Source
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.sascalc.calculator.gsc_model as gsc_model
-from sas.sascalc.calculator.sas_gen import ComputationType
 from sas.qtgui.Plotting.Arrow3D import Arrow3D
 from sas.qtgui.Plotting.PlotterBase import PlotterBase
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
@@ -28,6 +27,7 @@ from sas.qtgui.Utilities.GenericReader import GenReader
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor
 from sas.sascalc.calculator import sas_gen
 from sas.sascalc.calculator.geni import create_beta_plot, f_of_q, radius_of_gyration
+from sas.sascalc.calculator.sas_gen import ComputationType
 from sas.system.user import find_plugins_dir
 
 # Local UI
