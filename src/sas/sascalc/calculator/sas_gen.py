@@ -196,7 +196,7 @@ class GenSAS:
         vol = self.data_vol
         match self.type:
             case ComputationType.SANS_2D:
-                if qy is not None and len(qy) > 0:
+                if not (qy is not None and len(qy) > 0):
                     raise ValueError("For SANS_2D computation qy must be None or empty")
 
                 # 2-D calculation
