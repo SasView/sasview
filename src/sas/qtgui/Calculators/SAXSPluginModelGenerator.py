@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 from sas.system.user import find_plugins_dir
@@ -29,14 +30,14 @@ f'''\
 r"""
 This file is auto-generated, and any changes will be overwritten. 
 
-This plugin model uses the AUSAXS library (doi: https://doi.org/10.1107/S160057672500562X) to fit the provided SAXS data to the file:
+This plugin model uses the AUSAXS library (https://doi.org/10.1107/S160057672500562X) to fit the provided SAXS data to the file:
  * \"{structure_path}\"
 If this is not the intended structure file, please regenerate the plugin model from the generic scattering calculator.
 """
 '''
 
 f'''\
-name = "SAXS fitting"
+name = "SAXS fit ({os.path.basename(structure_path).split('.')[0]})"
 title = "AUSAXS"
 description = "Structural validation using AUSAXS"
 category = "plugin"
@@ -50,11 +51,14 @@ parameters = [
 import pyausaxs as ausaxs
 
 structure_path = "{structure_path}"
-mol = ausaxs.create_molecule(structure_path)
-mol.hydrate()
-fit = ausaxs.manual_fit(mol)
 
 def Iq(q, c):
-    return fit.evaluate([c], q)
+    # Initialize on first call to keep objects alive for function lifetime
+    if not hasattr(Iq, '_initialized'):
+        Iq._mol = ausaxs.create_molecule(structure_path)
+        Iq._mol.hydrate()
+        Iq._fitobj = ausaxs.manual_fit(Iq._mol)
+        Iq._initialized = True
+    return Iq._fitobj.evaluate([c], q)
 Iq.vectorized = True
 ''')

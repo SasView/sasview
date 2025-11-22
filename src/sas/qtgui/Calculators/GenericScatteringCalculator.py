@@ -748,6 +748,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.datafile = QtWidgets.QFileDialog.getOpenFileName(self, "Choose a file", "", f_type)[0]
 
             if self.model.type is ComputationType.SAXS:
+                self.txtNucData.setText(os.path.basename(str(self.datafile)))
                 return
 
             # If a file has been sucessfully chosen
@@ -1448,8 +1449,40 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 raise RuntimeError("No structure file is loaded! SAXS calculations require a structure file.")
             from sas.qtgui.Calculators.SAXSPluginModelGenerator import write_plugin_model
             write_plugin_model(self.datafile)
-            self.manager.communicator().customModelDirectoryChanged.emit()
-            # automatically select the new model & focus on the fitting panel?
+            self.manager.communicator().customModelDirectoryChanged.emit() # notify that a new plugin model is available
+
+            # try to bring the fit panel into focus and select the newly generated plugin
+            try:
+                self.manager.actionFitting() # switch to fitting window
+                per = self.manager.perspective() # internal access into the fitting window's state
+                # currentFittingWidget is provided by the Fitting perspective
+                fw = getattr(per, 'currentFittingWidget', None)
+                if fw is not None:
+                    # select the plugin models category & our newly generated model
+                    idx = fw.cbCategory.findText("Plugin Models")
+                    if idx == -1: return
+
+                    # force population of model combobox
+                    fw.cbCategory.setCurrentIndex(idx)
+                    fw.onSelectCategory()
+
+                    # plugin name base is 'SAXS fit'
+                    # the actual model name includes a structure tag, e.g. 'SAXS fit (2epe)'
+                    model_name = "SAXS fit"
+                    midx = fw.cbModel.findText(model_name, QtCore.Qt.MatchStartsWith)
+                    if midx == -1: return
+
+                    # load the model into the parameter table
+                    fw.cbModel.setCurrentIndex(midx)
+                    fw.onSelectModel()
+
+                    # make sure the perspective window is visible and focused
+                    self.close() # close the calculator window to highlight the changes to the fitting window
+                    per.show()
+
+            except Exception:
+                pass
+
             return
 
         try:
