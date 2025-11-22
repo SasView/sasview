@@ -288,6 +288,7 @@ class GenSAS:
             if len(x[1]) > 0:
                 raise ValueError("Not a 1D vector.")
             # 1D I is found at y=0 in the 2D pattern
+            self.set_computation_type(ComputationType.SANS_1D)
             out = self.calculate_Iq(x[0])
             return out
         else:
