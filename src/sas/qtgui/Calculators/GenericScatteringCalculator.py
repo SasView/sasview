@@ -1667,7 +1667,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
     def onSaveFile(self):
         """Save data as .sld file"""
-        path = os.path.dirname(str(self.nuc_filename if self.nuc_filename else self.mag_filename))
+        path = os.path.dirname(str(self.datafile))
         default_name = os.path.join(path, 'sld_file')
         parent = self
         directory =  default_name
