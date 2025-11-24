@@ -45,4 +45,3 @@ class BoxSum(QtWidgets.QDialog, Ui_BoxSumUI):
 
         # Handle the Close button click
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Close).clicked.connect(lambda:self.closeWidgetSignal.emit())
-
