@@ -121,8 +121,6 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
         new_plot = Data1D(x=(sector.x - numpy.pi) * 180 / numpy.pi, y=sector.y, dy=sector.dy)
         new_plot.dxl = dxl
         new_plot.dxw = dxw
-        # new_plot.name = "AnnulusPhi" + "(" + self.data.name + ")"
-        # new_plot.title = "AnnulusPhi" + "(" + self.data.name + ")"
 
         new_plot.source = self.data.source
         new_plot.interactive = True
