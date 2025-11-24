@@ -337,9 +337,10 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
     def onSlicerReplaceChanged(self, index):
         """replace the slicer with the one chosen"""
         if index == 0:  # No interactor
-            self.parent.onClearSlicer()
-            self.setModel(None)
-            self.onGeneratePlots(False)
+            return
+            # self.parent.onClearSlicer()
+            # self.setModel(None)
+            # self.onGeneratePlots(False)
         else:
             # delete the currently selected slicer
             self.onDelete()
