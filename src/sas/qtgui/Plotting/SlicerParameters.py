@@ -140,12 +140,11 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         {slicer_name:checkbox_status}
         """
         current_slicers = {}
-        if self.lstSlicers.count() != 0:
-            for row in range(self.lstSlicers.count()):
-                item = self.lstSlicers.item(row)
-                isChecked = item.checkState() != QtCore.Qt.Unchecked
-                slicer = item.text()
-                current_slicers[slicer] = isChecked
+        for row in range(self.lstSlicers.count()):
+            item = self.lstSlicers.item(row)
+            isChecked = item.checkState() != QtCore.Qt.Unchecked
+            slicer = item.text()
+            current_slicers[slicer] = isChecked
         return current_slicers
 
     def setSlicersList(self):
@@ -161,6 +160,15 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
             self.slicerButtonGroup = QtWidgets.QButtonGroup(self)
             self.slicerButtonGroup.setExclusive(True)
 
+        # Determine which slicer should be selected based on the current model
+        slicer_to_select = None
+        if self.model is not None:
+            # Find which slicer has this model
+            for slicer_name, slicer_obj in self.parent.slicers.items():
+                if hasattr(slicer_obj, '_model') and slicer_obj._model is self.model:
+                    slicer_to_select = slicer_name
+                    break
+
         # Fill out list of slicers
         for idx, item in enumerate(self.parent.slicers):
             # Create a widget to hold the radio button
@@ -172,8 +180,8 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
             radio = QtWidgets.QRadioButton(str(item))
 
             # Check if this should be selected
-            if current_slicer_text == str(item) or (current_slicer_text is None and idx == 0):
-                radio.setChecked(True)
+            should_select = (slicer_to_select == str(item)) or (slicer_to_select is None and idx == 0)
+            radio.setChecked(should_select)
 
             # Add to button group
             self.slicerButtonGroup.addButton(radio, idx)
