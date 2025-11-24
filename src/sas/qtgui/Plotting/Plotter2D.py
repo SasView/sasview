@@ -537,7 +537,11 @@ class Plotter2DWidget(PlotterBase):
 
     def setSlicer(self, slicer):
         """ Create a new slicer without removing the old one """
-        if self.slicer is BoxSumCalculator:
+        # Clear the previous slicers if BoxSumCalculator is used or clear BoxSum if other slicer is used
+        if isinstance(self.slicer, BoxSumCalculator):
+            self.onClearSlicer()
+        elif self.slicer is not None and slicer == BoxSumCalculator:
+            # If we're creating a BoxSum but there are other slicers, clear them
             self.onClearSlicer()
 
         self.slicer_z += 1
