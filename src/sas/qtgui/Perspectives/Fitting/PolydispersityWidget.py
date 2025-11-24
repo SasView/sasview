@@ -24,6 +24,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
     cmdFitSignal = QtCore.Signal()
     updateDataSignal = QtCore.Signal()
     iterateOverModelSignal = QtCore.Signal()
+    toggledSignal = QtCore.Signal(bool)  # Signal when polydispersity is enabled/disabled
 
     def __init__(self, parent: QtWidgets.QWidget | None = None) -> None:
         super(PolydispersityWidget, self).__init__()
@@ -202,6 +203,9 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
                 if key[-6:] == '.width':
                     self.logic.kernel_module.setParam(key, (value if isChecked else 0))
 
+        # Emit signal to notify parent that state changed
+        self.toggledSignal.emit(isChecked)
+
     def updateModel(self, model: Any | None = None) -> None:
         # add polydisperse parameters if asked
         if self.isActive and self.poly_model.rowCount() > 0:
@@ -257,7 +261,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
 
         # All possible polydisp. functions as strings in combobox
         func = QtWidgets.QComboBox()
-        func.addItems([str(name_disp) for name_disp in POLYDISPERSITY_MODELS.keys()])
+        func.addItems([str(name_disp) for name_disp in POLYDISPERSITY_MODELS])
         # Set the default index
         func.setCurrentIndex(func.findText(DEFAULT_POLYDISP_FUNCTION))
         ind = self.poly_model.index(all_items-1,self.lstPoly.itemDelegate().poly_function)
