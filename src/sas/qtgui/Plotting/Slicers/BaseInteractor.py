@@ -1,3 +1,5 @@
+import logging
+
 interface_color = "black"
 disable_color = "gray"
 active_color = "red"
@@ -6,6 +8,8 @@ mu_color = "green"
 P_color = "blue"
 theta_color = "orange"
 profile_colors = [rho_color, mu_color, P_color, theta_color]
+
+logger = logging.getLogger(__name__)
 
 
 class BaseInteractor:
@@ -63,7 +67,7 @@ class BaseInteractor:
             try:
                 h.remove()
             except (ValueError, AttributeError):
-                pass
+                logger.warning("Failed to remove marker: %s", h)
         if self.markers:
             self.base.connect.clear(*self.markers)
         self.markers = []
@@ -140,7 +144,7 @@ class BaseInteractor:
             if hasattr(self.base, 'notifySlicerModified'):
                 self.base.notifySlicerModified(self)
         except (ValueError, AttributeError):
-            pass
+            logger.warning("Failed to notify slicer modified: %s", self.base)
         return True
 
     def onDrag(self, ev):

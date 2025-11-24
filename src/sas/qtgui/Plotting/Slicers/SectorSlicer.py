@@ -1,3 +1,5 @@
+import logging
+
 import numpy
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
@@ -5,6 +7,8 @@ from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.SlicerModel import SlicerModel
 from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
 from sas.qtgui.Plotting.Slicers.SlicerUtils import generate_unique_plot_id
+
+logger = logging.getLogger(__name__)
 
 MIN_PHI = 0.05
 
@@ -80,21 +84,12 @@ class SectorInteractor(BaseInteractor, SlicerModel):
 
     def clear(self):
         """
-        Clear the slicer and all connected events related to this slicer
+        Clear this slicer and its markers
         """
         self.clear_markers()
-        try:
-            self.main_line.clear()
-        except (ValueError, AttributeError):
-            pass
-        try:
-            self.left_line.clear()
-        except (ValueError, AttributeError):
-            pass
-        try:
-            self.right_line.clear()
-        except (ValueError, AttributeError):
-            pass
+        self.main_line.clear()
+        self.left_line.clear()
+        self.right_line.clear()
 
     def update(self):
         """
@@ -203,12 +198,12 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         if param_name == "Delta_Phi [deg]":
             # First, check the closeness
             if numpy.fabs(param_value) < MIN_DIFFERENCE:
-                print("Sector angles too close. Please adjust.")
+                logger.warning("Sector angles too close. Please adjust.")
                 isValid = False
         elif param_name == "nbins":
             # Can't be 0
             if param_value < 1:
-                print("Number of bins cannot be less than or equal to 0. Please adjust.")
+                logger.warning("Number of bins cannot be less than or equal to 0. Please adjust.")
                 isValid = False
         return isValid
 
@@ -357,15 +352,10 @@ class SideInteractor(BaseInteractor):
         Clear the slicer and all connected events related to this slicer
         """
         self.clear_markers()
-        try:
+        if self.inner_marker.axes is not None:
             self.inner_marker.remove()
-            self.outer_marker.remove()
-        except (ValueError, AttributeError):
-            pass
-        try:
+        if self.line.axes is not None:
             self.line.remove()
-        except (ValueError, AttributeError):
-            pass
 
     def update(self, phi=None, delta=None, mline=None, side=False, left=False, right=False):
         """
@@ -542,18 +532,10 @@ class LineInteractor(BaseInteractor):
 
     def clear(self):
         self.clear_markers()
-        try:
+        if self.inner_marker.axes is not None:
             self.inner_marker.remove()
-        except (ValueError, AttributeError):
-            pass
-        try:
-            self.outer_marker.remove()
-        except (ValueError, AttributeError):
-            pass
-        try:
+        if self.line.axes is not None:
             self.line.remove()
-        except (ValueError, AttributeError):
-            pass
 
     def update(self, theta=None):
         """

@@ -65,14 +65,10 @@ class ArcInteractor(BaseInteractor):
         Clear this slicer and its markers
         """
         self.clear_markers()
-        try:
+        if self.marker.axes is not None:
             self.marker.remove()
-        except (ValueError, AttributeError):
-            pass
-        try:
+        if self.arc.axes is not None:
             self.arc.remove()
-        except (ValueError, AttributeError):
-            pass
 
     def update(self, theta=None, phi=None, r=None):
         """

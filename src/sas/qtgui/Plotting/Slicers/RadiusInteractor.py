@@ -91,22 +91,10 @@ class RadiusInteractor(BaseInteractor):
         Clear this slicer and its markers
         """
         self.clear_markers()
-        try:
-            self.l_marker.remove()
-        except (ValueError, AttributeError):
-            pass
-        try:
+        if self.l_line.axes is not None:
             self.l_line.remove()
-        except (ValueError, AttributeError):
-            pass
-        try:
-            self.r_marker.remove()
-        except (ValueError, AttributeError):
-            pass
-        try:
+        if self.r_line.axes is not None:
             self.r_line.remove()
-        except (ValueError, AttributeError):
-            pass
 
     def update(self, r1=None, r2=None, theta=None, phi=None):
         """

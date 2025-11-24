@@ -312,14 +312,10 @@ class RingInteractor(BaseInteractor):
         Clear the slicer and all connected events related to this slicer
         """
         self.clear_markers()
-        try:
+        if self.inner_marker.axes is not None:
             self.inner_marker.remove()
-        except (ValueError, AttributeError):
-            pass
-        try:
+        if self.inner_circle.axes is not None:
             self.inner_circle.remove()
-        except (ValueError, AttributeError):
-            pass
 
     def get_radius(self):
         """

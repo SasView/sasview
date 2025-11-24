@@ -2,7 +2,7 @@
 Utility functions for slicers
 """
 
-def generate_unique_plot_id(base_id, item):
+def generate_unique_plot_id(base_id: str, item) -> str:
     """
     Generate a unique plot ID by checking existing plots in the data tree.
 
@@ -12,7 +12,7 @@ def generate_unique_plot_id(base_id, item):
     """
     parent_item = item if item.parent() is None else item.parent()
 
-    existing = 0
+    existing: int = 0
     for i in range(parent_item.rowCount()):
         it = parent_item.child(i)
         d = it.data()
