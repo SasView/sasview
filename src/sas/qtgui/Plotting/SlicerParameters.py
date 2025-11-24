@@ -298,12 +298,13 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         self.lstParams.setSelectionModel(selection_model)
         self.lstParams.setCurrentIndex(self.model.index(row, column))
 
-    def onSlicerChanged(self, index):
+    def onSlicerChanged(self, index: int):
         """change the parameters based on the slicer chosen"""
         if index == 0:  # No interactor
-            self.parent.onClearSlicer()
-            self.setModel(None)
-            self.onGeneratePlots(False)
+            return
+            # self.parent.onClearSlicer()
+            # self.setModel(None)
+            # self.onGeneratePlots(False)
         else:
             slicer = self.callbacks[index]
             if self.active_plots.keys():
@@ -314,12 +315,13 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
                 self.cbSlicer.blockSignals(False)
         self.onParamChange()
 
-    def onSlicerReplaceChanged(self, index):
+    def onSlicerReplaceChanged(self, index: int):
         """replace the slicer with the one chosen"""
         if index == 0:  # No interactor
-            self.parent.onClearSlicer()
-            self.setModel(None)
-            self.onGeneratePlots(False)
+            return
+            # self.parent.onClearSlicer()
+            # self.setModel(None)
+            # self.onGeneratePlots(False)
         else:
             # delete the currently selected slicer
             self.onDelete()
@@ -628,14 +630,20 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         if not checked:
             return
 
+        # Check if "None" was selected - don't clear everything, just update the view
+        if slicer_name not in self.parent.slicers:
+            # No valid slicer selected, but don't clear
+            return
+
         # Update the parameter model to show this slicer's parameters
         if slicer_name in self.slicer_models:
             self.setModel(self.slicer_models[slicer_name])
         elif slicer_name in self.parent.slicers:
             # Get the model from the slicer object
             slicer_obj = self.parent.slicers[slicer_name]
-            if hasattr(slicer_obj, '_model') and slicer_name not in self.slicer_models:
-                self.slicer_models[slicer_name] = slicer_obj._model
+            if hasattr(slicer_obj, '_model'):
+                if slicer_name not in self.slicer_models:
+                    self.slicer_models[slicer_name] = slicer_obj._model
                 self.setModel(slicer_obj._model)
 
 class ProxyModel(QtCore.QIdentityProxyModel):
