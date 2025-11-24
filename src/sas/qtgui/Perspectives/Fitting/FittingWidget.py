@@ -1177,6 +1177,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Reset parameters to fit
         self.resetParametersToFit()
         self.has_error_column = False
+        self.polydispersity_widget.has_poly_error_column = False
+        self.magnetism_widget.has_magnet_error_column = False
 
         structure = None
         if self.cbStructureFactor.isEnabled():
@@ -1220,6 +1222,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Reset parameters to fit
         self.resetParametersToFit()
         self.has_error_column = False
+        self.polydispersity_widget.has_poly_error_column = False
+        self.magnetism_widget.has_magnet_error_column = False
 
         self.respondToModelStructure(model=model, structure_factor=structure)
         # recast the original parameters into the model

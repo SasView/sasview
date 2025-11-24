@@ -73,6 +73,19 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         if self.is2D:
             parameters += self.logic.model_parameters.orientation_parameters
 
+        # Reset delegate column indices to standard (no error column) BEFORE creating parameters
+        # This ensures comboboxes are created at the correct column positions
+        delegate = self.lstPoly.itemDelegate()
+        delegate.poly_parameter = 0
+        delegate.poly_pd = 1
+        delegate.poly_error = None
+        delegate.poly_min = 2
+        delegate.poly_max = 3
+        delegate.poly_npts = 4
+        delegate.poly_nsigs = 5
+        delegate.poly_function = 6
+        delegate.poly_filename = 7
+
         [self.setPolyModelParameters(i, param) for i, param in \
             enumerate(parameters) if param.polydisperse]
 

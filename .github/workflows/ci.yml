@@ -2,6 +2,25 @@ name: CI
 
 on:
   workflow_call:
+    inputs:
+      sasmodels_ref:
+        description: 'Branch or tag for sasmodels (default: master)'
+        required: false
+        type: string
+      sasdata_ref:
+        description: 'Branch or tag for sasdata (default: master)'
+        required: false
+        type: string
+  workflow_dispatch:
+    inputs:
+      sasmodels_ref:
+        description: 'Branch or tag for sasmodels (default: master)'
+        required: false
+        type: string
+      sasdata_ref:
+        description: 'Branch or tag for sasdata (default: master)'
+        required: false
+        type: string
   pull_request:
   push:
 
@@ -10,7 +29,16 @@ defaults:
     shell: bash
 
 env:
-  RELEASE: ${{ github.event_name == 'push' && contains(github.ref, 'refs/tags/test-v') }}
+  # Version of Python that will be used in the release builds
+  RELEASE_PYVER: "3.13"
+  # Determine if this CI is being done during the release polishing steps
+  RELEASE_BRANCH_BUILD: ${{
+      (
+        (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/release')) ||
+        (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
+        (github.event_name == 'pull_request' && startsWith(github.base_ref, 'refs/heads/release'))
+      ) && 'true' || '' }}
+
   # The test-installer job can use an old existing image rather than the most
   # recently built image; the 'needs' can be commented out to allow the
   # test-installer job to run independently (and therefore faster)
@@ -18,7 +46,6 @@ env:
   INSTALLER_OLD_RUNID: 3204825457
   # The test-installer job can run with the pyinstaller debug bundle
   INSTALLER_USE_DEBUG: false
-  BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
 
 jobs:
 
@@ -36,6 +63,47 @@ jobs:
         if: always()
         with:
           msg: '[pre-commit.ci lite] apply automatic fixes for ruff linting errors'
+
+  set-dependency-refs:
+    needs: [ruff]
+    name: Set dependency refs
+    runs-on: ubuntu-latest
+    outputs:
+      dependency-matrix-json: ${{ steps.set-refs.outputs.dependency_matrix }}
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.RELEASE_PYVER }}
+
+      - name: Set dependency refs and generate matrix
+        id: set-refs
+        run: |
+          # Get refs from inputs (workflow_call or workflow_dispatch) or default to master
+          SASMODELS_REF="${{ inputs.sasmodels_ref || 'master' }}"
+          SASDATA_REF="${{ inputs.sasdata_ref || 'master' }}"
+          echo "Using sasmodels ref: $SASMODELS_REF"
+          echo "Using sasdata ref: $SASDATA_REF"
+          
+          # Generate dependency matrix as JSON using Python for proper escaping
+          python3 << 'PYTHON_SCRIPT'
+          import json
+          import os
+          
+          sasmodels_ref = os.environ.get('SASMODELS_REF', 'master')
+          sasdata_ref = os.environ.get('SASDATA_REF', 'master')
+          
+          dependency_matrix = [
+              {"name": "sasdata", "url": "https://github.com/SasView/sasdata.git", "ref": sasdata_ref},
+              {"name": "sasmodels", "url": "https://github.com/SasView/sasmodels.git", "ref": sasmodels_ref}
+          ]
+          
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write(f"dependency_matrix={json.dumps(dependency_matrix)}\n")
+          PYTHON_SCRIPT
+        env:
+          SASMODELS_REF: ${{ inputs.sasmodels_ref || 'master' }}
+          SASDATA_REF: ${{ inputs.sasdata_ref || 'master' }}
 
   matrix:
     needs: [ruff]
@@ -58,7 +126,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: 3.12
+          python-version: ${{ env.RELEASE_PYVER }}
 
       - uses: actions/checkout@v5
 
@@ -68,17 +136,13 @@ jobs:
 
 
   build-dependencies:
-    needs: [ruff]
+    needs: [ruff, set-dependency-refs]
     runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
       matrix:
-        dependency:
-          # the ref can be a branch or a tag
-          - { name: "sasdata", url: "https://github.com/SasView/sasdata.git", ref: "master" }
-          - { name: "sasmodels",  url: "https://github.com/SasView/sasmodels.git", ref: "master" }
-          # - { name: "bumps", url: "https://github.com/bumps/bumps.git", ref: "v1.0.3" }
+        dependency: ${{ fromJson(needs.set-dependency-refs.outputs.dependency-matrix-json) }}
 
     name: Build wheel ${{ matrix.dependency.name }}
 
@@ -86,7 +150,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: 3.12
+          python-version: ${{ env.RELEASE_PYVER }}
 
       ### Check if this wheel is already cached
 
@@ -130,7 +194,7 @@ jobs:
           cp dist/*whl ~/.cache/cache-wheel/
 
       - name: Store wheel of ${{ matrix.dependency.name }} for use
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: build-dependency-${{ matrix.dependency.name }}-wheel
           path: |
@@ -156,10 +220,10 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: 3.12
+          python-version: ${{ env.RELEASE_PYVER }}
 
       - name: Install uv utilities to speed up python module installation
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
           prune-cache: false
@@ -178,7 +242,7 @@ jobs:
           sudo eatmydata apt-get -y install libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils xvfb libegl-dev libcairo2-dev
 
       - name: Fetch wheels of sibling projects
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           path: dist/
           pattern: build-dependency-*-wheel
@@ -199,7 +263,7 @@ jobs:
           python -m build --no-isolation --sdist --wheel
 
       - name: Publish sdist
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: sasview-sdist
           path: |
@@ -207,7 +271,7 @@ jobs:
           if-no-files-found: error
 
       - name: Publish wheel package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: sasview-wheel
           path: |
@@ -222,12 +286,6 @@ jobs:
       matrix:
         include: ${{ fromJson(needs.matrix.outputs.test-matrix-json) }}
     env:
-      RELEASE_BRANCH_BUILD: ${{
-          (
-            (github.event_name == 'push' && contains(github.ref, 'release')) ||
-            (github.event_name == 'push' && contains(github.ref, 'tags/v6.1')) ||
-            (github.event_name == 'pull_request' && contains(github.base_ref, 'release-6.1'))
-          ) && 'true' || '' }}
       UV_SYSTEM_PYTHON: 1
 
     name: "${{ matrix.job_name }}"
@@ -280,16 +338,15 @@ jobs:
         include: ${{ fromJson(needs.matrix.outputs.installer-matrix-json) }}
     env:
       MACOS_DMG_NAME: SasView6-${{ matrix.os }}.dmg
-      # Be strict about version pinning during the release freeze
-      RELEASE_BRANCH_BUILD: ${{
-          (
-            (github.event_name == 'push' && contains(github.ref, 'release')) ||
-            (github.event_name == 'push' && contains(github.ref, 'tags/v6.1')) ||
-            (github.event_name == 'pull_request' && contains(github.base_ref, 'release-6.1'))
-          ) && 'true' || '' }}
 
-      # Only sign the installer if non-forked repo
-      SIGN_INSTALLER: ${{ (! github.event.repository.fork && ! github.event.pull_request.head.repo.fork ) && 'true' || '' }}
+      # Only sign the installer if non-forked repo and the build is important enough to sign
+      SIGN_INSTALLER: ${{
+        (
+          (! github.event.repository.fork) &&
+          (! github.event.pull_request.head.repo.fork) &&
+          (startsWith(github.ref, 'refs/tags/v') ||
+          startsWith(github.ref, 'refs/heads/release'))
+        ) && 'true' || '' }}
 
       UV_SYSTEM_PYTHON: 1
 
@@ -330,7 +387,7 @@ jobs:
 
       - name: Collect a debug tarball of the installer package
         if: ${{ matrix.installer }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: Debug-SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
           path: |
@@ -420,13 +477,13 @@ jobs:
         shell: bash
 
       - name: Sign the binary using keypair alias
-        if: ${{ startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER && env.RELEASE_BRANCH_BUILD }}
+        if: ${{ startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
         run: |
            smctl sign --keypair-alias key_911959544 --input installers/dist/setupSasView.exe
         shell: cmd
 
       - name: Publish installer package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
           path: |
@@ -474,7 +531,7 @@ jobs:
 
       - name: Retrieve installer (workflow image)
         if: ${{ env.INSTALLER_USE_OLD_IMAGE != 'true' }}
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         id: download
         with:
           name: SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
