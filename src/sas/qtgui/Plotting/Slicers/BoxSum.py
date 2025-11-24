@@ -41,6 +41,8 @@ class BoxSumCalculator(BaseInteractor):
         self.update_model = False
         # connect the artist for the motion
         self.connect = self.base.connect
+        # Reference to the widget (if any)
+        self.widget = None
 
         # when qmax is reached the selected line is reset the its previous value
         self.qmax = min(self.data.xmax, self.data.xmin)
@@ -173,18 +175,13 @@ class BoxSumCalculator(BaseInteractor):
         Clear the slicer and all connected events related to this slicer
         """
         self.clear_markers()
-        try:
-            self.horizontal_lines.clear()
-        except (ValueError, AttributeError):
-            logger.debug("Error clearing horizontal lines")
-        try:
-            self.vertical_lines.clear()
-        except (ValueError, AttributeError):
-            logger.debug("Error clearing vertical lines")
-        try:
-            self.center.clear()
-        except (ValueError, AttributeError):
-            logger.debug("Error clearing center")
+        self.horizontal_lines.clear()
+        self.vertical_lines.clear()
+        self.center.clear()
+        # Close the associated widget if it exists
+        if self.widget is not None:
+            self.widget.closeWidgetSignal.emit()
+            self.widget = None
 
     def update(self):
         """
@@ -360,14 +357,7 @@ class PointInteractor(BaseInteractor):
         """
         Clear this figure and its markers
         """
-        try:
-            self.clear_markers()
-        except Exception as e:
-            logger.error("Error clearing markers: %s", e)
-        try:
-            self.center.remove()
-        except Exception as e:
-            logger.error("Error removing center: %s", e)
+        self.clear_markers()
 
     def update(self, center_x=None, center_y=None):
         """
@@ -492,18 +482,9 @@ class VerticalDoubleLine(BaseInteractor):
         """
         Clear this slicer  and its markers
         """
-        try:
-            self.clear_markers()
-        except Exception as e:
-            logger.error("Error clearing markers: %s", e)
-        try:
-            self.right_line.remove()
-        except Exception as e:
-            logger.error("Error removing right line: %s", e)
-        try:
-            self.left_line.remove()
-        except Exception as e:
-            logger.error("Error removing left line: %s", e)
+        self.clear_markers()
+        self.right_line.remove()
+        self.left_line.remove()
 
     def update(self, x1=None, x2=None, y1=None, y2=None, width=None, height=None, center=None):
         """

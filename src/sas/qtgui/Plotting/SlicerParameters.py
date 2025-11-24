@@ -592,10 +592,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         The slicer's clear() method handles all cleanup for that specific slicer type.
         """
         if hasattr(slicer_obj, 'clear'):
-            try:
-                slicer_obj.clear()
-            except (ValueError, AttributeError):
-                pass
+            slicer_obj.clear()
 
     def updateSlicersList(self):
         """

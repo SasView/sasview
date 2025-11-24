@@ -96,7 +96,7 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         Clear the slicer and all connected events related to this slicer
         """
         self.averager = None
-        self.clear_markers()
+        # self.clear_markers()
         self.outer_arc.clear()
         self.inner_arc.clear()
         self.radial_lines.clear()

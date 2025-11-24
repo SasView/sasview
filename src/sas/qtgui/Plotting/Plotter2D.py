@@ -275,32 +275,24 @@ class Plotter2DWidget(PlotterBase):
         """
         Remove all slicers from the chart
         """
-
         # Clear all existing slicers
         for slicer in self.slicers.values():
-            try:
-                slicer.clear()
-            except (ValueError, AttributeError) as e:
-                logger.debug(f"Error clearing slicer: {e}")
+            slicer.clear()
         self.slicers = {}
 
         # Clear box sum which is not stored in the dict
         if self.slicer is not None:
-            try:
-                self.slicer.clear()
-            except (ValueError, AttributeError) as e:
-                logger.debug(f"Error clearing current slicer: {e}")
+            self.slicer.clear()
             if self.slicer is BoxSumCalculator:
                 self.boxwidget.close()
                 self.boxwidget_subwindow.close()
+                self.boxwidget = None
+                self.boxwidget_subwindow = None
 
         self.slicer = None
         # Reset color index when all slicers are cleared
         self._slicer_color_index = 0
-        try:
-            self._removeSlicerPlots()
-        except Exception as e:
-            logger.error(f"Failed to clear slicer: {e}")
+        self._removeSlicerPlots()
 
         self.canvas.draw()
 
@@ -484,10 +476,6 @@ class Plotter2DWidget(PlotterBase):
         """
         Clear the previous slicer plots
         """
-        # Clear current slicer
-        # if self.slicer is not None:
-            # self.slicer.clear()
-
         # Clear the old slicer plots so they don't reappear later
         if not hasattr(self, '_item'):
             return
@@ -641,6 +629,9 @@ class Plotter2DWidget(PlotterBase):
             # reset box on "Edit Slicer Parameters" window close
             self.manager.parent.workspace().removeSubWindow(self.boxwidget_subwindow)
             self.boxwidget = None
+            # Clear the reference in the slicer
+            if self.slicer is not None:
+                self.slicer.widget = None
 
         # Get the BoxSumCalculator model.
         self.box_sum_model = self.slicer.model()
@@ -649,6 +640,9 @@ class Plotter2DWidget(PlotterBase):
         # Add the plot to the workspace
         self.boxwidget_subwindow = self.manager.parent.workspace().addSubWindow(self.boxwidget)
         self.boxwidget.closeWidgetSignal.connect(boxWidgetClosed)
+
+        # Store widget reference in the slicer so it can close it when cleared
+        self.slicer.widget = self.boxwidget
 
         self.boxwidget.show()
 

@@ -126,11 +126,14 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         """
         Clear the slicer and all connected events related to this slicer
         """
-        self.averager = None
         self.clear_markers()
-        self.center.clear()
-        self.horizontal_lines.clear()
-        self.vertical_lines.clear()
+        if self.center.axes is not None:
+            self.center.clear()
+        if self.horizontal_lines.axes is not None:
+            self.horizontal_lines.clear()
+        if self.vertical_lines.axes is not None:
+            self.vertical_lines.clear()
+        self.averager = None
 
     def update(self):
         """
@@ -497,18 +500,9 @@ class PointInteractor(BaseInteractor):
         """
         Clear this figure and its markers
         """
-        try:
-            self.clear_markers()
-        except (ValueError, AttributeError):
-            pass
-        try:
+        self.clear_markers()
+        if self.center.axes is not None:
             self.center.remove()
-        except (ValueError, AttributeError):
-            pass
-        try:
-            self.center_marker.remove()
-        except (ValueError, AttributeError):
-            pass
 
     def update(self, center_x=None, center_y=None):
         """
@@ -648,18 +642,10 @@ class VerticalDoubleLine(BaseInteractor):
         Clear this slicer  and its markers
         """
         self.clear_markers()
-        try:
-            self.right_marker.remove()
-        except (ValueError, AttributeError):
-            pass
-        try:
+        if self.right_line.axes is not None:
             self.right_line.remove()
-        except (ValueError, AttributeError):
-            pass
-        try:
+        if self.left_line.axes is not None:
             self.left_line.remove()
-        except (ValueError, AttributeError):
-            pass
 
     def update(self, x1=None, x2=None, y1=None, y2=None, half_width=None, half_height=None, center=None):
         """
@@ -844,18 +830,10 @@ class HorizontalDoubleLine(BaseInteractor):
         Clear this figure and its markers
         """
         self.clear_markers()
-        try:
-            self.top_marker.remove()
-        except (ValueError, AttributeError):
-            pass
-        try:
+        if self.top_line.axes is not None:
             self.top_line.remove()
-        except (ValueError, AttributeError):
-            pass
-        try:
+        if self.bottom_line.axes is not None:
             self.bottom_line.remove()
-        except (ValueError, AttributeError):
-            pass
 
     def update(self, x1=None, x2=None, y1=None, y2=None, half_width=None, half_height=None, center=None):
         """
