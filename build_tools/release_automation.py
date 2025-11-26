@@ -3,13 +3,14 @@ import datetime
 import json
 import logging
 import os
+import subprocess
 import sys
 from csv import DictReader
 from pathlib import Path
 
 import requests
 
-from sas.system.legal import legal
+from sas.system import legal
 
 USAGE = '''This script should be run from one directory above the base sasview directory. This script also requires both
  sasmodels and sasdata repositories to be in the same directory as the sasview repository.
@@ -293,6 +294,17 @@ def update_file(license_file: Path, license_line: str, line_to_update: int):
         f.writelines(output_lines)
 
 
+def update_credits(credits_file: Path):
+    """Update the credits.html file with relevant license info"""
+    subprocess.check_call(
+        [
+            sys.executable,
+            "--minimal",
+            "build_tools/release_automation.py",
+            credits_file,
+        ])
+
+
 def update_acknowledgement_widget():
     """
 
@@ -308,7 +320,7 @@ def prepare_release_notes(issues_list, repository, username, password):
     """
     issue_titles = []
     for issue in issues_list:
-        # WARNING: One can try running with auth but there is limitted number of requests
+        # WARNING: One can try running with auth but there is limited number of requests
         response = requests.get('https://api.github.com/repos/SasView/' + repository + '/issues/' + issue,
                                 auth=(username, password))
         if response.status_code != 200:
@@ -365,6 +377,7 @@ def main(args=None):
     update_file(SASMODELS_PATH / 'LICENSE.txt', license_line, 0)
     update_file(SASDATA_PATH / 'LICENSE.TXT', license_line, 0)
     update_file(SASVIEW_PATH / 'installers' / 'license.txt', license_line, -1)
+    update_credits(SASVIEW_PATH / "src" / "sas" / "system" / "credits.html")
 
     sasview_issues_list = args.sasview_list
     sasmodels_issues_list = args.sasmodels_list

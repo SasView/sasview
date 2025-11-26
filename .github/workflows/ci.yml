@@ -371,6 +371,12 @@ jobs:
         run: |
           uv pip install pyinstaller
 
+      - name: Generate the embedded credits file for all packages
+        if: ${{ matrix.installer }}
+        run: |
+          uv pip install pip-licenses
+          python build_tools/compile_licenses.py installers/credits.html
+
       - name: Build sasview with pyinstaller
         if: ${{ matrix.installer }}
         run: |
