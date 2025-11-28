@@ -331,11 +331,11 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
         self.no_extrapolation_plot.plot_role = DataRole.ROLE_DEFAULT
         self.no_extrapolation_plot.show_errors = False
-        self.no_extrapolation_plot.show_q_range_sliders = True
+        self.no_extrapolation_plot.show_q_range_sliders = False
         self.no_extrapolation_plot.slider_update_on_move = False
-        self.no_extrapolation_plot.slider_perspective_name = self.name
-        self.no_extrapolation_plot.slider_low_q_input = self.txtGuinierEnd_ex.text()
-        self.no_extrapolation_plot.slider_high_q_input = self.txtPorodStart_ex.text()
+        # self.no_extrapolation_plot.slider_perspective_name = self.name
+        # self.no_extrapolation_plot.slider_low_q_input = self.txtGuinierEnd_ex.text()
+        # self.no_extrapolation_plot.slider_high_q_input = self.txtPorodStart_ex.text()
         GuiUtils.updateModelItemWithPlot(
             self._model_item, self.no_extrapolation_plot, self.no_extrapolation_plot.title
         )
@@ -375,7 +375,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             self.low_extrapolation_plot.slider_high_q_input = self.txtGuinierEnd_ex.text()
             self.low_extrapolation_plot.slider_high_q_setter = ["set_low_q_extrapolation_upper_limit"]
             self.low_extrapolation_plot.slider_high_q_getter = ["get_low_q_extrapolation_upper_limit"]
-            self.low_extrapolation_plot.slider_low_q_input = self.txtQmin_ex.text()
             GuiUtils.updateModelItemWithPlot(
                 self._model_item, self.low_extrapolation_plot, self.low_extrapolation_plot.title
             )
@@ -641,7 +640,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             self.high_extrapolation_plot._yunit = temp_data._yunit
 
             if self._high_fit:
-                reactor.callFromThread(self.update_model_from_thread, WIDGETS.W_HIGHQ_POWER_VALUE, power_high)
+                reactor.callFromThread(self.update_model_from_thread, WIDGETS.W_HIGHQ_POWER_VALUE_EX, power_high)
 
         if qstar_high == "ERROR":
             qstar_high: float = 0.0
@@ -1034,25 +1033,32 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
     def update_progress_bars(self) -> None:
         """Update progress bars based on Q* values"""
         try:
-            if not self._calculator:
+            # Reset to 0 if no calculator or no data
+            if not self._calculator or not self._data:
+                self.progressBarData.setValue(0)
+                self.progressBarLowQ.setValue(0)
+                self.progressBarHighQ.setValue(0)
                 return
 
             qstar_data = 0.0
             qstar_low = 0.0
             qstar_high = 0.0
 
-            try:
             # Get values from calculator if available
-                if hasattr(self._calculator, '_qstar'):
-                    qstar_data = self._calculator._qstar
-                if hasattr(self._calculator, '_qstar_low'):
-                    qstar_low = self._calculator._qstar_low
-                if hasattr(self._calculator, '_qstar_high'):
-                    qstar_high = self._calculator._qstar_high
-
-            except (AttributeError, TypeError):
-                # Values not yet calculated
+            # Only use values if they have been explicitly calculated
+            if hasattr(self._calculator, '_qstar') and self._calculator._qstar is not None:
+                qstar_data = self._calculator._qstar
+            else:
+                # No calculation performed yet
+                self.progressBarData.setValue(0)
+                self.progressBarLowQ.setValue(0)
+                self.progressBarHighQ.setValue(0)
                 return
+
+            if hasattr(self._calculator, '_qstar_low') and self._calculator._qstar_low is not None:
+                qstar_low = self._calculator._qstar_low
+            if hasattr(self._calculator, '_qstar_high') and self._calculator._qstar_high is not None:
+                qstar_high = self._calculator._qstar_high
 
             # Calculate total
             qstar_total = qstar_data + qstar_low + qstar_high
@@ -1067,7 +1073,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                 self.progressBarData.setValue(data_percent)
                 self.progressBarLowQ.setValue(low_percent)
                 self.progressBarHighQ.setValue(high_percent)
-
             else:
                 # Reset if no valid data
                 self.progressBarData.setValue(0)
@@ -1075,7 +1080,10 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                 self.progressBarHighQ.setValue(0)
 
         except (ValueError, TypeError, AttributeError):
-            pass
+            # Reset on any error
+            self.progressBarData.setValue(0)
+            self.progressBarLowQ.setValue(0)
+            self.progressBarHighQ.setValue(0)
 
     def setupModel(self) -> None:
         """ """
