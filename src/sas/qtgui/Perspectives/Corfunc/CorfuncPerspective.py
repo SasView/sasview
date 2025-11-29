@@ -989,3 +989,10 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         report.add_plot(self.idf_figure)
 
         return report.report_data
+
+    def reset(self):
+        """
+        Reset the corfunc perspective to an empty state
+        """
+        self.removeData([self._model_item] if self._model_item else None)
+

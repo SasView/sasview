@@ -15,6 +15,8 @@ onto Data Explorer.
 
 A *SasView* session can also be saved and reloaded as an 'Analysis' (an individual model fit or invariant 
 calculation, etc), or as a 'Project' (everything you have done since starting your *SasView* session).
+Finally, a session can be closed so a new project can be created. This will clear all plots, data and
+content in all the perspectives, even those which are not currently visible.
 
 Edit
 ----

@@ -2180,3 +2180,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             if item.isCheckable():
                 item.setCheckState(status)
         model.blockSignals(False)
+
+    def reset(self):
+        """
+        Reset the data explorer to an empty state
+        """
+        self.closeAllPlots()
+        self.model.clear()
+        self.theory_model.clear()
+
