@@ -38,8 +38,9 @@ class CustomToolbar(NavigationToolbar):
         self._actions['fitting'].setVisible(False)
 
     def sendToFitting(self):
-        search_name: str = self.parent.label_name
-        self.parent.manager.communicator.freezeDataNameSignal.emit(search_name)
+        search_name = self.parent.data
+        for item in search_name:
+            self.parent.manager.communicator.freezeDataNameSignal.emit(item.name)
         self._actions["fitting"].setEnabled(False)
 
         # Re-enable after 3 seconds
