@@ -30,7 +30,7 @@ class CustomToolbar(NavigationToolbar):
         #   self._actions['xxx']
         custom_icon = QtGui.QIcon()  # You can load an icon here if you want e.g., QtGui.QIcon("path/to/icon.png")
         custom_action = QtGui.QAction(custom_icon, "Send to Fitting", self)
-        custom_action.setToolTip("Send the last data set to Fitting")
+        custom_action.setToolTip("Send all data to Fitting in seperate tabs")
         custom_action.triggered.connect(self.sendToFitting)
         self.insertAction(self.actions()[-1], custom_action)
         #self.addAction(custom_action)
