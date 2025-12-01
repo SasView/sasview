@@ -310,42 +310,12 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             self.cmdCalculate.setEnabled(False)
             self.cmdCalculate.setText("Calculate (Enter volume fraction or contrast)")
 
-    def plot_initial(self, model: QtGui.QStandardItemModel) -> None:
-        """Plot initial data"""
-        self.model = model
-        self._data = GuiUtils.dataFromItem(self._model_item)
-        # Send the modified model item to DE for keeping in the model
-        plots = [self._model_item]
-
-        self.no_extrapolation_plot = self._manager.createGuiData(self._data)
-        self.no_extrapolation_plot.name = self._model_item.text()
-        self.no_extrapolation_plot.title = self._model_item.text()
-        self.no_extrapolation_plot.symbol = 0
-        self.no_extrapolation_plot.has_errors = False
-
-        # copy labels and units of axes for plotting
-        self.no_extrapolation_plot._xaxis = self._data._xaxis
-        self.no_extrapolation_plot._xunit = self._data._xunit
-        self.no_extrapolation_plot._yaxis = self._data._yaxis
-        self.no_extrapolation_plot._yunit = self._data._yunit
-
-        self.no_extrapolation_plot.plot_role = DataRole.ROLE_DEFAULT
-        self.no_extrapolation_plot.show_errors = False
-        self.no_extrapolation_plot.show_q_range_sliders = False
-        self.no_extrapolation_plot.slider_update_on_move = False
-        GuiUtils.updateModelItemWithPlot(
-            self._model_item, self.no_extrapolation_plot, self.no_extrapolation_plot.title
-        )
-        plots.append(self.no_extrapolation_plot)
-
-        self.communicate.plotRequestedSignal.emit(plots)
-
     def plot_result(self, model: QtGui.QStandardItemModel) -> None:
         """Plot result of calculation"""
         self.model = model
         self._data = GuiUtils.dataFromItem(self._model_item)
-        # Send the modified model item to DE for keeping in the model
-        plots = [self._model_item]
+        # Send the modified model item and data to replace initial plot
+        plots = [self._model_item, self._data]
 
         if self.high_extrapolation_plot:
             self.high_extrapolation_plot.plot_role = DataRole.ROLE_DEFAULT
@@ -377,8 +347,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                 self._model_item, self.low_extrapolation_plot, self.low_extrapolation_plot.title
             )
             plots.append(self.low_extrapolation_plot)
-        if len(plots) > 1:
-            self.communicate.plotRequestedSignal.emit(plots)
+
+        # Always emit the plots (will replace any previous plot)
+        self.communicate.plotRequestedSignal.emit(plots)
 
         # Update the details dialog in case it is open
         self.update_details_widget()
@@ -474,6 +445,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             self._high_power_value: int | None = DEFAULT_POWER_VALUE
             if self.rbHighQFix_ex.isChecked():
                 self._high_power_value = int(self.model.item(WIDGETS.W_HIGHQ_POWER_VALUE_EX).text())
+            if self._high_fit:
+                self._high_power_value = None
 
             # Convert slider/q-value (Porod start) to number of points if available
             try:
@@ -588,9 +561,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             return self.model
 
         if low_calculation_pass:
-            extrapolated_data = self._calculator.get_extra_data_low(
-                self._low_points, q_start=float(self.extrapolation_parameters.data_q_min)
-            )
+            qmin_ext: float = float(self.extrapolation_parameters.data_q_min)
+            extrapolated_data = self._calculator.get_extra_data_low(self._low_points, q_start=qmin_ext)
             power_low: float | None = self._calculator.get_extrapolation_power(range="low")
 
             # Plot the chart
@@ -615,8 +587,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
         if high_calculation_pass:
             # for presentation in InvariantDetails
-            qmax_input: float = float(self.extrapolation_parameters.point_3)
-            qmax_plot: float = qmax_input
+            qmax_plot: float = float(self.extrapolation_parameters.point_3)
 
             power_high: float | None = self._calculator.get_extrapolation_power(range="high")
             high_out_data = self._calculator.get_extra_data_high(q_end=qmax_plot, npts=500)
@@ -866,13 +837,13 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
     def notify_extrapolation_text_box_validity(self, params: ExtrapolationParameters, show_dialog: bool = False) -> None:
         # Round values to 8 significant figures to avoid floating point precision issues
-        p1: float = float(f"{params.point_1:.7g}")
+        p1: float = Q_MINIMUM
         p2: float = float(f"{params.point_2:.7g}")
         p3: float = float(f"{params.point_3:.7g}")
         qmin: float = float(f"{params.data_q_min:.7g}")
-        qmax: float = float(f"{params.data_q_max:.7g}")
+        qmax: float = Q_MAXIMUM
 
-        # Determine validity flags such that data_q_min < point_1 < point_2 < point_3 < data_q_max
+        # Determine validity flags such that q_min < point_1 < point_2 < point_3 < q_max
         invalid_1: bool = p1 < qmin or p1 >= p2
         invalid_2: bool = p2 <= p1 or p2 >= p3
         invalid_3: bool = p3 <= p2 or p3 > qmax
@@ -1250,7 +1221,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
         self.tabWidget.setCurrentIndex(0)
 
-        self.plot_initial(self.model)
+        self.plot_result(self.model)
 
     def removeData(self, data_list: list = None) -> None:
         """Remove the existing data reference from the Invariant Persepective"""
@@ -1268,7 +1239,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.updateFromParameters({})
         # Disable buttons to return to base state
         self.cmdCalculate.setEnabled(False)
-        self.cmdStatus.setEnabled(False)
 
     def updateGuiFromFile(self, data: Data1D = None) -> None:
         """Update display in GUI and plot"""
