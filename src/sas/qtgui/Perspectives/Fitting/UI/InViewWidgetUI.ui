@@ -53,7 +53,7 @@
        <item>
         <widget class="QPushButton" name="cmdUpdateParam">
          <property name="text">
-          <string>Update fitted parametres</string>
+          <string>Update fitted parameters</string>
          </property>
         </widget>
        </item>

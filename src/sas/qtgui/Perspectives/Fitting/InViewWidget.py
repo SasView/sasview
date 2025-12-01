@@ -50,13 +50,8 @@ class InViewWidget(QtWidgets.QWidget, Ui_InViewWidgetUI):
             x = data.x
             y = data.y
             if y is not None and hasattr(y, "__len__") and len(x) == len(y):
-                # Let Plotter draw data points (with errors if present)
-                # Optional: ensure it's not mistaken for a theory line
-                # data.symbol = 17  # e.g. triangle marker; leave as-is if you prefer defaults
                 self.plotter.plot(data=data)
-            # else: skip plotting data, but keep the window and model plotting functional
         except Exception:
-            # If anything odd about the dataset, skip plotting data
             pass
 
     def initFromFitPage(self, fitting_widget):
@@ -289,7 +284,7 @@ class InViewWidget(QtWidgets.QWidget, Ui_InViewWidgetUI):
     def _apply_to_fitpage(self):
         if self._fw is None:
             return
-        # Update the Fit page table only; no plotting here
+        # Update the Fit page table only;
         for name, val in self._param_values.items():
             row = self._fw.getRowFromName(name)
             if row is None:
@@ -320,5 +315,4 @@ class InViewWidget(QtWidgets.QWidget, Ui_InViewWidgetUI):
         help_location = base / "user" / "qtgui" / "Perspectives" / "Fitting" / "inview.html"
         if not help_location.exists():
             help_location = base / "user" / "qtgui" / "Perspectives" / "Fitting" / "fitting_help.html"
-        # Keep a reference so the window isn't garbage collected immediately
         self._help_window = GuiUtils.showHelp(help_location)
