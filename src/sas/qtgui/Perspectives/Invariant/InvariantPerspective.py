@@ -333,9 +333,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.no_extrapolation_plot.show_errors = False
         self.no_extrapolation_plot.show_q_range_sliders = False
         self.no_extrapolation_plot.slider_update_on_move = False
-        # self.no_extrapolation_plot.slider_perspective_name = self.name
-        # self.no_extrapolation_plot.slider_low_q_input = self.txtGuinierEnd_ex.text()
-        # self.no_extrapolation_plot.slider_high_q_input = self.txtPorodStart_ex.text()
         GuiUtils.updateModelItemWithPlot(
             self._model_item, self.no_extrapolation_plot, self.no_extrapolation_plot.title
         )
@@ -372,6 +369,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             self.low_extrapolation_plot.show_q_range_sliders = True
             self.low_extrapolation_plot.slider_update_on_move = False
             self.low_extrapolation_plot.slider_perspective_name = self.name
+            self.low_extrapolation_plot.slider_low_q_input = self.extrapolation_parameters.data_q_min
             self.low_extrapolation_plot.slider_high_q_input = self.txtGuinierEnd_ex.text()
             self.low_extrapolation_plot.slider_high_q_setter = ["set_low_q_extrapolation_upper_limit"]
             self.low_extrapolation_plot.slider_high_q_getter = ["get_low_q_extrapolation_upper_limit"]
@@ -591,7 +589,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
         if low_calculation_pass:
             extrapolated_data = self._calculator.get_extra_data_low(
-                self._low_points, q_start=float(self.extrapolation_parameters.point_1)
+                self._low_points, q_start=float(self.extrapolation_parameters.data_q_min)
             )
             power_low: float | None = self._calculator.get_extrapolation_power(range="low")
 
