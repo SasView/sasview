@@ -4,9 +4,10 @@ from unittest.mock import MagicMock
 
 import pytest
 from PySide6 import QtCore, QtGui, QtWidgets
+
+from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.InViewWidget import InViewWidget
 from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Perspectives.Fitting import FittingUtilities
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +22,7 @@ class InViewWidgetTest:
         w.show()
         qapp.processEvents()
         return w
-        
+
     def _make_fw(self, *, params, values, details, data=None, pdi=False):
         """
         Building dummy widget of Fit Page with elements that are connected with InViewWidget
@@ -39,7 +40,7 @@ class InViewWidgetTest:
 
             def isChecked(self):
                 return self._c
-        
+
         class _Poly:
             def __init__(self):
                 self.poly_params_to_fit = [n for n in params if n.endswith('.width')]
@@ -50,9 +51,9 @@ class InViewWidgetTest:
                     self.poly_model.appendRow(it)
                 self.poly_params = {}
 
-        fw.polydispersity_widget = _Poly()                    
-            
-    
+        fw.polydispersity_widget = _Poly()
+
+
         # Adding controls that are getting turned on and off when InViewWidget is active
         fw.lstParams = QtWidgets.QTableView()
         fw.cbCategory = QtWidgets.QComboBox()
@@ -72,7 +73,7 @@ class InViewWidgetTest:
         class _Kernel:
             def __init__(self, _details):
                 self.details = dict(_details)
-        
+
             def setParam(self, name, value): #### <-----------------
                 pass
 
@@ -80,16 +81,16 @@ class InViewWidgetTest:
             def __init__(self):
                 self.kernel_module = _Kernel(details)
                 self.data = data or Data1D(x=[0.01, 0.02], y=[1.0, 1.0])
-            
+
             def new1DPlot(self, return_data, tab_id):
                 return SimpleNamespace()
 
-        
+
         fw.logic = _Logic()
         fw.q_range_min = None
         fw.q_range_max = None
 
-        class _Smearing():
+        class _Smearing:
             def smearer(self):
                 return None
 
@@ -174,7 +175,7 @@ class InViewWidgetTest:
 
         widget._apply_to_fitpage()
         model = fw.model_dict['model']
-        assert model.item(0, 1).text() == '1.2345'   
+        assert model.item(0, 1).text() == '1.2345'
 
 
     @pytest.mark.xfail(reason="2022-09 already broken")
