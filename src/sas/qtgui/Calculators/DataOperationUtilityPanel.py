@@ -417,7 +417,6 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             plotter2D.x_label = ''
             plotter2D.plot(data=data, show_colorbar=False)
             plotter2D.show()
-
         elif isinstance(data, Data1D):
             # plot 1D data
             plotter = PlotterWidget(self, quickplot=True)
