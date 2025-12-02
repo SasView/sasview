@@ -133,7 +133,7 @@ roman==5.1
 roman-numerals-py==3.1.0
 rpds-py==0.27.0
 sasdata==0.11.0
-sasmodels==1.0.11
+sasmodels==1.0.12
 scipy==1.16.1
 setuptools-scm==9.2.0
 shiboken6==6.9.1
