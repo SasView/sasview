@@ -13,6 +13,63 @@ Release Notes
 Features
 ========
 
+New in Version 6.1.2
+--------------------
+
+This is a minor bug fix release of SasView. It is built with Sasmodels v1.0.12, Sasdata v0.11.0, and Bumps v1.0.2.
+
+This release fixes two major issues introduced in v6.1.1:
+
+- Plugin models now work correctly
+- The 2-Yukawa structure factor is available and does not throw an error.
+
+Bug fixes
+^^^^^^^^^
+
+* Fix for plugin models not being found by @DrPaulSharp in https://github.com/SasView/sasview/pull/3659
+* Fix for Wedge and Sector Slicers in Q using the same plot by @jellybean2004 in https://github.com/SasView/sasview/pull/3597
+* Replaces 'magic numbers' with enum by @jellybean2004 in https://github.com/SasView/sasview/pull/3598
+* Adds plotUpdateSignal to BoxSlicer by @DrPaulSharp in https://github.com/SasView/sasview/pull/3600
+* Fix for Chi2 calculation in Inversion perspective by @jellybean2004 in https://github.com/SasView/sasview/pull/3607
+* Invariant bugfixes and 'TODO' tasks by @jellybean2004 in https://github.com/SasView/sasview/pull/3627
+* Removes redundant param by @jellybean2004 in https://github.com/SasView/sasview/pull/3633
+* Invariant reformat by @jellybean2004 in https://github.com/SasView/sasview/pull/3631
+* Adds module level logging to all files by @jellybean2004 in https://github.com/SasView/sasview/pull/3637
+* Adds function for close by @jellybean2004 in https://github.com/SasView/sasview/pull/3635
+
+Documentation fixes
+^^^^^^^^^^^^^^^^^^^
+
+* Various fixes to try to get sasview sphinx docs to build cleanly. by @pkienzle in https://github.com/SasView/sasview/pull/3504
+* Include API docs from sasmodels in sasview sphinx output by @llimeht in https://github.com/SasView/sasview/pull/3661
+* Update plugin model location in docs by @DrPaulSharp in https://github.com/SasView/sasview/pull/3665
+
+Linting changes
+^^^^^^^^^^^^^^^
+
+* Converts type comments to type hints by @DrPaulSharp in https://github.com/SasView/sasview/pull/3578
+* Explicitly specifies latest version of ruff in CI by @DrPaulSharp in https://github.com/SasView/sasview/pull/3608
+* Adds local pre-commit hook for ruff linting auto fixes by @DrPaulSharp in https://github.com/SasView/sasview/pull/3573
+
+Infrastructure Changes
+^^^^^^^^^^^^^^^^^^^^^^
+
+* Add dependabot for github actions by @krzywon in https://github.com/SasView/sasview/pull/3571
+* Limit windows signing action by @rozyczko in https://github.com/SasView/sasview/pull/3617
+* Install innosetup in windows installer CI runs by @llimeht in https://github.com/SasView/sasview/pull/3606
+* Bump actions/download-artifact from 4 to 5 by @dependabot[bot] in https://github.com/SasView/sasview/pull/3592
+* Bump dawidd6/action-download-artifact from 6 to 11 by @dependabot[bot] in https://github.com/SasView/sasview/pull/3591
+* Bump actions/checkout from 4 to 5 by @dependabot[bot] in https://github.com/SasView/sasview/pull/3590
+* Bump actions/setup-python from 5 to 6 by @dependabot[bot] in https://github.com/SasView/sasview/pull/3588
+* Bump digicert/ssm-code-signing from 1.0.1 to 1.1.1 by @dependabot[bot] in https://github.com/SasView/sasview/pull/3589
+* move qt gui build to cli.py and remove run.py by @pkienzle in https://github.com/SasView/sasview/pull/3596
+* Change remaining mentions of appdirs to platformdirs by @llimeht in https://github.com/SasView/sasview/pull/3640
+* Removes macos-13 from CI by @DrPaulSharp in https://github.com/SasView/sasview/pull/3629
+* Replace direct AUSAXS library integration with the pyAUSAXS wrapper by @klytje in https://github.com/SasView/sasview/pull/3634
+
+
+**Full Changelog**: https://github.com/SasView/sasview/compare/v6.1.1...v6.1.2rc1
+
 New in Version 6.1.1
 --------------------
 
