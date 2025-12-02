@@ -1081,7 +1081,7 @@ class InvariantCalculator:
         which gives (this should be checked before using in anger): ::
 
             ds = sqrt((dporod_const**2 * contrast**2 + 4 * (porod_const *
-                          dcontrast)**2) / (4 * pi**2 * constrast**6))
+                          dcontrast)**2) / (4 * pi**2 * contrast**6))
 
         We also assume some users will never enter a value for uncertainty so
         allow for None even when it is an option.
@@ -1119,6 +1119,6 @@ class InvariantCalculator:
         # For this new computation we DO need to convert the units
         # _porod_const = porod_const * 1e-8
         # ds = math.sqrt((_dporod_const**2 * contrast**2 + 4 * (_porod_const *
-        #                 dcontrast)**2 / (4 * math.pi**2 * constrast**6))
+        #                 dcontrast)**2 / (4 * math.pi**2 * contrast**6))
 
         return s, ds
