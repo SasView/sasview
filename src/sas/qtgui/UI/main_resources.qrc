@@ -18,5 +18,6 @@
     <file>res/settings.png</file>
     <file>res/left-round.png</file>
     <file>res/right-round.png</file>
+    <file>res/sasbdb.png</file>
   </qresource>
 </RCC>

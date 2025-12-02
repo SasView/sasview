@@ -67,6 +67,7 @@
     <addaction name="actionSaveParamsAs"/>
     <addaction name="separator"/>
     <addaction name="actionReport"/>
+    <addaction name="actionSASBDB"/>
     <addaction name="actionReset"/>
     <addaction name="separator"/>
     <addaction name="actionFreeze_Theory"/>
@@ -196,6 +197,7 @@
    <addaction name="actionReset"/>
    <addaction name="actionSave"/>
    <addaction name="actionReport"/>
+   <addaction name="actionSASBDB"/>
    <addaction name="actionUndo"/>
    <addaction name="actionRedo"/>
    <addaction name="actionCopy"/>
@@ -238,6 +240,18 @@
    </property>
    <property name="toolTip">
     <string>report</string>
+   </property>
+  </action>
+  <action name="actionSASBDB">
+   <property name="icon">
+    <iconset>
+     <normaloff>:/res/sasbdb.png</normaloff>:/res/sasbdb.png</iconset>
+   </property>
+   <property name="text">
+    <string>Export to SASBDB</string>
+   </property>
+   <property name="toolTip">
+    <string>Export data to SASBDB format</string>
    </property>
   </action>
   <action name="actionUndo">

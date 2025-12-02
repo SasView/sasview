@@ -3536,6 +3536,86 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         return report_logic.reportList()
 
+    def getSASBDBData(self):
+        """
+        Create and return SASBDB export data from fitting results
+        Similar to getReport() but returns SASBDBExportData instead
+        """
+        from sas.qtgui.Utilities.SASBDB.sasbdb_data import SASBDBExportData
+        from sas.qtgui.Utilities.SASBDB.sasbdb_data_collector import SASBDBDataCollector
+        
+        collector = SASBDBDataCollector()
+        export_data = collector.export_data
+        
+        # Check if we have data and a model
+        if self.data is None or self.logic.kernel_module is None:
+            return None
+        
+        # Collect sample data and instrument information from the data object
+        sample, instrument = collector.collect_from_data(self.data)
+        
+        # Add instrument to export data if available
+        if instrument:
+            export_data.instruments.append(instrument)
+        
+        # Collect fit information
+        fit_data = {}
+        model_name = None
+        optimizer_name = None
+        
+        # Extract chi2 from fit results (same way as ReportPageLogic does)
+        if hasattr(self, 'chi2') and self.chi2 is not None:
+            fit_data['chi2'] = self.chi2
+        
+        # Get model name (same way as ReportPageLogic does)
+        if self.logic.kernel_module:
+            model_name = getattr(self.logic.kernel_module, 'id', None)
+            if not model_name:
+                model_name = getattr(self.logic.kernel_module, 'name', None)
+        
+        # Get optimizer name (same way as ReportPageLogic does)
+        try:
+            from bumps import options
+            if hasattr(options, 'FIT_CONFIG') and hasattr(options.FIT_CONFIG, 'selected_fitter'):
+                optimizer_name = options.FIT_CONFIG.selected_fitter.name
+        except (ImportError, AttributeError):
+            pass
+        
+        # Get model parameters (same way as ReportPageLogic does)
+        model_parameters = []
+        if self.logic.kernel_module:
+            from sas.qtgui.Perspectives.Fitting import FittingUtilities
+            params = FittingUtilities.getStandardParam(self._model_model)
+            poly_params = []
+            magnet_params = []
+            if self.chkPolydispersity.isChecked() and self.polydispersity_widget.poly_model.rowCount() > 0:
+                poly_params = FittingUtilities.getStandardParam(self.polydispersity_widget.poly_model)
+            if self.chkMagnetism.isChecked() and self.canHaveMagnetism() and self.magnetism_widget._magnet_model.rowCount() > 0:
+                magnet_params = FittingUtilities.getStandardParam(self.magnetism_widget._magnet_model)
+            model_parameters = params + poly_params + magnet_params
+        
+        # Create fit entry if we have fit information
+        if fit_data.get('chi2') is not None or model_name or optimizer_name:
+            fit = collector.collect_from_fit(fit_data, model_name, optimizer_name, model_parameters)
+            # Update angular units from sample
+            if sample.angular_units:
+                fit.angular_units = sample.angular_units
+            sample.fits.append(fit)
+        
+        # Add default molecule and buffer if not present
+        if sample.molecule is None:
+            sample.molecule = collector.create_default_molecule()
+        if sample.buffer is None:
+            sample.buffer = collector.create_default_buffer()
+        
+        export_data.samples.append(sample)
+        
+        # Create default project if not set
+        if export_data.project is None:
+            export_data.project = collector.create_default_project()
+        
+        return export_data
+
     def loadPageStateCallback(self, state: Any | None = None, datainfo: Any | None = None, format: Any | None = None) -> None:
         """
         This is a callback method called from the CANSAS reader.
