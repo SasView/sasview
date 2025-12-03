@@ -40,6 +40,7 @@ from sas.qtgui.Perspectives.Inversion.InversionPerspective import InversionWindo
 from sas.qtgui.Perspectives.perspective import Perspective
 from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionPerspective import SizeDistributionWindow
 from sas.qtgui.Utilities.About.About import About
+from sas.qtgui.Utilities.About.Credits import Credits
 
 # from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
 from sas.qtgui.Utilities.FileConverter import FileConverterWidget
@@ -777,6 +778,7 @@ class GuiManager:
         self._workspace.actionModel_Marketplace.triggered.connect(self.actionMarketplace)
         self._workspace.actionAcknowledge.triggered.connect(self.actionAcknowledge)
         self._workspace.actionAbout.triggered.connect(self.actionAbout)
+        self._workspace.actionCredits.triggered.connect(self.actionCredits)
         self._workspace.actionWelcomeWidget.triggered.connect(self.actionWelcome)
         self._workspace.actionCheck_for_update.triggered.connect(self.actionCheck_for_update)
         self._workspace.actionWhat_s_New.triggered.connect(self.actionWhatsNew)
@@ -1321,6 +1323,14 @@ class GuiManager:
         # TODO: proper sizing
         about = About()
         about.exec()
+
+    def actionCredits(self):
+        """
+        Open the Credits/Licenses box
+        """
+        # TODO: proper sizing
+        credits = Credits()
+        credits.exec()
 
     def actionClose_Project(self):
         """
