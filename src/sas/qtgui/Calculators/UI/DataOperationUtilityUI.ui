@@ -25,7 +25,7 @@
   <property name="maximumSize">
    <size>
     <width>2000</width>
-    <height>425</height>
+    <height>2000</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -76,7 +76,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Generate the Data and send to Data Explorer.</string>
+        <string>Generate the Data and show the preview.</string>
        </property>
        <property name="text">
         <string>Compute</string>
@@ -88,6 +88,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="cmdSaveData">
+       <property name="toolTip">
+        <string>Save the data and send it to Data Explorer.</string>
+       </property>
        <property name="text">
         <string>Save</string>
        </property>
@@ -139,7 +142,7 @@
    <item row="0" column="0">
     <widget class="QGroupBox" name="groupBox">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -153,7 +156,7 @@
      <property name="maximumSize">
       <size>
        <width>1999</width>
-       <height>400</height>
+       <height>1999</height>
       </size>
      </property>
      <property name="title">
@@ -168,121 +171,14 @@
         <property name="horizontalSpacing">
          <number>6</number>
         </property>
-        <item row="2" column="2">
-         <widget class="QComboBox" name="cbOperator">
-          <property name="minimumSize">
-           <size>
-            <width>51</width>
-            <height>26</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>60</width>
-            <height>30</height>
-           </size>
-          </property>
-          <property name="toolTip">
-           <string>Add: +
-Subtract: - 
-Multiply: *
-Divide: /
-Append(Combine): |</string>
-          </property>
-          <item>
-           <property name="text">
-            <string>+</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>-</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>*</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>/</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>|</string>
-           </property>
-          </item>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QLabel" name="lblData1">
-          <property name="text">
-           <string>Data1</string>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="5">
-         <widget class="QLabel" name="lblBigEqual">
-          <property name="minimumSize">
-           <size>
-            <width>51</width>
-            <height>21</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>=</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="2">
-         <widget class="QLabel" name="lblOperatorApplied">
-          <property name="minimumSize">
-           <size>
-            <width>21</width>
-            <height>21</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>+</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-          <property name="textInteractionFlags">
-           <set>Qt::LinksAccessibleByMouse|Qt::TextEditable</set>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="5">
-         <widget class="QLabel" name="lblEqual">
-          <property name="minimumSize">
-           <size>
-            <width>21</width>
-            <height>21</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>=</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="3">
-         <widget class="QLabel" name="lblData2OrNumber">
-          <property name="text">
-           <string>Data2 (or Number)</string>
-          </property>
-         </widget>
-        </item>
         <item row="0" column="6">
          <widget class="QLabel" name="lblOutputDataName">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="text">
            <string>Output Data Name</string>
           </property>
@@ -313,62 +209,19 @@ Append(Combine): |</string>
           </property>
          </widget>
         </item>
-        <item row="4" column="6">
-         <widget class="QGraphicsView" name="graphOutput">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
+        <item row="2" column="5">
+         <widget class="QLabel" name="lblEqual">
           <property name="minimumSize">
            <size>
-            <width>334</width>
-            <height>260</height>
+            <width>21</width>
+            <height>21</height>
            </size>
           </property>
-          <property name="maximumSize">
-           <size>
-            <width>1000</width>
-            <height>300</height>
-           </size>
+          <property name="text">
+           <string>=</string>
           </property>
-          <property name="focusPolicy">
-           <enum>Qt::NoFocus</enum>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::StyledPanel</enum>
-          </property>
-          <property name="resizeAnchor">
-           <enum>QGraphicsView::AnchorViewCenter</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="1">
-         <widget class="QGraphicsView" name="graphData1">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>334</width>
-            <height>260</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>1000</width>
-            <height>300</height>
-           </size>
-          </property>
-          <property name="focusPolicy">
-           <enum>Qt::NoFocus</enum>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::StyledPanel</enum>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
           </property>
          </widget>
         </item>
@@ -414,8 +267,50 @@ Append(Combine): |</string>
           </item>
          </widget>
         </item>
-        <item row="4" column="3">
-         <widget class="QGraphicsView" name="graphData2">
+        <item row="4" column="5">
+         <widget class="QLabel" name="lblBigEqual">
+          <property name="minimumSize">
+           <size>
+            <width>51</width>
+            <height>21</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>=</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLabel" name="lblData1">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Data1</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3">
+         <widget class="QLabel" name="lblData2OrNumber">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Data2 (or Number)</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="6">
+         <widget class="QGraphicsView" name="graphOutput">
           <property name="sizePolicy">
            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
             <horstretch>0</horstretch>
@@ -431,7 +326,7 @@ Append(Combine): |</string>
           <property name="maximumSize">
            <size>
             <width>1000</width>
-            <height>300</height>
+            <height>2000</height>
            </size>
           </property>
           <property name="focusPolicy">
@@ -440,8 +335,8 @@ Append(Combine): |</string>
           <property name="frameShape">
            <enum>QFrame::StyledPanel</enum>
           </property>
-          <property name="frameShadow">
-           <enum>QFrame::Sunken</enum>
+          <property name="resizeAnchor">
+           <enum>QGraphicsView::AnchorViewCenter</enum>
           </property>
          </widget>
         </item>
@@ -521,6 +416,132 @@ Append(Combine): |</string>
            </widget>
           </item>
          </layout>
+        </item>
+        <item row="4" column="2">
+         <widget class="QLabel" name="lblOperatorApplied">
+          <property name="minimumSize">
+           <size>
+            <width>21</width>
+            <height>21</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>+</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+          <property name="textInteractionFlags">
+           <set>Qt::LinksAccessibleByMouse|Qt::TextEditable</set>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="2">
+         <widget class="QComboBox" name="cbOperator">
+          <property name="minimumSize">
+           <size>
+            <width>51</width>
+            <height>26</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>60</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Add: +
+Subtract: - 
+Multiply: *
+Divide: /
+Append(Combine): |</string>
+          </property>
+          <item>
+           <property name="text">
+            <string>+</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>-</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>*</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>/</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>|</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="4" column="1">
+         <widget class="QGraphicsView" name="graphData1">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>334</width>
+            <height>260</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>1000</width>
+            <height>2000</height>
+           </size>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::NoFocus</enum>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="3">
+         <widget class="QGraphicsView" name="graphData2">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>334</width>
+            <height>260</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>1000</width>
+            <height>2000</height>
+           </size>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::NoFocus</enum>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Sunken</enum>
+          </property>
+         </widget>
         </item>
        </layout>
       </item>
