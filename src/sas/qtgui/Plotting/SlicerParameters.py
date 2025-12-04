@@ -151,7 +151,6 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         """
         Create and initially populate the list of slicers with radio button behavior
         """
-        current_slicer_text = self.getCheckedSlicer()  # Already returns string now
 
         self.lstSlicers.clear()
 
@@ -330,9 +329,9 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
             if self.active_plots.keys():
                 self.parent.setSlicer(slicer=slicer)
                 # Reset combo box back to "None" after setting slicer
-                self.cbSlicer.blockSignals(True)
-                self.cbSlicer.setCurrentIndex(0)
-                self.cbSlicer.blockSignals(False)
+                self.cbSlicerReplace.blockSignals(True)
+                self.cbSlicerReplace.setCurrentIndex(0)
+                self.cbSlicerReplace.blockSignals(False)
         self.onParamChange()
 
     def onGeneratePlots(self, isChecked):

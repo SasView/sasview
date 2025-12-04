@@ -479,7 +479,7 @@ class Plotter2DWidget(PlotterBase):
             child = item.child(item_index)
             if child.hasChildren():
                 self._recurse_plots_to_remove(child)
-            if not (isinstance(child.data(), (Data1D, Data2D))
+            if (isinstance(child.data(), (Data1D, Data2D))
                     and hasattr(child.data(), 'type_id')
                     and slicer_type_id in child.data().type_id
                     and child.rowCount() > 0
