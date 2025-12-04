@@ -7,6 +7,7 @@ from sas.qtgui.Plotting.Slicers.ArcInteractor import ArcInteractor
 from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
 from sas.qtgui.Plotting.Slicers.RadiusInteractor import RadiusInteractor
 from sas.qtgui.Plotting.Slicers.SectorSlicer import LineInteractor
+from sas.qtgui.Plotting.Slicers.SlicerUtils import generate_unique_plot_id
 
 
 class WedgeInteractor(BaseInteractor, SlicerModel):
@@ -58,21 +59,23 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         self.fold = True
         # reference of the current data averager
         self.averager = None
+        # Saves plot id so it doesn't get recreated each time a parameter changes
+        self.plot_id = None
 
         self.inner_arc = ArcInteractor(
-            self, self.axes, color="black", zorder=zorder, r=self.r1, theta=self.theta, phi=self.phi
+            self, self.axes, color=color, zorder=zorder, r=self.r1, theta=self.theta, phi=self.phi
         )
         self.inner_arc.qmax = self.qmax
         self.outer_arc = ArcInteractor(
-            self, self.axes, color="black", zorder=zorder + 1, r=self.r2, theta=self.theta, phi=self.phi
+            self, self.axes, color=color, zorder=zorder + 1, r=self.r2, theta=self.theta, phi=self.phi
         )
         self.outer_arc.qmax = self.qmax * 1.2
         self.radial_lines = RadiusInteractor(
-            self, self.axes, color="black", zorder=zorder + 1, r1=self.r1, r2=self.r2, theta=self.theta, phi=self.phi
+            self, self.axes, color=color, zorder=zorder + 1, r1=self.r1, r2=self.r2, theta=self.theta, phi=self.phi
         )
         self.radial_lines.qmax = self.qmax * 1.2
         self.central_line = LineInteractor(
-            self, self.axes, color="black", zorder=zorder, r=self.qmax * 1.414, theta=self.theta, half_length=True
+            self, self.axes, color=color, zorder=zorder, r=self.qmax * 1.414, theta=self.theta, half_length=True
         )
         self.central_line.qmax = self.qmax * 1.414
         self.update()
@@ -93,12 +96,10 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         Clear the slicer and all connected events related to this slicer
         """
         self.averager = None
-        self.clear_markers()
         self.outer_arc.clear()
         self.inner_arc.clear()
         self.radial_lines.clear()
         self.central_line.clear()
-        self.base.connect.clearall()
 
     def update(self):
         """
@@ -209,10 +210,15 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
             new_plot.xaxis(r"\rm{Q}", "A^{-1}")
         new_plot.yaxis(r"\rm{Intensity} ", "cm^{-1}")
 
-        new_plot.id = "Wedge" + self.averager.__name__ + self.data.name
-        new_plot.type_id = (
-            "Slicer" + self.data.name
-        )  # Used to remove plots after changing slicer so they don't keep showing up after closed
+        # Assign unique id per slicer instance and use it as the display name
+        if self.plot_id is None:
+            base_id = "Wedge" + self.averager.__name__ + self.data.name
+            self.plot_id = generate_unique_plot_id(base_id, self._item)
+
+        new_plot.id = self.plot_id
+        new_plot.name = new_plot.id
+        new_plot.title = new_plot.id
+        new_plot.type_id = ("Slicer" + self.data.name)
         new_plot.is_data = True
         item = self._item
         if self._item.parent() is not None:

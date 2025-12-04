@@ -66,6 +66,9 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         # Initially, Apply is disabled
         self.cmdApply.setEnabled(False)
 
+        # Store models for each slicer - add this line
+        self.slicer_models = {}
+
         # Mapping combobox index -> slicer module
         self.callbacks = {
             0: None,
@@ -109,6 +112,9 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         # Set up plots list
         self.setPlotsList()
 
+        # Set up slicers list - add this line
+        self.setSlicersList()
+
     def setParamsList(self):
         """
         Create and initially populate the list of parameters
@@ -127,6 +133,87 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         """ """
         self.active_plots = self.parent.getActivePlots()
         self.setPlotsList()
+
+    def getCurrentSlicerDict(self):
+        """
+        Returns a dictionary of currently shown slicers
+        {slicer_name:checkbox_status}
+        """
+        current_slicers = {}
+        for row in range(self.lstSlicers.count()):
+            item = self.lstSlicers.item(row)
+            isChecked = item.checkState() != QtCore.Qt.Unchecked
+            slicer = item.text()
+            current_slicers[slicer] = isChecked
+        return current_slicers
+
+    def setSlicersList(self):
+        """
+        Create and initially populate the list of slicers with radio button behavior
+        """
+
+        self.lstSlicers.clear()
+
+        # Create a button group for radio button behavior
+        if not hasattr(self, 'slicerButtonGroup'):
+            self.slicerButtonGroup = QtWidgets.QButtonGroup(self)
+            self.slicerButtonGroup.setExclusive(True)
+
+        # Determine which slicer should be selected based on the current model
+        slicer_to_select = None
+        if self.model is not None:
+            # Find which slicer has this model
+            for slicer_name, slicer_obj in self.parent.slicers.items():
+                if hasattr(slicer_obj, '_model') and slicer_obj._model is self.model:
+                    slicer_to_select = slicer_name
+                    break
+
+        # Fill out list of slicers
+        for idx, item in enumerate(self.parent.slicers):
+            # Create a widget to hold the radio button
+            widget = QtWidgets.QWidget()
+            layout = QtWidgets.QHBoxLayout(widget)
+            layout.setContentsMargins(5, 2, 5, 2)
+
+            # Create radio button
+            radio = QtWidgets.QRadioButton(str(item))
+
+            # Check if this should be selected
+            should_select = (slicer_to_select == str(item)) or (slicer_to_select is None and idx == 0)
+            radio.setChecked(should_select)
+
+            # Add to button group
+            self.slicerButtonGroup.addButton(radio, idx)
+
+            layout.addWidget(radio)
+            layout.addStretch()
+
+            # Create list item
+            listItem = QtWidgets.QListWidgetItem(self.lstSlicers)
+            listItem.setSizeHint(widget.sizeHint())
+
+            # Add to list
+            self.lstSlicers.addItem(listItem)
+            self.lstSlicers.setItemWidget(listItem, widget)
+
+            # Store the slicer's model
+            if item in self.parent.slicers:
+                slicer_obj = self.parent.slicers[item]
+                if hasattr(slicer_obj, '_model'):
+                    self.slicer_models[str(item)] = slicer_obj._model
+
+            # Connect radio button to update handler
+            radio.toggled.connect(lambda checked, name=str(item): self.onSlicerRadioToggled(checked, name))
+
+    def getCheckedSlicer(self):
+        """
+        Returns the currently checked slicer (radio button)
+        """
+        if not hasattr(self, 'slicerButtonGroup'):
+            return None
+
+        checked_button = self.slicerButtonGroup.checkedButton()
+        return checked_button.text() if checked_button else None
 
     def getCurrentPlotDict(self):
         """
@@ -181,6 +268,9 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         # Apply slicer to selected plots
         self.cmdApply.clicked.connect(self.onApply)
 
+        # Delete slicer
+        self.cmdDelete.clicked.connect(self.onDelete)
+
         # Initialize slicer combobox to the current slicer
         current_slicer = type(self.parent.slicer)
         for index in self.callbacks:
@@ -189,6 +279,9 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
                 break
         # change the slicer type
         self.cbSlicer.currentIndexChanged.connect(self.onSlicerChanged)
+
+        # Replace slicer type
+        self.cbSlicerReplace.currentIndexChanged.connect(self.onSlicerReplaceChanged)
 
         # Updates to the slicer moder must propagate to all plotters
         if self.model is not None:
@@ -204,16 +297,41 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         self.lstParams.setSelectionModel(selection_model)
         self.lstParams.setCurrentIndex(self.model.index(row, column))
 
-    def onSlicerChanged(self, index):
+    def onSlicerChanged(self, index: int):
         """change the parameters based on the slicer chosen"""
         if index == 0:  # No interactor
-            self.parent.onClearSlicer()
-            self.setModel(None)
-            self.onGeneratePlots(False)
+            return
+            # self.parent.onClearSlicer()
+            # self.setModel(None)
+            # self.onGeneratePlots(False)
         else:
             slicer = self.callbacks[index]
             if self.active_plots.keys():
                 self.parent.setSlicer(slicer=slicer)
+                # Reset combo box back to "None" after setting slicer
+                self.cbSlicer.blockSignals(True)
+                self.cbSlicer.setCurrentIndex(0)
+                self.cbSlicer.blockSignals(False)
+        self.onParamChange()
+
+    def onSlicerReplaceChanged(self, index: int):
+        """replace the slicer with the one chosen"""
+        if index == 0:  # No interactor
+            return
+            # self.parent.onClearSlicer()
+            # self.setModel(None)
+            # self.onGeneratePlots(False)
+        else:
+            # delete the currently selected slicer
+            self.onDelete()
+            # add the new slicer
+            slicer = self.callbacks[index]
+            if self.active_plots.keys():
+                self.parent.setSlicer(slicer=slicer)
+                # Reset combo box back to "None" after setting slicer
+                self.cbSlicerReplace.blockSignals(True)
+                self.cbSlicerReplace.setCurrentIndex(0)
+                self.cbSlicerReplace.blockSignals(False)
         self.onParamChange()
 
     def onGeneratePlots(self, isChecked):
@@ -288,6 +406,46 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         if self.isSave and self.model is not None:
             self.save1DPlotsForPlot(plots)
         pass  # debug anchor
+
+    def onDelete(self):
+        """
+        Delete the current slicer
+        """
+        # Pop up a confirmation dialog
+        reply = QtWidgets.QMessageBox.question(self, 'Delete Slicer',
+                                             'Are you sure you want to delete this slicer?',
+                                             QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+                                             QtWidgets.QMessageBox.No)
+        if reply == QtWidgets.QMessageBox.No:
+            return
+        # Get the current slicer name
+        slicer_item = self.getCheckedSlicer()
+        # Remove the slicer from the dictionary
+        if slicer_item in self.parent.slicers:
+            slicer_obj = self.parent.slicers[slicer_item]
+            # Clear only this slicer's markers without affecting other slicers
+            # Use clear_markers() which uses connect.clear(*markers) instead of clearall()
+            self._clear_slicer_markers(slicer_obj)
+            # Remove from dictionary
+            del self.parent.slicers[slicer_item]
+            # Remove from slicer_models cache
+            if slicer_item in self.slicer_models:
+                del self.slicer_models[slicer_item]
+            # update the canvas
+            self.parent.canvas.draw()
+            # update the slicer list
+            self.updateSlicersList()
+            # Select the next remaining slicer if any exist
+            if len(self.parent.slicers) > 0:
+                # Get the first remaining slicer
+                next_slicer_name = next(iter(self.parent.slicers.keys()))
+                # Update self.parent.slicer to point to the remaining slicer
+                self.parent.slicer = self.parent.slicers[next_slicer_name]
+                self.checkSlicerByName(next_slicer_name)
+            else:
+                # No slicers left, clear the model and slicer reference
+                self.parent.slicer = None
+                self.setModel(None)
 
     def applyPlotter(self, plot):
         """
@@ -437,6 +595,55 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         url = "/user/qtgui/MainWindow/graph_help.html#d-data-averaging"
         self.manager.parent.showHelp(url)
 
+    def _clear_slicer_markers(self, slicer_obj):
+        """
+        Clear the slicer by calling its clear() method.
+        The slicer's clear() method handles all cleanup for that specific slicer type.
+        """
+        if hasattr(slicer_obj, 'clear'):
+            slicer_obj.clear()
+
+    def updateSlicersList(self):
+        """
+        Update the slicers list when slicers are added or removed
+        """
+        self.setSlicersList()
+
+    def checkSlicerByName(self, slicer_name):
+        """
+        Check (select) a slicer radio button by name
+        """
+        if not hasattr(self, 'slicerButtonGroup'):
+            return
+
+        # Find and check the radio button with this slicer name
+        for button in self.slicerButtonGroup.buttons():
+            if button.text() == slicer_name:
+                button.setChecked(True)
+                break
+
+    def onSlicerRadioToggled(self, checked, slicer_name):
+        """
+        Update parameter list when a slicer radio button is toggled
+        """
+        if not checked:
+            return
+
+        # Check if "None" was selected - don't clear everything, just update the view
+        if slicer_name not in self.parent.slicers:
+            # No valid slicer selected, but don't clear
+            return
+
+        # Update the parameter model to show this slicer's parameters
+        if slicer_name in self.slicer_models:
+            self.setModel(self.slicer_models[slicer_name])
+        elif slicer_name in self.parent.slicers:
+            # Get the model from the slicer object
+            slicer_obj = self.parent.slicers[slicer_name]
+            if hasattr(slicer_obj, '_model'):
+                if slicer_name not in self.slicer_models:
+                    self.slicer_models[slicer_name] = slicer_obj._model
+                self.setModel(slicer_obj._model)
 
 class ProxyModel(QtCore.QIdentityProxyModel):
     """
