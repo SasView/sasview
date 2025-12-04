@@ -125,7 +125,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
 
 
     def onCompute(self):
-        """ perform calculation """
+        """ Perform calculation """
         # set operator to be applied
         operator = self.cbOperator.currentText()
         # calculate and send data to DataExplorer
@@ -147,7 +147,10 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             self.updatePlot(self.graphOutput, self.layoutOutput, self.output)
 
     def onSaveData(self):
-        """ Save current output in data file and add it to the DataExplorer"""
+        """ Save current output in data file and add it to the DataExplorer """
+        # If output is empty, then compute it first
+        if self.output is None:
+            self.onCompute()
         # if outputname was unused, proceed to save files
         if self.onCheckOutputName():
             # add outputname to self.filenames
@@ -180,6 +183,9 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         self.lblOperatorApplied.setText(self.cbOperator.currentText())
         self.newPlot(self.graphOutput, self.layoutOutput)
 
+        # Initialize output
+        self.output = None
+
     def onReset(self):
         """
         Reset Panel to its initial state (default values) keeping
@@ -199,6 +205,9 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         self.data1OK = False
         self.data2OK = False
 
+        # Initialize output
+        self.output = None
+
         # Empty graphs
         self.newPlot(self.graphOutput, self.layoutOutput)
         self.newPlot(self.graphData1, self.layoutData1)
@@ -207,8 +216,9 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
     def onSelectData1(self):
         """ Plot for selection of Data1 """
         choice_data1 = str(self.cbData1.currentText())
-
         wrong_choices = ['No Data Available', 'Select Data', '']
+        # Initialize output
+        self.output = None
 
         if choice_data1 in wrong_choices:
             # check validity of choice: input = filename
@@ -236,6 +246,8 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         """ Plot for selection of Data2 """
         choice_data2 = str(self.cbData2.currentText())
         wrong_choices = ['No Data Available', 'Select Data', '']
+        # Initialize output
+        self.output = None
 
         if choice_data2 in wrong_choices:
             self.newPlot(self.graphData2, self.layoutData2)

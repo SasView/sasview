@@ -47,7 +47,9 @@ Using the tool
    generate an analyzable data set.
 
 7) If you are happy with the preview, you can save the new dataset with the Save 
-   button, and it will appear in the *Data Explorer*.
+   button, and it will appear in the *Data Explorer*. If you want, you can generate
+   the preview and save it directly as a new dataset by simply hitting the Save
+   button without hitting the Compute button first. 
 
 *NOTE! Any errors and warnings will be displayed at the bottom of the SasView
 window.*
@@ -56,4 +58,4 @@ window.*
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Cristian Pilloni, 03December2025
+.. note::  This help document was last changed by Cristian Pilloni, 04December2025

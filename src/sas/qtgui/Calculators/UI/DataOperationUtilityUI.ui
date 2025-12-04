@@ -89,7 +89,7 @@
      <item>
       <widget class="QPushButton" name="cmdSaveData">
        <property name="toolTip">
-        <string>Save the data and send it to Data Explorer.</string>
+        <string>Send the computed data to the Data Explorer.</string>
        </property>
        <property name="text">
         <string>Save</string>
