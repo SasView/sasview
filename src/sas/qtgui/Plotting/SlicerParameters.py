@@ -271,6 +271,12 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         # Delete slicer
         self.cmdDelete.clicked.connect(self.onDelete)
 
+        # Delete slicer plots
+        self.cmdDelSlicerPlots.clicked.connect(self.onDeleteSlicerPlots)
+
+        # Stack Plots
+        self.cbStackPlots.toggled.connect(self.onStackPlotsChanged)
+
         # Initialize slicer combobox to the current slicer
         current_slicer = type(self.parent.slicer)
         for index in self.callbacks:
@@ -446,6 +452,20 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
                 # No slicers left, clear the model and slicer reference
                 self.parent.slicer = None
                 self.setModel(None)
+
+    def onDeleteSlicerPlots(self):
+        """
+        Delete all plots created by the current slicer
+        """
+        pass
+
+
+    def onStackPlotsChanged(self, checked):
+        """
+        Handle stack plots checkbox change
+        """
+        self.parent.stack_plots = checked
+
 
     def applyPlotter(self, plot):
         """
