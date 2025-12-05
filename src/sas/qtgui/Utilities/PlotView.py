@@ -1,9 +1,9 @@
-
 from matplotlib.backends.qt_compat import QtWidgets
 
 # The Figure object is used to create backend-independent plot representations.
 from matplotlib.figure import Figure
-from PySide6.QtWidgets import QComboBox, QLabel
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QComboBox, QHeaderView, QLabel, QTableWidget, QTableWidgetItem
 
 
 class FitResultView(QtWidgets.QWidget):
@@ -71,18 +71,115 @@ class CorrelationView(FitResultView):
         plot_corrmatrix(draw=draw, fig=self.figure)
         self.canvas.draw_idle()
 
+class CorrelationTable(QtWidgets.QWidget):
+    def __init__(self, **kw):
+        QtWidgets.QWidget.__init__(self, **kw)
+        if 'title' in kw:
+            self.title = kw['title']
+        self.state = None
+        self.table = QTableWidget()
+        self.table.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        self.table.setShowGrid(True)
+        self.table.setStyleSheet("""
+            QTableWidget {
+                gridline-color: #a0a0a0;
+                border: 1px solid #a0a0a0;
+            }
+            QTableWidget::item {
+                border: 1px solid #c0c0c0;
+                padding: 5px;
+            }
+        """)
+        layout = QtWidgets.QVBoxLayout()
+        layout.addWidget(self.table)
+        self.setLayout(layout)
+
+    def update(self, state):
+        self.state = state
+        self.plot()
+
+    def _parse_stats(self):
+        """Parse correlation statistics from the uncertainty state.
+
+        Returns:
+            tuple: (headers, data_rows) where headers is a list of column names
+                   and data_rows is a list of lists containing the formatted data.
+        """
+        import re
+
+        from bumps.dream.stats import format_vars, parse_var, var_stats
+
+        # Get formatted statistics from the uncertainty state
+        draw = self.state.uncertainty_state.draw()
+        stats = var_stats(draw)
+        formatted_output = format_vars(stats)
+
+        # Parse the formatted string into table data using parse_var
+        lines = [line.strip() for line in formatted_output.split('\n') if line.strip()]
+        if not lines:
+            return [], []
+
+        # Parse headers from the first line by extracting bracketed intervals and words
+        header_line = lines[0]
+        # Extract column headers, treating bracketed text as single units
+        headers = re.findall(r'\[.*?\]|\S+', header_line)
+
+        # Extract data rows using parse_var to parse each line, skipping the header
+        data_rows = []
+        for line in lines[1:]:
+            parsed = parse_var(line)
+            if parsed:
+                # Use parse_var to extract all values, then format them for display
+                row_data = [
+                    parsed.name,
+                    f"{parsed.mean:.6g}",
+                    f"{parsed.median:.6g}",
+                    f"{parsed.best:.6g}",
+                    f"[ {parsed.p68[0]:.6g} {parsed.p68[1]:.6g} ]",
+                    f"[ {parsed.p95[0]:.6g} {parsed.p95[1]:.6g} ]",
+                ]
+                data_rows.append(row_data)
+
+        return headers, data_rows
+
+    def plot(self):
+        """Display correlation statistics in a table format."""
+        headers, data_rows = self._parse_stats()
+        if not headers or not data_rows:
+            return
+
+        # Configure table dimensions
+        self.table.setRowCount(len(data_rows))
+        self.table.setColumnCount(len(headers))
+        self.table.setHorizontalHeaderLabels(headers)
+
+        # Add tooltip to "best" column header
+        if "best" in headers:
+            best_column_index = headers.index("best")
+            best_header_item = self.table.horizontalHeaderItem(best_column_index)
+            if best_header_item is not None:
+                best_header_item.setToolTip("Point estimate")
+
+        # Populate table cells with left-aligned text
+        for row_idx, row_data in enumerate(data_rows):
+            for col_idx, cell_value in enumerate(row_data):
+                item = QTableWidgetItem(cell_value)
+                item.setTextAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+                self.table.setItem(row_idx, col_idx, item)
+
+        # Make columns stretch to fill available width
+        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
 
 class UncertaintyView(FitResultView):
+
     def plot(self):
         from bumps.dream.stats import var_stats
         from bumps.dream.varplot import plot_vars
-
         draw = self.state.uncertainty_state.draw()
         stats = var_stats(draw)
         self.figure.clear()
         plot_vars(draw, stats, fig=self.figure)
         self.canvas.draw_idle()
-
 
 class TraceView(FitResultView):
     show_plot_selector = True
