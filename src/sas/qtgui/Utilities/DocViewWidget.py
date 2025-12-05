@@ -15,7 +15,6 @@ from sas.system.user import (
     HELP_DIRECTORY_LOCATION,
     MAIN_DOC_SRC,
     PATH_LIKE,
-    create_user_files_if_needed,
     get_plugin_dir,
 )
 
@@ -186,7 +185,6 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         rst_path = MAIN_DOC_SRC
         base_path = self.source.parent.parts
         url_str = str(self.source)
-        create_user_files_if_needed()
 
         if not MAIN_DOC_SRC.exists() and not HELP_DIRECTORY_LOCATION.exists():
             # The user docs were never built - disable edit button and do not attempt doc regen
