@@ -3602,6 +3602,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 fit.angular_units = sample.angular_units
             sample.fits.append(fit)
         
+        # Collect Guinier analysis using FreeSAS auto_guinier
+        # Only for 1D data
+        if hasattr(self.data, '__class__') and self.data.__class__.__name__ == 'Data1D':
+            guinier = collector.collect_guinier_from_freesas(self.data)
+            if guinier:
+                sample.guinier = guinier
+        
         # Add default molecule and buffer if not present
         if sample.molecule is None:
             sample.molecule = collector.create_default_molecule()

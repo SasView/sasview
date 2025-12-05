@@ -147,11 +147,14 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
             if sample.guinier:
                 guinier = sample.guinier
                 if guinier.rg:
-                    self.txtGuinierRg.setText(str(guinier.rg))
+                    # Format to 2 significant digits
+                    self.txtGuinierRg.setText(f"{guinier.rg:.2g}")
                 if guinier.rg_error:
-                    self.txtGuinierRgError.setText(str(guinier.rg_error))
+                    # Format to 2 significant digits
+                    self.txtGuinierRgError.setText(f"{guinier.rg_error:.2g}")
                 if guinier.i0:
-                    self.txtGuinierI0.setText(str(guinier.i0))
+                    # Format to 2 significant digits
+                    self.txtGuinierI0.setText(f"{guinier.i0:.2g}")
                 if guinier.range_start:
                     self.txtGuinierRangeStart.setText(str(guinier.range_start))
                 if guinier.range_end:

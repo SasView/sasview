@@ -344,6 +344,121 @@ class SASBDBDataCollector:
         guinier.range_end = range_end
         return guinier
     
+    def collect_guinier_from_freesas(self, data) -> SASBDBGuinier | None:
+        """
+        Collect Guinier analysis results using FreeSAS auto_guinier
+        
+        :param data: Data1D object with x (q), y (I), and dy (errors)
+        :return: SASBDBGuinier object or None if analysis fails
+        """
+        try:
+            from freesas.autorg import auto_guinier
+            import numpy as np
+        except ImportError:
+            logger.warning("FreeSAS not available, skipping auto_guinier")
+            return None
+        
+        # Check if we have 1D data with required attributes
+        if not hasattr(data, 'x') or not hasattr(data, 'y'):
+            return None
+        
+        q = np.array(data.x)
+        I = np.array(data.y)
+        
+        # Get errors, use ones if not available
+        if hasattr(data, 'dy') and data.dy is not None and len(data.dy) > 0:
+            err = np.array(data.dy)
+        else:
+            err = np.ones_like(I)
+        
+        # Check for valid data
+        if len(q) == 0 or len(I) == 0:
+            return None
+        
+        # Filter out invalid values
+        valid_mask = np.isfinite(q) & np.isfinite(I) & np.isfinite(err)
+        valid_mask = valid_mask & (I > 0) & (err > 0) & (q > 0)
+        
+        if not np.any(valid_mask):
+            return None
+        
+        q_valid = q[valid_mask]
+        I_valid = I[valid_mask]
+        err_valid = err[valid_mask]
+        
+        # Determine unit conversion - FreeSAS expects q in nm^-1
+        # Check if data is in 1/A (Angstrom^-1) and convert to nm^-1
+        # 1 A^-1 = 10 nm^-1
+        unit_conversion = 1.0
+        if hasattr(data, 'get_xaxis'):
+            try:
+                xaxis_label, xaxis_units = data.get_xaxis()
+                xaxis_label = str(xaxis_label) if xaxis_label else ''
+                xaxis_units = str(xaxis_units) if xaxis_units else ''
+                if 'A^{-1}' in xaxis_label or 'A^-1' in xaxis_label or 'A^{-1}' in xaxis_units or 'A^-1' in xaxis_units:
+                    # Data is in 1/A, convert to 1/nm
+                    unit_conversion = 10.0
+            except (AttributeError, TypeError, ValueError):
+                # Fallback: check _xunit attribute if available
+                if hasattr(data, '_xunit'):
+                    xunit = str(data._xunit)
+                    if 'A^{-1}' in xunit or 'A^-1' in xunit:
+                        unit_conversion = 10.0
+        
+        # Convert q to nm^-1 for FreeSAS
+        q_for_freesas = q_valid * unit_conversion
+        
+        # Prepare data in format expected by FreeSAS: (q, I, err)
+        # FreeSAS expects q in nm^-1
+        data_array = np.column_stack((q_for_freesas, I_valid, err_valid))
+        
+        try:
+            # Call FreeSAS auto_guinier
+            result = auto_guinier(data_array)
+            
+            if result is None:
+                return None
+            
+            # Extract results from RG_RESULT object
+            guinier = SASBDBGuinier()
+            
+            # Rg is in nm (FreeSAS returns in nm)
+            if hasattr(result, 'Rg') and result.Rg is not None:
+                guinier.rg = float(result.Rg)
+            
+            # Rg error
+            if hasattr(result, 'sigma_Rg') and result.sigma_Rg is not None:
+                guinier.rg_error = float(result.sigma_Rg)
+            
+            # I0
+            if hasattr(result, 'I0') and result.I0 is not None:
+                guinier.i0 = float(result.I0)
+            
+            # Range start and end (indices converted back to q values in original units)
+            if hasattr(result, 'start_point') and result.start_point is not None:
+                start_idx = int(result.start_point)
+                if 0 <= start_idx < len(q_valid):
+                    # Return q in original units
+                    guinier.range_start = float(q_valid[start_idx])
+            
+            if hasattr(result, 'end_point') and result.end_point is not None:
+                end_idx = int(result.end_point)
+                if 0 <= end_idx < len(q_valid):
+                    # Return q in original units
+                    guinier.range_end = float(q_valid[end_idx])
+            
+            # Only return if we got at least Rg
+            if guinier.rg is not None:
+                return guinier
+            
+        except Exception as e:
+            logger.warning(f"FreeSAS auto_guinier failed: {e}")
+            import traceback
+            logger.debug(traceback.format_exc())
+            return None
+        
+        return None
+    
     def collect_pddf_from_corfunc(self, dmax: float = None, rg: float = None,
                                    i0: float = None, porod_volume: float = None,
                                    software: str = "ATSAS") -> SASBDBPDDF:
