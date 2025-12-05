@@ -2,18 +2,17 @@ import logging
 
 import numpy
 
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.SlicerModel import SlicerModel
 from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
-from sas.qtgui.Plotting.Slicers.SlicerUtils import generate_unique_plot_id
+from sas.qtgui.Plotting.Slicers.SlicerUtils import StackableMixin, generate_unique_plot_id
 
 logger = logging.getLogger(__name__)
 
 MIN_PHI = 0.05
 
 
-class SectorInteractor(BaseInteractor, SlicerModel):
+class SectorInteractor(BaseInteractor, SlicerModel, StackableMixin):
     """
     SectorInteractor plots a data1D average of a sector area defined in a
     Data2D object. The data1D averaging itself is performed in sasdata by
@@ -35,6 +34,7 @@ class SectorInteractor(BaseInteractor, SlicerModel):
     def __init__(self, base, axes, item=None, color="black", zorder=3):
         BaseInteractor.__init__(self, base, axes, color=color)
         SlicerModel.__init__(self)
+        StackableMixin.__init__(self)
         # Class initialization
         self.markers = []
         self.axes = axes
@@ -123,6 +123,10 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         self.right_line.save(ev)
         self.left_line.save(ev)
 
+    def _get_slicer_type_id(self):
+        """Return the slicer type identifier"""
+        return "SectorQ" + self.data.name
+
     def _post_data(self, nbins=None):
         """
         compute sector averaging of data2D into data1D
@@ -180,9 +184,9 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         item = self._item
         if self._item.parent() is not None:
             item = self._item.parent()
-        GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
-        self.base.manager.communicator.plotUpdateSignal.emit([new_plot])
-        self.base.manager.communicator.forcePlotDisplaySignal.emit([item, new_plot])
+
+        # Use the mixin to handle stacking/updating
+        self._create_or_update_plot(new_plot, item)
 
         if self.update_model:
             self.setModelFromParams()
