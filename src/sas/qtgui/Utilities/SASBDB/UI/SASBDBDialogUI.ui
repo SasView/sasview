@@ -1,0 +1,723 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SASBDBDialogUI</class>
+ <widget class="QDialog" name="SASBDBDialogUI">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Export to SASBDB</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="tabProject">
+      <attribute name="title">
+       <string>Project</string>
+      </attribute>
+      <layout class="QFormLayout" name="formLayoutProject">
+       <item row="0" column="0">
+        <widget class="QLabel" name="lblPublished">
+         <property name="text">
+          <string>Published:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QCheckBox" name="chkPublished">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="lblPubmedPMID">
+         <property name="text">
+          <string>PubMed PMID:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="txtPubmedPMID"/>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="lblDOI">
+         <property name="text">
+          <string>DOI:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLineEdit" name="txtDOI"/>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="lblProjectTitle">
+         <property name="text">
+          <string>Project Title:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QLineEdit" name="txtProjectTitle"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabSample">
+      <attribute name="title">
+       <string>Sample/Data</string>
+      </attribute>
+      <layout class="QFormLayout" name="formLayoutSample">
+       <item row="0" column="0">
+        <widget class="QLabel" name="lblSampleTitle">
+         <property name="text">
+          <string>Sample Title:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="txtSampleTitle"/>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="lblCurveType">
+         <property name="text">
+          <string>Curve Type:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QComboBox" name="cmbCurveType">
+         <item>
+          <property name="text">
+           <string>Single concentration</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="lblAngularUnits">
+         <property name="text">
+          <string>Angular Units:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QComboBox" name="cmbAngularUnits">
+         <item>
+          <property name="text">
+           <string>1/nm</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>1/A</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>arbitrary</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="lblIntensityUnits">
+         <property name="text">
+          <string>Intensity Units:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QComboBox" name="cmbIntensityUnits">
+         <item>
+          <property name="text">
+           <string>1/cm</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>arbitrary</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="lblExpMW">
+         <property name="text">
+          <string>Experimental MW:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QLineEdit" name="txtExpMW"/>
+       </item>
+       <item row="5" column="0">
+        <widget class="QLabel" name="lblExperimentDate">
+         <property name="text">
+          <string>Experiment Date:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <widget class="QLineEdit" name="txtExperimentDate"/>
+       </item>
+       <item row="6" column="0">
+        <widget class="QLabel" name="lblBeamline">
+         <property name="text">
+          <string>Beamline/Instrument:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="1">
+        <widget class="QLineEdit" name="txtBeamline"/>
+       </item>
+       <item row="7" column="0">
+        <widget class="QLabel" name="lblWavelength">
+         <property name="text">
+          <string>Wavelength (nm):</string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="1">
+        <widget class="QLineEdit" name="txtWavelength"/>
+       </item>
+       <item row="8" column="0">
+        <widget class="QLabel" name="lblDistance">
+         <property name="text">
+          <string>Sample-Detector Distance (m):</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="1">
+        <widget class="QLineEdit" name="txtDistance"/>
+       </item>
+       <item row="9" column="0">
+        <widget class="QLabel" name="lblTemperature">
+         <property name="text">
+          <string>Cell Temperature (°C):</string>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="1">
+        <widget class="QLineEdit" name="txtTemperature"/>
+       </item>
+       <item row="10" column="0">
+        <widget class="QLabel" name="lblConcentration">
+         <property name="text">
+          <string>Concentration (mg/ml):</string>
+         </property>
+        </widget>
+       </item>
+       <item row="10" column="1">
+        <widget class="QLineEdit" name="txtConcentration"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabMolecule">
+      <attribute name="title">
+       <string>Molecule</string>
+      </attribute>
+      <layout class="QFormLayout" name="formLayoutMolecule">
+       <item row="0" column="0">
+        <widget class="QLabel" name="lblMoleculeType">
+         <property name="text">
+          <string>Type:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QComboBox" name="cmbMoleculeType">
+         <item>
+          <property name="text">
+           <string>Protein</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>DNA</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>RNA</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Lipid</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Other bound molecules</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="lblLongName">
+         <property name="text">
+          <string>Long Name:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="txtLongName"/>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="lblShortName">
+         <property name="text">
+          <string>Short Name:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLineEdit" name="txtShortName"/>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="lblFastaSequence">
+         <property name="text">
+          <string>FASTA Sequence:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QTextEdit" name="txtFastaSequence"/>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="lblMonomerMW">
+         <property name="text">
+          <string>Monomer MW (kDa):</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QLineEdit" name="txtMonomerMW"/>
+       </item>
+       <item row="5" column="0">
+        <widget class="QLabel" name="lblOligomericState">
+         <property name="text">
+          <string>Oligomeric State:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <widget class="QComboBox" name="cmbOligomericState">
+         <item>
+          <property name="text">
+           <string>monomer</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>dimer</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>trimer</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>tetramer</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>other</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="6" column="0">
+        <widget class="QLabel" name="lblNumberOfMolecules">
+         <property name="text">
+          <string>Number of Molecules:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="1">
+        <widget class="QSpinBox" name="spnNumberOfMolecules">
+         <property name="minimum">
+          <number>1</number>
+         </property>
+         <property name="maximum">
+          <number>9999</number>
+         </property>
+         <property name="value">
+          <number>1</number>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="0">
+        <widget class="QLabel" name="lblUniProt">
+         <property name="text">
+          <string>UniProt Accession:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="1">
+        <widget class="QLineEdit" name="txtUniProt"/>
+       </item>
+       <item row="8" column="0">
+        <widget class="QLabel" name="lblSourceOrganism">
+         <property name="text">
+          <string>Source Organism:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="1">
+        <widget class="QLineEdit" name="txtSourceOrganism"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabBuffer">
+      <attribute name="title">
+       <string>Buffer</string>
+      </attribute>
+      <layout class="QFormLayout" name="formLayoutBuffer">
+       <item row="0" column="0">
+        <widget class="QLabel" name="lblBufferDescription">
+         <property name="text">
+          <string>Description:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QTextEdit" name="txtBufferDescription"/>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="lblBufferPH">
+         <property name="text">
+          <string>pH:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="txtBufferPH"/>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="lblBufferComment">
+         <property name="text">
+          <string>Comment:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QTextEdit" name="txtBufferComment"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabGuinier">
+      <attribute name="title">
+       <string>Guinier</string>
+      </attribute>
+      <layout class="QFormLayout" name="formLayoutGuinier">
+       <item row="0" column="0">
+        <widget class="QLabel" name="lblGuinierRg">
+         <property name="text">
+          <string>Rg (nm):</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="txtGuinierRg"/>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="lblGuinierRgError">
+         <property name="text">
+          <string>Rg Error:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="txtGuinierRgError"/>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="lblGuinierI0">
+         <property name="text">
+          <string>I(0):</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLineEdit" name="txtGuinierI0"/>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="lblGuinierRangeStart">
+         <property name="text">
+          <string>Range Start:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QLineEdit" name="txtGuinierRangeStart"/>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="lblGuinierRangeEnd">
+         <property name="text">
+          <string>Range End:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QLineEdit" name="txtGuinierRangeEnd"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabFit">
+      <attribute name="title">
+       <string>Fit</string>
+      </attribute>
+      <layout class="QFormLayout" name="formLayoutFit">
+       <item row="0" column="0">
+        <widget class="QLabel" name="lblFitSoftware">
+         <property name="text">
+          <string>Software:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="txtFitSoftware"/>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="lblFitVersion">
+         <property name="text">
+          <string>Software Version:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="txtFitVersion"/>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="lblChiSquared">
+         <property name="text">
+          <string>Chi-squared:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLineEdit" name="txtChiSquared"/>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="lblCorMapPValue">
+         <property name="text">
+          <string>CorMap p-value:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QLineEdit" name="txtCorMapPValue"/>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="lblModelSection">
+         <property name="text">
+          <string>Model:</string>
+         </property>
+         <property name="styleSheet">
+          <string>font-weight: bold;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QLabel" name="lblModelPlaceholder">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QLabel" name="lblModelName">
+         <property name="text">
+          <string>Model Name:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <widget class="QLineEdit" name="txtModelName"/>
+       </item>
+       <item row="6" column="0">
+        <widget class="QLabel" name="lblModelParameters">
+         <property name="text">
+          <string>Parameters:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="1">
+        <widget class="QTextEdit" name="txtModelParameters"/>
+       </item>
+       <item row="7" column="0">
+        <widget class="QLabel" name="lblModelComment">
+         <property name="text">
+          <string>Comment:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="1">
+        <widget class="QTextEdit" name="txtModelComment"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabInstrument">
+      <attribute name="title">
+       <string>Instrument</string>
+      </attribute>
+      <layout class="QFormLayout" name="formLayoutInstrument">
+       <item row="0" column="0">
+        <widget class="QLabel" name="lblSourceType">
+         <property name="text">
+          <string>Source Type:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QComboBox" name="cmbSourceType">
+         <item>
+          <property name="text">
+           <string>X-ray synchrotron</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>X-ray in house</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Neutron source</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Other</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="lblBeamlineName">
+         <property name="text">
+          <string>Beamline/Instrument:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="txtBeamlineName"/>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="lblSynchrotronName">
+         <property name="text">
+          <string>Synchrotron/Facility:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLineEdit" name="txtSynchrotronName"/>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="lblDetectorManufacturer">
+         <property name="text">
+          <string>Detector Manufacturer/Model:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QLineEdit" name="txtDetectorManufacturer"/>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="lblDetectorType">
+         <property name="text">
+          <string>Detector Type:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QLineEdit" name="txtDetectorType"/>
+       </item>
+       <item row="5" column="0">
+        <widget class="QLabel" name="lblDetectorResolution">
+         <property name="text">
+          <string>Detector Resolution (pixel size):</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <widget class="QLineEdit" name="txtDetectorResolution"/>
+       </item>
+       <item row="6" column="0">
+        <widget class="QLabel" name="lblCity">
+         <property name="text">
+          <string>City:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="1">
+        <widget class="QLineEdit" name="txtCity"/>
+       </item>
+       <item row="7" column="0">
+        <widget class="QLabel" name="lblCountry">
+         <property name="text">
+          <string>Country:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="1">
+        <widget class="QLineEdit" name="txtCountry"/>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="cmdExport">
+       <property name="text">
+        <string>Export</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="cmdClose">
+       <property name="text">
+        <string>Close</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>cmdClose</sender>
+   <signal>clicked()</signal>
+   <receiver>SASBDBDialogUI</receiver>
+   <slot>close()</slot>
+  </connection>
+ </connections>
+</ui>
+
