@@ -1,16 +1,15 @@
 import numpy as np
 
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
 from sas.qtgui.Plotting.SlicerModel import SlicerModel
 from sas.qtgui.Plotting.Slicers.ArcInteractor import ArcInteractor
 from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
 from sas.qtgui.Plotting.Slicers.RadiusInteractor import RadiusInteractor
 from sas.qtgui.Plotting.Slicers.SectorSlicer import LineInteractor
-from sas.qtgui.Plotting.Slicers.SlicerUtils import generate_unique_plot_id
+from sas.qtgui.Plotting.Slicers.SlicerUtils import StackableMixin, generate_unique_plot_id
 
 
-class WedgeInteractor(BaseInteractor, SlicerModel):
+class WedgeInteractor(BaseInteractor, SlicerModel, StackableMixin):
     """
     This WedgeInteractor is a cross between the SectorInteractor and the
     AnnulusInteractor. It plots a data1D average of a wedge area defined in a
@@ -34,6 +33,7 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
     def __init__(self, base, axes, item=None, color="black", zorder=3):
         BaseInteractor.__init__(self, base, axes, color=color)
         SlicerModel.__init__(self)
+        StackableMixin.__init__(self)
 
         self.markers = []
         self.axes = axes
@@ -59,8 +59,8 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         self.fold = True
         # reference of the current data averager
         self.averager = None
-        # Saves plot id so it doesn't get recreated each time a parameter changes
-        self.plot_id = None
+        # Store plot id so it doesn't get recreated each time a parameter changes
+        self._plot_id = None
 
         self.inner_arc = ArcInteractor(
             self, self.axes, color=color, zorder=zorder, r=self.r1, theta=self.theta, phi=self.phi
@@ -135,6 +135,10 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         self.outer_arc.save(ev)
         self.radial_lines.save(ev)
         self.central_line.save(ev)
+
+    def _get_slicer_type_id(self):
+        """Return the slicer type identifier"""
+        return f"Wedge{self.averager.__name__}" + self.data.name if self.averager else "Wedge" + self.data.name
 
     def _post_data(self, new_sector=None, nbins=None):
         """
@@ -211,22 +215,21 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         new_plot.yaxis(r"\rm{Intensity} ", "cm^{-1}")
 
         # Assign unique id per slicer instance and use it as the display name
-        if self.plot_id is None:
+        if self._plot_id is None:
             base_id = "Wedge" + self.averager.__name__ + self.data.name
-            self.plot_id = generate_unique_plot_id(base_id, self._item)
+            self._plot_id = generate_unique_plot_id(base_id, self._item)
 
-        new_plot.id = self.plot_id
+        new_plot.id = self._plot_id
         new_plot.name = new_plot.id
         new_plot.title = new_plot.id
-        new_plot.type_id = ("Slicer" + self.data.name)
         new_plot.is_data = True
+
         item = self._item
         if self._item.parent() is not None:
             item = self._item.parent()
-        GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
 
-        self.base.manager.communicator.plotUpdateSignal.emit([new_plot])
-        self.base.manager.communicator.forcePlotDisplaySignal.emit([item, new_plot])
+        # Use the mixin to handle stacking/updating
+        self._create_or_update_plot(new_plot, item)
 
         if self.update_model:
             self.setModelFromParams()

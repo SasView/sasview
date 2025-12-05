@@ -63,8 +63,10 @@ class Plotter2DWidget(PlotterBase):
         self.slicer_z = 5
         # Reference to the current slicer
         self.slicer = None
-        self.slicers = {}  # Change from list to dict
+        self.slicers = {}
         self.slicer_widget = None
+        self.stackplots = False # whether to stack multiple slicer plots
+        self.slicer_plots_dict = {} # keep track of slicer plots
         self.vmin = None
         self.vmax = None
         self.im = None
@@ -504,7 +506,7 @@ class Plotter2DWidget(PlotterBase):
             item = self._item.parent()
         self._recurse_plots_to_remove(item)
 
-    def setSlicer(self, slicer):
+    def setSlicer(self, slicer, stack: bool=None):
         """ Create a new slicer without removing the old one """
         # Clear the previous slicers if BoxSumCalculator is used or clear BoxSum if other slicer is used
         if isinstance(self.slicer, BoxSumCalculator):
@@ -519,6 +521,9 @@ class Plotter2DWidget(PlotterBase):
         slicer_color = self._get_next_slicer_color()
 
         self.slicer = slicer(self, self.ax, item=self._item, color=slicer_color, zorder=self.slicer_z)
+
+        if stack is not None:
+            self.stackplots = stack
 
         # Generate a unique name for this slicer
         slicer_name = f"{slicer.__name__}_{self.data0.name}_{len(self.slicers)}"

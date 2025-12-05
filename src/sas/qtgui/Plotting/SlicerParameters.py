@@ -130,9 +130,14 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         header.setStretchLastSection(True)
 
     def updatePlotList(self):
-        """ """
+        """ Update the list of active plots """
         self.active_plots = self.parent.getActivePlots()
         self.setPlotsList()
+
+    # def updateSlicerPlotList(self):
+    #     """ Update the list of slicer plots """
+    #     self.active_slicer_plots = self.parent.getActiveSlicerPlots()
+    #     self.setSlicerPlotList()
 
     def getCurrentSlicerDict(self):
         """
@@ -460,11 +465,11 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         pass
 
 
-    def onStackPlotsChanged(self, checked):
+    def onStackPlotsChanged(self, checked: bool):
         """
         Handle stack plots checkbox change
         """
-        self.parent.stack_plots = checked
+        self.parent.stackplots = checked
 
 
     def applyPlotter(self, plot):

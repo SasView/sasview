@@ -1,6 +1,13 @@
 """
-Utility functions for slicers
+Utility functions for slicers in the 2D plotter, including unique ID generation and stacking mixin.
 """
+
+import logging
+
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
+
+logger = logging.getLogger(__name__)
+
 
 def _count_matching_ids(item, base_id: str) -> int:
     """
@@ -36,3 +43,186 @@ def generate_unique_plot_id(base_id: str, item) -> str:
     existing = _count_matching_ids(parent_item, base_id)
 
     return base_id if existing == 0 else f"{base_id}_{existing + 1}"
+
+
+class StackableMixin:
+    """
+    Mixin class that provides stacking functionality for slicer plots.
+    Any slicer that inherits from this mixin can stack multiple plots on the same window.
+    
+    Required attributes in the slicer class:
+    - self.base: Reference to the 2D plot
+    - self.data: The 2D data being sliced
+    - self._item: The data explorer item
+    - self.color: Color for this slicer
+    - self._plot_id: The base plot ID (set before calling _create_or_update_plot)
+    
+    Required methods in the slicer class:
+    - self._get_slicer_type_id(): Should return a string identifying the slicer type
+    """
+
+    def __init__(self):
+        """Initialize stacking-related attributes"""
+        self._plot_window = None  # Track the plot window this slicer uses
+        self._actual_plot_id = None  # The actual ID used (may differ when stacking)
+
+    def _get_slicer_type_id(self):
+        """
+        Get the type identifier for this slicer.
+        Should be overridden by subclasses to return something like "AnnulusPhi" + data.name
+        
+        :return: String identifying the slicer type and source data
+        """
+        raise NotImplementedError("Subclass must implement _get_slicer_type_id()")
+
+    def _create_or_update_plot(self, new_plot, item):
+        """
+        Create a new plot or update/stack onto an existing one based on state.
+        
+        :param new_plot: The Data1D object to plot
+        :param item: The data explorer item
+        """
+        # Set the type_id for stacking identification
+        new_plot.type_id = self._get_slicer_type_id()
+        new_plot.custom_color = self.color
+
+        # Check if this is an update to an existing plot
+        if self._plot_window is not None and self._actual_plot_id is not None:
+            # Update existing plot
+            new_plot.id = self._actual_plot_id
+            new_plot.name = self._actual_plot_id
+            new_plot.title = self._actual_plot_id
+            self._update_existing_plot(new_plot, item)
+        else:
+            # First time: check if we should stack
+            should_stack = getattr(self.base, 'stackplots', False)
+
+            if should_stack:
+                # Find existing plot window for this slicer type
+                existing_plot_window = self._find_stackable_plot_window()
+
+                if existing_plot_window is not None:
+                    # Stack onto existing plot
+                    actual_id = self._append_to_plot_window(existing_plot_window, new_plot, item)
+                    self._plot_window = existing_plot_window
+                    self._actual_plot_id = actual_id
+                else:
+                    # No existing window, create new one
+                    self._create_new_plot(new_plot, item)
+            else:
+                # Not stacking, create new plot
+                self._create_new_plot(new_plot, item)
+
+    def _find_stackable_plot_window(self):
+        """
+        Find an existing plot window that can accept this slicer's data.
+        
+        :return: Plot window if found, None otherwise
+        """
+        type_id = self._get_slicer_type_id()
+
+        # Search through active plots
+        if hasattr(self.base, 'manager') and hasattr(self.base.manager, 'active_plots'):
+            for plot_id, plot_window in self.base.manager.active_plots.items():
+                if hasattr(plot_window, 'data') and plot_window.data is not None:
+                    # Get first data item
+                    data_list = plot_window.data if isinstance(plot_window.data, list) else [plot_window.data]
+                    if len(data_list) > 0:
+                        first_data = data_list[0]
+                        # Check if it's from the same slicer type and parent
+                        if (hasattr(first_data, 'type_id') and
+                            first_data.type_id is not None and
+                            first_data.type_id == type_id):
+                            return plot_window
+
+        return None
+
+    def _append_to_plot_window(self, plot_window, new_plot, item):
+        """
+        Append new data to an existing plot window.
+        
+        :param plot_window: The existing plot window to append to
+        :param new_plot: The new Data1D object to add
+        :param item: The item for the data model
+        :return: The actual ID assigned to the plot
+        """
+        # Make the ID unique by appending counter
+        base_id = new_plot.id
+        counter = 1
+        unique_id = f"{base_id}_{counter}"
+
+        # Check existing IDs in the plot window
+        existing_ids = []
+        if hasattr(plot_window, 'data') and plot_window.data:
+            data_list = plot_window.data if isinstance(plot_window.data, list) else [plot_window.data]
+            existing_ids = [d.id for d in data_list if hasattr(d, 'id')]
+
+        while unique_id in existing_ids:
+            counter += 1
+            unique_id = f"{base_id}_{counter}"
+
+        # Update plot with unique ID
+        new_plot.id = unique_id
+        new_plot.name = unique_id
+        new_plot.title = unique_id
+        new_plot.custom_color = self.color
+
+        # Add to model
+        GuiUtils.updateModelItemWithPlot(item, new_plot, unique_id)
+
+        # Add to existing window
+        plot_window.plot(data=new_plot, color=self.color, hide_error=False)
+
+        # Notify manager
+        self.base.manager.communicator.plotUpdateSignal.emit([new_plot])
+
+        return unique_id
+
+    def _create_new_plot(self, new_plot, item):
+        """
+        Create a new plot window.
+        
+        :param new_plot: The Data1D object to plot
+        :param item: The data explorer item
+        """
+        # Add to model
+        GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
+
+        # Signal to create plot
+        self.base.manager.communicator.plotUpdateSignal.emit([new_plot])
+        self.base.manager.communicator.forcePlotDisplaySignal.emit([item, new_plot])
+
+        # Store references
+        self._actual_plot_id = new_plot.id
+
+        # Find the plot window that was created
+        if hasattr(self.base, 'manager') and hasattr(self.base.manager, 'active_plots'):
+            for plot_id, plot_window in self.base.manager.active_plots.items():
+                if plot_id == new_plot.id or (hasattr(plot_window, 'data') and
+                    any(hasattr(d, 'id') and d.id == new_plot.id
+                        for d in (plot_window.data if isinstance(plot_window.data, list) else [plot_window.data]))):
+                    self._plot_window = plot_window
+                    break
+
+    def _update_existing_plot(self, new_plot, item):
+        """
+        Update data in existing plot window.
+        
+        :param new_plot: The updated Data1D object
+        :param item: The data explorer item
+        """
+        if self._plot_window is None:
+            logger.warning(f"No plot window found for {new_plot.id}")
+            return
+
+        # Preserve color
+        new_plot.custom_color = self.color
+
+        # Replace plot data
+        self._plot_window.replacePlot(new_plot.id, new_plot)
+
+        # Update model
+        GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.name)
+
+        # Notify manager
+        self.base.manager.communicator.plotUpdateSignal.emit([new_plot])
