@@ -728,7 +728,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 if self.model.type is ComputationType.SAXS:
                     f_type = """
                         All supported files (*.CIF *.cif *.pdb *.PDB);;
-                            CIF files (*.SLD *.sld);;
+                            CIF files (*.CIF *.cif);;
                             PDB files (*.pdb *.PDB);;
                     """
                 else:
