@@ -675,7 +675,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 self.txtFileName.setEnabled(False)
                 self.cmdCompute.setText("Generate plugin model")
                 return
-            case _: 
+            case _:
                 raise RuntimeError(f"Unknown computation type selected: {self.cbOptionsCalc.currentIndex()}")
 
         self.cmdCompute.setText("Compute")
