@@ -240,30 +240,25 @@ class Constraints(QWidget, Ui_Constraints):
             """Extract all symbols used in the constraints."""
             lhs, rhs = set(), set()
             lineno = {}
-            for node in constraints:
-                # left-hand side of assignment
-                for target in node.targets:
-                    match target:
-                        case ast.Name():
-                            lhs.add(target.id)
-                            lineno[target.id] = target.lineno
-                        case ast.Tuple():
-                            for elt in target.elts:
-                                if isinstance(elt, ast.Name):
-                                    lhs.add(elt.id)
-                                    lineno[elt.id] = elt.lineno
 
-                # right-hand side of assignment
+            # Helper function to discover named parameters in the supplied AST, adding them to the provided set.
+            def discover_params(param: ast.AST, add_to_set: set[str]):
+                match param:
+                    case ast.Name():
+                        add_to_set.add(param.id)
+                        lineno[param.id] = param.lineno
+                    case ast.Tuple():
+                        for elt in param.elts:
+                            if isinstance(elt, ast.Name):
+                                add_to_set.add(elt.id)
+                                lineno[elt.id] = elt.lineno
+
+            for node in constraints:
+                for target in node.targets:
+                    discover_params(target, lhs)
+
                 for value in ast.walk(node.value):
-                    match value:
-                        case ast.Name():
-                            rhs.add(value.id)
-                            lineno[value.id] = value.lineno
-                        case ast.Tuple:
-                            for elt in value.elts:
-                                if isinstance(elt, ast.Name):
-                                    rhs.add(elt.id)
-                                    lineno[elt.id] = elt.lineno
+                    discover_params(value, rhs)
 
             return lhs, rhs, lineno
 
