@@ -59,7 +59,7 @@ class SimulationParameters:
     Npoints: int | None = field(default_factory=lambda: 3000)
     #seed: Optional[int] #TODO:Add for future projects
     #method: Optional[str] #generation of point method #TODO: Add for future projects
-    model_name: list[str] | None = field(default_factory=lambda: ['Model_1'])
+    model_name: list[str] | None = field(default_factory=lambda: ['Shape2SAS model'])
 
 
 @dataclass
