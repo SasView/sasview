@@ -40,7 +40,7 @@ class StructureFactor:
             try:
                 return globals()[self.Stype](self.q, self.x_new, self.y_new, self.z_new, self.p_new, self.par)
             except KeyError:
-                ValueError(f"Structure factor '{self.Stype}' was not found in structureFactor or global scope.")
+                raise ValueError(f"Structure factor '{self.Stype}' was not found in structureFactor or global scope.")
 
     @staticmethod
     def getparname(name: str) -> list[str]:
