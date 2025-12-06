@@ -4,16 +4,19 @@ import numpy as np
 
 ################################ Shape2SAS helper functions ###################################
 class Qsampling:
+    @staticmethod
     def onQsampling(qmin: float, qmax: float, Nq: int) -> np.ndarray:
         """Returns uniform q sampling"""
         return np.linspace(qmin, qmax, Nq)
 
+    @staticmethod
     def onUserSampledQ(q: np.ndarray) -> np.ndarray:
         """Returns user sampled q"""
         if isinstance(q, list):
             q = np.array(q)
         return q
 
+    @staticmethod
     def qMethodsNames(name: str):
         methods = {
             "Uniform": Qsampling.onQsampling,
@@ -21,6 +24,7 @@ class Qsampling:
         }
         return methods[name]
 
+    @staticmethod
     def qMethodsInput(name: str):
         inputs = {
             "Uniform": {"qmin": 0.001, "qmax": 0.5, "Nq": 400},
