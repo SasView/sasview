@@ -1,0 +1,37 @@
+Template to write a subunit class
+
+class <NAME OF SUBUNIT HERE>:
+    def __init__(self, dimensions: List[float]):
+        #PARAMERERS HERE
+        self.<PARAMETER NAME> = dimensions[0]
+        self.<PARAMETER NAME> = dimensions[1]
+        self.<PARAMETER NAME> = dimensions[2]
+    
+    def getVolume(self) -> float:
+        """Returns the volume of the subunit"""
+
+        <WRITE VOLUME CALCULATION OF THE SUBUNIT HERE>
+
+        return <VOLUME>
+
+    def getPointDistribution(self, Npoints: int) -> Vector3D:
+        """Returns the point distribution of the subunit"""
+
+        Volume = self.getVolume()
+        Volume_max = <MAXIMUM VOLUME> ###Box around the subunit
+        Vratio = Volume_max/Volume
+
+        N = int(Vratio * Npoints)
+
+        <WRITE POINT DISTRIBUTION HERE>
+
+        return x_add, y_add, z_add
+
+    def checkOverlap(self, x_eff: np.ndarray,
+                            y_eff: np.ndarray,
+                            z_eff: np.ndarray) -> np.ndarray:
+          """Check for points within the subunit"""
+    
+          <WRITE OVERLAP CHECK HERE>
+    
+          return idx
