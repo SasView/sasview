@@ -116,7 +116,7 @@ class GeneratePoints:
 
     def onGeneratingPoints(self) -> Vector3D:
         """Generates the points"""
-        print(f"Generating {self.Npoints} points for subunit {self.subunitClass.__name__} with dimensions {self.dimensions}")
+        # print(f"Generating {self.Npoints} points for subunit {self.subunitClass.__name__} with dimensions {self.dimensions}")
         x, y, z= self.subunitClass(self.dimensions).getPointDistribution(self.Npoints)
         x, y, z = self.onTransformingPoints(x, y, z)
         return x, y, z
@@ -312,20 +312,20 @@ class GenerateAllPoints:
             p_new.append(p_add)
 
         #Show information about the model and its subunits
-        N_remain = []
-        for j in range(self.Number_of_subunits):
-            srho = rho[j] * self.p_s[j]
-            N_remain.append(N[j] - N_exclude[j])
-            print(f"        {N[j]} points for subunit {j}: {self.subunits[j]}")
-            print(f"             Point density     : {rho[j]:.3e} (points per volume)")
-            print(f"             Scattering density: {srho:.3e} (density times scattering length)")
-            print(f"             Excluded points   : {N_exclude[j]} (overlap region)")
-            print(f"             Remaining points  : {N_remain[j]} (non-overlapping region)")
+        # N_remain = []
+        # for j in range(self.Number_of_subunits):
+        #     srho = rho[j] * self.p_s[j]
+        #     N_remain.append(N[j] - N_exclude[j])
+        #     print(f"        {N[j]} points for subunit {j}: {self.subunits[j]}")
+        #     print(f"             Point density     : {rho[j]:.3e} (points per volume)")
+        #     print(f"             Scattering density: {srho:.3e} (density times scattering length)")
+        #     print(f"             Excluded points   : {N_exclude[j]} (overlap region)")
+        #     print(f"             Remaining points  : {N_remain[j]} (non-overlapping region)")
 
-        N_total = sum(N_remain)
-        print(f"        Total points in model: {N_total}")
-        print(f"        Total volume of model: {volume_total:.3e} A^3")
-        print(" ")
+        # N_total = sum(N_remain)
+        # print(f"        Total points in model: {N_total}")
+        # print(f"        Total volume of model: {volume_total:.3e} A^3")
+        # print(" ")
 
         return x_new, y_new, z_new, p_new, volume_total
 
@@ -373,20 +373,20 @@ class GenerateAllPoints:
             volume_total += volume[i] * fraction_left
 
         #Show information about the model and its subunits
-        N_remain = []
-        for j in range(self.Number_of_subunits):
-            srho = rho[j] * self.p_s[j]
-            N_remain.append(N[j] - N_exclude[j])
-            print(f"        {N[j]} points for subunit {j}: {self.subunits[j]}")
-            print(f"             Point density     : {rho[j]:.3e} (points per volume)")
-            print(f"             Scattering density: {srho:.3e} (density times scattering length)")
-            print(f"             Excluded points   : {N_exclude[j]} (overlap region)")
-            print(f"             Remaining points  : {N_remain[j]} (non-overlapping region)")
+        # N_remain = []
+        # for j in range(self.Number_of_subunits):
+        #     srho = rho[j] * self.p_s[j]
+        #     N_remain.append(N[j] - N_exclude[j])
+        #     print(f"        {N[j]} points for subunit {j}: {self.subunits[j]}")
+        #     print(f"             Point density     : {rho[j]:.3e} (points per volume)")
+        #     print(f"             Scattering density: {srho:.3e} (density times scattering length)")
+        #     print(f"             Excluded points   : {N_exclude[j]} (overlap region)")
+        #     print(f"             Remaining points  : {N_remain[j]} (non-overlapping region)")
 
-        N_total = sum(N_remain)
-        print(f"        Total points in model: {N_total}")
-        print(f"        Total volume of model: {volume_total:.3e} A^3")
-        print(" ")
+        # N_total = sum(N_remain)
+        # print(f"        Total points in model: {N_total}")
+        # print(f"        Total volume of model: {volume_total:.3e} A^3")
+        # print(" ")
 
         return x_new, y_new, z_new, p_new, volume_total
 
@@ -394,11 +394,11 @@ class GenerateAllPoints:
 def getPointDistribution(prof: ModelProfile, Npoints):
     """Generate points for a given model profile."""
 
-    print(f"Generating points for model profile: {prof.subunits}")
-    print(f"Number of subunits: {len(prof.subunits)}")
-    for i, subunit in enumerate(prof.subunits):
-        print(f"  Subunit {i}: {subunit} with dimensions {prof.dimensions[i]} at COM {prof.com[i]}")
-        print(f"  Rotation: {prof.rotation[i]} at rotation point {prof.rotation_points[i]} with SLD {prof.p_s[i]}")
+    # print(f"Generating points for model profile: {prof.subunits}")
+    # print(f"Number of subunits: {len(prof.subunits)}")
+    # for i, subunit in enumerate(prof.subunits):
+    #     print(f"  Subunit {i}: {subunit} with dimensions {prof.dimensions[i]} at COM {prof.com[i]}")
+    #     print(f"  Rotation: {prof.rotation[i]} at rotation point {prof.rotation_points[i]} with SLD {prof.p_s[i]}")
 
     x_new, y_new, z_new, p_new, volume_total = GenerateAllPoints(Npoints, prof.com, prof.subunits,
                                                   prof.dimensions, prof.rotation, prof.rotation_points,

@@ -144,12 +144,12 @@ class Constraints(QWidget, Ui_Constraints):
     ) -> tuple[list[str], str, str, list[list[bool]]]:
         """Parse the text in the constraints editor and return a dictionary of parameters"""
 
-        print("Parsing constraints text.")
-        print("Received input:")
-        print(f"fitPar: {fitPar}")
-        print(f"modelPars: {modelPars}")
-        print(f"modelVals: {modelVals}")
-        print(f"checkedPars: {checkedPars}")
+        logger.debug("Parsing constraints text.")
+        logger.debug("Received input:")
+        logger.debug(f"fitPar: {fitPar}")
+        logger.debug(f"modelPars: {modelPars}")
+        logger.debug(f"modelVals: {modelVals}")
+        logger.debug(f"checkedPars: {checkedPars}")
 
         def as_ast(text: str):
             try:
@@ -327,10 +327,10 @@ class Constraints(QWidget, Ui_Constraints):
         symbols = (lhs, rhs)
 
         self.log_embedded("Successfully parsed user text. Generating plugin model...")
-        print(f"Parsed parameters: {params}")
-        print(f"Parsed imports: {imports}")
-        print(f"Parsed constraints: {constraints}")
-        print(f"Symbols used: {symbols}")
+        logger.debug(f"Parsed parameters: {params}")
+        logger.debug(f"Parsed imports: {imports}")
+        logger.debug(f"Parsed constraints: {constraints}")
+        logger.debug(f"Symbols used: {symbols}")
 
         return UserText(imports, params, constraints, symbols), mark_named_parameters(checkedPars, modelPars, lhs.union(rhs))
 
