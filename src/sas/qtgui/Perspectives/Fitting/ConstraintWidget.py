@@ -1242,7 +1242,6 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             # slave parameter has model name and parameter separated
             # by colon e.g `M1:scale` so no need to parse the constraint
             # string.
-            print("Checking constraint:", constraint, "for", name, row, name in constraint)
             if name in constraint:
                 self.tblConstraints.item(row, 0).setCheckState(QtCore.Qt.Unchecked)
                 # deactivate the constraint
