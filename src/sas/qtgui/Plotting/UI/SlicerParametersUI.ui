@@ -300,7 +300,7 @@
                <string>When checked, slicers of the same type will append to the same plot instead of creating separate plots</string>
               </property>
               <property name="text">
-               <string>Stack</string>
+               <string>Stack Plots</string>
               </property>
              </widget>
             </item>

@@ -120,6 +120,10 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         # Set up slicer plots list
         self.setSlicerPlotsList()
 
+        # Initial update of active plots
+        self.updatePlotList()
+        self.updateSlicerPlotList()
+
     def setParamsList(self):
         """
         Create and initially populate the list of parameters

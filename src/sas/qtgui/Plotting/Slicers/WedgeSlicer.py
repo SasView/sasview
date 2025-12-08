@@ -138,11 +138,11 @@ class WedgeInteractor(BaseInteractor, SlicerModel, StackableMixin):
 
     def _get_slicer_type_id(self):
         """Return the slicer type identifier"""
-        return f"Wedge{self.averager.__name__}" + self.data.name if self.averager else "Wedge" + self.data.name
+        return f"Wedge{self.averager.__name__}" + self.data.name if self.averager is not None else "Wedge" + self.data.name
 
     def _post_data(self, new_sector=None, nbins=None):
         """
-        post 1D data averagin in Q or Phi given new_sector type
+        post 1D data averaging in Q or Phi given new_sector type
 
         :param new_sector: slicer used for directional averaging in Q or Phi
         :param nbins: the number of point plotted when averaging
