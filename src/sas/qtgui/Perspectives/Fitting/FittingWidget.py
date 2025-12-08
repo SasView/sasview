@@ -1329,8 +1329,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             msgbox.addButton(button_remove, QtWidgets.QMessageBox.YesRole)
             button_cancel = QtWidgets.QPushButton("Cancel")
             msgbox.addButton(button_cancel, QtWidgets.QMessageBox.RejectRole)
-            retval = msgbox.exec_()
-            if retval == QtWidgets.QMessageBox.RejectRole:
+            msgbox.exec_()
+            if msgbox.clickedButton() == button_cancel:
                 # cancel fit
                 raise ValueError("Fitting cancelled")
             else:
