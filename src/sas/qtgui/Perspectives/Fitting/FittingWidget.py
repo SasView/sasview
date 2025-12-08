@@ -3594,8 +3594,77 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 magnet_params = FittingUtilities.getStandardParam(self.magnetism_widget._magnet_model)
             model_parameters = params + poly_params + magnet_params
         
+        # Calculate CorMap p-value if we have both data and model
+        if (self.data is not None and 
+            self.logic.kernel_module is not None and 
+            hasattr(self.data, '__class__') and 
+            self.data.__class__.__name__ == 'Data1D'):
+            try:
+                import numpy as np
+                from freesas.cormap import gof
+                
+                # Get experimental data
+                exp_q = np.array(self.data.x)
+                exp_I = np.array(self.data.y)
+                
+                # Filter valid data points
+                valid_mask = np.isfinite(exp_q) & np.isfinite(exp_I) & (exp_I > 0) & (exp_q > 0)
+                if np.any(valid_mask):
+                    exp_q_valid = exp_q[valid_mask]
+                    exp_I_valid = exp_I[valid_mask]
+                    
+                    # Calculate model curve at experimental q values
+                    # Use the kernel_module to calculate model intensity
+                    try:
+                        model_I_result = self.logic.kernel_module.calculate_Iq(exp_q_valid)
+                        # Handle tuple return (some models return (Iq, intermediate_results))
+                        if isinstance(model_I_result, tuple):
+                            model_I = model_I_result[0]
+                        else:
+                            model_I = model_I_result
+                        
+                        # Ensure model_I is a numpy array
+                        model_I = np.array(model_I)
+                        
+                        # Ensure both arrays have the same length
+                        min_len = min(len(exp_I_valid), len(model_I))
+                        if min_len > 10:  # Need at least 10 points for meaningful CorMap
+                            exp_I_final = exp_I_valid[:min_len]
+                            model_I_final = model_I[:min_len]
+                            
+                            # Filter out any remaining invalid values
+                            final_mask = (np.isfinite(exp_I_final) & 
+                                         np.isfinite(model_I_final) & 
+                                         (exp_I_final > 0) & 
+                                         (model_I_final > 0))
+                            
+                            if np.sum(final_mask) > 10:
+                                exp_I_final = exp_I_final[final_mask]
+                                model_I_final = model_I_final[final_mask]
+                                
+                                # Prepare data for FreeSAS gof function
+                                # gof expects numpy arrays, can be 2D with shape (n, 1) or 1D
+                                exp_data = exp_I_final.reshape(-1, 1) if exp_I_final.ndim == 1 else exp_I_final
+                                model_data = model_I_final.reshape(-1, 1) if model_I_final.ndim == 1 else model_I_final
+                                
+                                # Calculate CorMap
+                                gof_result = gof(exp_data, model_data)
+                                
+                                # Extract p-value (P attribute from GOF object)
+                                if hasattr(gof_result, 'P') and gof_result.P is not None:
+                                    fit_data['cormap_pvalue'] = float(gof_result.P)
+                    except Exception as calc_error:
+                        logger.debug(f"Model calculation failed for CorMap: {calc_error}")
+                        
+            except ImportError:
+                logger.warning("FreeSAS not available, skipping CorMap calculation")
+            except Exception as e:
+                logger.warning(f"CorMap calculation failed: {e}")
+                import traceback
+                logger.debug(traceback.format_exc())
+        
         # Create fit entry if we have fit information
-        if fit_data.get('chi2') is not None or model_name or optimizer_name:
+        if fit_data.get('chi2') is not None or model_name or optimizer_name or fit_data.get('cormap_pvalue') is not None:
             fit = collector.collect_from_fit(fit_data, model_name, optimizer_name, model_parameters)
             # Update angular units from sample
             if sample.angular_units:
