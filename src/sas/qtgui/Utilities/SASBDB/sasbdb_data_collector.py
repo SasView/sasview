@@ -120,10 +120,6 @@ class SASBDBDataCollector:
                 sample.beamline_instrument = str(meta['beamline'])
             elif 'instrument' in meta:
                 sample.beamline_instrument = str(meta['instrument'])
-        
-        # Also check data.instrument attribute (shown in info panel)
-        if hasattr(data, 'instrument') and data.instrument and not sample.beamline_instrument:
-            sample.beamline_instrument = str(data.instrument)
             
             if 'concentration' in meta:
                 try:
@@ -150,6 +146,10 @@ class SASBDBDataCollector:
                     sample.number_of_frames = int(meta[frames_key])
                 except (ValueError, TypeError):
                     pass
+        
+        # Also check data.instrument attribute (shown in info panel)
+        if hasattr(data, 'instrument') and data.instrument and not sample.beamline_instrument:
+            sample.beamline_instrument = str(data.instrument)
         
         # Set default experiment date if not found
         if not sample.experiment_date:
@@ -286,6 +286,10 @@ class SASBDBDataCollector:
             fit.chi_squared = float(fit_data['chi_squared'])
         elif 'chi2_value' in fit_data:
             fit.chi_squared = float(fit_data['chi2_value'])
+        
+        # CorMap p-value
+        if 'cormap_pvalue' in fit_data:
+            fit.cormap_pvalue = float(fit_data['cormap_pvalue'])
         
         # Angular units (should match sample)
         fit.angular_units = '1/A'  # Default, will be updated from sample
