@@ -8,6 +8,7 @@ import logging
 import os
 from enum import Enum
 
+import numpy as np
 from PySide6 import QtCore, QtGui, QtWidgets
 
 from sasdata.dataloader.loader import Loader
@@ -325,6 +326,9 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         # Stack Plots
         self.cbStackPlots.toggled.connect(self.onStackPlotsChanged)
 
+        # Apply symmetric slicers
+        self.cmdApplySym.clicked.connect(self.onApplySymmetricSlicers)
+
         # Initialize slicer combobox to the current slicer
         current_slicer = type(self.parent.slicer)
         for index in self.callbacks:
@@ -501,6 +505,16 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
                 self.parent.slicer = None
                 self.setModel(None)
 
+    def deleteAllSlicerPlots(self):
+        """
+        Check all slicer plots in the list for deletion
+        """
+        for row in range(self.lstSlicerPlots.count()):
+            item = self.lstSlicerPlots.item(row)
+            item.setCheckState(QtCore.Qt.Checked)
+
+        self.onDeleteSlicerPlots()
+
     def onDeleteSlicerPlots(self):
         """
         Delete selected slicer plots
@@ -553,6 +567,106 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
 
         # Update the slicer plots list to reflect deletions
         self.setSlicerPlotsList()
+
+    def onApplySymmetricSlicers(self):
+        """
+        Apply multiple symmetric slicers based on the selected type and count
+        """
+
+        # Check if there are existing slicers and warn the user
+        if len(self.parent.slicers) > 0:
+            reply = QtWidgets.QMessageBox.question(self, 'Existing Slicers Detected',
+                                                 'Applying symmetric slicers will remove existing slicers and their plots.\nDo you want to continue?',
+                                                 QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+                                                 (QtWidgets.QMessageBox.No))
+            if reply == QtWidgets.QMessageBox.No:
+                return
+
+        self.parent.onClearSlicer()
+        self.deleteAllSlicerPlots()
+
+        # Get the slicer type from combobox
+        slicer_type_index = self.cbSlicerType.currentIndex()
+
+        # Map combobox index to slicer class
+        symmetric_callbacks = {
+            0: None,
+            1: SectorInteractor,
+            2: WedgeInteractorQ,
+            3: WedgeInteractorPhi,
+        }
+
+        slicer_class = symmetric_callbacks.get(slicer_type_index)
+
+        if slicer_class is None:
+            QtWidgets.QMessageBox.warning(self, "No Slicer Selected",
+                                         "Please select a slicer type.")
+            return
+
+        # Get the count
+        try:
+            count = int(self.txtSlicerCount.text())
+            if count < 1:
+                raise ValueError("Count must be positive")
+        except (ValueError, AttributeError):
+            QtWidgets.QMessageBox.warning(self, "Invalid Count",
+                                         "Please enter a valid positive number for slicer count.")
+            return
+
+        # Check if slicer type supports symmetric distribution
+        if slicer_class not in [SectorInteractor, WedgeInteractorQ, WedgeInteractorPhi]:
+            QtWidgets.QMessageBox.warning(self, "Unsupported Slicer",
+                                         "This slicer type doesn't support symmetric distribution.")
+            return
+
+        # Stack plots
+        self.parent.stackplots = True
+        self.cbStackPlots.setChecked(True)
+
+        # Calculate angular distribution
+        if slicer_class == SectorInteractor:
+            angle_step = np.pi / count  # 180 degrees divided by count because the sectors are symmetric
+        elif slicer_class in [WedgeInteractorQ, WedgeInteractorPhi]:
+            angle_step = 2 * np.pi / count  # 360 degrees divided by count for full circle distribution
+
+        # Create slicers symmetrically distributed
+        for i in range(count):
+            angle = i * angle_step
+
+            # Create the slicer
+            self.parent.setSlicer(slicer=slicer_class)
+
+            # Get the newly created slicer
+            slicer_name = list(self.parent.slicers.keys())[-1]
+            slicer_obj = self.parent.slicers[slicer_name]
+
+            # Set the angle based on slicer type
+            if slicer_class == SectorInteractor:
+                # For sector slicer, adjust theta (main angle)
+                slicer_obj.main_line.theta = angle
+                slicer_obj.theta2 = angle
+                slicer_obj.main_line.update()
+                slicer_obj.right_line.update(delta=-slicer_obj.left_line.phi / 2,
+                                            mline=slicer_obj.main_line.theta, right=True)
+                slicer_obj.left_line.update(delta=slicer_obj.left_line.phi / 2,
+                                           mline=slicer_obj.main_line.theta, left=True)
+
+            elif slicer_class in [WedgeInteractorQ, WedgeInteractorPhi]:
+                # For wedge slicers, adjust theta (central angle)
+                slicer_obj.theta = angle
+                slicer_obj.central_line.theta = angle
+                slicer_obj.central_line.update()
+                slicer_obj.inner_arc.update(theta=angle)
+                slicer_obj.outer_arc.update(theta=angle)
+                slicer_obj.radial_lines.update(theta=angle)
+
+            # Update the slicer
+            slicer_obj.update()
+            slicer_obj._post_data()
+            slicer_obj.draw()
+
+        # Update the slicers list
+        self.updateSlicersList()
 
     def onStackPlotsChanged(self, checked: bool):
         """
