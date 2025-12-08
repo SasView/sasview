@@ -502,7 +502,7 @@
          </property>
          <layout class="QGridLayout" name="gridLayout_8">
           <item row="0" column="0">
-           <widget class="QListWidget" name="listWidget">
+           <widget class="QListWidget" name="lstSlicerPlots">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
               <horstretch>0</horstretch>

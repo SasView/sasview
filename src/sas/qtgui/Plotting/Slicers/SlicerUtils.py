@@ -5,6 +5,7 @@ Utility functions for slicers in the 2D plotter, including unique ID generation 
 import logging
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Plotting.PlotterData import Data1D
 
 logger = logging.getLogger(__name__)
 
@@ -12,7 +13,7 @@ logger = logging.getLogger(__name__)
 def _count_matching_ids(item, base_id: str) -> int:
     """
     Recursively count items with IDs starting with base_id.
-    
+
     :param item: Tree item to search
     :param base_id: The base identifier to match
     :return: Count of matching items in this subtree
@@ -49,14 +50,14 @@ class StackableMixin:
     """
     Mixin class that provides stacking functionality for slicer plots.
     Any slicer that inherits from this mixin can stack multiple plots on the same window.
-    
+
     Required attributes in the slicer class:
     - self.base: Reference to the 2D plot
     - self.data: The 2D data being sliced
     - self._item: The data explorer item
     - self.color: Color for this slicer
     - self._plot_id: The base plot ID (set before calling _create_or_update_plot)
-    
+
     Required methods in the slicer class:
     - self._get_slicer_type_id(): Should return a string identifying the slicer type
     """
@@ -70,15 +71,15 @@ class StackableMixin:
         """
         Get the type identifier for this slicer.
         Should be overridden by subclasses to return something like "AnnulusPhi" + data.name
-        
+
         :return: String identifying the slicer type and source data
         """
         raise NotImplementedError("Subclass must implement _get_slicer_type_id()")
 
-    def _create_or_update_plot(self, new_plot, item):
+    def _create_or_update_plot(self, new_plot: Data1D, item) -> None:
         """
         Create a new plot or update/stack onto an existing one based on state.
-        
+
         :param new_plot: The Data1D object to plot
         :param item: The data explorer item
         """
@@ -116,7 +117,7 @@ class StackableMixin:
     def _find_stackable_plot_window(self):
         """
         Find an existing plot window that can accept this slicer's data.
-        
+
         :return: Plot window if found, None otherwise
         """
         type_id = self._get_slicer_type_id()
@@ -137,10 +138,10 @@ class StackableMixin:
 
         return None
 
-    def _append_to_plot_window(self, plot_window, new_plot, item):
+    def _append_to_plot_window(self, plot_window: object, new_plot: Data1D, item) -> str:
         """
         Append new data to an existing plot window.
-        
+
         :param plot_window: The existing plot window to append to
         :param new_plot: The new Data1D object to add
         :param item: The item for the data model
@@ -176,12 +177,16 @@ class StackableMixin:
         # Notify manager
         self.base.manager.communicator.plotUpdateSignal.emit([new_plot])
 
+        # Update slicer plots list if the slicer widget exists
+        if hasattr(self.base, 'slicer_widget') and self.base.slicer_widget is not None:
+            self.base.slicer_widget.updateSlicerPlotList()
+
         return unique_id
 
-    def _create_new_plot(self, new_plot, item):
+    def _create_new_plot(self, new_plot: Data1D, item) -> None:
         """
         Create a new plot window.
-        
+
         :param new_plot: The Data1D object to plot
         :param item: The data explorer item
         """
@@ -204,10 +209,14 @@ class StackableMixin:
                     self._plot_window = plot_window
                     break
 
+        # Update slicer plots list if the slicer widget exists
+        if hasattr(self.base, 'slicer_widget') and self.base.slicer_widget is not None:
+            self.base.slicer_widget.updateSlicerPlotList()
+
     def _update_existing_plot(self, new_plot, item):
         """
         Update data in existing plot window.
-        
+
         :param new_plot: The updated Data1D object
         :param item: The data explorer item
         """
