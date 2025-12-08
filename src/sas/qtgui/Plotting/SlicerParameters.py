@@ -15,6 +15,7 @@ from sasdata.file_converter.nxcansas_writer import NXcanSASWriter
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas import config
+from sas.qtgui.Plotting import PlotHelper
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.Slicers.AnnulusSlicer import AnnulusInteractor
 from sas.qtgui.Plotting.Slicers.BoxSlicer import BoxInteractorX, BoxInteractorY
@@ -60,13 +61,14 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         self.model = model
         self.validate_method = validate_method
         self.active_plots = active_plots
+        self.active_slicer_plots = {}
         self.save_location = config.DEFAULT_OPEN_FOLDER
         self.communicator = communicator
 
         # Initially, Apply is disabled
         self.cmdApply.setEnabled(False)
 
-        # Store models for each slicer - add this line
+        # Store models for each slicer
         self.slicer_models = {}
 
         # Mapping combobox index -> slicer module
@@ -112,8 +114,11 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         # Set up plots list
         self.setPlotsList()
 
-        # Set up slicers list - add this line
+        # Set up slicers list
         self.setSlicersList()
+
+        # Set up slicer plots list
+        self.setSlicerPlotsList()
 
     def setParamsList(self):
         """
@@ -133,11 +138,12 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         """ Update the list of active plots """
         self.active_plots = self.parent.getActivePlots()
         self.setPlotsList()
+        self.updateSlicerPlotList()  # Add this to update slicer plots too
 
-    # def updateSlicerPlotList(self):
-    #     """ Update the list of slicer plots """
-    #     self.active_slicer_plots = self.parent.getActiveSlicerPlots()
-    #     self.setSlicerPlotList()
+    def updateSlicerPlotList(self):
+        """ Update the list of active slicer plots """
+        self.active_slicer_plots = self.parent.getActiveSlicerPlots()
+        self.setSlicerPlotsList()  # Fixed: was setSlicerPlotList (missing 's')
 
     def getCurrentSlicerDict(self):
         """
@@ -256,6 +262,43 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
             chkboxItem.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
             chkboxItem.setCheckState(checked)
             self.lstPlots.addItem(chkboxItem)
+
+    def getCurrentSlicerPlotDict(self):
+        """
+        Returns a dictionary of currently shown slicer plots
+        {slicer_plot_name:checkbox_status}
+        """
+        current_slicer_plots = {}
+        if self.lstSlicerPlots.count() != 0:
+            for row in range(self.lstSlicerPlots.count()):
+                item = self.lstSlicerPlots.item(row)
+                isChecked = item.checkState() != QtCore.Qt.Unchecked
+                plot = item.text()
+                current_slicer_plots[plot] = isChecked
+        return current_slicer_plots
+
+    def setSlicerPlotsList(self):
+        """
+        Create and initially populate the list of slicer plots
+        """
+        current_slicer_plots = self.getCurrentSlicerPlotDict()
+        self.lstSlicerPlots.clear()
+
+        # Fill out list of slicer plots from active_slicer_plots
+        for plot_name, plot_widget in self.active_slicer_plots.items():
+            if str(plot_name) in current_slicer_plots.keys():
+                # redo the list
+                checked = QtCore.Qt.Checked if current_slicer_plots[plot_name] else QtCore.Qt.Unchecked
+            else:
+                # create a new list - default to unchecked
+                checked = QtCore.Qt.Unchecked
+
+            chkboxItem = QtWidgets.QListWidgetItem(str(plot_name))
+            chkboxItem.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
+            chkboxItem.setCheckState(checked)
+            # Store the plot widget reference in the item
+            chkboxItem.setData(QtCore.Qt.UserRole, plot_widget)
+            self.lstSlicerPlots.addItem(chkboxItem)
 
     def setSlots(self):
         """
@@ -460,10 +503,55 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
 
     def onDeleteSlicerPlots(self):
         """
-        Delete all plots created by the current slicer
+        Delete selected slicer plots
         """
-        pass
+        # Pop a confirmation warning
+        msg = "Are you sure you want to delete the selected plots?"
+        reply = QtWidgets.QMessageBox.question(self, "Warning", msg, QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.No)
 
+        if reply == QtWidgets.QMessageBox.No:
+            return
+
+        # Iterate over the list and delete checked items
+        for row in range(self.lstSlicerPlots.count()-1, -1, -1):
+            item = self.lstSlicerPlots.item(row)
+            isChecked = item.checkState() != QtCore.Qt.Unchecked
+            if isChecked:
+                plot_name = item.text()
+                plot_widget = item.data(QtCore.Qt.UserRole)
+
+                # Get the plot ID for PlotHelper cleanup
+                plot_id = PlotHelper.idOfPlot(plot_widget)
+
+                # Close the plot window if it exists
+                if hasattr(plot_widget, 'close'):
+                    plot_widget.close()
+
+                # Remove from PlotHelper
+                if plot_id:
+                    PlotHelper.deletePlot(plot_id)
+
+                # Remove from parent's slicer_plots_dict
+                if plot_name in self.parent.slicer_plots_dict:
+                    del self.parent.slicer_plots_dict[plot_name]
+
+                # Remove from active plots if present
+                if plot_name in self.active_plots:
+                    del self.active_plots[plot_name]
+
+                # Remove from the manager's plot_widgets if it exists
+                if hasattr(self.parent.manager, 'plot_widgets') and plot_id in self.parent.manager.plot_widgets:
+                    subwindow = self.parent.manager.plot_widgets[plot_id]
+                    # Remove from workspace
+                    if hasattr(self.parent.manager.parent, 'workspace'):
+                        self.parent.manager.parent.workspace().removeSubWindow(subwindow)
+                    del self.parent.manager.plot_widgets[plot_id]
+
+                # Remove from the list widget
+                self.lstSlicerPlots.takeItem(row)
+
+        # Update the slicer plots list to reflect deletions
+        self.setSlicerPlotsList()
 
     def onStackPlotsChanged(self, checked: bool):
         """

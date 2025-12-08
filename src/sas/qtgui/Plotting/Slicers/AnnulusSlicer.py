@@ -225,6 +225,10 @@ class AnnulusInteractor(BaseInteractor, SlicerModel, StackableMixin):
         # Notify manager
         self.base.manager.communicator.plotUpdateSignal.emit([new_plot])
 
+        # Update slicer plots list if the slicer widget exists
+        if hasattr(self.base, 'slicer_widget') and self.base.slicer_widget is not None:
+            self.base.slicer_widget.updateSlicerPlotList()
+
         return unique_id
 
     def _create_new_plot(self, new_plot, item):
@@ -247,6 +251,10 @@ class AnnulusInteractor(BaseInteractor, SlicerModel, StackableMixin):
                     any(hasattr(d, 'id') and d.id == new_plot.id for d in (plot_window.data if isinstance(plot_window.data, list) else [plot_window.data]))):
                     self._plot_window = plot_window
                     break
+
+        # Update slicer plots list if the slicer widget exists
+        if hasattr(self.base, 'slicer_widget') and self.base.slicer_widget is not None:
+            self.base.slicer_widget.updateSlicerPlotList()
 
     def _update_existing_plot(self, new_plot, item):
         """

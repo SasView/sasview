@@ -314,6 +314,46 @@ class Plotter2DWidget(PlotterBase):
         ''' utility method for manager query of active plots '''
         return self.manager.active_plots
 
+    def getActiveSlicerPlots(self):
+        """
+        Utility method for manager query of active slicer plots.
+        Returns a dictionary of plot_id: plot_window for all 1D plots
+        that were created by slicers from this 2D plot.
+        """
+        slicer_plots = {}
+
+        if not hasattr(self, 'manager') or not hasattr(self.manager, 'active_plots'):
+            return slicer_plots
+
+        # Search through all active plots
+        for plot_id, plot_window in self.manager.active_plots.items():
+            if hasattr(plot_window, 'data') and plot_window.data is not None:
+                # Get the data (could be a list or single item)
+                data_list = plot_window.data if isinstance(plot_window.data, list) else [plot_window.data]
+
+                # Check if any data in this plot is from a slicer
+                for data in data_list:
+                    # Primary method: Check if this data has a type_id (which we set in StackableMixin)
+                    if (hasattr(data, 'type_id') and
+                        data.type_id is not None and
+                        isinstance(data.type_id, str)):
+                        # Check if the type_id contains this 2D plot's name
+                        # type_id format is like "AnnulusPhi" + self.data.name or "SectorQ" + self.data.name
+                        if self.data0.name in data.type_id:
+                            slicer_plots[plot_id] = plot_window
+                            break  # Found a slicer plot, no need to check other data
+
+                    # Fallback: Check if data has plot_role attribute (older method)
+                    elif hasattr(data, 'plot_role') and data.plot_role is not None:
+                        from sas.qtgui.Plotting.PlotterData import DataRole
+                        # Check if it's a slicer-generated plot
+                        # Only use the roles that actually exist
+                        if (data.plot_role == DataRole.ROLE_ANGULAR_SLICE and
+                            self.data0.name in data.name):
+                            slicer_plots[plot_id] = plot_window
+                            break
+        return slicer_plots
+
     def onEditSlicer(self):
         """
         Present a dialog for manipulating the current slicer
