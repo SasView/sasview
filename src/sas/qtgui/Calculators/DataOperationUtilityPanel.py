@@ -74,7 +74,6 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
          DataExplorer. For Data2, there is the additional option of choosing
          a number to apply to data1 """
         self.filenames = filenames
-        print(filenames)
 
         if list(filenames.keys()):
             # clear contents of comboboxes
