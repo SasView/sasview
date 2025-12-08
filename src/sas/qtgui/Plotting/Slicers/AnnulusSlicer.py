@@ -2,7 +2,6 @@ import logging
 
 import numpy
 
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
 from sas.qtgui.Plotting.SlicerModel import SlicerModel
 from sas.qtgui.Plotting.Slicers.SlicerUtils import StackableMixin, generate_unique_plot_id
@@ -163,121 +162,6 @@ class AnnulusInteractor(BaseInteractor, SlicerModel, StackableMixin):
 
         if self.update_model:
             self.setModelFromParams()
-
-    def _find_stackable_plot_window(self):
-        """
-        Find an existing plot window that can accept this slicer's data.
-        """
-        slicer_type = "AnnulusPhi"
-        parent_name = self.data.name
-
-        # Search through active plots
-        if hasattr(self.base, 'manager') and hasattr(self.base.manager, 'active_plots'):
-            for plot_id, plot_window in self.base.manager.active_plots.items():
-                if hasattr(plot_window, 'data') and plot_window.data is not None:
-                    # Get first data item
-                    data_list = plot_window.data if isinstance(plot_window.data, list) else [plot_window.data]
-                    if len(data_list) > 0:
-                        first_data = data_list[0]
-                        # Check if it's from the same slicer type and parent
-                        if (hasattr(first_data, 'type_id') and
-                            first_data.type_id is not None and
-                            first_data.type_id == (slicer_type + parent_name)):
-                            return plot_window
-
-        return None
-
-    def _append_to_plot_window(self, plot_window, new_plot, item):
-        """
-        Append new data to an existing plot window.
-        Returns the actual ID assigned to the plot.
-        """
-        # Get unique color
-        color = self.color  # Already assigned in __init__
-
-        # Make the ID unique by appending counter
-        base_id = new_plot.id
-        counter = 1
-        unique_id = f"{base_id}_{counter}"
-
-        # Check existing IDs in the plot window
-        existing_ids = []
-        if hasattr(plot_window, 'data') and plot_window.data:
-            data_list = plot_window.data if isinstance(plot_window.data, list) else [plot_window.data]
-            existing_ids = [d.id for d in data_list if hasattr(d, 'id')]
-
-        while unique_id in existing_ids:
-            counter += 1
-            unique_id = f"{base_id}_{counter}"
-
-        # Update plot with unique ID
-        new_plot.id = unique_id
-        new_plot.name = unique_id
-        new_plot.title = unique_id
-        new_plot.custom_color = color
-
-        # Add to model
-        GuiUtils.updateModelItemWithPlot(item, new_plot, unique_id)
-
-        # Use replacePlot to add to existing window
-        plot_window.plot(data=new_plot, color=color, hide_error=False)
-
-        # Notify manager
-        self.base.manager.communicator.plotUpdateSignal.emit([new_plot])
-
-        # Update slicer plots list if the slicer widget exists
-        if hasattr(self.base, 'slicer_widget') and self.base.slicer_widget is not None:
-            self.base.slicer_widget.updateSlicerPlotList()
-
-        return unique_id
-
-    def _create_new_plot(self, new_plot, item):
-        """
-        Create a new plot window.
-        """
-        # Add to model
-        GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
-
-        # Signal to create plot
-        self.base.manager.communicator.plotUpdateSignal.emit([new_plot])
-        self.base.manager.communicator.forcePlotDisplaySignal.emit([item, new_plot])
-
-        # Store references
-        self._actual_plot_id = new_plot.id
-        # Find the plot window that was created
-        if hasattr(self.base, 'manager') and hasattr(self.base.manager, 'active_plots'):
-            for plot_id, plot_window in self.base.manager.active_plots.items():
-                if plot_id == new_plot.id or (hasattr(plot_window, 'data') and
-                    any(hasattr(d, 'id') and d.id == new_plot.id for d in (plot_window.data if isinstance(plot_window.data, list) else [plot_window.data]))):
-                    self._plot_window = plot_window
-                    break
-
-        # Update slicer plots list if the slicer widget exists
-        if hasattr(self.base, 'slicer_widget') and self.base.slicer_widget is not None:
-            self.base.slicer_widget.updateSlicerPlotList()
-
-    def _update_existing_plot(self, new_plot, item):
-        """
-        Update data in existing plot window.
-        """
-        if self._plot_window is None:
-            logger.warning(f"No plot window found for {new_plot.id}")
-            return
-
-        # Preserve color
-        if hasattr(new_plot, 'custom_color'):
-            new_plot.custom_color = self.color
-        else:
-            new_plot.custom_color = self.color
-
-        # Replace plot data
-        self._plot_window.replacePlot(new_plot.id, new_plot)
-
-        # Update model
-        GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.name)
-
-        # Notify manager
-        self.base.manager.communicator.plotUpdateSignal.emit([new_plot])
 
     def validate(self, param_name, param_value):
         """

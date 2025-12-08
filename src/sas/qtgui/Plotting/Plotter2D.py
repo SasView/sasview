@@ -65,8 +65,8 @@ class Plotter2DWidget(PlotterBase):
         self.slicer = None
         self.slicers = {}
         self.slicer_widget = None
-        self.stackplots = False # whether to stack multiple slicer plots
-        self.slicer_plots_dict = {} # keep track of slicer plots
+        self.stackplots = False  # whether to stack multiple slicer plots
+        self.slicer_plots_dict = {}  # keep track of slicer plots
         self.vmin = None
         self.vmax = None
         self.im = None
@@ -79,9 +79,6 @@ class Plotter2DWidget(PlotterBase):
 
         # Track color index for slicer color cycling
         self._slicer_color_index = 0
-
-        # Whether to stack multiple slicer plots
-        self.stack_plots = False  # True to stack multiple slicer plots on same axes
 
     @property
     def data(self):
