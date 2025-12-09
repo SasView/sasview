@@ -73,7 +73,7 @@ class GuiManager:
     """
     Main SasView window functionality
     """
-    def __init__(self, parent=None, filepath: str | Path | None = None):
+    def __init__(self, parent=None):
         """
         Initialize the manager as a child of MainWindow.
         """
@@ -126,9 +126,6 @@ class GuiManager:
 
         if self.WhatsNew.has_new_messages(): # Not a static method
             self.WhatsNew.show()
-
-        if filepath:
-            self.filesWidget.loadFromArbitraryPath(filepath)
 
     def info(self, type, value, tb):
         logger.error("".join(traceback.format_exception(type, value, tb)))

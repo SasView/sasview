@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 class MainSasViewWindow(QMainWindow, Ui_SasView):
     # Main window of the application
-    def __init__(self, parent=None, filepath=None):
+    def __init__(self, parent=None):
         super(MainSasViewWindow, self).__init__(parent)
 
         self.setupUi(self)
@@ -42,7 +42,7 @@ class MainSasViewWindow(QMainWindow, Ui_SasView):
         # Create the gui manager
         from .GuiManager import GuiManager
         try:
-            self.guiManager = GuiManager(self, filepath)
+            self.guiManager = GuiManager(self)
         except Exception as ex:
             logger.error("Application failed with: "+str(ex))
             raise ex
@@ -117,7 +117,7 @@ def run_sasview(filepath=None):
     from twisted.internet import reactor
 
     # Show the main SV window
-    mainwindow = MainSasViewWindow(filepath=filepath)
+    mainwindow = MainSasViewWindow()
 
     # no more splash screen
     splash.finish(mainwindow)
