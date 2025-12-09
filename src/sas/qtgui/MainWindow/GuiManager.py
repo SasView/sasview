@@ -127,6 +127,9 @@ class GuiManager:
         if self.WhatsNew.has_new_messages(): # Not a static method
             self.WhatsNew.show()
 
+        if filepath:
+            self.filesWidget.loadFromArbitraryPath(filepath)
+
     def info(self, type, value, tb):
         logger.error("".join(traceback.format_exception(type, value, tb)))
 

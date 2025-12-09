@@ -6,6 +6,8 @@ import os
 import sys
 import time
 
+from pathlib import Path
+
 from PySide6 import QtCore, QtGui, QtWidgets
 from twisted.internet import threads
 
@@ -317,6 +319,35 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         filename = QtWidgets.QFileDialog.getOpenFileName(**kwargs)[0]
         if filename:
             self.readProject(filename)
+
+    def loadFromArbitraryPath(self, filepath: str | Path | None = None):
+        """Logic to load any file, regardless of path, and pass it to the appropriate method for loading."""
+        if not filepath:
+            # Early return is no file path is given
+            return
+        file = Path(filepath)
+        if filepath and file.exists():
+            ext = file.suffix
+            # If the file extension is an analysis file type, the logic path is the same as project files
+            if ext in config.PLUGIN_STATE_EXTENSIONS:
+                ext = '.json'
+            # Get absolute path string in case downstream logic is not compatible with pathlib.Path objects
+            abs_path = str(file.absolute()).replace('\n', '').replace('\r', '')
+            match ext:
+                case ".json":
+                    # Matches analysis files and project files
+                    self.readProject(abs_path)
+                case _:
+                    # All other cases fall through here
+                    if file.is_dir():
+                        # If a directory is given as an argument, gather all files
+                        path_list = [os.path.join(os.path.abspath(file), filename) for filename in os.listdir(file)]
+                    else:
+                        # If a single file is given, load it individually
+                        path_list = [abs_path]
+                    self.readData(path_list)
+        elif not file.exists():
+            logger.warning(f"The path, {filepath}, does not exist. No files were loaded.")
 
     def saveProject(self):
         """
