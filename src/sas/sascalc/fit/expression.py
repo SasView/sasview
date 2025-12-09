@@ -326,7 +326,7 @@ def _compile_constraints(symtab, exprs, context={}, html=False):
     # of the parameter in the expression.
     names = list(sorted(symtab.keys()))
     parameters = dict(('P%d'%i, symtab[k]) for i, k in enumerate(names))
-    mapping = dict((k, 'P%d.slot'%i) for i, k in enumerate(names))
+    mapping = dict((k, 'P%d.value'%i) for i, k in enumerate(names))
 
     # Add the parameters to the global context
     global_context = standard_symbols(context)
