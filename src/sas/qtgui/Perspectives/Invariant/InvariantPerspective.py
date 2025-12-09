@@ -1060,58 +1060,87 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.txtVolFrac2.setEnabled(toggle)
 
     def update_progress_bars(self) -> None:
-        """Update progress bars based on Q* values"""
+        """Update progress bars based on Q* values from the model"""
         try:
-            # Reset to 0 if no calculator or no data
-            if not self._calculator or not self._data:
+            # Reset to 0 if no data
+            if not self._data:
                 self.progressBarData.setValue(0)
+                self.progressBarData.setFormat("")
                 self.progressBarLowQ.setValue(0)
+                self.progressBarLowQ.setFormat("")
                 self.progressBarHighQ.setValue(0)
+                self.progressBarHighQ.setFormat("")
                 return
 
-            qstar_low = 0.0
-            qstar_high = 0.0
-
-            # Get values from calculator if available
-            # Only use values if they have been explicitly calculated
-            if hasattr(self._calculator, "_qstar") and self._calculator._qstar is not None:
-                qstar_data = self._calculator._qstar
-            else:
+            # Get Q* total from model
+            qstar_total_item = self.model.item(WIDGETS.W_INVARIANT)
+            if not qstar_total_item or not qstar_total_item.text():
                 # No calculation performed yet
                 self.progressBarData.setValue(0)
+                self.progressBarData.setFormat("")
                 self.progressBarLowQ.setValue(0)
+                self.progressBarLowQ.setFormat("")
                 self.progressBarHighQ.setValue(0)
+                self.progressBarHighQ.setFormat("")
                 return
 
-            if hasattr(self._calculator, "_qstar_low") and self._calculator._qstar_low is not None:
-                qstar_low = self._calculator._qstar_low
-            if hasattr(self._calculator, "_qstar_high") and self._calculator._qstar_high is not None:
-                qstar_high = self._calculator._qstar_high
+            qstar_total = float(qstar_total_item.text())
 
-            # Calculate total
-            qstar_total = qstar_data + qstar_low + qstar_high
+            # Get Q* low from model
+            qstar_low_item = self.model.item(WIDGETS.D_LOW_QSTAR)
+            qstar_low = 0.0
+            if qstar_low_item and qstar_low_item.text() and qstar_low_item.text() != "ERROR":
+                try:
+                    qstar_low = float(qstar_low_item.text())
+                except (ValueError, TypeError):
+                    qstar_low = 0.0
+
+            # Get Q* high from model
+            qstar_high_item = self.model.item(WIDGETS.D_HIGH_QSTAR)
+            qstar_high = 0.0
+            if qstar_high_item and qstar_high_item.text() and qstar_high_item.text() != "ERROR":
+                try:
+                    qstar_high = float(qstar_high_item.text())
+                except (ValueError, TypeError):
+                    qstar_high = 0.0
 
             if qstar_total > 0:
-                # Calculate percentages
-                data_percent = int((qstar_data / qstar_total) * 100)
-                low_percent = int((qstar_low / qstar_total) * 100)
-                high_percent = int((qstar_high / qstar_total) * 100)
+                # Calculate percentages - match InvariantDetails logic
+                # Low-Q percentage
+                low_percent = (qstar_low / qstar_total) * 100.0
 
-                # Update progress bars
-                self.progressBarData.setValue(data_percent)
-                self.progressBarLowQ.setValue(low_percent)
-                self.progressBarHighQ.setValue(high_percent)
+                # High-Q percentage
+                high_percent = (qstar_high / qstar_total) * 100.0
+
+                # Data percentage is what remains (ensures they sum to 100%)
+                data_percent = 100.0 - low_percent - high_percent
+
+                # Update progress bars with fixed-width format strings
+                self.progressBarLowQ.setValue(int(low_percent))
+                self.progressBarLowQ.setFormat("%6.2f %%" % low_percent)
+
+                self.progressBarData.setValue(int(data_percent))
+                self.progressBarData.setFormat("%6.2f %%" % data_percent)
+
+                self.progressBarHighQ.setValue(int(high_percent))
+                self.progressBarHighQ.setFormat("%6.2f %%" % high_percent)
             else:
                 # Reset if no valid data
                 self.progressBarData.setValue(0)
+                self.progressBarData.setFormat("")
                 self.progressBarLowQ.setValue(0)
+                self.progressBarLowQ.setFormat("")
                 self.progressBarHighQ.setValue(0)
+                self.progressBarHighQ.setFormat("")
 
         except (ValueError, TypeError, AttributeError):
             # Reset on any error
             self.progressBarData.setValue(0)
+            self.progressBarData.setFormat("")
             self.progressBarLowQ.setValue(0)
+            self.progressBarLowQ.setFormat("")
             self.progressBarHighQ.setValue(0)
+            self.progressBarHighQ.setFormat("")
 
     def setupModel(self) -> None:
         """ """
