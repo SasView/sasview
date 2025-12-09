@@ -52,5 +52,5 @@ def safe_float(x: str):
 
     try:
         return float(x)
-    except:
+    except (ValueError, TypeError):
         return 0.0
