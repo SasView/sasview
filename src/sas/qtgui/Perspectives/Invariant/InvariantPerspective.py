@@ -173,7 +173,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
     def extrapolation_parameters(self) -> ExtrapolationParameters | None:
         if self._data is not None:
             return ExtrapolationParameters(
-                safe_float(Q_MINIMUM),
+                safe_float(self._data.x.min()),
                 safe_float(self.model.item(WIDGETS.W_GUINIER_END_EX).text()),
                 safe_float(self.model.item(WIDGETS.W_POROD_START_EX).text()),
                 safe_float(self.model.item(WIDGETS.W_POROD_END_EX).text()),
@@ -861,15 +861,17 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self, params: ExtrapolationParameters, show_dialog: bool = False
     ) -> None:
         # Round values to 8 significant figures to avoid floating point precision issues
-        p1: float = Q_MINIMUM
-        p2: float = float(f"{params.point_2:.7g}")
-        p3: float = float(f"{params.point_3:.7g}")
-        qmin: float = float(f"{params.data_q_min:.7g}")
+        p1: float = float(f"{params.point_1:.7g}")  # Guinier end
+        p2: float = float(f"{params.point_2:.7g}")  # Porod start
+        p3: float = float(f"{params.point_3:.7g}")  # Porod end
+        data_q_min: float = float(f"{self._data.x.min():.7g}")  # Actual data min
+        data_q_max: float = float(f"{self._data.x.max():.7g}")  # Actual data max
         qmax: float = Q_MAXIMUM
 
-        # Determine validity flags such that q_min < point_1 < point_2 < point_3 < q_max
-        invalid_1: bool = p1 < qmin or p1 >= p2
-        invalid_2: bool = p2 <= p1 or p2 >= p3
+        # Determine validity flags such that data_q_min < point_1 < point_2 < point_3 < qmax
+        # Also p2 < data_q_max so that Porod start is within data range
+        invalid_1: bool = p1 <= data_q_min or p1 >= p2
+        invalid_2: bool = p2 <= p1 or p2 >= p3 or p2 >= data_q_max
         invalid_3: bool = p3 <= p2 or p3 > qmax
 
         # Make the background red if the text box is invalid
@@ -878,13 +880,30 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.txtPorodEnd_ex.setStyleSheet(BG_RED if invalid_3 else BG_DEFAULT)
 
         # Show dialog if requested and values are out of range
-        if show_dialog and (p1 < qmin or p3 > qmax):
+        if show_dialog and (p1 <= data_q_min or p3 > qmax):
             msg = "The slider values are out of range.\n"
-            msg += f"The minimum value is {qmin:.7g} and the maximum value is {qmax:.7g}"
+            msg += f"The minimum value is {data_q_min:.7g} and the maximum value is {qmax:.7g}"
             dialog = QtWidgets.QMessageBox(self, text=msg)
             dialog.setWindowTitle("Value out of range")
             dialog.setStandardButtons(QtWidgets.QMessageBox.Ok)
             dialog.exec_()
+            if p1 < data_q_min:
+                self.txtGuinierEnd_ex.setText(str(data_q_min + 1e-7))
+                self.on_extrapolation_text_changed_1()
+            if p3 > qmax:
+                self.txtPorodEnd_ex.setText(str(qmax))
+                self.on_extrapolation_text_changed_3()
+
+        # Show dialog if p2 is greater than data max
+        if show_dialog and (p2 > data_q_max):
+            msg = "The Porod start value cannot be greater than the maximum Q value of the data.\n"
+            msg += f"The maximum Q value of the data is {data_q_max:.7g}"
+            dialog = QtWidgets.QMessageBox(self, text=msg)
+            dialog.setWindowTitle("Invalid Porod Start Value")
+            dialog.setStandardButtons(QtWidgets.QMessageBox.Ok)
+            dialog.exec_()
+            self.txtPorodStart_ex.setText(str(data_q_max - 1e-7))
+            self.on_extrapolation_text_changed_2()
 
     def stateChanged(self) -> None:
         """Catch modifications from low- and high-Q extrapolation check boxes"""
