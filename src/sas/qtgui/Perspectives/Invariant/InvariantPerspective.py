@@ -390,11 +390,10 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         # Low Q extrapolation calculations
         if self._low_extrapolate:
             function_low = "power_law"
+            self._low_power_value = None
             if self._low_guinier:
                 function_low = "guinier"
-            if self._low_fit:
-                self._low_power_value = None
-            if self._low_fix:
+            elif self._low_fix:
                 self._low_power_value = float(self.model.item(WIDGETS.W_LOWQ_POWER_VALUE_EX).text())
 
             try:
@@ -443,10 +442,13 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         # High Q Extrapolation calculations
         if self._high_extrapolate:
             function_high: str = "power_law"
-            if self._high_fix:
-                self._high_power_value = float(self.model.item(WIDGETS.W_HIGHQ_POWER_VALUE_EX).text())
             if self._high_fit:
                 self._high_power_value = None
+            elif self._high_fix:
+                self._high_power_value = float(self.model.item(WIDGETS.W_HIGHQ_POWER_VALUE_EX).text())
+            else:
+                logger.debug("No high-q fit/fix option selected, using default power law.")
+                return None
 
             # Convert slider/q-value (Porod start) to number of points if available
             try:
@@ -610,9 +612,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
             if self._high_fit:
                 reactor.callFromThread(self.update_model_from_thread, WIDGETS.W_HIGHQ_POWER_VALUE_EX, power_high)
-                print(">>> HIGH Q FIT")
-            if self._high_fix:
-                print(">>> HIGH Q FIX")
 
         if qstar_high == "ERROR":
             qstar_high: float = 0.0
@@ -757,7 +756,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             self.rbHighQFit_ex.setEnabled(True)
 
             if not(self.rbHighQFix_ex.isChecked() or self.rbHighQFit_ex.isChecked()):
-                self.rbHighQFix_ex.setChecked(True)
+                self.rbHighQFit_ex.setChecked(True)
 
             if self.rbHighQFix_ex.isChecked():
                 self.txtHighQPower_ex.setEnabled(True)
@@ -1210,8 +1209,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         def fractional_position(f):
             return math.exp(f*log_data_max + (1-f)*log_data_min)
 
-        self.model.setItem(WIDGETS.W_GUINIER_END_EX, QtGui.QStandardItem("%.7g"%fractional_position(0.05)))
-        self.model.setItem(WIDGETS.W_POROD_START_EX, QtGui.QStandardItem("%.7g"%fractional_position(0.95)))
+        self.model.setItem(WIDGETS.W_GUINIER_END_EX, QtGui.QStandardItem("%.7g"%fractional_position(0.15)))
+        self.model.setItem(WIDGETS.W_POROD_START_EX, QtGui.QStandardItem("%.7g"%fractional_position(0.85)))
         self.model.setItem(WIDGETS.W_POROD_END_EX, QtGui.QStandardItem("%.7g"%Q_MAXIMUM))
 
         # update GUI and model with info from loaded data
