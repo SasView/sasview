@@ -109,7 +109,7 @@ class DetailsDialog(QtWidgets.QDialog, Ui_Dialog):
             self.progress_data_qstar = "error"
 
         # Low-Q
-        if self._model.item(WIDGETS.W_ENABLE_LOWQ).text() == "true":
+        if self._model.item(WIDGETS.W_ENABLE_LOWQ_EX).text() == "true":
             self.qlow = float(self._model.item(WIDGETS.D_LOW_QSTAR).text())
 
             self.txtQLowQ.setText(str(self.qlow))
@@ -120,7 +120,7 @@ class DetailsDialog(QtWidgets.QDialog, Ui_Dialog):
                 self.progress_low_qstar = "error"
 
         # High-Q
-        if self._model.item(WIDGETS.W_ENABLE_HIGHQ).text() == "true":
+        if self._model.item(WIDGETS.W_ENABLE_HIGHQ_EX).text() == "true":
             self.qhigh = float(self._model.item(WIDGETS.D_HIGH_QSTAR).text())
 
             self.txtQHighQ.setText(str(self.qhigh))
