@@ -40,6 +40,10 @@ def generate_unique_plot_id(base_id: str, item) -> str:
     :param item: The current item in the data explorer tree
     :return: A unique ID string, either base_id or base_id_N where N is a number
     """
+    # Handle case where item is None or has no parent (multislicer)
+    if item is None or not hasattr(item, "parent"):
+        return base_id
+
     parent_item = item if item.parent() is None else item.parent()
     existing = _count_matching_ids(parent_item, base_id)
 

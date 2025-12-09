@@ -618,11 +618,6 @@
              </item>
              <item>
               <property name="text">
-               <string>Annulus Interactor</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
                <string>Wedge Interactor Q</string>
               </property>
              </item>
