@@ -749,7 +749,7 @@
       <item row="0" column="1">
        <widget class="QProgressBar" name="progressBarLowQ">
         <property name="value">
-         <number>24</number>
+         <number>100</number>
         </property>
        </widget>
       </item>
@@ -763,7 +763,7 @@
       <item row="1" column="1">
        <widget class="QProgressBar" name="progressBarData">
         <property name="value">
-         <number>24</number>
+         <number>100</number>
         </property>
        </widget>
       </item>
@@ -777,7 +777,7 @@
       <item row="2" column="1">
        <widget class="QProgressBar" name="progressBarHighQ">
         <property name="value">
-         <number>24</number>
+         <number>100</number>
         </property>
        </widget>
       </item>
