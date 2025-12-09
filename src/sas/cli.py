@@ -184,7 +184,8 @@ def main(dev_mode: bool|None=None) -> int:
         from sas.qtgui.MainWindow.MainWindow import run_sasview
         # sys.argv is unchanged
         # Maybe hand cli.quiet to run_sasview?
-        run_sasview()
+        file = opts.file if opts.file else None
+        run_sasview(file)
         return 0 # don't drop into the interactive interpreter
 
     # TODO: Start interactive with ipython rather than normal python

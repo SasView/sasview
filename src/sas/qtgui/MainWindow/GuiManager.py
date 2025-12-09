@@ -73,7 +73,7 @@ class GuiManager:
     """
     Main SasView window functionality
     """
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, filepath=None):
         """
         Initialize the manager as a child of MainWindow.
         """
