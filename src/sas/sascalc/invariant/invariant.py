@@ -868,25 +868,6 @@ class InvariantCalculator:
             raise ValueError("The contrast parameter must be non-zero")
         return _porod_const / (2 * math.pi * math.fabs(contrast) ** 2)
 
-    def get_surface_from_volume_fraction(self, volume, porod_const, extrapolation=None):
-        """
-        Compute the specific surface from the data using volume fraction and invariant as: ::
-
-            surface = (pi * V * (1- V) * porod_const) / q_star
-
-        :param volume: volume fraction provided by the user of type float.
-                 volume must be between 0 and 1
-                 volume must have no unit
-        :param porod_const: Porod constant
-                 unit is cm^-1 A^-4
-        :param extrapolation: string to apply optional extrapolation
-
-        :return: specific surface
-        """
-        _porod_const = 1.0e-8 * porod_const
-        q = self.get_qstar(extrapolation) * 1.0e-8
-        return math.pi * _porod_const * volume * (1 - volume) / q
-
     def get_volume_fraction(self, contrast, extrapolation=None):
         """
         Compute volume fraction is deduced as follows: ::
