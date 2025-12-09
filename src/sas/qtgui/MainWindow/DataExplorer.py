@@ -5,7 +5,6 @@ import logging
 import os
 import sys
 import time
-
 from pathlib import Path
 
 from PySide6 import QtCore, QtGui, QtWidgets
