@@ -10,7 +10,7 @@ work in the Windows console.
 **Usage:**
 
 sasview [flags]
-    *Run SasView. If no flag is given, or -q or -V are given, this will start
+    *Run SasView. If no flag is given, or -q or -f or -V are given, this will start
     the GUI.*
 
 sasview [flags] script [args...]
@@ -25,6 +25,9 @@ sasview [flags] -c "python statements" [args...]
 
 sasview -V
     *Print sasview version and exit.*
+
+sasview -f filename
+    *Load a data file, directory, project file, or analysis file on app launch.*
 
 **Flags:**
 
@@ -70,6 +73,8 @@ def parse_cli(argv: list[str]) -> argparse.Namespace:
         help="Don't print banner when entering interactive mode")
     parser.add_argument("-l", "--loglevel", type=str,
         help="Logging level (production or development for now)")
+    parser.add_argument("-f", "--file", type=str,
+        help="File location for any file type to load on launch. This could be a project, analysis, or data file")
     parser.add_argument("args", nargs="*",
         help="script followed by args")
 
