@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>650</width>
-    <height>580</height>
+    <height>600</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,7 +19,7 @@
   <property name="minimumSize">
    <size>
     <width>650</width>
-    <height>580</height>
+    <height>600</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -31,7 +31,7 @@
      <x>10</x>
      <y>10</y>
      <width>631</width>
-     <height>521</height>
+     <height>551</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -47,7 +47,7 @@
     </size>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="tabMain">
     <attribute name="title">
@@ -151,43 +151,36 @@
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_5">
         <item>
-         <layout class="QGridLayout" name="gridLayout_3">
-          <item row="0" column="0">
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
            <widget class="QLabel" name="lblBackground">
             <property name="text">
              <string>Background:</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
+          <item>
            <widget class="QLineEdit" name="txtBackgd"/>
           </item>
-          <item row="0" column="2">
-           <widget class="QLabel" name="label_8">
-            <property name="text">
-             <string>Contrast:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="4">
-           <widget class="QLineEdit" name="txtVolFrac2"/>
-          </item>
-          <item row="1" column="3">
-           <widget class="QLabel" name="lblVF1">
+          <item>
+           <widget class="QLabel" name="lblScale">
             <property name="text">
              <string>Scale:</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="4">
+          <item>
            <widget class="QLineEdit" name="txtScale"/>
           </item>
          </layout>
         </item>
         <item>
          <layout class="QGridLayout" name="gridLayout_10">
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="txtVolFrac1"/>
+          </item>
           <item row="1" column="2">
-           <widget class="QLabel" name="label">
+           <widget class="QLabel" name="lblPM_5">
             <property name="text">
              <string>+/-</string>
             </property>
@@ -197,28 +190,17 @@
            <widget class="QLineEdit" name="txtContrast"/>
           </item>
           <item row="1" column="4">
-           <widget class="QLabel" name="lblContrastUnits">
+           <widget class="QLabel" name="lblContrastUnits_in">
             <property name="text">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-2&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_33">
-            <property name="text">
-             <string>Volume Fraction 1:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_6">
-            <property name="text">
-             <string>Contrast:</string>
-            </property>
-           </widget>
+          <item row="2" column="3">
+           <widget class="QLineEdit" name="txtVolFrac1Err"/>
           </item>
           <item row="2" column="2">
-           <widget class="QLabel" name="label_2">
+           <widget class="QLabel" name="lblPM_7">
             <property name="text">
              <string>+/-</string>
             </property>
@@ -227,28 +209,8 @@
           <item row="1" column="3">
            <widget class="QLineEdit" name="txtContrastErr"/>
           </item>
-          <item row="2" column="3">
-           <widget class="QLineEdit" name="txtVolFrac1Err"/>
-          </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="txtVolFrac1"/>
-          </item>
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="txtPorodCst">
-            <property name="toolTip">
-             <string>Porod constant (optional)</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_10">
-            <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Porod constant:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="2">
-           <widget class="QLabel" name="label_3">
+           <widget class="QLabel" name="lblPM_6">
             <property name="text">
              <string>+/-</string>
             </property>
@@ -257,6 +219,20 @@
           <item row="0" column="3">
            <widget class="QLineEdit" name="txtPorodCstErr"/>
           </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="lblPorodCst">
+            <property name="text">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Porod constant:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="txtPorodCst">
+            <property name="toolTip">
+             <string>Porod constant (optional)</string>
+            </property>
+           </widget>
+          </item>
           <item row="0" column="4">
            <widget class="QLabel" name="lblPorodCstUnits">
             <property name="text">
@@ -264,11 +240,14 @@
             </property>
            </widget>
           </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_9">
-          <item>
+          <item row="1" column="0">
+           <widget class="QRadioButton" name="rbContrast">
+            <property name="text">
+             <string>Contrast:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
            <widget class="QRadioButton" name="rbVolFrac">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
@@ -277,8 +256,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Use Volume
- Fraction</string>
+             <string>Volume Fraction:</string>
             </property>
            </widget>
           </item>
@@ -538,7 +516,7 @@
          </widget>
         </item>
         <item row="2" column="4">
-         <widget class="QLabel" name="lblContrastUnits_2">
+         <widget class="QLabel" name="lblContrastUnits_out">
           <property name="text">
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-2&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
@@ -637,7 +615,7 @@
            </widget>
           </item>
           <item row="1" column="2">
-           <widget class="QLabel" name="labelUnits_2">
+           <widget class="QLabel" name="lblGuinierEndUnits">
             <property name="text">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
@@ -740,7 +718,7 @@
            </widget>
           </item>
           <item row="1" column="3">
-           <widget class="QLabel" name="labelUnits">
+           <widget class="QLabel" name="lblPorodStartUnits">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
               <horstretch>0</horstretch>
@@ -802,7 +780,7 @@
            </widget>
           </item>
           <item row="2" column="3">
-           <widget class="QLabel" name="labelUnits_3">
+           <widget class="QLabel" name="lblPorodEndUnits">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
               <horstretch>0</horstretch>
@@ -895,7 +873,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>531</y>
+     <y>560</y>
      <width>611</width>
      <height>31</height>
     </rect>
@@ -955,12 +933,24 @@
   <tabstop>txtName</tabstop>
   <tabstop>txtTotalQMin</tabstop>
   <tabstop>txtTotalQMax</tabstop>
-  <tabstop>txtVolFract</tabstop>
-  <tabstop>txtVolFractErr</tabstop>
-  <tabstop>txtSpecSurf</tabstop>
-  <tabstop>txtSpecSurfErr</tabstop>
-  <tabstop>txtInvariantTot</tabstop>
-  <tabstop>txtInvariantTotErr</tabstop>
+  <tabstop>txtBackgd</tabstop>
+  <tabstop>txtScale</tabstop>
+  <tabstop>txtPorodCst</tabstop>
+  <tabstop>txtPorodCstErr</tabstop>
+  <tabstop>txtContrast</tabstop>
+  <tabstop>txtContrastErr</tabstop>
+  <tabstop>txtVolFrac1</tabstop>
+  <tabstop>txtVolFrac1Err</tabstop>
+  <tabstop>chkLowQ_ex</tabstop>
+  <tabstop>rbLowQGuinier_ex</tabstop>
+  <tabstop>rbLowQPower_ex</tabstop>
+  <tabstop>rbLowQFit_ex</tabstop>
+  <tabstop>rbLowQFix_ex</tabstop>
+  <tabstop>txtLowQPower_ex</tabstop>
+  <tabstop>chkHighQ_ex</tabstop>
+  <tabstop>rbHighQFit_ex</tabstop>
+  <tabstop>rbHighQFix_ex</tabstop>
+  <tabstop>txtHighQPower_ex</tabstop>
   <tabstop>cmdCalculate</tabstop>
   <tabstop>cmdStatus</tabstop>
   <tabstop>cmdHelp</tabstop>
