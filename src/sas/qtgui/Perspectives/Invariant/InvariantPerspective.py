@@ -640,7 +640,11 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             formatted_value: str = str(value)
         item = QtGui.QStandardItem(formatted_value)
         self.model.setItem(row, item)
-        self.mapper.toLast()
+
+        # Don't call mapper.toLast() if we're updating power values
+        # as this can reset radio button states
+        if row not in [WIDGETS.W_LOWQ_POWER_VALUE_EX, WIDGETS.W_HIGHQ_POWER_VALUE_EX]:
+            self.mapper.toLast()
 
         # Update progress bars if we're updating Q* values
         if row in [WIDGETS.D_DATA_QSTAR, WIDGETS.D_LOW_QSTAR, WIDGETS.D_HIGH_QSTAR]:
@@ -778,6 +782,10 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         else:
             self.showLowQPowerOptions(False)
 
+        # Update model to reflect the radio button states
+        self.model.setItem(WIDGETS.W_LOWQ_GUINIER_EX, QtGui.QStandardItem(str(self.rbLowQGuinier_ex.isChecked()).lower()))
+        self.model.setItem(WIDGETS.W_LOWQ_POWER_EX, QtGui.QStandardItem(str(self.rbLowQPower_ex.isChecked()).lower()))
+
         self.update_from_model()
 
     def showLowQPowerOptions(self, state: bool) -> None:
@@ -798,6 +806,10 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         else:
             self.txtHighQPower_ex.setEnabled(False)
 
+        # Update model to reflect the radio button states
+        self.model.setItem(WIDGETS.W_HIGHQ_FIT_EX, QtGui.QStandardItem(str(self.rbHighQFit_ex.isChecked()).lower()))
+        self.model.setItem(WIDGETS.W_HIGHQ_FIX_EX, QtGui.QStandardItem(str(self.rbHighQFix_ex.isChecked()).lower()))
+
         self.update_from_model()
 
     def lowFitAndFixToggle_ex(self) -> None:
@@ -806,6 +818,10 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             self.txtLowQPower_ex.setEnabled(True)
         else:
             self.txtLowQPower_ex.setEnabled(False)
+
+        # Update model to reflect the radio button states
+        self.model.setItem(WIDGETS.W_LOWQ_FIT_EX, QtGui.QStandardItem(str(self.rbLowQFit_ex.isChecked()).lower()))
+        self.model.setItem(WIDGETS.W_LOWQ_FIX_EX, QtGui.QStandardItem(str(self.rbLowQFix_ex.isChecked()).lower()))
 
         self.update_from_model()
 
