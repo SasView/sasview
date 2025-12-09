@@ -295,9 +295,11 @@ def getValidColor(color):
         if len(color) == 1:
             if color not in list (COLORS_LETTER.keys()):
                 raise AttributeError
-        elif color in list(COLORS.keys()):
+        # Convert letter code to RGB format
+            color = COLORS_LETTER[color]
+        elif color.capitalize() in list(COLORS.keys()):
             # or the full word
-            pass
+            color = COLORS[color.capitalize()]
         else:
             # or an RGB string
             assert(color[0]=="#" and len(color) == 7)

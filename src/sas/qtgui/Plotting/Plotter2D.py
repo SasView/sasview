@@ -299,10 +299,6 @@ class Plotter2DWidget(PlotterBase):
 
         self.canvas.draw()
 
-        if self.slicer_widget:
-            self.slicer_widget.close()
-            self.slicer_widget = None
-
         # Close the box sum widget if it exists
         if hasattr(self, 'boxwidget') and self.boxwidget is not None:
             self.boxwidget.close()
