@@ -83,13 +83,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self._volfrac1: float | None = None
         self._volfrac2: float | None = None
 
-        # Old extrapolation parameters
-        self._qmax_lowq: float | None = None
-        self._qmin_highq: float | None = None
-        self._qmax_highq: float | None = None
-        self._ex_power_lowq: float | None = None
-        self._ex_power_highq: float | None = None
-
         # New extrapolation options
         self._low_extrapolate: bool = False
         self._low_guinier: bool = True
@@ -197,16 +190,10 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.rbHighQFit_ex.setEnabled(state)
         self.rbHighQFix_ex.setEnabled(state)
 
-        if self.rbLowQPower_ex.isChecked():
-            if state and self.rbLowQFix_ex.isChecked():
-                self.txtLowQPower_ex.setEnabled(True)
-            else:
-                self.txtLowQPower_ex.setDisabled(True)
+        if state and self.rbLowQFix_ex.isChecked():
+            self.txtLowQPower_ex.setEnabled(True)
         else:
-            if state and self.rbLowQFix_ex.isChecked():
-                self.txtLowQPower_ex.setEnabled(True)
-            else:
-                self.txtLowQPower_ex.setDisabled(True)
+            self.txtLowQPower_ex.setDisabled(True)
 
         if state and self.rbHighQFix_ex.isChecked():
             self.txtHighQPower_ex.setEnabled(True)
@@ -406,18 +393,22 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         high_calculation_pass: bool = False
 
         # Update calculator with background, scale, and data values
-        self._calculator.background: float = self._background
-        self._calculator.scale: float = self._scale
+        self._calculator.background = self._background
+        self._calculator.scale = self._scale
         self._calculator.set_data(temp_data)
 
         # Low Q extrapolation calculations
         if self._low_extrapolate:
             function_low = "power_law"
-            self._low_power_value = None
             if self._low_guinier:
                 function_low = "guinier"
-            elif self._low_fix:
-                self._low_power_value = float(self.model.item(WIDGETS.W_LOWQ_POWER_VALUE_EX).text())
+                self._low_power_value = None
+            else:
+                function_low = "power_law"
+                if self._low_fit:
+                    self._low_power_value = None
+                elif self._low_fix:
+                    self._low_power_value = float(self.model.item(WIDGETS.W_LOWQ_POWER_VALUE_EX).text())
 
             try:
                 if self._data and self.txtGuinierEnd_ex.text():
@@ -972,11 +963,17 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         GuiUtils.updateModelItemStatus(self._manager.filesWidget.model, self._path, name, self.sender().checkState())
 
     def checkVolFrac(self) -> None:
-        """Check if volfrac1, volfrac2 < 1  and volfrac1 + volfrac2 = 1"""
+        """Check if volfrac1, volfrac2 are strictly between 0 and 1, and volfrac1 + volfrac2 = 1"""
         if self.txtVolFrac1.text() and self.txtVolFrac2.text():
-            vf1 = float(self.txtVolFrac1.text())
-            vf2 = float(self.txtVolFrac2.text())
-            if vf1 <= 1 and vf2 <= 1 and math.isclose(vf1 + vf2, 1.0, rel_tol=1e-9, abs_tol=1e-6):
+            try:
+                vf1 = float(self.txtVolFrac1.text())
+                vf2 = float(self.txtVolFrac2.text())
+            except ValueError:
+                self.txtVolFrac1.setStyleSheet(BG_RED)
+                self.txtVolFrac2.setStyleSheet(BG_RED)
+                self.cmdCalculate.setEnabled(False)
+                return
+            if 0 < vf1 < 1 and 0 < vf2 < 1 and math.isclose(vf1 + vf2, 1.0, rel_tol=1e-9, abs_tol=1e-6):
                 self.txtVolFrac1.setStyleSheet(BG_DEFAULT)
                 self.txtVolFrac2.setStyleSheet(BG_DEFAULT)
                 self.allow_calculation()
@@ -1010,7 +1007,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             WIDGETS.W_HIGHQ_POWER_VALUE_EX,
         ]
 
-        related_internal_values: list[float] = [
+        related_internal_values: list[float | None] = [
             self._background,
             self._contrast,
             self._porod,
@@ -1018,10 +1015,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             self._volfrac1,
             self._volfrac2,
             self._low_power_value,
-            self._high_power_value,
-            self._low_points,
-            self._ex_power_lowq,
-            self._ex_power_highq,
+            self._high_power_value
         ]
 
         item: QtGui.QStandardItem = QtGui.QStandardItem(self.sender().text())
@@ -1334,7 +1328,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.plot_result(self.model)
 
     def removeData(self, data_list: list = None) -> None:
-        """Remove the existing data reference from the Invariant Persepective"""
+        """Remove the existing data reference from the Invariant Perspective"""
         if not data_list or self._model_item not in data_list:
             return
         self._data = None
@@ -1399,7 +1393,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         if self._data:
             tab_data: dict = self.serializePage()
             data_id: str = tab_data.pop("data_id", "")
-            state[data_id]: dict = {"invar_params": tab_data}
+            state[data_id] = {"invar_params": tab_data}
         return state
 
     def serializePage(self) -> dict:
@@ -1411,8 +1405,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         # Get all parameters from page
         param_dict: dict = self.serializeState()
         if self._data:
-            param_dict["data_name"]: str = str(self._data.name)
-            param_dict["data_id"]: str = str(self._data.id)
+            param_dict["data_name"] = str(self._data.name)
+            param_dict["data_id"] = str(self._data.id)
         return param_dict
 
     def serializeState(self) -> dict:
