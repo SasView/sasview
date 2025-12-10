@@ -237,6 +237,28 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         """Allow outsiders close this widget"""
         self._allow_close = value
 
+    def isSerializable(self):
+        """
+        Tell the caller that this perspective writes its state
+        """
+        return True
+
+    def closeEvent(self, event):
+        """
+        Overwrite QDialog close method to allow for custom widget close
+        """
+        if self._allow_close:
+            # reset the closability flag
+            self.setClosable(value=False)
+            # Tell the MdiArea to close the container if it is visible
+            if self.parentWidget():
+                self.parentWidget().close()
+            event.accept()
+        else:
+            event.ignore()
+            # Maybe we should just minimize
+            self.setWindowState(QtCore.Qt.WindowMinimized)
+
     def update_from_model(self) -> None:
         """Update the globals based on the data in the model"""
         self._background = float(self.model.item(WIDGETS.W_BACKGROUND).text())
