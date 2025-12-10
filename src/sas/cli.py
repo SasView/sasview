@@ -176,7 +176,7 @@ def main(dev_mode: bool|None=None) -> int:
     elif opts.command: # -c "command"
         sys.argv = ["-c", *opts.args]
         exec(opts.command, context)
-    elif opts.args and len(opts.args) and is_script(opts.args[0]): # script [arg...]
+    elif opts.args and is_script(opts.args[0]): # script [arg...]
         import runpy
         sys.argv = opts.args
         context = runpy.run_path(opts.args[0], run_name="__main__")
