@@ -72,7 +72,7 @@ def SplashScreen():
 def get_highdpi_scaling():
     return 1.0
 
-def run_sasview(filepath=None):
+def run_sasview(filepath: list[str] | None = None):
     # Disable GPU. This is a workaround for the issue with the QtWebEngine on some Win 10 systems
     # https://github.com/SasView/sasview/issues/3384
     # TODO: remove when the issue is fixed in QtWebEngine
@@ -124,6 +124,11 @@ def run_sasview(filepath=None):
 
     # Time for the welcome window
     mainwindow.guiManager.showWelcomeMessage()
+
+    # Trigger an event to pass the filepath(s) to the GUI without requiring an API change
+    if filepath:
+        for file in filepath:
+            mainwindow.guiManager.communicate.fileTriggerSignal.emit(file)
 
     timer = QTimer()
     timer.timeout.connect(lambda: None)
