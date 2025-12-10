@@ -99,6 +99,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         self.currentChanged.connect(self.onTabSwitch)
         self.communicator = self.parent.communicator()
+        self.communicator.fileTriggerSignal.connect(self.loadFromArbitraryPath)
         self.communicator.fileReadSignal.connect(self.loadFromURL)
         self.communicator.activeGraphsSignal.connect(self.updateGraphCount)
         self.communicator.activeGraphName.connect(self.updatePlotName)
