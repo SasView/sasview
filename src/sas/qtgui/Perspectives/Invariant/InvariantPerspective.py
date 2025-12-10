@@ -166,7 +166,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
     def extrapolation_parameters(self) -> ExtrapolationParameters | None:
         if self._data is not None:
             return ExtrapolationParameters(
-                safe_float(self._data.x.min()),
+                safe_float(Q_MINIMUM),
                 safe_float(self.model.item(WIDGETS.W_GUINIER_END_EX).text()),
                 safe_float(self.model.item(WIDGETS.W_POROD_START_EX).text()),
                 safe_float(self.model.item(WIDGETS.W_POROD_END_EX).text()),
