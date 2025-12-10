@@ -558,13 +558,16 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
         # Surface Error calculations
         if self._porod:
-            try:
-                surface, surface_error = self._calculator.get_surface_with_error(self._contrast, self._porod)
-            except Exception as ex:
-                calculation_failed: bool = True
-                msg += str(ex)
-                surface: float | str = "ERROR"
-                surface_error: float | str = "ERROR"
+            # Use calculated contrast if in volume fraction mode, otherwise use input contrast
+            contrast_for_surface = contrast_out if self.rbVolFrac.isChecked() and self._volfrac1 else self._contrast
+            if contrast_for_surface:
+                try:
+                    surface, surface_error = self._calculator.get_surface_with_error(contrast_for_surface, self._porod)
+                except Exception as ex:
+                    calculation_failed: bool = True
+                    msg += str(ex)
+                    surface: float | str = "ERROR"
+                    surface_error: float | str = "ERROR"
             reactor.callFromThread(self.update_model_from_thread, WIDGETS.W_SPECIFIC_SURFACE, surface)
             reactor.callFromThread(self.update_model_from_thread, WIDGETS.W_SPECIFIC_SURFACE_ERR, surface_error)
 
