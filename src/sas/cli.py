@@ -10,8 +10,11 @@ work in the Windows console.
 **Usage:**
 
 sasview [flags] [file1 file2 ...]
-    *Run SasView. If no flag is given, a list of loadable files, or -q is given, this will start
-    the GUI.*
+    *Run SasView. If no flags, a list of loadable files, or -q is given,
+    this will start the GUI. The list of files can include individual data files,
+    data directories, analysis files, and project files. Any number of files may
+    be listed and an attempt will be made to load them all, but please note that
+    loading multiple projects may create load conflicts.*
 
 sasview [flags] script [args...]
     *Run a python script using the installed SasView libraries [passing
