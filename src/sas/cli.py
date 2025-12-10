@@ -9,8 +9,8 @@ work in the Windows console.
 
 **Usage:**
 
-sasview [flags]
-    *Run SasView. If no flag is given, or -q or -f or -V are given, this will start
+sasview [flags] [file1 file2 ...]
+    *Run SasView. If no flag is given, a list of loadable files, or -q is given, this will start
     the GUI.*
 
 sasview [flags] script [args...]
@@ -26,8 +26,6 @@ sasview [flags] -c "python statements" [args...]
 sasview -V
     *Print sasview version and exit.*
 
-sasview -f filename
-    *Load a data file, directory, project file, or analysis file on app launch.*
 
 **Flags:**
 
@@ -73,8 +71,6 @@ def parse_cli(argv: list[str]) -> argparse.Namespace:
         help="Don't print banner when entering interactive mode")
     parser.add_argument("-l", "--loglevel", type=str,
         help="Logging level (production or development for now)")
-    parser.add_argument("-f", "--file", type=str,
-        help="File location for any file type to load on launch. This could be a project, analysis, or data file")
     parser.add_argument("args", nargs="*",
         help="script followed by args")
 
@@ -107,6 +103,11 @@ def parse_cli(argv: list[str]) -> argparse.Namespace:
     if collect_rest:
         opts.args = rest
     return opts
+
+def is_script(filename):
+    # allow .py.txt as the script file name for those with mail systems that filter .py files
+    filename = Path(filename)
+    return filename.suffix in ('.py', '.py.txt')
 
 def main(dev_mode: bool|None=None) -> int:
     """
@@ -171,7 +172,7 @@ def main(dev_mode: bool|None=None) -> int:
     elif opts.command: # -c "command"
         sys.argv = ["-c", *opts.args]
         exec(opts.command, context)
-    elif opts.args: # script [arg...]
+    elif opts.args and len(opts.args) and is_script(opts.args[0]): # script [arg...]
         import runpy
         sys.argv = opts.args
         context = runpy.run_path(opts.args[0], run_name="__main__")
@@ -184,8 +185,8 @@ def main(dev_mode: bool|None=None) -> int:
         from sas.qtgui.MainWindow.MainWindow import run_sasview
         # sys.argv is unchanged
         # Maybe hand cli.quiet to run_sasview?
-        file = opts.file if opts.file else None
-        run_sasview(file)
+        file_list = [str(Path(filepath).absolute()) for filepath in opts.args] if opts.args else None
+        run_sasview(file_list)
         return 0 # don't drop into the interactive interpreter
 
     # TODO: Start interactive with ipython rather than normal python
