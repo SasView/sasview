@@ -107,10 +107,11 @@ def parse_cli(argv: list[str]) -> argparse.Namespace:
         opts.args = rest
     return opts
 
-def is_script(filename):
-    # allow .py.txt as the script file name for those with mail systems that filter .py files
-    filename = Path(filename)
-    return filename.suffix in ('.py', '.py.txt')
+def is_script(filename: str | Path) -> bool:
+    # allow .py.txt as the script file name for those with mail systems that filter .py files, but py.txt should
+    #   be considered a txt file
+    filename = str(filename)
+    return any(filename.endswith(target) for target in (".py", ".py.txt"))
 
 def main(dev_mode: bool|None=None) -> int:
     """
