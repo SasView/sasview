@@ -171,7 +171,8 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
                     # Format chi-squared to 2 decimal places
                     self.txtChiSquared.setText(f"{fit.chi_squared:.2f}")
                 if fit.cormap_pvalue:
-                    self.txtCorMapPValue.setText(str(fit.cormap_pvalue))
+                    # Format to 2 significant digits
+                    self.txtCorMapPValue.setText(f"{fit.cormap_pvalue:.2g}")
                 
                 # Model section (use first model if available)
                 if fit.models:
