@@ -17,8 +17,10 @@ sasview [flags] [file1 file2 ...]
     loading multiple projects may create load conflicts.*
 
 sasview [flags] script [args...]
-    *Run a python script using the installed SasView libraries [passing
-    optional arguments]*
+    *Run a python script (with the extension .py or .py.txt) using the installed
+    SasView libraries [passing optional arguments]. Please note, this is the same
+    API as launching the GUI with data files. Whether a script is run or the GUI
+    is launched, is determined by the first non-flag argument.*
 
 sasview [flags] -m module [args...]
     *Run a SasView/Sasmodels/Bumps module as main [passing optional arguments]*
