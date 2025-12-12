@@ -636,6 +636,20 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
             )
             return
 
+        # Warn if count is large
+        threshold = 4 if slicer_def == SymmetricDefinitions.SECTOR else 8
+
+        if count > threshold:
+            reply = QtWidgets.QMessageBox.question(
+                self,
+                "That is a lot of slicers!",
+                f"Are you sure you want to create more than {threshold} slicers? This may lead to severe performance issues.",
+                QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+                (QtWidgets.QMessageBox.No),
+            )
+            if reply == QtWidgets.QMessageBox.No:
+                return
+
         # Stack plots
         self.parent.stackplots = True
 
