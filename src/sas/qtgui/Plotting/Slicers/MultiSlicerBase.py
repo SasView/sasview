@@ -121,7 +121,9 @@ class MultiSlicerBase(BaseInteractor, SlicerModel, StackableMixin):
         for i in range(self.count):
             slicer_class = self._get_slicer_class()
 
-            slicer = slicer_class(base=self.base, axes=self.axes, item=self._item, color=self.color, zorder=zorder + 1)
+            color = self.base._get_next_slicer_color()
+
+            slicer = slicer_class(base=self.base, axes=self.axes, item=self._item, color=color, zorder=zorder + 1)
 
             # Disable model updates for all but the first wedge
             if i > 0:
@@ -779,8 +781,9 @@ class SectorInteractorMulti(MultiSlicerBase):
             master_theta = None
 
             if moved_interactor_name == "main_line":
+                # Preserve each slicer's existing side-line separation (phi)
+                # Only align the central/main line angle to the master's.
                 master_theta = getattr(master, "main_line").theta if hasattr(master, "main_line") else None
-                slicer.phi = master.phi
             elif moved_interactor_name == "left_line":
                 # left_line.theta2 is the shared anchor for sectors
                 left = getattr(master, "left_line", None)
@@ -796,9 +799,8 @@ class SectorInteractorMulti(MultiSlicerBase):
             else:
                 # Check which interactor moved and get its current angle
                 if hasattr(master, "main_line") and master.main_line.has_move:
-                    # Main line moved - use its theta
+                    # Main line moved - use its theta; keep slicer's phi
                     master_theta = master.main_line.theta
-                    slicer.phi = master.phi
                 elif hasattr(master, "left_line") and master.left_line.has_move:
                     # Left line moved - extract theta2 from left_line
                     master_theta = master.left_line.theta2
@@ -808,9 +810,8 @@ class SectorInteractorMulti(MultiSlicerBase):
                     master_theta = master.right_line.theta2
                     slicer.phi = -master.right_line.phi  # right_line.phi is negative
                 else:
-                    # Fallback - use main_line.theta
+                    # Fallback - use main_line.theta and keep current slicer.phi
                     master_theta = master.main_line.theta if hasattr(master, "main_line") else master.theta2
-                    slicer.phi = master.phi
 
             # Guard: ensure master_theta is valid
             if master_theta is None:
