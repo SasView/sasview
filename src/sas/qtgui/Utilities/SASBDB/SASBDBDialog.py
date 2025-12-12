@@ -7,7 +7,7 @@ import logging
 import os
 from typing import Optional
 
-from PySide6 import QtCore, QtWidgets
+from PySide6 import QtCore, QtWidgets, QtGui
 
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 from sas.qtgui.Utilities.SASBDB.sasbdb_data import (
@@ -59,6 +59,9 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
         
         # Set up initial state
         self.onPublishedToggled(self.chkPublished.isChecked())
+        
+        # Generate model visualization if available
+        self.updateModelVisualization()
     
     def populateFromData(self):
         """
@@ -179,12 +182,9 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
                     model = fit.models[0]
                     if model.software_or_db:
                         self.txtModelName.setText(model.software_or_db)
-                    if model.comment:
-                        self.txtModelComment.setPlainText(model.comment)
                     
                     # Format parameters if available
-                    # Parameters are stored as a formatted string in comment or log
-                    # We'll extract them from the model if available
+                    # Parameters are stored as a formatted string in log
                     if model.log:
                         self.txtModelParameters.setPlainText(model.log)
         
@@ -368,17 +368,14 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
         # Model section
         model_name = self.txtModelName.text().strip()
         model_parameters = self.txtModelParameters.toPlainText().strip()
-        model_comment = self.txtModelComment.toPlainText().strip()
         
-        if model_name or model_parameters or model_comment:
+        if model_name or model_parameters:
             model = SASBDBModel()
             if model_name:
                 model.software_or_db = model_name
             if model_parameters:
                 # Store parameters in log field
                 model.log = model_parameters
-            if model_comment:
-                model.comment = model_comment
             fit.models.append(model)
         
         if any([fit.software, fit.chi_squared, fit.models]):
@@ -458,6 +455,109 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
         self.txtPubmedPMID.setEnabled(checked)
         self.txtDOI.setEnabled(checked)
         self.txtProjectTitle.setEnabled(not checked)
+    
+    def updateModelVisualization(self):
+        """
+        Generate and display model shape visualization if available
+        """
+        # Check if we have model data with visualization parameters
+        model_name = None
+        viz_params = None
+        
+        if self.export_data.samples:
+            sample = self.export_data.samples[0]
+            if sample.fits:
+                fit = sample.fits[0]
+                if fit.models:
+                    model = fit.models[0]
+                    model_name = model.software_or_db
+                    viz_params = model.visualization_params
+        
+        if not model_name:
+            # No model available
+            if hasattr(self, 'lblShapeImage'):
+                self.lblShapeImage.setText("No model visualization available")
+            return
+        
+        try:
+            # Try to import sasmodels shape visualizer
+            from sasmodels.shape_visualizer import generate_shape_image, SASModelsLoader, SASModelsShapeDetector
+            
+            # Normalize model name (remove any path or module prefixes)
+            normalized_name = model_name
+            if '.' in normalized_name:
+                # Extract just the model name if it's a module path
+                normalized_name = normalized_name.split('.')[-1]
+            
+            # Load model info - try both original and normalized names
+            model_info = SASModelsLoader.load_model_info(normalized_name)
+            if model_info is None and normalized_name != model_name:
+                # Try original name if normalized didn't work
+                model_info = SASModelsLoader.load_model_info(model_name)
+            
+            if model_info is None:
+                if hasattr(self, 'lblShapeImage'):
+                    self.lblShapeImage.setText(f"Model '{model_name}' not found in sasmodels")
+                return
+            
+            # Check if model supports visualization
+            visualizer = SASModelsShapeDetector.create_visualizer(model_info)
+            if visualizer is None:
+                if hasattr(self, 'lblShapeImage'):
+                    self.lblShapeImage.setText(f"Model '{normalized_name}' does not support shape visualization")
+                return
+            
+            # Generate visualization image
+            # Use visualization params if available, otherwise use defaults
+            params = viz_params if viz_params else None
+            
+            # Generate image as BytesIO - use normalized name
+            image_buffer = generate_shape_image(
+                normalized_name, 
+                params=params, 
+                output_file=None,
+                show_cross_sections=True,  # Include cross-section views
+                show_wireframe=False
+            )
+            
+            if image_buffer:
+                # Convert BytesIO to QPixmap
+                pixmap = QtGui.QPixmap()
+                pixmap.loadFromData(image_buffer.getvalue())
+                
+                # Display the image at a good size
+                if hasattr(self, 'lblShapeImage'):
+                    # Scale to fit the available space while maintaining aspect ratio
+                    # With cross-sections, the image is larger (16x10 inches at 300 DPI = 4800x3000 pixels)
+                    # Scale it down to fit the 600x400 minimum size label
+                    target_width = 580
+                    target_height = int(target_width * pixmap.height() / pixmap.width()) if pixmap.width() > 0 else 380
+                    # Ensure it fits within the label bounds
+                    if target_height > 380:
+                        target_height = 380
+                        target_width = int(target_height * pixmap.width() / pixmap.height()) if pixmap.height() > 0 else 580
+                    
+                    target_size = QtCore.QSize(target_width, target_height)
+                    
+                    scaled_pixmap = pixmap.scaled(
+                        target_size,
+                        QtCore.Qt.AspectRatioMode.KeepAspectRatio,
+                        QtCore.Qt.TransformationMode.SmoothTransformation
+                    )
+                    self.lblShapeImage.setPixmap(scaled_pixmap)
+                    self.lblShapeImage.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            else:
+                if hasattr(self, 'lblShapeImage'):
+                    self.lblShapeImage.setText(f"Failed to generate visualization for '{model_name}'")
+                    
+        except ImportError:
+            logger.warning("sasmodels.shape_visualizer not available")
+            if hasattr(self, 'lblShapeImage'):
+                self.lblShapeImage.setText("Shape visualization not available\n(sasmodels not installed)")
+        except Exception as e:
+            logger.warning(f"Error generating model visualization: {e}")
+            if hasattr(self, 'lblShapeImage'):
+                self.lblShapeImage.setText(f"Error generating visualization:\n{str(e)[:50]}")
     
     def onExport(self):
         """

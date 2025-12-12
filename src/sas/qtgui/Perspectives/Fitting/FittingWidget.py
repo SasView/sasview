@@ -3663,12 +3663,31 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 import traceback
                 logger.debug(traceback.format_exc())
         
+        # Collect visualization parameters (parameter name -> value dict for shape visualizer)
+        visualization_params = {}
+        if model_parameters:
+            for param in model_parameters:
+                # param format: [name, value, error, ...]
+                if len(param) >= 2:
+                    param_name = param[0]
+                    param_value = param[1]
+                    # Convert to float if possible
+                    try:
+                        visualization_params[param_name] = float(param_value)
+                    except (ValueError, TypeError):
+                        pass
+        
         # Create fit entry if we have fit information
         if fit_data.get('chi2') is not None or model_name or optimizer_name or fit_data.get('cormap_pvalue') is not None:
             fit = collector.collect_from_fit(fit_data, model_name, optimizer_name, model_parameters)
             # Update angular units from sample
             if sample.angular_units:
                 fit.angular_units = sample.angular_units
+            
+            # Add visualization parameters to the model if available
+            if fit.models and visualization_params:
+                fit.models[0].visualization_params = visualization_params
+            
             sample.fits.append(fit)
         
         # Collect Guinier analysis using FreeSAS auto_guinier

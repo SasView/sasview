@@ -420,9 +420,11 @@
       <attribute name="title">
        <string>Guinier</string>
       </attribute>
-      <layout class="QFormLayout" name="formLayoutGuinier">
-       <item row="0" column="0">
-        <widget class="QLabel" name="lblGuinierRg">
+      <layout class="QVBoxLayout" name="verticalLayoutGuinier">
+       <item>
+        <layout class="QFormLayout" name="formLayoutGuinier">
+         <item row="0" column="0">
+          <widget class="QLabel" name="lblGuinierRg">
          <property name="text">
           <string>Rg (nm):</string>
          </property>
@@ -470,6 +472,21 @@
        </item>
        <item row="4" column="1">
         <widget class="QLineEdit" name="txtGuinierRangeEnd"/>
+       </item>
+       <item row="5" column="0" colspan="2">
+        <widget class="QLabel" name="lblGuinierNote">
+         <property name="text">
+          <string>Note: Guinier region values are auto-estimated using the freesas package and may be incorrect. Please verify these values.</string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+         <property name="styleSheet">
+          <string>color: #d9534f; font-style: italic;</string>
+         </property>
+        </widget>
+       </item>
+        </layout>
        </item>
       </layout>
      </widget>
@@ -556,14 +573,43 @@
         <widget class="QTextEdit" name="txtModelParameters"/>
        </item>
        <item row="7" column="0">
-        <widget class="QLabel" name="lblModelComment">
+        <widget class="QLabel" name="lblModelVisualization">
          <property name="text">
-          <string>Comment:</string>
+          <string>Shape Visualization:</string>
+         </property>
+         <property name="styleSheet">
+          <string>font-weight: bold;</string>
          </property>
         </widget>
        </item>
        <item row="7" column="1">
-        <widget class="QTextEdit" name="txtModelComment"/>
+        <widget class="QLabel" name="lblModelVizPlaceholder">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="0" colspan="2">
+        <widget class="QLabel" name="lblShapeImage">
+         <property name="minimumSize">
+          <size>
+           <width>600</width>
+           <height>400</height>
+          </size>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Sunken</enum>
+         </property>
+         <property name="text">
+          <string>No visualization available</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>

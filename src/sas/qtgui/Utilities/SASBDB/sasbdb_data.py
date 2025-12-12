@@ -4,7 +4,7 @@ Data structures for SASBDB export
 This module defines dataclasses that match the SASBDB submission structure.
 """
 from dataclasses import dataclass, field
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 
 
 @dataclass
@@ -90,6 +90,8 @@ class SASBDBModel:
     symmetry: Optional[str] = None
     log: Optional[str] = None
     comment: Optional[str] = None
+    # For shape visualization (not exported to JSON, only used for UI display)
+    visualization_params: Optional[Dict[str, Any]] = field(default=None, repr=False)
 
 
 @dataclass
