@@ -98,14 +98,47 @@ class MultiSlicerBase(BaseInteractor, SlicerModel, StackableMixin):
         raise NotImplementedError("_update_slicer_position must be implemented in subclasses.")
 
     def _on_model_changed(self, item):
-        """ "
-        Synchronize all slicers when the model changes.
-        Must be implemented by subclasses.
+        """Base implementation with batching - subclasses should call this after processing"""
+        # After subclass updates geometry, batch-post data for all non-master slicers
+        if item is None or not self.slicers:
+            return
 
-        Parameters:
-        - item: The model item that changed
-        """
-        raise NotImplementedError("_on_model_changed must be implemented in subclasses.")
+        xlim, ylim = self.axes.get_xlim(), self.axes.get_ylim()
+
+        # Suspend plot signals during batch update
+        manager = getattr(self.base, "manager", None)
+        if manager is not None:
+            setattr(manager, "_suspend_plot_signals", True)
+            if not hasattr(manager, "_pending_plot_updates"):
+                manager._pending_plot_updates = []
+
+        # Post data for all secondary slicers
+        for i, slicer in enumerate(self.slicers[1:], start=1):
+            try:
+                slicer._post_data()
+            except Exception as e:
+                logger.warning(f"Failed to post data for slicer {i + 1}: {e}")
+
+        # Flush pending updates
+        if manager is not None:
+            setattr(manager, "_suspend_plot_signals", False)
+            pending = getattr(manager, "_pending_plot_updates", [])
+            if pending:
+                unique = []
+                seen = set()
+                for p in pending:
+                    pid = getattr(p, "id", None)
+                    if pid not in seen:
+                        seen.add(pid)
+                        unique.append(p)
+                try:
+                    manager.communicator.plotUpdateSignal.emit(unique)
+                finally:
+                    manager._pending_plot_updates = []
+
+        self.axes.set_xlim(xlim)
+        self.axes.set_ylim(ylim)
+        self.base.draw()
 
     def _create_slicers(self, zorder):
         """
@@ -262,37 +295,63 @@ class MultiSlicerBase(BaseInteractor, SlicerModel, StackableMixin):
         xlim, ylim = self.axes.get_xlim(), self.axes.get_ylim()
 
         master = self.slicers[0]
+
+        # Block model signals during batch geometry update to prevent premature recomputation
+        if self._model is not None:
+            self._model.blockSignals(True)
+
+        # Update master geometry
         master.update()
 
-        # Synchronize other slicers
+        # Synchronize geometry for all secondary slicers
         for i, slicer in enumerate(self.slicers[1:], start=1):
             self._update_slicer_position(slicer, i, master, moved_interactor_name=interactor_name)
 
+            # Update visual representation only (lines, markers)
             for name in self._get_interactor_names():
                 if hasattr(slicer, name):
                     getattr(slicer, name).update()
 
-                try:
-                    import warnings
+        # Restore axis limits before posting data
+        self.axes.set_xlim(xlim)
+        self.axes.set_ylim(ylim)
 
-                    with warnings.catch_warnings():
-                        warnings.simplefilter("ignore")
-                        slicer._post_data()
-                except (ValueError, RuntimeError) as e:
-                    logger.warning(f"Failed to post data for slicer {i + 1}: {e}")
+        # Unblock model signals
+        if self._model is not None:
+            self._model.blockSignals(False)
 
+        # Post master data first
         try:
             import warnings
-
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 master._post_data()
         except (ValueError, RuntimeError) as e:
             logger.warning(f"Failed to post data for master slicer: {e}")
 
-        # Restore axis limits
-        self.axes.set_xlim(xlim)
-        self.axes.set_ylim(ylim)
+        # Now post data for all secondary slicers (with update_model temporarily enabled)
+        for i, slicer in enumerate(self.slicers[1:], start=1):
+            try:
+                # Temporarily enable model updates for this slicer
+                old_update_model = slicer.update_model
+                slicer.update_model = True
+
+                import warnings
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore")
+                    slicer._post_data()
+
+                # Restore original state
+                slicer.update_model = old_update_model
+            except (ValueError, RuntimeError) as e:
+                logger.warning(f"Failed to post data for slicer {i + 1}: {e}")
+
+        # Update slicer plots list once
+        if hasattr(self.base, 'slicer_widget') and self.base.slicer_widget is not None:
+            try:
+                self.base.slicer_widget.updateSlicerPlotList()
+            except Exception:
+                pass
 
         self.base.draw()
 
@@ -474,7 +533,11 @@ class WedgeInteractorPhiMulti(MultiSlicerBase):
 
                     if i > 0:
                         try:
+                            # Temporarily enable updates
+                            old_update_model = slicer.update_model
+                            slicer.update_model = True
                             slicer._post_data()
+                            slicer.update_model = old_update_model
                         except Exception as e:
                             logger.warning(f"Failed to post data: {e}")
 
@@ -656,7 +719,11 @@ class WedgeInteractorQMulti(MultiSlicerBase):
 
                     if i > 0:
                         try:
+                            # Temporarily enable updates
+                            old_update_model = slicer.update_model
+                            slicer.update_model = True
                             slicer._post_data()
+                            slicer.update_model = old_update_model
                         except Exception as e:
                             logger.warning(f"Failed to post data: {e}")
 
@@ -874,7 +941,11 @@ class SectorInteractorMulti(MultiSlicerBase):
 
                     if i > 0:
                         try:
+                            # Temporarily enable updates
+                            old_update_model = slicer.update_model
+                            slicer.update_model = True
                             slicer._post_data()
+                            slicer.update_model = old_update_model
                         except Exception as e:
                             logger.warning(f"Failed to post data: {e}")
 
