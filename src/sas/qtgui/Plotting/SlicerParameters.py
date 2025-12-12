@@ -519,7 +519,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
                 self.parent.slicer = None
                 self.setModel(None)
 
-    def deleteAllSlicerPlots(self):
+    def deleteAllSlicerPlots(self, quiet=False):
         """
         Check all slicer plots in the list for deletion
         """
@@ -527,20 +527,21 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
             item = self.lstSlicerPlots.item(row)
             item.setCheckState(QtCore.Qt.Checked)
 
-        self.onDeleteSlicerPlots()
+        self.onDeleteSlicerPlots(quiet=quiet)
 
-    def onDeleteSlicerPlots(self):
+    def onDeleteSlicerPlots(self, quiet=False):
         """
         Delete selected slicer plots
         """
         # Pop a confirmation warning
-        msg = "Are you sure you want to delete the selected plots?"
-        reply = QtWidgets.QMessageBox.question(
-            self, "Warning", msg, QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.No
-        )
+        if not quiet:
+            msg = "Are you sure you want to delete the selected plots?"
+            reply = QtWidgets.QMessageBox.question(
+                self, "Warning", msg, QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.No
+            )
 
-        if reply == QtWidgets.QMessageBox.No:
-            return
+            if reply == QtWidgets.QMessageBox.No:
+                return
 
         # Iterate over the list backwards and delete checked items
         # Backwards to avoid index shifting issues
@@ -602,7 +603,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
             if reply == QtWidgets.QMessageBox.No:
                 return
             self.parent.onClearSlicer()
-            self.deleteAllSlicerPlots()
+            self.deleteAllSlicerPlots(quiet=True)
 
         # Get the slicer type from combobox
         slicer_type_index = self.cbSlicerType.currentIndex()
