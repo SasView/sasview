@@ -1786,12 +1786,14 @@ System Requirements
   on the system. We currently use Python 2.7
 * For SasView 5.x: A Python version > 3.0 should be running on the system. We 
   currently use Python 3.6
+* For SasView 6.x: A python version >= 3.10 should be running on the systems. We
+  currently use Python 3.11
 
 Package Dependencies
 --------------------
 * Ensure the required dependencies are installed
-* For the latest list of dependencies see the appropriate yml file in
-  the SasView repo at sasview/build_tools/conda/ymls
+* For the latest list of dependencies, use the requirements.txt file
+  in the /build_tools/ directory.
 
 Installing from Source
 ----------------------
@@ -1807,12 +1809,15 @@ Installing from Source
 * To get a SPECIFIC RELEASE VERSION from source control go to
   https://github.com/SasView/sasview/releases
   and download the required zip or tar.gz file. Unzip/untar it
-  to the source code folder.
+  to the source code folder. Alternately, checkout a specific tag
+  using 'git checkout <tag>` after running `git fetch --all`.
 
 Building and Installing
 -----------------------
-* To build and install the code
-  use 'pip install .'
+* To build and install the code use 'pip install -e .'. The optional
+  '-e' flag will install the project files in editable mode allowing
+  a developer to make changes and test without having to pip install
+  the project every time a change is made.
 * To build a wheel for installation elsewhere
   use 'hatchling build --wheel'
 * To build the documentation
@@ -1820,11 +1825,8 @@ Building and Installing
 
 Running SasView
 ---------------
-* use 'python run.py'; this runs from the source directories, so you
-  don't have to rebuild every time you make a change, unless you are
-  changing the C model files.
-* if using Conda the above command will also build SasView, but you 
-  must issue 'activate sasview' first.
+* Assuming the python or conda environment that sasview was installed into
+  is active, use 'python -m sas' to launch the app directly from the source.
 
 Known Issues
 ============
@@ -1835,6 +1837,8 @@ users may wish to be aware of can be viewed at the following links:
 `[sasview] <https://github.com/SasView/sasview/milestones>`_
 
 `[sasmodels] <https://github.com/SasView/sasmodels/milestones>`_
+
+`[sasdata] <https://github.com/SasView/sasdata/milestones>`_
 
 All 5.0.x versions / 4.2.2 - All systems
 ----------------------------------------
