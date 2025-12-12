@@ -166,6 +166,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.actionReplace.setText("... replacing data in the current page")
         self.send_menu = QtWidgets.QMenu(self)
         self.send_menu.addAction(self.actionReplace)
+        self.actionReplace.triggered.connect(self.onDataReplaced)
 
     def closeEvent(self, event):
         """
@@ -1070,12 +1071,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
     def sendToMenu(self, hasSubmenu=False):
         # add menu to cmdSendTO
+        self.cmdSendTo.setMenu(None)
         if hasSubmenu:
             self.createSendToMenu()
             self.cmdSendTo.setMenu(self.send_menu)
             self.cmdSendTo.setPopupMode(QtWidgets.QToolButton.MenuButtonPopup)
         else:
-            self.cmdSendTo.setMenu(None)
             self.cmdSendTo.setPopupMode(QtWidgets.QToolButton.InstantPopup)
 
     def updatePerspectiveCombo(self, index):
@@ -1637,7 +1638,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.actionEditMask.triggered.connect(self.showEditDataMask)
         self.actionDelete.triggered.connect(self.deleteFile)
         self.actionFreezeResults.triggered.connect(self.freezeSelectedItems)
-        self.actionReplace.triggered.connect(self.onDataReplaced)
 
     def onCustomContextMenu(self, position):
         """
