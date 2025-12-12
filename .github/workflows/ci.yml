@@ -340,13 +340,7 @@ jobs:
       MACOS_DMG_NAME: SasView6-${{ matrix.os }}.dmg
 
       # Only sign the installer if non-forked repo and the build is important enough to sign
-      SIGN_INSTALLER: ${{
-        (
-          (! github.event.repository.fork) &&
-          (! github.event.pull_request.head.repo.fork) &&
-          (startsWith(github.ref, 'refs/tags/v') ||
-          startsWith(github.ref, 'refs/heads/release'))
-        ) && 'true' || '' }}
+      SIGN_INSTALLER: true
 
       UV_SYSTEM_PYTHON: 1
 
@@ -485,7 +479,7 @@ jobs:
       - name: Sign the binary using keypair alias
         if: ${{ startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
         run: |
-           smctl sign --keypair-alias key_911959544 --input installers/dist/setupSasView.exe
+           smctl sign --keypair-alias key_1369544803 --input installers/dist/setupSasView.exe
         shell: cmd
 
       - name: Publish installer package
