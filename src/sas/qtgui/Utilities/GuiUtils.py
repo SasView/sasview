@@ -79,6 +79,9 @@ class Communicate(QtCore.QObject):
     """
     Utility class for tracking of the Qt signals
     """
+    # File was passed as an argument on the command line, dropped on the executable, or double clicked
+    fileTriggerSignal = QtCore.Signal(str)
+
     # File got successfully read
     fileReadSignal = QtCore.Signal(list)
 
