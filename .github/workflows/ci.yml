@@ -485,7 +485,7 @@ jobs:
       - name: Sign the binary using keypair alias
         if: ${{ startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
         run: |
-           smctl sign --keypair-alias key_911959544 --input installers/dist/setupSasView.exe
+           smctl sign --keypair-alias key_1369544803 --input installers/dist/setupSasView.exe
         shell: cmd
 
       - name: Publish installer package
