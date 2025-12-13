@@ -10,7 +10,8 @@ from sas.qtgui.Calculators.Shape2SAS.PlotAspects.plotAspects import ViewerPlotDe
 
 # Local Perspectives
 from sas.qtgui.Calculators.Shape2SAS.ViewerAllOptions import ViewerButtons, ViewerModelRadius
-from sas.sascalc.shape2sas.Shape2SAS import ModelPointDistribution, TheoreticalScattering
+from sas.sascalc.shape2sas.Models import ModelPointDistribution
+from sas.sascalc.shape2sas.TheoreticalScattering import TheoreticalScattering
 
 
 class ViewerModel(QWidget):
@@ -21,6 +22,9 @@ class ViewerModel(QWidget):
         ### Qt setup ###
         ###3D plot view of model
         self.scatter = Q3DScatter()
+
+        # remove shadows
+        self.scatter.setShadowQuality(Q3DScatter.ShadowQuality.ShadowQualityNone)
 
         """
         NOTE: Orignal intend was to create
@@ -143,13 +147,24 @@ class ViewerModel(QWidget):
         self.scatter.setAxisZ(self.Z_ax)
 
     def setAxis(self, x_range: (float, float), y_range: (float, float), z_range: (float, float)):
-        """Set axis for the model"""
+        """Set axis for the model with equal aspect ratio"""
 
-        #FIXME: even if min and max are the same for X, Y, Z, a sphere still looks like an ellipsoid
-        #Tried with global min and max, and by centering the model, but no success.
-        self.X_ax.setRange(*x_range)
-        self.Y_ax.setRange(*y_range)
-        self.Z_ax.setRange(*z_range)
+        # Calculate the overall range to ensure equal aspect ratio
+        x_min, x_max = x_range
+        y_min, y_max = y_range
+        z_min, z_max = z_range
+        x_center = (x_min + x_max) / 2
+        y_center = (y_min + y_max) / 2
+        z_center = (z_min + z_max) / 2
+        max_range = max(x_max - x_min, y_max - y_min, z_max - z_min)
+
+        # Add some padding
+        half_range = (max_range*1.1) / 2
+
+        # Set equal ranges for all axes centered on their respective centers
+        self.X_ax.setRange(x_center - half_range, x_center + half_range)
+        self.Y_ax.setRange(y_center - half_range, y_center + half_range)
+        self.Z_ax.setRange(z_center - half_range, z_center + half_range)
 
         self.scatter.setAxisX(self.X_ax)
         self.scatter.setAxisY(self.Y_ax)
