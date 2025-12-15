@@ -267,6 +267,7 @@ class GuiManager:
         """
         if not plot:
             return
+
         name = plot[1].name
         for action in self._workspace.menuWindow.actions():
             if action.text() == name:

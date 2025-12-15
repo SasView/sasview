@@ -317,8 +317,13 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         """Plot result of calculation"""
         self.model = model
         self._data = GuiUtils.dataFromItem(self._model_item)
-        # Send the modified model item and data to replace initial plot
-        plots = [self._model_item, self._data]
+
+        # Close the initial data plot that was created in setData()
+        if self._model_item is not None and (self.high_extrapolation_plot or self.low_extrapolation_plot):
+            self._manager.filesWidget.closePlotsForItem(self._model_item)
+
+        # Send the modified model item to replace initial plot
+        plots = [self._model_item]
 
         if self.high_extrapolation_plot:
             self.high_extrapolation_plot.plot_role = DataRole.ROLE_DEFAULT
@@ -351,8 +356,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             )
             plots.append(self.low_extrapolation_plot)
 
-        # Always emit the plots (will replace any previous plot)
-        self.communicate.plotRequestedSignal.emit(plots)
+        if len(plots) > 1:
+            self.communicate.plotRequestedSignal.emit(plots)
 
         # Update the details dialog in case it is open
         self.update_details_widget()
@@ -1286,7 +1291,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
         self.tabWidget.setCurrentIndex(0)
 
-        self.plot_result(self.model)
+        self._manager.filesWidget.newPlot()
 
         self.mapper.toFirst()
 
@@ -1294,6 +1299,11 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         """Remove the existing data reference from the Invariant Perspective"""
         if not data_list or self._model_item not in data_list:
             return
+
+        # close all plots associated with this data before clearing the item
+        if self._model_item is not None:
+            self._manager.filesWidget.closePlotsForItem(self._model_item)
+
         self._data = None
         self._model_item = None
         self.low_extrapolation_plot = None
