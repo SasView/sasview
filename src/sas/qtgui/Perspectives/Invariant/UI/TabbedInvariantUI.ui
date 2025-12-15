@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>580</width>
+    <width>650</width>
     <height>580</height>
    </rect>
   </property>
@@ -18,7 +18,7 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>580</width>
+    <width>650</width>
     <height>580</height>
    </size>
   </property>
@@ -30,7 +30,7 @@
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>547</width>
+     <width>631</width>
      <height>521</height>
     </rect>
    </property>
@@ -47,7 +47,7 @@
     </size>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>1</number>
    </property>
    <widget class="QWidget" name="tabMain">
     <attribute name="title">
@@ -81,7 +81,7 @@
              <item>
               <widget class="QLineEdit" name="txtTotalQMin">
                <property name="enabled">
-                <bool>true</bool>
+                <bool>false</bool>
                </property>
                <property name="readOnly">
                 <bool>true</bool>
@@ -98,7 +98,7 @@
              <item>
               <widget class="QLineEdit" name="txtTotalQMax">
                <property name="enabled">
-                <bool>true</bool>
+                <bool>false</bool>
                </property>
                <property name="readOnly">
                 <bool>true</bool>
@@ -152,39 +152,45 @@
        <layout class="QVBoxLayout" name="verticalLayout_5">
         <item>
          <layout class="QGridLayout" name="gridLayout_3">
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="txtBackgd"/>
-          </item>
           <item row="0" column="0">
-           <widget class="QLabel" name="label_5">
+           <widget class="QLabel" name="lblBackground">
             <property name="text">
              <string>Background:</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="3">
-           <widget class="QLabel" name="label_34">
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="txtBackgd"/>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLabel" name="lblBackgroundUnits">
             <property name="text">
-             <string>Volume Fraction 2:</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;cm&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="2">
-           <widget class="QLabel" name="label_8">
+          <item row="0" column="4">
+           <widget class="QLineEdit" name="txtContrast"/>
+          </item>
+          <item row="0" column="3">
+           <widget class="QLabel" name="lblContrast">
             <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;cm&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string>Contrast:</string>
             </property>
            </widget>
           </item>
           <item row="2" column="4">
            <widget class="QLineEdit" name="txtVolFrac2"/>
           </item>
-          <item row="0" column="3">
-           <widget class="QLabel" name="label_6">
+          <item row="1" column="3">
+           <widget class="QLabel" name="lblVF1">
             <property name="text">
-             <string>Contrast:</string>
+             <string>Volume Fraction 1:</string>
             </property>
            </widget>
+          </item>
+          <item row="1" column="4">
+           <widget class="QLineEdit" name="txtVolFrac1"/>
           </item>
           <item row="0" column="5">
            <widget class="QLabel" name="lblContrastUnits">
@@ -196,20 +202,24 @@
           <item row="1" column="1">
            <widget class="QLineEdit" name="txtScale"/>
           </item>
+          <item row="2" column="3">
+           <widget class="QLabel" name="lblVF2">
+            <property name="text">
+             <string>Volume Fraction 2:</string>
+            </property>
+           </widget>
+          </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="label_9">
+           <widget class="QLabel" name="lblScale">
             <property name="text">
              <string>Scale:</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="4">
-           <widget class="QLineEdit" name="txtContrast"/>
-          </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="txtPorodCst">
-            <property name="toolTip">
-             <string>Porod constant (optional)</string>
+          <item row="2" column="0">
+           <widget class="QLabel" name="lblPorodCst">
+            <property name="text">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Porod constant:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
            </widget>
           </item>
@@ -220,38 +230,31 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="4">
-           <widget class="QLineEdit" name="txtVolFrac1"/>
-          </item>
-          <item row="1" column="3">
-           <widget class="QLabel" name="label_33">
-            <property name="text">
-             <string>Volume Fraction 1:</string>
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="txtPorodCst">
+            <property name="toolTip">
+             <string>Porod constant (optional)</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_10">
-            <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Porod constant:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_9">
-          <item>
-           <widget class="QRadioButton" name="rbVolFrac">
-            <property name="text">
-             <string>Use Volume Fraction</string>
-            </property>
-           </widget>
-          </item>
-          <item>
+          <item row="0" column="6">
            <widget class="QRadioButton" name="rbContrast">
             <property name="text">
              <string>Use Contrast</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="6" rowspan="2">
+           <widget class="QRadioButton" name="rbVolFrac">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Use Volume
+ Fraction</string>
             </property>
            </widget>
           </item>
@@ -299,14 +302,14 @@
          </widget>
         </item>
         <item row="3" column="0">
-         <widget class="QLabel" name="label_22">
+         <widget class="QLabel" name="lblSpSurface">
           <property name="text">
            <string>Specific Surface:</string>
           </property>
          </widget>
         </item>
         <item row="1" column="2">
-         <widget class="QLabel" name="label_20">
+         <widget class="QLabel" name="lblPM">
           <property name="text">
            <string>+/-</string>
           </property>
@@ -320,21 +323,21 @@
          </widget>
         </item>
         <item row="5" column="2">
-         <widget class="QLabel" name="label_26">
+         <widget class="QLabel" name="lblPM_4">
           <property name="text">
            <string>+/-</string>
           </property>
          </widget>
         </item>
         <item row="1" column="0">
-         <widget class="QLabel" name="label_21">
+         <widget class="QLabel" name="lblVFOut">
           <property name="text">
            <string>Volume fraction:</string>
           </property>
          </widget>
         </item>
         <item row="3" column="2">
-         <widget class="QLabel" name="label_23">
+         <widget class="QLabel" name="lblPM_3">
           <property name="text">
            <string>+/-</string>
           </property>
@@ -408,7 +411,7 @@
          </widget>
         </item>
         <item row="5" column="0">
-         <widget class="QLabel" name="label_25">
+         <widget class="QLabel" name="lblInvariantTotalQ">
           <property name="text">
            <string>Invariant Total [Q]:</string>
           </property>
@@ -453,7 +456,7 @@
          </widget>
         </item>
         <item row="2" column="0">
-         <widget class="QLabel" name="label_24">
+         <widget class="QLabel" name="lblContrastOut">
           <property name="text">
            <string>Contrast:</string>
           </property>
@@ -485,7 +488,7 @@
          </widget>
         </item>
         <item row="2" column="2">
-         <widget class="QLabel" name="label_27">
+         <widget class="QLabel" name="lblPM_2">
           <property name="text">
            <string>+/-</string>
           </property>
@@ -517,272 +520,344 @@
    </widget>
    <widget class="QWidget" name="tabExtrapolation">
     <attribute name="title">
-     <string>Page</string>
+     <string>Extrapolation</string>
     </attribute>
-    <widget class="QGroupBox" name="groupBox_5">
-     <property name="geometry">
-      <rect>
-       <x>-1</x>
-       <y>9</y>
-       <width>531</width>
-       <height>301</height>
-      </rect>
-     </property>
-     <property name="title">
-      <string>Extrapolation</string>
-     </property>
-     <widget class="QWidget" name="horizontalLayoutWidget">
-      <property name="geometry">
-       <rect>
-        <x>9</x>
-        <y>20</y>
-        <width>511</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_10">
-       <item>
-        <widget class="QLabel" name="labelName">
-         <property name="text">
-          <string>Name:</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLineEdit" name="txtFileName"/>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="gridLayoutWidget">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>110</y>
-        <width>511</width>
-        <height>27</height>
-       </rect>
-      </property>
-      <layout class="QGridLayout" name="gridLayout_4">
-       <item row="0" column="5">
-        <widget class="QLineEdit" name="txtPorodEnd_ex"/>
-       </item>
-       <item row="0" column="1">
-        <widget class="QLineEdit" name="txtGuinierEnd_ex"/>
-       </item>
-       <item row="0" column="3">
-        <widget class="QLineEdit" name="txtPorodStart_ex"/>
-       </item>
-       <item row="0" column="4">
-        <widget class="QLabel" name="labelPorodEnd">
-         <property name="text">
-          <string>Porod End:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="2">
-        <widget class="QLabel" name="labelPorodStart">
-         <property name="text">
-          <string>Porod Start:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="labelGuinierEnd">
-         <property name="text">
-          <string>Guinier End:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="6">
-        <widget class="QLabel" name="labelUnits">
-         <property name="text">
-          <string>Å-1</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="horizontalLayoutWidget_2">
-      <property name="geometry">
-       <rect>
-        <x>9</x>
-        <y>60</y>
-        <width>511</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <layout class="QHBoxLayout" name="sliderLayout">
-       <property name="leftMargin">
-        <number>5</number>
+    <layout class="QVBoxLayout" name="verticalLayout_extrapolation">
+     <item>
+      <widget class="QGroupBox" name="groupBox_5">
+       <property name="title">
+        <string>Extrapolation</string>
        </property>
-       <property name="topMargin">
-        <number>10</number>
-       </property>
-       <property name="rightMargin">
-        <number>5</number>
-       </property>
-       <property name="bottomMargin">
-        <number>10</number>
-       </property>
-       <item>
-        <widget class="QLabel" name="label_7">
-         <property name="text">
-          <string>Adjust:</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </widget>
-    <widget class="QWidget" name="gridLayoutWidget_2">
-     <property name="geometry">
-      <rect>
-       <x>9</x>
-       <y>150</y>
-       <width>511</width>
-       <height>149</height>
-      </rect>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_9" rowstretch="0,0,0,0,0">
-      <item row="2" column="1">
-       <widget class="QRadioButton" name="rbLowQPower_ex">
-        <property name="text">
-         <string>Power</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QCheckBox" name="chkLowQ_ex">
-        <property name="text">
-         <string>Low-Q</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QRadioButton" name="rbLowQGuinier_ex">
-        <property name="text">
-         <string>Guinier</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
-       <widget class="QRadioButton" name="rbHighQFit_ex">
-        <property name="text">
-         <string>Fit</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="2">
-       <widget class="QRadioButton" name="rbHighQFix_ex">
-        <property name="text">
-         <string>Fix</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_11">
-        <property name="text">
-         <string>Extrapolation</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="2">
-       <widget class="QCheckBox" name="chkHighQ_ex">
-        <property name="text">
-         <string>High-Q</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="1">
-       <widget class="QLineEdit" name="txtLowQPower_ex"/>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="label_15">
-        <property name="text">
-         <string>Power:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="2">
-       <widget class="QLineEdit" name="txtHighQPower_ex"/>
-      </item>
-      <item row="3" column="1">
-       <layout class="QHBoxLayout" name="horizontalLayout_11">
+       <layout class="QVBoxLayout" name="verticalLayout_6">
         <item>
-         <widget class="QRadioButton" name="rbLowQFit_ex">
+         <layout class="QHBoxLayout" name="horizontalLayout_10">
+          <item>
+           <widget class="QLabel" name="labelName">
+            <property name="text">
+             <string>Name:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="txtFileName">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="frame">
+             <bool>false</bool>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="sliderLayout">
+          <item>
+           <widget class="QLabel" name="label_7">
+            <property name="text">
+             <string>Adjust:</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_6">
+       <item>
+        <widget class="QGroupBox" name="groupBox_6">
+         <property name="minimumSize">
+          <size>
+           <width>200</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="title">
+          <string/>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_7">
+          <item row="0" column="0" colspan="3">
+           <widget class="QCheckBox" name="chkLowQ_ex">
+            <property name="text">
+             <string>Low-Q</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="labelGuinierEnd">
+            <property name="text">
+             <string>End:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="txtGuinierEnd_ex">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QLabel" name="labelUnits_2">
+            <property name="text">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QRadioButton" name="rbLowQGuinier_ex">
+            <property name="text">
+             <string>Guinier</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QRadioButton" name="rbLowQPower_ex">
+            <property name="text">
+             <string>Power:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QLineEdit" name="txtLowQPower_ex">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <item>
+             <widget class="QRadioButton" name="rbLowQFit_ex">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Fit</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="rbLowQFix_ex">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Fix</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_8">
+         <property name="title">
+          <string/>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_8">
+          <item row="2" column="1">
+           <widget class="QLabel" name="labelPorodEnd">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string> End:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QLineEdit" name="txtPorodEnd_ex">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QLabel" name="label">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Power:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="3">
+           <widget class="QLabel" name="labelUnits">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="2">
+           <widget class="QLineEdit" name="txtHighQPower_ex">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QLineEdit" name="txtPorodStart_ex">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLabel" name="labelPorodStart">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Start:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1" colspan="5">
+           <widget class="QCheckBox" name="chkHighQ_ex">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>High-Q</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="3">
+           <widget class="QLabel" name="labelUnits_3">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="2">
+           <layout class="QHBoxLayout" name="horizontalLayout_5">
+            <item>
+             <widget class="QRadioButton" name="rbHighQFit_ex">
+              <property name="text">
+               <string>Fit</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="rbHighQFix_ex">
+              <property name="text">
+               <string>Fix</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="groupBox_4">
+       <property name="title">
+        <string>Invariant chart</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_6">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_12">
           <property name="text">
-           <string>Fit</string>
+           <string>Q* from Low-Q</string>
           </property>
          </widget>
         </item>
-        <item>
-         <widget class="QRadioButton" name="rbLowQFix_ex">
+        <item row="0" column="1">
+         <widget class="QProgressBar" name="progressBarLowQ">
+          <property name="value">
+           <number>100</number>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_13">
           <property name="text">
-           <string>Fix</string>
+           <string>Q* from Data</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QProgressBar" name="progressBarData">
+          <property name="value">
+           <number>100</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_14">
+          <property name="text">
+           <string>Q* from High-Q</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QProgressBar" name="progressBarHighQ">
+          <property name="value">
+           <number>100</number>
           </property>
          </widget>
         </item>
        </layout>
-      </item>
-     </layout>
-    </widget>
-    <widget class="QGroupBox" name="groupBox_4">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>318</y>
-       <width>521</width>
-       <height>121</height>
-      </rect>
-     </property>
-     <property name="title">
-      <string>Invariant chart</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_6">
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_12">
-        <property name="text">
-         <string>Q* from Low-Q</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QProgressBar" name="progressBarLowQ">
-        <property name="value">
-         <number>100</number>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_13">
-        <property name="text">
-         <string>Q* from Data</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QProgressBar" name="progressBarData">
-        <property name="value">
-         <number>100</number>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_14">
-        <property name="text">
-         <string>Q* from High-Q</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QProgressBar" name="progressBarHighQ">
-        <property name="value">
-         <number>100</number>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
+      </widget>
+     </item>
+    </layout>
    </widget>
   </widget>
   <widget class="QWidget" name="layoutWidget">
@@ -790,7 +865,7 @@
     <rect>
      <x>20</x>
      <y>531</y>
-     <width>521</width>
+     <width>611</width>
      <height>31</height>
     </rect>
    </property>

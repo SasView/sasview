@@ -18,6 +18,8 @@ class CorfuncSlider(QtWidgets.QWidget):
     def __init__(self,
                  parameters: ExtrapolationParameters = ExtrapolationParameters(1,2,4,8,16),
                  enabled: bool = False,
+                 lower_label: str = "Guinier",
+                 upper_label: str = "Porod",
                  *args, **kwargs):
 
         super().__init__(*args, **kwargs)
@@ -33,6 +35,8 @@ class CorfuncSlider(QtWidgets.QWidget):
         self._point_2 = parameters.point_2
         self._point_3 = parameters.point_3
         self._max = parameters.data_q_max
+        self._lower_label = lower_label
+        self._upper_label = upper_label
 
 
         # Display Parameters
@@ -410,11 +414,10 @@ class CorfuncSlider(QtWidgets.QWidget):
         #
 
 
-        self._paint_label(self.guinier_label_position, "Guinier")
+        self._paint_label(self.guinier_label_position, self._lower_label)
         self._paint_label(self.data_label_centre, "Data")
         # self._paint_label(self.transition_label_centre, "Transition") # Looks better without this
-        self._paint_label(self.porod_label_centre, "Porod")
-
+        self._paint_label(self.porod_label_centre, self._upper_label)
 
     def _paint_label(self, position: float, text: str, centre_justify=True):
 

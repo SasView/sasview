@@ -937,7 +937,7 @@ class InvariantCalculator:
         """
         Compute contrast is deduced as follows: ::
 
-            q_star = 2*(pi*contrast)**2* volume(1- volume)
+            q_star = 2*(pi*contrast)**2 * volume*(1- volume)
             contrast**2 = 10^(-8) * q_star / (2 * pi**2 * volume * (1- volume))
             we get |contrast| = sqrt(10^(-8) * q_star / (2 * pi**2 * volume * (1- volume)))
 
