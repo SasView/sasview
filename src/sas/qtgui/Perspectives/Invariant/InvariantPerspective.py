@@ -952,6 +952,12 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                 self.txtVolFrac1.setStyleSheet(BG_RED)
                 self.txtVolFrac2.setStyleSheet(BG_RED)
                 self.cmdCalculate.setEnabled(False)
+                msg = "Volume fractions must be valid numbers."
+                dialog = QtWidgets.QMessageBox(self, text=msg)
+                dialog.setWindowTitle("Invalid Volume Fraction")
+                dialog.setIcon(QtWidgets.QMessageBox.Warning)
+                dialog.setStandardButtons(QtWidgets.QMessageBox.Ok)
+                dialog.exec_()
                 return
             if 0 < vf1 < 1 and 0 < vf2 < 1 and round(vf1 + vf2, 3) == 1.0:
                 self.txtVolFrac1.setStyleSheet(BG_DEFAULT)
@@ -961,6 +967,12 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                 self.txtVolFrac1.setStyleSheet(BG_RED)
                 self.txtVolFrac2.setStyleSheet(BG_RED)
                 self.cmdCalculate.setEnabled(False)
+                msg = "Volume fractions must be between 0 and 1, and their sum must equal 1."
+                dialog = QtWidgets.QMessageBox(self, text=msg)
+                dialog.setWindowTitle("Invalid Volume Fraction")
+                dialog.setIcon(QtWidgets.QMessageBox.Warning)
+                dialog.setStandardButtons(QtWidgets.QMessageBox.Ok)
+                dialog.exec_()
 
     def updateFromGui(self) -> None:
         """Update model when new user inputs"""
