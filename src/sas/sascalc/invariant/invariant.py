@@ -1096,8 +1096,8 @@ class InvariantCalculator:
         """
         # until contrast and porod_constant are given with uncertainties set
         # them to 0
-        # dcontrast = None
-        # dporod_const = None
+        dcontrast = None
+        dporod_const = None
         # IMPORTANT: the porod constant (and eventually its uncertainty) are
         # given in units of cm^-1 A^-4.  We need to be mindful of units when
         # writing equations. Thus for computing ds both the porod constant and
@@ -1110,15 +1110,15 @@ class InvariantCalculator:
         # just return nothing.
         ds = None
         # When they are available, use the following:
-        # if dporod_const is None:
-        #     _dporod_const = 0.
-        # else:
-        #     _dporod_const = dporod_const * 1e-8
-        # if dcontrast is None:
-        #    dcontrast = 0.
+        if dporod_const is None:
+            _dporod_const = 0.
+        else:
+            _dporod_const = dporod_const * 1e-8
+        if dcontrast is None:
+           dcontrast = 0.
         # For this new computation we DO need to convert the units
-        # _porod_const = porod_const * 1e-8
-        # ds = math.sqrt((_dporod_const**2 * contrast**2 + 4 * (_porod_const *
-        #                 dcontrast)**2 / (4 * math.pi**2 * contrast**6))
+        _porod_const = porod_const * 1e-8
+        ds = math.sqrt((_dporod_const**2 * contrast**2 + 4 * (_porod_const *
+                        dcontrast)**2) / (4 * math.pi**2 * contrast**6))
 
         return s, ds

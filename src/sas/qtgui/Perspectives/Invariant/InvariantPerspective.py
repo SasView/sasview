@@ -554,6 +554,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         reactor.callFromThread(self.update_model_from_thread, WIDGETS.W_CONTRAST_OUT_ERR, contrast_out_error)
 
         # Surface Error calculations
+        surface: float | str = ""
+        surface_error: float | str = ""
+
         if self._porod:
             # Use calculated contrast if in volume fraction mode, otherwise use input contrast
             contrast_for_surface = contrast_out if self.rbVolFrac.isChecked() and self._volfrac1 else self._contrast
@@ -1311,6 +1314,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.no_extrapolation_plot = None
         self._path = ""
         self.txtName.setText("")
+        self.txtFileName.setText("")
         self._porod = None
         # Pass an empty dictionary to set all inputs to their default values
         self.updateFromParameters({})
