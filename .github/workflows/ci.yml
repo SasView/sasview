@@ -307,7 +307,7 @@ jobs:
         if: ${{ matrix.installer && startsWith(matrix.os, 'macos') && env.SIGN_INSTALLER }}
         uses: lando/notarize-action@v2
         with:
-          product-path: installers/dist/SasView6-macos-latest.dmg
+          product-path: installers/dist/SasView6-${{ matrix.os }}.dmg
           primary-bundle-id: "org.sasview.SasView6"
           appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
           appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
@@ -318,7 +318,7 @@ jobs:
         if: ${{ matrix.installer && startsWith(matrix.os, 'macos') && env.SIGN_INSTALLER }}
         uses: BoundfoxStudios/action-xcode-staple@v1
         with:
-          product-path: installers/dist/SasView6-macos-latest.dmg
+          product-path: installers/dist/SasView6-${{ matrix.os }}.dmg
 
       - name: Install DigiCert Client tools from Github Custom Actions marketplace
         if: ${{ matrix.installer && startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
