@@ -179,7 +179,7 @@ class Guinier(Transform):
         r"""
         Retrieve the guinier function after apply an inverse guinier function
         to x
-        Compute $F(x) = s * \exp\left(-(r x)^{2/3}\right)$.
+        Compute $F(x) = s * \exp\left(-(r x)^{2}/3\right)$.
 
         :param x: a vector of q values
 
@@ -873,6 +873,8 @@ class InvariantCalculator:
         # convert porod_const to units of A^-5 instead of cm^-1 A^-4 so that
         # s is returned in units of 1/A.
         _porod_const = 1.0e-8 * porod_const
+        if contrast == 0:
+            raise ValueError("The contrast parameter must be non-zero")
         return _porod_const / (2 * math.pi * math.fabs(contrast) ** 2)
 
     def get_volume_fraction(self, contrast, extrapolation=None):
@@ -970,7 +972,7 @@ class InvariantCalculator:
             raise RuntimeError(msg)
 
         try:
-            contrast = math.sqrt(1.e-8 * self._qstar / (2 * math.pi**2 * volume * (1 - volume)))
+            contrast = math.sqrt(1.0e-8 * self._qstar / (2 * math.pi**2 * volume * (1 - volume)))
             return contrast
         except (ValueError, ZeroDivisionError):
             msg = "Could not compute the contrast: invalid volume fraction"
@@ -989,136 +991,189 @@ class InvariantCalculator:
         self.get_qstar(extrapolation)
         return self._qstar, self._qstar_err
 
-    def get_volume_fraction_with_error(self, contrast, extrapolation=None):
+    def get_volume_fraction_with_error(self, contrast, contrast_err=0.0, extrapolation=None):
         """
         Compute uncertainty on volume value as well as the volume fraction
         This uncertainty is given by the following equation: ::
 
-            sigV = dV/dq_star * sigq_star
+            sig_V = sqrt((sig_Q / 2 pi |contrast|^2 * sqrt(1-4k))^2 + (sigcontrast * Q / pi^2 |contrast|^3 * sqrt(1-4k))^2)
 
-        so that: ::
+        where: ::
 
-            sigV = (k * sigq_star) /(q_star * math.sqrt(1 - 4 * k))
-
-            for k = 10^(-8)*q_star/(2*(pi*|contrast|)**2)
+            k = 10^(-8)*q_star/(2*(pi*|contrast|)**2)
 
         Notes:
 
         - 10^(-8) converts from cm^-1 to A^-1
         - q_star: the invariant, in cm^-1A^-3, including extrapolated values
           if they have been requested
-        - dq_star: the invariant uncertainty
-        - dV: the volume uncertainty
+        - sigq: the invariant uncertainty
+        - sigcontrast: the contrast uncertainty
+        - sigV: the volume uncertainty
 
         The uncertainty will be set to -1 if it can't be computed.
 
         :param contrast: contrast value
+        :param contrast_err: contrast uncertainty
         :param extrapolation: string to apply optional extrapolation
 
         :return: V, dV = volume fraction, error on volume fraction
         """
         volume = self.get_volume_fraction(contrast, extrapolation)
 
-        # Compute error
-        k = 1.0e-8 * self._qstar / (2 * (math.pi * math.fabs(float(contrast))) ** 2)
-        # Check value inside the sqrt function
-        value = 1 - k * self._qstar
-        if (value) <= 0:
-            uncertainty = -1
-        else:
-            # Compute uncertainty
-            uncertainty = math.fabs((k * self._qstar_err) / (self._qstar * math.sqrt(1 - 4 * k)))
+        contrast_err = 0.0 if contrast_err is None else contrast_err
 
-        return volume, uncertainty
+        Q = self._qstar * 1.0e-8
+        Q_err = self._qstar_err * 1.0e-8
 
-    def get_contrast_with_error(self, volume, extrapolation=None):
+        # Compute k
+        k = Q / (2 * (math.pi * math.fabs(float(contrast))) ** 2)
+
+        # Compute error on volume
+        term_Q = Q_err / (2 * math.pi**2 * contrast**2 * math.sqrt(1 - 4 * k))
+        term_contrast = Q * contrast_err / (math.pi**2 * contrast**3 * math.sqrt(1 - 4 * k))
+        volume_err = math.sqrt(term_Q**2 + term_contrast**2)
+
+        # Set error to -1 if it can't be computed
+        volume_err = -1 if volume_err < 0 else volume_err
+
+        return volume, volume_err
+
+    def get_contrast_with_error(self, volume, volume_err=0.0, extrapolation=None):
         """
         Compute uncertainty on contrast value as well as the contrast
         This uncertainty is given by the following equation: ::
 
-            sigcontrast = dcontrast/dq_star * sigq_star
+            sigcontrast = sqrt((d contrast/d q_star * sigq_star)^2 + (d contrast/d k * sigk)^2)
+
+            for k = volume * (1 - volume)
 
         so that: ::
 
-            sigcontrast = (|contrast| * sigq_star) / (2 * q_star)
+            sigcontrast = |contrast| / 2 * sqrt((sigq_star / q_star)^2 + (sigk / k)^2)
 
         Notes:
 
         - q_star: the invariant, in cm^-1A^-3, including extrapolated values
           if they have been requested
-        - dq_star: the invariant uncertainty
-        - dcontrast: the contrast uncertainty
+        - sigq_star: the invariant uncertainty
+        - k: volume * (1 - volume)
+        - sigk: the uncertainty on k
+        - sigcontrast: the contrast uncertainty
 
         The uncertainty will be set to -1 if it can't be computed.
 
         :param volume: volume fraction value
+        :param volume_err: volume fraction uncertainty
         :param extrapolation: string to apply optional extrapolation
 
         :return: contrast, dcontrast = contrast, error on contrast
         """
         contrast = self.get_contrast(volume, extrapolation)
 
-        # Compute error
+        volume_err = 0.0 if volume_err is None else volume_err
+
+        k = volume * (1 - volume)
+
+        # Compute error on k
+        k_err = math.fabs((1 - 2 * volume) * volume_err)
+
+        # Compute uncertainty on contrast
         try:
-            uncertainty = math.fabs((contrast * self._qstar_err) / (2 * self._qstar))
+            uncertainty = contrast / 2.0 * math.sqrt((self._qstar_err / self._qstar) ** 2 + (k_err / k) ** 2)
         except (ZeroDivisionError, ValueError):
             uncertainty = -1
 
         return contrast, uncertainty
 
-    def get_surface_with_error(self, contrast, porod_const, extrapolation=None):
+    def get_surface_with_error(
+        self, contrast, porod_const, contrast_err=None, porod_const_err=None, extrapolation=None
+    ):
         """
-        As of SasView 4.3 and 5.0.3, the specific surface is computed directly
-        from the contrast and porod_constant wich are currently user inputs
-        with no option for any uncertainty so no uncertainty can be calculated.
-        However we include the uncertainty computation for future use if and
-        when these values get an uncertainty. This is given as: ::
+        Compute the specific surface and its propagated uncertainty.
 
-            ds = sqrt[(s\'_cp)**2 * dcp**2 + (s\'_contrast)**2 * dcontrast**2]
+        The specific surface S is computed via::
 
-        where s'_x is the partial derivative of S with respect to x
+            S = porod_const / (2 * pi * contrast**2)
 
-        which gives (this should be checked before using in anger): ::
+        where the Porod constant is internally converted to the units required
+        by `get_surface()`.
 
-            ds = sqrt((dporod_const**2 * contrast**2 + 4 * (porod_const *
-                          dcontrast)**2) / (4 * pi**2 * contrast**6))
+        The uncertainty is calculated using standard linear error propagation,
+        assuming independent and small uncertainties::
 
-        We also assume some users will never enter a value for uncertainty so
-        allow for None even when it is an option.
+            (dS / S)^2 = (dP / P)^2 + (2 dC / C)^2
 
-        :param contrast: contrast value eventually with the error
-        :param porod_const: porod constant value eventually with the error
-        :param extrapolation: string to apply optional extrapolation. This will
-               only be needed if and when the contrast term is calculated from
-               the invariant.
+        where:
+            P = porod_const
+            dP = porod_const_err
+            C = contrast
+            dC = contrast_err
 
-        :return s, ds: the surface, with its uncertainty
+        This formulation automatically accounts for the internal unit conversion
+        applied to the Porod constant.
+
+        Parameters
+        ----------
+        contrast : float
+            Scattering length density contrast between the two phases.
+            Must be non-zero. Units must be consistent with `contrast_err`.
+
+        porod_const : float
+            Porod constant. Units must be consistent with `porod_const_err`.
+            The value is converted internally to the units used by
+            `get_surface()`.
+
+        contrast_err : float or None, optional
+            One-sigma uncertainty on `contrast`. If None, the uncertainty is
+            assumed to be zero. Must be non-negative.
+
+        porod_const_err : float or None, optional
+            One-sigma uncertainty on `porod_const`. If None, the uncertainty is
+            assumed to be zero. Must be non-negative.
+
+        extrapolation : str or None, optional
+            Optional extrapolation mode. Currently passed through to
+            `get_surface()` but not otherwise used here.
+
+        Returns
+        -------
+        s : float or None
+            Specific surface. Returned in the same units as `get_surface()`.
+
+        ds : float or None
+            One-sigma uncertainty on the specific surface. Returns None if the
+            uncertainty cannot be determined (e.g. zero contrast, undefined
+            relative error).
+
+        Notes
+        -----
+        - Assumes `contrast` and `porod_const` are independent variables.
+        - Assumes uncertainties are small (linear approximation).
+        - Correlated uncertainties are not supported.
+        - If uncertainty cannot be determined (e.g. contrast == 0, or P==0
+            while dP>0) the function returns (S, None).
         """
-        # until contrast and porod_constant are given with uncertainties set
-        # them to 0
-        dcontrast = None
-        dporod_const = None
-        # IMPORTANT: the porod constant (and eventually its uncertainty) are
-        # given in units of cm^-1 A^-4.  We need to be mindful of units when
-        # writing equations. Thus for computing ds both the porod constant and
-        # its uncertainty need to be converted to A^-5 so they play well with
-        # the contrast which is in A-2.
-        # Note that the porod constant is converted in self.get_surface method
-        # so do NOT convert before calling here
-        s = self.get_surface(contrast=contrast, porod_const=porod_const)
-        # Until uncertainties in contrast and the Porod Constant are provided
-        # just return nothing.
-        ds = None
-        # When they are available, use the following:
-        if dporod_const is None:
-            _dporod_const = 0.
-        else:
-            _dporod_const = dporod_const * 1e-8
-        if dcontrast is None:
-           dcontrast = 0.
-        # For this new computation we DO need to convert the units
-        _porod_const = porod_const * 1e-8
-        ds = math.sqrt((_dporod_const**2 * contrast**2 + 4 * (_porod_const *
-                        dcontrast)**2) / (4 * math.pi**2 * contrast**6))
 
+        # Default error values to zero if None
+        contrast_err = 0.0 if contrast_err is None else contrast_err
+        porod_const_err = 0.0 if porod_const_err is None else porod_const_err
+
+        if contrast_err < 0.0 or porod_const_err < 0.0:
+            raise ValueError("The contrast and Porod constant uncertainties must be non-negative")
+
+        # compute surface (this applies the internal conversion of porod_const)
+        s = self.get_surface(contrast=contrast, porod_const=porod_const, extrapolation=extrapolation)
+
+        # If s could not be computed, return immediately
+        if s is None:
+            return None, None
+
+        # Use relative-error formula (conversion on porod_const cancels out)
+        try:
+            rel = math.sqrt((porod_const_err / porod_const) ** 2 + (2.0 * contrast_err / contrast) ** 2)
+        except ZeroDivisionError:
+            return s, None
+
+        ds = abs(s) * rel
         return s, ds

@@ -413,7 +413,7 @@
         <item row="5" column="0">
          <widget class="QLabel" name="lblInvariantTotalQ">
           <property name="text">
-           <string>Invariant Total [Q]:</string>
+           <string>Invariant Total [Q*]:</string>
           </property>
          </widget>
         </item>
@@ -541,7 +541,7 @@
           <item>
            <widget class="QLineEdit" name="txtFileName">
             <property name="enabled">
-             <bool>true</bool>
+             <bool>false</bool>
             </property>
             <property name="frame">
              <bool>false</bool>

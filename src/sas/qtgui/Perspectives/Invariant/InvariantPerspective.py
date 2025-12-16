@@ -143,7 +143,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.txtBackgd.setValidator(GuiUtils.DoubleValidator())
         self.txtContrast.setValidator(GuiUtils.DoubleValidator())
         self.txtScale.setValidator(GuiUtils.DoubleValidator())
-        self.txtPorodCst.setValidator(GuiUtils.DoubleValidator())
         self.txtVolFrac1.setValidator(GuiUtils.DoubleValidator())
         self.txtVolFrac2.setValidator(GuiUtils.DoubleValidator())
 
@@ -554,8 +553,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         reactor.callFromThread(self.update_model_from_thread, WIDGETS.W_CONTRAST_OUT_ERR, contrast_out_error)
 
         # Surface Error calculations
-        surface: float | str = ""
-        surface_error: float | str = ""
+        surface: float | str | None = ""
+        surface_error: float | str | None = ""
 
         if self._porod:
             # Use calculated contrast if in volume fraction mode, otherwise use input contrast
@@ -569,8 +568,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                     surface: float | str = "ERROR"
                     surface_error: float | str = "ERROR"
 
-            reactor.callFromThread(self.update_model_from_thread, WIDGETS.W_SPECIFIC_SURFACE, surface)
-            reactor.callFromThread(self.update_model_from_thread, WIDGETS.W_SPECIFIC_SURFACE_ERR, surface_error)
+        reactor.callFromThread(self.update_model_from_thread, WIDGETS.W_SPECIFIC_SURFACE, surface)
+        reactor.callFromThread(self.update_model_from_thread, WIDGETS.W_SPECIFIC_SURFACE_ERR, surface_error)
 
         # Enable the status button
         self.cmdStatus.setEnabled(True)
@@ -656,6 +655,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                 formatted_value: str = str(round(value, 3))
         except (TypeError, ValueError):
             formatted_value: str = str(value)
+
         item = QtGui.QStandardItem(formatted_value)
         self.model.setItem(row, item)
 
@@ -999,23 +999,36 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             WIDGETS.W_HIGHQ_POWER_VALUE_EX,
         ]
 
-        related_internal_values: list[float | None] = [
-            self._background,
-            self._contrast,
-            self._porod,
-            self._scale,
-            self._volfrac1,
-            self._volfrac2,
-            self._low_power_value,
-            self._high_power_value
-        ]
+        sender_name = self.sender().objectName()
+        text_value = self.sender().text()
+        index_elt: int = possible_senders.index(sender_name)
 
-        item: QtGui.QStandardItem = QtGui.QStandardItem(self.sender().text())
-        index_elt: int = possible_senders.index(self.sender().objectName())
+        # Allow empty strings for optional fields like contrast and porod constant
+        optional_fields: list[str] = ["txtContrast", "txtPorodCst"]
+
+        if text_value == "" and sender_name in optional_fields:
+            # Set the corresponding attribute to None
+            item = QtGui.QStandardItem("")
+            self.model.setItem(related_widgets[index_elt], item)
+            self.sender().setStyleSheet(BG_DEFAULT)
+
+            # Map sender names to instance variable names
+            sender_to_attr = {
+                "txtContrast": "_contrast",
+                "txtPorodCst": "_porod",
+            }
+            if sender_name in sender_to_attr:
+                setattr(self, sender_to_attr[sender_name], None)
+
+            self.allow_calculation()
+            return
+
+        # Set model item with the text value
+        item: QtGui.QStandardItem = QtGui.QStandardItem(text_value)
         self.model.setItem(related_widgets[index_elt], item)
 
         try:
-            new_value = float(self.sender().text())
+            new_value = float(text_value)
             self.sender().setStyleSheet(BG_DEFAULT)
 
             # Map sender names to instance variable names
@@ -1030,7 +1043,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                 "txtHighQPower_ex": "_high_power_value",
             }
 
-            sender_name = self.sender().objectName()
             if sender_name in sender_to_attr:
                 setattr(self, sender_to_attr[sender_name], new_value)
 
