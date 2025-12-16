@@ -355,6 +355,7 @@ jobs:
           path: |
             installers/dist/setupSasView.exe
             installers/dist/SasView6-macos-latest.dmg
+            installers/dist/SasView6-macos-15-intel.dmg
             installers/dist/SasView6.tar.gz
           if-no-files-found: ignore
 
@@ -364,7 +365,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ windows-latest, macos-latest, ubuntu-22.04 ]
+        os: [ windows-latest, macos-latest, macos-15-intel, ubuntu-22.04 ]
         python-version: [ 3.11 ]
       fail-fast: false
 
