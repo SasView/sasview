@@ -338,16 +338,16 @@ class TestInvariantCalculator(unittest.TestCase):
         # of this test class.
 
         # volumer fraction
-        v, dv = inv.get_volume_fraction_with_error(2.2e-6, None)
+        v, dv = inv.get_volume_fraction_with_error(2.2e-6, extrapolation=None)
         _check_values(v, 0.01)
 
-        v_l, dv_l = inv.get_volume_fraction_with_error(2.2e-6, 'low')
+        v_l, dv_l = inv.get_volume_fraction_with_error(2.2e-6, extrapolation='low')
         _check_values(v_l, 0.01)
 
-        v_h, dv_h = inv.get_volume_fraction_with_error(2.2e-6, 'high')
+        v_h, dv_h = inv.get_volume_fraction_with_error(2.2e-6, extrapolation='high')
         _check_values(v_h, 0.01)
 
-        v_b, dv_b = inv.get_volume_fraction_with_error(2.2e-6, 'both')
+        v_b, dv_b = inv.get_volume_fraction_with_error(2.2e-6, extrapolation='both')
         _check_values(v_b, 0.01)
 
         # Specific Surface - though these are really redundant since
@@ -356,16 +356,16 @@ class TestInvariantCalculator(unittest.TestCase):
         # however since some day we could add a feature where vol frac can be
         # an input parameter in which case Sv WOULD in fact depend on the
         # invariant:
-        s, ds = inv.get_surface_with_error(2.2e-6, 1.825e-7, None)
+        s, ds = inv.get_surface_with_error(2.2e-6, 1.825e-7, extrapolation=None)
         _check_values(s, 6.00e-5)
 
-        s_l, ds_l = inv.get_surface_with_error(2.2e-6, 1.825e-7, 'low')
+        s_l, ds_l = inv.get_surface_with_error(2.2e-6, 1.825e-7, extrapolation='low')
         _check_values(s_l, 6.00e-5)
 
-        s_h, ds_h = inv.get_surface_with_error(2.2e-6, 1.825e-7, 'high')
+        s_h, ds_h = inv.get_surface_with_error(2.2e-6, 1.825e-7, extrapolation='high')
         _check_values(s_h, 6.00e-5)
 
-        s_b, ds_b = inv.get_surface_with_error(2.2e-6, 1.825e-7, 'both')
+        s_b, ds_b = inv.get_surface_with_error(2.2e-6, 1.825e-7, extrapolation='both')
         _check_values(s_b, 6.00e-5)
 
 
