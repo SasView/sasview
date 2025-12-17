@@ -304,10 +304,10 @@ jobs:
           codesign -s "Developer ID Application: The International Scattering Alliance (8CX8K63BQM)" $MACOS_DMG_NAME
 
       - name: Notarize Release Build (OSX)
-        if: ${{ matrix.installer && matrix.os == 'macos-latest' && env.SIGN_INSTALLER }}
+        if: ${{ matrix.installer && startsWith(matrix.os, 'macos') && env.SIGN_INSTALLER }}
         uses: lando/notarize-action@v2
         with:
-          product-path: installers/dist/SasView6-macos-latest.dmg
+          product-path: installers/dist/SasView6-${{ matrix.os }}.dmg
           primary-bundle-id: "org.sasview.SasView6"
           appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
           appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
@@ -315,10 +315,10 @@ jobs:
           verbose: True
 
       - name: Staple Release Build (OSX)
-        if: ${{ matrix.installer && matrix.os == 'macos-latest' && env.SIGN_INSTALLER }}
+        if: ${{ matrix.installer && startsWith(matrix.os, 'macos') && env.SIGN_INSTALLER }}
         uses: BoundfoxStudios/action-xcode-staple@v1
         with:
-          product-path: installers/dist/SasView6-macos-latest.dmg
+          product-path: installers/dist/SasView6-${{ matrix.os }}.dmg
 
       - name: Install DigiCert Client tools from Github Custom Actions marketplace
         if: ${{ matrix.installer && startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
@@ -355,6 +355,7 @@ jobs:
           path: |
             installers/dist/setupSasView.exe
             installers/dist/SasView6-macos-latest.dmg
+            installers/dist/SasView6-macos-15-intel.dmg
             installers/dist/SasView6.tar.gz
           if-no-files-found: ignore
 
@@ -364,7 +365,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ windows-latest, macos-latest, ubuntu-22.04 ]
+        os: [ windows-latest, macos-latest, macos-15-intel, ubuntu-22.04 ]
         python-version: [ 3.11 ]
       fail-fast: false
 
