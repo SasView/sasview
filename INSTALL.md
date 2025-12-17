@@ -106,7 +106,10 @@ To set up the pre-commit hook for a package, simply navigate to the appropriate 
 pre-commit install
 ```
 
-This will configure the pre-commit hook for the relevant package. To set up the pre-commit hooks for SasView, SasData, and SasModels this command needs to be run in the directory for each package separately.
+This will configure the pre-commit hook for the relevant package.
+
+> [!IMPORTANT]
+> To set up the pre-commit hooks for SasView, SasData, and SasModels this command needs to be run in the directory for each package separately.
 
 ## Seeing and testing your changes
 
