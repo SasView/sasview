@@ -465,6 +465,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Magnetism model displayed in magnetism list
         self.magnetism_widget.setMagneticModel()
+        self.lstMagnetic.customContextMenuRequested.connect(self.showModelContextMenu)
 
         # Initial status of the ordering tab - invisible
         self.tabFitting.removeTab(TAB_ORDERING)
@@ -731,8 +732,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         # See which model we're dealing with by looking at the tab id
         current_list = self.tabToList[self.tabFitting.currentIndex()]
+        model_key = self.tabToKey[self.tabFitting.currentIndex()]
         rows = [s.row() for s in current_list.selectionModel().selectedRows()
-                if self.isCheckable(s.row())]
+                if self.isCheckable(s.row(), model_key=model_key)]
 
         menu = self.showModelDescription() if not rows else self.modelContextMenu(rows)
         try:
@@ -1016,7 +1018,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         status = QtCore.Qt.Checked
         model_key = self.tabToKey[self.tabFitting.currentIndex()]
         model = self.model_dict[model_key]
-        item = model.itemFromIndex(self.lstParams.currentIndex())
+        current_list = self.lst_dict[model_key]
+        item = model.itemFromIndex(current_list.currentIndex())
         self.setParameterSelection(status, item=item, model_key=model_key)
 
     def deselectParameters(self) -> None:
@@ -1026,7 +1029,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         status = QtCore.Qt.Unchecked
         model_key = self.tabToKey[self.tabFitting.currentIndex()]
         model = self.model_dict[model_key]
-        item = model.itemFromIndex(self.lstParams.currentIndex())
+        current_list = self.lst_dict[model_key]
+        item = model.itemFromIndex(current_list.currentIndex())
         self.setParameterSelection(status, item=item, model_key=model_key)
 
     def selectedParameters(self, model_key: str = "standard") -> list[int]:

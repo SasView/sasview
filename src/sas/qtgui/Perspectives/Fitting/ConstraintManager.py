@@ -197,11 +197,25 @@ class ConstraintManager:
         """
         model_key = self.widget.tabToKey[self.widget.tabFitting.currentIndex()]
         model = self.model_dict[model_key]
-        min_col = self.widget.lstParams.itemDelegate().param_min
-        max_col = self.widget.lstParams.itemDelegate().param_max
+        current_list = self.lst_dict[model_key]
+        delegate = current_list.itemDelegate()
+
+        # Get correct min/max column indices based on model type
+        if model_key == 'poly':
+            min_col = delegate.poly_min
+            max_col = delegate.poly_max
+        elif model_key == 'magnet':
+            min_col = delegate.mag_min
+            max_col = delegate.mag_max
+        else:
+            min_col = delegate.param_min
+            max_col = delegate.param_max
 
         for row in self.widget.selectedParameters(model_key=model_key):
             param = model.item(row, 0).text()
+            # Convert display name to actual parameter name for poly
+            if model_key == 'poly':
+                param = self.widget.polydispersity_widget.polyNameToParam(param)
             value = model.item(row, 1).text()
             min_t = model.item(row, min_col).text()
             max_t = model.item(row, max_col).text()
@@ -313,6 +327,18 @@ class ConstraintManager:
         """
         param_list = self.lst_dict[model_key]
         model = self.model_dict[model_key]
+        delegate = param_list.itemDelegate()
+
+        # Get correct min/max column indices based on model type
+        if model_key == 'poly':
+            min_col = delegate.poly_min
+            max_col = delegate.poly_max
+        elif model_key == 'magnet':
+            min_col = delegate.mag_min
+            max_col = delegate.mag_max
+        else:
+            min_col = delegate.param_min
+            max_col = delegate.param_max
 
         for row in range(model.rowCount()):
             if not self.widget.isCheckable(row, model_key=model_key):
@@ -334,17 +360,9 @@ class ConstraintManager:
             # Now we got the right row. Delete the constraint and clean up
             # Retrieve old values and put them on the model
             if constraint.min is not None:
-                try:
-                    min_col = param_list.itemDelegate().param_min
-                except AttributeError:
-                    min_col = 2
                 model.item(row, min_col).setText(constraint.min)
 
             if constraint.max is not None:
-                try:
-                    max_col = param_list.itemDelegate().param_max
-                except AttributeError:
-                    max_col = 3
                 model.item(row, max_col).setText(constraint.max)
 
             # Remove constraint item
