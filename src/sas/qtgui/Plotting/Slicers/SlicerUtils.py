@@ -98,20 +98,13 @@ class StackableMixin:
             # First time: check if we should stack
             should_stack = getattr(self.base, 'stackplots', False)
 
-            if should_stack:
-                # Find existing plot window for this slicer type
-                existing_plot_window = self._find_stackable_plot_window()
-
-                if existing_plot_window is not None:
-                    # Stack onto existing plot
-                    actual_id = self._append_to_plot_window(existing_plot_window, new_plot, item)
-                    self._plot_window = existing_plot_window
-                    self._actual_plot_id = actual_id
-                else:
-                    # No existing window, create new one
-                    self._create_new_plot(new_plot, item)
+            if should_stack and (existing_plot_window := self._find_stackable_plot_window()):
+                # Stack onto existing plot
+                actual_id = self._append_to_plot_window(existing_plot_window, new_plot, item)
+                self._plot_window = existing_plot_window
+                self._actual_plot_id = actual_id
             else:
-                # Not stacking, create new plot
+                # No existing window or not stacking, create new plot
                 self._create_new_plot(new_plot, item)
 
     def _find_stackable_plot_window(self):
@@ -120,22 +113,15 @@ class StackableMixin:
 
         :return: Plot window if found, None otherwise
         """
-        type_id = self._get_slicer_type_id()
 
         # Search through active plots
         if hasattr(self.base, 'manager') and hasattr(self.base.manager, 'active_plots'):
             for plot_id, plot_window in self.base.manager.active_plots.items():
-                if hasattr(plot_window, 'data') and plot_window.data is not None:
-                    # Get first data item
-                    data_list = plot_window.data if isinstance(plot_window.data, list) else [plot_window.data]
-                    if len(data_list) > 0:
-                        first_data = data_list[0]
-                        # Check if it's from the same slicer type and parent
-                        if (hasattr(first_data, 'type_id') and
-                            first_data.type_id is not None and
-                            first_data.type_id == type_id):
-                            return plot_window
-
+                if ((data := getattr(plot_window, 'data', None)) and
+                    (data_list := data if isinstance(data, list) else [data]) and
+                    hasattr(data_list[0], 'type_id') and
+                    data_list[0].type_id == self._get_slicer_type_id()):
+                    return plot_window
         return None
 
     def _append_to_plot_window(self, plot_window: object, new_plot: Data1D, item) -> str:
@@ -147,29 +133,10 @@ class StackableMixin:
         :param item: The item for the data model
         :return: The actual ID assigned to the plot
         """
-        # Make the ID unique by appending counter
-        base_id = new_plot.id
-        counter = 1
-        unique_id = f"{base_id}_{counter}"
-
-        # Check existing IDs in the plot window
-        existing_ids = []
-        if hasattr(plot_window, 'data') and plot_window.data:
-            data_list = plot_window.data if isinstance(plot_window.data, list) else [plot_window.data]
-            existing_ids = [d.id for d in data_list if hasattr(d, 'id')]
-
-        while unique_id in existing_ids:
-            counter += 1
-            unique_id = f"{base_id}_{counter}"
-
-        # Update plot with unique ID
-        new_plot.id = unique_id
-        new_plot.name = unique_id
-        new_plot.title = unique_id
         new_plot.custom_color = self.color
 
         # Add to model
-        GuiUtils.updateModelItemWithPlot(item, new_plot, unique_id)
+        GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
 
         # Add to existing window
         plot_window.plot(data=new_plot, color=self.color, hide_error=False)
@@ -181,7 +148,7 @@ class StackableMixin:
         if hasattr(self.base, 'slicer_widget') and self.base.slicer_widget is not None:
             self.base.slicer_widget.updateSlicerPlotList()
 
-        return unique_id
+        return new_plot.id
 
     def _create_new_plot(self, new_plot: Data1D, item) -> None:
         """

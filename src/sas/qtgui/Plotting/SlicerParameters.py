@@ -122,7 +122,6 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
 
         # Initial update of active plots
         self.updatePlotList()
-        self.updateSlicerPlotList()
 
     def setParamsList(self):
         """
@@ -142,12 +141,12 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         """ Update the list of active plots """
         self.active_plots = self.parent.getActivePlots()
         self.setPlotsList()
-        self.updateSlicerPlotList()  # Add this to update slicer plots too
+        self.updateSlicerPlotList()
 
     def updateSlicerPlotList(self):
         """ Update the list of active slicer plots """
         self.active_slicer_plots = self.parent.getActiveSlicerPlots()
-        self.setSlicerPlotsList()  # Fixed: was setSlicerPlotList (missing 's')
+        self.setSlicerPlotsList()
 
     def getCurrentSlicerDict(self):
         """
@@ -273,12 +272,11 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         {slicer_plot_name:checkbox_status}
         """
         current_slicer_plots = {}
-        if self.lstSlicerPlots.count() != 0:
-            for row in range(self.lstSlicerPlots.count()):
-                item = self.lstSlicerPlots.item(row)
-                isChecked = item.checkState() != QtCore.Qt.Unchecked
-                plot = item.text()
-                current_slicer_plots[plot] = isChecked
+        for row in range(self.lstSlicerPlots.count()):
+            item = self.lstSlicerPlots.item(row)
+            isChecked = item.checkState() != QtCore.Qt.Unchecked
+            plot = item.text()
+            current_slicer_plots[plot] = isChecked
         return current_slicer_plots
 
     def setSlicerPlotsList(self):
@@ -290,12 +288,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
 
         # Fill out list of slicer plots from active_slicer_plots
         for plot_name, plot_widget in self.active_slicer_plots.items():
-            if str(plot_name) in current_slicer_plots.keys():
-                # redo the list
-                checked = QtCore.Qt.Checked if current_slicer_plots[plot_name] else QtCore.Qt.Unchecked
-            else:
-                # create a new list - default to unchecked
-                checked = QtCore.Qt.Unchecked
+            checked = QtCore.Qt.Checked if current_slicer_plots.get(str(plot_name), None) else QtCore.Qt.Unchecked
 
             chkboxItem = QtWidgets.QListWidgetItem(str(plot_name))
             chkboxItem.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
@@ -516,7 +509,8 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         if reply == QtWidgets.QMessageBox.No:
             return
 
-        # Iterate over the list and delete checked items
+        # Iterate over the list backwards and delete checked items
+        # Backwards to avoid index shifting issues
         for row in range(self.lstSlicerPlots.count()-1, -1, -1):
             item = self.lstSlicerPlots.item(row)
             isChecked = item.checkState() != QtCore.Qt.Unchecked
