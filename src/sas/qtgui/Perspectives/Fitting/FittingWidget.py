@@ -38,7 +38,8 @@ from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
 from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
 from sas.sascalc.fit import models
 from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
-from sas.system.user import HELP_DIRECTORY_LOCATION, find_plugins_dir
+from sas.system import HELP_SYSTEM
+from sas.system.user import find_plugins_dir
 
 TAB_MAGNETISM = 4
 TAB_POLY = 3
@@ -1329,8 +1330,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             msgbox.addButton(button_remove, QtWidgets.QMessageBox.YesRole)
             button_cancel = QtWidgets.QPushButton("Cancel")
             msgbox.addButton(button_cancel, QtWidgets.QMessageBox.RejectRole)
-            retval = msgbox.exec_()
-            if retval == QtWidgets.QMessageBox.RejectRole:
+            msgbox.exec_()
+            if msgbox.clickedButton() == button_cancel:
                 # cancel fit
                 raise ValueError("Fitting cancelled")
             else:
@@ -1411,6 +1412,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Reset parameters to fit
         self.resetParametersToFit()
         self.has_error_column = False
+        self.polydispersity_widget.has_poly_error_column = False
+        self.magnetism_widget.has_magnet_error_column = False
 
         structure = None
         if self.cbStructureFactor.isEnabled():
@@ -1454,6 +1457,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Reset parameters to fit
         self.resetParametersToFit()
         self.has_error_column = False
+        self.polydispersity_widget.has_poly_error_column = False
+        self.magnetism_widget.has_magnet_error_column = False
 
         self.respondToModelStructure(model=model, structure_factor=structure)
         # recast the original parameters into the model
@@ -1662,7 +1667,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Show the "Fitting" section of help
         """
-        help_location = self.getHelpLocation(HELP_DIRECTORY_LOCATION)
+        if not HELP_SYSTEM.path:
+            logger.error("Help documentation was not found.")
+            return
+        help_location = self.getHelpLocation(HELP_SYSTEM.path)
         self.parent.showHelp(help_location)
 
     def getHelpLocation(self, tree_base: Path) -> Path:
@@ -2174,7 +2182,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         item = self._requestPlots(self.data.name, current_index.model())
         if item:
             # fit+data has not been shown - show just data
-            self.communicate.plotRequestedSignal.emit([item, data_to_show], self.tab_id)
+            self.communicate.plotRequestedSignal.emit([item, data_to_show])
 
     def _requestPlots(self, item_name: str, item_model: Any) -> Any | None:
         """
@@ -2188,7 +2196,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         for item, plot in plots.items():
             if plot.plot_role != DataRole.ROLE_DATA and fitpage_name in plot.name:
                 data_shown = True
-                self.communicate.plotRequestedSignal.emit([item, plot], self.tab_id)
+                self.communicate.plotRequestedSignal.emit([item, plot])
         # return the last data item seen, if nothing was plotted; supposed to be just data)
         return None if data_shown else item
 

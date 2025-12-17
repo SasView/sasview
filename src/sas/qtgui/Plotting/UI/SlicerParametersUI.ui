@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>395</width>
-    <height>468</height>
+    <width>570</width>
+    <height>671</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -78,7 +78,7 @@
        <string>Slicer</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_2">
-       <item row="0" column="0">
+       <item row="1" column="0">
         <widget class="QGroupBox" name="groupBox">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
@@ -90,17 +90,121 @@
           <string>Slicer Parameters </string>
          </property>
          <layout class="QGridLayout" name="gridLayout">
-          <item row="1" column="0">
+          <item row="2" column="0">
+           <widget class="QTableView" name="lstParams">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
            <layout class="QHBoxLayout" name="horizontalLayout_2">
             <item>
              <widget class="QLabel" name="label">
               <property name="text">
-               <string>Slicer type:</string>
+               <string>Change slicer:</string>
               </property>
              </widget>
             </item>
             <item>
              <spacer name="horizontalSpacer_2">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QComboBox" name="cbSlicerReplace">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <item>
+               <property name="text">
+                <string>None</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Sector Interactor</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Annulus Interactor</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Box Interactor X</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Box Interactor Y</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Wedge Interactor Q</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Wedge Interactor Phi</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QGroupBox" name="groupBox_3">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="title">
+          <string>Slicers</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_slicers">
+          <item>
+           <widget class="QListWidget" name="lstSlicers">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_create">
+            <item>
+             <widget class="QLabel" name="lblSlicerCreate">
+              <property name="text">
+               <string>Create new slicer:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_create">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
@@ -157,17 +261,27 @@
               </item>
              </widget>
             </item>
+            <item>
+             <spacer name="horizontalSpacer_3">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QPushButton" name="cmdDelete">
+              <property name="text">
+               <string>Delete</string>
+              </property>
+             </widget>
+            </item>
            </layout>
-          </item>
-          <item row="0" column="0">
-           <widget class="QTableView" name="lstParams">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-           </widget>
           </item>
          </layout>
         </widget>
@@ -354,7 +468,7 @@
  <tabstops>
   <tabstop>tabWidget</tabstop>
   <tabstop>lstParams</tabstop>
-  <tabstop>cbSlicer</tabstop>
+  <tabstop>cbSlicerReplace</tabstop>
   <tabstop>cmdApply</tabstop>
   <tabstop>cmdClose</tabstop>
   <tabstop>cmdHelp</tabstop>

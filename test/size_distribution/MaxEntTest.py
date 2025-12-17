@@ -7,7 +7,7 @@ import pytest
 from sasdata.dataloader.data_info import Data1D
 from sasdata.dataloader.loader import Loader
 
-from src.sas.sascalc.size_distribution.SizeDistribution import sizeDistribution
+from sas.sascalc.size_distribution.SizeDistribution import sizeDistribution
 
 
 def find(filename):

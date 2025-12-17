@@ -6,7 +6,6 @@ dominate
 h5py
 html2text
 html5lib
-importlib-resources;python_version<"3.9"
 ipython
 jsonschema
 lxml
@@ -30,7 +29,6 @@ sasdata
 sasmodels
 scipy
 siphash24
-sphinx
 superqt
 tccbox
 twisted

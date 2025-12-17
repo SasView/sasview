@@ -5,6 +5,7 @@ import logging
 import os
 import sys
 import time
+from pathlib import Path
 
 from PySide6 import QtCore, QtGui, QtWidgets
 from twisted.internet import threads
@@ -22,7 +23,12 @@ from sas.qtgui.MainWindow.DataManager import DataManager
 from sas.qtgui.MainWindow.DroppableDataLoadWidget import DroppableDataLoadWidget
 from sas.qtgui.MainWindow.NameChanger import ChangeName
 from sas.qtgui.Plotting.MaskEditor import MaskEditor
-from sas.qtgui.Plotting.Plotter import PlotterWidget
+
+# DO NOT REMOVE THE IMPORT BELOW - used in dynamic plotter creation
+from sas.qtgui.Plotting.Plotter import (
+    Plotter,  # noqa: F401
+    PlotterWidget,
+)
 from sas.qtgui.Plotting.Plotter2D import Plotter2D, Plotter2DWidget
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
 
@@ -93,6 +99,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         self.currentChanged.connect(self.onTabSwitch)
         self.communicator = self.parent.communicator()
+        self.communicator.fileTriggerSignal.connect(self.loadFromArbitraryPath)
         self.communicator.fileReadSignal.connect(self.loadFromURL)
         self.communicator.activeGraphsSignal.connect(self.updateGraphCount)
         self.communicator.activeGraphName.connect(self.updatePlotName)
@@ -102,6 +109,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.communicator.changeDataExplorerTabSignal.connect(self.changeTabs)
         self.communicator.forcePlotDisplaySignal.connect(self.displayData)
         self.communicator.updateModelFromPerspectiveSignal.connect(self.updateModelFromPerspective)
+        self.communicator.freezeDataNameSignal.connect(self.freezeFromName)
 
         # fixing silly naming clash in other managers
         self.communicate = self.communicator
@@ -160,6 +168,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.actionReplace.setText("... replacing data in the current page")
         self.send_menu = QtWidgets.QMenu(self)
         self.send_menu.addAction(self.actionReplace)
+        self.actionReplace.triggered.connect(self.onDataReplaced)
 
     def closeEvent(self, event):
         """
@@ -311,6 +320,35 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         filename = QtWidgets.QFileDialog.getOpenFileName(**kwargs)[0]
         if filename:
             self.readProject(filename)
+
+    def loadFromArbitraryPath(self, filepath: str | Path | None = None):
+        """Logic to load any file, regardless of path, and pass it to the appropriate method for loading."""
+        if not filepath:
+            # Early return is no file path is given
+            return
+        file = Path(filepath)
+        if filepath and file.exists():
+            ext = file.suffix
+            # If the file extension is an analysis file type, the logic path is the same as project files
+            if ext in config.PLUGIN_STATE_EXTENSIONS:
+                ext = '.json'
+            # Get absolute path string in case downstream logic is not compatible with pathlib.Path objects
+            abs_path = str(file.absolute()).replace('\n', '').replace('\r', '')
+            match ext:
+                case ".json":
+                    # Matches analysis files and project files
+                    self.readProject(abs_path)
+                case _:
+                    # All other cases fall through here
+                    if file.is_dir():
+                        # If a directory is given as an argument, gather all files
+                        path_list = [os.path.join(os.path.abspath(file), filename) for filename in os.listdir(file)]
+                    else:
+                        # If a single file is given, load it individually
+                        path_list = [abs_path]
+                    self.readData(path_list)
+        elif not file.exists():
+            logger.warning(f"The path, {filepath}, does not exist. No files were loaded.")
 
     def saveProject(self):
         """
@@ -808,12 +846,53 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
             _ = msgbox.exec_()
 
+    def freezeFromName(self, search_name = None):
+        def findName(model, target_name: str, column: int=0)-> tuple:
+            for row in range(model.rowCount()):
+                if model.item(row, column).text() == target_name:
+                    return row, -1
+                for row2 in range(model.item(row, column).rowCount()):
+                    tmp = model.item(row, column).child(row2, column)
+                    if tmp.text() == target_name:
+                            return row, row2
+            return -1, -1
+
+        model = self.model
+        row_index_parent, row_index_child = findName(model, search_name)
+        new_item = model.item(row_index_parent)
+        if row_index_child != -1:
+            data = new_item.child(row_index_child)
+            new_item = self.cloneTheory(data)
+            #new_item.setText(search_name)
+            #new_item.child(0).data().id = search_name
+            model.beginResetModel()
+            model.appendRow(new_item)
+            model.endResetModel()
+        self.sendData([new_item])
+
     def sendData(self, event=None):
         """
         Send selected item data to the current perspective and set the relevant notifiers
         """
-        selected_items = self.selectedItems()
-        if len(selected_items) < 1:
+
+        if type(event) == bool:
+            selected_items = self.selectedItems()
+        else:
+            selected_items = event
+
+        if len(selected_items) <1:
+            return
+
+        # Check that only one item is selected when sending to perspectives that don't support batch mode
+        if len(selected_items) > 1 and not self._perspective().allowBatch():
+            title = self._perspective().name
+            msg = title + " does not allow sending multiple data files. Please select only one file"
+            msgbox = QtWidgets.QMessageBox()
+            msgbox.setIcon(QtWidgets.QMessageBox.Critical)
+            msgbox.setWindowTitle('Error')
+            msgbox.setText(msg)
+            msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
+            _ = msgbox.exec_()
             return
 
         # Notify the GuiManager about the send request
@@ -1023,12 +1102,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
     def sendToMenu(self, hasSubmenu=False):
         # add menu to cmdSendTO
+        self.cmdSendTo.setMenu(None)
         if hasSubmenu:
             self.createSendToMenu()
             self.cmdSendTo.setMenu(self.send_menu)
             self.cmdSendTo.setPopupMode(QtWidgets.QToolButton.MenuButtonPopup)
         else:
-            self.cmdSendTo.setMenu(None)
             self.cmdSendTo.setPopupMode(QtWidgets.QToolButton.InstantPopup)
 
     def updatePerspectiveCombo(self, index):
@@ -1094,7 +1173,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if new_plots:
             self.plotData(new_plots)
 
-    def displayData(self, data_list, id=None):
+    def displayData(self, data_list):
         """
         Forces display of charts for the given data set
         """
@@ -1590,7 +1669,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.actionEditMask.triggered.connect(self.showEditDataMask)
         self.actionDelete.triggered.connect(self.deleteFile)
         self.actionFreezeResults.triggered.connect(self.freezeSelectedItems)
-        self.actionReplace.triggered.connect(self.onDataReplaced)
 
     def onCustomContextMenu(self, position):
         """
@@ -2133,3 +2211,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             if item.isCheckable():
                 item.setCheckState(status)
         model.blockSignals(False)
+
+    def reset(self):
+        """
+        Reset the data explorer to an empty state
+        """
+        self.closeAllPlots()
+        self.model.clear()
+        self.theory_model.clear()
+

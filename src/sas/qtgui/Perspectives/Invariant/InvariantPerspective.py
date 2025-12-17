@@ -292,7 +292,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             )
             plots.append(self.low_extrapolation_plot)
         if len(plots) > 1:
-            self.communicate.plotRequestedSignal.emit(plots, None)
+            self.communicate.plotRequestedSignal.emit(plots)
 
         # Update the details dialog in case it is open
         self.update_details_widget()
@@ -1151,3 +1151,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         Tell the caller that we can't swap data
         """
         return False
+
+    def reset(self):
+        """
+        Reset the fitting perspective to an empty state
+        """
+        self.removeData([self._model_item] if self._model_item else None)

@@ -72,6 +72,19 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         if self.is2D:
             parameters += self.logic.model_parameters.orientation_parameters
 
+        # Reset delegate column indices to standard (no error column) BEFORE creating parameters
+        # This ensures comboboxes are created at the correct column positions
+        delegate = self.lstPoly.itemDelegate()
+        delegate.poly_parameter = 0
+        delegate.poly_pd = 1
+        delegate.poly_error = None
+        delegate.poly_min = 2
+        delegate.poly_max = 3
+        delegate.poly_npts = 4
+        delegate.poly_nsigs = 5
+        delegate.poly_function = 6
+        delegate.poly_filename = 7
+
         [self.setPolyModelParameters(i, param) for i, param in \
             enumerate(parameters) if param.polydisperse]
 
@@ -275,7 +288,23 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         Modify polydisp. defaults on function choice
         """
         # Get npts/nsigs for current selection
-        param = self.logic.model_parameters.form_volume_parameters[row_index]
+
+
+        # Determine the parameter base name from the polydisp model row label.
+        # This ensures we use the expanded shell name (e.g. 'thickness2') instead of a template like 'thickness[n]'.
+        try:
+            display_text = str(self.poly_model.item(row_index, 0).text())
+            param_base = display_text.replace('Distribution of ', '').strip()
+        except Exception:
+            # Fallback to the model_parameters list if something unexpected happens
+            try:
+                param = self.logic.model_parameters.form_volume_parameters[row_index]
+                param_base = param.name
+            except Exception:
+                logger.exception("Could not determine parameter name for polydisp row %r", row_index)
+                return
+
+
         file_index = self.poly_model.index(row_index, self.lstPoly.itemDelegate().poly_function)
         combo_box = self.lstPoly.indexWidget(file_index)
         try:
@@ -286,13 +315,15 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
 
         if combo_string == 'array':
             try:
+                 # assure the combo is at the right index
+                if combo_box is not None:
                 # assure the combo is at the right index
-                combo_box.blockSignals(True)
-                combo_box.setCurrentIndex(combo_box.findText(combo_string))
-                combo_box.blockSignals(False)
+                    combo_box.blockSignals(True)
+                    combo_box.setCurrentIndex(combo_box.findText(combo_string))
+                    combo_box.blockSignals(False)
                 # Load the file
                 self.loadPolydispArray(row_index)
-                self.logic.kernel_module.set_dispersion(param.name, self.disp_model)
+                self.logic.kernel_module.set_dispersion(param_base, self.disp_model)
                 # uncheck the parameter
                 self.poly_model.item(row_index, 0).setCheckState(QtCore.Qt.Unchecked)
                 # disable the row
@@ -303,11 +334,12 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
                 self.poly_model.blockSignals(False)
                 return
             except OSError:
-                combo_box.setCurrentIndex(self.orig_poly_index)
+                if combo_box is not None:
+                    combo_box.setCurrentIndex(self.orig_poly_index)
                 # Pass for cancel/bad read
                 pass
         else:
-            self.logic.kernel_module.set_dispersion(param.name, self.disp_model)
+            self.logic.kernel_module.set_dispersion(param_base, self.disp_model)
 
         # Enable the row in case it was disabled by Array
         self.poly_model.blockSignals(True)

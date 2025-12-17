@@ -12,10 +12,11 @@
 import json
 import sys
 
-pretty = "--json" in sys.argv
+pretty = "--pretty" in sys.argv
 
 
-jobs = []
+test_jobs = []
+installer_jobs = []
 
 # List of OS images to use for release builds
 # Notes on OS selection:
@@ -26,25 +27,28 @@ jobs = []
 #   dynamically linked by pyinstaller.
 #   https://pyinstaller.readthedocs.io/en/stable/usage.html#making-gnu-linux-apps-forward-compatible
 os_release_list = [
-    'ubuntu-22.04',
-    'windows-latest',
-    'macos-latest',
-    'macos-15-intel',
+    "ubuntu-22.04",
+    "windows-latest",
+    "macos-latest",
+    "macos-15-intel",
 ]
 
 # List of OS images to use for release tests
 os_test_list = os_release_list + [
-    'ubuntu-latest',
+    "ubuntu-latest",
 ]
 
 # List of python versions to use for release builds
 python_release_list = [
-    '3.11',
+    # The current interpreter, set from ci.yml, is the release version
+    f"{sys.version_info.major}.{sys.version_info.minor}"
 ]
 
 # List of python versions to use for tests
 python_test_list = python_release_list + [
-    # No additional test versions - add more to this list as needed
+    # Additional test versions - add more to this list as needed
+    "3.12",
+    "3.14",
 ]
 
 
@@ -61,12 +65,11 @@ def entry(job_name="Job", os=None, pyver=None, tests=None, docs=None, installer=
     # job so that validating the matrix or fallbacks for missing keys are
     # not needed in the yml file.
     return {
-        'job_name': job_name,
-        'os': os or os_release_list[0],
-        'python-version': pyver or python_release_list[0],
-        'tests': truthy(tests),
-        'docs': truthy(docs),
-        'installer': truthy(installer),
+        "job_name": job_name,
+        "os": os or os_release_list[0],
+        "python-version": pyver or python_release_list[0],
+        "tests": truthy(tests),
+        "installer": truthy(installer),
     }
 
 
@@ -76,14 +79,13 @@ def entry(job_name="Job", os=None, pyver=None, tests=None, docs=None, installer=
 # leave them for a separate build.
 for os in os_test_list:
     for pyver in python_test_list:
-        jobs.append(
+        test_jobs.append(
             entry(
-                job_name = f"Test ({os}, {pyver})",
-                os = os,
-                pyver = pyver,
-                tests = True,
-                docs = False,
-                installer = False,
+                job_name=f"Test ({os}, {pyver})",
+                os=os,
+                pyver=pyver,
+                tests=True,
+                installer=False,
             )
         )
 
@@ -94,18 +96,22 @@ for os in os_test_list:
 # take a bit of time to run and are already run in the 'test' jobs.
 for os in os_release_list:
     for pyver in python_release_list:
-        jobs.append(
+        installer_jobs.append(
             entry(
-                job_name = f"Installer ({os}, {pyver})",
-                os = os,
-                pyver = pyver,
-                tests = False,
-                docs = True,
-                installer = True,
+                job_name=f"Installer ({os}, {pyver})",
+                os=os,
+                pyver=pyver,
+                tests=False,
+                installer=True,
             )
         )
 
 if not pretty:
-    print("matrix=", end='')
+    print("test_matrix=", end="")
 
-print(json.dumps(jobs, indent=4 if pretty else None))
+print(json.dumps(test_jobs, indent=4 if pretty else None))
+
+if not pretty:
+    print("installer_matrix=", end="")
+
+print(json.dumps(installer_jobs, indent=4 if pretty else None))
