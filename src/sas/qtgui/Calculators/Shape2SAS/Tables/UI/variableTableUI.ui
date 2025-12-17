@@ -208,7 +208,7 @@
             <string>Name to plugin model</string>
            </property>
            <property name="text">
-            <string>Model_1</string>
+            <string>Shape2SAS model</string>
            </property>
           </widget>
          </item>
