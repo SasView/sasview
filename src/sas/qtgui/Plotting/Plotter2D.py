@@ -65,7 +65,7 @@ class Plotter2DWidget(PlotterBase):
         self.slicer = None
         self.slicers = {}
         self.slicer_widget = None
-        self.stackplots = False  # whether to stack multiple slicer plots
+        self.stackplots = True  # whether to stack multiple slicer plots
         self.slicer_plots_dict = {}  # keep track of slicer plots
         self.vmin = None
         self.vmax = None

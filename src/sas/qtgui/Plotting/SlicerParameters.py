@@ -71,6 +71,9 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         # Store models for each slicer
         self.slicer_models = {}
 
+        # Set the checkbox state based on parent's stackplots attribute
+        self.cbStackPlots.setChecked(getattr(self.parent, 'stackplots', False))
+
         # Mapping combobox index -> slicer module
         self.callbacks = {
             0: None,
