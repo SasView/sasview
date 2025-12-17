@@ -47,6 +47,7 @@ python_release_list = [
 python_test_list = python_release_list + [
     # Additional test versions - add more to this list as needed
     "3.12",
+    "3.14",
 ]
 
 

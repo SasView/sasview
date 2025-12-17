@@ -1,6 +1,6 @@
 # Quick Intro for Building SasView
 
-:warning: Note - at the current time SasView requires Python 3.12 or Python 3.13.
+:warning: Note - at the current time SasView requires Python 3.12, 3.13, or 3.14.
 
 Whether you're installing SasView to use as a tool for your research or
 because you're wanting to work on the code, it is recommended that you

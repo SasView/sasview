@@ -52,7 +52,7 @@ jobs:
   ruff:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: astral-sh/ruff-action@v3
         with:
           version: "latest"
@@ -128,7 +128,7 @@ jobs:
         with:
           python-version: ${{ env.RELEASE_PYVER }}
 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Generate job configuration matrix
         id: set-matrix
@@ -171,7 +171,7 @@ jobs:
 
       - name: Obtain wheel cache
         id: cache-wheel
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/cache-wheel/
           key: wheel-${{ matrix.dependency.name }}-${{ steps.get-sha.outputs.sha }}
@@ -194,7 +194,7 @@ jobs:
           cp dist/*whl ~/.cache/cache-wheel/
 
       - name: Store wheel of ${{ matrix.dependency.name }} for use
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: build-dependency-${{ matrix.dependency.name }}-wheel
           path: |
@@ -213,7 +213,7 @@ jobs:
 
     steps:
       - name: Obtain SasView source from git
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -242,7 +242,7 @@ jobs:
           sudo eatmydata apt-get -y install libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils xvfb libegl-dev libcairo2-dev
 
       - name: Fetch wheels of sibling projects
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           path: dist/
           pattern: build-dependency-*-wheel
@@ -263,7 +263,7 @@ jobs:
           python -m build --no-isolation --sdist --wheel
 
       - name: Publish sdist
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: sasview-sdist
           path: |
@@ -271,7 +271,7 @@ jobs:
           if-no-files-found: error
 
       - name: Publish wheel package
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: sasview-wheel
           path: |
@@ -294,7 +294,7 @@ jobs:
 
     steps:
       - name: Obtain SasView source from git
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Install sasview wheel (and dependencies)
         uses: ./.github/actions/install-wheel
@@ -356,7 +356,7 @@ jobs:
 
     steps:
       - name: Obtain SasView source from git
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Install sasview wheel (and dependencies)
         uses: ./.github/actions/install-wheel
@@ -370,6 +370,12 @@ jobs:
         if: ${{ matrix.installer }}
         run: |
           uv pip install pyinstaller
+
+      - name: Generate the embedded credits file for all packages
+        if: ${{ matrix.installer }}
+        run: |
+          uv pip install pip-licenses
+          python build_tools/compile_licenses.py installers/credits.html
 
       - name: Build sasview with pyinstaller
         if: ${{ matrix.installer }}
@@ -387,7 +393,7 @@ jobs:
 
       - name: Collect a debug tarball of the installer package
         if: ${{ matrix.installer }}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: Debug-SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
           path: |
@@ -479,11 +485,11 @@ jobs:
       - name: Sign the binary using keypair alias
         if: ${{ startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
         run: |
-           smctl sign --keypair-alias key_911959544 --input installers/dist/setupSasView.exe
+           smctl sign --keypair-alias key_1369544803 --input installers/dist/setupSasView.exe
         shell: cmd
 
       - name: Publish installer package
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
           path: |
@@ -531,7 +537,7 @@ jobs:
 
       - name: Retrieve installer (workflow image)
         if: ${{ env.INSTALLER_USE_OLD_IMAGE != 'true' }}
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         id: download
         with:
           name: SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
