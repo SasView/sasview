@@ -138,9 +138,9 @@ class ModuleResources:
         if path:
             # this will be a entry within the directory or possibly even a subdirectory
             # need to walk up to find the entry we really want
-            match = f"/{self.module}/{src}"   # pathlib.Path directories don't end in /
+            match = str(Path(f"/{self.module}/{src}"))  # pathlib.Path directories don't end in /
             for part in itertools.chain([path], path.parents):
-                if str(part).endswith(match):
+                if str(Path(part)).endswith(match):
                     return part
             # if the upwards search falls through to here, then something went wrong
             # with the original filtering of the RECORD data, but allow it to try
