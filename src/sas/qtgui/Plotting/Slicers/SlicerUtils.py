@@ -67,7 +67,20 @@ class StackableMixin:
         self._plot_window = None  # Track the plot window this slicer uses
         self._actual_plot_id = None  # The actual ID used (may differ when stacking)
 
-    def _get_slicer_type_id(self):
+    @staticmethod
+    def as_list(data: object) -> list:
+        """
+        Ensure data is returned as a list.
+        Returns an empty list if data is None, a single-item list if data is a single item/
+        
+        :param data: Data which may be None, a single item, or a list
+        :return: List of data items
+        """
+        if data is None:
+            return []
+        return data if isinstance(data, list) else [data]
+
+    def _get_slicer_type_id(self) -> str:
         """
         Get the type identifier for this slicer.
         Should be overridden by subclasses to return something like "AnnulusPhi" + data.name
@@ -83,6 +96,7 @@ class StackableMixin:
         :param new_plot: The Data1D object to plot
         :param item: The data explorer item
         """
+
         # Set the type_id for stacking identification
         new_plot.type_id = self._get_slicer_type_id()
         new_plot.custom_color = self.color
@@ -107,21 +121,25 @@ class StackableMixin:
                 # No existing window or not stacking, create new plot
                 self._create_new_plot(new_plot, item)
 
-    def _find_stackable_plot_window(self):
+    def _find_stackable_plot_window(self) -> object:
         """
         Find an existing plot window that can accept this slicer's data.
+        Returns the latest matching plot window if found, None otherwise.
 
         :return: Plot window if found, None otherwise
         """
 
         # Search through active plots
-        if hasattr(self.base, 'manager') and hasattr(self.base.manager, 'active_plots'):
-            for plot_id, plot_window in self.base.manager.active_plots.items():
-                if ((data := getattr(plot_window, 'data', None)) and
-                    (data_list := data if isinstance(data, list) else [data]) and
-                    hasattr(data_list[0], 'type_id') and
-                    data_list[0].type_id == self._get_slicer_type_id()):
-                    return plot_window
+        manager = getattr(self.base, 'manager', None)
+        active_plots = getattr(manager, 'active_plots', {})
+        match_type_id = self._get_slicer_type_id()  # ID of the slicer being created
+
+        # Loop backwards to find the most recent matching plot
+        for plot_window in reversed(list(active_plots.values())):
+            data = getattr(plot_window, 'data', None)
+            data_list = self.as_list(data)
+            if data_list and hasattr(data_list[0], 'type_id') and data_list[0].type_id == match_type_id:
+                return plot_window
         return None
 
     def _append_to_plot_window(self, plot_window: object, new_plot: Data1D, item) -> str:
@@ -145,8 +163,8 @@ class StackableMixin:
         self.base.manager.communicator.plotUpdateSignal.emit([new_plot])
 
         # Update slicer plots list if the slicer widget exists
-        if hasattr(self.base, 'slicer_widget') and self.base.slicer_widget is not None:
-            self.base.slicer_widget.updateSlicerPlotList()
+        if (slicer_widget := getattr(self.base, 'slicer_widget', None)):
+            slicer_widget.updateSlicerPlotList()
 
         return new_plot.id
 
@@ -168,17 +186,17 @@ class StackableMixin:
         self._actual_plot_id = new_plot.id
 
         # Find the plot window that was created
-        if hasattr(self.base, 'manager') and hasattr(self.base.manager, 'active_plots'):
-            for plot_id, plot_window in self.base.manager.active_plots.items():
-                if plot_id == new_plot.id or (hasattr(plot_window, 'data') and
-                    any(hasattr(d, 'id') and d.id == new_plot.id
-                        for d in (plot_window.data if isinstance(plot_window.data, list) else [plot_window.data]))):
+        manager = getattr(self.base, 'manager', None)
+        if manager and hasattr(manager, 'active_plots'):
+            for plot_id, plot_window in manager.active_plots.items():
+                data_list = self.as_list(getattr(plot_window, 'data', None))
+                if plot_id == new_plot.id or any(getattr(d, 'id', None) == new_plot.id for d in data_list):
                     self._plot_window = plot_window
                     break
 
         # Update slicer plots list if the slicer widget exists
-        if hasattr(self.base, 'slicer_widget') and self.base.slicer_widget is not None:
-            self.base.slicer_widget.updateSlicerPlotList()
+        if (slicer_widget := getattr(self.base, 'slicer_widget', None)):
+            slicer_widget.updateSlicerPlotList()
 
     def _update_existing_plot(self, new_plot, item):
         """
@@ -202,3 +220,7 @@ class StackableMixin:
 
         # Notify manager
         self.base.manager.communicator.plotUpdateSignal.emit([new_plot])
+
+        # Update slicer plots list if the slicer widget exists
+        if (slicer_widget := getattr(self.base, 'slicer_widget', None)):
+            slicer_widget.updateSlicerPlotList()
