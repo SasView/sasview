@@ -320,6 +320,31 @@ average.
     The displayed average only updates when input focus is moved back to
     that window; ie, when the mouse pointer is moved onto that plot.
 
+You can also add more slicers to the same plot by repeating the process above.
+The 'Slicer Parameters' dialog window allows you to select a particular slicer
+you have already created and modify its parameters, or replace it with a different
+type of slicer.
+
+.. note::
+    Only one circular average or box sum slicer can be applied to a plot at a time.
+
+When adding multiple slicers to the same plot, by default, the 'Stack Slicers'
+option is selected in the 'Slicer Parameters' dialog so, all slicers of the same
+type will be combined in one plot. If you want to create a new plot for each slicer,
+uncheck the 'Stack Slicers' option.
+
+You can also view a list of all the slicer plots that have been created on the *Slicer
+Plots* tab in the dialog window. This also allows you to delete unwanted slicer plots.
+At the bottom of the *Slicer Plots* tab, there is an option to plot symmetric slicers.
+This allows you top plot a desired number of sector or wedge slicers, which are arranged
+symmetrically around the center. You can drag the master slicer (with square markers), or
+enter the desired parameters in the text boxes provided to change the size and angle of all 
+the slicers. The plots for the individual slicers will be stacked.
+
+..note::
+    Adding symmetric slicers will remove any existing slicers and their plots, and adding
+    new slicers will remove any existing symmetric slicers and their plots.
+
 Selecting *Box Sum* automatically brings up the 'Slicer Parameters' dialog in
 order to display the average numerically, rather than graphically.
 
@@ -408,4 +433,4 @@ is, the central value of each bin on the x-axis.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last modified by Sujaya Shrestha, 17 November 2025
+.. note::  This help document was last modified by Sujaya Shrestha, 18 December 2025.
