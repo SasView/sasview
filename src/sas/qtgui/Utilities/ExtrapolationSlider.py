@@ -5,10 +5,10 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QFontMetrics
 
-from sas.sascalc.corfunc.calculation_data import ExtrapolationInteractionState, ExtrapolationParameters
+from sas.sascalc.util import ExtrapolationInteractionState, ExtrapolationParameters
 
 
-class CorfuncSlider(QtWidgets.QWidget):
+class ExtrapolationSlider(QtWidgets.QWidget):
     """ Slider that allows the selection of the different Q-ranges involved in interpolation,
     and that provides some visual cues to how it works."""
 
@@ -16,10 +16,10 @@ class CorfuncSlider(QtWidgets.QWidget):
     valueEditing = Signal(ExtrapolationInteractionState, name='valueEditing')
 
     def __init__(self,
+                 lower_label: str,
+                 upper_label: str,
                  parameters: ExtrapolationParameters = ExtrapolationParameters(1,2,4,8,16),
                  enabled: bool = False,
-                 lower_label: str = "Guinier",
-                 upper_label: str = "Porod",
                  *args, **kwargs):
 
         super().__init__(*args, **kwargs)
@@ -44,9 +44,9 @@ class CorfuncSlider(QtWidgets.QWidget):
         self.left_pad = 60
         self.right_pad = 60
         self.line_width = 3
-        self.guinier_color = QtGui.QColor('orange')
+        self.lower_color = QtGui.QColor('orange')
         self.data_color = QtGui.QColor('white')
-        self.porod_color = QtGui.QColor('green')
+        self.upper_color = QtGui.QColor('green')
         self.text_color = QtGui.QColor('black')
         self.line_drag_color = mix_colours(QtGui.QColor('white'), QtGui.QColor('black'), 0.4)
         self.hover_colour = QtGui.QColor('white')
@@ -58,9 +58,9 @@ class CorfuncSlider(QtWidgets.QWidget):
         # - define hover colours by mixing with a grey
         mix_color = QtGui.QColor('grey')
         mix_fraction = 0.7
-        self.guinier_hover_color = mix_colours(self.guinier_color, mix_color, mix_fraction)
+        self.lower_hover_color = mix_colours(self.lower_color, mix_color, mix_fraction)
         self.data_hover_color = mix_colours(self.data_color, mix_color, mix_fraction)
-        self.porod_hover_color = mix_colours(self.porod_color, mix_color, mix_fraction)
+        self.upper_hover_color = mix_colours(self.upper_color, mix_color, mix_fraction)
 
         # Mouse control
         self._hovering = False
@@ -276,8 +276,8 @@ class CorfuncSlider(QtWidgets.QWidget):
         return self._min*math.exp((px_value - self.left_pad)/self.scale)
 
     @property
-    def guinier_label_position(self) -> float:
-        """ Position to put the text for the guinier region"""
+    def lower_label_position(self) -> float:
+        """ Position to put the text for the lower region"""
         return 0.5 * self.transform(self._point_1)
 
     @property
@@ -287,12 +287,12 @@ class CorfuncSlider(QtWidgets.QWidget):
 
     @property
     def transition_label_centre(self) -> float:
-        """ Centre of the data-porod transition"""
+        """ Centre of the data-upper transition"""
         return 0.5 * (self.transform(self._point_2) + self.transform(self._point_3))
 
     @property
-    def porod_label_centre(self) -> float:
-        """ Centre of the Porod region"""
+    def upper_label_centre(self) -> float:
+        """ Centre of the upper region"""
 
         return 0.5 * (self.transform(self._point_3) + self.width())
 
@@ -328,25 +328,25 @@ class CorfuncSlider(QtWidgets.QWidget):
         brush.setStyle(Qt.SolidPattern)
         if self.isEnabled():
             if self._hovering or self._dragging:
-                guinier_color = self.guinier_hover_color
+                lower_color = self.lower_hover_color
                 data_color = self.data_hover_color
-                porod_color = self.porod_hover_color
+                upper_color = self.upper_hover_color
             else:
-                guinier_color = self.guinier_color
+                lower_color = self.lower_color
                 data_color = self.data_color
-                porod_color = self.porod_color
+                upper_color = self.upper_color
         else:
-            guinier_color = self.disabled_non_data_color
+            lower_color = self.disabled_non_data_color
             data_color = self.data_color
-            porod_color = self.disabled_non_data_color
+            upper_color = self.disabled_non_data_color
 
 
-        brush.setColor(guinier_color)
+        brush.setColor(lower_color)
         rect = QtCore.QRect(0, 0, self.left_pad, self.vertical_size)
         painter.fillRect(rect, brush)
 
         grad = QtGui.QLinearGradient(positions[0], 0, positions[1], 0)
-        grad.setColorAt(0.0, guinier_color)
+        grad.setColorAt(0.0, lower_color)
         grad.setColorAt(1.0, data_color)
         rect = QtCore.QRect(positions[0], 0, widths[0], self.vertical_size)
         painter.fillRect(rect, grad)
@@ -357,11 +357,11 @@ class CorfuncSlider(QtWidgets.QWidget):
 
         grad = QtGui.QLinearGradient(positions[2], 0, positions[3], 0)
         grad.setColorAt(0.0, data_color)
-        grad.setColorAt(1.0, porod_color)
+        grad.setColorAt(1.0, upper_color)
         rect = QtCore.QRect(positions[2], 0, widths[2], self.vertical_size)
         painter.fillRect(rect, grad)
 
-        brush.setColor(porod_color)
+        brush.setColor(upper_color)
         rect = QtCore.QRect(positions[3], 0, widths[3] + self.right_pad, self.vertical_size)
         painter.fillRect(rect, brush)
 
@@ -371,7 +371,7 @@ class CorfuncSlider(QtWidgets.QWidget):
 
         # Data range lines
         if self.isEnabled():
-            pen = QtGui.QPen(mix_colours(self.hover_colour, guinier_color, 0.5), self.line_width)
+            pen = QtGui.QPen(mix_colours(self.hover_colour, lower_color, 0.5), self.line_width)
         else:
             pen = QtGui.QPen(self.disabled_line_color, self.line_width)
 
@@ -380,7 +380,7 @@ class CorfuncSlider(QtWidgets.QWidget):
 
 
         if self.isEnabled():
-            pen = QtGui.QPen(mix_colours(self.hover_colour, porod_color, 0.5), self.line_width)
+            pen = QtGui.QPen(mix_colours(self.hover_colour, upper_color, 0.5), self.line_width)
         else:
             pen = QtGui.QPen(self.disabled_line_color, self.line_width)
 
@@ -414,10 +414,10 @@ class CorfuncSlider(QtWidgets.QWidget):
         #
 
 
-        self._paint_label(self.guinier_label_position, self._lower_label)
+        self._paint_label(self.lower_label_position, self._lower_label)
         self._paint_label(self.data_label_centre, "Data")
         # self._paint_label(self.transition_label_centre, "Transition") # Looks better without this
-        self._paint_label(self.porod_label_centre, self._upper_label)
+        self._paint_label(self.upper_label_centre, self._upper_label)
 
     def _paint_label(self, position: float, text: str, centre_justify=True):
 
@@ -463,7 +463,7 @@ def mix_colours(a: QtGui.QColor, b: QtGui.QColor, k: float) -> QtGui.QColor:
 def main():
     """ Show a demo of the slider """
     app = QtWidgets.QApplication([])
-    slider = CorfuncSlider(enabled=True)
+    slider = ExtrapolationSlider(enabled=True)
     slider.show()
     app.exec_()
 

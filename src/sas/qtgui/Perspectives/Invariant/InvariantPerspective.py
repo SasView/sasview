@@ -7,13 +7,13 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from twisted.internet import reactor, threads
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Perspectives.Corfunc.CorfuncSlider import CorfuncSlider
 from sas.qtgui.Plotting import PlotterData
 from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
-from sas.sascalc.corfunc.calculation_data import ExtrapolationParameters
+from sas.qtgui.Utilities.ExtrapolationSlider import ExtrapolationSlider
 
 # sas-global
 from sas.sascalc.invariant import invariant
+from sas.sascalc.util import ExtrapolationParameters
 
 # local
 from ..perspective import Perspective
@@ -99,10 +99,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.no_extrapolation_plot: PlotterData | None = None
 
         # Slider
-        self.slider: CorfuncSlider = CorfuncSlider(
-            lower_label="Low-Q",
-            upper_label="High-Q",
-        )
+        self.slider = ExtrapolationSlider(lower_label="Low-Q", upper_label="High-Q")
         self.sliderLayout.insertWidget(1, self.slider)
 
         # no reason to have this widget resizable

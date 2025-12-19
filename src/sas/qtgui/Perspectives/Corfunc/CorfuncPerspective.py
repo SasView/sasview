@@ -10,20 +10,18 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtGui import QDoubleValidator, QStandardItem
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-
-# sas-global
-# pylint: disable=import-error, no-name-in-module
-from sas.qtgui.Perspectives.Corfunc.CorfuncSlider import CorfuncSlider
 from sas.qtgui.Perspectives.Corfunc.ExtractionCanvas import ExtractionCanvas
 from sas.qtgui.Perspectives.Corfunc.IDFCanvas import IDFCanvas
 from sas.qtgui.Perspectives.Corfunc.QSpaceCanvas import QSpaceCanvas
 from sas.qtgui.Perspectives.Corfunc.RealSpaceCanvas import RealSpaceCanvas
 from sas.qtgui.Plotting.PlotterData import Data1D
+
+# sas-global
+# pylint: disable=import-error, no-name-in-module
+from sas.qtgui.Utilities.ExtrapolationSlider import ExtrapolationSlider
 from sas.qtgui.Utilities.Reports import ReportBase
 from sas.qtgui.Utilities.Reports.reportdata import ReportData
 from sas.sascalc.corfunc.calculation_data import (
-    ExtrapolationInteractionState,
-    ExtrapolationParameters,
     GuinierData,
     LongPeriodMethod,
     PorodData,
@@ -31,6 +29,7 @@ from sas.sascalc.corfunc.calculation_data import (
     TransformedData,
 )
 from sas.sascalc.corfunc.corfunc_calculator import CalculationError, CorfuncCalculator
+from sas.sascalc.util import ExtrapolationInteractionState, ExtrapolationParameters
 
 from ..perspective import Perspective
 from .SaveExtrapolatedPopup import SaveExtrapolatedPopup
@@ -84,7 +83,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self._running = False
 
         # Add slider widget
-        self.slider = CorfuncSlider()
+        self.slider = ExtrapolationSlider(lower_label="Guinier", upper_label="Porod")
         self.sliderLayout.insertWidget(1, self.slider)
 
         # Plots
