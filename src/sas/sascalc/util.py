@@ -21,12 +21,13 @@ class SettableExtrapolationParameters:
 
 class ExtrapolationParameters(NamedTuple):
     """ Represents the parameters defining extrapolation"""
+    ex_q_min: float | None
     data_q_min: float
     point_1: float
     point_2: float
     point_3: float
     data_q_max: float
-
+    ex_q_max: float | None
 
 @dataclass
 class ExtrapolationInteractionState:
