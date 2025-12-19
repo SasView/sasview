@@ -316,6 +316,8 @@ define a region or select the number of points to plot (*nbins*).
 A separate plot window will also have appeared, displaying the requested
 average.
 
+..image:: image_slicer_params_window.png
+
 .. note::
     The displayed average only updates when input focus is moved back to
     that window; ie, when the mouse pointer is moved onto that plot.
@@ -333,17 +335,31 @@ option is selected in the 'Slicer Parameters' dialog so, all slicers of the same
 type will be combined in one plot. If you want to create a new plot for each slicer,
 uncheck the 'Stack Slicers' option.
 
+..image:: image_multi_slicer_plotting.png
+
 You can also view a list of all the slicer plots that have been created on the *Slicer
 Plots* tab in the dialog window. This also allows you to delete unwanted slicer plots.
-At the bottom of the *Slicer Plots* tab, there is an option to plot symmetric slicers.
-This allows you top plot a desired number of sector or wedge slicers, which are arranged
-symmetrically around the center. You can drag the master slicer (with square markers), or
-enter the desired parameters in the text boxes provided to change the size and angle of all 
-the slicers. The plots for the individual slicers will be stacked.
+
+At the bottom of the *Slicer* tab, there is an option to plot symmetric slicers.
+This allows you to plot a desired number of sector or wedge slicers, which are arranged
+symmetrically around the center. One of the slicers acts as the master slicer, marked 
+with square markers, and the others are created based on the parameters of the master slicer.
+You can adjust the master slicer by dragging it or entering the desired parameters in 
+the text boxes provided to change the size and angle of all the slicers. 
+The plots for the individual slicers will be stacked.
 
 ..note::
     Adding symmetric slicers will remove any existing slicers and their plots, and adding
     new slicers will remove any existing symmetric slicers and their plots.
+
+
+..image:: image_symmetric_wedge.png
+
+..note::
+    Since sector slicers span both positive and negative Q values, selecting N sectors
+    will result in 2N 'half-sectors' on the plot.
+
+..image:: image_symmetric_sector.png
 
 Selecting *Box Sum* automatically brings up the 'Slicer Parameters' dialog in
 order to display the average numerically, rather than graphically.
@@ -433,4 +449,4 @@ is, the central value of each bin on the x-axis.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last modified by Sujaya Shrestha, 18 December 2025.
+.. note::  This help document was last modified by Sujaya Shrestha, 19 December 2025.
