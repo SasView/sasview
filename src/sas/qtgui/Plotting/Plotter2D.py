@@ -13,7 +13,7 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.BoxSum import BoxSum
 from sas.qtgui.Plotting.ColorMap import ColorMap
 from sas.qtgui.Plotting.PlotterBase import PlotterBase
-from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
+from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
 from sas.qtgui.Plotting.SlicerParameters import SlicerParameters
 from sas.qtgui.Plotting.Slicers.AnnulusSlicer import AnnulusInteractor
 from sas.qtgui.Plotting.Slicers.BoxSlicer import BoxInteractorX, BoxInteractorY
@@ -63,8 +63,10 @@ class Plotter2DWidget(PlotterBase):
         self.slicer_z = 5
         # Reference to the current slicer
         self.slicer = None
-        self.slicers = {}  # Change from list to dict
+        self.slicers = {}
         self.slicer_widget = None
+        self.stackplots = True  # whether to stack multiple slicer plots
+        self.slicer_plots_dict = {}  # keep track of slicer plots
         self.vmin = None
         self.vmax = None
         self.im = None
@@ -309,6 +311,40 @@ class Plotter2DWidget(PlotterBase):
         ''' utility method for manager query of active plots '''
         return self.manager.active_plots
 
+    def getActiveSlicerPlots(self):
+        """
+        Utility method for manager query of active slicer plots.
+        Returns a dictionary of plot_id: plot_window for all 1D plots
+        that were created by slicers from this 2D plot.
+        """
+        slicer_plots = {}
+
+        if not hasattr(self, 'manager') or not hasattr(self.manager, 'active_plots'):
+            return slicer_plots
+
+        # Search through all active plots
+        for plot_id, plot_window in self.manager.active_plots.items():
+            if not hasattr(plot_window, 'data') and plot_window.data is not None:
+                # No data loaded (catches the cases where data == None and data == [])
+                continue
+            # Get the data (could be a list or single item)
+            data_list = plot_window.data if isinstance(plot_window.data, list) else [plot_window.data]
+
+            # Check if any data in this plot is from a slicer
+            for data in data_list:
+                if ((type_id := getattr(data, 'type_id', None)) and  # Primary method: Check if this data has a type_id
+                    self.data0.name in type_id):  # Check if the type_id contains this 2D plot's name
+                    slicer_plots[plot_id] = plot_window
+                    break  # Found a slicer plot, no need to check other data
+
+                # Fallback: Check if data has plot_role attribute (older method)
+                elif ((plot_role := getattr(data, 'plot_role', None)) and
+                      plot_role == DataRole.ROLE_ANGULAR_SLICE and  # Only use the roles that actually exist
+                      self.data0.name in data.name):  # Check if the data name contains this 2D plot's name
+                    slicer_plots[plot_id] = plot_window
+                    break
+        return slicer_plots
+
     def onEditSlicer(self):
         """
         Present a dialog for manipulating the current slicer
@@ -501,7 +537,7 @@ class Plotter2DWidget(PlotterBase):
             item = self._item.parent()
         self._recurse_plots_to_remove(item)
 
-    def setSlicer(self, slicer):
+    def setSlicer(self, slicer, stack: bool=None):
         """ Create a new slicer without removing the old one """
         # Clear the previous slicers if BoxSumCalculator is used or clear BoxSum if other slicer is used
         if isinstance(self.slicer, BoxSumCalculator):
@@ -516,6 +552,9 @@ class Plotter2DWidget(PlotterBase):
         slicer_color = self._get_next_slicer_color()
 
         self.slicer = slicer(self, self.ax, item=self._item, color=slicer_color, zorder=self.slicer_z)
+
+        if stack is not None:
+            self.stackplots = stack
 
         # Generate a unique name for this slicer
         slicer_name = f"{slicer.__name__}_{self.data0.name}_{len(self.slicers)}"

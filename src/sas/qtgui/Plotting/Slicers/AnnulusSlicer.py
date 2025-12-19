@@ -1,14 +1,17 @@
+import logging
+
 import numpy
 
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
 from sas.qtgui.Plotting.SlicerModel import SlicerModel
-from sas.qtgui.Plotting.Slicers.SlicerUtils import generate_unique_plot_id
+from sas.qtgui.Plotting.Slicers.SlicerUtils import StackableMixin, generate_unique_plot_id
 
 from .BaseInteractor import BaseInteractor
 
+logger = logging.getLogger(__name__)
 
-class AnnulusInteractor(BaseInteractor, SlicerModel):
+
+class AnnulusInteractor(BaseInteractor, SlicerModel, StackableMixin):
     """
     AnnulusInteractor plots a data1D average of an annulus area defined in a
     Data2D object. The data1D averaging itself is performed in sasdata by
@@ -22,6 +25,7 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
     def __init__(self, base, axes, item=None, color="black", zorder=3):
         BaseInteractor.__init__(self, base, axes, color=color)
         SlicerModel.__init__(self)
+        StackableMixin.__init__(self)
 
         self.markers = []
         self.axes = axes
@@ -53,6 +57,10 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
         self.draw()
 
         self.setModelFromParams()
+
+    def _get_slicer_type_id(self):
+        """Return the slicer type identifier"""
+        return "AnnulusPhi" + self.data.name
 
     def set_layer(self, n):
         """
@@ -144,12 +152,13 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
         new_plot.is_data = True
         new_plot.xtransform = "x"
         new_plot.ytransform = "y"
+
         item = self._item
         if self._item.parent() is not None:
             item = self._item.parent()
-        GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
-        self.base.manager.communicator.plotUpdateSignal.emit([new_plot])
-        self.base.manager.communicator.forcePlotDisplaySignal.emit([item, new_plot])
+
+        # Use the mixin to handle stacking/updating
+        self._create_or_update_plot(new_plot, item)
 
         if self.update_model:
             self.setModelFromParams()
