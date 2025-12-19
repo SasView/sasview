@@ -536,11 +536,13 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
     def extrapolation_parameters(self) -> ExtrapolationParameters | None:
         if self.data is not None:
             return ExtrapolationParameters(
-                min(self.data.x),
-                safe_float(self.model.item(WIDGETS.W_QMIN).text()),
-                safe_float(self.model.item(WIDGETS.W_QMAX).text()),
-                safe_float(self.model.item(WIDGETS.W_QCUTOFF).text()),
-                max(self.data.x))
+                ex_q_min=None,
+                data_q_min=min(self.data.x),
+                point_1=safe_float(self.model.item(WIDGETS.W_QMIN).text()),
+                point_2=safe_float(self.model.item(WIDGETS.W_QMAX).text()),
+                point_3=safe_float(self.model.item(WIDGETS.W_QCUTOFF).text()),
+                data_q_max=max(self.data.x),
+                ex_q_max=None)
         else:
             return None
 
@@ -669,44 +671,26 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             # Maybe we should just minimize
             self.setWindowState(QtCore.Qt.WindowMinimized)
 
-    def on_extrapolation_text_changed_1(self, text):
+    def on_extrapolation_text_changed_1(self):
         """ Text in LowerQMax changed"""
-
-        #
-        # Note: We need to update based on params below, not a call to self.extrapolation_parameters,
-        #       because that value wont be updated until after the QLineEdit.textEdited signals are
-        #       processed
-        #
-
-        params = self.extrapolation_parameters._replace(point_1=safe_float(text))
+        value: str = self.txtLowerQMax.text()
+        params = self.extrapolation_parameters._replace(point_1=safe_float(value))
         self.slider.extrapolation_parameters = params
         self._q_space_plot.update_lines(ExtrapolationInteractionState(params))
         self.notify_extrapolation_text_box_validity(params)
 
-    def on_extrapolation_text_changed_2(self, text):
+    def on_extrapolation_text_changed_2(self):
         """ Text in UpperQMin changed"""
-
-        #
-        # Note: We need to update based on params below, not a call to self.extrapolation_parameters,
-        #       because that value wont be updated until after the QLineEdit.textEdited signals are
-        #       processed
-        #
-
-        params = self.extrapolation_parameters._replace(point_2=safe_float(text))
+        value: str = self.txtUpperQMin.text()
+        params = self.extrapolation_parameters._replace(point_2=safe_float(value))
         self.slider.extrapolation_parameters = params
         self._q_space_plot.update_lines(ExtrapolationInteractionState(params))
         self.notify_extrapolation_text_box_validity(params)
 
-    def on_extrapolation_text_changed_3(self, text):
+    def on_extrapolation_text_changed_3(self):
         """ Text in UpperQMax changed"""
-
-        #
-        # Note: We need to update based on params below, not a call to self.extrapolation_parameters,
-        #       because that value wont be updated until after the QLineEdit.textEdited signals are
-        #       processed
-        #
-
-        params = self.extrapolation_parameters._replace(point_3=safe_float(text))
+        value: str = self.txtUpperQMax.text()
+        params = self.extrapolation_parameters._replace(point_3=safe_float(value))
         self.slider.extrapolation_parameters = params
         self._q_space_plot.update_lines(ExtrapolationInteractionState(params))
         self.notify_extrapolation_text_box_validity(params)
@@ -747,13 +731,36 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.txtUpperQMax.setStyleSheet(RED if invalid_3 else NORMAL)
 
         # Show dialog if requested and values are out of range
-        if show_dialog and (p1 < qmin or p3 > qmax):
-            msg = "The slider values are out of range.\n"
-            msg += f"The minimum value is {qmin:.8g} and the maximum value is {qmax:.8g}"
-            dialog = QtWidgets.QMessageBox(self, text=msg)
-            dialog.setWindowTitle("Value out of range")
-            dialog.setStandardButtons(QtWidgets.QMessageBox.Ok)
-            dialog.exec_()
+        if show_dialog:
+            if p1 <= qmin:
+                msg = "The slider values are out of range.\n"
+                msg += f"The minimum value is {qmin:.8g}.\n"
+                dialog = QtWidgets.QMessageBox(self, text=msg)
+                dialog.setWindowTitle("Min value out of range")
+                dialog.setStandardButtons(QtWidgets.QMessageBox.Ok)
+                dialog.exec_()
+                self.txtLowerQMax.setText(f"{qmin + 1e-6:.7g}")
+                self.on_extrapolation_text_changed_1()
+
+            if invalid_2:
+                msg = "The slider values are out of range.\n"
+                msg += f"Porod start must be between Guinier end: {p1:.8g} and Porod end: {p3:.8g}.\n"
+                dialog = QtWidgets.QMessageBox(self, text=msg)
+                dialog.setWindowTitle("Middle value out of range")
+                dialog.setStandardButtons(QtWidgets.QMessageBox.Ok)
+                dialog.exec_()
+                self.txtUpperQMin.setText(f"{(p1 + p3)/2:.7g}")
+                self.on_extrapolation_text_changed_2()
+
+            if p3 >= qmax:
+                msg = "The slider values are out of range.\n"
+                msg += f"The maximum value is {qmax:.8g}.\n"
+                dialog = QtWidgets.QMessageBox(self, text=msg)
+                dialog.setWindowTitle("Max value out of range")
+                dialog.setStandardButtons(QtWidgets.QMessageBox.Ok)
+                dialog.exec_()
+                self.txtUpperQMax.setText(f"{qmax - 1e-6:.7g}")
+                self.on_extrapolation_text_changed_3()
 
     def on_extrapolation_slider_changed(self, state: ExtrapolationParameters):
         """ Slider state changed"""

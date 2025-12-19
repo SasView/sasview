@@ -165,11 +165,13 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
     def extrapolation_parameters(self) -> ExtrapolationParameters | None:
         if self._data is not None:
             return ExtrapolationParameters(
-                safe_float(Q_MINIMUM),
-                safe_float(self.model.item(WIDGETS.W_GUINIER_END_EX).text()),
-                safe_float(self.model.item(WIDGETS.W_POROD_START_EX).text()),
-                safe_float(self.model.item(WIDGETS.W_POROD_END_EX).text()),
-                safe_float(Q_MAXIMUM),
+                ex_q_min=float(Q_MINIMUM),
+                data_q_min=safe_float(self.model.item(WIDGETS.W_QMIN).text()),
+                point_1=safe_float(self.model.item(WIDGETS.W_GUINIER_END_EX).text()),
+                point_2=safe_float(self.model.item(WIDGETS.W_POROD_START_EX).text()),
+                point_3=safe_float(self.model.item(WIDGETS.W_POROD_END_EX).text()),
+                data_q_max=safe_float(self.model.item(WIDGETS.W_QMAX).text()),
+                ex_q_max=float(Q_MAXIMUM),
             )
         else:
             return None
@@ -345,7 +347,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             self.low_extrapolation_plot.show_q_range_sliders = True
             self.low_extrapolation_plot.slider_update_on_move = False
             self.low_extrapolation_plot.slider_perspective_name = self.name
-            self.low_extrapolation_plot.slider_low_q_input = self.extrapolation_parameters.data_q_min
+            self.low_extrapolation_plot.slider_low_q_input = self.extrapolation_parameters.ex_q_min
             self.low_extrapolation_plot.slider_high_q_input = self.txtGuinierEnd_ex.text()
             self.low_extrapolation_plot.slider_high_q_setter = ["set_low_q_extrapolation_upper_limit"]
             self.low_extrapolation_plot.slider_high_q_getter = ["get_low_q_extrapolation_upper_limit"]
@@ -579,7 +581,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             return self.model
 
         if low_calculation_pass:
-            qmin_ext: float = float(self.extrapolation_parameters.data_q_min)
+            qmin_ext: float = float(self.extrapolation_parameters.ex_q_min)
             extrapolated_data = self._calculator.get_extra_data_low(self._low_points, q_start=qmin_ext)
             power_low: float | None = self._calculator.get_extrapolation_power(range="low")
 
@@ -873,15 +875,15 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self, params: ExtrapolationParameters, show_dialog: bool = False
     ) -> None:
         # Round values to 8 significant figures to avoid floating point precision issues
-        p1: float = float(f"{params.point_1:.7g}")  # Guinier end
-        p2: float = float(f"{params.point_2:.7g}")  # Porod start
-        p3: float = float(f"{params.point_3:.7g}")  # Porod end
+        p1: float = float(f"{params.point_1:.7g}")  # low q end
+        p2: float = float(f"{params.point_2:.7g}")  # high q start
+        p3: float = float(f"{params.point_3:.7g}")  # high q end
         data_q_min: float = float(f"{self._data.x.min():.7g}")  # Actual data min
         data_q_max: float = float(f"{self._data.x.max():.7g}")  # Actual data max
         qmax: float = Q_MAXIMUM
 
         # Determine validity flags such that data_q_min < point_1 < point_2 < point_3 < qmax
-        # Also p2 < data_q_max so that Porod start is within data range
+        # Also p2 < data_q_max so that high q start is within data range
         invalid_1: bool = p1 <= data_q_min or p1 >= p2
         invalid_2: bool = p2 <= p1 or p2 >= p3 or p2 >= data_q_max
         invalid_3: bool = p3 <= p2 or p3 > qmax
