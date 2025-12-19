@@ -2,16 +2,15 @@ import logging
 
 import numpy
 
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.SlicerModel import SlicerModel
 from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
-from sas.qtgui.Plotting.Slicers.SlicerUtils import generate_unique_plot_id
+from sas.qtgui.Plotting.Slicers.SlicerUtils import StackableMixin, generate_unique_plot_id
 
 logger = logging.getLogger(__name__)
 
 
-class BoxInteractor(BaseInteractor, SlicerModel):
+class BoxInteractor(BaseInteractor, SlicerModel, StackableMixin):
     """
     BoxInteractor plots a data1D average of a rectangular area defined in
     a Data2D object. The data1D averaging itself is performed in sasdata
@@ -28,6 +27,8 @@ class BoxInteractor(BaseInteractor, SlicerModel):
     def __init__(self, base, axes, item=None, color="black", zorder=3, direction=None):
         BaseInteractor.__init__(self, base, axes, color=color)
         SlicerModel.__init__(self)
+        StackableMixin.__init__(self)
+
         # Class initialization
         self.markers = []
         self.axes = axes
@@ -170,6 +171,9 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         self.horizontal_lines.save(ev)
         self.center.save(ev)
 
+    def _get_slicer_type_id(self):
+        return f"BoxSlicer{self.direction}{self.data.name}"
+
     def _post_data(self, new_slab=None, nbins=None, direction=None):
         """
         post 1D data averaging in Qx or Qy given new_slab type
@@ -265,7 +269,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
 
         # Assign unique id per slicer instance and use it as the display name
         if self._plot_id is None:
-            base_id = "BoxAverage" + self.data.name
+            base_id = "BoxAverage" + self.direction + self.data.name
             self._plot_id = generate_unique_plot_id(base_id, self._item)
 
         new_plot.id = self._plot_id
@@ -294,9 +298,9 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         item = self._item
         if self._item.parent() is not None:
             item = self._item.parent()
-        GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
-        self.base.manager.communicator.plotUpdateSignal.emit([new_plot])
-        self.base.manager.communicator.forcePlotDisplaySignal.emit([item, new_plot])
+
+        # Use the mixin to handle stacking/updating
+        self._create_or_update_plot(new_plot, item)
 
         if self.update_model:
             self.setModelFromParams()
