@@ -863,24 +863,16 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if row_index_child != -1:
             data = new_item.child(row_index_child)
             new_item = self.cloneTheory(data)
-            #new_item.setText(search_name)
-            #new_item.child(0).data().id = search_name
             model.beginResetModel()
             model.appendRow(new_item)
             model.endResetModel()
-        self.sendData([new_item])
 
     def sendData(self, event=None):
         """
         Send selected item data to the current perspective and set the relevant notifiers
         """
-
-        if type(event) == bool:
-            selected_items = self.selectedItems()
-        else:
-            selected_items = event
-
-        if len(selected_items) <1:
+        selected_items = self.selectedItems()
+        if len(selected_items) < 1:
             return
 
         # Check that only one item is selected when sending to perspectives that don't support batch mode
