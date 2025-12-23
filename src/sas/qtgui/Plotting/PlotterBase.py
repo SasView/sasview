@@ -33,17 +33,10 @@ class CustomToolbar(NavigationToolbar):
         custom_action.setToolTip("Send all data to the Data Explorer")
         custom_action.triggered.connect(self.sendToDataExplorer)
         self.insertAction(self.actions()[-1], custom_action)
-        self._actions["data_explorer"] = custom_action
-        self._actions["data_explorer"].setVisible(False)
 
     def sendToDataExplorer(self):
-        search_name = self.parent.data
-        for item in search_name:
+        for item in self.parent.data:
             self.parent.manager.communicator.freezeDataNameSignal.emit(item.name)
-        self._actions["data_explorer"].setEnabled(False)
-
-        # Re-enable after 3 seconds
-        QtCore.QTimer.singleShot(3000, lambda: self._actions["data_explorer"].setEnabled(True))
 
 class PlotterBase(QtWidgets.QWidget):
     #TODO: Describe what this class is
