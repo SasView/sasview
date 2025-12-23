@@ -1,13 +1,17 @@
+import logging
+
 import numpy
 
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
 from sas.qtgui.Plotting.SlicerModel import SlicerModel
+from sas.qtgui.Plotting.Slicers.SlicerUtils import StackableMixin, generate_unique_plot_id
 
 from .BaseInteractor import BaseInteractor
 
+logger = logging.getLogger(__name__)
 
-class AnnulusInteractor(BaseInteractor, SlicerModel):
+
+class AnnulusInteractor(BaseInteractor, SlicerModel, StackableMixin):
     """
     AnnulusInteractor plots a data1D average of an annulus area defined in a
     Data2D object. The data1D averaging itself is performed in sasdata by
@@ -17,22 +21,24 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
     r1 and r2 (Q1 and Q2). All Q points at a constant angle phi from the x-axis
     are averaged together to provide a 1D array in phi from 0 to 180 degrees.
     """
-    def __init__(self, base, axes, item=None, color='black', zorder=3):
 
+    def __init__(self, base, axes, item=None, color="black", zorder=3):
         BaseInteractor.__init__(self, base, axes, color=color)
         SlicerModel.__init__(self)
+        StackableMixin.__init__(self)
 
         self.markers = []
         self.axes = axes
         self.base = base
         self._item = item
-        self.qmax = max(numpy.fabs(self.data.xmax),
-                        numpy.fabs(self.data.xmin))  # must be positive
+        self.qmax = max(numpy.fabs(self.data.xmax), numpy.fabs(self.data.xmin))  # must be positive
         self.dqmin = min(numpy.fabs(self.data.qx_data))
         self.connect = self.base.connect
 
         # Number of points on the plot
         self.nbins = 100
+        # Store the plot ID so it doesn't change when parameters are updated
+        self._plot_id = None
         # Cursor position of Rings (Left(-1) or Right(1))
         self.xmaxd = self.data.xmax
         self.xmind = self.data.xmin
@@ -42,19 +48,19 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
         else:
             self.sign = -1
         # Inner circle
-        self.inner_circle = RingInteractor(self, self.axes,
-                                           zorder=zorder,
-                                           r=self.qmax / 2.0, sign=self.sign)
+        self.inner_circle = RingInteractor(self, self.axes, color=color, zorder=zorder, r=self.qmax / 2.0, sign=self.sign)
         self.inner_circle.qmax = self.qmax
-        self.outer_circle = RingInteractor(self, self.axes,
-                                           zorder=zorder + 1, r=self.qmax / 1.8,
-                                           sign=self.sign)
+        self.outer_circle = RingInteractor(self, self.axes, color=color, zorder=zorder + 1, r=self.qmax / 1.8, sign=self.sign)
         self.outer_circle.qmax = self.qmax * 1.2
         self.update()
         self._post_data()
         self.draw()
 
         self.setModelFromParams()
+
+    def _get_slicer_type_id(self):
+        """Return the slicer type identifier"""
+        return "AnnulusPhi" + self.data.name
 
     def set_layer(self, n):
         """
@@ -103,10 +109,9 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
             return
 
         from sasdata.data_util.manipulations import Ring
-        rmin = min(numpy.fabs(self.inner_circle.get_radius()),
-                   numpy.fabs(self.outer_circle.get_radius()))
-        rmax = max(numpy.fabs(self.inner_circle.get_radius()),
-                   numpy.fabs(self.outer_circle.get_radius()))
+
+        rmin = min(numpy.fabs(self.inner_circle.get_radius()), numpy.fabs(self.outer_circle.get_radius()))
+        rmax = max(numpy.fabs(self.inner_circle.get_radius()), numpy.fabs(self.outer_circle.get_radius()))
         if nbins is not None:
             self.nbins = nbins
         # Create the data1D Q average of data2D
@@ -121,36 +126,39 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
             dxw = sector.dxw
         else:
             dxw = None
-        new_plot = Data1D(x=(sector.x - numpy.pi) * 180 / numpy.pi,
-                          y=sector.y, dy=sector.dy)
+        new_plot = Data1D(x=(sector.x - numpy.pi) * 180 / numpy.pi, y=sector.y, dy=sector.dy)
         new_plot.dxl = dxl
         new_plot.dxw = dxw
-        new_plot.name = "AnnulusPhi" + "(" + self.data.name + ")"
-        new_plot.title = "AnnulusPhi" + "(" + self.data.name + ")"
 
         new_plot.source = self.data.source
         new_plot.interactive = True
         new_plot.detector = self.data.detector
         # If the data file does not tell us what the axes are, just assume...
-        new_plot.xaxis(r"\rm{\phi}", 'degrees')
+        new_plot.xaxis(r"\rm{\phi}", "degrees")
         new_plot.yaxis(r"\rm{Intensity} ", "cm^{-1}")
         new_plot.plot_role = DataRole.ROLE_ANGULAR_SLICE
-        if hasattr(data, "scale") and data.scale == 'linear' and \
-                self.data.name.count("Residuals") > 0:
-            new_plot.ytransform = 'y'
+        if hasattr(data, "scale") and data.scale == "linear" and self.data.name.count("Residuals") > 0:
+            new_plot.ytransform = "y"
             new_plot.yaxis(r"\rm{Residuals} ", "/")
 
-        new_plot.id = "AnnulusPhi" + self.data.name
-        new_plot.type_id = "Slicer" + self.data.name # Used to remove plots after changing slicer so they don't keep showing up after closed
+        # Assign unique id per slicer instance and use it as the display name
+        if self._plot_id is None:
+            base_id = "AnnulusPhi" + self.data.name
+            self._plot_id = generate_unique_plot_id(base_id, self._item)
+
+        new_plot.id = self._plot_id
+        new_plot.name = new_plot.id
+        new_plot.title = new_plot.id
         new_plot.is_data = True
         new_plot.xtransform = "x"
         new_plot.ytransform = "y"
+
         item = self._item
         if self._item.parent() is not None:
             item = self._item.parent()
-        GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
-        self.base.manager.communicator.plotUpdateSignal.emit([new_plot])
-        self.base.manager.communicator.forcePlotDisplaySignal.emit([item, new_plot])
+
+        # Use the mixin to handle stacking/updating
+        self._create_or_update_plot(new_plot, item)
 
         if self.update_model:
             self.setModelFromParams()
@@ -159,27 +167,27 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
         """
         Test the proposed new value "value" for row "row" of parameters
         """
-        #Set minimum difference in outer/inner ring to ensure data exists in annulus
+        # Set minimum difference in outer/inner ring to ensure data exists in annulus
         MIN_DIFFERENCE = self.dqmin
         isValid = True
 
-        if param_name == 'inner_radius':
+        if param_name == "inner_radius":
             # First, check the closeness
-            if numpy.fabs(param_value - self.getParams()['outer_radius']) < MIN_DIFFERENCE:
+            if numpy.fabs(param_value - self.getParams()["outer_radius"]) < MIN_DIFFERENCE:
                 print("Inner and outer radii too close. Please adjust.")
                 isValid = False
             elif param_value > self.qmax:
                 print("Inner radius exceeds maximum range. Please adjust.")
                 isValid = False
-        elif param_name == 'outer_radius':
+        elif param_name == "outer_radius":
             # First, check the closeness
-            if numpy.fabs(param_value - self.getParams()['inner_radius']) < MIN_DIFFERENCE:
+            if numpy.fabs(param_value - self.getParams()["inner_radius"]) < MIN_DIFFERENCE:
                 print("Inner and outer radii too close. Please adjust.")
                 isValid = False
             elif param_value > self.qmax:
                 print("Outer radius exceeds maximum range. Please adjust.")
                 isValid = False
-        elif param_name == 'nbins':
+        elif param_name == "nbins":
             # Can't be 0
             if param_value < 1:
                 print("Number of bins cannot be less than or equal to 0. Please adjust.")
@@ -241,16 +249,16 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
         self.draw()
 
     def draw(self):
-        """
-        """
+        """ """
         self.base.draw()
 
 
 class RingInteractor(BaseInteractor):
     """
-     Draw a ring on a data2D plot centered at (0,0) given a radius
+    Draw a ring on a data2D plot centered at (0,0) given a radius
     """
-    def __init__(self, base, axes, color='black', zorder=5, r=1.0, sign=1):
+
+    def __init__(self, base, axes, color="black", zorder=5, r=1.0, sign=1):
         """
         :param: the color of the line that defined the ring
         :param r: the radius of the ring
@@ -275,14 +283,21 @@ class RingInteractor(BaseInteractor):
         # # Create a marker
         # Inner circle marker
         x_value = [self.sign * numpy.fabs(self._inner_mouse_x)]
-        self.inner_marker = self.axes.plot(x_value, [0], linestyle='',
-                                           marker='s', markersize=10,
-                                           color=self.color, alpha=0.6,
-                                           pickradius=5, label="pick",
-                                           zorder=zorder,
-                                           visible=True)[0]
+        self.inner_marker = self.axes.plot(
+            x_value,
+            [0],
+            linestyle="",
+            marker="s",
+            markersize=10,
+            color=self.color,
+            alpha=0.6,
+            pickradius=5,
+            label="pick",
+            zorder=zorder,
+            visible=True,
+        )[0]
         # Draw a circle
-        [self.inner_circle] = self.axes.plot([], [], linestyle='-', marker='', color=self.color)
+        [self.inner_circle] = self.axes.plot([], [], linestyle="-", marker="", color=self.color)
         # The number of points that make the ring line
         self.npts = 40
 
@@ -304,8 +319,10 @@ class RingInteractor(BaseInteractor):
         Clear the slicer and all connected events related to this slicer
         """
         self.clear_markers()
-        self.inner_marker.remove()
-        self.inner_circle.remove()
+        if self.inner_marker.axes is not None:
+            self.inner_marker.remove()
+        if self.inner_circle.axes is not None:
+            self.inner_circle.remove()
 
     def get_radius(self):
         """
@@ -329,8 +346,7 @@ class RingInteractor(BaseInteractor):
             x.append(xval)
             y.append(yval)
 
-        self.inner_marker.set(xdata=[self.sign * numpy.fabs(self._inner_mouse_x)],
-                              ydata=[0])
+        self.inner_marker.set(xdata=[self.sign * numpy.fabs(self._inner_mouse_x)], ydata=[0])
         self.inner_circle.set_data(x, y)
 
     def save(self, ev):
@@ -390,5 +406,3 @@ class RingInteractor(BaseInteractor):
         """
         x = params["radius"]
         self.set_cursor(x, self._inner_mouse_y)
-
-

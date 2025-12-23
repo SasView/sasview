@@ -35,6 +35,7 @@ This module is extensible for future work to
 #     glob matching; until we're using that, we have some messier regular
 #     expressions in the code below.
 
+import contextlib
 import enum
 import functools
 import importlib.metadata
@@ -42,6 +43,8 @@ import importlib.resources
 import itertools
 import logging
 import re
+import tempfile
+from collections.abc import Generator
 from pathlib import Path, PurePath
 
 logger = logging.getLogger(__name__)
@@ -105,6 +108,32 @@ class ModuleResources:
             return True
 
         raise NotADirectoryError(f"Resource tree {src} not found in module {self.module}")
+
+    @contextlib.contextmanager
+    def resource(self, src: str | PurePath) -> Generator[Path, None, None]:
+        """Provide a filesystem path to a file resource, in a temporary directory if needed
+
+        If the resource is already available on the filesystem, then provide
+        the path to it directly; if it is available as an extractable resource,
+        then provide it in a temporary directory that will get cleaned up
+        when the context manager is completed.
+
+        If the resource can't be found by any means, then a FileNotFoundError
+        is raised.
+        """
+        # step 1: look for the resource already on disk
+        try:
+            path = self.path_to_resource(src)
+            yield path
+            return
+        except FileNotFoundError:
+            pass
+
+        # step 2: if not already on disk then it's time for a temp dir
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_path = Path(tmp_dir) / Path(src).name
+            self.extract_resource(src, tmp_path)
+            yield tmp_path
 
     def path_to_resource(self, src: str | PurePath) -> Path:
         """Provide the filesystem path to a file resource

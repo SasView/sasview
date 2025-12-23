@@ -17,6 +17,35 @@ from sas.qtgui.Plotting.WindowTitle import WindowTitle
 
 DEFAULT_CMAP = mpl.cm.jet
 
+class CustomToolbar(NavigationToolbar):
+    def __init__(self, canvas, parent=None):
+        super().__init__(canvas, parent)
+        self.parent = parent
+        self.add_custom_button()
+
+    def add_custom_button(self):
+        # I have been told that a Button is better
+        # But all NavitaionToolbar interactions are Actions
+        # This way all can be called with:
+        #   self._actions['xxx']
+        custom_icon = QtGui.QIcon()  # You can load an icon here if you want e.g., QtGui.QIcon("path/to/icon.png")
+        custom_action = QtGui.QAction(custom_icon, "Send to Fitting", self)
+        custom_action.setToolTip("Send all data to Fitting in seperate tabs")
+        custom_action.triggered.connect(self.sendToFitting)
+        self.insertAction(self.actions()[-1], custom_action)
+        #self.addAction(custom_action)
+        self._actions['fitting'] = custom_action
+        self._actions['fitting'].setVisible(False)
+
+    def sendToFitting(self):
+        search_name = self.parent.data
+        for item in search_name:
+            self.parent.manager.communicator.freezeDataNameSignal.emit(item.name)
+        self._actions["fitting"].setEnabled(False)
+
+        # Re-enable after 3 seconds
+        QtCore.QTimer.singleShot(3000, lambda: self._actions["fitting"].setEnabled(True))
+
 class PlotterBase(QtWidgets.QWidget):
     #TODO: Describe what this class is
 
@@ -45,7 +74,7 @@ class PlotterBase(QtWidgets.QWidget):
         # Set the layout and place the canvas widget in it.
         layout = QtWidgets.QVBoxLayout()
         # FIXME setMargin -> setContentsMargins in qt5 with 4 args
-        #layout.setContentsMargins(0)
+        layout.setSpacing(0)
         layout.addWidget(self.canvas)
 
         # 1D plotter defaults
@@ -109,7 +138,8 @@ class PlotterBase(QtWidgets.QWidget):
         self.canvas.mpl_connect('scroll_event', self.onMplWheel)
 
         self.contextMenu = QtWidgets.QMenu(self)
-        self.toolbar = NavigationToolbar(self.canvas, self)
+        self.toolbar = CustomToolbar(self.canvas, self)
+
         self.canvas.mpl_connect('resize_event', self.onResize)
         self.canvas.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.canvas.customContextMenuRequested.connect(self.showContextMenu)

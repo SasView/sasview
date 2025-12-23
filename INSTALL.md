@@ -1,7 +1,5 @@
 # Quick Intro for Building SasView
 
-:warning: Note - at the current time SasView requires Python 3.12 or Python 3.13.
-
 Whether you're installing SasView to use as a tool for your research or
 because you're wanting to work on the code, it is recommended that you
 work inside a Python virtual environment of some sort.
@@ -11,6 +9,7 @@ A `venv` or a `conda` are both popular choices.
 
 Installers for SasView can be found at [https://www.sasview.org/](https://www.sasview.org/),
 for various operating systems. You will also find walk through tutorials on how to install and use SasView.
+Note that SasView requires Python 3.12+.
 
 You can also install SasView using standard Python installation tools, such as
 - `uv tool install sasview` (or `pipx install sasview`) to install it into its own standalone
@@ -87,6 +86,30 @@ debugging software, e.g.:
 
 - [VS Code](https://code.visualstudio.com/docs/python/environments)
 - [PyCharm](https://www.jetbrains.com/help/pycharm/creating-virtual-environment.html)
+
+### Pre-Commit Hooks for Linting
+
+The SasView, SasData and SasModels repositories include [pre-commit hooks](https://pre-commit.com/), which can be set up to enable linting to be run on the code. A linter is a tool that can detect programming errors, bugs, stylistic errors, etc. SasView uses the [Ruff](https://docs.astral.sh/ruff/) package for linting. Ruff is able to warn about a wide range of possible errors, and in some cases apply automatic fixes for them.
+
+When code is submitted to the SasView repository, we make sure to always apply all available automatic fixes for any linting
+violations present. The pre-commit hooks can be used to warn of any linting errors when committing to the local branch, or pushing that branch to the repository.
+
+To use the pre-commit hooks provided in SasView, first activate your virtual environment and install the pre-commit package with:
+
+```shell
+pip install pre-commit
+```
+
+To set up the pre-commit hook for a package, simply navigate to the appropriate directory for the package and type:
+
+```shell
+pre-commit install
+```
+
+This will configure the pre-commit hook for the relevant package.
+
+> [!IMPORTANT]
+> To set up the pre-commit hooks for SasView, SasData, and SasModels this command needs to be run in the directory for each package separately.
 
 ## Seeing and testing your changes
 
@@ -168,7 +191,6 @@ that you will be able to see in your venv's site-packages (e.g. `.venv/lib/pytho
 - creates a `sas` directory that contains only the files that don't live in the "right" place in git and therefore do not sit in the filesystem in the correct location for the editable install.
 
 (For a regular installation rather than an editable installation, the `.pth` file would not exist and all the module files would be in that `sas` directory.)
-
 
 ## More information
 

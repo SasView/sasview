@@ -1247,5 +1247,5 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                 # deactivate the constraint
                 tab = self.parent.getTabByName(name[:name.index(":")])
                 row = tab.getRowFromName(name[name.index(":") + 1:])
-                model_key = tab.getModelKey(constraint)
+                model_key = tab.getModelKeyFromName(constraint)
                 tab.getConstraintForRow(row, model_key=model_key).active = False
