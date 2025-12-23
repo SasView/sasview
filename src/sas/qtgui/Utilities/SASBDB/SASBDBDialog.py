@@ -45,6 +45,15 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
         """
         super().__init__(parent)
         self.setupUi(self)
+
+        # Cache for the original (unscaled) shape pixmap; used to rescale efficiently on resize
+        self._shape_pixmap_original = None
+        if hasattr(self, 'lblShapeImage'):
+            self.lblShapeImage.installEventFilter(self)
+            self.lblShapeImage.setSizePolicy(
+                QtWidgets.QSizePolicy.Policy.Expanding,
+                QtWidgets.QSizePolicy.Policy.Expanding,
+            )
         
         # Store export data
         self.export_data = export_data or SASBDBExportData()
@@ -66,6 +75,20 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
         
         # Generate model visualization if available
         self.updateModelVisualization()
+
+    def eventFilter(self, obj, event):
+        """Keep the shape visualization filling the available label size on resize (no re-render)."""
+        if hasattr(self, 'lblShapeImage') and obj is self.lblShapeImage:
+            if event.type() == QtCore.QEvent.Type.Resize:
+                if self._shape_pixmap_original is not None and not self._shape_pixmap_original.isNull():
+                    scaled = self._shape_pixmap_original.scaled(
+                        self.lblShapeImage.size(),
+                        QtCore.Qt.AspectRatioMode.KeepAspectRatio,
+                        QtCore.Qt.TransformationMode.SmoothTransformation,
+                    )
+                    self.lblShapeImage.setPixmap(scaled)
+                    self.lblShapeImage.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        return super().eventFilter(obj, event)
     
     def populateFromData(self):
         """
@@ -463,6 +486,7 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
     def updateModelVisualization(self):
         """
         Generate and display model shape visualization if available
+        Uses built-in matplotlib rendering for common sasmodels shapes
         """
         # Check if we have model data with visualization parameters
         model_name = None
@@ -484,84 +508,725 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
             return
         
         try:
-            # Try to import sasmodels shape visualizer
-            from sasmodels.shape_visualizer import generate_shape_image, SASModelsLoader, SASModelsShapeDetector
+            # Generate visualization using built-in matplotlib rendering
+            if hasattr(self, 'lblShapeImage'):
+                label_size = self.lblShapeImage.size()
+                # When the dialog is first shown, the label may not be laid out yet
+                if label_size.width() < 50 or label_size.height() < 50:
+                    label_size = self.lblShapeImage.minimumSize()
+            else:
+                label_size = None
+
+            pixmap = self._generateModelShapePixmap(model_name, viz_params, target_size=label_size)
             
-            # Normalize model name (remove any path or module prefixes)
-            normalized_name = model_name
-            if '.' in normalized_name:
-                # Extract just the model name if it's a module path
-                normalized_name = normalized_name.split('.')[-1]
-            
-            # Load model info - try both original and normalized names
-            model_info = SASModelsLoader.load_model_info(normalized_name)
-            if model_info is None and normalized_name != model_name:
-                # Try original name if normalized didn't work
-                model_info = SASModelsLoader.load_model_info(model_name)
-            
-            if model_info is None:
-                if hasattr(self, 'lblShapeImage'):
-                    self.lblShapeImage.setText(f"Model '{model_name}' not found in sasmodels")
-                return
-            
-            # Check if model supports visualization
-            visualizer = SASModelsShapeDetector.create_visualizer(model_info)
-            if visualizer is None:
-                if hasattr(self, 'lblShapeImage'):
-                    self.lblShapeImage.setText(f"Model '{normalized_name}' does not support shape visualization")
-                return
-            
-            # Generate visualization image
-            # Use visualization params if available, otherwise use defaults
-            params = viz_params if viz_params else None
-            
-            # Generate image as BytesIO - use normalized name
-            image_buffer = generate_shape_image(
-                normalized_name, 
-                params=params, 
-                output_file=None,
-                show_cross_sections=True,  # Include cross-section views
-                show_wireframe=False
-            )
-            
-            if image_buffer:
-                # Convert BytesIO to QPixmap
-                pixmap = QtGui.QPixmap()
-                pixmap.loadFromData(image_buffer.getvalue())
-                
+            if pixmap and not pixmap.isNull():
                 # Display the image at a good size
                 if hasattr(self, 'lblShapeImage'):
-                    # Scale to fit the available space while maintaining aspect ratio
-                    # With cross-sections, the image is larger (16x10 inches at 300 DPI = 4800x3000 pixels)
-                    # Scale it down to fit the 600x400 minimum size label
-                    target_width = 580
-                    target_height = int(target_width * pixmap.height() / pixmap.width()) if pixmap.width() > 0 else 380
-                    # Ensure it fits within the label bounds
-                    if target_height > 380:
-                        target_height = 380
-                        target_width = int(target_height * pixmap.width() / pixmap.height()) if pixmap.height() > 0 else 580
-                    
-                    target_size = QtCore.QSize(target_width, target_height)
-                    
-                    scaled_pixmap = pixmap.scaled(
-                        target_size,
+                    # Pixmap is generated to fit the label; no hard-coded downscaling here
+                    self._shape_pixmap_original = pixmap
+                    # Scale once now (future resizes are handled by eventFilter)
+                    scaled = pixmap.scaled(
+                        self.lblShapeImage.size(),
                         QtCore.Qt.AspectRatioMode.KeepAspectRatio,
-                        QtCore.Qt.TransformationMode.SmoothTransformation
+                        QtCore.Qt.TransformationMode.SmoothTransformation,
                     )
-                    self.lblShapeImage.setPixmap(scaled_pixmap)
+                    self.lblShapeImage.setPixmap(scaled)
                     self.lblShapeImage.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
             else:
                 if hasattr(self, 'lblShapeImage'):
-                    self.lblShapeImage.setText(f"Failed to generate visualization for '{model_name}'")
+                    self.lblShapeImage.setText(f"Visualization not available for '{model_name}'")
                     
-        except ImportError:
-            logger.warning("sasmodels.shape_visualizer not available")
-            if hasattr(self, 'lblShapeImage'):
-                self.lblShapeImage.setText("Shape visualization not available\n(sasmodels not installed)")
         except Exception as e:
             logger.warning(f"Error generating model visualization: {e}")
+            import traceback
+            logger.warning(traceback.format_exc())
             if hasattr(self, 'lblShapeImage'):
-                self.lblShapeImage.setText(f"Error generating visualization:\n{str(e)[:50]}")
+                self.lblShapeImage.setText(f"Error generating visualization:\n{str(e)[:80]}")
+    
+    def _generateModelShapePixmap(self, model_name: str, params: dict = None, target_size: QtCore.QSize = None) -> QtGui.QPixmap:
+        """
+        Generate a QPixmap visualization of the model shape using matplotlib
+        
+        :param model_name: Name of the sasmodel (e.g., 'sphere', 'cylinder', 'core_shell_sphere')
+        :param params: Dictionary of model parameters
+        :param target_size: Target size for the pixmap (typically the QLabel size)
+        :return: QPixmap with the visualization
+        """
+        import numpy as np
+        from matplotlib.figure import Figure
+        from matplotlib.backends.backend_agg import FigureCanvasAgg
+        from mpl_toolkits.mplot3d import Axes3D
+        import io
+        
+        # Normalize model name
+        normalized_name = model_name.lower().replace(' ', '_')
+        if '.' in normalized_name:
+            normalized_name = normalized_name.split('.')[-1]
+        
+        # Create figure sized to the actual target widget size (fills the available space)
+        dpi = 100
+        if target_size is not None:
+            w_px = max(int(target_size.width()), 1)
+            h_px = max(int(target_size.height()), 1)
+            # Cap to avoid excessive memory usage on very large screens
+            w_px = min(w_px, 2200)
+            h_px = min(h_px, 1800)
+            fig = Figure(figsize=(w_px / dpi, h_px / dpi), dpi=dpi)
+        else:
+            fig = Figure(figsize=(20, 12), dpi=dpi)
+        canvas = FigureCanvasAgg(fig)
+        
+        # Use GridSpec efficiently: 3D view takes ~70% width, cross-sections take ~30% width
+        from matplotlib.gridspec import GridSpec
+        gs = GridSpec(
+            3, 3,
+            figure=fig,
+            width_ratios=[2.2, 2.2, 1.8],
+            height_ratios=[1, 1, 1],
+            hspace=0.08,
+            wspace=0.08,
+        )
+        
+        # Main 3D view spans first 2 columns and all 3 rows
+        ax_main = fig.add_subplot(gs[:, :2], projection='3d')
+        
+        # Cross-sections stacked in rightmost column (made wider)
+        ax1 = fig.add_subplot(gs[0, 2])  # XY view (top)
+        ax2 = fig.add_subplot(gs[1, 2])  # XZ view (front)
+        ax3 = fig.add_subplot(gs[2, 2])  # YZ view (side)
+        
+        # Get default parameters if none provided
+        if params is None:
+            params = {}
+        
+        # Define shape drawing functions for common models
+        try:
+            if 'sphere' in normalized_name and 'core_shell' in normalized_name:
+                self._draw_core_shell_sphere(ax1, ax2, ax3, params)
+                self._draw_3d_core_shell_sphere(ax_main, params)
+            elif 'sphere' in normalized_name:
+                self._draw_sphere(ax1, ax2, ax3, params)
+                self._draw_3d_sphere(ax_main, params)
+            elif 'cylinder' in normalized_name and 'core_shell' in normalized_name:
+                self._draw_core_shell_cylinder(ax1, ax2, ax3, params)
+                self._draw_3d_core_shell_cylinder(ax_main, params)
+            elif 'cylinder' in normalized_name:
+                self._draw_cylinder(ax1, ax2, ax3, params)
+                self._draw_3d_cylinder(ax_main, params)
+            elif 'ellipsoid' in normalized_name:
+                self._draw_ellipsoid(ax1, ax2, ax3, params)
+                self._draw_3d_ellipsoid(ax_main, params)
+            elif 'parallelepiped' in normalized_name or 'rectangular' in normalized_name:
+                self._draw_parallelepiped(ax1, ax2, ax3, params)
+                self._draw_3d_parallelepiped(ax_main, params)
+            else:
+                # Generic visualization - show model name
+                self._draw_generic_shape(ax1, ax2, ax3, normalized_name, params)
+                self._draw_3d_generic(ax_main, normalized_name, params)
+            
+            # Remove axes from main 3D plot
+            ax_main.set_axis_off()
+            # Maximize usable area for cross-sections (titles only)
+            for ax in (ax1, ax2, ax3):
+                ax.set_axis_off()
+            
+            # Set titles
+            #ax_main.set_title('3D View', fontsize=16, fontweight='bold', pad=6)
+            ax1.set_title('XY (Top)', fontsize=11, pad=2)
+            ax2.set_title('XZ (Front)', fontsize=11, pad=2)
+            ax3.set_title('YZ (Side)', fontsize=11, pad=2)
+            
+            # Add main title
+            fig.suptitle(f'Model: {model_name}', fontsize=14, fontweight='bold', y=0.99)
+            # Use manual spacing (tight_layout can shrink axes in dense grids)
+            fig.subplots_adjust(left=0.01, right=0.99, bottom=0.01, top=0.94, wspace=0.06, hspace=0.10)
+            
+            # Convert figure to QPixmap
+            buf = io.BytesIO()
+            fig.savefig(buf, format='png', dpi=dpi, facecolor='white', edgecolor='none')
+            buf.seek(0)
+            
+            pixmap = QtGui.QPixmap()
+            pixmap.loadFromData(buf.getvalue())
+            
+            return pixmap
+            
+        except Exception as e:
+            logger.warning(f"Error drawing shape for {model_name}: {e}")
+            import traceback
+            logger.warning(traceback.format_exc())
+            return None
+    
+    def _draw_sphere(self, ax1, ax2, ax3, params):
+        """Draw a sphere in three views"""
+        import numpy as np
+        
+        radius = params.get('radius', 50.0)
+        
+        # Create circle for all views (sphere looks like circle from all angles)
+        theta = np.linspace(0, 2*np.pi, 100)
+        x = radius * np.cos(theta)
+        y = radius * np.sin(theta)
+        
+        for ax in [ax1, ax2, ax3]:
+            ax.fill(x, y, alpha=0.6, color='steelblue', edgecolor='darkblue', linewidth=2)
+            ax.set_xlim(-radius*1.5, radius*1.5)
+            ax.set_ylim(-radius*1.5, radius*1.5)
+            ax.set_aspect('equal')
+            ax.grid(True, alpha=0.3)
+            ax.axhline(y=0, color='k', linewidth=0.5)
+            ax.axvline(x=0, color='k', linewidth=0.5)
+        
+        ax1.set_xlabel('X (Å)')
+        ax1.set_ylabel('Y (Å)')
+        ax2.set_xlabel('X (Å)')
+        ax2.set_ylabel('Z (Å)')
+        ax3.set_xlabel('Y (Å)')
+        ax3.set_ylabel('Z (Å)')
+    
+    def _draw_core_shell_sphere(self, ax1, ax2, ax3, params):
+        """Draw a core-shell sphere in three views"""
+        import numpy as np
+        
+        # Try multiple parameter name variations for core radius
+        core_radius = params.get('radius', params.get('radius_core', params.get('core_radius', 40.0)))
+        # Try multiple parameter name variations for thickness  
+        thickness = params.get('thickness', params.get('shell_thickness', params.get('thick_shell', 10.0)))
+        outer_radius = core_radius + thickness
+        
+        logger.info(f"Drawing core_shell_sphere with core_radius={core_radius}, thickness={thickness}")
+        
+        theta = np.linspace(0, 2*np.pi, 100)
+        
+        for ax in [ax1, ax2, ax3]:
+            # Draw outer shell
+            x_outer = outer_radius * np.cos(theta)
+            y_outer = outer_radius * np.sin(theta)
+            ax.fill(x_outer, y_outer, alpha=0.5, color='lightcoral', 
+                   edgecolor='darkred', linewidth=2, label='Shell')
+            
+            # Draw core
+            x_core = core_radius * np.cos(theta)
+            y_core = core_radius * np.sin(theta)
+            ax.fill(x_core, y_core, alpha=0.7, color='steelblue', 
+                   edgecolor='darkblue', linewidth=2, label='Core')
+            
+            ax.set_xlim(-outer_radius*1.5, outer_radius*1.5)
+            ax.set_ylim(-outer_radius*1.5, outer_radius*1.5)
+            ax.set_aspect('equal')
+            ax.grid(True, alpha=0.3)
+            ax.axhline(y=0, color='k', linewidth=0.5)
+            ax.axvline(x=0, color='k', linewidth=0.5)
+        
+        ax1.legend(loc='upper right', fontsize=8)
+        ax1.set_xlabel('X (Å)')
+        ax1.set_ylabel('Y (Å)')
+        ax2.set_xlabel('X (Å)')
+        ax2.set_ylabel('Z (Å)')
+        ax3.set_xlabel('Y (Å)')
+        ax3.set_ylabel('Z (Å)')
+    
+    def _draw_cylinder(self, ax1, ax2, ax3, params):
+        """Draw a cylinder in three views"""
+        import numpy as np
+        
+        radius = params.get('radius', 20.0)
+        length = params.get('length', 100.0)
+        half_length = length / 2
+        
+        theta = np.linspace(0, 2*np.pi, 100)
+        
+        # XY view (top) - circle
+        x_circle = radius * np.cos(theta)
+        y_circle = radius * np.sin(theta)
+        ax1.fill(x_circle, y_circle, alpha=0.6, color='steelblue', 
+                edgecolor='darkblue', linewidth=2)
+        ax1.set_xlim(-radius*2, radius*2)
+        ax1.set_ylim(-radius*2, radius*2)
+        ax1.set_aspect('equal')
+        ax1.grid(True, alpha=0.3)
+        ax1.set_xlabel('X (Å)')
+        ax1.set_ylabel('Y (Å)')
+        
+        # XZ view (front) - rectangle
+        rect_x = [-radius, radius, radius, -radius, -radius]
+        rect_z = [-half_length, -half_length, half_length, half_length, -half_length]
+        ax2.fill(rect_x, rect_z, alpha=0.6, color='steelblue', 
+                edgecolor='darkblue', linewidth=2)
+        max_dim = max(radius*2, half_length*2)
+        ax2.set_xlim(-max_dim*0.7, max_dim*0.7)
+        ax2.set_ylim(-max_dim*0.7, max_dim*0.7)
+        ax2.set_aspect('equal')
+        ax2.grid(True, alpha=0.3)
+        ax2.set_xlabel('X (Å)')
+        ax2.set_ylabel('Z (Å)')
+        
+        # YZ view (side) - rectangle
+        ax3.fill(rect_x, rect_z, alpha=0.6, color='steelblue', 
+                edgecolor='darkblue', linewidth=2)
+        ax3.set_xlim(-max_dim*0.7, max_dim*0.7)
+        ax3.set_ylim(-max_dim*0.7, max_dim*0.7)
+        ax3.set_aspect('equal')
+        ax3.grid(True, alpha=0.3)
+        ax3.set_xlabel('Y (Å)')
+        ax3.set_ylabel('Z (Å)')
+    
+    def _draw_core_shell_cylinder(self, ax1, ax2, ax3, params):
+        """Draw a core-shell cylinder in three views"""
+        import numpy as np
+        
+        core_radius = params.get('radius', 20.0)
+        shell_thickness = params.get('thickness', 5.0)
+        outer_radius = core_radius + shell_thickness
+        length = params.get('length', 100.0)
+        half_length = length / 2
+        
+        theta = np.linspace(0, 2*np.pi, 100)
+        
+        # XY view (top) - concentric circles
+        for ax in [ax1]:
+            x_outer = outer_radius * np.cos(theta)
+            y_outer = outer_radius * np.sin(theta)
+            ax.fill(x_outer, y_outer, alpha=0.5, color='lightcoral', 
+                   edgecolor='darkred', linewidth=2)
+            x_core = core_radius * np.cos(theta)
+            y_core = core_radius * np.sin(theta)
+            ax.fill(x_core, y_core, alpha=0.7, color='steelblue', 
+                   edgecolor='darkblue', linewidth=2)
+            ax.set_xlim(-outer_radius*2, outer_radius*2)
+            ax.set_ylim(-outer_radius*2, outer_radius*2)
+            ax.set_aspect('equal')
+            ax.grid(True, alpha=0.3)
+        ax1.set_xlabel('X (Å)')
+        ax1.set_ylabel('Y (Å)')
+        
+        # XZ and YZ views - nested rectangles
+        for ax, xlabel in [(ax2, 'X (Å)'), (ax3, 'Y (Å)')]:
+            # Shell rectangle
+            shell_x = [-outer_radius, outer_radius, outer_radius, -outer_radius, -outer_radius]
+            shell_z = [-half_length, -half_length, half_length, half_length, -half_length]
+            ax.fill(shell_x, shell_z, alpha=0.5, color='lightcoral', 
+                   edgecolor='darkred', linewidth=2)
+            # Core rectangle
+            core_x = [-core_radius, core_radius, core_radius, -core_radius, -core_radius]
+            ax.fill(core_x, shell_z, alpha=0.7, color='steelblue', 
+                   edgecolor='darkblue', linewidth=2)
+            max_dim = max(outer_radius*2, half_length*2)
+            ax.set_xlim(-max_dim*0.7, max_dim*0.7)
+            ax.set_ylim(-max_dim*0.7, max_dim*0.7)
+            ax.set_aspect('equal')
+            ax.grid(True, alpha=0.3)
+            ax.set_xlabel(xlabel)
+            ax.set_ylabel('Z (Å)')
+    
+    def _draw_ellipsoid(self, ax1, ax2, ax3, params):
+        """Draw an ellipsoid in three views"""
+        import numpy as np
+        
+        radius_a = params.get('radius_equatorial', params.get('radius_a', 50.0))
+        radius_b = params.get('radius_polar', params.get('radius_b', 30.0))
+        radius_c = params.get('radius_c', radius_a)  # Often prolate/oblate
+        
+        theta = np.linspace(0, 2*np.pi, 100)
+        
+        # XY view
+        x1 = radius_a * np.cos(theta)
+        y1 = radius_c * np.sin(theta)
+        ax1.fill(x1, y1, alpha=0.6, color='steelblue', edgecolor='darkblue', linewidth=2)
+        max_r1 = max(radius_a, radius_c) * 1.5
+        ax1.set_xlim(-max_r1, max_r1)
+        ax1.set_ylim(-max_r1, max_r1)
+        ax1.set_aspect('equal')
+        ax1.grid(True, alpha=0.3)
+        ax1.set_xlabel('X (Å)')
+        ax1.set_ylabel('Y (Å)')
+        
+        # XZ view
+        x2 = radius_a * np.cos(theta)
+        z2 = radius_b * np.sin(theta)
+        ax2.fill(x2, z2, alpha=0.6, color='steelblue', edgecolor='darkblue', linewidth=2)
+        max_r2 = max(radius_a, radius_b) * 1.5
+        ax2.set_xlim(-max_r2, max_r2)
+        ax2.set_ylim(-max_r2, max_r2)
+        ax2.set_aspect('equal')
+        ax2.grid(True, alpha=0.3)
+        ax2.set_xlabel('X (Å)')
+        ax2.set_ylabel('Z (Å)')
+        
+        # YZ view
+        y3 = radius_c * np.cos(theta)
+        z3 = radius_b * np.sin(theta)
+        ax3.fill(y3, z3, alpha=0.6, color='steelblue', edgecolor='darkblue', linewidth=2)
+        max_r3 = max(radius_c, radius_b) * 1.5
+        ax3.set_xlim(-max_r3, max_r3)
+        ax3.set_ylim(-max_r3, max_r3)
+        ax3.set_aspect('equal')
+        ax3.grid(True, alpha=0.3)
+        ax3.set_xlabel('Y (Å)')
+        ax3.set_ylabel('Z (Å)')
+    
+    def _draw_parallelepiped(self, ax1, ax2, ax3, params):
+        """Draw a parallelepiped/rectangular prism in three views"""
+        import numpy as np
+        
+        a = params.get('length_a', params.get('a', 50.0))
+        b = params.get('length_b', params.get('b', 40.0))
+        c = params.get('length_c', params.get('c', 30.0))
+        
+        # XY view
+        rect1 = [[-a/2, -b/2], [a/2, -b/2], [a/2, b/2], [-a/2, b/2], [-a/2, -b/2]]
+        ax1.fill([p[0] for p in rect1], [p[1] for p in rect1], alpha=0.6, 
+                color='steelblue', edgecolor='darkblue', linewidth=2)
+        max_dim1 = max(a, b) * 0.8
+        ax1.set_xlim(-max_dim1, max_dim1)
+        ax1.set_ylim(-max_dim1, max_dim1)
+        ax1.set_aspect('equal')
+        ax1.grid(True, alpha=0.3)
+        ax1.set_xlabel('X (Å)')
+        ax1.set_ylabel('Y (Å)')
+        
+        # XZ view
+        rect2 = [[-a/2, -c/2], [a/2, -c/2], [a/2, c/2], [-a/2, c/2], [-a/2, -c/2]]
+        ax2.fill([p[0] for p in rect2], [p[1] for p in rect2], alpha=0.6, 
+                color='steelblue', edgecolor='darkblue', linewidth=2)
+        max_dim2 = max(a, c) * 0.8
+        ax2.set_xlim(-max_dim2, max_dim2)
+        ax2.set_ylim(-max_dim2, max_dim2)
+        ax2.set_aspect('equal')
+        ax2.grid(True, alpha=0.3)
+        ax2.set_xlabel('X (Å)')
+        ax2.set_ylabel('Z (Å)')
+        
+        # YZ view
+        rect3 = [[-b/2, -c/2], [b/2, -c/2], [b/2, c/2], [-b/2, c/2], [-b/2, -c/2]]
+        ax3.fill([p[0] for p in rect3], [p[1] for p in rect3], alpha=0.6, 
+                color='steelblue', edgecolor='darkblue', linewidth=2)
+        max_dim3 = max(b, c) * 0.8
+        ax3.set_xlim(-max_dim3, max_dim3)
+        ax3.set_ylim(-max_dim3, max_dim3)
+        ax3.set_aspect('equal')
+        ax3.grid(True, alpha=0.3)
+        ax3.set_xlabel('Y (Å)')
+        ax3.set_ylabel('Z (Å)')
+    
+    def _draw_generic_shape(self, ax1, ax2, ax3, model_name, params):
+        """Draw a generic representation for unsupported models"""
+        for ax in [ax1, ax2, ax3]:
+            ax.text(0.5, 0.5, f'{model_name}', 
+                   transform=ax.transAxes,
+                   ha='center', va='center', fontsize=10,
+                   bbox=dict(boxstyle='round', facecolor='lightblue', alpha=0.5))
+            ax.set_xlim(0, 1)
+            ax.set_ylim(0, 1)
+            ax.set_aspect('equal')
+            
+            # Show parameters if available
+            if params:
+                param_text = '\n'.join([f'{k}: {v:.2f}' if isinstance(v, float) else f'{k}: {v}' 
+                                       for k, v in list(params.items())[:5]])
+                ax.text(0.5, 0.2, param_text, 
+                       transform=ax.transAxes,
+                       ha='center', va='center', fontsize=8,
+                       family='monospace')
+        
+        ax1.set_xlabel('X')
+        ax1.set_ylabel('Y')
+        ax2.set_xlabel('X')
+        ax2.set_ylabel('Z')
+        ax3.set_xlabel('Y')
+        ax3.set_ylabel('Z')
+    
+    # ========== 3D Drawing Functions ==========
+    
+    def _draw_3d_sphere(self, ax, params):
+        """Draw a 3D sphere"""
+        import numpy as np
+        
+        radius = params.get('radius', 50.0)
+        
+        # Create sphere mesh
+        u = np.linspace(0, 2 * np.pi, 30)
+        v = np.linspace(0, np.pi, 20)
+        x = radius * np.outer(np.cos(u), np.sin(v))
+        y = radius * np.outer(np.sin(u), np.sin(v))
+        z = radius * np.outer(np.ones(np.size(u)), np.cos(v))
+        
+        ax.plot_surface(x, y, z, alpha=0.7, color='steelblue', edgecolor='darkblue', linewidth=0.3)
+        
+        self._set_3d_axes(ax, radius * 1.3)
+    
+    def _draw_3d_core_shell_sphere(self, ax, params):
+        """Draw a 3D core-shell sphere with cutaway"""
+        import numpy as np
+        
+        # Try multiple parameter name variations for core radius
+        core_radius = params.get('radius', params.get('radius_core', params.get('core_radius', 40.0)))
+        # Try multiple parameter name variations for thickness  
+        thickness = params.get('thickness', params.get('shell_thickness', params.get('thick_shell', 10.0)))
+        outer_radius = core_radius + thickness
+        
+        # Create meshes
+        u = np.linspace(0, 2 * np.pi, 30)
+        v = np.linspace(0, np.pi, 20)
+        
+        # Draw shell (with partial transparency to show core)
+        x_shell = outer_radius * np.outer(np.cos(u), np.sin(v))
+        y_shell = outer_radius * np.outer(np.sin(u), np.sin(v))
+        z_shell = outer_radius * np.outer(np.ones(np.size(u)), np.cos(v))
+        ax.plot_surface(x_shell, y_shell, z_shell, alpha=0.3, color='lightcoral', 
+                       edgecolor='darkred', linewidth=0.2)
+        
+        # Draw core (visible through shell)
+        x_core = core_radius * np.outer(np.cos(u), np.sin(v))
+        y_core = core_radius * np.outer(np.sin(u), np.sin(v))
+        z_core = core_radius * np.outer(np.ones(np.size(u)), np.cos(v))
+        ax.plot_surface(x_core, y_core, z_core, alpha=0.8, color='steelblue', 
+                       edgecolor='darkblue', linewidth=0.2)
+        
+        self._set_3d_axes(ax, outer_radius * 1.3)
+    
+    def _draw_3d_cylinder(self, ax, params):
+        """Draw a 3D cylinder"""
+        import numpy as np
+        
+        radius = params.get('radius', 20.0)
+        length = params.get('length', 100.0)
+        half_length = length / 2
+        
+        # Create cylinder mesh
+        theta = np.linspace(0, 2 * np.pi, 30)
+        z_cyl = np.linspace(-half_length, half_length, 20)
+        theta_grid, z_grid = np.meshgrid(theta, z_cyl)
+        x = radius * np.cos(theta_grid)
+        y = radius * np.sin(theta_grid)
+        
+        ax.plot_surface(x, y, z_grid, alpha=0.7, color='steelblue', 
+                       edgecolor='darkblue', linewidth=0.3)
+        
+        # Draw top and bottom caps
+        r_cap = np.linspace(0, radius, 10)
+        theta_cap = np.linspace(0, 2 * np.pi, 30)
+        r_grid, theta_grid = np.meshgrid(r_cap, theta_cap)
+        x_cap = r_grid * np.cos(theta_grid)
+        y_cap = r_grid * np.sin(theta_grid)
+        
+        # Top cap
+        z_top = np.ones_like(x_cap) * half_length
+        ax.plot_surface(x_cap, y_cap, z_top, alpha=0.7, color='steelblue', 
+                       edgecolor='darkblue', linewidth=0.2)
+        # Bottom cap
+        z_bottom = np.ones_like(x_cap) * (-half_length)
+        ax.plot_surface(x_cap, y_cap, z_bottom, alpha=0.7, color='steelblue', 
+                       edgecolor='darkblue', linewidth=0.2)
+        
+        max_dim = max(radius, half_length) * 1.3
+        self._set_3d_axes(ax, max_dim)
+    
+    def _draw_3d_core_shell_cylinder(self, ax, params):
+        """Draw a 3D core-shell cylinder"""
+        import numpy as np
+        
+        core_radius = params.get('radius', 20.0)
+        shell_thickness = params.get('thickness', 5.0)
+        outer_radius = core_radius + shell_thickness
+        length = params.get('length', 100.0)
+        half_length = length / 2
+        
+        theta = np.linspace(0, 2 * np.pi, 30)
+        z_cyl = np.linspace(-half_length, half_length, 20)
+        theta_grid, z_grid = np.meshgrid(theta, z_cyl)
+        
+        # Shell
+        x_shell = outer_radius * np.cos(theta_grid)
+        y_shell = outer_radius * np.sin(theta_grid)
+        ax.plot_surface(x_shell, y_shell, z_grid, alpha=0.3, color='lightcoral', 
+                       edgecolor='darkred', linewidth=0.2)
+        
+        # Core
+        x_core = core_radius * np.cos(theta_grid)
+        y_core = core_radius * np.sin(theta_grid)
+        ax.plot_surface(x_core, y_core, z_grid, alpha=0.8, color='steelblue', 
+                       edgecolor='darkblue', linewidth=0.2)
+        
+        max_dim = max(outer_radius, half_length) * 1.3
+        self._set_3d_axes(ax, max_dim)
+    
+    def _draw_3d_ellipsoid(self, ax, params):
+        """Draw a 3D ellipsoid"""
+        import numpy as np
+        
+        radius_a = params.get('radius_equatorial', params.get('radius_a', 50.0))
+        radius_b = params.get('radius_polar', params.get('radius_b', 30.0))
+        radius_c = params.get('radius_c', radius_a)
+        
+        u = np.linspace(0, 2 * np.pi, 30)
+        v = np.linspace(0, np.pi, 20)
+        
+        x = radius_a * np.outer(np.cos(u), np.sin(v))
+        y = radius_c * np.outer(np.sin(u), np.sin(v))
+        z = radius_b * np.outer(np.ones(np.size(u)), np.cos(v))
+        
+        ax.plot_surface(x, y, z, alpha=0.7, color='steelblue', 
+                       edgecolor='darkblue', linewidth=0.3)
+        
+        max_dim = max(radius_a, radius_b, radius_c) * 1.3
+        self._set_3d_axes(ax, max_dim)
+    
+    def _draw_3d_parallelepiped(self, ax, params):
+        """Draw a 3D parallelepiped/box"""
+        import numpy as np
+        
+        a = params.get('length_a', params.get('a', 50.0))
+        b = params.get('length_b', params.get('b', 40.0))
+        c = params.get('length_c', params.get('c', 30.0))
+        
+        # Define vertices
+        vertices = np.array([
+            [-a/2, -b/2, -c/2], [a/2, -b/2, -c/2], [a/2, b/2, -c/2], [-a/2, b/2, -c/2],
+            [-a/2, -b/2, c/2], [a/2, -b/2, c/2], [a/2, b/2, c/2], [-a/2, b/2, c/2]
+        ])
+        
+        # Define faces
+        faces = [
+            [vertices[0], vertices[1], vertices[2], vertices[3]],  # bottom
+            [vertices[4], vertices[5], vertices[6], vertices[7]],  # top
+            [vertices[0], vertices[1], vertices[5], vertices[4]],  # front
+            [vertices[2], vertices[3], vertices[7], vertices[6]],  # back
+            [vertices[0], vertices[3], vertices[7], vertices[4]],  # left
+            [vertices[1], vertices[2], vertices[6], vertices[5]]   # right
+        ]
+        
+        from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+        ax.add_collection3d(Poly3DCollection(faces, alpha=0.7, facecolor='steelblue', 
+                                             edgecolor='darkblue', linewidth=1))
+        
+        max_dim = max(a, b, c) * 0.8
+        self._set_3d_axes(ax, max_dim)
+    
+    def _draw_3d_generic(self, ax, model_name, params):
+        """Draw a generic 3D representation for unsupported models"""
+        # Just draw a simple sphere as placeholder
+        import numpy as np
+        
+        radius = 50.0
+        u = np.linspace(0, 2 * np.pi, 20)
+        v = np.linspace(0, np.pi, 15)
+        x = radius * np.outer(np.cos(u), np.sin(v))
+        y = radius * np.outer(np.sin(u), np.sin(v))
+        z = radius * np.outer(np.ones(np.size(u)), np.cos(v))
+        
+        ax.plot_surface(x, y, z, alpha=0.5, color='gray', edgecolor='darkgray', linewidth=0.3)
+        ax.text2D(0.5, 0.95, model_name, transform=ax.transAxes, ha='center', fontsize=9)
+        
+        self._set_3d_axes(ax, radius * 1.3)
+    
+    def _set_3d_axes(self, ax, max_dim):
+        """Set up 3D axes with equal aspect ratio"""
+        ax.set_xlim(-max_dim, max_dim)
+        ax.set_ylim(-max_dim, max_dim)
+        ax.set_zlim(-max_dim, max_dim)
+        ax.set_xlabel('X (Å)', fontsize=8)
+        ax.set_ylabel('Y (Å)', fontsize=8)
+        ax.set_zlabel('Z (Å)', fontsize=8)
+        ax.tick_params(labelsize=7)
+        # Set viewing angle
+        ax.view_init(elev=20, azim=45)
+    
+    def _generateModelShapeFigure(self, model_name: str, params: dict = None):
+        """
+        Generate a matplotlib Figure visualization of the model shape
+        Similar to _generateModelShapePixmap but returns a Figure for PDF generation
+        
+        :param model_name: Name of the sasmodel (e.g., 'sphere', 'cylinder', 'core_shell_sphere')
+        :param params: Dictionary of model parameters
+        :return: matplotlib.figure.Figure with the visualization
+        """
+        import numpy as np
+        from matplotlib.figure import Figure
+        from matplotlib.backends.backend_agg import FigureCanvasAgg
+        from mpl_toolkits.mplot3d import Axes3D
+        
+        # Normalize model name
+        normalized_name = model_name.lower().replace(' ', '_')
+        if '.' in normalized_name:
+            normalized_name = normalized_name.split('.')[-1]
+        
+        # Create figure with large 3D view + cross-sections (PDF rendering)
+        fig = Figure(figsize=(24, 12), dpi=100)
+        canvas = FigureCanvasAgg(fig)
+        
+        # Use GridSpec efficiently: 3D view takes ~70% width, cross-sections take ~30% width
+        from matplotlib.gridspec import GridSpec
+        gs = GridSpec(
+            3, 3,
+            figure=fig,
+            width_ratios=[2.2, 2.2, 1.8],
+            height_ratios=[1, 1, 1],
+            hspace=0.08,
+            wspace=0.08,
+        )
+        
+        # Main 3D view spans first 2 columns and all 3 rows
+        ax_main = fig.add_subplot(gs[:, :2], projection='3d')
+        
+        # Cross-sections stacked in rightmost column (made wider)
+        ax1 = fig.add_subplot(gs[0, 2])  # XY view (top)
+        ax2 = fig.add_subplot(gs[1, 2])  # XZ view (front)
+        ax3 = fig.add_subplot(gs[2, 2])  # YZ view (side)
+        
+        # Get default parameters if none provided
+        if params is None:
+            params = {}
+        
+        # Define shape drawing functions for common models
+        try:
+            if 'sphere' in normalized_name and 'core_shell' in normalized_name:
+                self._draw_core_shell_sphere(ax1, ax2, ax3, params)
+                self._draw_3d_core_shell_sphere(ax_main, params)
+            elif 'sphere' in normalized_name:
+                self._draw_sphere(ax1, ax2, ax3, params)
+                self._draw_3d_sphere(ax_main, params)
+            elif 'cylinder' in normalized_name and 'core_shell' in normalized_name:
+                self._draw_core_shell_cylinder(ax1, ax2, ax3, params)
+                self._draw_3d_core_shell_cylinder(ax_main, params)
+            elif 'cylinder' in normalized_name:
+                self._draw_cylinder(ax1, ax2, ax3, params)
+                self._draw_3d_cylinder(ax_main, params)
+            elif 'ellipsoid' in normalized_name:
+                self._draw_ellipsoid(ax1, ax2, ax3, params)
+                self._draw_3d_ellipsoid(ax_main, params)
+            elif 'parallelepiped' in normalized_name or 'rectangular' in normalized_name:
+                self._draw_parallelepiped(ax1, ax2, ax3, params)
+                self._draw_3d_parallelepiped(ax_main, params)
+            else:
+                # Generic visualization - show model name
+                self._draw_generic_shape(ax1, ax2, ax3, normalized_name, params)
+                self._draw_3d_generic(ax_main, normalized_name, params)
+            
+            # Remove axes from main 3D plot
+            ax_main.set_axis_off()
+            # Maximize usable area for cross-sections (titles only)
+            for ax in (ax1, ax2, ax3):
+                ax.set_axis_off()
+            
+            # Set titles
+            ax_main.set_title('3D View', fontsize=16, fontweight='bold', pad=6)
+            ax1.set_title('XY (Top)', fontsize=11, pad=2)
+            ax2.set_title('XZ (Front)', fontsize=11, pad=2)
+            ax3.set_title('YZ (Side)', fontsize=11, pad=2)
+            
+            # Add main title
+            fig.suptitle(f'Model: {model_name}', fontsize=14, fontweight='bold', y=0.99)
+            # Use manual spacing (tight_layout can shrink axes in dense grids)
+            fig.subplots_adjust(left=0.01, right=0.99, bottom=0.01, top=0.94, wspace=0.06, hspace=0.10)
+            
+            return fig
+            
+        except Exception as e:
+            logger.warning(f"Error drawing shape for {model_name}: {e}")
+            import traceback
+            logger.warning(traceback.format_exc())
+            return None
     
     def onExport(self):
         """
@@ -1330,7 +1995,7 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
                     fig.tight_layout()
                     return fig
             
-            # Fallback: Try to generate shape visualization from model data
+            # Fallback: Try to generate shape visualization from model data using built-in rendering
             if not self.export_data.samples:
                 return None
             
@@ -1342,56 +2007,21 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
             for fit in sample.fits:
                 if fit.models:
                     for model in fit.models:
-                        if hasattr(model, 'visualization_params') and model.visualization_params:
-                            # Try to generate shape visualization
+                        # Get model name from software_or_db or model_data
+                        model_name = model.software_or_db or ""
+                        if not model_name and model.model_data:
+                            # Try to extract model name from model_data
+                            import json
                             try:
-                                import sys
-                                import os
-                                # Add parent directory to path to access sasmodels
-                                parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
-                                if parent_dir not in sys.path:
-                                    sys.path.insert(0, parent_dir)
-                                
-                                from sasmodels.shape_visualizer import generate_shape_image
-                                from matplotlib.figure import Figure
-                                from matplotlib.backends.backend_agg import FigureCanvasAgg
-                                import numpy as np
-                                
-                                # Get model name from software_or_db or model_data
-                                model_name = model.software_or_db or ""
-                                if not model_name and model.model_data:
-                                    # Try to extract model name from model_data
-                                    import json
-                                    try:
-                                        model_data_dict = json.loads(model.model_data)
-                                        model_name = model_data_dict.get('name', '')
-                                    except:
-                                        pass
-                                
-                                if not model_name:
-                                    return None
-                                
-                                # Generate shape image
-                                fig = Figure(figsize=(8, 6))
-                                canvas = FigureCanvasAgg(fig)
-                                
-                                # Generate the shape visualization
-                                img_array = generate_shape_image(
-                                    model_name=model_name,
-                                    params=model.visualization_params,
-                                    show_cross_sections=True
-                                )
-                                
-                                if img_array is not None:
-                                    ax = fig.add_subplot(111)
-                                    ax.imshow(img_array)
-                                    ax.axis('off')
-                                    ax.set_title(f"Shape Visualization: {model_name}", fontsize=12)
-                                    fig.tight_layout()
-                                    return fig
-                            except Exception as e:
-                                logger.warning(f"Could not generate model shape visualization: {e}")
-                                return None
+                                model_data_dict = json.loads(model.model_data)
+                                model_name = model_data_dict.get('name', '')
+                            except:
+                                pass
+                        
+                        if model_name:
+                            # Generate visualization using built-in matplotlib rendering
+                            viz_params = getattr(model, 'visualization_params', None)
+                            return self._generateModelShapeFigure(model_name, viz_params)
             
             return None
         except Exception as e:
