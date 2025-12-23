@@ -746,6 +746,13 @@
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="cmdGeneratePDF">
+       <property name="text">
+        <string>Generate PDF</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="cmdClose">
        <property name="text">
         <string>Close</string>
