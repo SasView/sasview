@@ -351,6 +351,7 @@ class MultiSlicerBase(BaseInteractor, SlicerModel, StackableMixin):
             try:
                 self.base.slicer_widget.updateSlicerPlotList()
             except Exception:
+                # Best-effort UI update; ignore failures so they do not prevent drawing.
                 pass
 
         self.base.draw()

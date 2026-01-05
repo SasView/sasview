@@ -321,8 +321,10 @@ class Plotter2DWidget(PlotterBase):
 
         # Search through all active plots
         for plot_id, plot_window in self.manager.active_plots.items():
-            if not hasattr(plot_window, 'data') and plot_window.data is not None:
-                # No data loaded (catches the cases where data == None and data == [])
+            if (not hasattr(plot_window, 'data') or
+                plot_window.data is None or
+                plot_window.data == []):
+                # No data loaded (catches the cases where data == None or data == [])
                 continue
             # Get the data (could be a list or single item)
             data_list = plot_window.data if isinstance(plot_window.data, list) else [plot_window.data]
