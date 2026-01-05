@@ -645,7 +645,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
                 "That is a lot of slicers!",
                 f"Are you sure you want to create more than {threshold} slicers? This may lead to severe performance issues.",
                 QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
-                (QtWidgets.QMessageBox.No),
+                QtWidgets.QMessageBox.No,
             )
             if reply == QtWidgets.QMessageBox.No:
                 return

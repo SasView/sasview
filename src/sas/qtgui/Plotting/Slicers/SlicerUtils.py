@@ -65,7 +65,7 @@ class StackableMixin:
     def as_list(data: object) -> list:
         """
         Ensure data is returned as a list.
-        Returns an empty list if data is None, a single-item list if data is a single item/
+        Returns an empty list if data is None, a single-item list if data is a single item
         
         :param data: Data which may be None, a single item, or a list
         :return: List of data items
