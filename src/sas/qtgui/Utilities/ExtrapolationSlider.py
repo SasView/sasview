@@ -88,7 +88,7 @@ class ExtrapolationSlider(QtWidgets.QWidget):
 
     @staticmethod
     def find_parameter_problems(params: ExtrapolationParameters) -> str | None:
-        """ Check an extratpolation prarameters object for consistency
+        """ Check an extrapolation parameters object for consistency
 
         :param params: An extrapolation parameters object describing a desired state
         :returns: A description of the problem if it exists, otherwise None
