@@ -29,6 +29,7 @@ class ExtrapolationParameters(NamedTuple):
     data_q_max: float
     ex_q_max: float | None
 
+
 @dataclass
 class ExtrapolationInteractionState:
     """ Represents the state of the slider used to control extrapolation parameters

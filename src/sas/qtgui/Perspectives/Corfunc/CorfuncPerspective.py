@@ -732,35 +732,31 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
         # Show dialog if requested and values are out of range
         if show_dialog:
+            messages = []
+
             if p1 <= qmin:
-                msg = "The slider values are out of range.\n"
-                msg += f"The minimum value is {qmin:.8g}.\n"
-                dialog = QtWidgets.QMessageBox(self, text=msg)
-                dialog.setWindowTitle("Min value out of range")
-                dialog.setStandardButtons(QtWidgets.QMessageBox.Ok)
-                dialog.exec_()
+                messages.append(f"The minimum value is {qmin:.8g}.")
                 self.txtLowerQMax.setText(f"{qmin + 1e-6:.7g}")
                 self.on_extrapolation_text_changed_1()
 
             if invalid_2:
-                msg = "The slider values are out of range.\n"
-                msg += f"Porod start must be between Guinier end: {p1:.8g} and Porod end: {p3:.8g}.\n"
-                dialog = QtWidgets.QMessageBox(self, text=msg)
-                dialog.setWindowTitle("Middle value out of range")
-                dialog.setStandardButtons(QtWidgets.QMessageBox.Ok)
-                dialog.exec_()
+                messages.append(
+                    f"Porod start must be between Guinier end: {p1:.8g} and Porod end: {p3:.8g}."
+                )
                 self.txtUpperQMin.setText(f"{(p1 + p3)/2:.7g}")
                 self.on_extrapolation_text_changed_2()
 
             if p3 >= qmax:
-                msg = "The slider values are out of range.\n"
-                msg += f"The maximum value is {qmax:.8g}.\n"
-                dialog = QtWidgets.QMessageBox(self, text=msg)
-                dialog.setWindowTitle("Max value out of range")
-                dialog.setStandardButtons(QtWidgets.QMessageBox.Ok)
-                dialog.exec_()
+                messages.append(f"The maximum value is {qmax:.8g}.")
                 self.txtUpperQMax.setText(f"{qmax - 1e-6:.7g}")
                 self.on_extrapolation_text_changed_3()
+
+            if messages:
+                msg = "The slider values are out of range.\n" + "\n".join(messages) + "\n"
+                dialog = QtWidgets.QMessageBox(self, text=msg)
+                dialog.setWindowTitle("Slider values out of range")
+                dialog.setStandardButtons(QtWidgets.QMessageBox.Ok)
+                dialog.exec_()
 
     def on_extrapolation_slider_changed(self, state: ExtrapolationParameters):
         """ Slider state changed"""
