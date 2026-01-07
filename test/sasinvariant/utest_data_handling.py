@@ -385,7 +385,7 @@ class TestInvariantCalculator(unittest.TestCase):
 
     def test_volume_fraction_uncertainty_increases_with_contrast_err(self):
         """
-        Checks if the uncertainty caclculated for volume fraction scales with the uncertainty entered for contrast
+        Checks if the uncertainty calculated for volume fraction scales with the uncertainty entered for contrast
         """
         inv = invariant.InvariantCalculator(self.data)
         contrast = 2.2e-6
@@ -395,7 +395,7 @@ class TestInvariantCalculator(unittest.TestCase):
 
     def test_contrast_uncertainty_increases_with_volume_err(self):
         """
-        Checks if the uncertainty calculated for contrast scales with the uncertinty entered for volume fraction
+        Checks if the uncertainty calculated for contrast scales with the uncertainty entered for volume fraction
         """
         inv = invariant.InvariantCalculator(self.data)
         volume = 0.01
