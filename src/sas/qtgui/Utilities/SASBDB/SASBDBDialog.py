@@ -578,6 +578,7 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
         
         # Use GridSpec efficiently: 3D view takes ~70% width, cross-sections take ~30% width
         from matplotlib.gridspec import GridSpec
+        from matplotlib.ticker import MaxNLocator
         gs = GridSpec(
             3, 3,
             figure=fig,
@@ -626,15 +627,36 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
             
             # Remove axes from main 3D plot
             ax_main.set_axis_off()
-            # Maximize usable area for cross-sections (titles only)
+
+            # Keep cross-section axes but make them clean: few ticks, small labels, subtle spines
+            def _style_cross_section_ax(ax):
+                ax.tick_params(axis='both', which='major', labelsize=7, length=2, pad=1)
+                ax.xaxis.set_major_locator(MaxNLocator(nbins=3))
+                ax.yaxis.set_major_locator(MaxNLocator(nbins=3))
+                for spine in ax.spines.values():
+                    spine.set_linewidth(0.6)
+                    spine.set_alpha(0.6)
+                ax.grid(True, alpha=0.15, linewidth=0.6)
+
             for ax in (ax1, ax2, ax3):
-                ax.set_axis_off()
+                _style_cross_section_ax(ax)
             
             # Set titles
             #ax_main.set_title('3D View', fontsize=16, fontweight='bold', pad=6)
-            ax1.set_title('XY (Top)', fontsize=11, pad=2)
-            ax2.set_title('XZ (Front)', fontsize=11, pad=2)
-            ax3.set_title('YZ (Side)', fontsize=11, pad=2)
+            # Put cross-section titles inside the axes to avoid overlapping with ticks
+            for ax, label in (
+                (ax1, 'XY (Top)'),
+                (ax2, 'XZ (Front)'),
+                (ax3, 'YZ (Side)'),
+            ):
+                ax.set_title("")
+                ax.text(
+                    0.02, 0.98, label,
+                    transform=ax.transAxes,
+                    ha='left', va='top',
+                    fontsize=10, color='0.2',
+                    bbox=dict(boxstyle='round,pad=0.15', facecolor='white', edgecolor='none', alpha=0.85),
+                )
             
             # Add main title
             fig.suptitle(f'Model: {model_name}', fontsize=14, fontweight='bold', y=0.99)
@@ -1157,6 +1179,7 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
         
         # Use GridSpec efficiently: 3D view takes ~70% width, cross-sections take ~30% width
         from matplotlib.gridspec import GridSpec
+        from matplotlib.ticker import MaxNLocator
         gs = GridSpec(
             3, 3,
             figure=fig,
@@ -1205,15 +1228,36 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
             
             # Remove axes from main 3D plot
             ax_main.set_axis_off()
-            # Maximize usable area for cross-sections (titles only)
+
+            # Keep cross-section axes but make them clean: few ticks, small labels, subtle spines
+            def _style_cross_section_ax(ax):
+                ax.tick_params(axis='both', which='major', labelsize=7, length=2, pad=1)
+                ax.xaxis.set_major_locator(MaxNLocator(nbins=3))
+                ax.yaxis.set_major_locator(MaxNLocator(nbins=3))
+                for spine in ax.spines.values():
+                    spine.set_linewidth(0.6)
+                    spine.set_alpha(0.6)
+                ax.grid(True, alpha=0.15, linewidth=0.6)
+
             for ax in (ax1, ax2, ax3):
-                ax.set_axis_off()
+                _style_cross_section_ax(ax)
             
             # Set titles
             ax_main.set_title('3D View', fontsize=16, fontweight='bold', pad=6)
-            ax1.set_title('XY (Top)', fontsize=11, pad=2)
-            ax2.set_title('XZ (Front)', fontsize=11, pad=2)
-            ax3.set_title('YZ (Side)', fontsize=11, pad=2)
+            # Put cross-section titles inside the axes to avoid overlapping with ticks
+            for ax, label in (
+                (ax1, 'XY (Top)'),
+                (ax2, 'XZ (Front)'),
+                (ax3, 'YZ (Side)'),
+            ):
+                ax.set_title("")
+                ax.text(
+                    0.02, 0.98, label,
+                    transform=ax.transAxes,
+                    ha='left', va='top',
+                    fontsize=10, color='0.2',
+                    bbox=dict(boxstyle='round,pad=0.15', facecolor='white', edgecolor='none', alpha=0.85),
+                )
             
             # Add main title
             fig.suptitle(f'Model: {model_name}', fontsize=14, fontweight='bold', y=0.99)
@@ -1231,6 +1275,10 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
     def onExport(self):
         """
         Handle export button click
+        Saves three files to the selected folder:
+        1. JSON file (user-selected filename)
+        2. PDF file (auto-named based on JSON filename)
+        3. Project file (auto-named based on JSON filename)
         """
         # Validate data
         is_valid, error_msg = self.validateData()
@@ -1260,35 +1308,193 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
             'JSON file (*.json)',
             ""
         )
-        filename = filename_tuple[0]
-        if not filename:
+        json_filename = filename_tuple[0]
+        if not json_filename:
             return
         
         # Update save location
-        self.save_location = os.path.dirname(filename)
+        self.save_location = os.path.dirname(json_filename)
         ObjectLibrary.addObject('SASBDBDialog_directory', self.save_location)
         
         # Ensure .json extension
-        if not filename.endswith('.json'):
-            filename += '.json'
+        if not json_filename.endswith('.json'):
+            json_filename += '.json'
         
-        # Export
-        exporter = SASBDBExporter(export_data)
-        success = exporter.export_to_json(filename)
+        # Extract base name (without extension) and directory
+        base_name = os.path.splitext(os.path.basename(json_filename))[0]
+        directory = os.path.dirname(json_filename)
         
-        if success:
+        # Generate filenames for PDF and project
+        pdf_filename = os.path.join(directory, f"{base_name}.pdf")
+        project_filename = os.path.join(directory, f"{base_name}_project.json")
+        
+        # Track success/failure for each file
+        results = {
+            'json': False,
+            'pdf': False,
+            'project': False
+        }
+        errors = {
+            'json': None,
+            'pdf': None,
+            'project': None
+        }
+        
+        # 1. Export JSON file
+        try:
+            exporter = SASBDBExporter(export_data)
+            results['json'] = exporter.export_to_json(json_filename)
+            if not results['json']:
+                errors['json'] = "Failed to export JSON file"
+        except Exception as e:
+            logger.error(f"Error exporting JSON: {e}", exc_info=True)
+            errors['json'] = str(e)
+        
+        # 2. Generate PDF file
+        try:
+            self._generatePDFReport(export_data, pdf_filename)
+            results['pdf'] = True
+        except Exception as e:
+            logger.error(f"Error generating PDF: {e}", exc_info=True)
+            errors['pdf'] = str(e)
+        
+        # 3. Save project file
+        try:
+            results['project'] = self._saveProjectFile(project_filename)
+            if not results['project']:
+                errors['project'] = "Failed to save project file (GuiManager not accessible or no data available)"
+        except Exception as e:
+            logger.error(f"Error saving project file: {e}", exc_info=True)
+            errors['project'] = str(e)
+        
+        # Show results message
+        success_count = sum(1 for v in results.values() if v)
+        total_count = len(results)
+        
+        if success_count == total_count:
+            # All files saved successfully
+            message = f"All files exported successfully:\n\n"
+            message += f"• JSON: {json_filename}\n"
+            message += f"• PDF: {pdf_filename}\n"
+            message += f"• Project: {project_filename}"
             QtWidgets.QMessageBox.information(
                 self,
                 "Export Successful",
-                f"SASBDB data exported to:\n{filename}"
+                message
             )
             self.close()
+        elif success_count > 0:
+            # Partial success
+            message = f"Export completed with {success_count} of {total_count} files saved:\n\n"
+            if results['json']:
+                message += f"✓ JSON: {json_filename}\n"
+            else:
+                message += f"✗ JSON: {errors['json'] or 'Failed'}\n"
+            
+            if results['pdf']:
+                message += f"✓ PDF: {pdf_filename}\n"
+            else:
+                message += f"✗ PDF: {errors['pdf'] or 'Failed'}\n"
+            
+            if results['project']:
+                message += f"✓ Project: {project_filename}\n"
+            else:
+                message += f"✗ Project: {errors['project'] or 'Failed'}\n"
+            
+            QtWidgets.QMessageBox.warning(
+                self,
+                "Partial Export Success",
+                message
+            )
         else:
+            # All failed
+            message = "Failed to export all files:\n\n"
+            message += f"• JSON: {errors['json'] or 'Failed'}\n"
+            message += f"• PDF: {errors['pdf'] or 'Failed'}\n"
+            message += f"• Project: {errors['project'] or 'Failed'}\n\n"
+            message += "Please check the logs for details."
             QtWidgets.QMessageBox.critical(
                 self,
                 "Export Failed",
-                "Failed to export SASBDB data. Please check the logs for details."
+                message
             )
+    
+    def _saveProjectFile(self, filepath: str) -> bool:
+        """
+        Save SasView project file programmatically without showing file dialog.
+        This replicates the functionality of GuiManager.actionSave_Project() but
+        saves to a specified filepath instead of prompting the user.
+        
+        :param filepath: Full path where the project file should be saved
+        :return: True if successful, False otherwise
+        """
+        try:
+            # Access GuiManager via parent window
+            parent_window = self.parent()
+            if parent_window is None:
+                logger.warning("Cannot save project file: dialog has no parent window")
+                return False
+            
+            # Try to get guiManager from parent
+            gui_manager = None
+            if hasattr(parent_window, 'guiManager'):
+                gui_manager = parent_window.guiManager
+            elif hasattr(parent_window, 'gui_manager'):
+                gui_manager = parent_window.gui_manager
+            
+            if gui_manager is None:
+                logger.warning("Cannot save project file: GuiManager not accessible from parent window")
+                return False
+            
+            # Get serialized data from filesWidget
+            if not hasattr(gui_manager, 'filesWidget'):
+                logger.warning("Cannot save project file: filesWidget not available")
+                return False
+            
+            all_data = gui_manager.filesWidget.getSerializedData()
+            final_data = {}
+            for id, data in all_data.items():
+                final_data[id] = {'fit_data': data}
+            
+            # Get serialized data from all perspectives
+            analysis = {}
+            if hasattr(gui_manager, 'loadedPerspectives'):
+                for name, per in gui_manager.loadedPerspectives.items():
+                    if hasattr(per, 'isSerializable') and per.isSerializable():
+                        perspective_data = per.serializeAll()
+                        for key, value in perspective_data.items():
+                            if key in final_data:
+                                final_data[key].update(value)
+                            elif 'cs_tab' in key:
+                                final_data[key] = value
+                        # Merge analysis data
+                        analysis.update(perspective_data)
+            
+            # Add batch and grid data if available
+            if hasattr(gui_manager, 'grid_window') and hasattr(gui_manager.grid_window, 'data_dict'):
+                final_data['batch_grid'] = gui_manager.grid_window.data_dict
+            else:
+                final_data['batch_grid'] = {}
+            
+            final_data['is_batch'] = analysis.get('is_batch', 'False')
+            
+            # Add visible perspective if available
+            if hasattr(gui_manager, '_current_perspective') and gui_manager._current_perspective:
+                final_data['visible_perspective'] = gui_manager._current_perspective.name
+            else:
+                final_data['visible_perspective'] = ''
+            
+            # Save using GuiUtils.saveData()
+            import sas.qtgui.Utilities.GuiUtils as GuiUtils
+            with open(filepath, 'w') as outfile:
+                GuiUtils.saveData(outfile, final_data)
+            
+            logger.info(f"Project file saved to {filepath}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error saving project file: {e}", exc_info=True)
+            return False
     
     def onGeneratePDF(self):
         """
