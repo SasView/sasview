@@ -294,7 +294,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         reactor.callFromThread(lambda: self.plot_result(model))
         self.allow_calculation()
 
-    def allow_calculation(self) -> None:
+    def allow_calculation(self, state: bool = True) -> None:
         """Enable the calculate button if either volume fraction or contrast is selected"""
         if self._data is None:
             self.cmdCalculate.setEnabled(False)
@@ -310,6 +310,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         else:
             self.cmdCalculate.setEnabled(False)
             self.cmdCalculate.setText("Calculate (Enter volume fraction or contrast)")
+
+        if not state:
+            self.cmdCalculate.setEnabled(state)
 
     def plot_result(self, model: QtGui.QStandardItemModel) -> None:
         """Plot result of calculation"""
@@ -701,9 +704,12 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
         # Extrapolation parameters
         # Q range fields
-        self.txtGuinierEnd_ex.editingFinished.connect(self.on_extrapolation_text_changed_1)
-        self.txtPorodStart_ex.editingFinished.connect(self.on_extrapolation_text_changed_2)
-        self.txtPorodEnd_ex.editingFinished.connect(self.on_extrapolation_text_changed_3)
+        self.txtGuinierEnd_ex.textEdited.connect(self.on_extrapolation_text_changed_1)
+        self.txtPorodStart_ex.textEdited.connect(self.on_extrapolation_text_changed_2)
+        self.txtPorodEnd_ex.textEdited.connect(self.on_extrapolation_text_changed_3)
+        self.txtGuinierEnd_ex.editingFinished.connect(self.on_extrapolation_text_finished)
+        self.txtPorodStart_ex.editingFinished.connect(self.on_extrapolation_text_finished)
+        self.txtPorodEnd_ex.editingFinished.connect(self.on_extrapolation_text_finished)
         self.txtGuinierEnd_ex.setValidator(GuiUtils.DoubleValidator())
         self.txtPorodStart_ex.setValidator(GuiUtils.DoubleValidator())
         self.txtPorodEnd_ex.setValidator(GuiUtils.DoubleValidator())
@@ -847,6 +853,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.update_from_model()
 
     def on_extrapolation_slider_changed(self, state: ExtrapolationParameters) -> None:
+        """Handle when user changes any of the extrapolation slider values"""
         format_string: str = "%.7g"
         self.model.setItem(WIDGETS.W_GUINIER_END_EX, QtGui.QStandardItem(format_string % state.point_1))
         self.model.setItem(WIDGETS.W_POROD_START_EX, QtGui.QStandardItem(format_string % state.point_2))
@@ -854,26 +861,44 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.notify_extrapolation_text_box_validity(state, show_dialog=True)
 
     def on_extrapolation_text_changed_1(self) -> None:
+        """Handle when user changes the Guinier end text box"""
         value: str = self.txtGuinierEnd_ex.text()
         params = self.extrapolation_parameters._replace(point_1=safe_float(value))
         self.slider.extrapolation_parameters = params
-        self.notify_extrapolation_text_box_validity(params, show_dialog=True)
+        self.notify_extrapolation_text_box_validity(params, show_dialog=False)
 
     def on_extrapolation_text_changed_2(self) -> None:
+        """Handle when user changes the Porod start text box"""
         value: str = self.txtPorodStart_ex.text()
         params = self.extrapolation_parameters._replace(point_2=safe_float(value))
         self.slider.extrapolation_parameters = params
-        self.notify_extrapolation_text_box_validity(params, show_dialog=True)
+        self.notify_extrapolation_text_box_validity(params, show_dialog=False)
 
     def on_extrapolation_text_changed_3(self) -> None:
+        """Handle when user changes the Porod end text box"""
         value: str = self.txtPorodEnd_ex.text()
         params = self.extrapolation_parameters._replace(point_3=safe_float(value))
         self.slider.extrapolation_parameters = params
+        self.notify_extrapolation_text_box_validity(params, show_dialog=False)
+
+    def on_extrapolation_text_finished(self) -> None:
+        """Handle when user finishes editing any of the extrapolation text boxes"""
+        params = self.extrapolation_parameters
         self.notify_extrapolation_text_box_validity(params, show_dialog=True)
 
     def notify_extrapolation_text_box_validity(
         self, params: ExtrapolationParameters, show_dialog: bool = False
     ) -> None:
+        """
+        Check validity of extrapolation text boxes and notify user if invalid
+        1. point_1 < point_2 < point_3
+        2. point_1 > data_q_min
+        3. point_3 < Q_MAXIMUM
+        4. point_2 < data_q_max
+        5. Highlight invalid text boxes in red
+        6. Optionally show dialog if invalid
+        7. Disable calculation if invalid
+        """
         # Round values to 8 significant figures to avoid floating point precision issues
         p1: float = float(f"{params.point_1:.7g}")  # low q end
         p2: float = float(f"{params.point_2:.7g}")  # high q start
@@ -893,31 +918,43 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.txtPorodStart_ex.setStyleSheet(BG_RED if invalid_2 else BG_DEFAULT)
         self.txtPorodEnd_ex.setStyleSheet(BG_RED if invalid_3 else BG_DEFAULT)
 
-        # If requested, show dialog if values are out of range
-        if show_dialog and (p1 <= data_q_min or p3 > qmax):
-            msg = "The slider values are out of range.\n"
-            msg += f"The minimum value is {data_q_min:.7g} and the maximum value is {qmax:.7g}"
-            dialog = QtWidgets.QMessageBox(self, text=msg)
-            dialog.setWindowTitle("Value out of range")
-            dialog.setStandardButtons(QtWidgets.QMessageBox.Ok)
-            dialog.exec_()
-            if p1 < data_q_min:
+        # Shows warning dialog if any of the values are invalid
+        # Also reset out-of-range values to nearest valid value
+        if show_dialog:
+            messages = []
+            if p1 <= data_q_min:
+                messages.append(f"The minimum value is {data_q_min:.7g}.")
                 self.txtGuinierEnd_ex.setText(f"{data_q_min + 1e-7:.7g}")
                 self.on_extrapolation_text_changed_1()
+                invalid_1: bool = False  # re-evaluate validity after correction
+
             if p3 > qmax:
+                messages.append(f"The maximum value is {qmax:.7g}.")
                 self.txtPorodEnd_ex.setText(f"{qmax:.7g}")
                 self.on_extrapolation_text_changed_3()
+                invalid_3: bool = False
 
-        # Show dialog if p2 is greater than data max
-        if show_dialog and (p2 > data_q_max):
-            msg = "The High-Q start value cannot be greater than the maximum Q value of the data.\n"
-            msg += f"The maximum Q value of the data is {data_q_max:.7g}"
-            dialog = QtWidgets.QMessageBox(self, text=msg)
-            dialog.setWindowTitle("Invalid High-Q Start Value")
-            dialog.setStandardButtons(QtWidgets.QMessageBox.Ok)
-            dialog.exec_()
-            self.txtPorodStart_ex.setText(str(data_q_max - 1e-7))
-            self.on_extrapolation_text_changed_2()
+            if p2 > data_q_max:
+                messages.append(f"The maximum Q value of the data is {data_q_max:.7g}.")
+                self.txtPorodStart_ex.setText(str(data_q_max - 1e-7))
+                self.on_extrapolation_text_changed_2()
+                invalid_2: bool = False
+
+            if invalid_1 or invalid_2 or invalid_3:
+                messages.append("Please correct the invalid values highlighted in red.")
+                # this does not reset the text boxes, only notifies the user
+
+            if messages:
+                dialog = QtWidgets.QMessageBox(self)
+                dialog.setWindowTitle("Invalid Extrapolation Values")
+                dialog.setIcon(QtWidgets.QMessageBox.Warning)
+                dialog.setText("\n".join(messages))
+                dialog.setStandardButtons(QtWidgets.QMessageBox.Ok)
+                dialog.exec_()
+
+        # Disable calculation if any of the values are invalid
+        self.allow_calculation(not (invalid_1 or invalid_2 or invalid_3))
+
 
     def stateChanged(self) -> None:
         """Catch modifications from low- and high-Q extrapolation check boxes"""
