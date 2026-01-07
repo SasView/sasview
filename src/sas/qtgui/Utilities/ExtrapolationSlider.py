@@ -373,31 +373,38 @@ class ExtrapolationSlider(QtWidgets.QWidget):
         rect = QtCore.QRect(0, 0, self.left_pad, self.vertical_size)
         painter.fillRect(rect, brush)
 
+        # segment 0: lower; orange -> white; min/data_min -> point_1 (positions[2])
+        # segment 1: data; white; point 1 -> point 2 (positions[3])
+        # segment 2: upper; white -> green; point 2 -> point_3 (positions[4])
+
+
+
         # segment 0: min -> data_min (gradient lower->data)
-        if segment_widths[0] > 0:
-            grad = QtGui.QLinearGradient(positions[0], 0, positions[1], 0)
+        lower_width = segment_widths[0] + segment_widths[1]
+        if lower_width > 0:
+            grad = QtGui.QLinearGradient(positions[0], 0, positions[2], 0)
             grad.setColorAt(0.0, lower_color)
             grad.setColorAt(1.0, data_color)
-            rect = QtCore.QRect(positions[0], 0, segment_widths[0], self.vertical_size)
+            rect = QtCore.QRect(positions[0], 0, lower_width, self.vertical_size)
             painter.fillRect(rect, grad)
 
         # segment 1: data_min -> point_1 (solid data color)
-        if segment_widths[1] > 0:
+        if segment_widths[2] > 0:
             brush.setColor(data_color)
-            rect = QtCore.QRect(positions[1], 0, segment_widths[1], self.vertical_size)
+            rect = QtCore.QRect(positions[2], 0, segment_widths[2], self.vertical_size)
             painter.fillRect(rect, brush)
 
         # segment 2: point_1 -> point_2 (gradient data->upper)
-        if segment_widths[2] > 0:
-            grad = QtGui.QLinearGradient(positions[2], 0, positions[3], 0)
+        if segment_widths[3] > 0:
+            grad = QtGui.QLinearGradient(positions[3], 0, positions[4], 0)
             grad.setColorAt(0.0, data_color)
             grad.setColorAt(1.0, upper_color)
-            rect = QtCore.QRect(positions[2], 0, segment_widths[2], self.vertical_size)
+            rect = QtCore.QRect(positions[3], 0, segment_widths[3], self.vertical_size)
             painter.fillRect(rect, grad)
 
         # remaining area from point_2 to right boundary: paint with upper_color
         right_boundary = self.width() - self.right_pad
-        rest_start = positions[3]
+        rest_start = positions[4]
         rest_width = max(0, right_boundary - rest_start)
         if rest_width > 0:
             brush.setColor(upper_color)
