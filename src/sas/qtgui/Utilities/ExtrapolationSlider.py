@@ -1,4 +1,5 @@
 import math
+from enum import Enum
 
 import numpy as np
 from PySide6 import QtCore, QtGui, QtWidgets
@@ -7,6 +8,10 @@ from PySide6.QtGui import QFontMetrics
 
 from sas.sascalc.util import ExtrapolationInteractionState, ExtrapolationParameters
 
+
+class SliderPerspective(Enum):
+    INVARIANT = "Invariant"
+    CORFUNC = "Corfunc"
 
 class ExtrapolationSlider(QtWidgets.QWidget):
     """ Slider that allows the selection of the different Q-ranges involved in interpolation,
@@ -18,6 +23,7 @@ class ExtrapolationSlider(QtWidgets.QWidget):
     def __init__(self,
                  lower_label: str,
                  upper_label: str,
+                 perspective: SliderPerspective,
                  parameters: ExtrapolationParameters = ExtrapolationParameters(1,2,4,8,16,32,64),
                  enabled: bool = False,
                  *args, **kwargs):
@@ -47,6 +53,7 @@ class ExtrapolationSlider(QtWidgets.QWidget):
         self._lower_label = lower_label
         self._upper_label = upper_label
 
+        self.perspective = perspective
 
         # Display Parameters
         self.vertical_size = 20
@@ -319,7 +326,14 @@ class ExtrapolationSlider(QtWidgets.QWidget):
 
     @property
     def upper_label_centre(self) -> float:
-        """ Centre of the upper region"""
+        """
+        Centre of the upper region
+        - Between point 2 and point 3 for invariant
+        - Between point 3 and widget edge for corfunc
+        """
+        if self.perspective == "Invariant":
+            print("Invariant upper label")
+            return 0.5 * (self.transform(self._point_2) + self.transform(self._point_3))
 
         return 0.5 * (self.transform(self._point_3) + self.width())
 
@@ -373,13 +387,7 @@ class ExtrapolationSlider(QtWidgets.QWidget):
         rect = QtCore.QRect(0, 0, self.left_pad, self.vertical_size)
         painter.fillRect(rect, brush)
 
-        # segment 0: lower; orange -> white; min/data_min -> point_1 (positions[2])
-        # segment 1: data; white; point 1 -> point 2 (positions[3])
-        # segment 2: upper; white -> green; point 2 -> point_3 (positions[4])
-
-
-
-        # segment 0: min -> data_min (gradient lower->data)
+        # segment 0: lower; (gradient lower -> data) -> white; min/data_min -> point_1 (positions[2])
         lower_width = segment_widths[0] + segment_widths[1]
         if lower_width > 0:
             grad = QtGui.QLinearGradient(positions[0], 0, positions[2], 0)
@@ -388,13 +396,13 @@ class ExtrapolationSlider(QtWidgets.QWidget):
             rect = QtCore.QRect(positions[0], 0, lower_width, self.vertical_size)
             painter.fillRect(rect, grad)
 
-        # segment 1: data_min -> point_1 (solid data color)
+        # segment 1: data; solid data color; point 1 -> point 2 (positions[3])
         if segment_widths[2] > 0:
             brush.setColor(data_color)
             rect = QtCore.QRect(positions[2], 0, segment_widths[2], self.vertical_size)
             painter.fillRect(rect, brush)
 
-        # segment 2: point_1 -> point_2 (gradient data->upper)
+        # segment 2: upper; gradient data->upper; point 2 -> point_3 (positions[4])
         if segment_widths[3] > 0:
             grad = QtGui.QLinearGradient(positions[3], 0, positions[4], 0)
             grad.setColorAt(0.0, data_color)
