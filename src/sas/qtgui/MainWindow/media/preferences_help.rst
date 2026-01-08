@@ -1,7 +1,7 @@
 .. preferences_help.rst
 
 .. Initial Draft: J Krzywon, August 2022
-.. Last Updated: J Krzywon, Nov. 22, 2023
+.. Last Updated: S Shrestha, January 2026
 
 .. _Preferences:
 
@@ -41,6 +41,9 @@ are completed. The plots can still be accessed in the data explorer under the da
 **Show toolbar on all new plots**: When selected, all new plots will open a toolbar on the bottom. The toolbar comes
 from Matplotlib. Note: The toolbar can be enabled and disabled in each individual plot by opening the context menu with
 a right click and selecting 'Toggle Navigation Menu'
+
+**Stack plots when using slicers**: When selected, multiple plots generated using slicers will be added to the same plot
+window, each with its own legend entry. When not selected, each plot will open in its own window. *persistent*
 
 .. _Display_Preferences:
 
