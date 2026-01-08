@@ -99,7 +99,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.no_extrapolation_plot: PlotterData | None = None
 
         # Slider
-        self.slider = ExtrapolationSlider(lower_label="Low-Q", upper_label="High-Q")
+        self.slider = ExtrapolationSlider(lower_label="Low-Q", upper_label="High-Q", perspective="Invariant")
         self.sliderLayout.insertWidget(1, self.slider)
 
         # no reason to have this widget resizable

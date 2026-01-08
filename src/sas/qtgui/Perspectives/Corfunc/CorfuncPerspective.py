@@ -80,7 +80,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self._running = False
 
         # Add slider widget
-        self.slider = ExtrapolationSlider(lower_label="Guinier", upper_label="Porod")
+        self.slider = ExtrapolationSlider(lower_label="Guinier", upper_label="Porod", perspective ="Corfunc")
         self.sliderLayout.insertWidget(1, self.slider)
 
         # Plots
