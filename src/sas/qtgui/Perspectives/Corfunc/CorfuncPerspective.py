@@ -166,9 +166,9 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
         self.model.itemChanged.connect(self.model_changed)
 
-        self.txtLowerQMax.textEdited.connect(self.on_extrapolation_text_changed_1)
-        self.txtUpperQMin.textEdited.connect(self.on_extrapolation_text_changed_2)
-        self.txtUpperQMax.textEdited.connect(self.on_extrapolation_text_changed_3)
+        self.txtLowerQMax.textChanged.connect(self.on_extrapolation_text_changed_1)
+        self.txtUpperQMin.textChanged.connect(self.on_extrapolation_text_changed_2)
+        self.txtUpperQMax.textChanged.connect(self.on_extrapolation_text_changed_3)
         self.txtLowerQMax.editingFinished.connect(self.on_extrapolation_text_finished_1)
         self.txtUpperQMin.editingFinished.connect(self.on_extrapolation_text_finished_2)
         self.txtUpperQMax.editingFinished.connect(self.on_extrapolation_text_finished_3)
@@ -668,27 +668,36 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
     def on_extrapolation_text_changed_1(self):
         """ Text in LowerQMax changed"""
+        if self.extrapolation_parameters is None:
+            return
         value: str = self.txtLowerQMax.text()
         params = self.extrapolation_parameters._replace(point_1=safe_float(value))
         self.slider.extrapolation_parameters = params
         self._q_space_plot.update_lines(ExtrapolationInteractionState(params))
         self.notify_extrapolation_text_box_validity(params)
+        self.model.setItem(WIDGETS.W_QMIN,QtGui.QStandardItem(value))
 
     def on_extrapolation_text_changed_2(self):
         """ Text in UpperQMin changed"""
+        if self.extrapolation_parameters is None:
+            return
         value: str = self.txtUpperQMin.text()
         params = self.extrapolation_parameters._replace(point_2=safe_float(value))
         self.slider.extrapolation_parameters = params
         self._q_space_plot.update_lines(ExtrapolationInteractionState(params))
         self.notify_extrapolation_text_box_validity(params)
+        self.model.setItem(WIDGETS.W_QMAX,QtGui.QStandardItem(value))
 
     def on_extrapolation_text_changed_3(self):
         """ Text in UpperQMax changed"""
+        if self.extrapolation_parameters is None:
+            return
         value: str = self.txtUpperQMax.text()
         params = self.extrapolation_parameters._replace(point_3=safe_float(value))
         self.slider.extrapolation_parameters = params
         self._q_space_plot.update_lines(ExtrapolationInteractionState(params))
         self.notify_extrapolation_text_box_validity(params)
+        self.model.setItem(WIDGETS.W_QCUTOFF,QtGui.QStandardItem(value))
 
     def on_extrapolation_text_finished_1(self):
         """ Editing finished in LowerQMax - show dialog if out of range"""
