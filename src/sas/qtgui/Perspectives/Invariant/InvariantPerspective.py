@@ -704,9 +704,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
         # Extrapolation parameters
         # Q range fields
-        self.txtGuinierEnd_ex.textEdited.connect(self.on_extrapolation_text_changed_1)
-        self.txtPorodStart_ex.textEdited.connect(self.on_extrapolation_text_changed_2)
-        self.txtPorodEnd_ex.textEdited.connect(self.on_extrapolation_text_changed_3)
+        self.txtGuinierEnd_ex.textChanged.connect(self.on_extrapolation_text_changed_1)
+        self.txtPorodStart_ex.textChanged.connect(self.on_extrapolation_text_changed_2)
+        self.txtPorodEnd_ex.textChanged.connect(self.on_extrapolation_text_changed_3)
         self.txtGuinierEnd_ex.editingFinished.connect(self.on_extrapolation_text_finished)
         self.txtPorodStart_ex.editingFinished.connect(self.on_extrapolation_text_finished)
         self.txtPorodEnd_ex.editingFinished.connect(self.on_extrapolation_text_finished)
@@ -862,24 +862,33 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
     def on_extrapolation_text_changed_1(self) -> None:
         """Handle when user changes the Guinier end text box"""
+        if self.extrapolation_parameters is None:
+            return
         value: str = self.txtGuinierEnd_ex.text()
         params = self.extrapolation_parameters._replace(point_1=safe_float(value))
         self.slider.extrapolation_parameters = params
         self.notify_extrapolation_text_box_validity(params, show_dialog=False)
+        self.model.setItem(WIDGETS.W_GUINIER_END_EX, QtGui.QStandardItem(value))
 
     def on_extrapolation_text_changed_2(self) -> None:
         """Handle when user changes the Porod start text box"""
+        if self.extrapolation_parameters is None:
+            return
         value: str = self.txtPorodStart_ex.text()
         params = self.extrapolation_parameters._replace(point_2=safe_float(value))
         self.slider.extrapolation_parameters = params
         self.notify_extrapolation_text_box_validity(params, show_dialog=False)
+        self.model.setItem(WIDGETS.W_POROD_START_EX, QtGui.QStandardItem(value))
 
     def on_extrapolation_text_changed_3(self) -> None:
         """Handle when user changes the Porod end text box"""
+        if self.extrapolation_parameters is None:
+            return
         value: str = self.txtPorodEnd_ex.text()
         params = self.extrapolation_parameters._replace(point_3=safe_float(value))
         self.slider.extrapolation_parameters = params
         self.notify_extrapolation_text_box_validity(params, show_dialog=False)
+        self.model.setItem(WIDGETS.W_POROD_END_EX, QtGui.QStandardItem(value))
 
     def on_extrapolation_text_finished(self) -> None:
         """Handle when user finishes editing any of the extrapolation text boxes"""
@@ -924,21 +933,21 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             messages = []
             if p1 <= data_q_min:
                 messages.append(f"The minimum value is {data_q_min:.7g}.")
+                print("changing p1")
                 self.txtGuinierEnd_ex.setText(f"{data_q_min + 1e-7:.7g}")
                 self.on_extrapolation_text_changed_1()
-                invalid_1: bool = False  # re-evaluate validity after correction
 
             if p3 > qmax:
                 messages.append(f"The maximum value is {qmax:.7g}.")
+                print("changing p3")
                 self.txtPorodEnd_ex.setText(f"{qmax:.7g}")
                 self.on_extrapolation_text_changed_3()
-                invalid_3: bool = False
 
-            if p2 > data_q_max:
+            if p2 >= data_q_max:
                 messages.append(f"The maximum Q value of the data is {data_q_max:.7g}.")
+                print("changing p2")
                 self.txtPorodStart_ex.setText(str(data_q_max - 1e-7))
                 self.on_extrapolation_text_changed_2()
-                invalid_2: bool = False
 
             if invalid_1 or invalid_2 or invalid_3:
                 messages.append("Please correct the invalid values highlighted in red.")
