@@ -332,7 +332,6 @@ class ExtrapolationSlider(QtWidgets.QWidget):
         - Between point 3 and widget edge for corfunc
         """
         if self.perspective == "Invariant":
-            print("Invariant upper label")
             return 0.5 * (self.transform(self._point_2) + self.transform(self._point_3))
 
         return 0.5 * (self.transform(self._point_3) + self.width())

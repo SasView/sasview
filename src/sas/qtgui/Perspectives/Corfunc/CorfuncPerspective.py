@@ -745,7 +745,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
             if invalid_2:
                 messages.append(
-                    f"Porod start must be between Guinier end: {p1:.8g} and Porod end: {p3:.8g}."
+                    f"Porod start must be after Guinier end: {p1:.8g} and before Porod end: {p3:.8g}."
                 )
                 self.allow_go("Porod start out of range")
 
