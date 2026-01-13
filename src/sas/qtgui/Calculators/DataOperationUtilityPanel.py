@@ -373,19 +373,17 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
     # ########
     # Modification of inputs
     # ########
-    def _findId(self, name):
-        """ find id of name in list of filenames """
-        isinstance(name, str)
-
-        for key_id in list(self.filenames.keys()):
-            # data with title
-            if self.filenames[key_id].name:
-                input = self.filenames[key_id].name
-            # data without title
-            else:
-                input = str(key_id)
-            if name in input:
-                return key_id
+    def _findId(self, name: str) -> str | None:
+        """Verify the displayed name matches a name in the data explorer"""
+        name_list = [str(self.filenames[key_id].name) for key_id in self.filenames.keys()]
+        key_list = [str(key_id) for key_id in self.filenames.keys()]
+        # The name must completely match the key or name to ensure 'non-alphabetic-data_name'
+        # does not match 'M1[non-alphabetic-data_name]'
+        # See https://github.com/SasView/sasview/issues/3796 for reference.
+        if name in name_list or name in key_list:
+            return str(name)
+        else:
+            return None
 
     def _extractData(self, key_id):
         """ Extract data from file with id contained in list of filenames """
