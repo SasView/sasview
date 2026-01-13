@@ -1,6 +1,5 @@
 import base64
 import datetime
-import importlib.resources as pkg_resources
 import logging
 import os
 import sys
@@ -20,6 +19,10 @@ import sas.system.version
 from sas.qtgui.Plotting.PlotterBase import Data1D
 from sas.qtgui.Utilities import GuiUtils
 from sas.qtgui.Utilities.Reports.reportdata import ReportData
+from sas.system import SAS_RESOURCES
+
+logger = logging.getLogger(__name__)
+
 
 #
 # Utility classes
@@ -97,8 +100,8 @@ class ReportBase:
                 tags.link(rel="stylesheet", href=style_link)
 
             else:
-                style_data = pkg_resources.read_text("sas.qtgui.Utilities.Reports", "report_style.css")
-                tags.style(style_data)
+                with SAS_RESOURCES.resource("qtgui/Utilities/Reports/report_style.css") as res_path:
+                    tags.style(res_path.read_text())
 
         with self._html_doc.body:
             with tags.div(id="main"):
@@ -160,7 +163,7 @@ class ReportBase:
             tags.h2(figure_title)
 
         if image_type == "svg":
-            logging.warning("xhtml2pdf does not currently support svg export to pdf.")
+            logger.warning("xhtml2pdf does not currently support svg export to pdf.")
             self._add_plot_svg(fig)
         elif image_type == "png":
             self._add_plot_png(fig)
@@ -175,7 +178,7 @@ class ReportBase:
                 self.plots.append(fig)
 
         except PermissionError as ex:
-            logging.error("Creating of report images failed: %s" % str(ex))
+            logger.error("Creating of report images failed: %s" % str(ex))
             return
 
     def _add_plot_png(self, fig):
@@ -190,7 +193,7 @@ class ReportBase:
                 self.plots.append(fig)
 
         except PermissionError as ex:
-            logging.error("Creating of report images failed: %s" % str(ex))
+            logger.error("Creating of report images failed: %s" % str(ex))
             return
 
     def add_image_from_file(self, filename: str):
@@ -270,7 +273,7 @@ class ReportBase:
 
             except Exception as ex:
                 import traceback
-                logging.error("Error creating pdf: " + str(ex) + "\n" + traceback.format_exc())
+                logger.error("Error creating pdf: " + str(ex) + "\n" + traceback.format_exc())
 
 
 

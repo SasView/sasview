@@ -429,7 +429,7 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
 
 
         if smearing_error_flag:
-            logging.critical(msg)
+            logger.critical(msg)
             errorbox = QtWidgets.QMessageBox()
             errorbox.setWindowTitle('Smearing Input Error')
             errorbox.setText(msg)

@@ -1,5 +1,4 @@
 # Alphabetized list of OS and version agnostic dependencies
-appdirs
 bumps
 cffi
 docutils
@@ -7,7 +6,6 @@ dominate
 h5py
 html2text
 html5lib
-importlib-resources;python_version<"3.9"
 ipython
 jsonschema
 lxml
@@ -18,6 +16,7 @@ numpy
 packaging
 periodictable
 platformdirs
+pyausaxs==1.0.4
 pybind11
 pylint
 pyopencl
@@ -30,7 +29,6 @@ sasdata
 sasmodels
 scipy
 siphash24
-sphinx
 superqt
 tccbox
 twisted

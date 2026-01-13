@@ -18,6 +18,8 @@ class CorfuncSlider(QtWidgets.QWidget):
     def __init__(self,
                  parameters: ExtrapolationParameters = ExtrapolationParameters(1,2,4,8,16),
                  enabled: bool = False,
+                 lower_label: str = "Guinier",
+                 upper_label: str = "Porod",
                  *args, **kwargs):
 
         super().__init__(*args, **kwargs)
@@ -33,6 +35,8 @@ class CorfuncSlider(QtWidgets.QWidget):
         self._point_2 = parameters.point_2
         self._point_3 = parameters.point_3
         self._max = parameters.data_q_max
+        self._lower_label = lower_label
+        self._upper_label = upper_label
 
 
         # Display Parameters
@@ -83,14 +87,14 @@ class CorfuncSlider(QtWidgets.QWidget):
         if params.data_q_min >= params.point_1:
             return "min_q should be smaller than q_point_1"
 
-        if params.point_1 > params.point_2:
-            return "q_point_1 should be smaller or equal to q_point_2"
+        if params.point_1 >= params.point_2:
+            return "q_point_1 should be smaller than q_point_2"
 
-        if params.point_2 > params.point_3:
-            return "q_point_2 should be smaller or equal to q_point_3"
+        if params.point_2 >= params.point_3:
+            return "q_point_2 should be smaller than q_point_3"
 
-        if params.point_3 > params.data_q_max:
-            return "q_point_3 should be smaller or equal to max_q"
+        if params.point_3 >= params.data_q_max:
+            return "q_point_3 should be smaller than max_q"
 
         return None
 
@@ -134,7 +138,8 @@ class CorfuncSlider(QtWidgets.QWidget):
     def mouseReleaseEvent(self, event: QtGui.QMouseEvent):
         if self.isEnabled():
             if self._drag_id is not None and self._movement_line_position is not None:
-                self.set_boundary(self._drag_id, self.inverse_transform(self._movement_line_position))
+                safe_pos = self._sanitise_new_position(self._drag_id, self._movement_line_position)
+                self.set_boundary(self._drag_id, self.inverse_transform(safe_pos))
 
             self._drag_id = None
             self._movement_line_position = None
@@ -273,7 +278,7 @@ class CorfuncSlider(QtWidgets.QWidget):
     @property
     def guinier_label_position(self) -> float:
         """ Position to put the text for the guinier region"""
-        return 0.5*self.left_pad
+        return 0.5 * self.transform(self._point_1)
 
     @property
     def data_label_centre(self) -> float:
@@ -409,11 +414,10 @@ class CorfuncSlider(QtWidgets.QWidget):
         #
 
 
-        self._paint_label(self.guinier_label_position, "Guinier")
+        self._paint_label(self.guinier_label_position, self._lower_label)
         self._paint_label(self.data_label_centre, "Data")
         # self._paint_label(self.transition_label_centre, "Transition") # Looks better without this
-        self._paint_label(self.porod_label_centre, "Porod")
-
+        self._paint_label(self.porod_label_centre, self._upper_label)
 
     def _paint_label(self, position: float, text: str, centre_justify=True):
 

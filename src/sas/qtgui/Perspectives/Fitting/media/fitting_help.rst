@@ -109,7 +109,7 @@ Also see :ref:`Interaction_Models` for further information.
     SasView v5.0.4 incorporated a technical change to how the volume
     normalisation is incorporated in the interaction calculator that computes
     $I(Q)$ from $P(Q) S(Q)$. The change will affect all future versions of
-    SasView. For more details, please see the :ref:`Release_Notes`.
+    SasView. For more details, please see the :ref:`Sasview_Release_Notes`.
 
 Mixture Models
 ^^^^^^^^^^^^^^
@@ -201,7 +201,7 @@ There are essentially four ways to generate new fitting models for SasView:
 In the last two cases, please read the guidance on :ref:`Writing_a_Plugin`
 before proceeding.
 
-**For your model to be found by SasView it must reside in the *~\\.sasview\\plugin_models* folder.**
+**For your model to be found by SasView it must reside in the *~\\AppData\\Local\\sasview\\SasView\\plugin_models* folder.**
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -424,8 +424,8 @@ This does not currently work properly (although it *may appear to* in SasView
 4.2.x).
 
 Instead, use the *Easy Add/Multiply Editor* dialog to combine the first two
-models, then navigate to the plugin folder (~\\.sasview\\plugin_models on 
-Windows) and open the plugin Python file (eg, MyPluginModel.py) in a text
+models, then navigate to the plugin folder (~\\AppData\\Local\\sasview\\SasView\\plugin_models
+on Windows) and open the plugin Python file (eg, MyPluginModel.py) in a text
 editor.
 
 Now edit the Python to specify all the models to contribute to the expanded
@@ -484,7 +484,7 @@ Plugin Manager
 Selecting the *Manage Custom Models* option shows a list of all the plugin
 models in the plugin model folder, on Windows this is
 
-  *C:\\Users\\{username}\\.sasview\\plugin_models*
+  *C:\\Users\\{username}\\AppData\\Local\\sasview\\SasView\\plugin_models*
 
 You can add, edit, duplicate and delete these models using buttons on the right
 side of the list.

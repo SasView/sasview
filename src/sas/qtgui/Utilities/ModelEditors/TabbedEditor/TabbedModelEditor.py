@@ -15,8 +15,9 @@ from sas.qtgui.Utilities.CustomGUI.CodeEditor import QCodeEditor
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.ModelEditor import ModelEditor
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.PluginDefinition import PluginDefinition
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.UI.TabbedModelEditor import Ui_TabbedModelEditor
-from sas.sascalc.fit import models
-from sas.system.user import MAIN_DOC_SRC, find_plugins_dir
+from sas.system.user import find_plugins_dir
+
+logger = logging.getLogger(__name__)
 
 
 class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
@@ -48,12 +49,16 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.is_modified = False
         self.showNoCompileWarning = True
         self.label = None
-        self.file_to_regenerate = ""
         self.include_polydisperse = False
 
         self.addWidgets()
 
         self.addSignals()
+        # Install an application-level event filter so pressing Esc
+        # doesn't accidentally close the dialog while editing table cells.
+        app = QtWidgets.QApplication.instance()
+        if app is not None:
+            app.installEventFilter(self)
 
         if self.load_file is not None:
             self.onLoad(at_launch=True)
@@ -138,6 +143,18 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             return
         event.accept()
 
+    def eventFilter(self, obj: QtCore.QObject, event: QtCore.QEvent) -> bool:
+        """Intercept Escape key press.
+        Escape is captured to prevent closing the dialog.
+        """
+        if event.type() != QtCore.QEvent.KeyPress:
+            return super(TabbedModelEditor, self).eventFilter(obj, event)
+        if event.key() == QtCore.Qt.Key_Escape:
+            if isinstance(obj, QtWidgets.QDialog) and (obj == self or self.isAncestorOf(obj)):
+                return True
+            else:
+                return False
+
     def onLoad(self, at_launch: bool = False):
         """
         Loads a model plugin file. at_launch is value of whether to attempt a load of a file from launch of the widget or not
@@ -153,16 +170,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         # the documentation viewer into the filepath for its corresponding RST
         if at_launch:
             user_models = find_plugins_dir()
-            user_model_name = user_models + self.load_file + ".py"
-
-            if self.model is True:
-                # Find location of model .py files and load from that location
-                filename = user_model_name if os.path.isfile(user_model_name) \
-                    else MAIN_DOC_SRC / "user" / "models" / "src" / (self.load_file + ".py")
-            else:
-                filename = MAIN_DOC_SRC / self.load_file.replace(".html", ".rst")
-                self.is_python = False
-                self.is_documentation = True
+            filename = user_models + self.load_file + ".py"
         else:
             plugin_location = find_plugins_dir()
             filename = QtWidgets.QFileDialog.getOpenFileName(
@@ -174,13 +182,12 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
 
         # Load the file
         if not filename:
-            logging.info("No data file chosen.")
+            logger.info("No data file chosen.")
             return
 
         # remove c-plugin tab, if present.
         if self.tabWidget.count() > 1:
             self.tabWidget.removeTab(1)
-        self.file_to_regenerate = filename
         self.loadFile(str(filename))
 
     def allBuiltinModels(self) -> [str]:
@@ -350,7 +357,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             return
 
         # check if file exists
-        plugin_location = models.find_plugins_dir()
+        plugin_location = find_plugins_dir()
 
         # Generate the full path of the python path for the model and ensure the extension is .py
         full_path = Path(plugin_location) / filename
@@ -408,7 +415,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         # Notify the user
         msg = "Custom model " + filename + " successfully created."
         self.parent.communicate.statusBarUpdateSignal.emit(msg)
-        logging.info(msg)
+        logger.info(msg)
 
     def createOrUpdateTab(self, filename: str | Path, widget: QtWidgets.QWidget):
         """Check if the widget is already included in the list of tabs. Add it, if it isn't already present
@@ -455,13 +462,13 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
 
         except Exception as ex:
             msg = "Error building model: " + str(ex)
-            logging.error(msg)
+            logger.error(msg)
             # print four last lines of the stack trace
             # this will point out the exact line failing
             all_lines = traceback.format_exc().split("\n")
             last_lines = all_lines[-4:]
             traceback_to_show = "\n".join(last_lines)
-            logging.error(traceback_to_show)
+            logger.error(traceback_to_show)
 
             # Set the status bar message
             # GuiUtils.Communicate.statusBarUpdateSignal.emit("Model check failed")
@@ -501,7 +508,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         filename = self.filename_py if w.is_python else self.filename_c
         # make sure we have the file handle ready
         if not filename:
-            logging.error("No file name was provided for your plugin model. No file was written.")
+            logger.error("No file name was provided for your plugin model. No file was written.")
             return
 
         # Retrieve model string
@@ -510,7 +517,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.writeFile(filename, model_str)
 
         # Get model filepath
-        plugin_location = models.find_plugins_dir()
+        plugin_location = find_plugins_dir()
         full_path = Path(plugin_location) / filename
 
         error_line = self.findFirstError(full_path.with_suffix(".py"))
@@ -549,19 +556,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         # notify the user
         msg = f"{str(filename)} successfully saved."
         self.parent.communicate.statusBarUpdateSignal.emit(msg)
-        logging.info(msg)
-        if self.is_documentation:
-            self.regenerateDocumentation()
-
-    def regenerateDocumentation(self):
-        """
-        Defer to subprocess the documentation regeneration process
-        """
-        # TODO: Move the doc regen methods out of the documentation window - this forces the window to remain open
-        #  in order for the documentation regeneration process to run.
-        # The regen method is part of the documentation window. If the window is closed, the method no longer exists.
-        if hasattr(self.parent, "helpWindow"):
-            self.parent.helpWindow.regenerateHtml(self.filename_py)
+        logger.info(msg)
 
     def noModelCheckWarning(self):
         """
@@ -948,7 +943,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         def visit_FunctionDef(self, node):
             """
             Extract the source code of the function with the given name.
-            NOTE: Do NOT change the name of this method-- visit_ is a prefix that ast.NodeVisitor uses
+            NOTE: Do NOT change the name of this method; ``visit_`` is a prefix that ast.NodeVisitor uses
             """
             if node.name == self.function_name:
                 body = node.body

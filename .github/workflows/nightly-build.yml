@@ -27,7 +27,7 @@ jobs:
 
     steps:
       - name: Retrieve saved artifacts
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v7
 
       - name: Display structure of downloaded files
         run: ls -R
@@ -35,7 +35,7 @@ jobs:
 
       - name: Bundle up wheels
         run: |
-          cp sasview-wheel-*/* sasview-wheel/
+          cp build-dependency-*-wheel/* sasview-wheel/
           cd sasview-wheel
           zip ../SasView-nightly-wheels.zip *
 

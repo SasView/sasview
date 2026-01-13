@@ -444,13 +444,13 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
 
         except Exception as ex:
             msg = "Error building model: " + str(ex)
-            logging.error(msg)
+            logger.error(msg)
             # print four last lines of the stack trace
             # this will point out the exact line failing
             all_lines = traceback.format_exc().split('\n')
             last_lines = all_lines[-4:]
             traceback_to_show = '\n'.join(last_lines)
-            logging.error(traceback_to_show)
+            logger.error(traceback_to_show)
 
             # Set the status bar message
             # GuiUtils.Communicate.statusBarUpdateSignal.emit("Model check failed")
@@ -586,7 +586,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
             tree_location = tree_base + f"{self.loaded_model_name}.html"
             self.parent.showHelp(tree_location)
         else:
-            logging.info("No model detected to have been loaded. Showing default help page.")
+            logger.info("No model detected to have been loaded. Showing default help page.")
             self.onHelp()
 
     ### CLASS METHODS ###

@@ -12,6 +12,7 @@ from sasmodels.sasview_model import load_standard_models
 from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
 from sas.qtgui.Utilities.ModelEditors.Dialogs.UI.ModelSelectorUI import Ui_ModelSelector
 from sas.sascalc.fit import models
+from sas.system.user import find_plugins_dir
 
 logger = logging.getLogger(__name__)
 
@@ -143,7 +144,7 @@ class ModelSelector(QtWidgets.QDialog, Ui_ModelSelector):
 
         if self.modelTree.selectedItems()[0].parent() == CATEGORY_CUSTOM:
             # custom kernel load requires full path
-            name = os.path.join(models.find_plugins_dir(), name+".py")
+            name = os.path.join(find_plugins_dir(), name+".py")
         try:
             kernel_module = generate.load_kernel_module(name)
         except (ModuleNotFoundError, FileNotFoundError):

@@ -12,8 +12,11 @@ import json
 import logging
 import os
 from collections import OrderedDict, defaultdict
+from contextlib import suppress
 
 from sas.system.user import get_config_dir
+
+logger = logging.getLogger(__name__)
 
 USER_FILE = 'categories.json'
 
@@ -75,7 +78,7 @@ class CategoryInstaller:
 
     @staticmethod
     def get_default_file():
-        logging.warning("CategoryInstaller.get_default_file is deprecated.")
+        logger.warning("CategoryInstaller.get_default_file is deprecated.")
 
     @staticmethod
     def check_install(homedir = None, model_list=None):
@@ -107,7 +110,8 @@ class CategoryInstaller:
         for cat in list(master_category_dict.keys()):
             for ind in range(len(master_category_dict[cat])):
                 model_name, enabled = master_category_dict[cat][ind]
-                add_list.remove(model_name)
+                with suppress(ValueError):
+                    add_list.remove(model_name)
                 if not enabled:
                     model_enabled_dict.pop(model_name)
         if del_name or (len(add_list) > 0):

@@ -12,6 +12,7 @@ from mpl_toolkits.mplot3d.axes3d import Axes3D
 from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtCore import QSize
 from PySide6.QtGui import QIcon
+from PySide6.QtWidgets import QMessageBox
 from scipy.spatial.transform import Rotation
 from twisted.internet import threads
 
@@ -26,10 +27,12 @@ from sas.qtgui.Utilities.GenericReader import GenReader
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor
 from sas.sascalc.calculator import sas_gen
 from sas.sascalc.calculator.geni import create_beta_plot, f_of_q, radius_of_gyration
-from sas.sascalc.fit import models
+from sas.system.user import find_plugins_dir
 
 # Local UI
 from .UI.GenericScatteringCalculator import Ui_GenericScatteringCalculator
+
+logger = logging.getLogger(__name__)
 
 
 class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalculator):
@@ -80,6 +83,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.data_betaQ = None
         self.fQ = []
         self.graph_num = 1      # index for name of graph
+        self.warned_user_large_calc = False
 
         # finish UI setup - install qml window
         self.setup_display()
@@ -733,7 +737,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                     # only load pdb files for nuclear data
                     loader = self.pdb_reader
                 else:
-                    logging.warning("The selected file does not have a suitable file extension")
+                    logger.warning("The selected file does not have a suitable file extension")
                     return
 
                 if self.reader is not None and self.reader.isrunning():
@@ -753,7 +757,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 self.reader.queue()
         except (OSError, RuntimeError):
             log_msg = "Generic SAS Calculator: %s" % sys.exc_info()[1]
-            logging.info(log_msg)
+            logger.info(log_msg)
             raise
         return
 
@@ -763,7 +767,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             status_type = "progress"
         else:
             status_type = "stop"
-        logging.info(status_type)
+        logger.info(status_type)
 
     def complete_loading_ex(self, data=None, load_nuc=True):
         """Send the finish message from calculate threads to main thread
@@ -828,13 +832,13 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         except OSError:
             log_msg = "Loading Error: " \
                       "This file format is not supported for GenSAS."
-            logging.warning(log_msg)
+            logger.warning(log_msg)
             raise
         except ValueError:
             log_msg = "Could not find any data"
-            logging.info(log_msg)
+            logger.info(log_msg)
             raise
-        logging.info("Load Complete")
+        logger.info("Load Complete")
         # Once data files are loaded allow them to be enabled and then enable them
         if load_nuc:
             self.checkboxNucData.setEnabled(True)
@@ -951,7 +955,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             if self.nuc_sld_data.is_elements:
                 self.txtRgMass.setText("N/A")
                 self.txtRG.setText("N/A ")
-                logging.info("SasView does not support computation of Radius of Gyration for elements.")
+                logger.info("SasView does not support computation of Radius of Gyration for elements.")
             else:
                 rgVals = radius_of_gyration(self.nuc_sld_data)  #[String, String, Float], float used for plugin model
                 self.txtRgMass.setText(rgVals[0])
@@ -961,7 +965,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         elif self.is_mag:
             self.txtRgMass.setText("N/A")
             self.txtRG.setText("N/A")
-            logging.info("SasView does not support computation of Radius of Gyration for Magnetic Data.")
+            logger.info("SasView does not support computation of Radius of Gyration for Magnetic Data.")
         else:
             self.txtRgMass.setText("No Data")
             self.txtRG.setText("No Data")
@@ -1365,6 +1369,44 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                                              numpy.radians(float(self.txtSampleRoll.text()))])
         return env, sample*env
 
+    def check_large_calculation(self, num_points):
+        """
+        Generate a popup warning the user about a large calculation
+        :return True if the calculation should continue, False otherwise.
+        """
+
+        if self.warned_user_large_calc or num_points < 50_000: return True
+        # timings for an i7-1165G7 4-core CPU from 2020:
+        # 50k: 1.8s | 100k: 6.3s | 200k: 28.7s | 300k: 65.6s | 400k: 117.2s | 500k: 181.2s
+        # multiply by 2 & round to get a conservative estimate
+        thresholds = [
+            (100_000,      50_000,  "30 seconds"),
+            (200_000,      100_000, "a minute"),
+            (300_000,      200_000, "a couple of minutes"),
+            (400_000,      300_000, "around 5 minutes"),
+            (500_000,      400_000, "around 10 minutes"),
+            (float('inf'), 500_000, "more than an hour")
+        ]
+
+        # find the appropriate threshold and time estimate
+        for limit, exceeded_threshold, time_estimate in thresholds:
+            if num_points < limit:
+                msg = (f"The number of atoms exceeds {exceeded_threshold:,}.\n"
+                       f"This calculation may take {time_estimate} to complete. "
+                       "Do you wish to proceed?")
+                break
+
+        flag_continue = False
+        popup = QMessageBox(standardButtons = QMessageBox.Ok | QMessageBox.Cancel)
+        popup.setIcon(QMessageBox.Warning)
+        popup.setText(msg)
+        popup.setWindowTitle("Large input structure")
+        popup.setDefaultButton(QMessageBox.Cancel)
+        result = popup.exec()
+        flag_continue = (result == QMessageBox.Ok)
+        self.warned_user_large_calc = flag_continue
+        return flag_continue
+
     def onCompute(self):
         """Execute the computation of I(qx, qy)
 
@@ -1373,12 +1415,14 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         try:
             # create the combined sld data and update from gui
             sld_data = self.create_full_sld_data()
+            if hasattr(sld_data, 'data_length') and not self.check_large_calculation(sld_data.data_length): return
+
             # TODO: implement fourier transform for meshes with multiple element or face types
             # The easy option is to simply convert all elements to tetrahedra - but this could rapidly
             # increase the calculation time.
             if sld_data.is_elements:
                 if not sld_data.are_elements_array:
-                    logging.warning("SasView does not currently support computation of meshes with multiple element or face types")
+                    logger.warning("SasView does not currently support computation of meshes with multiple element or face types")
                     return
             self.model.set_sld_data(sld_data)
             UVW_to_uvw, UVW_to_xyz = self.create_rotation_matrices()
@@ -1393,7 +1437,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             else:
                 self._create_default_2d_data()
                 inputs = [self.data.qx_data, self.data.qy_data]
-            logging.info("Computation is in progress...")
+            logger.info("Computation is in progress...")
             self.cmdCompute.setText('Cancel')
             self.cmdCompute.setToolTip("<html><head/><body><p>Cancel the computation of the scattering calculation.</p></body></html>")
             self.cmdCompute.clicked.disconnect()
@@ -1408,7 +1452,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             d.addErrback(self.calculateFailed)
         except Exception:
             log_msg = f"{sys.exc_info()[1]}. stop"
-            logging.info(log_msg)
+            logger.info(log_msg)
         return
 
     def onCancel(self):
@@ -1425,7 +1469,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             msg = "%d%% complete..." % int(percentage)
         else:
             msg = "Computing..."
-        logging.info(msg)
+        logger.info(msg)
 
     def calculateFailed(self, reason):
         """
@@ -1456,6 +1500,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         nq = len(input[0])
         chunk_size = 32 if self.is_avg else 256
         out = []
+
         # the 1D AUSAXS calculator cannot be chunked
         if self.is_avg and not len(input[1]):
             self.data_to_plot = self.model.runXY(input)
@@ -1480,12 +1525,12 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                     update(time=t, percentage=100*(ind + chunk_size)/nq) # ensure final progress shown
                     self.data_to_plot = numpy.full(nq, numpy.nan)
                     self.data_to_plot[:ind + chunk_size] = numpy.hstack(out)
-                    logging.info('Gen computation cancelled.')
+                    logger.info('Gen computation cancelled.')
                     break
             else:
                 out = numpy.hstack(out)
                 self.data_to_plot = out
-                logging.info('Gen computation completed.')
+                logger.info('Gen computation completed.')
 
         # if Beta(Q) Calculation has been requested, run calculation
         if self.is_beta:
@@ -1500,7 +1545,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
             # Notify the user
             msg = "Custom model " + str(model_path.absolute()) + " successfully created."
-            logging.info(msg)
+            logger.info(msg)
 
         self.cmdCompute.setText('Compute')
         self.cmdCompute.setToolTip("<html><head/><body><p>Compute the scattering pattern and display 1D or 2D plot depending on the settings.</p></body></html>")
@@ -1533,7 +1578,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtFileName.setEnabled(False)
 
     def getFileName(self):
-        plugin_location = models.find_plugins_dir()
+        plugin_location = find_plugins_dir()
         i = 0
         while True:
             full_path = os.path.join(plugin_location, "custom_gsc" + str(i))
@@ -1826,10 +1871,10 @@ class Plotter3DWidget(PlotterBase):
                     pass
 
                 log_msg = "Arrow Drawing completed.\n"
-                logging.info(log_msg)
+                logger.info(log_msg)
 
             log_msg = "Arrow Drawing is in progress..."
-            logging.info(log_msg)
+            logger.info(log_msg)
 
             # Defer the drawing of arrows to another thread
             d = threads.deferToThread(_draw_arrow, ax)

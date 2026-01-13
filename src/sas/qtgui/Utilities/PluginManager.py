@@ -9,6 +9,9 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor
 from sas.qtgui.Utilities.UI.PluginManagerUI import Ui_PluginManagerUI
 from sas.sascalc.fit import models
+from sas.system.user import find_plugins_dir
+
+logger = logging.getLogger(__name__)
 
 
 class PluginManager(QtWidgets.QDialog, Ui_PluginManagerUI):
@@ -90,7 +93,7 @@ class PluginManager(QtWidgets.QDialog, Ui_PluginManagerUI):
             name = self.plugins[plugin].filename
             # if no filename defined, attempt plugin name as filename
             if not name:
-                name = os.path.join(models.find_plugins_dir(), plugin + ".py")
+                name = os.path.join(find_plugins_dir(), plugin + ".py")
             os.remove(name)
 
         self.parent.communicate.customModelDirectoryChanged.emit()
@@ -112,13 +115,13 @@ class PluginManager(QtWidgets.QDialog, Ui_PluginManagerUI):
         if not plugin_file:
             return
 
-        plugin_dir = models.find_plugins_dir()
+        plugin_dir = find_plugins_dir()
         file_name = os.path.basename(str(plugin_file))
 
         # check if valid model
         try:
             model_results = GuiUtils.checkModel(plugin_file)
-            logging.info(model_results)
+            logger.info(model_results)
         # We can't guarantee the type of the exception coming from
         # Sasmodels, so need the overreaching general Exception
         except Exception:
@@ -148,7 +151,7 @@ class PluginManager(QtWidgets.QDialog, Ui_PluginManagerUI):
                 # cancel copy
                 return
 
-        # Copy from origin to ~/.sasview/plugin_models
+        # Copy from origin to ~/AppData/Local/sasview/SasView/plugin_models
         from shutil import copy
 
         # no check on clash
@@ -161,7 +164,7 @@ class PluginManager(QtWidgets.QDialog, Ui_PluginManagerUI):
 
         self.parent.communicate.customModelDirectoryChanged.emit()
         log_msg = "New plugin added: %s" % file_name
-        logging.info(log_msg)
+        logger.info(log_msg)
 
     def onDuplicate(self):
         """
@@ -169,7 +172,7 @@ class PluginManager(QtWidgets.QDialog, Ui_PluginManagerUI):
         """
 
         plugins_to_copy = [s.data() for s in self.lstModels.selectionModel().selectedRows()]
-        plugin_dir = models.find_plugins_dir()
+        plugin_dir = find_plugins_dir()
         for plugin in plugins_to_copy:
             src_filename = plugin + ".py"
 
@@ -184,7 +187,7 @@ class PluginManager(QtWidgets.QDialog, Ui_PluginManagerUI):
 
             dst_filename = GuiUtils.findNextFilename(src_filename, plugin_dir)
             if not dst_filename:
-                logging.error("Could not find appropriate filename for "+src_file)
+                logger.error("Could not find appropriate filename for " + src_file)
             dst_file = os.path.join(plugin_dir, dst_filename)
             copyfile(src_file, dst_file)
             self.parent.communicate.customModelDirectoryChanged.emit()
@@ -193,7 +196,7 @@ class PluginManager(QtWidgets.QDialog, Ui_PluginManagerUI):
         """
         Show the edit existing model dialog
         """
-        plugin_location = models.find_plugins_dir()
+        plugin_location = find_plugins_dir()
         # GUI assured only one row selected. Pick up the only element in list.
         try:
             model_to_edit = self.lstModels.selectionModel().selectedRows()[0].data()

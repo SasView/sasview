@@ -3,13 +3,14 @@ import datetime
 import json
 import logging
 import os
+import subprocess
 import sys
 from csv import DictReader
 from pathlib import Path
 
 import requests
 
-from sas.system.legal import legal
+from sas.system import legal
 
 USAGE = '''This script should be run from one directory above the base sasview directory. This script also requires both
  sasmodels and sasdata repositories to be in the same directory as the sasview repository.
@@ -37,9 +38,9 @@ zenodo_url = "https://zenodo.org"
 # Should import release notes from git repo, for now will need to cut and paste
 sasview_data = {
 'metadata': {
-    'title': 'SasView version 6.1.0',
-    'description': '6.1.0 release',
-    'related_identifiers': [{'identifier': 'https://github.com/SasView/sasview/releases/tag/v6.1.0-alpha-1',
+    'title': 'SasView version 6.1.2',
+    'description': '6.1.2 release',
+    'related_identifiers': [{'identifier': 'https://github.com/SasView/sasview/releases/tag/v6.1.1',
                         'relation': 'isAlternateIdentifier', 'scheme': 'url'}],
     'contributors': [
         {'name': 'Anuchitanukul, Atijit', 'affiliation': 'STFC - Rutherford Appleton Laboratory', 'type':'Researcher'},
@@ -86,7 +87,7 @@ sasview_data = {
         {'name': 'Heenan, Richard','affiliation': 'STFC - Rutherford Appleton Laboratory','orcid': '0000-0002-7729-1454'},
         {'name': 'Jackson, Andrew','affiliation': 'European Spallation Source ERIC', 'orcid': '0000-0002-6296-0336'},
         {'name': 'King, Stephen','affiliation': 'STFC - Rutherford Appleton Laboratory', 'orcid': '0000-0003-3386-9151'},
-        {'name': 'Kienzle, Paul','affiliation': 'National Institute of Standards and Technology'},
+        {'name': 'Kienzle, Paul','affiliation': 'National Institute of Standards and Technology', 'orcid': '0000-0002-7893-0318'},
         {'name': 'Krzywon, Jeff','affiliation': 'National Institute of Standards and Technology', 'orcid': '0000-0002-2380-4090'},
         {'name': 'Maranville, Brian', 'affiliation': 'National Institute of Standards and Technology', 'orcid': '0000-0002-6105-8789'},
         {'name': 'Martinez, Nicolas','affiliation': 'Institut Laue-Langevin'},
@@ -132,6 +133,16 @@ class SplitArgs(argparse.Action):
         setattr(namespace, self.dest, values.split(','))
 
 
+def sort_records(records: list[dict]):
+    records.sort(key=lambda r: r['name'])
+
+    # Move the release manager(s) so they are at the front of the list.
+    filtered_release_managers = [r for r in records if r['release_manager']]
+    for record in reversed(filtered_release_managers):
+        # Go backwards through the list to ensure the release managers remain in alphabetical order when appending to the beginning of the contributors list
+        records.remove(record)
+        records.insert(0, record)
+
 def generate_sasview_data() -> dict:
     """Read in a known file and parse it for the information required to populate the list of participants used
     in the zenodo record generation. The defined contributor types and difference between creators are defined in
@@ -147,6 +158,10 @@ def generate_sasview_data() -> dict:
                 record = {"name": row["Name"], "affiliation": row["Affiliation"]}
                 if 'ORCID' in row:
                     record['orcid'] = row['ORCID']
+                if 'ReleaseManager' in row:
+                    record['release_manager'] = row['ReleaseManager'] == 'x'
+                else:
+                    record['release_manager'] = False
                 if row['Creator']:
                     creators.append(record)
                 elif row['Producer']:
@@ -155,6 +170,8 @@ def generate_sasview_data() -> dict:
                 else:
                     record['type'] = 'Other'
                     contributors.append(record)
+        sort_records(creators)
+        sort_records(contributors)
         return {"creators": creators, "contributors": contributors}
     else:
         return {}
@@ -277,6 +294,17 @@ def update_file(license_file: Path, license_line: str, line_to_update: int):
         f.writelines(output_lines)
 
 
+def update_credits(credits_file: Path):
+    """Update the credits.html file with relevant license info"""
+    subprocess.check_call(
+        [
+            sys.executable,
+            "--minimal",
+            "build_tools/release_automation.py",
+            credits_file,
+        ])
+
+
 def update_acknowledgement_widget():
     """
 
@@ -292,7 +320,7 @@ def prepare_release_notes(issues_list, repository, username, password):
     """
     issue_titles = []
     for issue in issues_list:
-        # WARNING: One can try running with auth but there is limitted number of requests
+        # WARNING: One can try running with auth but there is limited number of requests
         response = requests.get('https://api.github.com/repos/SasView/' + repository + '/issues/' + issue,
                                 auth=(username, password))
         if response.status_code != 200:
@@ -349,6 +377,7 @@ def main(args=None):
     update_file(SASMODELS_PATH / 'LICENSE.txt', license_line, 0)
     update_file(SASDATA_PATH / 'LICENSE.TXT', license_line, 0)
     update_file(SASVIEW_PATH / 'installers' / 'license.txt', license_line, -1)
+    update_credits(SASVIEW_PATH / "src" / "sas" / "system" / "credits.html")
 
     sasview_issues_list = args.sasview_list
     sasmodels_issues_list = args.sasmodels_list

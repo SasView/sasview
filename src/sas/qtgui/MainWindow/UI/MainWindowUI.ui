@@ -24,7 +24,7 @@
      <x>0</x>
      <y>0</y>
      <width>915</width>
-     <height>20</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -41,6 +41,8 @@
     <addaction name="actionSave_Analysis"/>
     <addaction name="separator"/>
     <addaction name="actionPreferences"/>
+    <addaction name="separator"/>
+    <addaction name="actionClose_Project"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
@@ -159,6 +161,7 @@
     <addaction name="actionAcknowledge"/>
     <addaction name="separator"/>
     <addaction name="actionAbout"/>
+    <addaction name="actionCredits"/>
     <addaction name="actionWelcomeWidget"/>
     <addaction name="separator"/>
     <addaction name="actionCheck_for_update"/>
@@ -517,6 +520,11 @@
     <string>About</string>
    </property>
   </action>
+  <action name="actionCredits">
+   <property name="text">
+    <string>Credits and licenses</string>
+   </property>
+  </action>
   <action name="actionCheck_for_update">
    <property name="text">
     <string>Check for update</string>
@@ -632,11 +640,16 @@
   <action name="actionMuMag_Fitter">
    <property name="text">
     <string>MuMag Fitter (Experimental)</string>
-      </property>
+   </property>
   </action>
   <action name="actionWhat_s_New">
    <property name="text">
     <string>What's New</string>
+   </property>
+  </action>
+  <action name="actionClose_Project">
+   <property name="text">
+    <string>Close Project</string>
    </property>
   </action>
  </widget>

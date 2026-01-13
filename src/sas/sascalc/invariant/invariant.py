@@ -1,11 +1,11 @@
 # pylint: disable=invalid-name
-#####################################################################
-#This software was developed by the University of Tennessee as part of the
-#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-#project funded by the US National Science Foundation.
-#See the license text in license.txt
-#copyright 2010, University of Tennessee
-######################################################################
+###########################################################################
+# This software was developed by the University of Tennessee as part of the
+# Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+# project funded by the US National Science Foundation.
+# See the license text in license.txt
+# copyright 2010, University of Tennessee
+###########################################################################
 """
 This module implements invariant and its related computations.
 
@@ -30,6 +30,7 @@ Q_MAXIMUM = 10
 
 # Number of steps in the extrapolation
 INTEGRATION_NSTEPS = 1000
+
 
 class Transform:
     """
@@ -56,10 +57,11 @@ class Transform:
         # Transform the data
         data_points = zip(data.x, data.y, dy)
 
-        output_points = [(self.linearize_q_value(p[0]),
-                          math.log(p[1]),
-                          p[2] / p[1]) for p in data_points if p[0] > 0 and \
-                          p[1] > 0 and p[2] > 0]
+        output_points = [
+            (self.linearize_q_value(p[0]), math.log(p[1]), p[2] / p[1])
+            for p in data_points
+            if p[0] > 0 and p[1] > 0 and p[2] > 0
+        ]
 
         x_out, y_out, dy_out = zip(*output_points)
 
@@ -78,8 +80,7 @@ class Transform:
 
         :param data: Data1D object
         """
-        return [p[0] > 0 and p[1] > 0 and p[2] > 0 for p in zip(data.x, data.y,
-                                                                data.dy)]
+        return [p[0] > 0 and p[1] > 0 and p[2] > 0 for p in zip(data.x, data.y, data.dy)]
 
     def linearize_q_value(self, value):
         """
@@ -105,11 +106,13 @@ class Transform:
         """
         return NotImplemented
 
+
 class Guinier(Transform):
     """
     class of type Transform that performs operations related to guinier
     function
     """
+
     def __init__(self, scale=1, radius=60):
         Transform.__init__(self)
         self.scale = scale
@@ -162,10 +165,13 @@ class Guinier(Transform):
 
         :param x: array of q-values
         """
-        p1 = np.array([self.dscale * math.exp(-((self.radius * q) ** 2 / 3)) \
-                          for q in x])
-        p2 = np.array([self.scale * math.exp(-((self.radius * q) ** 2 / 3))\
-                     * (-(q ** 2 / 3)) * 2 * self.radius * self.dradius for q in x])
+        p1 = np.array([self.dscale * math.exp(-((self.radius * q) ** 2 / 3)) for q in x])
+        p2 = np.array(
+            [
+                self.scale * math.exp(-((self.radius * q) ** 2 / 3)) * (-(q**2 / 3)) * 2 * self.radius * self.dradius
+                for q in x
+            ]
+        )
         diq2 = p1 * p1 + p2 * p2
         return np.array([math.sqrt(err) for err in diq2])
 
@@ -173,7 +179,7 @@ class Guinier(Transform):
         r"""
         Retrieve the guinier function after apply an inverse guinier function
         to x
-        Compute $F(x) = s * \exp\left(-(r x)^{2/3}\right)$.
+        Compute $F(x) = s * \exp\left(-(r x)^{2}/3\right)$.
 
         :param x: a vector of q values
 
@@ -191,11 +197,13 @@ class Guinier(Transform):
         value = np.array([math.exp(-((self.radius * i) ** 2 / 3)) for i in x])
         return self.scale * value
 
+
 class PowerLaw(Transform):
     """
     class of type transform that perform operation related to power_law
     function
     """
+
     def __init__(self, scale=1, power=4):
         Transform.__init__(self)
         self.scale = scale
@@ -239,8 +247,7 @@ class PowerLaw(Transform):
         :param x: array of q-values
         """
         p1 = np.array([self.dscale * math.pow(q, -self.power) for q in x])
-        p2 = np.array([self.scale * self.power * math.pow(q, -self.power - 1)\
-                           * self.dpower for q in x])
+        p2 = np.array([self.scale * self.power * math.pow(q, -self.power - 1) * self.dpower for q in x])
         diq2 = p1 * p1 + p2 * p2
         return np.array([math.sqrt(err) for err in diq2])
 
@@ -268,10 +275,12 @@ class PowerLaw(Transform):
         value = np.array([math.pow(i, -self.power) for i in x])
         return self.scale * value
 
+
 class Extrapolator:
     """
     Extrapolate I(q) distribution using a given model
     """
+
     def __init__(self, data, model=None):
         """
         Determine a and b given a linear equation y = ax + b
@@ -313,9 +322,7 @@ class Extrapolator:
         fx = np.zeros(len(self.data.x))
 
         # Uncertainty
-        if isinstance(self.data.dy, np.ndarray) and \
-            len(self.data.dy) == len(self.data.x) and \
-                np.all(self.data.dy > 0):
+        if isinstance(self.data.dy, np.ndarray) and len(self.data.dy) == len(self.data.x) and np.all(self.data.dy > 0):
             sigma = self.data.dy
         else:
             sigma = np.ones(len(self.data.x))
@@ -325,25 +332,17 @@ class Extrapolator:
 
         # Linearize the data
         if self.model is not None:
-            linearized_data = self.model.linearize_data(\
-                                            LoaderData1D(self.data.x[idx],
-                                                         fx[idx],
-                                                         dy=sigma[idx]))
+            linearized_data = self.model.linearize_data(LoaderData1D(self.data.x[idx], fx[idx], dy=sigma[idx]))
         else:
-            linearized_data = LoaderData1D(self.data.x[idx],
-                                           fx[idx],
-                                           dy=sigma[idx])
+            linearized_data = LoaderData1D(self.data.x[idx], fx[idx], dy=sigma[idx])
 
         ##power is given only for function = power_law
         if power is not None:
             sigma2 = linearized_data.dy * linearized_data.dy
             a = -(power)
-            b = (np.sum(linearized_data.y / sigma2) \
-                 - a * np.sum(linearized_data.x / sigma2)) / np.sum(1.0 / sigma2)
+            b = (np.sum(linearized_data.y / sigma2) - a * np.sum(linearized_data.x / sigma2)) / np.sum(1.0 / sigma2)
 
-
-            deltas = linearized_data.x * a + \
-                     np.ones(len(linearized_data.x)) * b - linearized_data.y
+            deltas = linearized_data.x * a + np.ones(len(linearized_data.x)) * b - linearized_data.y
             residuals = np.sum(deltas * deltas / sigma2)
 
             err = np.fabs(residuals) / np.sum(1.0 / sigma2)
@@ -352,8 +351,7 @@ class Extrapolator:
             A = np.vstack([linearized_data.x / linearized_data.dy, 1.0 / linearized_data.dy]).T
             # CRUFT: numpy>=1.14.0 allows rcond=None for the following default
             rcond = np.finfo(float).eps * max(A.shape)
-            p, residuals, _, _ = np.linalg.lstsq(A, linearized_data.y / linearized_data.dy,
-                                                 rcond=rcond)
+            p, residuals, _, _ = np.linalg.lstsq(A, linearized_data.y / linearized_data.dy, rcond=rcond)
 
             # Get the covariance matrix, defined as inv_cov = a_transposed * a
             err = np.zeros(2)
@@ -379,6 +377,7 @@ class InvariantCalculator:
 
     :note: Some computations depends on each others.
     """
+
     def __init__(self, data, background=0, scale=1):
         """
         Initialize variables.
@@ -451,17 +450,20 @@ class InvariantCalculator:
         :return: new data = self._scale x data - self._background
         """
         if not issubclass(data.__class__, LoaderData1D):
-            #Process only data that inherited from DataLoader.Data_info.Data1D
+            # Process only data that inherited from DataLoader.Data_info.Data1D
             raise ValueError("Data must be of type DataLoader.Data1D")
-        #from copy import deepcopy
+        # from copy import deepcopy
         new_data = (self._scale * data) - self._background
 
         # Check that the vector lengths are equal
         assert len(new_data.x) == len(new_data.y)
 
         # Verify that the errors are set correctly
-        if new_data.dy is None or len(new_data.x) != len(new_data.dy) or \
-            (min(new_data.dy) == 0 and max(new_data.dy) == 0):
+        if (
+            new_data.dy is None
+            or len(new_data.x) != len(new_data.dy)
+            or (min(new_data.dy) == 0 and max(new_data.dy) == 0)
+        ):
             new_data.dy = np.ones(len(new_data.x))
         return new_data
 
@@ -485,8 +487,7 @@ class InvariantCalculator:
         extrapolator = Extrapolator(data=self._data, model=model)
         p, dp = extrapolator.fit(power=power, qmin=qmin, qmax=qmax)
 
-        return model.extract_model_parameters(constant=p[1], slope=p[0],
-                                              dconstant=dp[1], dslope=dp[0])
+        return model.extract_model_parameters(constant=p[1], slope=p[0], dconstant=dp[1], dslope=dp[0])
 
     def _get_qstar(self, data):
         """
@@ -522,9 +523,9 @@ class InvariantCalculator:
                 gx = data.dxl * data.x
 
             n = len(data.x) - 1
-            #compute the first delta q
+            # compute the first delta q
             dx0 = (data.x[1] - data.x[0]) / 2
-            #compute the last delta q
+            # compute the last delta q
             dxn = (data.x[n] - data.x[n - 1]) / 2
             total = 0
             total += gx[0] * data.y[0] * dx0
@@ -533,8 +534,7 @@ class InvariantCalculator:
             if len(data.x) == 2:
                 return total
             else:
-                #iterate between for element different
-                #from the first and the last
+                # iterate between for element different from the first and the last
                 for i in range(1, n - 1):
                     dxi = (data.x[i + 1] - data.x[i - 1]) / 2
                     total += gx[i] * data.y[i] * dxi
@@ -557,9 +557,12 @@ class InvariantCalculator:
         :param data:
         :note: if data doesn't contain dy return "None"
         """
-        if len(data.x) <= 1 or len(data.y) <= 1 or \
-            len(data.x) != len(data.y) or \
-            (data.dy is not None and (len(data.dy) != len(data.y))):
+        if (
+            len(data.x) <= 1
+            or len(data.y) <= 1
+            or len(data.x) != len(data.y)
+            or (data.dy is not None and (len(data.dy) != len(data.y)))
+        ):
             msg = "Length of data.x and data.y must be equal"
             msg += " and greater than 1; got x=%s, y=%s" % (len(data.x), len(data.y))
             raise ValueError(msg)
@@ -579,9 +582,9 @@ class InvariantCalculator:
                 gx = data.dxl * data.x
 
             n = len(data.x) - 1
-            #compute the first delta
+            # compute the first delta
             dx0 = (data.x[1] - data.x[0]) / 2
-            #compute the last delta
+            # compute the last delta
             dxn = (data.x[n] - data.x[n - 1]) / 2
             total = 0
             total += (gx[0] * dy[0] * dx0) ** 2
@@ -589,23 +592,18 @@ class InvariantCalculator:
             if len(data.x) == 2:
                 return math.sqrt(total)
             else:
-                #iterate between for element different
-                #from the first and the last
+                # iterate between for element different from the first and the last
                 for i in range(1, n - 1):
                     dxi = (data.x[i + 1] - data.x[i - 1]) / 2
                     total += (gx[i] * dy[i] * dxi) ** 2
                 return math.sqrt(total)
 
-    def _get_extrapolated_data(self, model, npts=INTEGRATION_NSTEPS,
-                               q_start=Q_MINIMUM, q_end=Q_MAXIMUM):
+    def _get_extrapolated_data(self, model, npts=INTEGRATION_NSTEPS, q_start=Q_MINIMUM, q_end=Q_MAXIMUM):
         """
         :return: extrapolate data create from data
         """
-        #create new Data1D to compute the invariant
-        q = np.linspace(start=q_start,
-                           stop=q_end,
-                           num=npts,
-                           endpoint=True)
+        # create new Data1D to compute the invariant
+        q = np.linspace(start=q_start, stop=q_end, num=npts, endpoint=True)
         iq = model.evaluate_model(q)
         diq = model.evaluate_model_errors(q)
 
@@ -620,12 +618,12 @@ class InvariantCalculator:
         """
         return self._data
 
-    def get_extrapolation_power(self, range='high'):
+    def get_extrapolation_power(self, range="high"):
         """
         :return: the fitted power for power law function for a given
             extrapolation range
         """
-        if range == 'low':
+        if range == "low":
             return self._low_extrapolation_power_fitted
         return self._high_extrapolation_power_fitted
 
@@ -651,15 +649,14 @@ class InvariantCalculator:
         self._low_q_limit = low_q_limit if low_q_limit else Q_MINIMUM
 
         # Extrapolate the low-Q data
-        p, _ = self._fit(model=self._low_extrapolation_function,
-                         qmin=qmin,
-                         qmax=qmax,
-                         power=self._low_extrapolation_power)
+        p, _ = self._fit(
+            model=self._low_extrapolation_function, qmin=qmin, qmax=qmax, power=self._low_extrapolation_power
+        )
         self._low_extrapolation_power_fitted = p[0]
 
         data = self._get_extrapolated_data(
-            model=self._low_extrapolation_function,
-            npts=INTEGRATION_NSTEPS, q_start=self._low_q_limit, q_end=qmin)
+            model=self._low_extrapolation_function, npts=INTEGRATION_NSTEPS, q_start=self._low_q_limit, q_end=qmin
+        )
 
         # Systematic error
         # If we have smearing, the shape of the I(q) distribution at low Q will
@@ -690,16 +687,15 @@ class InvariantCalculator:
         high_q_limit = high_q_limit if high_q_limit else Q_MAXIMUM
 
         # fit the data with a model to get the appropriate parameters
-        p, _ = self._fit(model=self._high_extrapolation_function,
-                         qmin=qmin,
-                         qmax=qmax,
-                         power=self._high_extrapolation_power)
+        p, _ = self._fit(
+            model=self._high_extrapolation_function, qmin=qmin, qmax=qmax, power=self._high_extrapolation_power
+        )
         self._high_extrapolation_power_fitted = p[0]
 
-        #create new Data1D to compute the invariant
+        # create new Data1D to compute the invariant
         data = self._get_extrapolated_data(
-            model=self._high_extrapolation_function,
-            npts=INTEGRATION_NSTEPS, q_start=qmax, q_end=high_q_limit)
+            model=self._high_extrapolation_function, npts=INTEGRATION_NSTEPS, q_start=qmax, q_end=high_q_limit
+        )
 
         return self._get_qstar(data), self._get_qstar_uncertainty(data)
 
@@ -729,10 +725,9 @@ class InvariantCalculator:
         if q_start >= q_end:
             return np.zeros(0), np.zeros(0)
 
-        return self._get_extrapolated_data(\
-                                    model=self._low_extrapolation_function,
-                                    npts=npts,
-                                    q_start=q_start, q_end=q_end)
+        return self._get_extrapolated_data(
+            model=self._low_extrapolation_function, npts=npts, q_start=q_start, q_end=q_end
+        )
 
     def get_extra_data_high(self, npts_in=None, q_end=Q_MAXIMUM, npts=20):
         """
@@ -757,10 +752,9 @@ class InvariantCalculator:
         if q_start >= q_end:
             return np.zeros(0), np.zeros(0)
 
-        return self._get_extrapolated_data(\
-                                model=self._high_extrapolation_function,
-                                npts=npts,
-                                q_start=q_start, q_end=q_end)
+        return self._get_extrapolated_data(
+            model=self._high_extrapolation_function, npts=npts, q_start=q_start, q_end=q_end
+        )
 
     def set_extrapolation(self, range, npts=4, function=None, power=None):
         """
@@ -777,22 +771,22 @@ class InvariantCalculator:
 
         """
         range = range.lower()
-        if range not in ['high', 'low']:
+        if range not in ["high", "low"]:
             raise ValueError("Extrapolation range should be 'high' or 'low'")
         function = function.lower()
-        if function not in ['power_law', 'guinier']:
+        if function not in ["power_law", "guinier"]:
             msg = "Extrapolation function should be 'guinier' or 'power_law'"
             raise ValueError(msg)
 
-        if range == 'high':
-            if function != 'power_law':
+        if range == "high":
+            if function != "power_law":
                 msg = "Extrapolation only allows a power law at high Q"
                 raise ValueError(msg)
             self._high_extrapolation_npts = npts
             self._high_extrapolation_power = power
             self._high_extrapolation_power_fitted = power
         else:
-            if function == 'power_law':
+            if function == "power_law":
                 self._low_extrapolation_function = PowerLaw()
             else:
                 self._low_extrapolation_function = Guinier()
@@ -835,8 +829,7 @@ class InvariantCalculator:
             qs_hi, dqs_hi = self.get_qstar_high()
 
         self._qstar += qs_low + qs_hi
-        self._qstar_err = math.sqrt(self._qstar_err * self._qstar_err \
-                                    + dqs_low * dqs_low + dqs_hi * dqs_hi)
+        self._qstar_err = math.sqrt(self._qstar_err * self._qstar_err + dqs_low * dqs_low + dqs_hi * dqs_hi)
 
         return self._qstar
 
@@ -880,7 +873,9 @@ class InvariantCalculator:
         # convert porod_const to units of A^-5 instead of cm^-1 A^-4 so that
         # s is returned in units of 1/A.
         _porod_const = 1.0e-8 * porod_const
-        return _porod_const / (2 * math.pi * math.fabs(contrast)**2)
+        if contrast == 0:
+            raise ValueError("The contrast parameter must be non-zero")
+        return _porod_const / (2 * math.pi * math.fabs(contrast) ** 2)
 
     def get_volume_fraction(self, contrast, extrapolation=None):
         """
@@ -919,7 +914,7 @@ class InvariantCalculator:
             raise RuntimeError(msg)
 
         # Compute intermediate constant
-        k = 1.e-8 * self._qstar / (2 * (math.pi * math.fabs(float(contrast))) ** 2)
+        k = 1.0e-8 * self._qstar / (2 * (math.pi * math.fabs(float(contrast))) ** 2)
         # Check discriminant value
         discrim = 1 - 4 * k
 
@@ -940,6 +935,49 @@ class InvariantCalculator:
             msg = "Could not compute the volume fraction: inconsistent results"
             raise RuntimeError(msg)
 
+    def get_contrast(self, volume, extrapolation=None):
+        """
+        Compute contrast is deduced as follows: ::
+
+            q_star = 2*(pi*contrast)**2 * volume*(1- volume)
+            contrast**2 = 10^(-8) * q_star / (2 * pi**2 * volume * (1- volume))
+            we get |contrast| = sqrt(10^(-8) * q_star / (2 * pi**2 * volume * (1- volume)))
+
+                10^(-8) converts from cm^-1 to A^-1
+
+            q_star: the invariant value included extrapolation is applied
+                         unit  1/A^(3)*1/cm
+                    q_star = self.get_qstar()
+
+            the result returned will be 0 <= |contrast|
+
+        :param volume: volume fraction provided by the user of type float.
+                 volume must be between 0 and 1
+                 volume must have no unit
+        :param extrapolation: string to apply optional extrapolation
+
+        :return: contrast
+
+        :note: contrast is returned in units of 1/A^(2) = 10^(16)cm^(2)
+        """
+        if volume <= 0 or volume >= 1:
+            raise ValueError("The volume fraction must be between 0 and 1")
+
+        # Make sure Q star is up to date
+        self.get_qstar(extrapolation)
+
+        if self._qstar <= 0:
+            msg = "Invalid invariant: Invariant Q* must be greater than zero\n"
+            msg += "Please check if scale and background values are correct"
+            raise RuntimeError(msg)
+
+        try:
+            contrast = math.sqrt(1.0e-8 * self._qstar / (2 * math.pi**2 * volume * (1 - volume)))
+            return contrast
+        except (ValueError, ZeroDivisionError):
+            msg = "Could not compute the contrast: invalid volume fraction"
+            raise RuntimeError(msg)
+
     def get_qstar_with_error(self, extrapolation=None):
         """
         Compute the invariant uncertainty.
@@ -953,103 +991,189 @@ class InvariantCalculator:
         self.get_qstar(extrapolation)
         return self._qstar, self._qstar_err
 
-    def get_volume_fraction_with_error(self, contrast, extrapolation=None):
+    def get_volume_fraction_with_error(self, contrast, contrast_err=0.0, extrapolation=None):
         """
         Compute uncertainty on volume value as well as the volume fraction
         This uncertainty is given by the following equation: ::
 
-            sigV = dV/dq_star * sigq_star
+            sig_V = sqrt((sig_Q / 2 pi |contrast|^2 * sqrt(1-4k))^2 + (sigcontrast * Q / pi^2 |contrast|^3 * sqrt(1-4k))^2)
 
-        so that: ::
+        where: ::
 
-            sigV = (k * sigq_star) /(q_star * math.sqrt(1 - 4 * k))
-
-            for k = 10^(-8)*q_star/(2*(pi*|contrast|)**2)
+            k = 10^(-8)*q_star/(2*(pi*|contrast|)**2)
 
         Notes:
 
         - 10^(-8) converts from cm^-1 to A^-1
         - q_star: the invariant, in cm^-1A^-3, including extrapolated values
           if they have been requested
-        - dq_star: the invariant uncertainty
-        - dV: the volume uncertainty
+        - sigq: the invariant uncertainty
+        - sigcontrast: the contrast uncertainty
+        - sigV: the volume uncertainty
 
         The uncertainty will be set to -1 if it can't be computed.
 
         :param contrast: contrast value
+        :param contrast_err: contrast uncertainty
         :param extrapolation: string to apply optional extrapolation
 
         :return: V, dV = volume fraction, error on volume fraction
         """
         volume = self.get_volume_fraction(contrast, extrapolation)
 
-        # Compute error
-        k = 1.e-8 * self._qstar / (2 * (math.pi * \
-                                        math.fabs(float(contrast)))** 2)
-        # Check value inside the sqrt function
-        value = 1 - k * self._qstar
-        if (value) <= 0:
+        contrast_err = 0.0 if contrast_err is None else contrast_err
+
+        Q = self._qstar * 1.0e-8
+        Q_err = self._qstar_err * 1.0e-8
+
+        # Compute k
+        k = Q / (2 * (math.pi * math.fabs(float(contrast))) ** 2)
+
+        # Compute error on volume
+        term_Q = Q_err / (2 * math.pi**2 * contrast**2 * math.sqrt(1 - 4 * k))
+        term_contrast = Q * contrast_err / (math.pi**2 * contrast**3 * math.sqrt(1 - 4 * k))
+        volume_err = math.sqrt(term_Q**2 + term_contrast**2)
+
+        # Set error to -1 if it can't be computed
+        volume_err = -1 if volume_err < 0 else volume_err
+
+        return volume, volume_err
+
+    def get_contrast_with_error(self, volume, volume_err=0.0, extrapolation=None):
+        """
+        Compute uncertainty on contrast value as well as the contrast
+        This uncertainty is given by the following equation: ::
+
+            sigcontrast = sqrt((d contrast/d q_star * sigq_star)^2 + (d contrast/d k * sigk)^2)
+
+            for k = volume * (1 - volume)
+
+        so that: ::
+
+            sigcontrast = |contrast| / 2 * sqrt((sigq_star / q_star)^2 + (sigk / k)^2)
+
+        Notes:
+
+        - q_star: the invariant, in cm^-1A^-3, including extrapolated values
+          if they have been requested
+        - sigq_star: the invariant uncertainty
+        - k: volume * (1 - volume)
+        - sigk: the uncertainty on k
+        - sigcontrast: the contrast uncertainty
+
+        The uncertainty will be set to -1 if it can't be computed.
+
+        :param volume: volume fraction value
+        :param volume_err: volume fraction uncertainty
+        :param extrapolation: string to apply optional extrapolation
+
+        :return: contrast, dcontrast = contrast, error on contrast
+        """
+        contrast = self.get_contrast(volume, extrapolation)
+
+        volume_err = 0.0 if volume_err is None else volume_err
+
+        k = volume * (1 - volume)
+
+        # Compute error on k
+        k_err = math.fabs((1 - 2 * volume) * volume_err)
+
+        # Compute uncertainty on contrast
+        try:
+            uncertainty = contrast / 2.0 * math.sqrt((self._qstar_err / self._qstar) ** 2 + (k_err / k) ** 2)
+        except (ZeroDivisionError, ValueError):
             uncertainty = -1
-        else:
-            # Compute uncertainty
-            uncertainty = math.fabs((k * self._qstar_err)
-                                    / (self._qstar * math.sqrt(1 - 4 * k)))
 
-        return volume, uncertainty
+        return contrast, uncertainty
 
-    def get_surface_with_error(self, contrast, porod_const, extrapolation=None):
+    def get_surface_with_error(
+        self, contrast, porod_const, contrast_err=None, porod_const_err=None, extrapolation=None
+    ):
         """
-        As of SasView 4.3 and 5.0.3, the specific surface is computed directly
-        from the contrast and porod_constant wich are currently user inputs
-        with no option for any uncertainty so no uncertainty can be calculated.
-        However we include the uncertainty computation for future use if and
-        when these values get an uncertainty. This is given as: ::
+        Compute the specific surface and its propagated uncertainty.
 
-            ds = sqrt[(s\'_cp)**2 * dcp**2 + (s\'_contrast)**2 * dcontrast**2]
+        The specific surface S is computed via::
 
-        where s'_x is the partial derivative of S with respect to x
+            S = porod_const / (2 * pi * contrast**2)
 
-        which gives (this should be checked before using in anger): ::
+        where the Porod constant is internally converted to the units required
+        by `get_surface()`.
 
-            ds = sqrt((dporod_const**2 * contrast**2 + 4 * (porod_const *
-                          dcontrast)**2) / (4 * pi**2 * contrast**6))
+        The uncertainty is calculated using standard linear error propagation,
+        assuming independent and small uncertainties::
 
-        We also assume some users will never enter a value for uncertainty so
-        allow for None even when it is an option.
+            (dS / S)^2 = (dP / P)^2 + (2 dC / C)^2
 
-        :param contrast: contrast value eventually with the error
-        :param porod_const: porod constant value eventually with the error
-        :param extrapolation: string to apply optional extrapolation. This will
-               only be needed if and when the contrast term is calculated from
-               the invariant.
+        where:
+            P = porod_const
+            dP = porod_const_err
+            C = contrast
+            dC = contrast_err
 
-        :return s, ds: the surface, with its uncertainty
+        This formulation automatically accounts for the internal unit conversion
+        applied to the Porod constant.
+
+        Parameters
+        ----------
+        contrast : float
+            Scattering length density contrast between the two phases.
+            Must be non-zero. Units must be consistent with `contrast_err`.
+
+        porod_const : float
+            Porod constant. Units must be consistent with `porod_const_err`.
+            The value is converted internally to the units used by
+            `get_surface()`.
+
+        contrast_err : float or None, optional
+            One-sigma uncertainty on `contrast`. If None, the uncertainty is
+            assumed to be zero. Must be non-negative.
+
+        porod_const_err : float or None, optional
+            One-sigma uncertainty on `porod_const`. If None, the uncertainty is
+            assumed to be zero. Must be non-negative.
+
+        extrapolation : str or None, optional
+            Optional extrapolation mode. Currently passed through to
+            `get_surface()` but not otherwise used here.
+
+        Returns
+        -------
+        s : float or None
+            Specific surface. Returned in the same units as `get_surface()`.
+
+        ds : float or None
+            One-sigma uncertainty on the specific surface. Returns None if the
+            uncertainty cannot be determined (e.g. zero contrast, undefined
+            relative error).
+
+        Notes
+        -----
+        - Assumes `contrast` and `porod_const` are independent variables.
+        - Assumes uncertainties are small (linear approximation).
+        - Correlated uncertainties are not supported.
+        - If uncertainty cannot be determined (e.g. contrast == 0, or P==0
+            while dP>0) the function returns (S, None).
         """
-        # until contrast and porod_constant are given with uncertainties set
-        # them to 0
-        dcontrast = None
-        dporod_const = None
-        # IMPORTATN: the porod constant (and eventually its uncertainty) are
-        # given in units of cm^-1 A^-4.  We need to be mindfult of units when
-        # writing equations. Thus for computing ds both the porod constant and
-        # its uncertainty need to be converted to A^-5 so they play well with
-        # the contrast which is in A-2.
-        # Note that the porod constant is converted in self.get_surface method
-        #so do NOT convert before calling here
-        s = self.get_surface(contrast=contrast, porod_const=porod_const)
-        # Until uncertainties in contrast and the Porod Constant are provided
-        # just return nothing.
-        ds = None
-        # When they are available, use the following:
-        # if dporod_const is None:
-        #     _dporod_const = 0.
-        # else:
-        #     _dporod_const = dporod_const * 1e-8
-        # if dcontrast is None:
-        #    dcontrast = 0.
-        # For this new computation we DO need to convert the units
-        # _porod_const = porod_const * 1e-8
-        #ds = math.sqrt((_dporod_const**2 * contrast**2 + 4 * (_porod_const *
-        #                 dcontrast)**2 / (4 * math.pi**2 * constrast**6))
 
+        # Default error values to zero if None
+        contrast_err = 0.0 if contrast_err is None else contrast_err
+        porod_const_err = 0.0 if porod_const_err is None else porod_const_err
+
+        if contrast_err < 0.0 or porod_const_err < 0.0:
+            raise ValueError("The contrast and Porod constant uncertainties must be non-negative")
+
+        # compute surface (this applies the internal conversion of porod_const)
+        s = self.get_surface(contrast=contrast, porod_const=porod_const, extrapolation=extrapolation)
+
+        # If s could not be computed, return immediately
+        if s is None:
+            return None, None
+
+        # Use relative-error formula (conversion on porod_const cancels out)
+        try:
+            rel = math.sqrt((porod_const_err / porod_const) ** 2 + (2.0 * contrast_err / contrast) ** 2)
+        except ZeroDivisionError:
+            return s, None
+
+        ds = abs(s) * rel
         return s, ds

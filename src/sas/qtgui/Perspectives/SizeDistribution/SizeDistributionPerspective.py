@@ -519,7 +519,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             GuiUtils.updateModelItemWithPlot(self._model_item, self.fit_plot, title)
             plots.append(self.fit_plot)
 
-        self.communicate.plotRequestedSignal.emit(plots, None)
+        self.communicate.plotRequestedSignal.emit(plots)
 
     def getState(self):
         """
@@ -660,7 +660,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         # re-enable the fit buttons
         self.is_calculating = False
         self.enableButtons()
-        logging.exception("Fitting failed", exc_info=(etype, value, traceback))
+        logger.exception("Fitting failed", exc_info=(etype, value, traceback))
 
     def fitComplete(self, result: MaxEntResult) -> None:
         """
@@ -695,7 +695,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             title = self.trust_plot.name
             GuiUtils.updateModelItemWithPlot(self._model_item, self.trust_plot, title)
             plots.append(self.trust_plot)
-        self.communicate.plotRequestedSignal.emit(plots, None)
+        self.communicate.plotRequestedSignal.emit(plots)
 
         # add fit to data plot
         if isinstance(result.data_max_ent, LoadData1D):
@@ -813,3 +813,10 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self.txtDiameterMean.setText("")
         self.txtDiameterMode.setText("")
         self.txtDiameterMedian.setText("")
+
+    def reset(self):
+        """
+        Reset the size distribution perspective to an empty state
+        """
+        self.removeData([self._model_item] if self._model_item else None)
+        self.resetWindow()

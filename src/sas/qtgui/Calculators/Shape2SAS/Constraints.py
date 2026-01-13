@@ -2,7 +2,6 @@
 import ast
 import importlib.util
 import logging
-import re
 import traceback
 
 from PySide6.QtCore import Qt
@@ -10,12 +9,9 @@ from PySide6.QtWidgets import QPushButton, QWidget
 
 from sas.qtgui.Calculators.Shape2SAS.ButtonOptions import ButtonOptions
 from sas.qtgui.Calculators.Shape2SAS.Tables.variableTable import VariableTable
-
-#Local Perspectives
 from sas.qtgui.Calculators.Shape2SAS.UI.ConstraintsUI import Ui_Constraints
-
-#Global SasView
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.ModelEditor import ModelEditor
+from sas.sascalc.shape2sas.UserText import UserText
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +25,7 @@ class Constraints(QWidget, Ui_Constraints):
 
         #Setup GUI for Constraints
         self.constraintTextEditor = ModelEditor() #SasView's standard text editor
+        self.constraintTextEditor.modelModified.connect(lambda: self.createPlugin.setEnabled(True))
         self.constraintTextEditor.gridLayout.setContentsMargins(0, 0, 0, 0)
         self.constraintTextEditor.gridLayout_16.setContentsMargins(5, 5, 5, 5)
         self.constraintTextEditor.groupBox_13.setTitle("Constraints") #override title
@@ -45,8 +42,9 @@ class Constraints(QWidget, Ui_Constraints):
         self.createPlugin = QPushButton("Create Plugin")
         self.createPlugin.setMinimumSize(110, 24)
         self.createPlugin.setMaximumSize(110, 24)
-        self.createPlugin.setToolTip("Create and send the plugin model to the Plugin Models Category in Fit panel")
+        self.createPlugin.setToolTip("Create the plugin model. It will be available in the Plugin Models category in the Fit panel.")
         self.createPlugin.setEnabled(False)
+        self.variableTable.on_item_changed_callback = lambda _: self.createPlugin.setEnabled(True)
 
         self.buttonOptions.horizontalLayout_5.insertWidget(1, self.createPlugin)
         self.buttonOptions.horizontalLayout_5.setContentsMargins(0, 0, 0, 0)
@@ -55,67 +53,284 @@ class Constraints(QWidget, Ui_Constraints):
         defaultText = "<span><b>Shape2SAS plugin constraints log</b></p></span>"
         self.textEdit_2.append(defaultText)
 
+    def log_embedded_error(self, message: str):
+        """Log an error message in the embedded logbook."""
+        self.textEdit_2.append(f"<span style='color: red;'>{message}</span>")
+        self.textEdit_2.verticalScrollBar().setValue(self.textEdit_2.verticalScrollBar().maximum())
+        logger.error(message)
 
-    def getConstraintText(self, constraints: str) -> str:
-        """Get default text for constraints"""
+    def log_embedded(self, message: str):
+        """Log a message in the embedded logbook."""
+        self.textEdit_2.append(f"<span style='color: black;'>{message}</span>")
+        self.textEdit_2.verticalScrollBar().setValue(self.textEdit_2.verticalScrollBar().maximum())
 
-        self.constraintText = (f'''
-#Write libraries to be imported here.
-from numpy import inf
+    def getConstraintText(self, fit_params: str) -> str:
+        """Get the default text for the constraints editor"""
 
-#Modify fit parameters here.
-parameters = {constraints}
-
-#Set constraints here.
-translation = """
-
-"""
-
-        ''').lstrip().rstrip()
+        self.constraintText = (
+            "# Write libraries to be imported here.\n"
+            "from numpy import inf\n"
+            "\n"
+            "# Modify fit parameters here.\n"
+            f"parameters = {fit_params}\n"
+            "\n"
+            "# Define your constraints here.\n"
+            "# Both absolute and relative parameters can be used.\n"
+            "# Example: dCOMX2 = dCOMX1 will make COMX2 track changes in COMX1\n"
+        )
 
         return self.constraintText
 
-    def setConstraints(self, constraints: str):
-        """Set text to QTextEdit"""
+    def setConstraints(self, parameter_text: str):
+        """Insert the text into the constraints editor"""
 
-        constraints = self.getConstraintText(constraints)
-        self.constraintTextEditor.txtEditor.setPlainText(constraints)
+        def get_default(parameter_text: str):
+            return self.getConstraintText(parameter_text)
+
+        def merge_text(current_text: str, parameter_text: str):
+            if not current_text:
+                return get_default(parameter_text)
+
+            # search for 'parameters =' in the current text
+            found = False
+            current_text_lines = current_text.splitlines()
+            for start, line in enumerate(current_text_lines):
+                if line.startswith("parameters ="):
+                    break
+
+            # find closing bracket of the parameters list
+            bracket_count = 0
+            for end, line in enumerate(current_text_lines[start:]):
+                bracket_count += line.count('[') - line.count(']')
+                if bracket_count == 0:
+                    # found the closing bracket
+                    found = True
+                    old_lines = current_text_lines[start:start+end+1]
+                    break
+
+            if not found:
+                return get_default(parameter_text)
+
+            new_lines = parameter_text.split("\n")
+            # fit_param string is formatted as:
+            # [
+            #  # header
+            #  ['name1', 'unit1', ...],
+            #  ['name2', 'unit2', ...],
+            # ...
+            # ]
+            # extract names from the first element of each sublist, skipping the first two and last lines
+            table = str.maketrans("", "", "[]' ")
+            old_names = [line.translate(table).split(",")[0] for line in old_lines[2:-1]]
+            new_names = [line.translate(table).split(",")[0] for line in new_lines[2:-1]]
+
+            # create new list of parameters, replacing existing old lines in the new list
+            for i, name in enumerate(new_names):
+                if name in old_names:
+                    entry = old_lines[old_names.index(name)+2]
+                    new_lines[i+2] = entry + ',' if entry[-1] != ',' else entry
+
+            # remove old lines from the current text and insert the new ones in the middle
+            current_text = "\n".join(current_text_lines[:start+1] + new_lines[2:-1] + current_text_lines[start+end:])
+            return current_text
+
+        current_text = self.constraintTextEditor.txtEditor.toPlainText()
+        text = merge_text(current_text, parameter_text)
+        self.constraintTextEditor.txtEditor.setPlainText(text)
         self.createPlugin.setEnabled(True)
 
-    def checkPythonSyntax(self, text: str):
-        """Check if text is valid python syntax"""
+    def parseConstraintsText(self,
+        text: str, fitPar: list[str], modelPars: list[list[str]], modelVals: list[list[float]], checkedPars: list[list[bool]]
+    ) -> tuple[list[str], str, str, list[list[bool]]]:
+        """Parse the text in the constraints editor and return a dictionary of parameters"""
 
-        try:
-            ast.parse(text)
+        logger.debug("Parsing constraints text.")
+        logger.debug("Received input:")
+        logger.debug(f"fitPar: {fitPar}")
+        logger.debug(f"modelPars: {modelPars}")
+        logger.debug(f"modelVals: {modelVals}")
+        logger.debug(f"checkedPars: {checkedPars}")
 
-        except SyntaxError:
-            #Get last line of traceback
-            all_lines = traceback.format_exc().split('\n')
-            last_lines = all_lines[-1:]
-            traceback_to_show = '\n'.join(last_lines)
+        def as_ast(text: str):
+            try:
+                return ast.parse(text)
+            except SyntaxError as e:
+                # log most recent traceback error
+                all_lines = traceback.format_exc().split('\n')
+                last_lines = all_lines[-1:]
+                traceback_to_show = '\n'.join(last_lines)
+                logger.error(traceback_to_show)
+                self.log_embedded_error(f"{e}")
+                return None
 
-            #send to log
-            logger.error(traceback_to_show)
+        def expand_center_of_mass_pars(constraint: ast.Assign) -> list[ast.Assign]:
+            """Expand center of mass parameters to include all components."""
 
-    def getConstraints(self, constraintsStr: str, fitPar: [str], modelPars: [str], modelVals: [[float]],
-                       checkedPars: [str]) -> ([str], str, str, [[bool]]):
-        """Read inputs from text editor"""
+            # check if this is a COM assignment we need to expand
+            if (len(constraint.targets) != 1 or
+                not isinstance(constraint.targets[0], ast.Name) or
+                not isinstance(constraint.value, ast.Name)):
+                return constraint
 
-        self.checkPythonSyntax(constraintsStr)
+            lhs = constraint.targets[0].id
+            rhs = constraint.value.id
 
-        #Get and check import statements
-        importStatement = self.getImportStatements(constraintsStr)
+            # check if lhs is a COM parameter (with or without 'd' prefix)
+            lhs_is_delta = lhs.startswith('d')
+            lhs_base = lhs[1:] if lhs_is_delta else lhs
 
-        #Get and check parameters
-        parameters = self.getParameters(constraintsStr, fitPar)
+            if not (lhs_base.startswith("COM") and lhs_base[3:].isdigit()):
+                return constraint
 
-        #Get and check translation
-        translation, checkedPars = self.getTranslation(constraintsStr, importStatement, modelPars, modelVals, checkedPars)
+            # check rhs
+            rhs_is_delta = rhs.startswith('d')
+            rhs_base = rhs[1:] if rhs_is_delta else rhs
 
-        return importStatement, parameters, translation, checkedPars
+            new_targets, new_values = [], []
+            if rhs_base.startswith("COM") and rhs_base[3:].isdigit():
+                # rhs is also a COM parameter: COM2 = COM1 -> COMX2, COMY2, COMZ2 =COMX1, COMY1, COMZ1
+                lhs_shape_num = lhs_base[3:]
+                rhs_shape_num = rhs_base[3:]
+
+                for axis in ['X', 'Y', 'Z']:
+                    lhs_full = f"{'d' if lhs_is_delta else ''}COM{axis}{lhs_shape_num}"
+                    rhs_full = f"{'d' if rhs_is_delta else ''}COM{axis}{rhs_shape_num}"
+                    new_targets.append(ast.Name(id=lhs_full, ctx=ast.Store()))
+                    new_values.append(ast.Name(id=rhs_full, ctx=ast.Load()))
+
+            else:
+                # rhs is a regular parameter: COM2 = X -> COMX2, COMY2, COMZ2 = X, X, X
+                lhs_shape_num = lhs_base[3:]
+                rhs_full = f"{'d' if rhs_is_delta else ''}{rhs_base}"
+                for axis in ['X', 'Y', 'Z']:
+                    lhs_full = f"{'d' if lhs_is_delta else ''}COM{axis}{lhs_shape_num}"
+                    new_targets.append(ast.Name(id=lhs_full, ctx=ast.Store()))
+                    new_values.append(ast.Name(id=rhs_full, ctx=ast.Load()))
+
+            constraint.targets = [ast.Tuple(elts=new_targets, ctx=ast.Store())]
+            constraint.value = ast.Tuple(elts=new_values, ctx=ast.Load())
+            return constraint
+
+        def parse_ast(tree: ast.AST):
+            params = None
+            imports = []
+            constraints = []
+
+            for node in ast.walk(tree):
+                match node:
+                    case ast.ImportFrom() | ast.Import():
+                        imports.append(node)
+
+                    case ast.Assign():
+                        if len(node.targets) != 1 or isinstance(node.targets[0], ast.Tuple) or isinstance(node.value, ast.Tuple):
+                            self.log_embedded_error(f"Tuple assignment is not supported (line {node.lineno}).")
+                            raise ValueError(f"Tuple assignment is not supported (line {node.lineno}).")
+
+                        if node.targets[0].id == 'parameters':
+                            params = node
+                            continue
+
+                        if node.targets[0].id.startswith('dCOM') or node.targets[0].id.startswith('COM'):
+                            constraints.append(expand_center_of_mass_pars(node))
+                        else:
+                            constraints.append(node)
+            return params, imports, constraints
+
+        def extract_symbols(constraints: list[ast.AST]) -> tuple[list[str], list[str]]:
+            """Extract all symbols used in the constraints."""
+            lhs, rhs = set(), set()
+            lineno = {}
+
+            # Helper function to discover named parameters in the supplied AST, adding them to the provided set.
+            def discover_params(param: ast.AST, add_to_set: set[str]):
+                match param:
+                    case ast.Name():
+                        add_to_set.add(param.id)
+                        lineno[param.id] = param.lineno
+                    case ast.Tuple():
+                        for elt in param.elts:
+                            if isinstance(elt, ast.Name):
+                                add_to_set.add(elt.id)
+                                lineno[elt.id] = elt.lineno
+
+            for node in constraints:
+                for target in node.targets:
+                    discover_params(target, lhs)
+
+                for value in ast.walk(node.value):
+                    discover_params(value, rhs)
+
+            return lhs, rhs, lineno
+
+        def validate_params(params: ast.AST):
+            if params is None:
+                self.log_embedded_error("No parameters found in constraints text.")
+                raise ValueError("No parameters found in constraints text.")
+
+        def validate_symbols(lhs: list[str], rhs: list[str], symbol_linenos: dict[str, int], fitPars: list[str]):
+            """Check if all symbols in lhs and rhs are valid parameters."""
+            # lhs is not allowed to contain fit parameters
+            for symbol in lhs:
+                if symbol in fitPars or symbol[1:] in fitPars:
+                    self.log_embedded_error(f"Symbol '{symbol}' is a fit parameter and cannot be assigned to (line {symbol_linenos[symbol]}).")
+                    raise ValueError(f"Symbol '{symbol}' is a fit parameter and cannot be assigned to (line {symbol_linenos[symbol]}).")
+
+            for symbol in rhs:
+                is_fit_par = symbol in fitPars or symbol[1:] in fitPars
+                is_defined = symbol in lhs
+                if not is_fit_par and not is_defined:
+                    self.log_embedded_error(f"Symbol '{symbol}' is undefined (line {symbol_linenos[symbol]}).")
+                    raise ValueError(f"Symbol '{symbol}' is undefined (line {symbol_linenos[symbol]}).")
+
+        def validate_imports(imports: list[ast.ImportFrom | ast.Import]):
+            """Check if all imports are valid."""
+            for imp in imports:
+                if isinstance(imp, ast.ImportFrom):
+                    if not importlib.util.find_spec(imp.module):
+                        self.log_embedded_error(f"Module '{imp.module}' not found (line {imp.lineno}).")
+                        raise ModuleNotFoundError(f"No module named {imp.module}")
+                elif isinstance(imp, ast.Import):
+                    for name in imp.names:
+                        if not importlib.util.find_spec(name.name):
+                            self.log_embedded_error(f"Module '{name.name}' not found (line {imp.lineno}).")
+                            raise ModuleNotFoundError(f"No module named {name.name}")
+
+        def mark_named_parameters(checkedPars: list[list[bool]], modelPars: list[str], symbols: set[str]):
+            """Mark parameters in the modelPars as checked if they are in symbols_lhs."""
+            def in_symbols(par: str):
+                if par in symbols: return True
+                if 'd' + par in symbols: return True
+                return False
+
+            for i, shape in enumerate(modelPars):
+                for j, par in enumerate(shape):
+                    if par is None:
+                        continue
+                    checkedPars[i][j] = checkedPars[i][j] or in_symbols(par)
+            return checkedPars
+
+        tree = as_ast(text)
+        params, imports, constraints = parse_ast(tree)
+        lhs, rhs, symbol_linenos = extract_symbols(constraints)
+        validate_params(params)
+        validate_symbols(lhs, rhs, symbol_linenos, fitPar)
+        validate_imports(imports)
+
+        params = ast.unparse(params)
+        imports = [ast.unparse(imp) for imp in imports]
+        constraints = [ast.unparse(constraint) for constraint in constraints]
+        symbols = (lhs, rhs)
+
+        self.log_embedded("Successfully parsed user text. Generating plugin model...")
+        logger.debug(f"Parsed parameters: {params}")
+        logger.debug(f"Parsed imports: {imports}")
+        logger.debug(f"Parsed constraints: {constraints}")
+        logger.debug(f"Symbols used: {symbols}")
+
+        return UserText(imports, params, constraints, symbols), mark_named_parameters(checkedPars, modelPars, lhs.union(rhs))
 
     @staticmethod
-    def getPosition(item: VAL_TYPE, itemLists: [[VAL_TYPE]]) -> (int, int):
+    def getPosition(item: VAL_TYPE, itemLists: list[list[VAL_TYPE]]) -> tuple[int, int]:
         """Find position of an item in lists"""
 
         for i, sublist in enumerate(itemLists):
@@ -123,7 +338,7 @@ translation = """
                 return i, sublist.index(item)
 
     @staticmethod
-    def removeFromList(listItems: [VAL_TYPE], listToCompare: [VAL_TYPE]):
+    def removeFromList(listItems: list[VAL_TYPE], listToCompare: list[VAL_TYPE]):
         """Remove items from a list if in another list"""
 
         finalpars = []
@@ -135,7 +350,7 @@ translation = """
         # Explicilty modify list sent to the method
         listItems = finalpars
 
-    def ifParameterExists(self, lineNames: [str], modelPars: [[str]]) -> bool:
+    def ifParameterExists(self, lineNames: list[str], modelPars: list[list[str]]) -> bool:
         """Check if parameter exists in model parameters"""
 
         for par in lineNames:
@@ -144,181 +359,6 @@ translation = """
                 logger.error(f"{par} does not exist in parameter table")
 
         return False
-
-    def getTranslation(self, constraintsStr: str, importStatement: [str], modelPars: [[str]], modelVals: [[float]],
-                       checkedPars: [[str]]) -> (str, [[bool]]):
-        """Get translation from constraints"""
-
-        #see if translation is in constraints
-        if not re.search(r'translation\s*=', constraintsStr):
-            logger.warn("No variable translation found in constraints")
-
-        #TODO: make getParametersFromConstraints general, so translation can be inputted
-        #NOTE: re.search() a bit slow, ast faster
-        translation = re.search(r'translation\s*=\s*"""(.*\n(?:.*\n)*?)"""', constraintsStr, re.DOTALL)
-        translationInput = translation.group(1) if translation else ""
-
-        #Check syntax
-        self.checkPythonSyntax(translationInput) #TODO: fix wrong line number output for translation
-        lines = translationInput.split('\n')
-
-        #remove empty lines and tabs
-        lines = [line.replace('\t', '').strip() for line in lines if line.strip()]
-        translationInput = ''
-
-        #Check parameters and update checkedPars
-        for line in lines:
-            if line.count('=') != 1:
-                logger.warn(f"Constraints may only have a single '=' sign in them. Please fix {line}.")
-
-            #split line
-            leftLine, rightLine = line.split('=')
-
-            #unicode greek letters: \u0370-\u03FF
-            rightPars = re.findall(r'(?<=)[a-zA-Z_\u0370-\u03FF]\w*\b', rightLine)
-            leftPars = re.findall(r'(?<=)[a-zA-Z_\u0370-\u03FF]\w*\b', leftLine)
-
-            #check for import statements (I can't imagine a case where it would be to the left)
-            self.removeFromList(rightPars, importStatement)
-
-            #check if parameters exist in model parameters
-            self.ifParameterExists(rightPars + leftPars, modelPars)
-
-            #Translate
-            notes = ""
-            for par in rightPars:
-                j, k = self.getPosition(par, modelPars)
-                if not checkedPars[j][k]:
-                    #if parameter is a constant, set inputted value
-                    inputVal = modelVals[j][k]
-
-                    #update line with input value
-                    rightLine = re.sub(r'\b' + re.escape(par) + r'\b', str(inputVal), rightLine)
-                    notes += f"{par} = {inputVal},"
-            #any constants added to notes?
-            if notes:
-                notes = f" #{notes}"
-
-            for par in leftPars:
-                j, k = self.getPosition(par, modelPars)
-                #check if paramater are to be set in ModelProfile
-                checkedPars[j][k] = True
-            line = leftLine + '=' + rightLine + notes
-            translationInput += line + "\n"
-
-        return translationInput, checkedPars
-
-    def extractValues(self, elt: ast.AST) -> VAL_TYPE:
-        if isinstance(elt, ast.Constant):
-            return elt.value
-        elif isinstance(elt, ast.List):
-            return [self.extractValues(elt) for elt in elt.elts]
-        #statements for the the boundary list:
-        elif isinstance(elt, ast.Name) and elt.id == 'inf':
-            return float('inf')
-        elif isinstance(elt, ast.Name):
-            return elt.id
-        #check for negative values in boundary list
-        elif isinstance(elt.op, ast.USub) and self.extractValues(elt.operand) == float('inf'):
-            return float('-inf')
-        elif isinstance(elt.op, ast.USub) and isinstance(self.extractValues(elt.operand), (int, float)):
-            return -1*self.extractValues(elt.operand)
-        return None
-
-    def getParametersFromConstraints(self, constraints_str: str, targetName: str) -> []:
-        """Extract parameters from constraints string"""
-        tree = ast.parse(constraints_str) #get abstract syntax tree
-
-        parametersNode = None
-        for node in ast.walk(tree):
-            #is the node an assignment and does it have the target name?
-            if isinstance(node, ast.Assign) and node.targets[0].id == targetName:
-                parametersNode = node.value
-                parameters = [self.extractValues(elt) for elt in parametersNode.elts]
-                return parameters
-
-        logger.warn(f"No {targetName} variable found in constraints")
-
-    def getParameters(self, constraintsStr: str, fitPar: [str]) -> str:
-        """Get parameters from constraints"""
-
-        #Is anything in parameters?
-        parameters = self.getParametersFromConstraints(constraintsStr, 'parameters')
-        names = [parameter[0] for parameter in parameters]
-
-        #Check parameters in constraints
-        if len(names) != len(fitPar):
-            logger.error("Number of parameters in variable parameters does not match checked parameters in table")
-
-        #Check if parameter exists in checked parameters
-        for name in names:
-            if name not in fitPar:
-                logger.error(f"{name} does not exists in checked parameters")
-
-        description = 'parameters =' + '[' + '\n' + '# name, units, default, [min, max], type, description,' + '\n'
-        parameters_str = description  + ',\n'.join(str(sublist) for sublist in parameters) + "\n]"
-
-        return parameters_str
-
-    def isImportFromStatement(self, node: ast.ImportFrom) -> [str]:
-        """Return list of ImportFrom statements"""
-
-        #Check if library exists
-        if not importlib.util.find_spec(node.module):
-            raise ModuleNotFoundError(f"No module named {node.module}")
-
-        imports = []
-        module = importlib.import_module(node.module)
-
-        for alias in node.names:
-            #check if library has the attribute
-            if not hasattr(module, f"{alias.name}"):
-                raise AttributeError(f"module {node.module} has no attribute {alias.name}")
-            if alias.asname:
-                imports.append(f"{alias.name} as {alias.asname}")
-            else:
-                imports.append(f"{alias.name}")
-
-        return [f"from {node.module} import {', '.join(imports)}"]
-
-    def isImportStatement(self, node: ast.Import) -> [str]:
-        """Return list of Import statements"""
-
-        imports = []
-        for alias in node.names:
-            #check if library exists
-            if not importlib.util.find_spec(alias.name):
-                raise ModuleNotFoundError(f"No module named {alias.name}")
-            #get name and asname
-            if alias.asname:
-                imports.append(f"{alias.name} as {alias.asname}")
-            else:
-                imports.append(f"{alias.name}")
-
-        return [f"import {', '.join(imports)}"]
-
-    def getImportStatements(self, text: str) -> [str]:
-        """return all import statements that were
-        written in the text editor"""
-
-        importStatements = []
-
-        try:
-            tree = ast.parse(text)
-            #look for import statements
-            for node in ast.walk(tree):
-                #check statement type
-                if isinstance(node, ast.ImportFrom):
-                    importStatements.extend(self.isImportFromStatement(node))
-
-                elif isinstance(node, ast.Import):
-                    importStatements.extend(self.isImportStatement(node))
-
-            return importStatements
-
-        except SyntaxError as e:
-            error_line = text.splitlines()[e.lineno - 1]
-            raise SyntaxError(f"Syntax error: {e.msg} at line {e.lineno}: {error_line}")
 
     def clearConstraints(self):
         """Clear text editor containing constraints"""

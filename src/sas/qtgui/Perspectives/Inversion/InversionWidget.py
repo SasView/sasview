@@ -288,7 +288,7 @@ class InversionWidget(QWidget, Ui_PrInversion):
             if current_calculator.est_bck:
                 self.backgroundInput.setText(format_float(out.background))
             self.computationTimeValue.setText(format_float(out.calc_time))
-            self.chiDofValue.setText(format_float_scientific(out.chi2[0]))
+            self.chiDofValue.setText(format_float_scientific(out.chi2))
             self.oscillationValue.setText(format_float(out.oscillations))
             self.posFractionValue.setText(format_float(out.pos_frac))
             self.sigmaPosFractionValue.setText(format_float(out.pos_err))
@@ -369,7 +369,7 @@ class InversionWidget(QWidget, Ui_PrInversion):
         for plot in plots:
             if plot is not None:
                 updateModelItemWithPlot(result.logic._data_item, plot, plot.name)
-                self.communicator.plotRequestedSignal.emit([result.logic._data_item, plot], None)
+                self.communicator.plotRequestedSignal.emit([result.logic._data_item, plot])
 
     def showCurrentPlots(self):
         self.showPlots(self.currentResult)

@@ -5,9 +5,21 @@ requires = [
     "hatch-requirements-txt",
     "hatch-sphinx",
     "hatch-vcs",
+    # For documentation
+    "bumps",
+    "dominate",
+    "html2text",
+    "numpy",
+    "periodictable",
+    "pyopengl",
     "pyside6",
+    "qtconsole",
+    "scipy",
+    "superqt",
     "sasdata",
     "sasmodels",
+    "twisted",
+    "uncertainties",
 ]
 build-backend = "hatchling.build"
 
@@ -21,7 +33,7 @@ dynamic = [
 ]
 description = "SasView application"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 license = { text = "BSD-3-Clause" }
 authors = [
     {name = "SasView Team", email = "developers@sasview.org"},
@@ -78,6 +90,7 @@ include = [
   "build_tools",
   "build/lib/doc/build",
   "docs/sphinx-docs/source",
+  "docs/sphinx-docs/*.py",
   "src",
   "test",
 ]
@@ -105,8 +118,6 @@ artifacts = [
 
 [tool.hatch.build.targets.wheel.force-include]
 "build/doc/html/" = "sas/docs"
-"docs/sphinx-docs/source-temp/" = "sas/docs-source"
-"src/sas/sasview/media/" = "sas/sasview/media"
 "src/sas/example_data/" = "sas/example_data"
 
 
@@ -123,13 +134,13 @@ artifacts = [
 
 [[tool.hatch.build.targets.wheel.hooks.sphinx.tools]]
 tool = "custom"
-doc_dir = "docs/sphinx-docs"
+doc_dir = "."
 out_dir = "tmp"
 commands = [
   # sphinx commands work within the "doc_dir" directory
-  "{python} extract-module-resource.py sasmodels docs-source tmp/sasmodels/docs",
-  "{python} extract-module-resource.py sasdata docs-source tmp/sasdata/docs",
-  "{python} extract-module-resource.py sasdata example_data ../../src/sas/example_data/",
+  "{python} src/sas/system/resources.py -r sasmodels docs-source docs/sphinx-docs/tmp/sasmodels/docs",
+  "{python} src/sas/system/resources.py -r sasdata docs-source docs/sphinx-docs/tmp/sasdata/docs",
+  "{python} src/sas/system/resources.py -r sasdata example_data src/sas/example_data/",
 ]
 
 
@@ -183,7 +194,6 @@ python_classes = [
 ]
 qt_api = "pyside6"
 addopts = [
-    "--ignore", "test/utest_sasview.py",
     "-v",
     "-rsx",
 ]
@@ -209,6 +219,7 @@ select = ["E",       # pycodestyle errors
           "F",       # pyflakes
           "I",       # isort
           "UP",      # pyupgrade
+          "W",       # pycodestyle warnings
           "SIM118",  # Use `key in dict` instead of `key in dict.keys()`
           "SIM300"]  # Yoda condition detected
 

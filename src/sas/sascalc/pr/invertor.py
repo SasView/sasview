@@ -209,11 +209,7 @@ class Invertor:
         if rcond is None:
             rcond = -1
         c, chi2, _, _ = lstsq(a, b, rcond=rcond)
-        # Sanity check
-        try:
-            float(chi2)
-        except:
-            chi2 = -1.0
+        chi2 = chi2[0] if chi2.shape == (1,) else -1.0
         self.chi2 = chi2
 
         # Get the covariance matrix, defined as inv_cov = a_transposed * a

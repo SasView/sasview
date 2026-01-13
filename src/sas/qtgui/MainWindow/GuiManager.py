@@ -8,7 +8,7 @@ from pathlib import Path
 from packaging.version import Version
 from PySide6.QtCore import QLocale, Qt
 from PySide6.QtGui import QStandardItem
-from PySide6.QtWidgets import QDockWidget, QLabel, QProgressBar, QTextBrowser
+from PySide6.QtWidgets import QDockWidget, QLabel, QMessageBox, QProgressBar, QTextBrowser
 from twisted.internet import reactor
 
 import sas
@@ -40,9 +40,9 @@ from sas.qtgui.Perspectives.Inversion.InversionPerspective import InversionWindo
 from sas.qtgui.Perspectives.perspective import Perspective
 from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionPerspective import SizeDistributionWindow
 from sas.qtgui.Utilities.About.About import About
+from sas.qtgui.Utilities.About.Credits import Credits
 
 # from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
-from sas.qtgui.Utilities.DocRegenInProgess import DocRegenProgress
 from sas.qtgui.Utilities.FileConverter import FileConverterWidget
 from sas.qtgui.Utilities.GridPanel import BatchOutputPanel
 from sas.qtgui.Utilities.HidableDialog import hidable_dialog
@@ -60,10 +60,9 @@ from sas.qtgui.Utilities.ResultPanel import ResultPanel
 
 # General SAS imports
 from sas.qtgui.Utilities.SasviewLogger import setup_qt_logging
-from sas.qtgui.Utilities.WhatsNew.WhatsNew import WhatsNew
-from sas.sascalc.doc_regen.makedocumentation import HELP_DIRECTORY_LOCATION, create_user_files_if_needed
-from sas.system import web
-from sas.system.user import HELP_DIRECTORY_LOCATION, create_user_files_if_needed
+from sas.qtgui.Utilities.WhatsNew.WhatsNew import WhatsNewWidget
+from sas.system import HELP_SYSTEM, web
+from sas.system.user import create_user_files_if_needed
 from sas.system.version import __release_date__ as SASVIEW_RELEASE_DATE
 from sas.system.version import __version__ as SASVIEW_VERSION
 
@@ -87,7 +86,7 @@ class GuiManager:
         # Redefine exception hook to not explicitly crash the app.
         sys.excepthook = self.info
 
-        # Ensure the user directory has all required documentation files for future doc regen purposes
+        # Ensure the user directory has all required layout and files
         create_user_files_if_needed()
 
         # Add signal callbacks
@@ -115,20 +114,15 @@ class GuiManager:
         handler.postman.messageWritten.connect(self.appendLog)
 
         # Log the start of the session
-        logging.info(f" --- SasView session started, version {SASVIEW_VERSION}, {SASVIEW_RELEASE_DATE} ---")
+        logger.info(f" --- SasView session started, version {SASVIEW_VERSION}, {SASVIEW_RELEASE_DATE} ---")
         # Log the python version
-        logging.info("Python: %s" % sys.version)
-        #logging.debug("Debug messages are shown.")
-        #logging.warn("Warnings are shown.")
-        #logging.error("Errors are shown.")
+        logger.info("Python: %s" % sys.version)
+        #logger.debug("Debug messages are shown.")
+        #logger.warn("Warnings are shown.")
+        #logger.error("Errors are shown.")
 
         # Set up the status bar
         self.statusBarSetup()
-
-        # Current tutorial location
-        self._tutorialLocation = os.path.abspath(os.path.join(HELP_DIRECTORY_LOCATION,
-                                              "_downloads",
-                                              "Tutorial.pdf"))
 
         if self.WhatsNew.has_new_messages(): # Not a static method
             self.WhatsNew.show()
@@ -200,8 +194,7 @@ class GuiManager:
         self.GENSASCalculator = None
         self.DataOperation = DataOperationUtilityPanel(self)
         self.FileConverter = FileConverterWidget(self)
-        self.WhatsNew = WhatsNew(self._parent)
-        self.regenProgress = DocRegenProgress(self)
+        self.WhatsNew = WhatsNewWidget(self._parent)
 
     def loadAllPerspectives(self):
         """ Load all the perspectives"""
@@ -253,7 +246,7 @@ class GuiManager:
             CategoryInstaller.check_install(model_list=model_list)
         except Exception:
             import traceback
-            logger.error("%s: could not load SasView models")
+            logger.error("Category manager: could not load SasView models")
             logger.error(traceback.format_exc())
 
     def updatePlotItems(self, graphs):
@@ -274,6 +267,7 @@ class GuiManager:
         """
         if not plot:
             return
+
         name = plot[1].name
         for action in self._workspace.menuWindow.actions():
             if action.text() == name:
@@ -365,14 +359,18 @@ class GuiManager:
         """
         Open a local url in the default browser
         """
+        if not HELP_SYSTEM.path:
+            logger.error("Help documentation was not found.")
+            return
+
         counter = 1
         window_name = "help_window"
         # Remove leading forward slashes from relative paths to allow easy Path building
         if isinstance(url, str):
             url = url.lstrip("//")
         url = Path(url)
-        if str(HELP_DIRECTORY_LOCATION.resolve()) not in str(url.absolute()):
-            url_abs = HELP_DIRECTORY_LOCATION / url
+        if str(HELP_SYSTEM.path.resolve()) not in str(url.absolute()):
+            url_abs = HELP_SYSTEM.path / url
         else:
             url_abs = Path(url)
         try:
@@ -390,7 +388,7 @@ class GuiManager:
             setattr(cls, window_name, GuiUtils.showHelp(url_abs))
 
         except Exception as ex:
-            logging.warning("Cannot display help. %s" % ex)
+            logger.warning("Cannot display help. %s" % ex)
 
     def workspace(self):
         """
@@ -503,7 +501,7 @@ class GuiManager:
             self._current_perspective.setData(list(data.values()))
         else:
             msg = "No perspective is currently active."
-            logging.info(msg)
+            logger.info(msg)
 
     def communicator(self):
         """ Accessor for the communicator """
@@ -564,7 +562,7 @@ class GuiManager:
             self._current_perspective.setData(list(data.values()))
         else:
             msg = "Guiframe does not have a current perspective"
-            logging.info(msg)
+            logger.info(msg)
 
     def findItemFromFilename(self, filename):
         """
@@ -604,7 +602,7 @@ class GuiManager:
         """
         latest_version = get_current_release_version()
         if latest_version is None:
-            logging.info("Failed to connect to www.sasview.org:")
+            logger.info("Failed to connect to www.sasview.org:")
         self.processVersion(latest_version)
 
     def log_installed_packages(self):
@@ -644,7 +642,7 @@ class GuiManager:
         except:
             msg = "guiframe: could not get latest application"
             msg += " version number\n  %s" % sys.exc_info()[1]
-            logging.error(msg)
+            logger.error(msg)
             msg = "Could not connect to the application server."
             msg += " Please try again later."
             self.communicate.statusBarUpdateSignal.emit(msg)
@@ -656,7 +654,7 @@ class GuiManager:
         self.welcomePanel.show()
 
     def actionWhatsNew(self):
-        self.WhatsNew = WhatsNew(self._parent, only_recent=False)
+        self.WhatsNew = WhatsNewWidget(self._parent, only_recent=False)
         self.WhatsNew.show()
 
     def showWelcomeMessage(self):
@@ -710,6 +708,7 @@ class GuiManager:
         self._workspace.actionOpen_Analysis.triggered.connect(self.actionOpen_Analysis)
         self._workspace.actionSave.triggered.connect(self.actionSave_Project)
         self._workspace.actionSave_Analysis.triggered.connect(self.actionSave_Analysis)
+        self._workspace.actionClose_Project.triggered.connect(self.actionClose_Project)
         self._workspace.actionPreferences.triggered.connect(self.actionOpen_Preferences)
         self._workspace.actionQuit.triggered.connect(self.actionQuit)
         # Edit
@@ -780,6 +779,7 @@ class GuiManager:
         self._workspace.actionModel_Marketplace.triggered.connect(self.actionMarketplace)
         self._workspace.actionAcknowledge.triggered.connect(self.actionAcknowledge)
         self._workspace.actionAbout.triggered.connect(self.actionAbout)
+        self._workspace.actionCredits.triggered.connect(self.actionCredits)
         self._workspace.actionWelcomeWidget.triggered.connect(self.actionWelcome)
         self._workspace.actionCheck_for_update.triggered.connect(self.actionCheck_for_update)
         self._workspace.actionWhat_s_New.triggered.connect(self.actionWhatsNew)
@@ -813,13 +813,14 @@ class GuiManager:
         self.filesWidget.loadAnalysis()
 
 
-    def actionSave_Project(self):
+    def actionSave_Project(self) -> bool:
         """
         Menu Save Project
+        return: True if save was successful, False otherwise
         """
         filename = self.filesWidget.saveProject()
         if not filename:
-            return
+            return False
 
         # datasets
         all_data = self.filesWidget.getSerializedData()
@@ -844,6 +845,7 @@ class GuiManager:
 
         with open(filename, 'w') as outfile:
             GuiUtils.saveData(outfile, final_data)
+        return True
 
     def actionSave_Analysis(self):
         """
@@ -909,7 +911,7 @@ class GuiManager:
             report_data = self._current_perspective.getReport()
 
             if report_data is None:
-                logging.info("Report data is empty, dialog not shown")
+                logger.info("Report data is empty, dialog not shown")
             else:
                 self.report_dialog = ReportDialog(report_data=report_data, parent=self._parent)
                 self.report_dialog.show()
@@ -919,7 +921,7 @@ class GuiManager:
     def actionReset(self):
         """
         """
-        logging.warning(" *** actionOpen_Analysis logging *******")
+        logger.warning(" *** actionOpen_Analysis logging *******")
         print("actionReset print TRIGGERED")
         sys.stderr.write("STDERR - TRIGGERED")
 
@@ -1041,7 +1043,7 @@ class GuiManager:
         try:
             self.ResolutionCalculator.show()
         except Exception as ex:
-            logging.error(str(ex))
+            logger.error(str(ex))
             return
 
     def actionGeneric_Scattering_Calculator(self):
@@ -1056,14 +1058,14 @@ class GuiManager:
             self.updateStatusBar("The Generic Scattering Calculator is open, but it sometimes opens behind the main "
                                  "window.")
         except Exception as ex:
-            logging.error(str(ex))
+            logger.error(str(ex))
             return
 
     def actionShape2SAS_Calculator(self):
         try:
             self.Shape2SASCalculator.show()
         except Exception as ex:
-            logging.error(str(ex))
+            logger.error(str(ex))
             return
 
     def actionPython_Shell_Editor(self):
@@ -1101,7 +1103,7 @@ class GuiManager:
                 self.image_viewer.menubar.setNativeMenuBar(False)
             self.image_viewer.show()
         except Exception as ex:
-            logging.error(str(ex))
+            logger.error(str(ex))
             return
 
     def actionFile_Converter(self):
@@ -1111,7 +1113,7 @@ class GuiManager:
         try:
             self.FileConverter.show()
         except Exception as ex:
-            logging.error(str(ex))
+            logger.error(str(ex))
             return
 
     #============ FITTING =================
@@ -1323,6 +1325,32 @@ class GuiManager:
         about = About()
         about.exec()
 
+    def actionCredits(self):
+        """
+        Open the Credits/Licenses box
+        """
+        # TODO: proper sizing
+        credits = Credits()
+        credits.exec()
+
+    def actionClose_Project(self):
+        """
+        Menu File/Close Project
+        """
+        # Make sure this is what the user really wants
+        reply = QMessageBox.question(self._parent, 'Close Project',
+                                    "Do you want to save the project before closing?\n"
+                                    "All unsaved changes will be lost if you don't save.",
+                                    QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel,
+                                    QMessageBox.Cancel)
+        if reply == QMessageBox.Save:
+            saved = self.actionSave_Project()
+            if saved:
+                self.resetProject()
+        elif reply == QMessageBox.Discard:
+            self.resetProject()
+        # else Cancel, do nothing
+
     def actionCheck_for_update(self):
         """
         Menu Help/Check for Update
@@ -1369,12 +1397,12 @@ class GuiManager:
         if hasattr(self, "filesWidget"):
             self.filesWidget.displayDataByName(name=name, is_data=True)
 
-    def showPlot(self, plot, id):
+    def showPlot(self, plot):
         """
         Pass the show plot request to the data explorer
         """
         if hasattr(self, "filesWidget"):
-            self.filesWidget.displayData(plot, id)
+            self.filesWidget.displayData(plot)
             # update windows menu
             self.addPlotItemsInWindowsMenu(plot)
 
@@ -1400,3 +1428,15 @@ class GuiManager:
         Save the config file based on current session values
         """
         config.save()
+
+    def resetProject(self):
+        """
+        Reset the project to an empty state
+        """
+        # perspectives
+        for per in self.loadedPerspectives.values():
+            if hasattr(per, 'reset'):
+                per.reset()
+        # file manager
+        self.filesWidget.reset()
+

@@ -1,5 +1,4 @@
 import logging
-import subprocess
 import sys
 import webbrowser
 
@@ -16,22 +15,25 @@ from sas.qtgui.Utilities.HidableDialog import HidableDialog
 from sas.qtgui.Utilities.IPythonWidget import IPythonWidget
 from sas.system import config
 
+logger = logging.getLogger(__name__)
+
 
 class GuiManagerTest:
-    '''Test the Main Window functionality'''
+    """Test the Main Window functionality"""
 
     def __init__(self):
-        config.override_with_defaults() # Disable saving of test file
-        config.LAST_WHATS_NEW_HIDDEN_VERSION = "999.999.999" # Give a very large version number
+        config.override_with_defaults()  # Disable saving of test file
+        config.LAST_WHATS_NEW_HIDDEN_VERSION = "999.999.999"  # Give a very large version number
 
     @pytest.fixture(autouse=True)
     def manager(self, qapp):
-        '''Create/Destroy the GUI Manager'''
+        """Create/Destroy the GUI Manager"""
+
         class MainWindow(MainSasViewWindow):
             # Main window of the application
 
-            def __init__(self,  parent=None):
-                super(MainWindow, self).__init__( parent)
+            def __init__(self, parent=None):
+                super(MainWindow, self).__init__(parent)
 
                 # define workspace for dialogs.
                 self.workspace = QMdiArea(self)
@@ -75,10 +77,9 @@ class GuiManagerTest:
         assert message in manager.logDockWidget.widget().toPlainText()
 
         # And finally, send a log message
-        import logging
         message = "from logging"
         message_logged = "ERROR: " + message
-        logging.error(message)
+        logger.error(message)
         assert message_logged in manager.logDockWidget.widget().toPlainText()
 
     @pytest.mark.skip("2022-09 already broken - generates runtime error")
@@ -96,18 +97,15 @@ class GuiManagerTest:
         assert manager._workspace.dockWidgetArea(manager.ipDockWidget) == QtCore.Qt.RightDockWidgetArea
 
     def testUpdatePerspective(self, manager):
-        """
-        """
+        """ """
         pass
 
     def testUpdateStatusBar(self, manager):
-        """
-        """
+        """ """
         pass
 
     def testSetData(self, manager):
-        """
-        """
+        """ """
         pass
 
     def testQuitApplication(self, manager, mocker):
@@ -117,11 +115,11 @@ class GuiManagerTest:
         manager._workspace.show()
 
         # Must mask sys.exit, otherwise the whole testing process stops.
-        mocker.patch.object(sys, 'exit')
+        mocker.patch.object(sys, "exit")
 
         # Say No to the close dialog
-        mocker.patch.object(QMessageBox, 'question', return_value=QMessageBox.No)
-        mocker.patch.object(HidableDialog, 'exec', return_value=0)
+        mocker.patch.object(QMessageBox, "question", return_value=QMessageBox.No)
+        mocker.patch.object(HidableDialog, "exec", return_value=0)
 
         # Open, then close the manager
         manager.quitApplication()
@@ -130,8 +128,8 @@ class GuiManagerTest:
         assert HidableDialog.exec.called
 
         # Say Yes to the close dialog
-        mocker.patch.object(QMessageBox, 'question', return_value=QMessageBox.Yes)
-        mocker.patch.object(HidableDialog, 'exec', return_value=1)
+        mocker.patch.object(QMessageBox, "question", return_value=QMessageBox.Yes)
+        mocker.patch.object(HidableDialog, "exec", return_value=1)
 
         # Open, then close the manager
         manager.quitApplication()
@@ -144,10 +142,12 @@ class GuiManagerTest:
         """
         Tests the SasView website version polling
         """
-        mocker.patch.object(manager, 'processVersion')
-        version = {'version'     : '5.0.2',
-                   'update_url'  : 'http://www.sasview.org/sasview.latestversion',
-                   'download_url': 'https://github.com/SasView/sasview/releases/tag/v5.0.2'}
+        mocker.patch.object(manager, "processVersion")
+        version = {
+            "version": "5.0.2",
+            "update_url": "http://www.sasview.org/sasview.latestversion",
+            "download_url": "https://github.com/SasView/sasview/releases/tag/v5.0.2",
+        }
         manager.checkUpdate()
 
         manager.processVersion.assert_called_with(version)
@@ -159,57 +159,56 @@ class GuiManagerTest:
         Tests the version checker logic
         """
         # 1. version = 0.0.0
-        version_info = {'version' : '0.0.0'}
+        version_info = {"version": "0.0.0"}
         spy_status_update = QtSignalSpy(manager, manager.communicate.statusBarUpdateSignal)
 
         manager.processVersion(version_info)
 
         assert spy_status_update.count() == 1
-        message = 'Could not connect to the application server. Please try again later.'
+        message = "Could not connect to the application server. Please try again later."
         assert message in str(spy_status_update.signal(index=0))
 
         # 2. version < config.__version__
-        version_info = {'version' : '0.0.1'}
+        version_info = {"version": "0.0.1"}
         spy_status_update = QtSignalSpy(manager, manager.communicate.statusBarUpdateSignal)
 
         manager.processVersion(version_info)
 
         assert spy_status_update.count() == 1
-        message = 'You have the latest version'
+        message = "You have the latest version"
         assert message in str(spy_status_update.signal(index=0))
 
         # 3. version > LocalConfig.__version__
-        version_info = {'version' : '999.0.0'}
+        version_info = {"version": "999.0.0"}
         spy_status_update = QtSignalSpy(manager, manager.communicate.statusBarUpdateSignal)
-        mocker.patch.object(webbrowser, 'open')
+        mocker.patch.object(webbrowser, "open")
 
         manager.processVersion(version_info)
 
         assert spy_status_update.count() == 1
-        message = 'Version 999.0.0 is available!'
+        message = "Version 999.0.0 is available!"
         assert message in str(spy_status_update.signal(index=0))
 
         webbrowser.open.assert_called_with("https://github.com/SasView/sasview/releases/latest")
 
         # 4. couldn't load version
         version_info = {}
-        mocker.patch.object(logging, 'error')
+        mocker.patch.object(logger, "error")
         spy_status_update = QtSignalSpy(manager, manager.communicate.statusBarUpdateSignal)
 
         manager.processVersion(version_info)
 
         # Retrieve and compare arguments of the mocked call
         message = "guiframe: could not get latest application version number"
-        args, _ = logging.error.call_args
+        args, _ = logger.error.call_args
         assert message in args[0]
 
         # Check the signal message
-        message = 'Could not connect to the application server.'
+        message = "Could not connect to the application server."
         assert message in str(spy_status_update.signal(index=0))
 
     def testActions(self, manager):
-        """
-        """
+        """ """
         pass
 
     #### FILE ####
@@ -218,7 +217,7 @@ class GuiManagerTest:
         Menu File/Load Data File(s)
         """
         # Mock the system file open method
-        mocker.patch.object(QFileDialog, 'getOpenFileNames', return_value=('',''))
+        mocker.patch.object(QFileDialog, "getOpenFileNames", return_value=("", ""))
 
         # invoke the action
         manager.actionLoadData()
@@ -231,7 +230,7 @@ class GuiManagerTest:
         Menu File/Load Data Folder
         """
         # Mock the system file open method
-        mocker.patch.object(QFileDialog, 'getExistingDirectory', return_value=('',''))
+        mocker.patch.object(QFileDialog, "getExistingDirectory", return_value=("", ""))
 
         # invoke the action
         manager.actionLoad_Data_Folder()
@@ -252,22 +251,21 @@ class GuiManagerTest:
 
         # Check the initial state
         assert not manager._workspace.toolBar.isVisible()
-        assert manager._workspace.actionHide_Toolbar.text() == 'Show Toolbar'
+        assert manager._workspace.actionHide_Toolbar.text() == "Show Toolbar"
 
         # Invoke action
         manager.actionHide_Toolbar()
 
         # Assure changes propagated correctly
         assert manager._workspace.toolBar.isVisible()
-        assert manager._workspace.actionHide_Toolbar.text() == 'Hide Toolbar'
+        assert manager._workspace.actionHide_Toolbar.text() == "Hide Toolbar"
 
         # Revert
         manager.actionHide_Toolbar()
 
         # Assure the original values are back
         assert not manager._workspace.toolBar.isVisible()
-        assert manager._workspace.actionHide_Toolbar.text() == 'Show Toolbar'
-
+        assert manager._workspace.actionHide_Toolbar.text() == "Show Toolbar"
 
     #### HELP ####
     # test when PyQt5 works with html
@@ -275,35 +273,13 @@ class GuiManagerTest:
         """
         Menu Help/Documentation
         """
-        mocker.patch.object(webbrowser, 'open')
+        mocker.patch.object(webbrowser, "open")
 
         # Invoke the action
         manager.actionDocumentation()
 
         # see that webbrowser open was attempted
         webbrowser.open.assert_called_once()
-
-
-    def skip_testActionTutorial(self, manager, mocker):
-        """
-        Menu Help/Tutorial
-        """
-        # Mock subprocess.Popen
-        mocker.patch.object(subprocess, 'Popen')
-
-        tested_location = manager._tutorialLocation
-
-        # Assure the filename is correct
-        assert "Tutorial.pdf" in tested_location
-
-        # Invoke the action
-        manager.actionTutorial()
-
-        # Check if popen() got called
-        assert subprocess.Popen.called
-
-        #Check the popen() call arguments
-        subprocess.Popen.assert_called_with([tested_location], shell=True)
 
     def testActionAcknowledge(self, manager):
         """
@@ -320,7 +296,7 @@ class GuiManagerTest:
         Menu Help/Check for update
         """
         # Just make sure checkUpdate is called.
-        mocker.patch.object(manager, 'checkUpdate')
+        mocker.patch.object(manager, "checkUpdate")
 
         manager.actionCheck_for_update()
 

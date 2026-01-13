@@ -1,6 +1,28 @@
-build
+# The list of dependencies needed to build sasview, this should be kept in
+# sync with pyproject.toml's build-system.requires list.
+# Additional tools for developers can be listed in this file.
+# Developers may also want the test dependencies in requirements-test.txt
+
+bumps
+dominate
 hatchling
 hatch-build-scripts
 hatch-requirements-txt
 hatch-sphinx
 hatch-vcs
+html2text
+numpy
+periodictable
+pyopengl
+pyside6
+qtconsole
+scipy
+superqt
+twisted
+uncertainties
+
+# not build-dependencies but important for developers
+build   # build is special: it doesn't get listed in build-system.requires but is needed
+pip-licenses
+pre-commit
+-r requirements-test.txt

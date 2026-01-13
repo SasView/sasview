@@ -41,7 +41,8 @@ from sas.qtgui.Plotting.Plottables import Chisq, Plottable, PlottableFit1D, Plot
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
 from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
 from sas.sascalc.fit.AbstractFitEngine import FitData1D, FitData2D, FResult
-from sas.system.user import HELP_DIRECTORY_LOCATION, PATH_LIKE
+from sas.system import HELP_SYSTEM
+from sas.system.user import PATH_LIKE
 
 warnings.simplefilter("ignore")
 
@@ -78,6 +79,9 @@ class Communicate(QtCore.QObject):
     """
     Utility class for tracking of the Qt signals
     """
+    # File was passed as an argument on the command line, dropped on the executable, or double clicked
+    fileTriggerSignal = QtCore.Signal(str)
+
     # File got successfully read
     fileReadSignal = QtCore.Signal(list)
 
@@ -102,7 +106,7 @@ class Communicate(QtCore.QObject):
 
     # New plot requested from the GUI manager
     # Old "NewPlotEvent"
-    plotRequestedSignal = QtCore.Signal(list, int)
+    plotRequestedSignal = QtCore.Signal(list)
 
     # Plot from file names
     plotFromNameSignal = QtCore.Signal(str)
@@ -173,14 +177,11 @@ class Communicate(QtCore.QObject):
     # Update the masked ranges in fitting
     updateMaskedDataSignal = QtCore.Signal()
 
-    # Triggers to refresh documentation
-    documentationRegenInProgressSignal = QtCore.Signal()
-    documentationRegeneratedSignal = QtCore.Signal()
-    documentationUpdateLogSignal = QtCore.Signal()
-
     # Global close to help kill active threads
     closeSignal = QtCore.Signal()
 
+    # Notify about a data name to be frozen and send to fitting perspective
+    freezeDataNameSignal = QtCore.Signal(str)
 
 communicate = Communicate()
 
@@ -546,7 +547,7 @@ def retrieveData1d(data):
     except:
         msg = "Unable to find min/max of \n data named %s" % \
                     data.filename
-        #logging.error(msg)
+        #logger.error(msg)
         raise ValueError(msg)
 
     text = data.__str__()
@@ -1168,7 +1169,7 @@ def saveData(fp, data):
             return o.value
 
         # not supported
-        logging.info("data cannot be serialized to json: %s" % type(o))
+        logger.info("data cannot be serialized to json: %s" % type(o))
         return None
 
     json.dump(data, fp, indent=2, sort_keys=True, default=jdefault)
@@ -1206,7 +1207,7 @@ def readDataFromFile(fp):
         try:
             cls = lookup[type]
         except KeyError:
-            logging.info('unknown type: %s' % type)
+            logger.info('unknown type: %s' % type)
             return None
 
         # tuples and sets
@@ -1245,7 +1246,7 @@ def readDataFromFile(fp):
         if cls == types.FunctionType:
             return cls
 
-        logging.info('not implemented: %s, %s' % (type, cls))
+        logger.info('not implemented: %s, %s' % (type, cls))
         return None
 
     def generate(data, level):
@@ -1276,7 +1277,7 @@ def readDataFromFile(fp):
         try:
             new_stored_data[id] = generate(data, 0)
         except TooComplexException:
-            logging.info('unable to load %s' % id)
+            logger.info('unable to load %s' % id)
 
     return new_stored_data
 
@@ -1458,7 +1459,7 @@ def showHelp(url: PATH_LIKE):
     if isinstance(url, str):
         url = url.lstrip("//")
     url = Path(url)
-    url_abs = HELP_DIRECTORY_LOCATION / url if str(HELP_DIRECTORY_LOCATION.resolve()) not in str(url.absolute()) else url
+    url_abs = HELP_SYSTEM.path / url if str(HELP_SYSTEM.path.resolve()) not in str(url.absolute()) else url
 
     try:
         help_window = DocViewWindow(source=url_abs)
@@ -1468,4 +1469,4 @@ def showHelp(url: PATH_LIKE):
         # Return the window so the caller can keep it in scope to prevent garbage collection
         return help_window
     except Exception as ex:
-        logging.warning(f"Cannot display help: {ex}")
+        logger.warning(f"Cannot display help: {ex}")

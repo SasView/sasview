@@ -281,7 +281,10 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         """
         Returns the index of the next available tab
         """
-        return max((tab.tab_id for tab in self.tabs), default=0) + 1
+        # account for ConstraintWidget ids which are >300
+        max_tab = max((tab.tab_id for tab in self.tabs
+                       if not isinstance(tab, ConstraintWidget)), default=0) + 1
+        return max_tab
 
     def addClosedTab(self):
         """
@@ -623,6 +626,15 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
             if hasattr(tab, 'modelName') and tab.modelName() == name:
                 return tab
         return None
+
+    def reset(self):
+        """
+        Reset the fitting perspective to an empty state
+        """
+        while self.count() > 0:
+            self.closeTabByIndex(0)
+        # Add an empty fit tab
+        self.addFit(None)
 
     @property
     def supports_reports(self) -> bool:

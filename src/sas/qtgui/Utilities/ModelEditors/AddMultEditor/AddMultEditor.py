@@ -17,7 +17,7 @@ from sas.qtgui.Perspectives.Fitting.FittingWidget import SUPPRESSED_MODELS
 
 # Local UI
 from sas.qtgui.Utilities.ModelEditors.AddMultEditor.UI.AddMultEditorUI import Ui_AddMultEditorUI
-from sas.sascalc.fit import models
+from sas.system.user import find_plugins_dir
 
 # Template for the output plugin file
 SUM_TEMPLATE = """
@@ -37,6 +37,8 @@ BG_RED = "background-color: rgb(244, 170, 164);"
 # Default model names for combo boxes
 CB1_DEFAULT = 'sphere'
 CB2_DEFAULT = 'cylinder'
+
+logger = logging.getLogger(__name__)
 
 
 class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
@@ -81,7 +83,7 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
 
         # Name and directory for saving new plugin model
         self.plugin_filename = None
-        self.plugin_dir = models.find_plugins_dir()
+        self.plugin_dir = find_plugins_dir()
 
         # Validators
         rx = QtCore.QRegularExpression("^[A-Za-z0-9_]*$")
@@ -167,13 +169,13 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
                 self.txtName.setStyleSheet(BG_RED)
                 msg = "Plugin with specified name already exists.\n"
                 msg += "Please specify different filename or allow file overwrite."
-                logging.warning(msg)
+                logger.warning(msg)
                 QtWidgets.QMessageBox.critical(self, 'Plugin Error', msg)
             else:
                 s_title = title
                 if len(title) > 20:
                     s_title = title[0:19] + '...'
-                logging.info(f"Model function ({str(s_title)}) has been set!\n")
+                logger.info(f"Model function ({str(s_title)}) has been set!\n")
                 self.good_name = True
                 self.txtName.setStyleSheet(BG_WHITE)
                 self.plugin_filename = os.path.join(self.plugin_dir, filename)
@@ -212,12 +214,12 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
         except Exception as ex:
             # broad exception from sasmodels
             msg = "Error building model: "+ str(ex)
-            logging.error(msg)
+            logger.error(msg)
             #print three last lines of the stack trace
             # this will point out the exact line failing
             last_lines = traceback.format_exc().split('\n')[-4:]
             traceback_to_show = '\n'.join(last_lines)
-            logging.error(traceback_to_show)
+            logger.error(traceback_to_show)
 
             # Set the status bar message
             self.parent.communicate.statusBarUpdateSignal.emit("Model check failed")
@@ -234,7 +236,7 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
         title = self.txtName.text().lstrip().rstrip()
         msg = "Custom model "+title + " successfully created."
         self.parent.communicate.statusBarUpdateSignal.emit(msg)
-        logging.info(msg)
+        logger.info(msg)
 
     def write_new_model_to_file(self, fname, model1_name, model2_name, operator):
         """ Write and Save file """

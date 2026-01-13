@@ -41,6 +41,7 @@ default_categories.json
 !**/UI/__init__.py
 config.json
 **/db.sqlite3
+Thumbs.db
 # INSTALL.md recommends a venv that should not be committed
 venv
 .venv
@@ -79,6 +80,4 @@ tests.log
 /installers/build
 /installers/dist
 *.exe
-
-# Local pre-commit hooks
-.pre-commit-config.yaml
+installers/credits.html

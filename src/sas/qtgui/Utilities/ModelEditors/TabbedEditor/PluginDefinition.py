@@ -17,6 +17,7 @@ VOLUME_TEXT = """volume = M_4PI_3 * {0}**3
 return volume
 """
 
+logger = logging.getLogger(__name__)
 
 def remove_empty_table_rows(tbl: QtWidgets.QTableWidget):
     """A helper function to remove empty rows in a PySide Table, if there are more than two empty rows at the end.
@@ -75,6 +76,12 @@ class PluginDefinition(QtWidgets.QDialog, Ui_PluginDefinition):
 
         # Initialize signals
         self.addSignals()
+
+        # Install an application-level event filter so pressing Enter/Return
+        # while editing cells in the parameter tables moves focus like Tab.
+        app = QtWidgets.QApplication.instance()
+        if app is not None:
+            app.installEventFilter(self)
 
     def addTooltips(self):
         """
@@ -336,9 +343,103 @@ class PluginDefinition(QtWidgets.QDialog, Ui_PluginDefinition):
                     item = QtWidgets.QTableWidgetItem(str(param[column]))
                     param_table.setItem(row, column, item)
                 else:
-                    logging.info(f"Missing data for Row {row}, Column {column}")
+                    logger.info(f"Missing data for Row {row}, Column {column}")
 
         param_table.blockSignals(False)
+
+    def _findParentTable(self, widget: QtWidgets.QWidget) -> QtWidgets.QTableWidget | None:
+        """Find if a widget is inside one of our parameter tables.
+
+        :param widget: The widget to search from
+        :return: The parent table widget if found, None otherwise
+        """
+        parent = widget
+        while parent is not None:
+            if parent is self.tblParams or parent is self.tblParamsPD:
+                return parent  # type: ignore[return-value]
+            parent = parent.parent()
+        return None
+
+    def _commitEditorData(self, table: QtWidgets.QTableWidget, editor_widget: QtWidgets.QWidget):
+        """Attempt to commit editor data to the table model.
+
+        :param table: The table widget
+        :param editor_widget: The current editor widget
+        """
+        try:
+            row, col = table.currentRow(), table.currentColumn()
+            if row < 0 or col < 0:
+                # Fallback: use indexAt from cursor position
+                idx = table.indexAt(table.viewport().mapFromGlobal(QtGui.QCursor.pos()))
+                row, col = idx.row(), idx.column()
+
+            model_index = table.model().index(row, col)
+            delegate = table.itemDelegate()
+            if delegate is not None and model_index.isValid():
+                delegate.setModelData(editor_widget, table.model(), model_index)
+        except Exception:
+            # If anything goes wrong committing, ignore and continue
+            pass
+
+    def _moveToNextCell(self, table: QtWidgets.QTableWidget):
+        """Move focus to the next cell in the table (like Tab behavior).
+
+        :param table: The table widget to navigate
+        """
+        row = max(0, table.currentRow())
+        col = max(0, table.currentColumn())
+        cols = table.columnCount()
+
+        # Calculate next cell position
+        if col < cols - 1:
+            next_row, next_col = row, col + 1
+        else:
+            next_row, next_col = row + 1, 0
+
+        # Add new row if needed
+        if next_row >= table.rowCount():
+            table.insertRow(next_row)
+
+        # Ensure there is an item to edit
+        if table.item(next_row, next_col) is None:
+            table.setItem(next_row, next_col, QtWidgets.QTableWidgetItem(""))
+
+        table.setCurrentCell(next_row, next_col)
+        item = table.item(next_row, next_col)
+        if item is not None:
+            table.editItem(item)
+
+    def eventFilter(self, obj: QtCore.QObject, event: QtCore.QEvent) -> bool:
+        """Intercept Enter/Return key presses while editing table cells.
+        Enter/Return moves focus to the next cell (like Tab).
+        This is installed at the application level so it catches editor
+        widgets created while editing table cells.
+        """
+        if event.type() != QtCore.QEvent.KeyPress:
+            return super(PluginDefinition, self).eventFilter(obj, event)
+
+        # Handle Enter/Return key press
+        if event.key() not in (QtCore.Qt.Key_Return, QtCore.Qt.Key_Enter):
+            return super(PluginDefinition, self).eventFilter(obj, event)
+
+        # Get the focused widget
+        focused_widget = QtWidgets.QApplication.focusWidget()
+        if focused_widget is None:
+            return super(PluginDefinition, self).eventFilter(obj, event)
+
+        # Check if the focused widget is inside one of our parameter tables
+        table = self._findParentTable(focused_widget)
+        if table is None:
+            return super(PluginDefinition, self).eventFilter(obj, event)
+
+        # Commit current editor data
+        self._commitEditorData(table, focused_widget)
+
+        # Move to the next cell
+        self._moveToNextCell(table)
+
+        # Swallow the event so default handling doesn't also run
+        return True
 
     def getModel(self) -> dict:
         """

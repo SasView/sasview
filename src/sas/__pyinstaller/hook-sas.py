@@ -11,7 +11,6 @@ try:
         excludes=[
             # handle the documentation trees manually
             'docs/',
-            'docs-source/',
             ],
         )
 
@@ -23,8 +22,6 @@ try:
         # are looking for the same resource in different places
         ('sas/qtgui/images', 'images'),
         ('sas/qtgui/images', "sas/qtgui/images"),
-        ('sas/sasview/media', 'media'),
-        ('sas/sascalc/calculator/ausaxs/lib', 'sas/sascalc/calculator/ausaxs/lib'),
         ('sas/qtgui/Utilities/Reports/report_style.css', 'sas/qtgui/Utilities/Reports'),
         ('sas/qtgui/Perspectives/Fitting/plugin_models', 'plugin_models'),
         ('sas/qtgui/Utilities/WhatsNew/messages', 'sas/qtgui/Utilities/WhatsNew/messages'),
@@ -53,7 +50,6 @@ try:
                 dst = src.relative_to(base).parent
                 datas.append((str(src), str(dst)))
 
-    append_data_files("sas/docs-source")
     append_data_files("sas/docs")
 
     datas.sort()

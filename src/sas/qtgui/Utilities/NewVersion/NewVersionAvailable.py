@@ -99,7 +99,7 @@ def get_current_release_version() -> tuple[str, str, Version] | None:
         return version_string, url, parse(version_string)
 
     except Exception as ex:
-        logging.info("Failed to get version number %s", ex)
+        logger.info("Failed to get version number %s", ex)
         return None
 
 

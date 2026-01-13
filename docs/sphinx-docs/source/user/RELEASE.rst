@@ -1,6 +1,6 @@
 .. RELEASE.rst
 
-.. _Release_Notes:
+.. _Sasview_Release_Notes:
 
 Release Notes
 =============
@@ -12,6 +12,118 @@ Release Notes
 
 Features
 ========
+
+New in Version 6.1.2
+--------------------
+
+This is a minor bug fix release of SasView. It is built with Sasmodels v1.0.12, Sasdata v0.11.0, and Bumps v1.0.2.
+
+This release fixes two major issues introduced in v6.1.1:
+
+- Plugin models now work correctly
+- The 2-Yukawa structure factor is available and does not throw an error.
+
+Bug fixes
+^^^^^^^^^
+
+* Fix for plugin models not being found by @DrPaulSharp in https://github.com/SasView/sasview/pull/3659
+* Fix for Wedge and Sector Slicers in Q using the same plot by @jellybean2004 in https://github.com/SasView/sasview/pull/3597
+* Replaces 'magic numbers' with enum by @jellybean2004 in https://github.com/SasView/sasview/pull/3598
+* Adds plotUpdateSignal to BoxSlicer by @DrPaulSharp in https://github.com/SasView/sasview/pull/3600
+* Fix for Chi2 calculation in Inversion perspective by @jellybean2004 in https://github.com/SasView/sasview/pull/3607
+* Invariant bugfixes and 'TODO' tasks by @jellybean2004 in https://github.com/SasView/sasview/pull/3627
+* Removes redundant param by @jellybean2004 in https://github.com/SasView/sasview/pull/3633
+* Invariant reformat by @jellybean2004 in https://github.com/SasView/sasview/pull/3631
+* Adds module level logging to all files by @jellybean2004 in https://github.com/SasView/sasview/pull/3637
+* Adds function for close by @jellybean2004 in https://github.com/SasView/sasview/pull/3635
+
+Documentation fixes
+^^^^^^^^^^^^^^^^^^^
+
+* Various fixes to try to get sasview sphinx docs to build cleanly. by @pkienzle in https://github.com/SasView/sasview/pull/3504
+* Include API docs from sasmodels in sasview sphinx output by @llimeht in https://github.com/SasView/sasview/pull/3661
+* Update plugin model location in docs by @DrPaulSharp in https://github.com/SasView/sasview/pull/3665
+
+Linting changes
+^^^^^^^^^^^^^^^
+
+* Converts type comments to type hints by @DrPaulSharp in https://github.com/SasView/sasview/pull/3578
+* Explicitly specifies latest version of ruff in CI by @DrPaulSharp in https://github.com/SasView/sasview/pull/3608
+* Adds local pre-commit hook for ruff linting auto fixes by @DrPaulSharp in https://github.com/SasView/sasview/pull/3573
+
+Infrastructure Changes
+^^^^^^^^^^^^^^^^^^^^^^
+
+* Add dependabot for github actions by @krzywon in https://github.com/SasView/sasview/pull/3571
+* Limit windows signing action by @rozyczko in https://github.com/SasView/sasview/pull/3617
+* Install innosetup in windows installer CI runs by @llimeht in https://github.com/SasView/sasview/pull/3606
+* Bump actions/download-artifact from 4 to 5 by @dependabot[bot] in https://github.com/SasView/sasview/pull/3592
+* Bump dawidd6/action-download-artifact from 6 to 11 by @dependabot[bot] in https://github.com/SasView/sasview/pull/3591
+* Bump actions/checkout from 4 to 5 by @dependabot[bot] in https://github.com/SasView/sasview/pull/3590
+* Bump actions/setup-python from 5 to 6 by @dependabot[bot] in https://github.com/SasView/sasview/pull/3588
+* Bump digicert/ssm-code-signing from 1.0.1 to 1.1.1 by @dependabot[bot] in https://github.com/SasView/sasview/pull/3589
+* move qt gui build to cli.py and remove run.py by @pkienzle in https://github.com/SasView/sasview/pull/3596
+* Change remaining mentions of appdirs to platformdirs by @llimeht in https://github.com/SasView/sasview/pull/3640
+* Removes macos-13 from CI by @DrPaulSharp in https://github.com/SasView/sasview/pull/3629
+* Replace direct AUSAXS library integration with the pyAUSAXS wrapper by @klytje in https://github.com/SasView/sasview/pull/3634
+
+
+**Full Changelog**: https://github.com/SasView/sasview/compare/v6.1.1...v6.1.2rc1
+
+New in Version 6.1.1
+--------------------
+
+This is a minor bug fix release of SasView. It is built with Sasmodels v1.0.11, Sasdata v0.11.0, and Bumps v1.0.2.
+
+Bug fixes
+^^^^^^^^^
+
+* Fix the magnetic fitting widget functionality by @rozyczko in https://github.com/SasView/sasview/pull/3581
+* Fix for PD plotting by @krzywon in https://github.com/SasView/sasview/pull/3505
+* Ensure plugin models are removed from the original user directory when moved by @krzywon in https://github.com/SasView/sasview/pull/3538
+* Fix new version available widget on non-Windows systems by @jamescrake-merani in https://github.com/SasView/sasview/pull/3552
+* Overide Qdialog closeEvent method to force kill(x) button to behave like the close button by @butlerpd in https://github.com/SasView/sasview/pull/3465
+* Move the example data to the user directory and clean up by @krzywon in https://github.com/SasView/sasview/pull/3535
+* Ensure the example data directory is in the same location as the tutorial says it is by @krzywon in https://github.com/SasView/sasview/pull/3585
+* Clear the calculated values in the Inversion perspective when a lone data entry is removed by @DrPaulSharp in https://github.com/SasView/sasview/pull/3567
+* Enable batch slicing to P(r) inversion by @dehoni and @jamescrake-merani in https://github.com/SasView/sasview/pull/3512
+* Various fixes to batch P(r)  by @jamescrake-merani in https://github.com/SasView/sasview/pull/3563
+* Ensure the external libausaxs is downloaded when building installers by @klytje in https://github.com/SasView/sasview/pull/3554
+
+Documentation fixes
+^^^^^^^^^^^^^^^^^^^
+
+* Fixed MumMag typo (should be MuMag) by @krzywon in https://github.com/SasView/sasview/pull/3514
+* Update corfunc-theory.rst by @lucas-wilkins in https://github.com/SasView/sasview/pull/3565
+
+Linting changes
+^^^^^^^^^^^^^^^
+
+* Applies automatic fixes from the default ruff ruleset by @DrPaulSharp in https://github.com/SasView/sasview/pull/3507
+* Adds ability to automatically apply ruff linting fixes to CI by @DrPaulSharp in https://github.com/SasView/sasview/pull/3520
+* Applies fixes for Ruff linting errors by @DrPaulSharp in https://github.com/SasView/sasview/pull/3539
+* Adds isort (I) ruleset to ruff linter by @DrPaulSharp in https://github.com/SasView/sasview/pull/3555
+* Adds Pyupgrade (UP) ruleset and rules SIM118 & SIM300 to ruff linter by @DrPaulSharp in https://github.com/SasView/sasview/pull/3560
+* Fixes whitespace errors by @DrPaulSharp in https://github.com/SasView/sasview/pull/3561
+
+Infrastructure Changes
+^^^^^^^^^^^^^^^^^^^^^^
+
+* Fixes fatal access violation in Windows tests by @DrPaulSharp in https://github.com/SasView/sasview/pull/3497
+* Disable dependabot for python dependency checks - Disable Dependabot by @krzywon in https://github.com/SasView/sasview/pull/3517
+* Stop new version dialogue from appearing in test by @llimeht in https://github.com/SasView/sasview/pull/3364
+* Speed up CI with faster python module installation with uv by @llimeht in https://github.com/SasView/sasview/pull/3351
+* Update tarball name in nightly flow to match CI.yml by @llimeht in https://github.com/SasView/sasview/pull/3334
+* Clean out nightly files by @llimeht in https://github.com/SasView/sasview/pull/3337
+* Suppress signature errors when CI run on PRs from forks by @llimeht in https://github.com/SasView/sasview/pull/3355
+* Publish wheels along side other installers in nightly-builds action by @llimeht in https://github.com/SasView/sasview/pull/3335
+* Specify a requirement of at least Python 3.11 in the pyproject.toml  by @jamescrake-merani in https://github.com/SasView/sasview/pull/3508
+* Use requirements-dev.txt instead of list of dependencies by @krzywon in https://github.com/SasView/sasview/pull/3515
+* Fix Invariant Test Warnings by @krzywon in https://github.com/SasView/sasview/pull/3509
+
+
+**Full Changelog**: https://github.com/SasView/sasview/compare/v6.1.0...v6.1.1
+
 
 New in Version 6.1.0
 --------------------
@@ -28,7 +140,7 @@ New Features
 * A model reparameterization editor is now available from the fitting menu by @tsole0 in https://github.com/SasView/sasview/pull/3136
 
 Feature Enhancements
-^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^
 * P(r) analysis now allows multiple files and batch processing by @ru4en in https://github.com/SasView/sasview/pull/3137
 * Fitting widget refactor by @rozyczko in https://github.com/SasView/sasview/pull/3169
 * Initial implementation of the undelete mechanism for fitting tabs by @rozyczko in https://github.com/SasView/sasview/pull/3140
@@ -37,14 +149,14 @@ Feature Enhancements
 * Update model editor (rebase) by @krzywon in https://github.com/SasView/sasview/pull/3135
 
 Bug Fixes
-^^^^^^^^^^^^
+^^^^^^^^^
 * Fix LaTeX equation in corfunc docs by @llimeht in https://github.com/SasView/sasview/pull/3162
 * Allow webfit to run in Django v5.0 by @summerhenson in https://github.com/SasView/sasview/pull/3200
 * Bumps v1.* compatibility fixes by @krzywon in https://github.com/SasView/sasview/pull/3165 and @bmaranville in https://github.com/SasView/sasview/pull/3268
 * Whats new window no longer shows previous version information by @lucas-wilkins in https://github.com/SasView/sasview/pull/3261
 
 Infrastructure Changes
-^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^
 * Bump dawidd6/action-download-artifact from 2 to 6 in /.github/workflows by @dependabot in https://github.com/SasView/sasview/pull/3151
 * Renabling the Ubuntu installer test by @jamescrake-merani in https://github.com/SasView/sasview/pull/3174
 * Remove Ubuntu 20.04 from CI by @jamescrake-merani in https://github.com/SasView/sasview/pull/3214
@@ -57,7 +169,7 @@ Infrastructure Changes
 * Auto generate wheels by @llimeht in https://github.com/SasView/sasview/pull/3281
 
 Known Issues
-^^^^^^^^^
+^^^^^^^^^^^^
 All known bugs and feature requests can be found in the issues on github.
 
 `sasview issues <https://github.com/SasView/sasview/issues>`_ | `sasmodels issues <https://github.com/SasView/sasmodels/issues>`_ | `sasdata issues <https://github.com/SasView/sasdata/issues>`_
@@ -70,20 +182,20 @@ This is a bug fix release and the issues fixed for this release are described be
 This version of SasView is built with Sasmodels v1.0.9, Sasdata v0.9.0, and bumps v0.9.3.
 
 General GUI Fixes
-^^^^^^^^^
+^^^^^^^^^^^^^^^^^
 * Open a pop-up on start-up if a new version is available by @lucas-wilkins in https://github.com/SasView/sasview/pull/3216
 * Removed superfluous signal connection causing duplicate theories by @rozyczko in https://github.com/SasView/sasview/pull/3199
 * Removing data from the context menu now removes it from perspectives by @rozyczko in https://github.com/SasView/sasview/pull/3236
 
 Plotting Fixes
-^^^^^^^^^
+^^^^^^^^^^^^^^
 * Fix to ensure default plot scaling matches the plot type by @krzywon in https://github.com/SasView/sasview/pull/3184
 * Delete intermediate theory plots by tab id not model id. by @jamescrake-merani in https://github.com/SasView/sasview/pull/3160
 * Linear fit no longer causes graph rescaling by @krzywon in https://github.com/SasView/sasview/pull/3187
 * Fix for errors thrown when modifying tick labels by @jamescrake-merani in https://github.com/SasView/sasview/pull/3191
 
 Fitting and Other Perspective Fixes
-^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 * Status bar message does not clear on gsc exit by @rozyczko in https://github.com/SasView/sasview/pull/3185
 * Guard against bad fit results to ensure fit tabs can run new fits by @rozyczko in https://github.com/SasView/sasview/pull/3172
 * A number of model editor bug fixes by @tsole0 in https://github.com/SasView/sasview/pull/2901
@@ -91,19 +203,19 @@ Fitting and Other Perspective Fixes
 * Added OpenCL support for the Flatpak release by @jamescrake-merani in https://github.com/flathub/org.sasview.sasview/pull/4
 
 Other Fixes
-^^^^^^^^^
+^^^^^^^^^^^
 * Call the system default csv viewer to allow batch fit results output for any OS by @summerhenson in https://github.com/SasView/sasview/pull/3186
 * Remove a button that did nothing by @jamescrake-merani in https://github.com/SasView/sasview/pull/3217
 
 Infrastructure Fixes
-^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^
 * Fixes to the flatpak metadata by @jamescrake-merani in https://github.com/SasView/sasview/pull/3150
 * Replace the expired OSX Notarization key by @krzywon in https://github.com/SasView/sasview/pull/3183
 * Include new contributors in the contributor file by @krzywon in https://github.com/SasView/sasview/pull/3192
 * Fix for sasmodel doc build by @krzywon in https://github.com/SasView/sasview/pull/3212
 
 Known Issues
-^^^^^^^^^
+^^^^^^^^^^^^
 All known bugs and feature requests can be found in the issues on github.
 
 `sasview issues <https://github.com/SasView/sasview/issues>`_ | `sasmodels issues <https://github.com/SasView/sasmodels/issues>`_ | `sasdata issues <https://github.com/SasView/sasdata/issues>`_
@@ -200,7 +312,7 @@ ______________
 * Fixed sesans residuals plots to show in real space rather than q space by @caitwolf in https://github.com/SasView/sasview/pull/2338
 
 Fitting and Other Perspective Fixes
-_____________
+___________________________________
 * Fix model date format in the user model docstring by @mrakitin in https://github.com/SasView/sasview/pull/2713
 * Various Multiplicity Model Fixes by @krzywon in https://github.com/SasView/sasview/pull/2647
 * Fix model save error by @krzywon in https://github.com/SasView/sasview/pull/2864
@@ -1531,7 +1643,7 @@ New in Version 2.2.0
 
 
 Feature set from previous versions
------------------------------------
+----------------------------------
 Perspectives Available
 ^^^^^^^^^^^^^^^^^^^^^^
 * Invariant calculator: Calculates the invariant, volume fraction, and
@@ -1674,12 +1786,14 @@ System Requirements
   on the system. We currently use Python 2.7
 * For SasView 5.x: A Python version > 3.0 should be running on the system. We 
   currently use Python 3.6
+* For SasView 6.x: A python version >= 3.10 should be running on the systems. We
+  currently use Python 3.11
 
 Package Dependencies
 --------------------
 * Ensure the required dependencies are installed
-* For the latest list of dependencies see the appropriate yml file in
-  the SasView repo at sasview/build_tools/conda/ymls
+* For the latest list of dependencies, use the requirements.txt file
+  in the /build_tools/ directory.
 
 Installing from Source
 ----------------------
@@ -1695,12 +1809,15 @@ Installing from Source
 * To get a SPECIFIC RELEASE VERSION from source control go to
   https://github.com/SasView/sasview/releases
   and download the required zip or tar.gz file. Unzip/untar it
-  to the source code folder.
+  to the source code folder. Alternately, checkout a specific tag
+  using 'git checkout <tag>` after running `git fetch --all`.
 
 Building and Installing
 -----------------------
-* To build and install the code
-  use 'pip install .'
+* To build and install the code use 'pip install -e .'. The optional
+  '-e' flag will install the project files in editable mode allowing
+  a developer to make changes and test without having to pip install
+  the project every time a change is made.
 * To build a wheel for installation elsewhere
   use 'hatchling build --wheel'
 * To build the documentation
@@ -1708,11 +1825,8 @@ Building and Installing
 
 Running SasView
 ---------------
-* use 'python run.py'; this runs from the source directories, so you
-  don't have to rebuild every time you make a change, unless you are
-  changing the C model files.
-* if using Conda the above command will also build SasView, but you 
-  must issue 'activate sasview' first.
+* Assuming the python or conda environment that sasview was installed into
+  is active, use 'python -m sas' to launch the app directly from the source.
 
 Known Issues
 ============
@@ -1723,6 +1837,8 @@ users may wish to be aware of can be viewed at the following links:
 `[sasview] <https://github.com/SasView/sasview/milestones>`_
 
 `[sasmodels] <https://github.com/SasView/sasmodels/milestones>`_
+
+`[sasdata] <https://github.com/SasView/sasdata/milestones>`_
 
 All 5.0.x versions / 4.2.2 - All systems
 ----------------------------------------
