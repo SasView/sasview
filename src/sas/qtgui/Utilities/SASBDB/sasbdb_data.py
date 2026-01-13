@@ -1,7 +1,18 @@
 """
-Data structures for SASBDB export
+Data structures for SASBDB export.
 
-This module defines dataclasses that match the SASBDB submission structure.
+This module defines dataclasses that match the SASBDB (Small Angle Scattering
+Biological Data Bank) submission structure. These data structures are used
+throughout the SASBDB export functionality to represent and organize all
+information required for data submission.
+
+The main container class is SASBDBExportData, which holds:
+- Project information (SASBDBProject)
+- Sample data (SASBDBSample), which includes molecule, buffer, fits, etc.
+- Instrument information (SASBDBInstrument)
+
+All dataclasses use Optional fields to allow for partial data entry, with
+required fields enforced during validation before export.
 """
 from dataclasses import dataclass, field
 from typing import Optional, List, Dict, Any
@@ -138,7 +149,20 @@ class SASBDBSample:
 
 @dataclass
 class SASBDBExportData:
-    """Container for all SASBDB export data"""
+    """
+    Container for all SASBDB export data.
+    
+    This is the top-level container class that holds all information for a
+    SASBDB submission. It contains:
+    
+    - project: Project-level information (publication status, title, etc.)
+    - samples: List of sample data objects (each sample can have multiple fits)
+    - instruments: List of instrument/facility information
+    
+    :param project: Project information (optional)
+    :param samples: List of sample data objects (default: empty list)
+    :param instruments: List of instrument objects (default: empty list)
+    """
     project: Optional[SASBDBProject] = None
     samples: List[SASBDBSample] = field(default_factory=list)
     instruments: List[SASBDBInstrument] = field(default_factory=list)

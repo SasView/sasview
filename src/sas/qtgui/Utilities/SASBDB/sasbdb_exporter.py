@@ -1,7 +1,17 @@
 """
-Export functionality for SASBDB format
+Export functionality for SASBDB format.
 
-This module handles exporting SASBDB data structures to JSON format.
+This module provides functionality to export SASBDB data structures to JSON
+format suitable for submission to the Small Angle Scattering Biological Data
+Bank. The SASBDBExporter class handles:
+
+- Converting SASBDBExportData objects to dictionary format
+- Serializing to JSON with proper formatting
+- Cleaning None values from the output
+- Exporting experimental data files (.dat format)
+
+The exporter ensures that the output JSON follows SASBDB submission format
+requirements and produces clean, well-formatted files.
 """
 import json
 import logging
@@ -15,14 +25,27 @@ logger = logging.getLogger(__name__)
 
 class SASBDBExporter:
     """
-    Exports SASBDB data to JSON format
+    Exports SASBDB data to JSON format.
+    
+    This class handles the conversion and export of SASBDBExportData objects
+    to JSON files. It provides methods to:
+    
+    - Convert data structures to dictionary format
+    - Remove None values for cleaner JSON output
+    - Export to JSON files with proper formatting
+    - Export experimental data to .dat files
+    
+    The exporter ensures that the output conforms to SASBDB submission
+    format requirements.
+    
+    :param export_data: SASBDBExportData object containing all data to export
     """
     
     def __init__(self, export_data: SASBDBExportData):
         """
-        Initialize exporter with data to export
+        Initialize exporter with data to export.
         
-        :param export_data: SASBDBExportData object containing all data
+        :param export_data: SASBDBExportData object containing all data to export
         """
         self.export_data = export_data
     

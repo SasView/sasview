@@ -33,7 +33,28 @@ logger = logging.getLogger(__name__)
 
 class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
     """
-    Dialog for SASBDB export functionality
+    Dialog for SASBDB export functionality.
+    
+    This dialog provides a user interface for reviewing and editing SASBDB export data
+    before exporting to JSON, PDF, and project file formats. It collects data from
+    the current SasView session (loaded datasets, fit results, metadata) and allows
+    users to complete missing information.
+    
+    The dialog includes multiple tabs for organizing different types of information:
+    - Project: Publication status and identification
+    - Sample: Experimental sample and data parameters
+    - Molecule: Biological molecule details
+    - Buffer: Buffer composition and conditions
+    - Guinier: Guinier analysis results (if available)
+    - Fit: Fit results and model information
+    - Instrument: Instrument and facility details
+    
+    It also provides a shape visualization panel showing 3D model representations
+    for supported model types.
+    
+    :param export_data: Pre-collected SASBDB export data (optional). If not provided,
+                        an empty SASBDBExportData object will be created.
+    :param parent: Parent widget for the dialog
     """
     
     def __init__(self, export_data: Optional[SASBDBExportData] = None, parent: Optional[QtCore.QObject] = None):
@@ -64,6 +85,7 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
         # Connect signals
         self.cmdExport.clicked.connect(self.onExport)
         self.cmdGeneratePDF.clicked.connect(self.onGeneratePDF)
+        self.cmdHelp.clicked.connect(self.onHelp)
         self.cmdClose.clicked.connect(self.close)
         self.chkPublished.toggled.connect(self.onPublishedToggled)
         
@@ -92,7 +114,14 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
     
     def populateFromData(self):
         """
-        Populate UI fields from export_data
+        Populate UI fields from export_data.
+        
+        This method reads the export_data object and fills in all UI form fields
+        with the available data. It handles all tabs including Project, Sample,
+        Molecule, Buffer, Guinier, Fit, and Instrument information.
+        
+        If export_data is empty or fields are missing, the corresponding UI fields
+        will remain empty for manual entry.
         """
         # Project tab
         if self.export_data.project:
@@ -239,9 +268,13 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
     
     def collectFromUI(self) -> SASBDBExportData:
         """
-        Collect data from UI fields and create SASBDBExportData
+        Collect data from UI fields and create SASBDBExportData.
         
-        :return: SASBDBExportData object
+        This method reads all UI form fields and constructs a complete SASBDBExportData
+        object containing all the information entered by the user. It handles parsing
+        of numeric fields, text fields, and dropdown selections across all tabs.
+        
+        :return: SASBDBExportData object containing all collected data from the UI
         """
         export_data = SASBDBExportData()
         
@@ -429,9 +462,16 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
     
     def validateData(self) -> tuple[bool, str]:
         """
-        Validate that required fields are filled
+        Validate that all required fields are filled.
         
-        :return: Tuple of (is_valid, error_message)
+        This method checks all required fields according to SASBDB submission requirements:
+        - Project: Either PMID/DOI (if published) or Title (if not published)
+        - Sample: Title, Experimental MW, Experiment Date, Beamline/Instrument
+        - Molecule: Long Name, FASTA Sequence, Monomer MW
+        - Buffer: Description, pH
+        
+        :return: Tuple of (is_valid, error_message). If is_valid is False, error_message
+                 contains a description of which required fields are missing.
         """
         # Project validation
         if self.chkPublished.isChecked():
@@ -483,10 +523,45 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
         self.txtDOI.setEnabled(checked)
         self.txtProjectTitle.setEnabled(not checked)
     
+    def onHelp(self):
+        """
+        Show the SASBDB Export help documentation.
+        
+        Opens the help window with the SASBDB Export documentation.
+        The help file is located at /user/qtgui/Utilities/SASBDB/sasbdb_help.html
+        """
+        help_url = "/user/qtgui/Utilities/SASBDB/sasbdb_help.html"
+        
+        # Try to use parent's showHelp method if available (GuiManager)
+        parent_window = self.parent()
+        if parent_window is not None:
+            if hasattr(parent_window, 'showHelp'):
+                parent_window.showHelp(help_url)
+                return
+            elif hasattr(parent_window, 'guiManager') and hasattr(parent_window.guiManager, 'showHelp'):
+                parent_window.guiManager.showHelp(help_url)
+                return
+        
+        # Fallback to GuiUtils.showHelp
+        from sas.qtgui.Utilities.GuiUtils import showHelp
+        showHelp(help_url)
+    
     def updateModelVisualization(self):
         """
-        Generate and display model shape visualization if available
-        Uses built-in matplotlib rendering for common sasmodels shapes
+        Generate and display model shape visualization if available.
+        
+        This method creates a 3D visualization of the fitted model along with
+        cross-sectional views. It uses built-in matplotlib rendering for common
+        sasmodels shapes including sphere, core_shell_sphere, cylinder, ellipsoid,
+        and parallelepiped models.
+        
+        The visualization is displayed in the Shape Visualization panel and includes:
+        - A 3D isometric view of the model
+        - Three orthogonal cross-sections (XY, XZ, YZ views)
+        - Model parameters used for the visualization
+        
+        If no model is available or the model type is not supported, the visualization
+        panel will show a message indicating that visualization is not available.
         """
         # Check if we have model data with visualization parameters
         model_name = None
@@ -1274,11 +1349,23 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
     
     def onExport(self):
         """
-        Handle export button click
-        Saves three files to the selected folder:
-        1. JSON file (user-selected filename)
-        2. PDF file (auto-named based on JSON filename)
-        3. Project file (auto-named based on JSON filename)
+        Handle export button click.
+        
+        This method performs the complete export process:
+        1. Validates that all required fields are filled
+        2. Collects data from the UI
+        3. Prompts user to select a location and filename for the JSON file
+        4. Saves three files to the selected directory:
+           - JSON file (user-selected filename): Main SASBDB export data
+           - PDF file (auto-named): PDF report with all export information
+           - Project file (auto-named): SasView project file for the current session
+        
+        The PDF and project files are automatically named based on the JSON filename.
+        For example, if the JSON file is "my_export.json", the other files will be
+        "my_export.pdf" and "my_export_project.json".
+        
+        After export, displays a success/failure message and closes the dialog if
+        all files were saved successfully.
         """
         # Validate data
         is_valid, error_msg = self.validateData()
@@ -1422,6 +1509,18 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
     def _saveProjectFile(self, filepath: str) -> bool:
         """
         Save SasView project file programmatically without showing file dialog.
+        
+        This method replicates the functionality of GuiManager.actionSave_Project()
+        but saves to a specified filepath without user interaction. It collects
+        data from the current SasView session including:
+        - All loaded data files from filesWidget
+        - All serializable perspectives and their data
+        - Current perspective state
+        
+        :param filepath: Full path where the project file should be saved
+        :return: True if the project file was saved successfully, False otherwise.
+                 Returns False if GuiManager is not accessible, filesWidget is missing,
+                 or if an error occurs during saving.
         This replicates the functionality of GuiManager.actionSave_Project() but
         saves to a specified filepath instead of prompting the user.
         

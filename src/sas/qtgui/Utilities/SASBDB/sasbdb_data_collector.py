@@ -1,8 +1,18 @@
 """
-Data collector for SASBDB export
+Data collector for SASBDB export.
 
-This module collects available data from SasView data objects, fit results,
-and metadata to populate SASBDB export structures.
+This module provides functionality to automatically collect and extract data
+from SasView data objects, fit results, and metadata to populate SASBDB export
+structures. The SASBDBDataCollector class handles:
+
+- Extracting sample and instrument information from Data1D/Data2D objects
+- Collecting fit results and model parameters from fitting widgets
+- Gathering Guinier analysis results (from Linear Fit or FreeSAS)
+- Collecting PDDF information from Corfunc analysis
+- Creating default structures for missing data
+
+The collector is designed to minimize manual data entry by automatically
+populating fields from available sources in the SasView session.
 """
 import logging
 from datetime import datetime
@@ -32,11 +42,24 @@ logger = logging.getLogger(__name__)
 
 class SASBDBDataCollector:
     """
-    Collects data from SasView for SASBDB export
+    Collects data from SasView for SASBDB export.
+    
+    This class provides methods to extract and organize data from various
+    sources in SasView (data objects, fit results, metadata) into SASBDB
+    export structures. It creates an empty SASBDBExportData object on
+    initialization that can be populated using the various collection methods.
+    
+    The collector handles unit conversions, metadata extraction, and provides
+    default values where appropriate.
     """
     
     def __init__(self):
-        """Initialize the collector"""
+        """
+        Initialize the collector.
+        
+        Creates an empty SASBDBExportData object that will be populated
+        by calling collection methods.
+        """
         self.export_data = SASBDBExportData()
     
     def collect_from_data(self, data: Data1D | Data2D) -> tuple[SASBDBSample, SASBDBInstrument | None]:

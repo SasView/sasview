@@ -37,7 +37,11 @@ The View option allows you to:
 
 Tools
 -----
-The Tools option provides access to a comprehensive range of tools and utilities. See :ref:`tools` for more information.
+The Tools option provides access to a comprehensive range of tools and utilities, including:
+
+- Export to SASBDB (for submitting data to the Small Angle Scattering Biological Data Bank)
+
+See :ref:`tools` for more information.
 
 Window
 ------
