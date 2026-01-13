@@ -18,7 +18,7 @@ Name	Affiliation	Creator	Producer	RelatedPerson	ReleaseManager	ORCID	Notes
 "Cooper-Benun, Torin"	ISIS Neutron and Muon Source	x					None
 "Cortes Hernandez, R"	"University of Tennessee, Knoxville"	x					None
 "Corona, Patrick"	"University of California, Santa Barbara"			x			None
-"Crake-Merani, James Akbar"	ISIS Neutron and Muon Source	x			x	0009-0003-1736-5567	None
+"Crake-Merani, James Akbar"	ISIS Neutron and Muon Source	x				0009-0003-1736-5567	None
 "Detiste, Alexandre"	The Debian Project	x					None
 "Doucet, Mathieu"	Oak Ridge National Laboratory	x				0000-0002-5560-6478	None
 "Doutch, James"	ISIS Neutron and Muon Source     	x					None
@@ -51,7 +51,7 @@ Name	Affiliation	Creator	Producer	RelatedPerson	ReleaseManager	ORCID	Notes
 "Kline, Steve"	National Institute of Standards and Technology	x					None
 "Knudsen, Mikkel"	University of Copenhagen			x			Who is this person? What is the connection?
 "Krueger, Susan"	National Institute of Standards and Technology			x			None
-"Krzywon, Jeff"	National Institute of Standards and Technology	x				0000-0002-2380-4090	None 
+"Krzywon, Jeff"	National Institute of Standards and Technology	x			x	0000-0002-2380-4090	None
 "Larsen, Andreas Haahr"	University of Copenhagen		x			0000-0002-2230-2654	None
 "Lee, Sangjoon Bob"	Columbia University		x			0000-0002-2367-3932	None
 "Lin, Jiao"	California Institute of Technology	x					None
@@ -95,6 +95,7 @@ Name	Affiliation	Creator	Producer	RelatedPerson	ReleaseManager	ORCID	Notes
 "Sharp, Paul"	ISIS Neutron and Muon Source	x				0000-0003-3072-6155	None
 "Shan, Xael"	National Institute of Standards and Technology	x					None
 "Shang, Yingrui"	Oak Ridge National Laboratory			x			None
+"Shrestha, Sujaya"	ISIS Neutron and Muon Source	x					None
 "Snow, Tim"	Diamond Light Source	x				0000-0001-7146-6885	None
 "Stellhorn, Annika"	European Spallation Source	x					None
 "Taylor, Jonathan"	European Spallation Source		x				None
