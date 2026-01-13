@@ -508,7 +508,7 @@ jobs:
       matrix:
         include: ${{ fromJson(needs.matrix.outputs.installer-matrix-json) }}
 
-    name: Test installer
+    name: "Test ${{ matrix.job_name }}"
 
     runs-on: ${{ matrix.os }}
 
