@@ -660,15 +660,11 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.checkboxPluginModel.setEnabled(self.is_avg)
 
         # set the type of calculation
+        self.model.set_computation_type(self.cbOptionsCalc.currentIndex())
         match self.cbOptionsCalc.currentIndex():
-            case 0:
-                self.model.set_computation_type(ComputationType.SANS_2D)
-            case 1:
-                self.model.set_computation_type(ComputationType.SANS_1D)
-            case 2:
-                self.model.set_computation_type(ComputationType.SANS_1D_BETA)
+            case 0 | 1 | 2:
+                pass
             case 3:
-                self.model.set_computation_type(ComputationType.SAXS)
                 self.checkboxPluginModel.setEnabled(False)
                 self.checkboxPluginModel.setChecked(True)
                 self.txtFileName.setText("saxs_fitting")
