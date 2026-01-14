@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 
 from sas.system.user import find_plugins_dir
@@ -46,7 +45,7 @@ If this is not the intended structure file, please regenerate the plugin model f
 '''
 
 f'''\
-name = "{get_base_plugin_name()} ({os.path.basename(structure_path).split('.')[0]})"
+name = "{get_base_plugin_name()} ({Path(structure_path).name.split('.')[0]})"
 title = "AUSAXS"
 description = "Structural validation using AUSAXS"
 category = "plugin"
