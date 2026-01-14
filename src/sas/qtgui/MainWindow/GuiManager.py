@@ -704,6 +704,7 @@ class GuiManager:
         # File
         self._workspace.actionLoadData.triggered.connect(self.actionLoadData)
         self._workspace.actionLoad_Data_Folder.triggered.connect(self.actionLoad_Data_Folder)
+        self._workspace.actionLoad_SASBDB.triggered.connect(self.actionLoad_SASBDB)
         self._workspace.actionOpen_Project.triggered.connect(self.actionOpen_Project)
         self._workspace.actionOpen_Analysis.triggered.connect(self.actionOpen_Analysis)
         self._workspace.actionSave.triggered.connect(self.actionSave_Project)
@@ -800,6 +801,197 @@ class GuiManager:
         Menu File/Load Data Folder
         """
         self.filesWidget.loadFolder()
+    
+    def actionLoad_SASBDB(self):
+        """
+        Menu File/Load from SASBDB
+        
+        Opens a dialog to download and load a dataset from SASBDB.
+        """
+        from sas.qtgui.Utilities.SASBDB.SASBDBDownloadDialog import SASBDBDownloadDialog
+        
+        dialog = SASBDBDownloadDialog(parent=self._workspace)
+        if dialog.exec():
+            # Get the downloaded file path and metadata
+            filepath = dialog.getDownloadedFilepath()
+            dataset_info = dialog.getDatasetInfo()
+            
+            if filepath and os.path.exists(filepath):
+                try:
+                    # Load the downloaded file into SasView
+                    # readData returns (output_dict, message)
+                    loaded_data, load_message = self.filesWidget.readData([filepath])
+                    
+                    # Populate additional metadata from SASBDB into loaded data
+                    if dataset_info and loaded_data:
+                        self._populateSASBDBMetadata(loaded_data, dataset_info)
+                    
+                    # Log metadata summary
+                    if dataset_info:
+                        entry_id = dataset_info.code or dataset_info.entry_id
+                        logger.info(f"Successfully loaded SASBDB dataset {entry_id} from {filepath}")
+                        if dataset_info.title:
+                            logger.info(f"  Title: {dataset_info.title}")
+                        if dataset_info.rg is not None:
+                            logger.info(f"  Rg: {dataset_info.rg:.2f} Å")
+                        if dataset_info.molecular_weight is not None:
+                            logger.info(f"  MW: {dataset_info.molecular_weight:.1f} kDa")
+                    else:
+                        logger.info(f"Successfully loaded SASBDB dataset from {filepath}")
+                        
+                except Exception as e:
+                    logger.error(f"Error loading downloaded SASBDB dataset: {e}", exc_info=True)
+                    QMessageBox.warning(
+                        self._workspace,
+                        "Load Error",
+                        f"Failed to load downloaded dataset:\n{str(e)}"
+                    )
+    
+    def _populateSASBDBMetadata(self, loaded_data: dict, dataset_info):
+        """
+        Populate SASBDB metadata into loaded data objects.
+        
+        Updates the sample, source, and other metadata properties of loaded
+        data with information from SASBDB.
+        
+        :param loaded_data: Dictionary of loaded data objects (keyed by id)
+        :param dataset_info: SASBDBDatasetInfo object with parsed metadata
+        """
+        from sasdata.dataloader.data_info import Sample, Source
+        
+        for data_id, data in loaded_data.items():
+            try:
+                # Debug: log what we have in dataset_info
+                logger.debug(f"Populating metadata for {data_id}: molecule_name={dataset_info.molecule_name}, "
+                           f"sample_name={dataset_info.sample_name}, temperature={dataset_info.temperature}, "
+                           f"concentration={dataset_info.concentration}, buffer={dataset_info.buffer_description}")
+                
+                # Update title
+                if dataset_info.title and not data.title:
+                    data.title = dataset_info.title
+                
+                # Update instrument from SASBDB instrument metadata
+                if dataset_info.instrument and not data.instrument:
+                    data.instrument = dataset_info.instrument
+                
+                # Update run info with SASBDB code
+                if dataset_info.code:
+                    if not data.run:
+                        data.run = []
+                    if dataset_info.code not in data.run:
+                        data.run.append(dataset_info.code)
+                
+                # Populate sample information from Molecule metadata
+                if data.sample is None:
+                    data.sample = Sample()
+                
+                # Ensure sample.details is initialized
+                if not hasattr(data.sample, 'details') or data.sample.details is None:
+                    data.sample.details = []
+                
+                # Use molecule name as sample name (molecule IS the sample in SASBDB context)
+                # Always set sample name if we have molecule_name or sample_name
+                if dataset_info.molecule_name:
+                    sample_name = dataset_info.molecule_name
+                    # Add molecule type if available
+                    if dataset_info.molecule_type:
+                        sample_name += f" ({dataset_info.molecule_type})"
+                    # Add oligomeric state if available
+                    if dataset_info.oligomeric_state:
+                        sample_name += f" - {dataset_info.oligomeric_state}"
+                    data.sample.name = sample_name
+                    logger.debug(f"Set sample.name to: {sample_name}")
+                elif dataset_info.sample_name:
+                    # Fallback to sample_name if molecule_name not available
+                    data.sample.name = dataset_info.sample_name
+                    logger.debug(f"Set sample.name to: {dataset_info.sample_name}")
+                
+                # Set temperature
+                if dataset_info.temperature is not None:
+                    data.sample.temperature = dataset_info.temperature
+                    if dataset_info.temperature_unit:
+                        data.sample.temperature_unit = dataset_info.temperature_unit
+                    logger.debug(f"Set sample.temperature to: {dataset_info.temperature} {dataset_info.temperature_unit}")
+                
+                # Store concentration in sample details
+                if dataset_info.concentration is not None:
+                    conc_str = f"Concentration: {dataset_info.concentration}"
+                    if dataset_info.concentration_unit:
+                        conc_str += f" {dataset_info.concentration_unit}"
+                    data.sample.details.append(conc_str)
+                    logger.debug(f"Added to sample.details: {conc_str}")
+                
+                # Add buffer info to sample details
+                if dataset_info.buffer_description:
+                    buffer_str = f"Buffer: {dataset_info.buffer_description}"
+                    if dataset_info.ph is not None:
+                        buffer_str += f" (pH {dataset_info.ph})"
+                    data.sample.details.append(buffer_str)
+                    logger.debug(f"Added to sample.details: {buffer_str}")
+                
+                # Log sample info for debugging
+                logger.debug(f"Sample populated for {data_id}: name={getattr(data.sample, 'name', None)}, "
+                           f"temperature={getattr(data.sample, 'temperature', None)}, "
+                           f"details={getattr(data.sample, 'details', [])}")
+                
+                # Populate source information
+                if data.source is None:
+                    data.source = Source()
+                
+                if dataset_info.wavelength is not None:
+                    data.source.wavelength = dataset_info.wavelength
+                    data.source.wavelength_unit = dataset_info.wavelength_unit
+                
+                # Store additional SASBDB metadata in meta_data dictionary
+                if not hasattr(data, 'meta_data') or data.meta_data is None:
+                    data.meta_data = {}
+                
+                # SASBDB-specific metadata
+                data.meta_data['SASBDB_code'] = dataset_info.code or dataset_info.entry_id
+                
+                if dataset_info.rg is not None:
+                    data.meta_data['SASBDB_Rg'] = dataset_info.rg
+                    if dataset_info.rg_error is not None:
+                        data.meta_data['SASBDB_Rg_error'] = dataset_info.rg_error
+                
+                if dataset_info.i0 is not None:
+                    data.meta_data['SASBDB_I0'] = dataset_info.i0
+                    if dataset_info.i0_error is not None:
+                        data.meta_data['SASBDB_I0_error'] = dataset_info.i0_error
+                
+                if dataset_info.dmax is not None:
+                    data.meta_data['SASBDB_Dmax'] = dataset_info.dmax
+                
+                if dataset_info.molecular_weight is not None:
+                    data.meta_data['SASBDB_MW'] = dataset_info.molecular_weight
+                    if dataset_info.molecular_weight_method:
+                        data.meta_data['SASBDB_MW_method'] = dataset_info.molecular_weight_method
+                
+                if dataset_info.porod_volume is not None:
+                    data.meta_data['SASBDB_Porod_volume'] = dataset_info.porod_volume
+                
+                if dataset_info.molecule_name:
+                    data.meta_data['SASBDB_molecule'] = dataset_info.molecule_name
+                
+                if dataset_info.molecule_type:
+                    data.meta_data['SASBDB_molecule_type'] = dataset_info.molecule_type
+                
+                if dataset_info.oligomeric_state:
+                    data.meta_data['SASBDB_oligomeric_state'] = dataset_info.oligomeric_state
+                
+                if dataset_info.publication_doi:
+                    data.meta_data['SASBDB_DOI'] = dataset_info.publication_doi
+                
+                if dataset_info.publication_pmid:
+                    data.meta_data['SASBDB_PMID'] = dataset_info.publication_pmid
+                
+                if dataset_info.authors:
+                    data.meta_data['SASBDB_authors'] = ', '.join(dataset_info.authors)
+                
+                logger.debug(f"Populated SASBDB metadata for data: {data_id}")
+                
+            except Exception as e:
+                logger.warning(f"Error populating metadata for data {data_id}: {e}")
 
     def actionOpen_Project(self):
         """

@@ -33,6 +33,7 @@
     </property>
     <addaction name="actionLoadData"/>
     <addaction name="actionLoad_Data_Folder"/>
+    <addaction name="actionLoad_SASBDB"/>
     <addaction name="separator"/>
     <addaction name="actionOpen_Project"/>
     <addaction name="actionOpen_Analysis"/>
@@ -308,6 +309,18 @@
   <action name="actionLoad_Data_Folder">
    <property name="text">
     <string>Load Data Folder</string>
+   </property>
+  </action>
+  <action name="actionLoad_SASBDB">
+   <property name="icon">
+    <iconset>
+     <normaloff>:/res/file_send-128.png</normaloff>:/res/file_send-128.png</iconset>
+   </property>
+   <property name="text">
+    <string>Load from SASBDB...</string>
+   </property>
+   <property name="toolTip">
+    <string>Download and load dataset from SASBDB</string>
    </property>
   </action>
   <action name="actionOpen_Project">
