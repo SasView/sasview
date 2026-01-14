@@ -197,7 +197,7 @@ class GenSAS:
         match self.type:
             case ComputationType.SANS_2D:
                 if not (qy is not None and len(qy) > 0):
-                    raise ValueError("For SANS_2D computation qy must be None or empty")
+                    raise ValueError("For a SANS_2D computation, qy cannot be None or empty")
 
                 # 2-D calculation
                 qx, qy = _vec(qx), _vec(qy)
