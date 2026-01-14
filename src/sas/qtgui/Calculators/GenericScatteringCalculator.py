@@ -1445,7 +1445,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         if self.model.type is ComputationType.SAXS:
             if self.datafile is None:
                 raise RuntimeError("No structure file is loaded! SAXS calculations require a structure file.")
-            from sas.qtgui.Calculators.SAXSPluginModelGenerator import write_plugin_model, get_base_plugin_name
+            from sas.qtgui.Calculators.SAXSPluginModelGenerator import get_base_plugin_name, write_plugin_model
             write_plugin_model(self.datafile)
             self.manager.communicator().customModelDirectoryChanged.emit() # notify that a new plugin model is available
 

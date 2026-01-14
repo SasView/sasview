@@ -2,6 +2,7 @@ from pathlib import Path
 
 from sas.system.user import find_plugins_dir
 
+
 def get_base_plugin_name() -> str:
     """
     Get the base name for the AUSAXS SAXS plugin model.
