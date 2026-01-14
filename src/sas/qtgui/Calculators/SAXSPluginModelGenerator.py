@@ -3,6 +3,14 @@ from pathlib import Path
 
 from sas.system.user import find_plugins_dir
 
+def get_base_plugin_name() -> str:
+    """
+    Get the base name for the AUSAXS SAXS plugin model.
+
+    :return: The base name of the plugin model.
+    """
+
+    return "SAXS fit"
 
 def write_plugin_model(structure_path: str):
     """
@@ -38,7 +46,7 @@ If this is not the intended structure file, please regenerate the plugin model f
 '''
 
 f'''\
-name = "SAXS fit ({os.path.basename(structure_path).split('.')[0]})"
+name = "{get_base_plugin_name()} ({os.path.basename(structure_path).split('.')[0]})"
 title = "AUSAXS"
 description = "Structural validation using AUSAXS"
 category = "plugin"
