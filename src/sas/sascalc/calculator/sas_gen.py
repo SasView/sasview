@@ -55,9 +55,9 @@ def transform_center(pos_x, pos_y, pos_z):
     return posx, posy, posz
 
 class ComputationType(Enum):
-    SANS_2D = 0,
-    SANS_1D = 1,
-    SANS_1D_BETA = 2,
+    SANS_2D = 0
+    SANS_1D = 1
+    SANS_1D_BETA = 2
     SAXS = 3
 
 class GenSAS:

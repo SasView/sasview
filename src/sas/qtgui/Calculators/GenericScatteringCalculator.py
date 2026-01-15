@@ -660,7 +660,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.checkboxPluginModel.setEnabled(self.is_avg)
 
         # set the type of calculation
-        self.model.set_computation_type(self.cbOptionsCalc.currentIndex())
+        self.model.set_computation_type(ComputationType(self.cbOptionsCalc.currentIndex()))
         match self.cbOptionsCalc.currentIndex():
             case 0 | 1 | 2:
                 pass
