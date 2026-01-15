@@ -7,13 +7,13 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from twisted.internet import reactor, threads
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Perspectives.Corfunc.CorfuncSlider import CorfuncSlider
 from sas.qtgui.Plotting import PlotterData
 from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
-from sas.sascalc.corfunc.calculation_data import ExtrapolationParameters
+from sas.qtgui.Utilities.ExtrapolationSlider import ExtrapolationSlider
 
 # sas-global
 from sas.sascalc.invariant import invariant
+from sas.sascalc.util import ExtrapolationParameters
 
 # local
 from ..perspective import Perspective
@@ -99,10 +99,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.no_extrapolation_plot: PlotterData | None = None
 
         # Slider
-        self.slider: CorfuncSlider = CorfuncSlider(
-            lower_label="Low-Q",
-            upper_label="High-Q",
-        )
+        self.slider = ExtrapolationSlider(lower_label="Low-Q", upper_label="High-Q", perspective="Invariant")
         self.sliderLayout.insertWidget(1, self.slider)
 
         # no reason to have this widget resizable
@@ -168,11 +165,13 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
     def extrapolation_parameters(self) -> ExtrapolationParameters | None:
         if self._data is not None:
             return ExtrapolationParameters(
-                safe_float(Q_MINIMUM),
-                safe_float(self.model.item(WIDGETS.W_GUINIER_END_EX).text()),
-                safe_float(self.model.item(WIDGETS.W_POROD_START_EX).text()),
-                safe_float(self.model.item(WIDGETS.W_POROD_END_EX).text()),
-                safe_float(Q_MAXIMUM),
+                ex_q_min=float(Q_MINIMUM),
+                data_q_min=safe_float(self.model.item(WIDGETS.W_QMIN).text()),
+                point_1=safe_float(self.model.item(WIDGETS.W_GUINIER_END_EX).text()),
+                point_2=safe_float(self.model.item(WIDGETS.W_POROD_START_EX).text()),
+                point_3=safe_float(self.model.item(WIDGETS.W_POROD_END_EX).text()),
+                data_q_max=safe_float(self.model.item(WIDGETS.W_QMAX).text()),
+                ex_q_max=float(Q_MAXIMUM),
             )
         else:
             return None
@@ -295,7 +294,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         reactor.callFromThread(lambda: self.plot_result(model))
         self.allow_calculation()
 
-    def allow_calculation(self) -> None:
+    def allow_calculation(self, state: bool = True) -> None:
         """Enable the calculate button if either volume fraction or contrast is selected"""
         if self._data is None:
             self.cmdCalculate.setEnabled(False)
@@ -311,6 +310,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         else:
             self.cmdCalculate.setEnabled(False)
             self.cmdCalculate.setText("Calculate (Enter volume fraction or contrast)")
+
+        if not state:
+            self.cmdCalculate.setEnabled(state)
 
     def plot_result(self, model: QtGui.QStandardItemModel) -> None:
         """Plot result of calculation"""
@@ -348,7 +350,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             self.low_extrapolation_plot.show_q_range_sliders = True
             self.low_extrapolation_plot.slider_update_on_move = False
             self.low_extrapolation_plot.slider_perspective_name = self.name
-            self.low_extrapolation_plot.slider_low_q_input = self.extrapolation_parameters.data_q_min
+            self.low_extrapolation_plot.slider_low_q_input = self.extrapolation_parameters.ex_q_min
             self.low_extrapolation_plot.slider_high_q_input = self.txtGuinierEnd_ex.text()
             self.low_extrapolation_plot.slider_high_q_setter = ["set_low_q_extrapolation_upper_limit"]
             self.low_extrapolation_plot.slider_high_q_getter = ["get_low_q_extrapolation_upper_limit"]
@@ -582,7 +584,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             return self.model
 
         if low_calculation_pass:
-            qmin_ext: float = float(self.extrapolation_parameters.data_q_min)
+            qmin_ext: float = float(self.extrapolation_parameters.ex_q_min)
             extrapolated_data = self._calculator.get_extra_data_low(self._low_points, q_start=qmin_ext)
             power_low: float | None = self._calculator.get_extrapolation_power(range="low")
 
@@ -702,9 +704,12 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
         # Extrapolation parameters
         # Q range fields
-        self.txtGuinierEnd_ex.editingFinished.connect(self.on_extrapolation_text_changed_1)
-        self.txtPorodStart_ex.editingFinished.connect(self.on_extrapolation_text_changed_2)
-        self.txtPorodEnd_ex.editingFinished.connect(self.on_extrapolation_text_changed_3)
+        self.txtGuinierEnd_ex.textChanged.connect(self.on_extrapolation_text_changed_1)
+        self.txtPorodStart_ex.textChanged.connect(self.on_extrapolation_text_changed_2)
+        self.txtPorodEnd_ex.textChanged.connect(self.on_extrapolation_text_changed_3)
+        self.txtGuinierEnd_ex.editingFinished.connect(self.on_extrapolation_text_finished)
+        self.txtPorodStart_ex.editingFinished.connect(self.on_extrapolation_text_finished)
+        self.txtPorodEnd_ex.editingFinished.connect(self.on_extrapolation_text_finished)
         self.txtGuinierEnd_ex.setValidator(GuiUtils.DoubleValidator())
         self.txtPorodStart_ex.setValidator(GuiUtils.DoubleValidator())
         self.txtPorodEnd_ex.setValidator(GuiUtils.DoubleValidator())
@@ -848,6 +853,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.update_from_model()
 
     def on_extrapolation_slider_changed(self, state: ExtrapolationParameters) -> None:
+        """Handle when user changes any of the extrapolation slider values"""
         format_string: str = "%.7g"
         self.model.setItem(WIDGETS.W_GUINIER_END_EX, QtGui.QStandardItem(format_string % state.point_1))
         self.model.setItem(WIDGETS.W_POROD_START_EX, QtGui.QStandardItem(format_string % state.point_2))
@@ -855,36 +861,63 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.notify_extrapolation_text_box_validity(state, show_dialog=True)
 
     def on_extrapolation_text_changed_1(self) -> None:
+        """Handle when user changes the Guinier end text box"""
+        if self.extrapolation_parameters is None:
+            return
         value: str = self.txtGuinierEnd_ex.text()
         params = self.extrapolation_parameters._replace(point_1=safe_float(value))
         self.slider.extrapolation_parameters = params
-        self.notify_extrapolation_text_box_validity(params, show_dialog=True)
+        self.notify_extrapolation_text_box_validity(params, show_dialog=False)
+        self.model.setItem(WIDGETS.W_GUINIER_END_EX, QtGui.QStandardItem(value))
 
     def on_extrapolation_text_changed_2(self) -> None:
+        """Handle when user changes the Porod start text box"""
+        if self.extrapolation_parameters is None:
+            return
         value: str = self.txtPorodStart_ex.text()
         params = self.extrapolation_parameters._replace(point_2=safe_float(value))
         self.slider.extrapolation_parameters = params
-        self.notify_extrapolation_text_box_validity(params, show_dialog=True)
+        self.notify_extrapolation_text_box_validity(params, show_dialog=False)
+        self.model.setItem(WIDGETS.W_POROD_START_EX, QtGui.QStandardItem(value))
 
     def on_extrapolation_text_changed_3(self) -> None:
+        """Handle when user changes the Porod end text box"""
+        if self.extrapolation_parameters is None:
+            return
         value: str = self.txtPorodEnd_ex.text()
         params = self.extrapolation_parameters._replace(point_3=safe_float(value))
         self.slider.extrapolation_parameters = params
+        self.notify_extrapolation_text_box_validity(params, show_dialog=False)
+        self.model.setItem(WIDGETS.W_POROD_END_EX, QtGui.QStandardItem(value))
+
+    def on_extrapolation_text_finished(self) -> None:
+        """Handle when user finishes editing any of the extrapolation text boxes"""
+        params = self.extrapolation_parameters
         self.notify_extrapolation_text_box_validity(params, show_dialog=True)
 
     def notify_extrapolation_text_box_validity(
         self, params: ExtrapolationParameters, show_dialog: bool = False
     ) -> None:
+        """
+        Check validity of extrapolation text boxes and notify user if invalid
+        1. point_1 < point_2 < point_3
+        2. point_1 > data_q_min
+        3. point_3 < Q_MAXIMUM
+        4. point_2 < data_q_max
+        5. Highlight invalid text boxes in red
+        6. Optionally show dialog if invalid
+        7. Disable calculation if invalid
+        """
         # Round values to 8 significant figures to avoid floating point precision issues
-        p1: float = float(f"{params.point_1:.7g}")  # Guinier end
-        p2: float = float(f"{params.point_2:.7g}")  # Porod start
-        p3: float = float(f"{params.point_3:.7g}")  # Porod end
+        p1: float = float(f"{params.point_1:.7g}")  # low q end
+        p2: float = float(f"{params.point_2:.7g}")  # high q start
+        p3: float = float(f"{params.point_3:.7g}")  # high q end
         data_q_min: float = float(f"{self._data.x.min():.7g}")  # Actual data min
         data_q_max: float = float(f"{self._data.x.max():.7g}")  # Actual data max
         qmax: float = Q_MAXIMUM
 
         # Determine validity flags such that data_q_min < point_1 < point_2 < point_3 < qmax
-        # Also p2 < data_q_max so that Porod start is within data range
+        # Also p2 < data_q_max so that high q start is within data range
         invalid_1: bool = p1 <= data_q_min or p1 >= p2
         invalid_2: bool = p2 <= p1 or p2 >= p3 or p2 >= data_q_max
         invalid_3: bool = p3 <= p2 or p3 > qmax
@@ -894,31 +927,43 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.txtPorodStart_ex.setStyleSheet(BG_RED if invalid_2 else BG_DEFAULT)
         self.txtPorodEnd_ex.setStyleSheet(BG_RED if invalid_3 else BG_DEFAULT)
 
-        # If requested, show dialog if values are out of range
-        if show_dialog and (p1 <= data_q_min or p3 > qmax):
-            msg = "The slider values are out of range.\n"
-            msg += f"The minimum value is {data_q_min:.7g} and the maximum value is {qmax:.7g}"
-            dialog = QtWidgets.QMessageBox(self, text=msg)
-            dialog.setWindowTitle("Value out of range")
-            dialog.setStandardButtons(QtWidgets.QMessageBox.Ok)
-            dialog.exec_()
-            if p1 < data_q_min:
+        # Shows warning dialog if any of the values are invalid
+        # Also reset out-of-range values to nearest valid value
+        if show_dialog:
+            messages = []
+            if p1 <= data_q_min:
+                messages.append(f"The minimum value is {data_q_min:.7g}.")
+                print("changing p1")
                 self.txtGuinierEnd_ex.setText(f"{data_q_min + 1e-7:.7g}")
                 self.on_extrapolation_text_changed_1()
+
             if p3 > qmax:
+                messages.append(f"The maximum value is {qmax:.7g}.")
+                print("changing p3")
                 self.txtPorodEnd_ex.setText(f"{qmax:.7g}")
                 self.on_extrapolation_text_changed_3()
 
-        # Show dialog if p2 is greater than data max
-        if show_dialog and (p2 > data_q_max):
-            msg = "The High-Q start value cannot be greater than the maximum Q value of the data.\n"
-            msg += f"The maximum Q value of the data is {data_q_max:.7g}"
-            dialog = QtWidgets.QMessageBox(self, text=msg)
-            dialog.setWindowTitle("Invalid High-Q Start Value")
-            dialog.setStandardButtons(QtWidgets.QMessageBox.Ok)
-            dialog.exec_()
-            self.txtPorodStart_ex.setText(str(data_q_max - 1e-7))
-            self.on_extrapolation_text_changed_2()
+            if p2 >= data_q_max:
+                messages.append(f"The maximum Q value of the data is {data_q_max:.7g}.")
+                print("changing p2")
+                self.txtPorodStart_ex.setText(str(data_q_max - 1e-7))
+                self.on_extrapolation_text_changed_2()
+
+            if invalid_1 or invalid_2 or invalid_3:
+                messages.append("Please correct the invalid values highlighted in red.")
+                # this does not reset the text boxes, only notifies the user
+
+            if messages:
+                dialog = QtWidgets.QMessageBox(self)
+                dialog.setWindowTitle("Invalid Extrapolation Values")
+                dialog.setIcon(QtWidgets.QMessageBox.Warning)
+                dialog.setText("\n".join(messages))
+                dialog.setStandardButtons(QtWidgets.QMessageBox.Ok)
+                dialog.exec_()
+
+        # Disable calculation if any of the values are invalid
+        self.allow_calculation(not (invalid_1 or invalid_2 or invalid_3))
+
 
     def stateChanged(self) -> None:
         """Catch modifications from low- and high-Q extrapolation check boxes"""
