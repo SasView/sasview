@@ -42,6 +42,7 @@ class SASBDBDownloadDialog(QtWidgets.QDialog, Ui_SASBDBDownloadDialogUI):
         # Connect signals
         self.cmdDownload.clicked.connect(self.onDownload)
         self.cmdCancel.clicked.connect(self.reject)
+        self.cmdHelp.clicked.connect(self.onHelp)
         self.txtDatasetId.returnPressed.connect(self.onDownload)
         
         # Set focus on dataset ID input
@@ -190,4 +191,33 @@ class SASBDBDownloadDialog(QtWidgets.QDialog, Ui_SASBDBDownloadDialogUI):
         :return: SASBDBDatasetInfo object, or None if metadata not available
         """
         return self.dataset_info
+    
+    def onHelp(self):
+        """
+        Show the SASBDB download help documentation.
+        """
+        from sas.qtgui.Utilities import GuiUtils
+        help_location = "user/qtgui/Utilities/SASBDB/sasbdb_download_help.html"
+        try:
+            # Try to get guiManager from parent workspace
+            parent = self.parent()
+            if parent:
+                # Check if parent has guiManager attribute
+                if hasattr(parent, 'guiManager') and hasattr(parent.guiManager, 'showHelp'):
+                    parent.guiManager.showHelp(help_location)
+                    return
+                # Check if parent itself has showHelp
+                elif hasattr(parent, 'showHelp'):
+                    parent.showHelp(help_location)
+                    return
+            
+            # Fallback to GuiUtils
+            GuiUtils.showHelp(help_location)
+        except Exception as e:
+            logger.warning(f"Could not display help: {e}")
+            # Final fallback to GuiUtils
+            try:
+                GuiUtils.showHelp(help_location)
+            except Exception as e2:
+                logger.error(f"Failed to display help: {e2}")
 

@@ -583,6 +583,100 @@ def _formatDictValue(value, max_depth=2) -> str:
     return "{...}"
 
 
+def _formatDictLine(line: str) -> str:
+    """
+    Extract and format dictionary information from a line.
+    
+    :param line: Line that may contain a dictionary representation
+    :return: Formatted line with dictionary info extracted, or original line if no dict found
+    """
+    import ast
+    import re
+    
+    stripped = line.strip()
+    
+    # Check if line contains a dictionary
+    if not ("{" in stripped and "'" in stripped and ":" in stripped):
+        return line
+    
+    # Try to extract the label (e.g., "Instrument:", "Detector:")
+    label_match = re.match(r'^(\w+)\s*:\s*(.+)', stripped)
+    if label_match:
+        label = label_match.group(1)
+        dict_str = label_match.group(2)
+    elif stripped.startswith("{'") or stripped.startswith("{"):
+        label = None
+        dict_str = stripped
+    else:
+        return line
+    
+    # Try to parse the dictionary string
+    try:
+        # Use ast.literal_eval to safely parse the dictionary
+        parsed_dict = ast.literal_eval(dict_str)
+        if not isinstance(parsed_dict, dict):
+            return line
+        
+        # Format the dictionary
+        parts = []
+        
+        # Extract instrument/source info
+        if 'name' in parsed_dict and parsed_dict['name']:
+            parts.append(parsed_dict['name'])
+        if 'beamline_name' in parsed_dict and parsed_dict['beamline_name']:
+            parts.append(f"Beamline: {parsed_dict['beamline_name']}")
+        if 'type_of_source' in parsed_dict and parsed_dict['type_of_source']:
+            parts.append(f"Source: {parsed_dict['type_of_source']}")
+        if 'city' in parsed_dict and parsed_dict['city']:
+            city = parsed_dict['city']
+            if 'country' in parsed_dict and parsed_dict['country']:
+                parts.append(f"{city}, {parsed_dict['country']}")
+            else:
+                parts.append(city)
+        elif 'country' in parsed_dict and parsed_dict['country']:
+            parts.append(parsed_dict['country'])
+        
+        # Extract detector info (nested or direct)
+        detector_info = None
+        if 'detector' in parsed_dict and isinstance(parsed_dict['detector'], dict):
+            det = parsed_dict['detector']
+            if 'name' in det and det['name']:
+                detector_info = det['name']
+            elif 'type' in det and det['type']:
+                detector_info = det['type']
+        elif 'detector' in parsed_dict:
+            detector_info = str(parsed_dict['detector'])
+        
+        if detector_info:
+            parts.append(f"Detector: {detector_info}")
+        
+        # If we extracted useful info, format it
+        if parts:
+            formatted = " | ".join(parts)
+            if label:
+                return f"{label}: {formatted}"
+            else:
+                return formatted
+        
+        # Fallback: show key-value pairs for simple dicts
+        simple_parts = []
+        for k, v in parsed_dict.items():
+            if v is not None and not isinstance(v, dict):
+                simple_parts.append(f"{k}: {v}")
+        if simple_parts and len(simple_parts) <= 5:
+            formatted = " | ".join(simple_parts)
+            if label:
+                return f"{label}: {formatted}"
+            else:
+                return formatted
+        
+    except (ValueError, SyntaxError):
+        # If parsing fails, return original line
+        pass
+    
+    return line
+
+
 def _formatSASBDBMetadata(data) -> str:
     """
     Format SASBDB metadata from data object for display.
@@ -766,19 +860,29 @@ def retrieveData1d(data):
 
     text = data.__str__()
     
-    # Clean up raw dictionary representations from the output
+    # Format dictionary representations instead of removing them
     import re
-    # Remove lines that are just raw dictionary representations
     lines = text.split('\n')
     cleaned_lines = []
     for line in lines:
-        # Skip lines that are just raw dictionary representations
         stripped = line.strip()
-        if stripped.startswith("{'") and "'" in stripped and ":" in stripped:
-            # Check if it looks like a dict (has multiple key-value pairs)
-            if stripped.count("'") >= 4 and ":" in stripped:
-                continue  # Skip this line
-        cleaned_lines.append(line)
+        # Check if line contains a dictionary representation
+        if ("{" in stripped and "'" in stripped and ":" in stripped and 
+            (stripped.startswith("{'") or 
+             re.search(r':\s*\{', stripped) or  # Matches "Instrument: {"
+             re.search(r"\{'[^']+':", stripped))):  # Matches "{'key':"
+            # Count opening and closing braces to detect dict structures
+            open_braces = stripped.count('{')
+            close_braces = stripped.count('}')
+            # If it looks like a dictionary, format it instead of skipping
+            if open_braces > 0 and close_braces > 0:
+                formatted_line = _formatDictLine(line)
+                if formatted_line != line:  # Only add if it was successfully formatted
+                    cleaned_lines.append(formatted_line)
+            else:
+                cleaned_lines.append(line)
+        else:
+            cleaned_lines.append(line)
     text = '\n'.join(cleaned_lines)
     
     # Add SASBDB metadata if present
@@ -829,19 +933,29 @@ def retrieveData2d(data):
 
     text = data.__str__()
     
-    # Clean up raw dictionary representations from the output
+    # Format dictionary representations instead of removing them
     import re
-    # Remove lines that are just raw dictionary representations
     lines = text.split('\n')
     cleaned_lines = []
     for line in lines:
-        # Skip lines that are just raw dictionary representations
         stripped = line.strip()
-        if stripped.startswith("{'") and "'" in stripped and ":" in stripped:
-            # Check if it looks like a dict (has multiple key-value pairs)
-            if stripped.count("'") >= 4 and ":" in stripped:
-                continue  # Skip this line
-        cleaned_lines.append(line)
+        # Check if line contains a dictionary representation
+        if ("{" in stripped and "'" in stripped and ":" in stripped and 
+            (stripped.startswith("{'") or 
+             re.search(r':\s*\{', stripped) or  # Matches "Instrument: {"
+             re.search(r"\{'[^']+':", stripped))):  # Matches "{'key':"
+            # Count opening and closing braces to detect dict structures
+            open_braces = stripped.count('{')
+            close_braces = stripped.count('}')
+            # If it looks like a dictionary, format it instead of skipping
+            if open_braces > 0 and close_braces > 0:
+                formatted_line = _formatDictLine(line)
+                if formatted_line != line:  # Only add if it was successfully formatted
+                    cleaned_lines.append(formatted_line)
+            else:
+                cleaned_lines.append(line)
+        else:
+            cleaned_lines.append(line)
     text = '\n'.join(cleaned_lines)
     
     # Add SASBDB metadata if present
