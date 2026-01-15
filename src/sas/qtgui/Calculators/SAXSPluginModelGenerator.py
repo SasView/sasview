@@ -59,7 +59,7 @@ parameters = [
 ###
 import pyausaxs as ausaxs
 
-structure_path = "{str(Path(structure_path).resolve())}"
+structure_path = "{str(Path(structure_path).as_posix())}"
 
 def Iq(q, c):
     # Initialize on first call to keep objects alive for function lifetime
