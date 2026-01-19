@@ -87,14 +87,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self._volfrac1: float | None = None
         self._volfrac1_err: float | None = None
 
-        # Old extrapolation parameters
-        self._qmax_lowq: float | None = None
-        self._qmin_highq: float | None = None
-        self._qmax_highq: float | None = None
-        self._ex_power_lowq: float | None = None
-        self._ex_power_highq: float | None = None
-
-        # New extrapolation options
         self._low_extrapolate: bool = False
         self._low_guinier: bool = True
         self._low_fit: bool = False
@@ -121,8 +113,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         new_font = 'font-family: -apple-system, "Helvetica Neue", "Ubuntu";'
         self.lblTotalQUnits.setStyleSheet(new_font)
         self.lblPorodCstUnits.setStyleSheet(new_font)
-        self.lblContrastUnits.setStyleSheet(new_font)
-        self.lblContrastUnits_2.setStyleSheet(new_font)
+        self.lblContrastUnits_in.setStyleSheet(new_font)
+        self.lblContrastUnits_out.setStyleSheet(new_font)
         self.lblSpecificSurfaceUnits.setStyleSheet(new_font)
         self.lblInvariantTotalQUnits.setStyleSheet(new_font)
 
@@ -254,28 +246,32 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
     def update_from_model(self) -> None:
         """Update the globals based on the data in the model"""
         self._background = float(self.model.item(WIDGETS.W_BACKGROUND).text())
-        if self.model.item(WIDGETS.W_CONTRAST).text() != "None" and self.model.item(WIDGETS.W_CONTRAST).text() != "":
-            self._contrast = float(self.model.item(WIDGETS.W_CONTRAST).text())
-        if (
-            self.model.item(WIDGETS.W_CONTRAST_ERR).text() != "None"
-            and self.model.item(WIDGETS.W_CONTRAST_ERR).text() != ""
-        ):
-            self._contrast_err = float(self.model.item(WIDGETS.W_CONTRAST_ERR).text())
+
+        contrast_text = self.model.item(WIDGETS.W_CONTRAST).text()
+        if contrast_text:
+            self._contrast = float(contrast_text)
+
+        contrast_err_text = self.model.item(WIDGETS.W_CONTRAST_ERR).text()
+        if contrast_err_text:
+            self._contrast_err = float(contrast_err_text)
+
         self._scale = float(self.model.item(WIDGETS.W_SCALE).text())
-        if self.model.item(WIDGETS.W_POROD_CST).text() != "None" and self.model.item(WIDGETS.W_POROD_CST).text() != "":
-            self._porod = float(self.model.item(WIDGETS.W_POROD_CST).text())
-        if (
-            self.model.item(WIDGETS.W_POROD_CST_ERR).text() != "None"
-            and self.model.item(WIDGETS.W_POROD_CST_ERR).text() != ""
-        ):
-            self._porod_err = float(self.model.item(WIDGETS.W_POROD_CST_ERR).text())
-        if self.model.item(WIDGETS.W_VOLFRAC1).text() != "None" and self.model.item(WIDGETS.W_VOLFRAC1).text() != "":
-            self._volfrac1 = float(self.model.item(WIDGETS.W_VOLFRAC1).text())
-        if (
-            self.model.item(WIDGETS.W_VOLFRAC1_ERR).text() != "None"
-            and self.model.item(WIDGETS.W_VOLFRAC1_ERR).text() != ""
-        ):
-            self._volfrac1_err = float(self.model.item(WIDGETS.W_VOLFRAC1_ERR).text())
+
+        porod_text = self.model.item(WIDGETS.W_POROD_CST).text()
+        if porod_text:
+            self._porod = float(porod_text)
+
+        porod_err_text = self.model.item(WIDGETS.W_POROD_CST_ERR).text()
+        if porod_err_text:
+            self._porod_err = float(porod_err_text)
+
+        volfrac1_text = self.model.item(WIDGETS.W_VOLFRAC1).text()
+        if volfrac1_text:
+            self._volfrac1 = float(volfrac1_text)
+
+        volfrac1_err_text = self.model.item(WIDGETS.W_VOLFRAC1_ERR).text()
+        if volfrac1_err_text:
+            self._volfrac1_err = float(volfrac1_err_text)
 
         self._low_extrapolate = str(self.model.item(WIDGETS.W_ENABLE_LOWQ_EX).text()) == "true"
         self._low_guinier = self.rbLowQGuinier_ex.isChecked()

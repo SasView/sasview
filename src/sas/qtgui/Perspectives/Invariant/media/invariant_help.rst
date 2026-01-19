@@ -135,7 +135,7 @@ Low-\ $q$ region (<= $q_{min}$ in data):
 *  The Guinier function $I_0.exp(-q^2 R_g^2/3)$ can be used, where $I_0$
    and $R_g$ are obtained by fitting the data within the range $q_{min}$ to
    $q_{min+j}$ where $j$ is the user-chosen number of points from which to
-   extrapolate. The default is the lower 15\% of the data points. Alternatively a power
+   extrapolate. The default is the lower 15\% of the data range. Alternatively a power
    law, similar to the high $q$ extrapolation, can be used but this is not
    recommended!
    
@@ -150,7 +150,7 @@ High-\ $q$ region (>= $q_{max}$ in data):
    such an extrapolation. The fitted constant(s) $A$ ($m$) is/are obtained by
    fitting the data within the range $q_{max-j}$ to $q_{max}$ where, again,
    $j$ is the user chosen number of points from which to extrapolate, the
-   default again being the upper 15\% of the data points.
+   default again being the upper 15\% of the data range.
 
 .. note:: While the high $q$ exponent should generally be close to 4 for a
     system with sharp interfaces, in the special case of *infinite* slit
@@ -195,7 +195,7 @@ and thus, if $\phi_1 < \phi_2$
     &\phi_1 = \frac{1 - \sqrt{1 - 4A}}{2} \\
     &\phi_2 = \frac{1 + \sqrt{1-4A}}{2}
 
-where $\phi_1$ (the volume fraction of the *minority phase*) is reported as the
+where $\phi_1$ (by convention, the volume fraction of the *minority phase*) is reported as the
 the volume fraction in the Invariant analysis window.
 
 .. note::
@@ -341,8 +341,8 @@ $C_p$ can be specified (required if the specific surface area $S_v$ is desired).
  Switch to the *Extrapolation* tab.
 
 Adjust the extrapolation types as necessary by checking the relevant check boxes. 
-If power law extrapolations are chosen, the exponent can be either held fixed or fitted. 
-The points over which the extrapolations are fitted can also be adjusted by changing the
+If power law extrapolations are chosen, the exponent can be either fitted or held fixed. 
+The range over which the extrapolations are fitted can also be adjusted by changing the
 slider positions, or entering a specific value in the relevant box. The default values
 are to use the lower and upper 15% of the data points for the low and high $q$ 
 extrapolations respectively. 
