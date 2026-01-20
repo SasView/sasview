@@ -39,6 +39,7 @@ from sas.qtgui.Perspectives.Invariant.InvariantPerspective import InvariantWindo
 from sas.qtgui.Perspectives.Inversion.InversionPerspective import InversionWindow
 from sas.qtgui.Perspectives.perspective import Perspective
 from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionPerspective import SizeDistributionWindow
+from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
 from sas.qtgui.Utilities.About.About import About
 from sas.qtgui.Utilities.About.Credits import Credits
 
@@ -57,9 +58,8 @@ from sas.qtgui.Utilities.PluginManager import PluginManager
 from sas.qtgui.Utilities.Preferences.PreferencesPanel import PreferencesPanel
 from sas.qtgui.Utilities.Reports.ReportDialog import ReportDialog
 from sas.qtgui.Utilities.ResultPanel import ResultPanel
-from sas.qtgui.Utilities.SASBDB.SASBDBDialog import SASBDBDialog
 from sas.qtgui.Utilities.SASBDB.sasbdb_data_collector import SASBDBDataCollector
-from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
+from sas.qtgui.Utilities.SASBDB.SASBDBDialog import SASBDBDialog
 
 # General SAS imports
 from sas.qtgui.Utilities.SasviewLogger import setup_qt_logging
