@@ -3542,38 +3542,37 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Create and return SASBDB export data from fitting results
         Similar to getReport() but returns SASBDBExportData instead
         """
-        from sas.qtgui.Utilities.SASBDB.sasbdb_data import SASBDBExportData
         from sas.qtgui.Utilities.SASBDB.sasbdb_data_collector import SASBDBDataCollector
-        
+
         collector = SASBDBDataCollector()
         export_data = collector.export_data
-        
+
         # Check if we have data and a model
         if self.data is None or self.logic.kernel_module is None:
             return None
-        
+
         # Collect sample data and instrument information from the data object
         sample, instrument = collector.collect_from_data(self.data)
-        
+
         # Add instrument to export data if available
         if instrument:
             export_data.instruments.append(instrument)
-        
+
         # Collect fit information
         fit_data = {}
         model_name = None
         optimizer_name = None
-        
+
         # Extract chi2 from fit results (same way as ReportPageLogic does)
         if hasattr(self, 'chi2') and self.chi2 is not None:
             fit_data['chi2'] = self.chi2
-        
+
         # Get model name (same way as ReportPageLogic does)
         if self.logic.kernel_module:
             model_name = getattr(self.logic.kernel_module, 'id', None)
             if not model_name:
                 model_name = getattr(self.logic.kernel_module, 'name', None)
-        
+
         # Get optimizer name (same way as ReportPageLogic does)
         try:
             from bumps import options
@@ -3581,7 +3580,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 optimizer_name = options.FIT_CONFIG.selected_fitter.name
         except (ImportError, AttributeError):
             pass
-        
+
         # Get model parameters (same way as ReportPageLogic does)
         model_parameters = []
         if self.logic.kernel_module:
@@ -3594,26 +3593,26 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             if self.chkMagnetism.isChecked() and self.canHaveMagnetism() and self.magnetism_widget._magnet_model.rowCount() > 0:
                 magnet_params = FittingUtilities.getStandardParam(self.magnetism_widget._magnet_model)
             model_parameters = params + poly_params + magnet_params
-        
+
         # Calculate CorMap p-value if we have both data and model
-        if (self.data is not None and 
-            self.logic.kernel_module is not None and 
-            hasattr(self.data, '__class__') and 
+        if (self.data is not None and
+            self.logic.kernel_module is not None and
+            hasattr(self.data, '__class__') and
             self.data.__class__.__name__ == 'Data1D'):
             try:
                 import numpy as np
                 from freesas.cormap import gof
-                
+
                 # Get experimental data
                 exp_q = np.array(self.data.x)
                 exp_I = np.array(self.data.y)
-                
+
                 # Filter valid data points
                 valid_mask = np.isfinite(exp_q) & np.isfinite(exp_I) & (exp_I > 0) & (exp_q > 0)
                 if np.any(valid_mask):
                     exp_q_valid = exp_q[valid_mask]
                     exp_I_valid = exp_I[valid_mask]
-                    
+
                     # Calculate model curve at experimental q values
                     # Use the kernel_module to calculate model intensity
                     try:
@@ -3623,47 +3622,47 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                             model_I = model_I_result[0]
                         else:
                             model_I = model_I_result
-                        
+
                         # Ensure model_I is a numpy array
                         model_I = np.array(model_I)
-                        
+
                         # Ensure both arrays have the same length
                         min_len = min(len(exp_I_valid), len(model_I))
                         if min_len > 10:  # Need at least 10 points for meaningful CorMap
                             exp_I_final = exp_I_valid[:min_len]
                             model_I_final = model_I[:min_len]
-                            
+
                             # Filter out any remaining invalid values
-                            final_mask = (np.isfinite(exp_I_final) & 
-                                         np.isfinite(model_I_final) & 
-                                         (exp_I_final > 0) & 
+                            final_mask = (np.isfinite(exp_I_final) &
+                                         np.isfinite(model_I_final) &
+                                         (exp_I_final > 0) &
                                          (model_I_final > 0))
-                            
+
                             if np.sum(final_mask) > 10:
                                 exp_I_final = exp_I_final[final_mask]
                                 model_I_final = model_I_final[final_mask]
-                                
+
                                 # Prepare data for FreeSAS gof function
                                 # gof expects numpy arrays, can be 2D with shape (n, 1) or 1D
                                 exp_data = exp_I_final.reshape(-1, 1) if exp_I_final.ndim == 1 else exp_I_final
                                 model_data = model_I_final.reshape(-1, 1) if model_I_final.ndim == 1 else model_I_final
-                                
+
                                 # Calculate CorMap
                                 gof_result = gof(exp_data, model_data)
-                                
+
                                 # Extract p-value (P attribute from GOF object)
                                 if hasattr(gof_result, 'P') and gof_result.P is not None:
                                     fit_data['cormap_pvalue'] = float(gof_result.P)
                     except Exception as calc_error:
                         logger.debug(f"Model calculation failed for CorMap: {calc_error}")
-                        
+
             except ImportError:
                 logger.warning("FreeSAS not available, skipping CorMap calculation")
             except Exception as e:
                 logger.warning(f"CorMap calculation failed: {e}")
                 import traceback
                 logger.debug(traceback.format_exc())
-        
+
         # Collect visualization parameters (parameter name -> value dict for shape visualizer)
         visualization_params = {}
         if model_parameters:
@@ -3677,39 +3676,39 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                         visualization_params[param_name] = float(param_value)
                     except (ValueError, TypeError):
                         pass
-        
+
         # Create fit entry if we have fit information
         if fit_data.get('chi2') is not None or model_name or optimizer_name or fit_data.get('cormap_pvalue') is not None:
             fit = collector.collect_from_fit(fit_data, model_name, optimizer_name, model_parameters)
             # Update angular units from sample
             if sample.angular_units:
                 fit.angular_units = sample.angular_units
-            
+
             # Add visualization parameters to the model if available
             if fit.models and visualization_params:
                 fit.models[0].visualization_params = visualization_params
-            
+
             sample.fits.append(fit)
-        
+
         # Collect Guinier analysis using FreeSAS auto_guinier
         # Only for 1D data
         if hasattr(self.data, '__class__') and self.data.__class__.__name__ == 'Data1D':
             guinier = collector.collect_guinier_from_freesas(self.data)
             if guinier:
                 sample.guinier = guinier
-        
+
         # Add default molecule and buffer if not present
         if sample.molecule is None:
             sample.molecule = collector.create_default_molecule()
         if sample.buffer is None:
             sample.buffer = collector.create_default_buffer()
-        
+
         export_data.samples.append(sample)
-        
+
         # Create default project if not set
         if export_data.project is None:
             export_data.project = collector.create_default_project()
-        
+
         return export_data
 
     def loadPageStateCallback(self, state: Any | None = None, datainfo: Any | None = None, format: Any | None = None) -> None:

@@ -1,0 +1,168 @@
+---
+alwaysApply: true
+---
+# SasView Cursor Rules (AI + Cursor / Copilot guidance)
+
+Use this as a **project-specific rulebook** for AI-assisted development in the **SasView** codebase.
+
+> **Golden rule:** never break the build. If you do, fixing it is priority #1. 
+
+---
+
+## 0) What repo am I in?
+
+**SasView** is a Small Angle Scattering (SAS) analysis application with a Qt-based GUI and a Python scripting surface. 
+
+**Top-level layout you'll see in this repo** (don't guess—navigate to the right place first):
+
+- `src/sas/` — application source (GUI + computation)
+- `test/` — calculation test suite
+- `docs/sphinx-docs/` — Sphinx documentation sources
+- `installers/`, `build_tools/`, `.github/` — packaging/CI tooling
+
+---
+
+## 1) How SasView is expected to run
+
+- **Running from a source directory is not supported** for launching the GUI; it must be installed.
+- Users can launch the GUI after installation with:
+
+  - `python -m sas` (from a venv)  
+  - or `uvx sasview` (if installed via `uv`)
+
+### Developer environment expectations (practical)
+
+- The repo points developers to **INSTALL.md** and **DeveloperNotes** for current setup instructions.
+
+**Rule:** If your change touches environment/setup, align with the project's current instructions rather than "typical Python project defaults".
+
+---
+
+## 2) Know the main subsystems before you edit
+
+SasView has two big "centers of gravity" for changes and tests:
+
+1. **Computation / calculators**: the `sascalc` package  
+2. **GUI**: the `qtgui` package
+
+And correspondingly, **two unit test suites** exist:
+
+- calculation tests (in the repo-level `test/` package)
+- GUI tests (in `qtgui` subpackages, in directories named `UnitTesting`)
+
+**CI expectation:** both suites must pass on Ubuntu; Windows/Mac require calculation tests.
+
+---
+
+## 3) AI workflow rules (how to behave when editing SasView)
+
+### 3.1 Always start by orienting in code
+Before writing anything substantial:
+
+- Locate the *current* class/module that owns the behavior.
+- Search for existing patterns in the same package (especially in `qtgui`).
+- Prefer extending an existing workflow instead of inventing a new one.
+
+### 3.2 Keep changes tight and reviewable
+- Small diffs, single responsibility.
+- Do not "drive-by refactor" unrelated formatting or renames.
+
+### 3.3 Preserve scientific meaning
+- Never "simplify" calculations unless you can justify equivalence.
+- If you change algorithm behavior, update documentation and add/adjust tests.
+
+---
+
+## 4) SasView coding standards (follow project rules, not your instincts)
+
+These are pulled from the SasView developer wiki coding rules.
+
+### Docstrings & documentation
+- Use `"""triple double quotes"""` for docstrings; use raw docstrings for backslashes.
+- Docstrings are processed by Sphinx and should use reStructuredText conventions.
+- For any public function/class: document arguments, return values, side effects, exceptions, and restrictions.
+
+### Naming
+- Classes: `CamelCase`
+- Variables/methods/modules: `snake_case` (underscores)
+- Non-public: prefix with `_` (`_snake_case`, `_CamelCase`)
+- Avoid `__dunder__` names except standard Python protocol requirements.
+
+### Imports
+- One module per `import` line.
+- Avoid `from x import *` (except carefully in `__init__.py` with `__all__`).
+- Import grouping order: stdlib → third-party → local, separated by blank lines.
+
+### Exceptions
+- Don't catch-and-ignore (`pass`/`print`)—handle meaningfully.
+- Don't use exceptions for flow control without a very good reason.
+- Never use a bare `except:`; use `except Exception:` at minimum.
+
+### Style basics
+- Follow PEP 8; 4 spaces; avoid magic numbers (use named constants); max 79-char lines (unless project tooling dictates otherwise).
+
+### API design guidance (important for "core logic" changes)
+- Prefer explicit constructor arguments with validation.
+- Use `@property` for user-facing fields; avoid `__getattr__`/`__setattr__` hacks.
+- Add type hints to API methods.
+
+---
+
+## 5) GUI rules (Qt / PySide6)
+
+SasView uses Qt via **PySide6**.
+
+When modifying `src/sas/qtgui/...`:
+
+- **Never block the UI thread** with heavy calculations or I/O.
+- Prefer existing thread/worker patterns already used in SasView.
+- Any dialog/interaction changes should have a clear UX reason and minimal regressions.
+- If you touch platform-specific behavior (file dialogs, paths), sanity-check against known PySide6 differences.
+
+---
+
+## 6) Models & fitting (where changes often go wrong)
+
+- SasView integrates with **sasmodels** for scattering models and **bumps** for fitting workflows (used even in the README scripting example).
+- SasView supports **plugin models**; the official docs describe how to create them and what types exist.
+
+**Rule:** if you change anything in fitting/model plumbing, add/adjust tests and verify both:
+- script-level usage (non-GUI)
+- GUI path (Fitting perspective)
+
+---
+
+## 7) Tests: what to add, where, and what must pass
+
+- Calculation tests: add to the repo-level `test/` suite.
+- GUI tests: place under the relevant `qtgui` subpackage in a `UnitTesting/` directory.
+
+**Rule:** new features should include tests; existing passing tests must keep passing.
+
+---
+
+## 8) Working with sibling repositories (common SasView dev workflow)
+
+During development, changes may land in sibling repos like `sasmodels`, `sasdata`, and `bumps`.
+
+If you need to test a SasView change against an unmerged sibling branch, the wiki documents a CI-based workflow by editing `.github/workflows/ci.yml` to clone specific sibling branches.
+
+**Rule:** if your SasView fix depends on a sibling change, document it clearly in the PR and link the sibling PR(s).
+
+---
+
+## 9) When you (the AI) are unsure
+
+- Prefer pointing to the authoritative sources (project wiki, docs, README) instead of guessing.
+- If a rule conflicts with your generic best practices, **the project rule wins**.
+- If a change might be controversial, keep the diff minimal and include rationale + tests.
+
+---
+
+## 10) Suggested Cursor setup
+
+Place this file somewhere discoverable (commonly repo root), and consider a small `.cursorrules` file that points to it, e.g.
+
+- "Follow `SasView Cursor Rules (AI + Cursor guidance)` in this repo."
+
+(Keep that pointer file tiny; keep the real rules here.)

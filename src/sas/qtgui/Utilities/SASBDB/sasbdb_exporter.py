@@ -15,8 +15,6 @@ requirements and produces clean, well-formatted files.
 """
 import json
 import logging
-import os
-from typing import Optional
 
 from sas.qtgui.Utilities.SASBDB.sasbdb_data import SASBDBExportData
 
@@ -40,7 +38,7 @@ class SASBDBExporter:
     
     :param export_data: SASBDBExportData object containing all data to export
     """
-    
+
     def __init__(self, export_data: SASBDBExportData):
         """
         Initialize exporter with data to export.
@@ -48,7 +46,7 @@ class SASBDBExporter:
         :param export_data: SASBDBExportData object containing all data to export
         """
         self.export_data = export_data
-    
+
     def to_dict(self) -> dict:
         """
         Convert SASBDBExportData to dictionary for JSON serialization
@@ -56,7 +54,7 @@ class SASBDBExporter:
         :return: Dictionary representation of the export data
         """
         result = {}
-        
+
         # Project information
         if self.export_data.project:
             result['project'] = {
@@ -65,7 +63,7 @@ class SASBDBExporter:
                 'doi': self.export_data.project.doi,
                 'project_title': self.export_data.project.project_title,
             }
-        
+
         # Samples
         result['samples'] = []
         for sample in self.export_data.samples:
@@ -89,7 +87,7 @@ class SASBDBExporter:
                 'number_of_frames': sample.number_of_frames,
                 'concentration': sample.concentration,
             }
-            
+
             # Molecule
             if sample.molecule:
                 sample_dict['molecule'] = {
@@ -108,7 +106,7 @@ class SASBDBExporter:
                     'total_mw_kda': sample.molecule.total_mw_kda,
                     'molecule_description': sample.molecule.molecule_description,
                 }
-            
+
             # Buffer
             if sample.buffer:
                 sample_dict['buffer'] = {
@@ -116,7 +114,7 @@ class SASBDBExporter:
                     'ph': sample.buffer.ph,
                     'comment': sample.buffer.comment,
                 }
-            
+
             # Guinier
             if sample.guinier:
                 sample_dict['guinier'] = {
@@ -126,7 +124,7 @@ class SASBDBExporter:
                     'range_start': sample.guinier.range_start,
                     'range_end': sample.guinier.range_end,
                 }
-            
+
             # PDDF
             if sample.pddf:
                 sample_dict['pddf'] = {
@@ -141,7 +139,7 @@ class SASBDBExporter:
                     'porod_volume': sample.pddf.porod_volume,
                     'mw_from_porod_volume': sample.pddf.mw_from_porod_volume,
                 }
-            
+
             # Fits
             sample_dict['fits'] = []
             for fit in sample.fits:
@@ -155,7 +153,7 @@ class SASBDBExporter:
                     'log_file': fit.log_file,
                     'description': fit.description,
                 }
-                
+
                 # Models
                 fit_dict['models'] = []
                 for model in fit.models:
@@ -168,11 +166,11 @@ class SASBDBExporter:
                         'comment': model.comment,
                     }
                     fit_dict['models'].append(model_dict)
-                
+
                 sample_dict['fits'].append(fit_dict)
-            
+
             result['samples'].append(sample_dict)
-        
+
         # Instruments
         result['instruments'] = []
         for instrument in self.export_data.instruments:
@@ -187,9 +185,9 @@ class SASBDBExporter:
                 'country': instrument.country,
             }
             result['instruments'].append(instrument_dict)
-        
+
         return result
-    
+
     def export_to_json(self, filepath: str) -> bool:
         """
         Export data to JSON file
@@ -199,20 +197,20 @@ class SASBDBExporter:
         """
         try:
             data_dict = self.to_dict()
-            
+
             # Remove None values for cleaner JSON
             cleaned_dict = self._remove_none_values(data_dict)
-            
+
             with open(filepath, 'w', encoding='utf-8') as f:
                 json.dump(cleaned_dict, f, indent=2, ensure_ascii=False)
-            
+
             logger.info(f"SASBDB data exported to {filepath}")
             return True
-            
+
         except Exception as e:
             logger.error(f"Failed to export SASBDB data: {e}")
             return False
-    
+
     def _remove_none_values(self, d: dict) -> dict:
         """
         Recursively remove None values from dictionary
@@ -222,7 +220,7 @@ class SASBDBExporter:
         """
         if not isinstance(d, dict):
             return d
-        
+
         result = {}
         for key, value in d.items():
             if value is None:
@@ -244,9 +242,9 @@ class SASBDBExporter:
                     result[key] = cleaned_list
             else:
                 result[key] = value
-        
+
         return result
-    
+
     def export_experimental_data(self, data, filepath: str) -> bool:
         """
         Export experimental data to .dat file
@@ -257,7 +255,7 @@ class SASBDBExporter:
         """
         try:
             from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
-            
+
             with open(filepath, 'w', encoding='utf-8') as f:
                 # Write header
                 f.write("# SASBDB Experimental Data Export\n")
@@ -266,7 +264,7 @@ class SASBDBExporter:
                 if hasattr(data, 'filename'):
                     f.write(f"# File: {data.filename}\n")
                 f.write("#\n")
-                
+
                 if isinstance(data, Data1D):
                     # Write 1D data
                     f.write("# Q\tI\tdI\n")
@@ -285,17 +283,17 @@ class SASBDBExporter:
                         qy = data.qy_data
                         i_data = data.data if hasattr(data, 'data') else None
                         err_data = data.err_data if hasattr(data, 'err_data') else None
-                        
+
                         for i in range(min(len(qx), len(qy))):
                             qx_val = qx[i]
                             qy_val = qy[i]
                             i_val = i_data[i] if i_data is not None and i < len(i_data) else 0
                             di = err_data[i] if err_data is not None and i < len(err_data) else 0
                             f.write(f"{qx_val}\t{qy_val}\t{i_val}\t{di}\n")
-            
+
             logger.info(f"Experimental data exported to {filepath}")
             return True
-            
+
         except Exception as e:
             logger.error(f"Failed to export experimental data: {e}")
             return False

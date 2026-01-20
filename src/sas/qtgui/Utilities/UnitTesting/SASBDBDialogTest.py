@@ -3,20 +3,20 @@ Unit tests for SASBDBDialog export functionality
 """
 import os
 import tempfile
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock
 
 import pytest
 from PySide6 import QtWidgets
 
-from sas.qtgui.Utilities.SASBDB.SASBDBDialog import SASBDBDialog
 from sas.qtgui.Utilities.SASBDB.sasbdb_data import (
+    SASBDBBuffer,
     SASBDBExportData,
+    SASBDBInstrument,
+    SASBDBMolecule,
     SASBDBProject,
     SASBDBSample,
-    SASBDBMolecule,
-    SASBDBBuffer,
-    SASBDBInstrument,
 )
+from sas.qtgui.Utilities.SASBDB.SASBDBDialog import SASBDBDialog
 
 
 class TestSASBDBDialog:
@@ -29,7 +29,7 @@ class TestSASBDBDialog:
         # Add minimal required data for validation
         project = SASBDBProject(project_title="Test Project")
         export_data.project = project
-        
+
         sample = SASBDBSample(
             sample_title="Test Sample",
             angular_units="1/A",
@@ -42,18 +42,18 @@ class TestSASBDBDialog:
             monomer_mw_kda=10.5
         )
         sample.molecule = molecule
-        
+
         buffer = SASBDBBuffer(description="PBS buffer", ph=7.4)
         sample.buffer = buffer
-        
+
         instrument = SASBDBInstrument(
             source_type="X-ray synchrotron",
             beamline_name="BL12"
         )
-        
+
         export_data.samples.append(sample)
         export_data.instruments.append(instrument)
-        
+
         w = SASBDBDialog(export_data=export_data, parent=None)
         yield w
         w.close()
@@ -66,9 +66,9 @@ class TestSASBDBDialog:
 
     def test_onExport_cancels_when_no_filename(self, dialog, mocker):
         """Test that onExport returns early when user cancels file dialog"""
-        mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName', 
+        mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName',
                           return_value=("", ""))
-        
+
         # Should return without error
         dialog.onExport()
         # Dialog should still be open (not closed)
@@ -77,9 +77,9 @@ class TestSASBDBDialog:
     def test_onExport_generates_correct_filenames(self, dialog, mocker):
         """Test that onExport generates correct PDF and project filenames"""
         test_json = "/tmp/test_export.json"
-        mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName', 
+        mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName',
                           return_value=(test_json, "JSON file (*.json)"))
-        
+
         # Mock all three save operations to succeed
         json_mock = mocker.patch(
             'sas.qtgui.Utilities.SASBDB.sasbdb_exporter.SASBDBExporter.export_to_json',
@@ -89,19 +89,19 @@ class TestSASBDBDialog:
         project_mock = mocker.patch.object(dialog, '_saveProjectFile', return_value=True)
         close_mock = mocker.patch.object(dialog, 'close')
         msgbox_mock = mocker.patch.object(QtWidgets.QMessageBox, 'information')
-        
+
         dialog.onExport()
-        
+
         # Verify JSON was saved with correct filename
         json_mock.assert_called_once()
         call_args = json_mock.call_args[0]
         assert call_args[0] == test_json
-        
+
         # Verify PDF filename was generated correctly
         pdf_mock.assert_called_once()
         pdf_args = pdf_mock.call_args[0]
         assert pdf_args[1] == "/tmp/test_export.pdf"
-        
+
         # Verify project filename was generated correctly
         project_mock.assert_called_once()
         project_args = project_mock.call_args[0]
@@ -110,9 +110,9 @@ class TestSASBDBDialog:
     def test_onExport_handles_filename_without_extension(self, dialog, mocker):
         """Test that onExport adds .json extension if missing"""
         test_json = "/tmp/test_export"  # No extension
-        mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName', 
+        mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName',
                           return_value=(test_json, "JSON file (*.json)"))
-        
+
         json_mock = mocker.patch(
             'sas.qtgui.Utilities.SASBDB.sasbdb_exporter.SASBDBExporter.export_to_json',
             return_value=True
@@ -121,9 +121,9 @@ class TestSASBDBDialog:
         mocker.patch.object(dialog, '_saveProjectFile', return_value=True)
         mocker.patch.object(QtWidgets.QMessageBox, 'information')
         mocker.patch.object(dialog, 'close')
-        
+
         dialog.onExport()
-        
+
         # Verify .json was added
         call_args = json_mock.call_args[0]
         assert call_args[0] == "/tmp/test_export.json"
@@ -131,9 +131,9 @@ class TestSASBDBDialog:
     def test_onExport_all_files_succeed(self, dialog, mocker):
         """Test onExport when all three files save successfully"""
         test_json = "/tmp/test_export.json"
-        mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName', 
+        mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName',
                           return_value=(test_json, "JSON file (*.json)"))
-        
+
         mocker.patch(
             'sas.qtgui.Utilities.SASBDB.sasbdb_exporter.SASBDBExporter.export_to_json',
             return_value=True
@@ -142,23 +142,23 @@ class TestSASBDBDialog:
         mocker.patch.object(dialog, '_saveProjectFile', return_value=True)
         close_mock = mocker.patch.object(dialog, 'close')
         msgbox_mock = mocker.patch.object(QtWidgets.QMessageBox, 'information')
-        
+
         dialog.onExport()
-        
+
         # Verify success message was shown
         msgbox_mock.assert_called_once()
         call_args = msgbox_mock.call_args
         assert call_args[0][1] == "Export Successful"
-        
+
         # Verify dialog was closed
         close_mock.assert_called_once()
 
     def test_onExport_partial_failure(self, dialog, mocker):
         """Test onExport when some files fail"""
         test_json = "/tmp/test_export.json"
-        mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName', 
+        mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName',
                           return_value=(test_json, "JSON file (*.json)"))
-        
+
         # JSON succeeds, PDF fails, Project succeeds
         mocker.patch(
             'sas.qtgui.Utilities.SASBDB.sasbdb_exporter.SASBDBExporter.export_to_json',
@@ -167,9 +167,9 @@ class TestSASBDBDialog:
         mocker.patch.object(dialog, '_generatePDFReport', side_effect=Exception("PDF error"))
         mocker.patch.object(dialog, '_saveProjectFile', return_value=True)
         msgbox_mock = mocker.patch.object(QtWidgets.QMessageBox, 'warning')
-        
+
         dialog.onExport()
-        
+
         # Verify warning message was shown (partial success)
         msgbox_mock.assert_called_once()
         call_args = msgbox_mock.call_args
@@ -180,9 +180,9 @@ class TestSASBDBDialog:
     def test_onExport_all_files_fail(self, dialog, mocker):
         """Test onExport when all files fail"""
         test_json = "/tmp/test_export.json"
-        mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName', 
+        mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName',
                           return_value=(test_json, "JSON file (*.json)"))
-        
+
         mocker.patch(
             'sas.qtgui.Utilities.SASBDB.sasbdb_exporter.SASBDBExporter.export_to_json',
             return_value=False
@@ -190,9 +190,9 @@ class TestSASBDBDialog:
         mocker.patch.object(dialog, '_generatePDFReport', side_effect=Exception("PDF error"))
         mocker.patch.object(dialog, '_saveProjectFile', return_value=False)
         msgbox_mock = mocker.patch.object(QtWidgets.QMessageBox, 'critical')
-        
+
         dialog.onExport()
-        
+
         # Verify error message was shown
         msgbox_mock.assert_called_once()
         call_args = msgbox_mock.call_args
@@ -201,9 +201,9 @@ class TestSASBDBDialog:
     def test_onExport_json_failure(self, dialog, mocker):
         """Test onExport when JSON export fails"""
         test_json = "/tmp/test_export.json"
-        mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName', 
+        mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName',
                           return_value=(test_json, "JSON file (*.json)"))
-        
+
         mocker.patch(
             'sas.qtgui.Utilities.SASBDB.sasbdb_exporter.SASBDBExporter.export_to_json',
             side_effect=Exception("JSON export failed")
@@ -211,9 +211,9 @@ class TestSASBDBDialog:
         mocker.patch.object(dialog, '_generatePDFReport')
         mocker.patch.object(dialog, '_saveProjectFile', return_value=True)
         msgbox_mock = mocker.patch.object(QtWidgets.QMessageBox, 'warning')
-        
+
         dialog.onExport()
-        
+
         # Should show partial success message
         msgbox_mock.assert_called_once()
         message = msgbox_mock.call_args[0][2]
@@ -231,7 +231,7 @@ class TestSASBDBDialog:
         parent.guiManager = None
         parent.gui_manager = None
         dialog.setParent(parent)
-        
+
         result = dialog._saveProjectFile("/tmp/test_project.json")
         assert result is False
 
@@ -242,7 +242,7 @@ class TestSASBDBDialog:
         gui_manager.filesWidget = None
         parent.guiManager = gui_manager
         dialog.setParent(parent)
-        
+
         result = dialog._saveProjectFile("/tmp/test_project.json")
         assert result is False
 
@@ -250,36 +250,36 @@ class TestSASBDBDialog:
         """Test _saveProjectFile when all conditions are met"""
         parent = MagicMock()
         gui_manager = MagicMock()
-        
+
         # Mock filesWidget
         files_widget = MagicMock()
         files_widget.getSerializedData.return_value = {'data1': 'test_data'}
         gui_manager.filesWidget = files_widget
-        
+
         # Mock perspectives
         perspective = MagicMock()
         perspective.isSerializable.return_value = True
         perspective.serializeAll.return_value = {'data1': {'fit': 'result'}}
         gui_manager.loadedPerspectives = {'fitting': perspective}
-        
+
         # Mock grid_window
         gui_manager.grid_window = MagicMock()
         gui_manager.grid_window.data_dict = {}
-        
+
         # Mock current perspective
         current_perspective = MagicMock()
         current_perspective.name = "Fitting"
         gui_manager._current_perspective = current_perspective
-        
+
         parent.guiManager = gui_manager
         dialog.setParent(parent)
-        
+
         # Mock GuiUtils.saveData
         save_mock = mocker.patch('sas.qtgui.Utilities.GuiUtils.GuiUtils.saveData')
-        
+
         with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
             filepath = f.name
-        
+
         try:
             result = dialog._saveProjectFile(filepath)
             assert result is True
@@ -297,7 +297,7 @@ class TestSASBDBDialog:
         gui_manager.filesWidget = files_widget
         parent.guiManager = gui_manager
         dialog.setParent(parent)
-        
+
         result = dialog._saveProjectFile("/tmp/test_project.json")
         assert result is False
 
@@ -306,11 +306,11 @@ class TestSASBDBDialog:
         # Make validation fail by clearing required fields
         dialog.txtProjectTitle.setText("")
         dialog.txtSampleTitle.setText("")
-        
+
         msgbox_mock = mocker.patch.object(QtWidgets.QMessageBox, 'warning')
-        
+
         dialog.onExport()
-        
+
         # Should show validation error, not file dialog
         msgbox_mock.assert_called_once()
         call_args = msgbox_mock.call_args
@@ -319,9 +319,9 @@ class TestSASBDBDialog:
     def test_file_naming_with_complex_path(self, dialog, mocker):
         """Test file naming with complex directory path"""
         test_json = "/tmp/subfolder/test_export.json"
-        mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName', 
+        mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName',
                           return_value=(test_json, "JSON file (*.json)"))
-        
+
         json_mock = mocker.patch(
             'sas.qtgui.Utilities.SASBDB.sasbdb_exporter.SASBDBExporter.export_to_json',
             return_value=True
@@ -330,13 +330,13 @@ class TestSASBDBDialog:
         project_mock = mocker.patch.object(dialog, '_saveProjectFile', return_value=True)
         mocker.patch.object(QtWidgets.QMessageBox, 'information')
         mocker.patch.object(dialog, 'close')
-        
+
         dialog.onExport()
-        
+
         # Verify PDF filename uses same directory
         pdf_args = pdf_mock.call_args[0]
         assert pdf_args[1] == "/tmp/subfolder/test_export.pdf"
-        
+
         # Verify project filename uses same directory
         project_args = project_mock.call_args[0]
         assert project_args[0] == "/tmp/subfolder/test_export_project.json"
@@ -344,9 +344,9 @@ class TestSASBDBDialog:
     def test_onExport_updates_save_location(self, dialog, mocker):
         """Test that onExport updates the save_location"""
         test_json = "/tmp/new_location/test_export.json"
-        mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName', 
+        mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName',
                           return_value=(test_json, "JSON file (*.json)"))
-        
+
         mocker.patch(
             'sas.qtgui.Utilities.SASBDB.sasbdb_exporter.SASBDBExporter.export_to_json',
             return_value=True
@@ -355,9 +355,9 @@ class TestSASBDBDialog:
         mocker.patch.object(dialog, '_saveProjectFile', return_value=True)
         mocker.patch.object(QtWidgets.QMessageBox, 'information')
         mocker.patch.object(dialog, 'close')
-        
+
         dialog.onExport()
-        
+
         # Verify save_location was updated
         assert dialog.save_location == "/tmp/new_location"
 
