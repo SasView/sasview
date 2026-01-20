@@ -445,10 +445,10 @@ jobs:
           codesign -s "Developer ID Application: The International Scattering Alliance (8CX8K63BQM)" $MACOS_DMG_NAME
 
       - name: Notarize Release Build (OSX)
-        if: ${{ matrix.os == 'macos-latest' && env.SIGN_INSTALLER }}
+        if: ${{ startsWith(matrix.os, 'macos') && env.SIGN_INSTALLER }}
         uses: lando/notarize-action@v2
         with:
-          product-path: installers/dist/SasView6-macos-latest.dmg
+          product-path: installers/dist/SasView6-${{ matrix.os }}.dmg
           primary-bundle-id: "org.sasview.SasView6"
           appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
           appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
@@ -456,10 +456,10 @@ jobs:
           verbose: True
 
       - name: Staple Release Build (OSX)
-        if: ${{ matrix.os == 'macos-latest' && env.SIGN_INSTALLER }}
+        if: ${{ startsWith(matrix.os, 'macos') && env.SIGN_INSTALLER }}
         uses: BoundfoxStudios/action-xcode-staple@v1
         with:
-          product-path: installers/dist/SasView6-macos-latest.dmg
+          product-path: installers/dist/SasView6-${{ matrix.os }}.dmg
 
       - name: Install DigiCert Client tools from Github Custom Actions marketplace
         if: ${{ startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
@@ -495,6 +495,7 @@ jobs:
           path: |
             installers/dist/setupSasView.exe
             installers/dist/SasView6-macos-latest.dmg
+            installers/dist/SasView6-macos-15-intel.dmg
             installers/dist/SasView6.tar.gz
           if-no-files-found: ignore
 
@@ -507,7 +508,7 @@ jobs:
       matrix:
         include: ${{ fromJson(needs.matrix.outputs.installer-matrix-json) }}
 
-    name: Test installer
+    name: "Test ${{ matrix.job_name }}"
 
     runs-on: ${{ matrix.os }}
 
@@ -556,7 +557,7 @@ jobs:
       - name: Retrieve installer (old image)
         if: ${{ env.INSTALLER_USE_OLD_IMAGE == 'true' }}
         id: download-old-installer
-        uses: dawidd6/action-download-artifact@v11
+        uses: dawidd6/action-download-artifact@v12
         with:
           # Select a specific installer image based on the GitHub Actions run id
           run_id: ${{ env.INSTALLER_OLD_RUNID }}
@@ -670,7 +671,7 @@ jobs:
       - name: Retrieve installer debug tarball
         if: ${{ env.INSTALLER_USE_DEBUG == 'true' }}
         id: download-old-debug
-        uses: dawidd6/action-download-artifact@v11
+        uses: dawidd6/action-download-artifact@v12
         with:
           # Select a specific installer image based on the GitHub Actions run id
           run_id: ${{ env.INSTALLER_OLD_RUNID }}

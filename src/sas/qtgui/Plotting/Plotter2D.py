@@ -20,6 +20,7 @@ from sas.qtgui.Plotting.Slicers.BoxSlicer import BoxInteractorX, BoxInteractorY
 from sas.qtgui.Plotting.Slicers.BoxSum import BoxSumCalculator
 from sas.qtgui.Plotting.Slicers.SectorSlicer import SectorInteractor
 from sas.qtgui.Plotting.Slicers.WedgeSlicer import WedgeInteractorPhi, WedgeInteractorQ
+from sas.system import config
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +66,7 @@ class Plotter2DWidget(PlotterBase):
         self.slicer = None
         self.slicers = {}
         self.slicer_widget = None
-        self.stackplots = True  # whether to stack multiple slicer plots
+        self.stackplots = config.STACK_PLOTS  # whether to stack multiple slicer plots
         self.slicer_plots_dict = {}  # keep track of slicer plots
         self.vmin = None
         self.vmax = None
