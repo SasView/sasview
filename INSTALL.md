@@ -18,6 +18,8 @@ environment
 
 ## Making a SasView Development Environment
 
+### Develop using `venv`
+
 If you're familiar with working with developing in Python, then the very quick version is:
 
 ```shell
@@ -87,7 +89,39 @@ debugging software, e.g.:
 - [VS Code](https://code.visualstudio.com/docs/python/environments)
 - [PyCharm](https://www.jetbrains.com/help/pycharm/creating-virtual-environment.html)
 
-### Pre-Commit Hooks for Linting
+### Develop using Pixi
+
+An alternative to `venv` is the package management tool Pixi. If Pixi is not
+installed, follow the instructions [here](https://pixi.prefix.dev/latest/#installation).
+
+To start developing using Pixi, download the repos and enter the shell into
+the development environment:
+
+```shell
+# Clone the repository
+git clone https://github.com/sasview/sasdata/
+git clone https://github.com/sasview/sasmodels/
+git clone https://github.com/sasview/sasview/
+
+# Enter the developer environment
+# (This will create (or reuse) a local Pixi environment with all required dependencies.)
+cd sasview
+pixi shell
+
+# Start the GUI
+sasview
+
+# Run tests
+pixi run test
+
+# Exit the developer environment
+exit
+```
+
+Note that `sasdata`, `sasmodels` and `sasview` are installed in editable mode,
+meaning that any changes are immediately available during development.
+
+## Pre-Commit Hooks for Linting
 
 The SasView, SasData and SasModels repositories include [pre-commit hooks](https://pre-commit.com/), which can be set up to enable linting to be run on the code. A linter is a tool that can detect programming errors, bugs, stylistic errors, etc. SasView uses the [Ruff](https://docs.astral.sh/ruff/) package for linting. Ruff is able to warn about a wide range of possible errors, and in some cases apply automatic fixes for them.
 
