@@ -33,4 +33,3 @@ Tools & Utilities
    MuMag Tool <qtgui/Utilities/MuMag/mumag_help>
 
    SASBDB Export <qtgui/Utilities/SASBDB/sasbdb_help>
-

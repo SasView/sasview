@@ -925,7 +925,7 @@ class GuiManager:
         """
         collector = SASBDBDataCollector()
         export_data = collector.export_data
-        
+
         # Try to get data from current perspective (same way as Report Results)
         if self._current_perspective is not None:
             try:
@@ -934,7 +934,7 @@ class GuiManager:
                     export_data = perspective_data
             except Exception as e:
                 logger.warning(f"Could not collect data from perspective: {e}")
-        
+
         # If no samples collected, try to get from data manager
         if not export_data.samples and hasattr(self, '_data_manager'):
             try:
@@ -952,7 +952,7 @@ class GuiManager:
                                 export_data.instruments.append(instrument)
             except Exception as e:
                 logger.warning(f"Could not collect data from data manager: {e}")
-        
+
         # If no samples collected, create defaults
         if not export_data.samples:
             # Create a default sample with defaults
@@ -962,16 +962,14 @@ class GuiManager:
             export_data.samples.append(sample)
             if instrument:
                 export_data.instruments.append(instrument)
-        
+
         # Create default project if not set
         if export_data.project is None:
             export_data.project = collector.create_default_project()
-        
+
         # Show dialog
         self.sasbdb_dialog = SASBDBDialog(export_data=export_data, parent=self._parent)
         self.sasbdb_dialog.show()
-
-
 
     def actionReset(self):
         """
