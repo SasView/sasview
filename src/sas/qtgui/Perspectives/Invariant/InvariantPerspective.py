@@ -142,12 +142,16 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
         # Validator: double
         self.txtBackgd.setValidator(GuiUtils.DoubleValidator())
+        self.txtPorodCst.setValidator(GuiUtils.DoubleValidator())
+        self.txtPorodCstErr.setValidator(GuiUtils.DoubleValidator())
         self.txtContrast.setValidator(GuiUtils.DoubleValidator())
+        self.txtContrastErr.setValidator(GuiUtils.DoubleValidator())
         self.txtScale.setValidator(GuiUtils.DoubleValidator())
         self.txtVolFrac1.setValidator(GuiUtils.DoubleValidator())
         self.txtGuinierEnd_ex.setValidator(GuiUtils.DoubleValidator())
         self.txtPorodStart_ex.setValidator(GuiUtils.DoubleValidator())
         self.txtPorodEnd_ex.setValidator(GuiUtils.DoubleValidator())
+        self.txtVolFrac1Err.setValidator(GuiUtils.DoubleValidator())
 
         # Start with all Extrapolation options disabled
         self.enable_extrapolation_options(False)
@@ -157,7 +161,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
         # Default to using contrast for volume fraction
         self.rbContrast.setChecked(True)
-        self.contrastToggle(True)
+        self.contrast_volfrac_toggle()
 
         self.tabWidget.setCurrentIndex(0)
 
@@ -248,30 +252,24 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self._background = float(self.model.item(WIDGETS.W_BACKGROUND).text())
 
         contrast_text = self.model.item(WIDGETS.W_CONTRAST).text()
-        if contrast_text:
-            self._contrast = float(contrast_text)
+        self._contrast = float(contrast_text) if contrast_text else None
 
         contrast_err_text = self.model.item(WIDGETS.W_CONTRAST_ERR).text()
-        if contrast_err_text:
-            self._contrast_err = float(contrast_err_text)
+        self._contrast_err = float(contrast_err_text) if contrast_err_text else None
 
         self._scale = float(self.model.item(WIDGETS.W_SCALE).text())
 
         porod_text = self.model.item(WIDGETS.W_POROD_CST).text()
-        if porod_text:
-            self._porod = float(porod_text)
+        self._porod = float(porod_text) if porod_text else None
 
         porod_err_text = self.model.item(WIDGETS.W_POROD_CST_ERR).text()
-        if porod_err_text:
-            self._porod_err = float(porod_err_text)
+        self._porod_err = float(porod_err_text) if porod_err_text else None
 
         volfrac1_text = self.model.item(WIDGETS.W_VOLFRAC1).text()
-        if volfrac1_text:
-            self._volfrac1 = float(volfrac1_text)
+        self._volfrac1 = float(volfrac1_text) if volfrac1_text else None
 
         volfrac1_err_text = self.model.item(WIDGETS.W_VOLFRAC1_ERR).text()
-        if volfrac1_err_text:
-            self._volfrac1_err = float(volfrac1_err_text)
+        self._volfrac1_err = float(volfrac1_err_text) if volfrac1_err_text else None
 
         self._low_extrapolate = str(self.model.item(WIDGETS.W_ENABLE_LOWQ_EX).text()) == "true"
         self._low_guinier = self.rbLowQGuinier_ex.isChecked()
@@ -326,10 +324,20 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             self.cmdCalculate.setText("Calculate (No data)")
             return
 
-        # Check if volume fraction or contrast is selected and has valid input
-        if (self.rbVolFrac.isChecked() and self.txtVolFrac1.text().strip() != "") or (
-            self.rbContrast.isChecked() and self.txtContrast.text().strip() != ""
-        ):
+        # Update from model first to ensure instance variables are current
+        self.update_from_model()
+
+        # Check ONLY the field that corresponds to the selected radio button
+        has_valid_input = False
+
+        if self.rbVolFrac.isChecked():
+            # In volume fraction mode, only check if volume fraction has a value
+            has_valid_input = self._volfrac1 is not None
+        elif self.rbContrast.isChecked():
+            # In contrast mode, only check if contrast has a value
+            has_valid_input = self._contrast is not None
+
+        if has_valid_input:
             self.cmdCalculate.setEnabled(True)
             self.cmdCalculate.setText("Calculate")
         else:
@@ -720,18 +728,23 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.cmdHelp.clicked.connect(self.onHelp)
 
         # slots for the volume fraction and contrast radio buttons
-        self.rbVolFrac.toggled.connect(self.volFracToggle)
-        self.rbContrast.toggled.connect(self.contrastToggle)
+        self.rbVolFrac.toggled.connect(self.contrast_volfrac_toggle)
+        self.rbContrast.toggled.connect(self.contrast_volfrac_toggle)
+
+        # group radio buttons to make them exclusive
+        self.VolFracContrastGroup = QtWidgets.QButtonGroup(self)
+        self.VolFracContrastGroup.addButton(self.rbVolFrac)
+        self.VolFracContrastGroup.addButton(self.rbContrast)
 
         # update model from gui editing by users
-        self.txtBackgd.editingFinished.connect(self.updateFromGui)
-        self.txtScale.editingFinished.connect(self.updateFromGui)
-        self.txtContrast.editingFinished.connect(self.updateFromGui)
-        self.txtContrastErr.editingFinished.connect(self.updateFromGui)
-        self.txtPorodCst.editingFinished.connect(self.updateFromGui)
-        self.txtVolFrac1.editingFinished.connect(self.updateFromGui)
+        self.txtBackgd.textEdited.connect(self.updateFromGui)
+        self.txtScale.textEdited.connect(self.updateFromGui)
+        self.txtContrast.textEdited.connect(self.updateFromGui)
+        self.txtContrastErr.textEdited.connect(self.updateFromGui)
+        self.txtPorodCst.textEdited.connect(self.updateFromGui)
+        self.txtVolFrac1.textEdited.connect(self.updateFromGui)
         self.txtVolFrac1.editingFinished.connect(self.checkVolFrac)
-        self.txtVolFrac1Err.editingFinished.connect(self.updateFromGui)
+        self.txtVolFrac1Err.textEdited.connect(self.updateFromGui)
 
         # Extrapolation parameters
         # Q range fields
@@ -1094,7 +1107,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             else:
                 self.txtVolFrac1.setStyleSheet(BG_RED)
                 self.cmdCalculate.setEnabled(False)
-                msg = "Volume fractions must be between 0 and 1, and their sum must equal 1."
+                msg = "Volume fraction must be between 0 and 1."
                 dialog = QtWidgets.QMessageBox(self, text=msg)
                 dialog.setWindowTitle("Invalid Volume Fraction")
                 dialog.setIcon(QtWidgets.QMessageBox.Warning)
@@ -1135,7 +1148,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         index_elt: int = possible_senders.index(sender_name)
 
         # Allow empty strings for optional fields like contrast and porod constant
-        optional_fields: list[str] = ["txtContrast", "txtPorodCst"]
+        optional_fields: list[str] = ["txtContrast", "txtContrastErr", "txtPorodCst", "txtPorodCstErr", "txtVolFrac1", "txtVolFrac1Err"]
 
         if text_value == "" and sender_name in optional_fields:
             # Set the corresponding attribute to None
@@ -1146,7 +1159,11 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             # Map sender names to instance variable names
             sender_to_attr = {
                 "txtContrast": "_contrast",
+                "txtContrastErr": "_contrast_err",
                 "txtPorodCst": "_porod",
+                "txtPorodCstErr": "_porod_err",
+                "txtVolFrac1": "_volfrac1",
+                "txtVolFrac1Err": "_volfrac1_err",
             }
             if sender_name in sender_to_attr:
                 setattr(self, sender_to_attr[sender_name], None)
@@ -1184,29 +1201,15 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             self.sender().setStyleSheet(BG_RED)
             self.cmdCalculate.setEnabled(False)
 
-    def contrastToggle(self, toggle: bool) -> None:
+    def contrast_volfrac_toggle(self) -> None:
         """
-        Enable editing of contrast and disable editing of volume fraction if Contrast is selected
+        Enable editing of the correct fields based on whether Contrast or VolFrac is selected
         """
-        self._update_contrast_volfrac_state(use_contrast=toggle)
+        use_contrast: bool = self.rbContrast.isChecked()
 
-    def volFracToggle(self, toggle: bool) -> None:
-        """
-        Enable editing of volume fraction and disable editing of contrast if VolFrac is selected
-        """
-        self._update_contrast_volfrac_state(use_contrast=not toggle)
-
-    def _update_contrast_volfrac_state(self, use_contrast: bool) -> None:
-        """
-        Update the enabled state of contrast and volume fraction fields.
-
-        Args:
-            use_contrast: If True, contrast is input and volume fraction is output.
-                          If False, volume fraction is input and contrast is output.
-        """
-        # Update model items
-        self.model.setItem(WIDGETS.W_ENABLE_CONTRAST, QtGui.QStandardItem(str(use_contrast).lower()))
-        self.model.setItem(WIDGETS.W_ENABLE_VOLFRAC, QtGui.QStandardItem(str(not use_contrast).lower()))
+        # update model items
+        self.model.setItem(WIDGETS.W_ENABLE_CONTRAST, QtGui.QStandardItem(str(self.rbContrast.isChecked()).lower()))
+        self.model.setItem(WIDGETS.W_ENABLE_VOLFRAC, QtGui.QStandardItem(str(self.rbVolFrac.isChecked()).lower()))
 
         # Input fields
         self.txtContrast.setEnabled(use_contrast)
@@ -1214,11 +1217,14 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.txtVolFrac1.setEnabled(not use_contrast)
         self.txtVolFrac1Err.setEnabled(not use_contrast)
 
-        # Output fields (grey out the one that's being used as input)
+        # Output fields
         self.txtVolFract.setEnabled(use_contrast)
         self.txtVolFractErr.setEnabled(use_contrast)
         self.txtContrastOut.setEnabled(not use_contrast)
         self.txtContrastOutErr.setEnabled(not use_contrast)
+
+        # allow calculation if the relevant fields are filled
+        self.allow_calculation()
 
     def update_progress_bars(self) -> None:
         """Update progress bars based on Q* values from the model"""
