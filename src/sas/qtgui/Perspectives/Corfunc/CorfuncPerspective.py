@@ -446,6 +446,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
                 self.allow_go("Extrapolation values not set")
                 return
 
+        self.allow_go()
+
     def update_readonly(self):
         """
         Disable text fields if the corresponding fit is enabled.
