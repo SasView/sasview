@@ -244,4 +244,4 @@ sasdata   = { path = "../sasdata", editable = true }
 sasmodels = { path = "../sasmodels", editable = true }
 
 [tool.pixi.tasks]
-test = { description = "Run the test suite", cmd = "pytest -s test" }
+test = { description = "Run the test suite", cmd = "python -m pytest -s test" }
