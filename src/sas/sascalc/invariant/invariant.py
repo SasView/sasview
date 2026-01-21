@@ -113,14 +113,14 @@ class Guinier(Transform):
     function
     """
 
-    def __init__(self, scale=1, radius=60):
+    def __init__(self, scale=1, Rg_squared=3600):
         Transform.__init__(self)
         self.scale = scale
-        self.radius = radius
+        self.Rg_squared = Rg_squared
         ## Uncertainty of scale parameter
         self.dscale = 0
-        ## Unvertainty of radius parameter
-        self.dradius = 0
+        ## Uncertainty of Rg squared parameter
+        self.dRg_squared = 0
 
     def linearize_q_value(self, value):
         """
@@ -137,18 +137,12 @@ class Guinier(Transform):
         assign new value to the scale and the radius
         """
         self.scale = math.exp(constant)
-        if slope > 0:
-            slope = 0.0
-        self.radius = math.sqrt(-3 * slope)
+        self.Rg_squared = -3.0 * slope
         # Errors
         self.dscale = math.exp(constant) * dconstant
-        if slope == 0.0:
-            n_zero = -1.0e-24
-            self.dradius = -3.0 / 2.0 / math.sqrt(-3 * n_zero) * dslope
-        else:
-            self.dradius = -3.0 / 2.0 / math.sqrt(-3 * slope) * dslope
+        self.dRg_squared = 3.0 * dslope
 
-        return [self.radius, self.scale], [self.dradius, self.dscale]
+        return [self.Rg_squared, self.scale], [self.dRg_squared, self.dscale]
 
     def evaluate_model(self, x):
         r"""
@@ -165,10 +159,10 @@ class Guinier(Transform):
 
         :param x: array of q-values
         """
-        p1 = np.array([self.dscale * math.exp(-((self.radius * q) ** 2 / 3)) for q in x])
+        p1 = np.array([self.dscale * math.exp(-(self.Rg_squared * q**2 / 3.0)) for q in x])
         p2 = np.array(
             [
-                self.scale * math.exp(-((self.radius * q) ** 2 / 3)) * (-(q**2 / 3)) * 2 * self.radius * self.dradius
+                self.scale * math.exp(-(self.Rg_squared * q**2 / 3.0)) * (-(q**2 / 3.0)) * self.dRg_squared
                 for q in x
             ]
         )
@@ -185,16 +179,13 @@ class Guinier(Transform):
 
         Also uses:
          - self.scale: $s$, the scale value
-         - self.radius: $r$, the guinier radius value
+         - self.Rg_squared: $R_g^2$, the guinier radius value squared
 
         :return: F(x)
         """
         # transform the radius of coming from the inverse guinier function to a
         # a radius of a guinier function
-        if self.radius <= 0:
-            msg = "Rg expected positive value, but got %s" % self.radius
-            raise ValueError(msg)
-        value = np.array([math.exp(-((self.radius * i) ** 2 / 3)) for i in x])
+        value = np.array([math.exp(-(self.Rg_squared * i**2 / 3.0)) for i in x])
         return self.scale * value
 
 
