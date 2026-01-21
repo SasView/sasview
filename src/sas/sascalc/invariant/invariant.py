@@ -179,7 +179,7 @@ class Guinier(Transform):
 
         Also uses:
          - self.scale: $s$, the scale value
-         - self.Rg_squared: $r$, the guinier radius value squared
+         - self.Rg_squared: $R_g^2$, the guinier radius value squared
 
         :return: F(x)
         """
