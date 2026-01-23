@@ -18,4 +18,4 @@ sentence:
 *"This work benefited from the use of the SasView application, originally 
 developed under NSF award DMR-0520547."*
 
-Copyright (c) 2009-2025, SasView Developers
+Copyright (c) 2009-2026, SasView Developers
