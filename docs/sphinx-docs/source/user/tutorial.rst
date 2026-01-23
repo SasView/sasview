@@ -7,6 +7,8 @@ Tutorials
 
 .. note:: In Windows use [Alt]-[Cursor left] to return to the previous page
 
+The following links will download as a PDF file into your default download location:
+
 :download:`Getting Started with Sasview <sasview/getting_started_with_sasview_v5.pdf>`
 
 :download:`Subtracting a Model Calculation from Experimental Data <sasview/subtracting_a_model_calculation_from_real_data_v5.pdf>`
