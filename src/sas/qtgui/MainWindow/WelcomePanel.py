@@ -18,6 +18,7 @@ class WelcomePanel(QtWidgets.QDialog, Ui_WelcomePanelUI):
         ver = "\nSasView %s\n%s" % (version, legal.copyright)
 
         self.lblVersion.setText(ver)
+        self.lblAcknowledgements.setText(legal.about)
 
         # no reason to have this widget resizable
         self.setFixedSize(self.minimumSizeHint())
