@@ -14,11 +14,60 @@ Features
 ========
 
 Jump to:
-:ref:`release_6_1_2` | :ref:`release_6_1_1` | :ref:`release_6_1_0` | :ref:`release_6_0_1` | :ref:`release_6_0_0`
+:ref:`release_6_1_3` | :ref:`release_6_1_2` | :ref:`release_6_1_1` | :ref:`release_6_1_0`
+ | :ref:`release_6_0_1` | :ref:`release_6_0_0`
  | :ref:`release_5_0_6` | :ref:`release_5_0_5` | :ref:`release_5_0_4` | :ref:`release_5_0_3` | :ref:`release_5_0_2`
- | :ref:`release_5_0_1` | :ref:`release_5_0_0` | :ref:`release_4_2_0` | :ref:`release_4_1_2` | :ref:`release_4_1_1`
- | :ref:`release_4_1_0` | :ref:`release_4_0_1` | :ref:`release_4_0_0` | :ref:`release_3_1_2` | :ref:`release_3_1_1`
- | :ref:`release_3_1_0` | :ref:`release_3_0_0` | :ref:`release_2_2_1` | :ref:`release_2_2_0`
+ | :ref:`release_5_0_1` | :ref:`release_5_0_0`
+ | :ref:`release_4_2_0` | :ref:`release_4_1_2` | :ref:`release_4_1_1` | :ref:`release_4_1_0`
+ | :ref:`release_4_0_1` | :ref:`release_4_0_0`
+ | :ref:`release_3_1_2` | :ref:`release_3_1_1` | :ref:`release_3_1_0` | :ref:`release_3_0_0`
+ | :ref:`release_2_2_1` | :ref:`release_2_2_0`
+
+.. _release_6_1_3:
+New in Version 6.1.3
+--------------------
+
+This is a minor bug fix release of SasView. It is built with Sasmodels v1.0.12, Sasdata v0.11.0, and Bumps v1.0.2.
+
+Bug fixes
+^^^^^^^^^
+
+* Fix handling cancel action on single fit with multi constraint by @bmaranville in https://github.com/SasView/sasview/pull/3808
+* Fix unchecking constraints by @bmaranville in https://github.com/SasView/sasview/pull/3809
+* Fix complex compiled constraints by @bmaranville in https://github.com/SasView/sasview/pull/3811
+* Fix for project load breaking the replace fit button by @krzywon in https://github.com/SasView/sasview/pull/3816
+* Fixing name for dispersity parameter for multishell models by @dehoni in https://github.com/SasView/sasview/pull/3779
+* Adds logger error for unsuitably scaled axes by @DrPaulSharp in https://github.com/SasView/sasview/pull/3778
+* Fixed disconnect logic with the proper PySide6 signal checking method by @rozyczko in https://github.com/SasView/sasview/pull/3771
+* Revert the polydisp table to the original state on model change by @rozyczko in https://github.com/SasView/sasview/pull/3768
+* Fixes for quick plotting - both 1D and 3D by @rozyczko in https://github.com/SasView/sasview/pull/3749
+* Warn user before starting scattering calcs on large structures by @klytje in https://github.com/SasView/sasview/pull/3737
+
+Documentation fixes
+^^^^^^^^^^^^^^^^^^^
+
+* Factor out documentation-locating code to be portable by @llimeht in https://github.com/SasView/sasview/pull/3667
+* Prevent crashes and log errors if docs can't be found by @llimeht in https://github.com/SasView/sasview/pull/3689
+* Fix typo in Kiessig calculator documentation by @conanr-create in https://github.com/SasView/sasview/pull/3750
+* Fix typo in help documentation for fitting options by @butlerpd in https://github.com/SasView/sasview/pull/3736
+
+Linting changes
+^^^^^^^^^^^^^^^
+
+* Clean up some nitpicks - dead file removal by @llimeht in https://github.com/SasView/sasview/pull/3735
+* Remove some big files from the distributions by @llimeht in https://github.com/SasView/sasview/pull/3482
+
+## New Contributors
+* @conanr-create made their first contribution in https://github.com/SasView/sasview/pull/3750
+
+**Full Changelog**: https://github.com/SasView/sasview/compare/v6.1.2...v6.1.3a1
+
+Known Issues
+^^^^^^^^^^^^
+All known bugs and feature requests can be found in the issues on github.
+
+`sasview issues <https://github.com/SasView/sasview/issues>`_ | `sasmodels issues <https://github.com/SasView/sasmodels/issues>`_ | `sasdata issues <https://github.com/SasView/sasdata/issues>`_
+
 
 .. _release_6_1_2:
 New in Version 6.1.2
