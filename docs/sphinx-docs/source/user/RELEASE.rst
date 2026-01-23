@@ -70,6 +70,13 @@ Infrastructure Changes
 
 **Full Changelog**: https://github.com/SasView/sasview/compare/v6.1.1...v6.1.2rc1
 
+Known Issues
+^^^^^^^^^^^^
+All known bugs and feature requests can be found in the issues on github.
+
+`sasview issues <https://github.com/SasView/sasview/issues>`_ | `sasmodels issues <https://github.com/SasView/sasmodels/issues>`_ | `sasdata issues <https://github.com/SasView/sasdata/issues>`_
+
+
 New in Version 6.1.1
 --------------------
 
@@ -123,6 +130,13 @@ Infrastructure Changes
 
 
 **Full Changelog**: https://github.com/SasView/sasview/compare/v6.1.0...v6.1.1
+
+Known Issues
+^^^^^^^^^^^^
+All known bugs and feature requests can be found in the issues on github.
+
+`sasview issues <https://github.com/SasView/sasview/issues>`_ | `sasmodels issues <https://github.com/SasView/sasmodels/issues>`_ | `sasdata issues <https://github.com/SasView/sasdata/issues>`_
+
 
 
 New in Version 6.1.0
