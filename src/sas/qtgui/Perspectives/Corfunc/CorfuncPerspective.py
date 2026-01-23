@@ -38,6 +38,9 @@ logger = logging.getLogger(__name__)
 RED = "QLineEdit { background-color: rgb(244, 170, 164) }"
 NORMAL = ""
 
+# Small epsilon to adjust extrapolation values
+ADJUST_EPS = 1e-7
+
 
 class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
     """Displays the correlation function analysis of sas data."""
@@ -166,12 +169,12 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
         self.model.itemChanged.connect(self.model_changed)
 
-        self.txtLowerQMax.textChanged.connect(self.on_extrapolation_text_changed_1)
-        self.txtUpperQMin.textChanged.connect(self.on_extrapolation_text_changed_2)
-        self.txtUpperQMax.textChanged.connect(self.on_extrapolation_text_changed_3)
-        self.txtLowerQMax.editingFinished.connect(self.on_extrapolation_text_finished_1)
-        self.txtUpperQMin.editingFinished.connect(self.on_extrapolation_text_finished_2)
-        self.txtUpperQMax.editingFinished.connect(self.on_extrapolation_text_finished_3)
+        self.txtLowerQMax.textEdited.connect(self.on_extrapolation_text_editing)
+        self.txtUpperQMin.textEdited.connect(self.on_extrapolation_text_editing)
+        self.txtUpperQMax.textEdited.connect(self.on_extrapolation_text_editing)
+        self.txtLowerQMax.editingFinished.connect(self.on_extrapolation_text_edited)
+        self.txtUpperQMin.editingFinished.connect(self.on_extrapolation_text_edited)
+        self.txtUpperQMax.editingFinished.connect(self.on_extrapolation_text_edited)
         self.txtLowerQMax.setValidator(QDoubleValidator(bottom=0))
         self.txtUpperQMin.setValidator(QDoubleValidator(bottom=0))
         self.txtUpperQMax.setValidator(QDoubleValidator(bottom=0))
@@ -668,108 +671,170 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             # Maybe we should just minimize
             self.setWindowState(QtCore.Qt.WindowMinimized)
 
-    def on_extrapolation_text_changed_1(self):
-        """ Text in LowerQMax changed"""
-        if self.extrapolation_parameters is None:
+    def on_extrapolation_text_editing(self):
+        """Handle when user edits any of the extrapolation text boxes"""
+        if self.extrapolation_parameters is None or self.data is None:
             return
-        value: str = self.txtLowerQMax.text()
-        params = self.extrapolation_parameters._replace(point_1=safe_float(value))
-        self.slider.extrapolation_parameters = params
-        self._q_space_plot.update_lines(ExtrapolationInteractionState(params))
-        self.notify_extrapolation_text_box_validity(params)
-        self.model.setItem(WIDGETS.W_QMIN,QtGui.QStandardItem(value))
+        self.check_extrapolation_values()
 
-    def on_extrapolation_text_changed_2(self):
-        """ Text in UpperQMin changed"""
-        if self.extrapolation_parameters is None:
+    def on_extrapolation_text_edited(self):
+        """Handle when user finishes editing any of the extrapolation text boxes"""
+        # First update the model with new values
+        self.apply_parameters_from_ui()
+        # Then correct any invalid values
+        self.correct_extrapolation_values()
+
+    def format_sig_fig(self, value:float) -> str:
+        """ Format a float to 7 significant figures as string """
+        return f"{value:.7g}"
+
+    def _get_live_extrapolation_values(self) -> tuple[float, float, float]:
+        """Read current text box values without correcting them."""
+        return (
+            safe_float(self.txtLowerQMax.text()),
+            safe_float(self.txtUpperQMin.text()),
+            safe_float(self.txtUpperQMax.text()),
+        )
+
+    def check_extrapolation_values(self):
+        """
+        Check validity of extrapolation values such that: data_q_min < point_1 < point_2 < point_3 < data_q_max
+        If invalid, set text box background to red and disable Go button
+        """
+        # source of values: live text boxes or model
+        p1, p2, p3 = self._get_live_extrapolation_values()
+
+        data_q_min = float(self.data.x.min())  # Actual data min
+        data_q_max = float(self.data.x.max())  # Actual data max
+
+        # Helper to test numeric presence
+        has_p1 = not math.isnan(p1)
+        has_p2 = not math.isnan(p2)
+        has_p3 = not math.isnan(p3)
+
+        invalid_p1_low = has_p1 and p1 <= data_q_min
+        invalid_p1_high = has_p1 and has_p2 and p1 >= p2
+        invalid_p2_low = has_p2 and p2 <= data_q_min
+        invalid_p2_high = has_p2 and p2 >= data_q_max
+        invalid_p3_low = has_p3 and has_p2 and p3 <= p2
+        invalid_p3_high = has_p3 and p3 >= data_q_max
+
+        # UI feedback:
+        # - If a field has no numeric value (user still typing "1e-" or empty) keep default background.
+        # - If the numeric check says invalid -> red
+        self.txtLowerQMax.setStyleSheet(RED if invalid_p1_low or invalid_p1_high else NORMAL)
+        self.txtUpperQMin.setStyleSheet(RED if invalid_p2_low or invalid_p2_high else NORMAL)
+        self.txtUpperQMax.setStyleSheet(RED if invalid_p3_low or invalid_p3_high else NORMAL)
+
+        self.validity_flags = [
+            invalid_p1_low,
+            invalid_p1_high,
+            invalid_p2_low,
+            invalid_p2_high,
+            invalid_p3_low,
+            invalid_p3_high
+        ]
+
+        # Disable Go button if any invalid
+        if any(self.validity_flags):
+            self.allow_go("Extrapolation values out of range")
+        else:
+            self.allow_go()
+
+    def correct_extrapolation_values(self):
+        """
+        Correct any invalid extrapolation values to be within valid ranges.
+        Show dialog informing user of corrections made.
+        """
+        # update validity flags first
+        self.check_extrapolation_values()
+
+        # if all values are valid, nothing to do
+        if not any(self.validity_flags):
             return
-        value: str = self.txtUpperQMin.text()
-        params = self.extrapolation_parameters._replace(point_2=safe_float(value))
-        self.slider.extrapolation_parameters = params
-        self._q_space_plot.update_lines(ExtrapolationInteractionState(params))
-        self.notify_extrapolation_text_box_validity(params)
-        self.model.setItem(WIDGETS.W_QMAX,QtGui.QStandardItem(value))
 
-    def on_extrapolation_text_changed_3(self):
-        """ Text in UpperQMax changed"""
-        if self.extrapolation_parameters is None:
-            return
-        value: str = self.txtUpperQMax.text()
-        params = self.extrapolation_parameters._replace(point_3=safe_float(value))
-        self.slider.extrapolation_parameters = params
-        self._q_space_plot.update_lines(ExtrapolationInteractionState(params))
-        self.notify_extrapolation_text_box_validity(params)
-        self.model.setItem(WIDGETS.W_QCUTOFF,QtGui.QStandardItem(value))
+        data_q_min = float(self.format_sig_fig(self.data.x.min()))
+        data_q_max = float(self.format_sig_fig(self.data.x.max()))
 
-    def on_extrapolation_text_finished_1(self):
-        """ Editing finished in LowerQMax - show dialog if out of range"""
-        params = self.extrapolation_parameters
-        self.notify_extrapolation_text_box_validity(params, show_dialog=True)
+        messages = []
 
-    def on_extrapolation_text_finished_2(self):
-        """ Editing finished in UpperQMin - show dialog if out of range"""
-        params = self.extrapolation_parameters
-        self.notify_extrapolation_text_box_validity(params, show_dialog=True)
+        # block signals to avoid recursive calls
+        with QtCore.QSignalBlocker(self.txtLowerQMax), QtCore.QSignalBlocker(self.txtUpperQMin), QtCore.QSignalBlocker(self.txtUpperQMax):
 
-    def on_extrapolation_text_finished_3(self):
-        """ Editing finished in UpperQMax - show dialog if out of range"""
-        params = self.extrapolation_parameters
-        self.notify_extrapolation_text_box_validity(params, show_dialog=True)
+            # start by updating p2 as it is used in multiple checks
+            if self.validity_flags[2]:  # p2 <= data_q_min
+                messages.append(f"Porod start was below data minimum: {data_q_min}")
+                new_p2: float = (data_q_min + data_q_max) / 2  # set to midpoint
+                self.txtUpperQMin.setText(self.format_sig_fig(new_p2))
+                self.check_extrapolation_values()  # re-check validity flags
 
-    def notify_extrapolation_text_box_validity(self, params, show_dialog=False):
-        """ Set the colour of the text boxes to red if they have bad parameter definitions"""
+            p1, p2, p3 = self._get_live_extrapolation_values()
 
-        # Round values to 8 significant figures to avoid floating point precision issues
-        p1 = float(f"{params.point_1:.8g}")
-        p2 = float(f"{params.point_2:.8g}")
-        p3 = float(f"{params.point_3:.8g}")
-        qmin = float(f"{params.data_q_min:.8g}")
-        qmax = float(f"{params.data_q_max:.8g}")
+            if self.validity_flags[0]:  # p1 <= qmin
+                messages.append(f"Guinier end was below data minimum: {data_q_min}")
+                new_p1 = data_q_min + ADJUST_EPS
+                self.txtLowerQMax.setText(self.format_sig_fig(new_p1))
 
-        # Determine validity flags such that data_q_min < point_1 < point_2 < point_3 < data_q_max
-        invalid_1 = p1 <= qmin or p1 >= p2
-        invalid_2 = p2 <= p1 or p2 >= p3
-        invalid_3 = p3 <= p2 or p3 >= qmax
+            if self.validity_flags[1]:  # p1 >= p2
+                messages.append("Guinier end must be before Porod start.")
+                new_p1 = p2 - ADJUST_EPS
+                self.txtLowerQMax.setText(self.format_sig_fig(new_p1))
 
-        # Make the background red if the text box is invalid
-        self.txtLowerQMax.setStyleSheet(RED if invalid_1 else NORMAL)
-        self.txtUpperQMin.setStyleSheet(RED if invalid_2 else NORMAL)
-        self.txtUpperQMax.setStyleSheet(RED if invalid_3 else NORMAL)
+            if self.validity_flags[3]:  # p2 >= qmax
+                messages.append(f"Porod start was above data maximum: {data_q_max}")
+                new_p2: float = p3 - ADJUST_EPS
+                self.txtUpperQMin.setText(self.format_sig_fig(new_p2))
+                p2 = new_p2  # update p2 for next check
 
-        # Show dialog if requested and values are out of range
-        if show_dialog:
-            messages = []
+            if self.validity_flags[4]:  # p3 <= p2
+                messages.append("Porod end was before Porod start.")
+                new_p3 = p2 + ADJUST_EPS
+                self.txtUpperQMax.setText(self.format_sig_fig(new_p3))
 
-            if p1 <= qmin:
-                messages.append(f"The minimum value is {qmin:.8g}.")
-                self.txtLowerQMax.setText(f"{qmin + 1e-6:.7g}")
-                self.on_extrapolation_text_changed_1()
+            if self.validity_flags[5]:  # p3 >= qmax
+                new_p3 = data_q_max - ADJUST_EPS
+                messages.append("Porod end was above data maximum.")
+                self.txtUpperQMax.setText(self.format_sig_fig(new_p3))
 
-            if invalid_2:
-                messages.append(
-                    f"Porod start must be after Guinier end: {p1:.8g} and before Porod end: {p3:.8g}."
-                )
-                self.allow_go("Porod start out of range")
+            # update slider and model
+            self.apply_parameters_from_ui()
 
-            if p3 >= qmax:
-                messages.append(f"The maximum value is {qmax:.8g}.")
-                self.txtUpperQMax.setText(f"{qmax - 1e-6:.7g}")
-                self.on_extrapolation_text_changed_3()
-
+            # Update text boxes and model if corrections were made
             if messages:
-                msg = "The slider values are out of range.\n" + "\n".join(messages)
-                dialog = QtWidgets.QMessageBox(self, text=msg)
-                dialog.setWindowTitle("Slider values out of range")
+                messages.append("Values have been adjusted to the nearest valid value.")
+                dialog = QtWidgets.QMessageBox(self)
+                dialog.setWindowTitle("Invalid Extrapolation Values")
+                dialog.setIcon(QtWidgets.QMessageBox.Warning)
+                dialog.setText("\n".join(messages))
                 dialog.setStandardButtons(QtWidgets.QMessageBox.Ok)
                 dialog.exec_()
 
-        if not (invalid_1 or invalid_2 or invalid_3):
-            self.allow_go()
+    def apply_parameters_from_ui(self):
+        """Sets extrapolation parameters from the text boxes into the model and slider"""
+        p1: str = self.txtLowerQMax.text()
+        p2: str = self.txtUpperQMin.text()
+        p3: str = self.txtUpperQMax.text()
+
+        if self.extrapolation_parameters is None:
+            return
+        # update the slider (this may emit a signal that will call on_extrapolation_slider_changed)
+        self.slider.extrapolation_parameters = self.extrapolation_parameters._replace(
+            point_1=safe_float(p1),
+            point_2=safe_float(p2),
+            point_3=safe_float(p3))
+
+        # update model item text too
+        self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem(p1))
+        self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem(p2))
+        self.model.setItem(WIDGETS.W_QCUTOFF, QtGui.QStandardItem(p3))
+
+        # re-validate to update any UI flags
+        self.check_extrapolation_values()
 
 
     def on_extrapolation_slider_changed(self, state: ExtrapolationParameters):
         """ Slider state changed"""
-        format_string = "%.8g"
+        format_string = "%.7g"
         self.model.setItem(WIDGETS.W_QMIN,
                            QtGui.QStandardItem(format_string%state.point_1))
         self.model.setItem(WIDGETS.W_QMAX,
@@ -778,7 +843,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
                            QtGui.QStandardItem(format_string%state.point_3))
 
         # Check validity of the text boxes
-        self.notify_extrapolation_text_box_validity(state)
+        # self.correct_extrapolation_values()
 
     def on_extrapolation_slider_changing(self, state: ExtrapolationInteractionState):
         """ Slider is being moved about"""
