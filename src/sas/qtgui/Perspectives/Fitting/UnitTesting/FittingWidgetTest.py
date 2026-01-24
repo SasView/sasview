@@ -2,7 +2,6 @@ import glob
 import logging
 import os
 import time
-import webbrowser
 from unittest.mock import MagicMock
 
 import pytest
@@ -959,9 +958,8 @@ class FittingWidgetTest:
         """
         Test various help pages shown in this widget
         """
-        #Mock the webbrowser.open method
+        # Mock the parent's showHelp method
         mocker.patch.object(widget.parent, 'showHelp', create=True)
-        mocker.patch.object(webbrowser, 'open')
 
         # Invoke the action on default tab
         widget.onHelp()

@@ -41,8 +41,6 @@ from sas.qtgui.Perspectives.perspective import Perspective
 from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionPerspective import SizeDistributionWindow
 from sas.qtgui.Utilities.About.About import About
 from sas.qtgui.Utilities.About.Credits import Credits
-
-# from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
 from sas.qtgui.Utilities.FileConverter import FileConverterWidget
 from sas.qtgui.Utilities.GridPanel import BatchOutputPanel
 from sas.qtgui.Utilities.HidableDialog import hidable_dialog
@@ -356,16 +354,11 @@ class GuiManager:
 
     @classmethod
     def showHelp(cls, url):
-        """
-        Open a local url in the default browser
-        """
+        """Open documentation in the default browser."""
         if not HELP_SYSTEM.path:
             logger.error("Help documentation was not found.")
             return
 
-        counter = 1
-        window_name = "help_window"
-        # Remove leading forward slashes from relative paths to allow easy Path building
         if isinstance(url, str):
             url = url.lstrip("//")
         url = Path(url)
@@ -373,22 +366,8 @@ class GuiManager:
             url_abs = HELP_SYSTEM.path / url
         else:
             url_abs = Path(url)
-        try:
-            # In order to have multiple help windows open simultaneously, we need to create a new class variable
-            # If we just reassign the old one, the old window will be destroyed
 
-            # Have we found a name not assigned to a window?
-            potential_help_window = getattr(cls, window_name, None)
-            while potential_help_window and potential_help_window.isVisible():
-                window_name = f"help_window_{counter}"
-                potential_help_window = getattr(cls, window_name, None)
-                counter += 1
-
-            # Assign new variable to the GuiManager
-            setattr(cls, window_name, GuiUtils.showHelp(url_abs))
-
-        except Exception as ex:
-            logger.warning("Cannot display help. %s" % ex)
+        GuiUtils.showHelp(url_abs)
 
     def workspace(self):
         """
