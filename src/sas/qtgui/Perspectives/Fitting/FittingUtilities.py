@@ -791,6 +791,8 @@ def updateKernelWithResults(kernel, results):
     Takes model kernel and applies results dict to its parameters,
     returning the modified (deep) copy of the kernel.
     """
+    if kernel is None:
+        return None
     assert isinstance(results, dict)
     local_kernel = copy.deepcopy(kernel)
 
