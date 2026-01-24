@@ -476,6 +476,8 @@ class PlotterWidget(PlotterBase):
             self.actionToggleLegend.triggered.connect(self.onToggleLegend)
         self.actionCustomizeLabel.triggered.connect(self.onCusotmizeLabel)
 
+        self.addHelpToContextMenu()
+
     def addPlotsToContextMenu(self):
         """
         Adds operations on all plotted sets of data to the context menu
@@ -550,6 +552,8 @@ class PlotterWidget(PlotterBase):
         if self.show_legend:
             self.actionToggleLegend = self.contextMenu.addAction("Toggle Legend")
             self.actionToggleLegend.triggered.connect(self.onToggleLegend)
+
+        self.addHelpToContextMenu()
 
     def onScaleChange(self):
         """
