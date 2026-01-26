@@ -1,14 +1,19 @@
 import math
+from enum import Enum
 
 import numpy as np
 from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QFontMetrics
 
-from sas.sascalc.corfunc.calculation_data import ExtrapolationInteractionState, ExtrapolationParameters
+from sas.sascalc.util import ExtrapolationInteractionState, ExtrapolationParameters
 
 
-class CorfuncSlider(QtWidgets.QWidget):
+class SliderPerspective(Enum):
+    INVARIANT = "Invariant"
+    CORFUNC = "Corfunc"
+
+class ExtrapolationSlider(QtWidgets.QWidget):
     """ Slider that allows the selection of the different Q-ranges involved in interpolation,
     and that provides some visual cues to how it works."""
 
@@ -16,10 +21,11 @@ class CorfuncSlider(QtWidgets.QWidget):
     valueEditing = Signal(ExtrapolationInteractionState, name='valueEditing')
 
     def __init__(self,
-                 parameters: ExtrapolationParameters = ExtrapolationParameters(1,2,4,8,16),
+                 lower_label: str,
+                 upper_label: str,
+                 perspective: SliderPerspective,
+                 parameters: ExtrapolationParameters = ExtrapolationParameters(1,2,4,8,16,32,64),
                  enabled: bool = False,
-                 lower_label: str = "Guinier",
-                 upper_label: str = "Porod",
                  *args, **kwargs):
 
         super().__init__(*args, **kwargs)
@@ -30,23 +36,33 @@ class CorfuncSlider(QtWidgets.QWidget):
         if parameter_problems is not None:
             raise ValueError(parameter_problems)
 
-        self._min = parameters.data_q_min
+        self._min = parameters.ex_q_min         # extrapolation min
+        self._data_min = parameters.data_q_min  # actual data min
         self._point_1 = parameters.point_1
         self._point_2 = parameters.point_2
         self._point_3 = parameters.point_3
-        self._max = parameters.data_q_max
+        self._data_max = parameters.data_q_max  # actual data max
+        self._max = parameters.ex_q_max         # extrapolation max
+
+        # Default to data min/max if extrapolation min/max not set
+        if self._min is None:
+            self._min = self._data_min
+        if self._max is None:
+            self._max = self._data_max
+
         self._lower_label = lower_label
         self._upper_label = upper_label
 
+        self.perspective = perspective
 
         # Display Parameters
         self.vertical_size = 20
         self.left_pad = 60
         self.right_pad = 60
         self.line_width = 3
-        self.guinier_color = QtGui.QColor('orange')
+        self.lower_color = QtGui.QColor('orange')
         self.data_color = QtGui.QColor('white')
-        self.porod_color = QtGui.QColor('green')
+        self.upper_color = QtGui.QColor('green')
         self.text_color = QtGui.QColor('black')
         self.line_drag_color = mix_colours(QtGui.QColor('white'), QtGui.QColor('black'), 0.4)
         self.hover_colour = QtGui.QColor('white')
@@ -58,9 +74,9 @@ class CorfuncSlider(QtWidgets.QWidget):
         # - define hover colours by mixing with a grey
         mix_color = QtGui.QColor('grey')
         mix_fraction = 0.7
-        self.guinier_hover_color = mix_colours(self.guinier_color, mix_color, mix_fraction)
+        self.lower_hover_color = mix_colours(self.lower_color, mix_color, mix_fraction)
         self.data_hover_color = mix_colours(self.data_color, mix_color, mix_fraction)
-        self.porod_hover_color = mix_colours(self.porod_color, mix_color, mix_fraction)
+        self.upper_hover_color = mix_colours(self.upper_color, mix_color, mix_fraction)
 
         # Mouse control
         self._hovering = False
@@ -79,22 +95,35 @@ class CorfuncSlider(QtWidgets.QWidget):
 
     @staticmethod
     def find_parameter_problems(params: ExtrapolationParameters) -> str | None:
-        """ Check an extratpolation prarameters object for consistency
+        """ Check an extrapolation parameters object for consistency
 
         :param params: An extrapolation parameters object describing a desired state
         :returns: A description of the problem if it exists, otherwise None
         """
-        if params.data_q_min >= params.point_1:
-            return "min_q should be smaller than q_point_1"
+        ex_min = params.ex_q_min
+        data_min = params.data_q_min
+        p1, p2, p3 = params.point_1, params.point_2, params.point_3
+        data_max = params.data_q_max
+        ex_max = params.ex_q_max
 
-        if params.point_1 >= params.point_2:
-            return "q_point_1 should be smaller than q_point_2"
+        checks = [
+            (p1 < data_min, "q_point_1 should be larger than min_q"),
+            (ex_min is not None and p1 <= ex_min, "q_point_1 should be larger than ex_q_min"),
+            (p1 >= p2, "q_point_1 should be smaller than q_point_2"),
+            (p2 >= p3, "q_point_2 should be smaller than q_point_3"),
+        ]
+        for cond, msg in checks:
+            if cond:
+                return msg
 
-        if params.point_2 >= params.point_3:
-            return "q_point_2 should be smaller than q_point_3"
-
-        if params.point_3 >= params.data_q_max:
-            return "q_point_3 should be smaller than max_q"
+        if ex_max is not None:  # extrapolating
+            if p2 >= data_max:
+                return "q_point_2 should be smaller than max_q"
+            if p3 >= ex_max:
+                return "q_point_3 should be smaller than ex_q_max"
+        else:
+            if p3 >= data_max:
+                return "q_point_3 should be smaller than max_q"
 
         return None
 
@@ -162,10 +191,12 @@ class CorfuncSlider(QtWidgets.QWidget):
     def _sanitise_new_position(self, line_id: int, new_position: int, delta=1) -> int:
         """ Returns a revised position for a line position that prevents the bounds being exceeded """
         l1, l2, l3 = (int(x) for x in self.line_paint_positions)
+        data_min_px = int(self.transform(self._data_min))
+        data_max_px = int(self.transform(self._data_max))
 
         if line_id == 0:
-            if self.left_pad > new_position:
-                return self.left_pad
+            if self.left_pad > new_position or new_position <= data_min_px:
+                return data_min_px + delta
             elif new_position > l2:
                 return l2 - delta
             else:
@@ -176,14 +207,16 @@ class CorfuncSlider(QtWidgets.QWidget):
                 return l1 + delta
             elif new_position > l3:
                 return l3 - delta
+            elif new_position >= data_max_px:
+                return data_max_px - delta
             else:
                 return new_position
 
         elif line_id == 2:
             if l2 > new_position:
                 return l2 + delta
-            elif new_position > self.width() - self.right_pad:
-                return self.width() - self.right_pad
+            elif new_position >= self.width() - self.right_pad:
+                return self.width() - self.right_pad - delta
             else:
                 return new_position
 
@@ -218,17 +251,18 @@ class CorfuncSlider(QtWidgets.QWidget):
 
     @property
     def extrapolation_parameters(self):
-        return ExtrapolationParameters(self._min, self._point_1, self._point_2, self._point_3, self._max)
+        return ExtrapolationParameters(self._min, self._data_min, self._point_1, self._point_2, self._point_3, self._data_max, self._max)
 
     @extrapolation_parameters.setter
     def extrapolation_parameters(self, params: ExtrapolationParameters):
         if params is not None:
-            self._min = params.data_q_min
+            self._min = params.ex_q_min if params.ex_q_min is not None else params.data_q_min
+            self._data_min = params.data_q_min
             self._point_1 = params.point_1
             self._point_2 = params.point_2
             self._point_3 = params.point_3
-            self._max = params.data_q_max
-
+            self._data_max = params.data_q_max
+            self._max = params.ex_q_max if params.ex_q_max is not None else params.data_q_max
         self.update()
 
     @property
@@ -276,8 +310,8 @@ class CorfuncSlider(QtWidgets.QWidget):
         return self._min*math.exp((px_value - self.left_pad)/self.scale)
 
     @property
-    def guinier_label_position(self) -> float:
-        """ Position to put the text for the guinier region"""
+    def lower_label_position(self) -> float:
+        """ Position to put the text for the lower region"""
         return 0.5 * self.transform(self._point_1)
 
     @property
@@ -287,12 +321,18 @@ class CorfuncSlider(QtWidgets.QWidget):
 
     @property
     def transition_label_centre(self) -> float:
-        """ Centre of the data-porod transition"""
+        """ Centre of the data-upper transition"""
         return 0.5 * (self.transform(self._point_2) + self.transform(self._point_3))
 
     @property
-    def porod_label_centre(self) -> float:
-        """ Centre of the Porod region"""
+    def upper_label_centre(self) -> float:
+        """
+        Centre of the upper region
+        - Between point 2 and point 3 for invariant
+        - Between point 3 and widget edge for corfunc
+        """
+        if self.perspective == "Invariant":
+            return 0.5 * (self.transform(self._point_2) + self.transform(self._point_3))
 
         return 0.5 * (self.transform(self._point_3) + self.width())
 
@@ -312,83 +352,95 @@ class CorfuncSlider(QtWidgets.QWidget):
         painter.fillRect(rect, brush)
 
         positions = [self.transform(self._min),
+                     self.transform(self._data_min),
                      self.transform(self._point_1),
                      self.transform(self._point_2),
                      self.transform(self._point_3),
+                     self.transform(self._data_max),
                      self.transform(self._max)]
 
-
-
         positions = [int(x) for x in positions]
-        widths = [positions[i+1] - positions[i] for i in range(4)]
+
+        # compute widths for all adjacent segments
+        segment_widths = [positions[i+1] - positions[i] for i in range(len(positions)-1)]
 
         #
-        # Draw the sections
+        # Draw the sections covering the entire widget
         #
         brush.setStyle(Qt.SolidPattern)
         if self.isEnabled():
             if self._hovering or self._dragging:
-                guinier_color = self.guinier_hover_color
+                lower_color = self.lower_hover_color
                 data_color = self.data_hover_color
-                porod_color = self.porod_hover_color
+                upper_color = self.upper_hover_color
             else:
-                guinier_color = self.guinier_color
+                lower_color = self.lower_color
                 data_color = self.data_color
-                porod_color = self.porod_color
+                upper_color = self.upper_color
         else:
-            guinier_color = self.disabled_non_data_color
+            lower_color = self.disabled_non_data_color
             data_color = self.data_color
-            porod_color = self.disabled_non_data_color
+            upper_color = self.disabled_non_data_color
 
-
-        brush.setColor(guinier_color)
+        brush.setColor(lower_color)
         rect = QtCore.QRect(0, 0, self.left_pad, self.vertical_size)
         painter.fillRect(rect, brush)
 
-        grad = QtGui.QLinearGradient(positions[0], 0, positions[1], 0)
-        grad.setColorAt(0.0, guinier_color)
-        grad.setColorAt(1.0, data_color)
-        rect = QtCore.QRect(positions[0], 0, widths[0], self.vertical_size)
-        painter.fillRect(rect, grad)
+        # segment 0: lower; (gradient lower -> data) -> white; min/data_min -> point_1 (positions[2])
+        lower_width = segment_widths[0] + segment_widths[1]
+        if lower_width > 0:
+            grad = QtGui.QLinearGradient(positions[0], 0, positions[2], 0)
+            grad.setColorAt(0.0, lower_color)
+            grad.setColorAt(1.0, data_color)
+            rect = QtCore.QRect(positions[0], 0, lower_width, self.vertical_size)
+            painter.fillRect(rect, grad)
 
-        brush.setColor(data_color)
-        rect = QtCore.QRect(positions[1], 0, widths[1], self.vertical_size)
-        painter.fillRect(rect, brush)
+        # segment 1: data; solid data color; point 1 -> point 2 (positions[3])
+        if segment_widths[2] > 0:
+            brush.setColor(data_color)
+            rect = QtCore.QRect(positions[2], 0, segment_widths[2], self.vertical_size)
+            painter.fillRect(rect, brush)
 
-        grad = QtGui.QLinearGradient(positions[2], 0, positions[3], 0)
-        grad.setColorAt(0.0, data_color)
-        grad.setColorAt(1.0, porod_color)
-        rect = QtCore.QRect(positions[2], 0, widths[2], self.vertical_size)
-        painter.fillRect(rect, grad)
+        # segment 2: upper; gradient data->upper; point 2 -> point_3 (positions[4])
+        if segment_widths[3] > 0:
+            grad = QtGui.QLinearGradient(positions[3], 0, positions[4], 0)
+            grad.setColorAt(0.0, data_color)
+            grad.setColorAt(1.0, upper_color)
+            rect = QtCore.QRect(positions[3], 0, segment_widths[3], self.vertical_size)
+            painter.fillRect(rect, grad)
 
-        brush.setColor(porod_color)
-        rect = QtCore.QRect(positions[3], 0, widths[3] + self.right_pad, self.vertical_size)
+        # remaining area from point_2 to right boundary: paint with upper_color
+        right_boundary = self.width() - self.right_pad
+        rest_start = positions[4]
+        rest_width = max(0, right_boundary - rest_start)
+        if rest_width > 0:
+            brush.setColor(upper_color)
+            rect = QtCore.QRect(rest_start, 0, rest_width, self.vertical_size)
+            painter.fillRect(rect, brush)
+
+        # right pad (ensure full coverage to widget edge)
+        brush.setColor(upper_color)
+        rect = QtCore.QRect(self.width() - self.right_pad, 0, self.right_pad, self.vertical_size)
         painter.fillRect(rect, brush)
 
         #
         # Dividing lines
         #
 
-        # Data range lines
-        if self.isEnabled():
-            pen = QtGui.QPen(mix_colours(self.hover_colour, guinier_color, 0.5), self.line_width)
-        else:
-            pen = QtGui.QPen(self.disabled_line_color, self.line_width)
-
+        pen = QtGui.QPen(self.disabled_non_data_color, self.line_width)
         painter.setPen(pen)
-        painter.drawLine(self.left_pad, 0, self.left_pad, self.vertical_size)
 
+        # extrapolation boundaries - min / max - render as grey (non-moveable)
+        if self._min is not None and self._max is not None:
+            painter.drawLine(positions[0], 0, positions[0], self.vertical_size)
+            painter.drawLine(positions[6], 0, positions[6], self.vertical_size)
 
-        if self.isEnabled():
-            pen = QtGui.QPen(mix_colours(self.hover_colour, porod_color, 0.5), self.line_width)
-        else:
-            pen = QtGui.QPen(self.disabled_line_color, self.line_width)
+        # data_min / data_max - render as grey (non-moveable)
+        painter.drawLine(positions[1], 0, positions[1], self.vertical_size)  # data_min
+        painter.drawLine(positions[5], 0, positions[5], self.vertical_size)  # data_max
 
-        painter.setPen(pen)
-        painter.drawLine(self.width() - self.right_pad, 0, self.width()-self.right_pad, self.vertical_size)
-
-        # Main lines
-        for i, x in enumerate(positions[1:-1]):
+        # Main lines (point_1, point_2, point_3)
+        for i, x in enumerate(positions[2:5]):
             if self.isEnabled():
                 # different color if it's the one that will be moved
                 if self._hovering and i == self._hover_id:
@@ -407,17 +459,12 @@ class CorfuncSlider(QtWidgets.QWidget):
             painter.setPen(pen)
             painter.drawLine(self._movement_line_position, 0, self._movement_line_position, self.vertical_size)
 
-
-
         #
         # Labels
         #
-
-
-        self._paint_label(self.guinier_label_position, self._lower_label)
+        self._paint_label(self.lower_label_position, self._lower_label)
         self._paint_label(self.data_label_centre, "Data")
-        # self._paint_label(self.transition_label_centre, "Transition") # Looks better without this
-        self._paint_label(self.porod_label_centre, self._upper_label)
+        self._paint_label(self.upper_label_centre, self._upper_label)
 
     def _paint_label(self, position: float, text: str, centre_justify=True):
 
@@ -463,7 +510,7 @@ def mix_colours(a: QtGui.QColor, b: QtGui.QColor, k: float) -> QtGui.QColor:
 def main():
     """ Show a demo of the slider """
     app = QtWidgets.QApplication([])
-    slider = CorfuncSlider(enabled=True)
+    slider = ExtrapolationSlider(lower_label="Low-Q", upper_label="High-Q", enabled=True)
     slider.show()
     app.exec_()
 
