@@ -842,9 +842,6 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.model.setItem(WIDGETS.W_QCUTOFF,
                            QtGui.QStandardItem(format_string%state.point_3))
 
-        # Check validity of the text boxes
-        # self.correct_extrapolation_values()
-
     def on_extrapolation_slider_changing(self, state: ExtrapolationInteractionState):
         """ Slider is being moved about"""
         self._q_space_plot.update_lines(state)
