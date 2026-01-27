@@ -1,9 +1,6 @@
 """
 Widget for parameter constraints.
 """
-import os
-import webbrowser
-
 # numpy methods required for the validator! Don't remove.
 # pylint: disable=unused-import,unused-wildcard-import,redefined-builtin
 from numpy import *
@@ -165,9 +162,8 @@ class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
         Display related help section
         """
         try:
-            help_location = (GuiUtils.HELP_SYSTEM.path /
-            "/user/qtgui/Perspectives/Fitting/fitting_help.html#simultaneous-fits-with-constraints")
-            webbrowser.open('file://' + os.path.realpath(help_location))
+            help_location = "/user/qtgui/Perspectives/Fitting/fitting_help.html#simultaneous-fits-with-constraints"
+            GuiUtils.showHelp(help_location)
         except AttributeError:
             # No manager defined - testing and standalone runs
             pass
