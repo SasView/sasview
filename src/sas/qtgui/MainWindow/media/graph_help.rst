@@ -41,8 +41,7 @@ minimised window.
 To delete a plot, click the *Close* (x) icon in the top-right corner of the
 plot window.
 
-.. note::
-    *If a residuals graph (when fitting data) is hidden, it will not show up
+.. note:: *If a residuals graph (when fitting data) is hidden, it will not show up
     after computation.*
 
 Dragging a plot
@@ -256,8 +255,7 @@ Removing data from the plot
 In the *Dataset Menu* (see Invoking_the_dataset_menu_), select *Remove*. The
 selected data will be removed from the plot.
 
-.. note::
-    The Remove data set action cannot be undone.
+.. note:: The Remove data set action cannot be undone.
 
 Show-Hide error bars
 ^^^^^^^^^^^^^^^^^^^^
@@ -322,8 +320,7 @@ average.
 
 .. image:: image_slicer_params_window.png
 
-.. note::
-    The displayed average only updates when input focus is moved back to
+.. note:: The displayed average only updates when input focus is moved back to
     that window; i.e., when the mouse pointer is moved onto that plot.
 
 You can also add more slicers to the same plot by repeating the process above.
@@ -378,8 +375,7 @@ list labelled *Create slicer*. Changing the slicer on the drop down list labelle
 *Change slicer* will change the currently selected slicer to the one selected
 from the drop down list.
 
-.. note::
-    The Delete slicer action cannot be undone.
+.. note:: The Delete slicer action cannot be undone.
 
 Unmasked circular average
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -485,18 +481,16 @@ You can adjust the master slicer by dragging it or entering the desired paramete
 the text boxes provided to change the size and angle of all the slicers. 
 The plots for the individual slicers will be stacked.
 
-.. note::
-    Adding symmetric slicers will remove any existing slicers and their plots, and adding
-    new slicers will remove any existing symmetric slicers and their plots.
+.. note:: Adding symmetric slicers will remove any existing slicers and their plots,
+    and adding new slicers will remove any existing symmetric slicers and their plots.
 
 .. image:: image_symmetric_wedge.png
 
-.. note::
-    Since sector slicers span both positive and negative $Q$ values, adding N sectors
+.. note:: Since sector slicers span both positive and negative $Q$ values, adding N sectors
     will result in 2N 'half-sectors' on the plot.
 
 .. image:: image_symmetric_sector.png
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last modified by Sujaya Shrestha, 24 December 2025.
+.. note:: This help document was last modified by Sujaya Shrestha, 24 December 2025.
