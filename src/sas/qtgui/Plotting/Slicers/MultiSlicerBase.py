@@ -3,6 +3,8 @@ Base class for creating multiple symmetric slicers.
 """
 
 import logging
+import warnings
+from abc import ABC, abstractmethod
 
 import numpy as np
 
@@ -16,7 +18,7 @@ from sas.qtgui.Utilities.GuiUtils import toDouble
 logger = logging.getLogger(__name__)
 
 
-class MultiSlicerBase(BaseInteractor, SlicerModel, StackableMixin):
+class MultiSlicerBase(BaseInteractor, SlicerModel, StackableMixin, ABC):
     """
     Base class for creating multiple symmetric slicers that move together as a unit.
 
@@ -70,20 +72,23 @@ class MultiSlicerBase(BaseInteractor, SlicerModel, StackableMixin):
             if self._model is not None:
                 self._model.itemChanged.connect(self._on_model_changed)
 
+    @abstractmethod
     def _get_slicer_class(self):
         """
         Return the slicer class to instantiate.
         Must be implemented by subclasses.
         """
-        raise NotImplementedError("_get_slicer_class must be implemented in subclasses.")
+        pass
 
+    @abstractmethod
     def _get_interactor_names(self):
         """
         Return the list of interactor attribute names.
         Must be implemented by subclasses.
         """
-        raise NotImplementedError("_get_interactor_names must be implemented in subclasses.")
+        pass
 
+    @abstractmethod
     def _update_slicer_position(self, slicer, index, master, moved_interactor_name=None):
         """
         Update the position of the given slicer based on the master slicer.
@@ -95,7 +100,7 @@ class MultiSlicerBase(BaseInteractor, SlicerModel, StackableMixin):
         - master: The master slicer to synchronize with
         - moved_interactor_name: The name of the interactor that was moved
         """
-        raise NotImplementedError("_update_slicer_position must be implemented in subclasses.")
+        pass
 
     def _on_model_changed(self, item):
         """Base implementation with batching - subclasses should call this after processing"""
@@ -142,7 +147,7 @@ class MultiSlicerBase(BaseInteractor, SlicerModel, StackableMixin):
 
     def _create_slicers(self, zorder):
         """
-        Create all wedge interactors and position them evenly around the circle.
+        Create all slicers and position them evenly around the circle.
 
         Parameters:
         - zorder: The z-order for drawing the slicers
@@ -158,7 +163,7 @@ class MultiSlicerBase(BaseInteractor, SlicerModel, StackableMixin):
 
             slicer = slicer_class(base=self.base, axes=self.axes, item=self._item, color=color, zorder=zorder + 1)
 
-            # Disable model updates for all but the first wedge
+            # Disable model updates for all but the first slicer
             if i > 0:
                 slicer.update_model = False
 
@@ -170,7 +175,7 @@ class MultiSlicerBase(BaseInteractor, SlicerModel, StackableMixin):
                 if hasattr(slicer, interactor_name):
                     getattr(slicer, interactor_name).update()
 
-            # Disable interaction for non-master wedges
+            # Disable interaction for non-master slicers
             if i > 0:
                 self._disable_slicer_interaction(slicer)
 
@@ -235,7 +240,7 @@ class MultiSlicerBase(BaseInteractor, SlicerModel, StackableMixin):
 
     def _connect_master_slicer(self):
         """
-        Connect the moveend signal of the first wedge to update all wedges.
+        Connect the moveend signal of the first slicer to update all slicers.
         """
         master = self.slicers[0]
 
@@ -322,7 +327,6 @@ class MultiSlicerBase(BaseInteractor, SlicerModel, StackableMixin):
 
         # Post master data first
         try:
-            import warnings
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 master._post_data()
@@ -335,8 +339,6 @@ class MultiSlicerBase(BaseInteractor, SlicerModel, StackableMixin):
                 # Temporarily enable model updates for this slicer
                 old_update_model = slicer.update_model
                 slicer.update_model = True
-
-                import warnings
                 with warnings.catch_warnings():
                     warnings.simplefilter("ignore")
                     slicer._post_data()
@@ -394,8 +396,6 @@ class MultiSlicerBase(BaseInteractor, SlicerModel, StackableMixin):
                     getattr(slicer, name).update()
 
             try:
-                import warnings
-
                 with warnings.catch_warnings():
                     warnings.simplefilter("ignore")
                     slicer._post_data()
@@ -403,8 +403,6 @@ class MultiSlicerBase(BaseInteractor, SlicerModel, StackableMixin):
                 logger.warning(f"Failed to post data for slicer {i + 1}: {e}")
 
         try:
-            import warnings
-
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 master._post_data()
@@ -619,8 +617,9 @@ class WedgeInteractorPhiMulti(MultiSlicerBase):
 
         self.axes.set_xlim(xlim)
         self.axes.set_ylim(ylim)
-        self.base.draw()
 
+        # call base class to handle batching
+        super()._on_model_changed(item)
 
 class WedgeInteractorQMulti(MultiSlicerBase):
     """
@@ -805,7 +804,9 @@ class WedgeInteractorQMulti(MultiSlicerBase):
 
         self.axes.set_xlim(xlim)
         self.axes.set_ylim(ylim)
-        self.base.draw()
+
+        # call base class to handle batching
+        super()._on_model_changed(item)
 
 
 class SectorInteractorMulti(MultiSlicerBase):
@@ -993,4 +994,6 @@ class SectorInteractorMulti(MultiSlicerBase):
 
         self.axes.set_xlim(xlim)
         self.axes.set_ylim(ylim)
-        self.base.draw()
+
+        # call base class to handle batching
+        super()._on_model_changed(item)
