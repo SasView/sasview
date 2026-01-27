@@ -998,9 +998,9 @@ class InvariantCalculator:
         - 10^(-8) converts from cm^-1 to A^-1
         - q_star: the invariant, in cm^-1A^-3, including extrapolated values
           if they have been requested
-        - sigq: the invariant uncertainty
+        - sig_Q: the invariant uncertainty
         - sigcontrast: the contrast uncertainty
-        - sigV: the volume uncertainty
+        - sig_V: the volume uncertainty
 
         The uncertainty will be set to -1 if it can't be computed.
 
