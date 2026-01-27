@@ -233,3 +233,15 @@ ignore = ["E501",  # line too long (leave to formatter)
 
 [tool.ruff.lint.isort]
 section-order = ["future", "standard-library", "third-party", "sas", "first-party", "local-folder"]
+
+[tool.pixi.workspace]
+channels = ["conda-forge"]
+platforms = ["linux-64", "win-64", "osx-arm64"]
+
+[tool.pixi.pypi-dependencies]
+sasview = { path = ".", editable = true }
+sasdata   = { path = "../sasdata", editable = true }
+sasmodels = { path = "../sasmodels", editable = true }
+
+[tool.pixi.tasks]
+test = { description = "Run the test suite", cmd = "python -m pytest -s test" }
