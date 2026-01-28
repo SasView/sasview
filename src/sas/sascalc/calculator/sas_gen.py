@@ -9,6 +9,7 @@ Calculation checked by sampling from an ellipsoid and comparing Iq with the
 import logging
 import os
 import sys
+from enum import Enum
 
 import numpy as np
 from periodictable import formula, nsf
@@ -53,6 +54,12 @@ def transform_center(pos_x, pos_y, pos_z):
     posz = pos_z - (min(pos_z) + max(pos_z)) / 2.0
     return posx, posy, posz
 
+class ComputationType(Enum):
+    SANS_2D = 0
+    SANS_1D = 1
+    SANS_1D_BETA = 2
+    SAXS = 3
+
 class GenSAS:
     """
     Generic SAS computation Model based on sld (n & m) arrays
@@ -75,6 +82,7 @@ class GenSAS:
         self.data_vol = None # [A^3]
         self.is_avg = False
         self.is_elements = False
+        self.type = ComputationType.SANS_2D
         ## Name of the model
         self.name = "GenSAS"
         ## Define parameters
@@ -105,6 +113,12 @@ class GenSAS:
         self.details['Up_phi'] = ['[deg]', -180, 180]
         # fixed parameters
         self.fixed = []
+
+    def set_computation_type(self, computation_type : ComputationType):
+        """
+        Set the computation type. This will determine which calculation is performed.
+        """
+        self.type = computation_type
 
     def set_pixel_volumes(self, volume):
         """
@@ -180,33 +194,41 @@ class GenSAS:
         x, y, z = self.transform_positions()
         sld = self.data_sldn - self.params['solvent_SLD']
         vol = self.data_vol
-        if qy is not None and len(qy) > 0:
-            # 2-D calculation
-            qx, qy = _vec(qx), _vec(qy)
-            # MagSLD can have sld_m = None, although in practice usually a zero array
-            # if all are None can continue as normal, otherwise set None to array of zeroes to allow rotations
-            mx, my, mz = self.transform_magnetic_slds()
-            in_spin = self.params['Up_frac_in']
-            out_spin = self.params['Up_frac_out']
-            # transform angles from environment to beamline coords
-            s_theta, s_phi = self.transform_angles()
+        match self.type:
+            case ComputationType.SANS_2D:
+                if not (qy is not None and len(qy) > 0):
+                    raise ValueError("For a SANS_2D computation, qy cannot be None or empty")
 
-            if self.is_elements:
-                I_out = Iqxy(
-                    qx, qy, x, y, z, sld, vol, mx, my, mz,
-                    in_spin, out_spin, s_theta, s_phi,
-                    self.data_elements, self.is_elements)
-            else:
-                I_out = Iqxy(
-                    qx, qy, x, y, z, sld, vol, mx, my, mz,
-                    in_spin, out_spin, s_theta, s_phi,
-                    )
-        else:
-            # 1-D calculation
-            q = _vec(qx)
-            if self.is_avg:
-                x, y, z = transform_center(x, y, z)
-            I_out = Iq(q, x, y, z, sld, vol, is_avg=self.is_avg)
+                # 2-D calculation
+                qx, qy = _vec(qx), _vec(qy)
+                # MagSLD can have sld_m = None, although in practice usually a zero array
+                # if all are None can continue as normal, otherwise set None to array of zeroes to allow rotations
+                mx, my, mz = self.transform_magnetic_slds()
+                in_spin = self.params['Up_frac_in']
+                out_spin = self.params['Up_frac_out']
+                # transform angles from environment to beamline coords
+                s_theta, s_phi = self.transform_angles()
+
+                if self.is_elements:
+                    I_out = Iqxy(
+                        qx, qy, x, y, z, sld, vol, mx, my, mz,
+                        in_spin, out_spin, s_theta, s_phi,
+                        self.data_elements, self.is_elements)
+                else:
+                    I_out = Iqxy(
+                        qx, qy, x, y, z, sld, vol, mx, my, mz,
+                        in_spin, out_spin, s_theta, s_phi,
+                        )
+
+            case ComputationType.SANS_1D | ComputationType.SANS_1D_BETA:
+                # 1-D calculation
+                q = _vec(qx)
+                if self.is_avg:
+                    x, y, z = transform_center(x, y, z)
+                I_out = Iq(q, x, y, z, sld, vol, is_avg=self.is_avg)
+
+            case ComputationType.SAXS:
+                raise RuntimeError("SAXS calculations can only be performed through a plugin model! Please click the \"plugin model\" button instead.")
 
         vol_correction = self.data_total_volume / self.params['total_volume']
         result = ((self.params['scale'] * vol_correction) * I_out
@@ -266,6 +288,7 @@ class GenSAS:
             if len(x[1]) > 0:
                 raise ValueError("Not a 1D vector.")
             # 1D I is found at y=0 in the 2D pattern
+            self.set_computation_type(ComputationType.SANS_1D)
             out = self.calculate_Iq(x[0])
             return out
         else:
