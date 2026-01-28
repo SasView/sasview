@@ -8,7 +8,7 @@ Plotting Data/Models
 ====================
 
 SasView generates three different types of graph window: one that displays *1D data*
-(i.e., $I(Q)$ vs $Q$), one that displays *1D residuals* (ie, the difference between the
+(i.e., $I(Q)$ vs $Q$), one that displays *1D residuals* (i.e., the difference between the
 experimental data and the theory at the same $Q$ values), and *2D color maps*.
 
 Graph window options
@@ -41,8 +41,7 @@ minimised window.
 To delete a plot, click the *Close* (x) icon in the top-right corner of the
 plot window.
 
-.. note::
-    *If a residuals graph (when fitting data) is hidden, it will not show up
+.. note:: *If a residuals graph (when fitting data) is hidden, it will not show up
     after computation.*
 
 Dragging a plot
@@ -200,7 +199,7 @@ displayed in the status bar at the very bottom-left of the SasView window.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-Dataset menu options
+Dataset Menu options
 --------------------
 
 .. _Invoking_the_dataset_menu:
@@ -248,7 +247,7 @@ background level, respectively.
 
 The following figure shows an example of a Guinier analysis using this option
 
-image:: guinier_fit.png
+.. image:: guinier_fit.png
 
 Removing data from the plot
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -256,8 +255,7 @@ Removing data from the plot
 In the *Dataset Menu* (see Invoking_the_dataset_menu_), select *Remove*. The
 selected data will be removed from the plot.
 
-.. note::
-    The Remove data set action cannot be undone.
+.. note:: The Remove data set action cannot be undone.
 
 Show-Hide error bars
 ^^^^^^^^^^^^^^^^^^^^
@@ -292,18 +290,22 @@ How to average
 ^^^^^^^^^^^^^^
 
 In the *Dataset Menu* (see Invoking_the_dataset_menu_), select one of the
-following averages
+following averages:
 
 *  Perform Circular Average
 *  Sector [Q view]
 *  Annulus [Phi view]
-*  Box sum
-*  Box averaging in Qx
-*  Box averaging on Qy
+*  Box Sum
+*  Box Averaging in Qx
+*  Box Averaging in Qy
+*  Wedge Averaging in Q
+*  Wedge Averaging in Phi
+
+.. image:: image_slicer_options.png
 
 A 'slicer' will appear (except for *Perform Circular Average*) in the plot that
 you can drag by clicking on a slicer's handle. When the handle is highlighted
-in red, it means that the slicer can move/change size.
+in red, it means that the slicer can be moved or resized.
 
 *NOTE! The slicer size will reset if you try to select a region greater than
 the size of the data.*
@@ -316,9 +318,28 @@ define a region or select the number of points to plot (*nbins*).
 A separate plot window will also have appeared, displaying the requested
 average.
 
+.. image:: image_slicer_params_window.png
+
+.. note:: The displayed average only updates when input focus is moved back to
+    that window; i.e., when the mouse pointer is moved onto that plot.
+
+You can also add more slicers to the same plot by repeating the process above.
+The 'Slicer Parameters' dialog window allows you to select a particular slicer
+you have already created and modify its parameters, or replace it with a different
+type of slicer.
+
 .. note::
-    The displayed average only updates when input focus is moved back to
-    that window; ie, when the mouse pointer is moved onto that plot.
+    Only one circular average or box sum slicer can be applied to a plot at a time.
+
+When adding multiple slicers to the same plot, by default, the 'Stack Slicers'
+option is selected in the 'Slicer Parameters' dialog so, all slicers of the same
+type will be combined in one plot. If you want to create a new plot for each slicer,
+uncheck the 'Stack Slicers' option.
+
+.. image:: image_multi_slicer_plotting.png
+
+You can also view a list of all the slicer plots that have been created on the *Slicer
+Plots* tab in the dialog window. This also allows you to delete unwanted slicer plots.
 
 Selecting *Box Sum* automatically brings up the 'Slicer Parameters' dialog in
 order to display the average numerically, rather than graphically.
@@ -326,28 +347,35 @@ order to display the average numerically, rather than graphically.
 A slicer can be applied to any or all existing 2D data plots using the *Edit Slicer
 Parameters* window. Batch slicing options are available in the right pane *Batch Slicing*.
 Select the 2D plots you want to apply the slicer to. Current 2D plot is selected by default.
-The resulting 1D data for all slicers can be saved as a text file and then sent to fitting by selecting the Auto save generated 1D check box.
+The resulting 1D data for all slicers can be saved as a text file and then sent to fitting
+by selecting the Auto save generated 1D check box.
 Sending data to the fitting perspective requires the data be saved.
 
 Once the auto save check box is selected, you can select where the files are saved.
 The file name for the saved data is the slicer name plus the file name of the original data set,
-plus what is in the Append to file name field. The default value in the append to field includes the names and values for all of the slicer parameters.
+plus what is in the Append to file name field. The default value in the append to
+field includes the names and values for all of the slicer parameters.
 
 The batch of slices can be sent to fitting if desired, with three options available.
 The first is to not fit the data, the second is to send the slices to individual fit pages,
 and the third is to send all sliced data to a single batch fit window.
 
-Clicking *Apply* will create a slicer for each selected plot with the parameters entered in the 'Slicer Parameters' window of the 'Slicer' tab.
-Depending on the options selected the data may then be saved, loaded as separate data sets in the data manager panel, and finally sent to fitting.
+Clicking *Apply* will create a slicer for each selected plot with the parameters
+entered in the 'Slicer Parameters' window of the 'Slicer' tab.
+Depending on the options selected the data may then be saved, loaded
+as separate data sets in the data manager panel, and finally sent to fitting.
 
-To remove a 'slicer', bring back the *Dataset menu* and select *Clear Slicers*.
+To remove a 'slicer', bring back the *Dataset Menu* and select *Clear Slicers*.
 
-If a slicer is active, another slicer can be added to the same plot by repeating the process above. *Clear Slicers* will remove all slicers from the plot. 
-Individual slicers can be removed by selecting the slicer and clicking on *Delete* in the Slicer Parameters window. Additional slicers can also be added by selecting a slicer from the drop down list labelled *Create slicer*.
-Changing the slicer on the drop down list labelled *Change slicer* will change the currently selected slicer to the one selected from the drop down list.
+Additional slicers can be added by repeating the steps above. *Clear Slicers*
+will remove all slicers from the plot. Individual slicers can be removed by
+selecting the slicer and clicking on *Delete* in the 'Slicer Parameters' window.
+Additional slicers can also be added by selecting a slicer from the drop down
+list labelled *Create slicer*. Changing the slicer on the drop down list labelled
+*Change slicer* will change the currently selected slicer to the one selected
+from the drop down list.
 
-.. note::
-    The Delete slicer action cannot be undone.
+.. note:: The Delete slicer action cannot be undone.
 
 Unmasked circular average
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -364,6 +392,8 @@ masked region is excluded.
 Sector average [Q View]
 ^^^^^^^^^^^^^^^^^^^^^^^
 
+.. image:: image_sector.png
+
 This operation averages in constant $Q$ arcs.
 
 The width of the sector is specified in degrees ($\pm\delta|\phi|$) each side
@@ -372,40 +402,95 @@ of the central angle $\phi$.
 Annular average [:math:`\phi`]
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+.. image:: image_annulus.png
+
 This operation performs an average between two $Q$ values centered on (0,0),
 and averaged over a specified number of pixels.
 
 The data is returned as a function of angle $\phi$ in degrees with zero
 degrees at the 3 O'clock position.
 
-Box sum
+Box Sum
 ^^^^^^^
+
+.. image:: image_box_sum.png
 
 This operation performs a sum of counts in a 2D region of interest.
 
-When editing the slicer parameters, the user can enter the length and the width
+When editing the slicer parameters, the user can enter the length and the width of
 the rectangular slicer and the coordinates of the center of the rectangle.
 
 Box Averaging in Qx
 ^^^^^^^^^^^^^^^^^^^
 
+.. image:: image_box_average_X.png
+
 This operation computes an average $I(Q_x)$ for the region of interest.
 
 When editing the slicer parameters, the user can control the length and the
-width the rectangular slicer. The averaged output is calculated from constant
+width of the rectangular slicer. The averaged output is calculated from constant
 bins with rectangular shape. The resultant $Q$ values are nominal values, that
 is, the central value of each bin on the x-axis.
 
 Box Averaging in Qy
 ^^^^^^^^^^^^^^^^^^^
 
+.. image:: image_box_average_Y.png
+
 This operation computes an average $I(Q_y)$ for the region of interest.
 
 When editing the slicer parameters, the user can control the length and the
-width the rectangular slicer. The averaged output is calculated from constant
+width of the rectangular slicer. The averaged output is calculated from constant
 bins with rectangular shape. The resultant $Q$ values are nominal values, that
 is, the central value of each bin on the x-axis.
 
+
+Wedge Averaging in Q
+^^^^^^^^^^^^^^^^^^^^
+
+.. image:: image_wedge_Q.png
+
+This operation computes an average $I(Q)$ for the region of interest,
+formed by the intersection of a sector and an annulus. The region is centered
+around a line at angle $\phi$ and extends $\pm\delta|\phi|$ each side of the central angle,
+and between two $Q$ values.
+
+When editing the slicer parameters, the user can control the inner and outer
+$Q$ values, the central angle $\phi$ and the sector width $\pm\delta|\phi|$.
+
+The averaged output is calculated from constant $Q$ bins.
+
+Wedge Averaging in Phi
+^^^^^^^^^^^^^^^^^^^^^^
+
+.. image:: image_wedge_Phi.png
+
+This operation is the same as *Wedge Averaging in Q* except that the output
+is as a function of angle $\phi$ in degrees with zero degrees at the 3 O'clock
+position.
+
+
+Symmetric slicers
+^^^^^^^^^^^^^^^^^
+
+At the bottom of the *Slicer* tab, there is an option to plot symmetric slicers.
+This allows you to plot a desired number of sector or wedge slicers, which are arranged
+symmetrically around the center. One of the slicers acts as the master slicer, marked 
+with square markers, and the others are created based on the parameters of the master slicer.
+You can adjust the master slicer by dragging it or entering the desired parameters in 
+the text boxes provided to change the size and angle of all the slicers. 
+The plots for the individual slicers will be stacked.
+
+.. note:: Adding symmetric slicers will remove any existing slicers and their plots,
+    and adding new slicers will remove any existing symmetric slicers and their plots.
+
+.. image:: image_symmetric_wedge.png
+
+.. note:: Since sector slicers span both positive and negative $Q$ values, adding N sectors
+    will result in 2N 'half-sectors' on the plot.
+
+.. image:: image_symmetric_sector.png
+
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last modified by Sujaya Shrestha, 17 November 2025
+.. note:: This help document was last modified by Sujaya Shrestha, 24 December 2025.
