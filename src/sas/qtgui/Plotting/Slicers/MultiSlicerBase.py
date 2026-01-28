@@ -424,184 +424,32 @@ class MultiSlicerBase(BaseInteractor, SlicerModel, StackableMixin, ABC):
         return True
 
 
-class WedgeInteractorPhiMulti(MultiSlicerBase):
+class WedgeInteractorMulti(MultiSlicerBase):
     """
     Creates multiple symmetric wedge slicers that move together as a unit.
+    Works with both WedgeInteractorPhi (phi mode) and WedgeInteractorQ (Q mode).
+    The plotting mode is determined by the slicer_class passed to __init__.
     """
+
+    def __init__(self, base, axes, count, slicer_class, item=None, color="black", zorder=3):
+        """
+        Initialize multiple wedge slicers.
+        
+        Parameters:
+        - base: The base plotter
+        - axes: The matplotlib axes
+        - count: Number of slicers to create
+        - slicer_class: Either WedgeInteractorPhi or WedgeInteractorQ
+        - item: Optional data item
+        - color: Color for the slicers
+        - zorder: Z-order for drawing
+        """
+        self.slicer_class = slicer_class
+        super().__init__(base, axes, count, item, color, zorder)
 
     def _get_slicer_class(self):
-        """
-        Return the WedgeInteractorPhi class.
-        """
-        return WedgeInteractorPhi
-
-    def _get_interactor_names(self):
-        """
-        Return the list of interactor attribute names for WedgeInteractorPhi.
-        """
-        return ["inner_arc", "outer_arc", "radial_lines", "central_line"]
-
-    def _update_slicer_position(self, slicer, index, master, moved_interactor_name=None):
-        """
-        Update the position of the given wedge slicer based on the master wedge.
-
-        Parameters:
-        - slicer: The wedge slicer to update
-        - index: The index of the wedge slicer in the list
-        - master: The master wedge slicer to synchronize with
-        - moved_interactor_name: The name of the interactor that was moved
-        """
-        if master is None:
-            # Initial positioning - spread evenly around full circle
-            theta = index * self.angle_step
-            slicer.theta = theta
-            slicer.central_line.theta = theta
-            slicer.inner_arc.theta = theta
-            slicer.outer_arc.theta = theta
-            slicer.radial_lines.theta = theta
-        else:
-            # Sync with master - detect which interactor moved
-            master_theta = None
-
-            # Check which interactor moved and get its current angle
-
-            if moved_interactor_name == "central_line":
-                master_theta = master.central_line.theta
-
-            elif moved_interactor_name == "radial_lines":
-                master_theta = master.radial_lines.theta
-
-            elif moved_interactor_name == "inner_arc":
-                master_theta = master.inner_arc.theta
-
-            elif moved_interactor_name == "outer_arc":
-                master_theta = master.outer_arc.theta
-
-            else:
-                # Should never reach here, but provide safe fallback
-                logger.warning(f"Unexpected interactor name: {moved_interactor_name}")
-                master_theta = master.central_line.theta
-
-            # Sync radii and phi
-            slicer.r1 = master.r1
-            slicer.r2 = master.r2
-            slicer.phi = master.phi
-
-            # Calculate offset and apply
-            offset_theta = index * self.angle_step
-            slicer.theta = (master_theta + offset_theta) % (2 * np.pi)
-
-            # Update all interactors
-            slicer.inner_arc.radius = slicer.r1
-            slicer.inner_arc.theta = slicer.theta
-            slicer.inner_arc.phi = slicer.phi
-
-            slicer.outer_arc.radius = slicer.r2
-            slicer.outer_arc.theta = slicer.theta
-            slicer.outer_arc.phi = slicer.phi
-
-            slicer.radial_lines.r1 = slicer.r1
-            slicer.radial_lines.r2 = slicer.r2
-            slicer.radial_lines.theta = slicer.theta
-            slicer.radial_lines.phi = slicer.phi
-
-            slicer.central_line.theta = slicer.theta
-
-    def _on_model_changed(self, item):
-        """
-        Handle parameter changes from UI
-        Synchronize all wedges when the model changes.
-        Parameters:
-        - item: The model item that changed
-        """
-        if item is None:
-            return
-
-        param_name = self._model.item(item.row(), 0).text()
-        param_value_str = self._model.item(item.row(), 1).text()
-
-        xlim, ylim = self.axes.get_xlim(), self.axes.get_ylim()
-
-        try:
-            if param_name == "phi [deg]":
-                master_theta = toDouble(param_value_str) * np.pi / 180.0
-                for i, slicer in enumerate(self.slicers):
-                    new_theta = (master_theta + i * self.angle_step) % (2 * np.pi)
-                    slicer.theta = new_theta
-                    slicer.central_line.theta = new_theta
-                    slicer.inner_arc.theta = new_theta
-                    slicer.outer_arc.theta = new_theta
-                    slicer.radial_lines.theta = new_theta
-
-                    for name in self._get_interactor_names():
-                        getattr(slicer, name).update()
-
-            elif param_name == "delta_phi [deg]":
-                delta_phi = toDouble(param_value_str) * np.pi / 180.0
-                if delta_phi <= 0 or delta_phi >= np.pi:
-                    return
-
-                for i, slicer in enumerate(self.slicers):
-                    slicer.phi = delta_phi
-                    slicer.radial_lines.phi = delta_phi
-                    slicer.inner_arc.phi = delta_phi
-                    slicer.outer_arc.phi = delta_phi
-
-                    slicer.radial_lines.update()
-                    slicer.inner_arc.update()
-                    slicer.outer_arc.update()
-
-            elif param_name == "r_min":
-                r_min = toDouble(param_value_str)
-                if r_min <= 0:
-                    return
-
-                for i, slicer in enumerate(self.slicers):
-                    slicer.r1 = r_min
-                    slicer.inner_arc.radius = r_min
-                    slicer.radial_lines.r1 = r_min
-
-                    slicer.inner_arc.update()
-                    slicer.radial_lines.update()
-
-            elif param_name == "r_max":
-                r_max = toDouble(param_value_str)
-                if r_max <= 0:
-                    return
-
-                for i, slicer in enumerate(self.slicers):
-                    slicer.r2 = r_max
-                    slicer.outer_arc.radius = r_max
-                    slicer.radial_lines.r2 = r_max
-
-                    slicer.outer_arc.update()
-                    slicer.radial_lines.update()
-
-            elif param_name == "nbins":
-                nbins = int(toDouble(param_value_str))
-                if nbins < 1:
-                    return
-
-                for i, slicer in enumerate(self.slicers):
-                    slicer.nbins = nbins
-
-        except Exception as e:
-            logger.error(f"Error in _on_model_changed: {e}")
-
-        self.axes.set_xlim(xlim)
-        self.axes.set_ylim(ylim)
-
-        # call base class to handle batching
-        super()._on_model_changed(item)
-
-class WedgeInteractorQMulti(MultiSlicerBase):
-    """
-    Creates multiple symmetric wedge slicers (Q mode) that move together as a unit.
-    """
-
-    def _get_slicer_class(self):
-        """Return the WedgeInteractorQ class"""
-        return WedgeInteractorQ
+        """Return the wedge slicer class (Phi or Q mode)"""
+        return self.slicer_class
 
     def _get_interactor_names(self):
         """Return list of interactor names for wedge slicers"""
@@ -619,23 +467,15 @@ class WedgeInteractorQMulti(MultiSlicerBase):
             slicer.radial_lines.theta = theta
         else:
             # Sync with master - detect which interactor moved
-            master_theta = None
-
-            # Check which interactor moved and get its current angle
             if moved_interactor_name == "central_line":
                 master_theta = master.central_line.theta
-
             elif moved_interactor_name == "radial_lines":
                 master_theta = master.radial_lines.theta
-
             elif moved_interactor_name == "inner_arc":
                 master_theta = master.inner_arc.theta
-
             elif moved_interactor_name == "outer_arc":
                 master_theta = master.outer_arc.theta
-
             else:
-                # Should never reach here, but provide safe fallback
                 logger.warning(f"Unexpected interactor name: {moved_interactor_name}")
                 master_theta = master.central_line.theta
 
@@ -665,14 +505,7 @@ class WedgeInteractorQMulti(MultiSlicerBase):
             slicer.central_line.theta = slicer.theta
 
     def _on_model_changed(self, item):
-        """
-        Handle parameter changes from UI.
-        Synchronize all wedges when the model changes.
-
-        Parameters:
-        - item: The model item that changed
-        """
-
+        """Handle parameter changes from UI"""
         if item is None:
             return
 
@@ -752,6 +585,18 @@ class WedgeInteractorQMulti(MultiSlicerBase):
 
         # call base class to handle batching
         super()._on_model_changed(item)
+
+
+class WedgeInteractorPhiMulti(WedgeInteractorMulti):
+    """Multiple wedge slicers in Phi mode (plots vs phi)"""
+    def __init__(self, base, axes, count, item=None, color="black", zorder=3):
+        super().__init__(base, axes, count, WedgeInteractorPhi, item, color, zorder)
+
+
+class WedgeInteractorQMulti(WedgeInteractorMulti):
+    """Multiple wedge slicers in Q mode (plots vs Q)"""
+    def __init__(self, base, axes, count, item=None, color="black", zorder=3):
+        super().__init__(base, axes, count, WedgeInteractorQ, item, color, zorder)
 
 
 class SectorInteractorMulti(MultiSlicerBase):
