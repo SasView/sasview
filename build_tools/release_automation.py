@@ -37,8 +37,8 @@ zenodo_url = "https://zenodo.org"
 # Should import release notes from git repo, for now will need to cut and paste
 sasview_data = {
 'metadata': {
-    'title': 'SasView version 6.1.2',
-    'description': '6.1.2 release',
+    'title': 'SasView version 6.1.3',
+    'description': '6.1.3 release',
     'related_identifiers': [{'identifier': 'https://github.com/SasView/sasview/releases/tag/v6.1.1',
                         'relation': 'isAlternateIdentifier', 'scheme': 'url'}],
     'contributors': [
