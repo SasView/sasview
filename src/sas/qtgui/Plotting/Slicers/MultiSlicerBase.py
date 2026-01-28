@@ -464,17 +464,23 @@ class WedgeInteractorPhiMulti(MultiSlicerBase):
             master_theta = None
 
             # Check which interactor moved and get its current angle
-            if hasattr(master, "central_line") and master.central_line.has_move:
+
+            if moved_interactor_name == "central_line":
                 master_theta = master.central_line.theta
-            elif hasattr(master, "radial_lines") and master.radial_lines.has_move:
+
+            elif moved_interactor_name == "radial_lines":
                 master_theta = master.radial_lines.theta
-            elif hasattr(master, "inner_arc") and master.inner_arc.has_move:
+
+            elif moved_interactor_name == "inner_arc":
                 master_theta = master.inner_arc.theta
-            elif hasattr(master, "outer_arc") and master.outer_arc.has_move:
+
+            elif moved_interactor_name == "outer_arc":
                 master_theta = master.outer_arc.theta
+
             else:
-                # Fallback to master.theta
-                master_theta = master.theta
+                # Should never reach here, but provide safe fallback
+                logger.warning(f"Unexpected interactor name: {moved_interactor_name}")
+                master_theta = master.central_line.theta
 
             # Sync radii and phi
             slicer.r1 = master.r1
@@ -530,16 +536,6 @@ class WedgeInteractorPhiMulti(MultiSlicerBase):
                     for name in self._get_interactor_names():
                         getattr(slicer, name).update()
 
-                    if i > 0:
-                        try:
-                            # Temporarily enable updates
-                            old_update_model = slicer.update_model
-                            slicer.update_model = True
-                            slicer._post_data()
-                            slicer.update_model = old_update_model
-                        except Exception as e:
-                            logger.warning(f"Failed to post data: {e}")
-
             elif param_name == "delta_phi [deg]":
                 delta_phi = toDouble(param_value_str) * np.pi / 180.0
                 if delta_phi <= 0 or delta_phi >= np.pi:
@@ -555,12 +551,6 @@ class WedgeInteractorPhiMulti(MultiSlicerBase):
                     slicer.inner_arc.update()
                     slicer.outer_arc.update()
 
-                    if i > 0:
-                        try:
-                            slicer._post_data()
-                        except Exception as e:
-                            logger.warning(f"Failed to post data: {e}")
-
             elif param_name == "r_min":
                 r_min = toDouble(param_value_str)
                 if r_min <= 0:
@@ -573,12 +563,6 @@ class WedgeInteractorPhiMulti(MultiSlicerBase):
 
                     slicer.inner_arc.update()
                     slicer.radial_lines.update()
-
-                    if i > 0:
-                        try:
-                            slicer._post_data()
-                        except Exception as e:
-                            logger.warning(f"Failed to post data: {e}")
 
             elif param_name == "r_max":
                 r_max = toDouble(param_value_str)
@@ -593,12 +577,6 @@ class WedgeInteractorPhiMulti(MultiSlicerBase):
                     slicer.outer_arc.update()
                     slicer.radial_lines.update()
 
-                    if i > 0:
-                        try:
-                            slicer._post_data()
-                        except Exception as e:
-                            logger.warning(f"Failed to post data: {e}")
-
             elif param_name == "nbins":
                 nbins = int(toDouble(param_value_str))
                 if nbins < 1:
@@ -606,11 +584,6 @@ class WedgeInteractorPhiMulti(MultiSlicerBase):
 
                 for i, slicer in enumerate(self.slicers):
                     slicer.nbins = nbins
-                    if i > 0:
-                        try:
-                            slicer._post_data()
-                        except Exception as e:
-                            logger.warning(f"Failed to post data: {e}")
 
         except Exception as e:
             logger.error(f"Error in _on_model_changed: {e}")
@@ -649,17 +622,22 @@ class WedgeInteractorQMulti(MultiSlicerBase):
             master_theta = None
 
             # Check which interactor moved and get its current angle
-            if hasattr(master, "central_line") and master.central_line.has_move:
+            if moved_interactor_name == "central_line":
                 master_theta = master.central_line.theta
-            elif hasattr(master, "radial_lines") and master.radial_lines.has_move:
+
+            elif moved_interactor_name == "radial_lines":
                 master_theta = master.radial_lines.theta
-            elif hasattr(master, "inner_arc") and master.inner_arc.has_move:
+
+            elif moved_interactor_name == "inner_arc":
                 master_theta = master.inner_arc.theta
-            elif hasattr(master, "outer_arc") and master.outer_arc.has_move:
+
+            elif moved_interactor_name == "outer_arc":
                 master_theta = master.outer_arc.theta
+
             else:
-                # Fallback to master.theta
-                master_theta = master.theta
+                # Should never reach here, but provide safe fallback
+                logger.warning(f"Unexpected interactor name: {moved_interactor_name}")
+                master_theta = master.central_line.theta
 
             # Sync radii and phi
             slicer.r1 = master.r1
@@ -717,16 +695,6 @@ class WedgeInteractorQMulti(MultiSlicerBase):
                     for name in self._get_interactor_names():
                         getattr(slicer, name).update()
 
-                    if i > 0:
-                        try:
-                            # Temporarily enable updates
-                            old_update_model = slicer.update_model
-                            slicer.update_model = True
-                            slicer._post_data()
-                            slicer.update_model = old_update_model
-                        except Exception as e:
-                            logger.warning(f"Failed to post data: {e}")
-
             elif param_name == "delta_phi [deg]":
                 delta_phi = toDouble(param_value_str) * np.pi / 180.0
                 if delta_phi <= 0 or delta_phi >= np.pi:
@@ -742,12 +710,6 @@ class WedgeInteractorQMulti(MultiSlicerBase):
                     slicer.inner_arc.update()
                     slicer.outer_arc.update()
 
-                    if i > 0:
-                        try:
-                            slicer._post_data()
-                        except Exception as e:
-                            logger.warning(f"Failed to post data: {e}")
-
             elif param_name == "r_min":
                 r_min = toDouble(param_value_str)
                 if r_min <= 0:
@@ -760,12 +722,6 @@ class WedgeInteractorQMulti(MultiSlicerBase):
 
                     slicer.inner_arc.update()
                     slicer.radial_lines.update()
-
-                    if i > 0:
-                        try:
-                            slicer._post_data()
-                        except Exception as e:
-                            logger.warning(f"Failed to post data: {e}")
 
             elif param_name == "r_max":
                 r_max = toDouble(param_value_str)
@@ -780,12 +736,6 @@ class WedgeInteractorQMulti(MultiSlicerBase):
                     slicer.outer_arc.update()
                     slicer.radial_lines.update()
 
-                    if i > 0:
-                        try:
-                            slicer._post_data()
-                        except Exception as e:
-                            logger.warning(f"Failed to post data: {e}")
-
             elif param_name == "nbins":
                 nbins = int(toDouble(param_value_str))
                 if nbins < 1:
@@ -793,11 +743,6 @@ class WedgeInteractorQMulti(MultiSlicerBase):
 
                 for i, slicer in enumerate(self.slicers):
                     slicer.nbins = nbins
-                    if i > 0:
-                        try:
-                            slicer._post_data()
-                        except Exception as e:
-                            logger.warning(f"Failed to post data: {e}")
 
         except Exception as e:
             logger.error(f"Error in _on_model_changed: {e}")
@@ -832,55 +777,35 @@ class SectorInteractorMulti(MultiSlicerBase):
             # Default phi offset
             slicer.phi = np.pi / 12
 
-            if hasattr(slicer, "main_line"):
-                slicer.main_line.theta = theta
+            slicer.main_line.theta = theta
 
-            if hasattr(slicer, "left_line"):
-                slicer.left_line.theta2 = theta
-                slicer.left_line.phi = slicer.phi
-                slicer.left_line.theta = theta + slicer.phi
+            slicer.left_line.theta2 = theta
+            slicer.left_line.phi = slicer.phi
+            slicer.left_line.theta = theta + slicer.phi
 
-            if hasattr(slicer, "right_line"):
-                slicer.right_line.theta2 = theta
-                slicer.right_line.phi = -slicer.phi
-                slicer.right_line.theta = theta - slicer.phi
+            slicer.right_line.theta2 = theta
+            slicer.right_line.phi = -slicer.phi
+            slicer.right_line.theta = theta - slicer.phi
 
         else:
-            # Prefer explicit interactor name (reliable); fallback to has_move checks
+            # Determine which interactor moved and get master_theta
             master_theta = None
 
             if moved_interactor_name == "main_line":
                 # Preserve each slicer's existing side-line separation (phi)
                 # Only align the central/main line angle to the master's.
-                master_theta = getattr(master, "main_line").theta if hasattr(master, "main_line") else None
+                master_theta = master.main_line.theta
             elif moved_interactor_name == "left_line":
                 # left_line.theta2 is the shared anchor for sectors
-                left = getattr(master, "left_line", None)
-                if left is not None:
-                    master_theta = left.theta2
-                    slicer.phi = left.phi
+                master_theta = master.left_line.theta2
+                slicer.phi = master.left_line.phi
             elif moved_interactor_name == "right_line":
-                right = getattr(master, "right_line", None)
-                if right is not None:
-                    master_theta = right.theta2
-                    # right_line.phi stored as negative of the intended phi
-                    slicer.phi = -right.phi
+                master_theta = master.right_line.theta2
+                slicer.phi = -master.right_line.phi
             else:
-                # Check which interactor moved and get its current angle
-                if hasattr(master, "main_line") and master.main_line.has_move:
-                    # Main line moved - use its theta; keep slicer's phi
-                    master_theta = master.main_line.theta
-                elif hasattr(master, "left_line") and master.left_line.has_move:
-                    # Left line moved - extract theta2 from left_line
-                    master_theta = master.left_line.theta2
-                    slicer.phi = master.left_line.phi
-                elif hasattr(master, "right_line") and master.right_line.has_move:
-                    # Right line moved - extract theta2 from right_line
-                    master_theta = master.right_line.theta2
-                    slicer.phi = -master.right_line.phi  # right_line.phi is negative
-                else:
-                    # Fallback - use main_line.theta and keep current slicer.phi
-                    master_theta = master.main_line.theta if hasattr(master, "main_line") else master.theta2
+                # Should never reach here, but provide safe fallback
+                logger.warning(f"Unexpected interactor name: {moved_interactor_name}")
+                master_theta = master.main_line.theta
 
             # Guard: ensure master_theta is valid
             if master_theta is None:
@@ -891,18 +816,15 @@ class SectorInteractorMulti(MultiSlicerBase):
             slicer.theta2 = (master_theta + offset_theta) % np.pi
 
             # Update all interactors
-            if hasattr(slicer, "main_line"):
-                slicer.main_line.theta = slicer.theta2
+            slicer.main_line.theta = slicer.theta2
 
-            if hasattr(slicer, "left_line"):
-                slicer.left_line.theta2 = slicer.theta2
-                slicer.left_line.phi = slicer.phi
-                slicer.left_line.theta = slicer.theta2 + slicer.phi
+            slicer.left_line.theta2 = slicer.theta2
+            slicer.left_line.phi = slicer.phi
+            slicer.left_line.theta = slicer.theta2 + slicer.phi
 
-            if hasattr(slicer, "right_line"):
-                slicer.right_line.theta2 = slicer.theta2
-                slicer.right_line.phi = -slicer.phi
-                slicer.right_line.theta = slicer.theta2 - slicer.phi
+            slicer.right_line.theta2 = slicer.theta2
+            slicer.right_line.phi = -slicer.phi
+            slicer.right_line.theta = slicer.theta2 - slicer.phi
 
     def _on_model_changed(self, item):
         """Handle parameter changes from UI"""
@@ -916,7 +838,7 @@ class SectorInteractorMulti(MultiSlicerBase):
 
         try:
             if param_name == "Phi [deg]":
-                # Central angle - FIXED: Also update theta2 to keep consistency
+                # Central angle
                 master_theta = toDouble(param_value_str) * np.pi / 180.0
 
                 # Update master's theta2 to keep consistency
@@ -927,29 +849,16 @@ class SectorInteractorMulti(MultiSlicerBase):
                     new_theta = (master_theta + i * self.angle_step / 2) % np.pi
                     slicer.theta2 = new_theta
 
-                    if hasattr(slicer, "main_line"):
-                        slicer.main_line.theta = new_theta
-                        slicer.main_line.update()
+                    slicer.main_line.theta = new_theta
+                    slicer.main_line.update()
 
-                    if hasattr(slicer, "left_line"):
-                        slicer.left_line.theta2 = new_theta
-                        slicer.left_line.theta = new_theta + slicer.left_line.phi
-                        slicer.left_line.update()
+                    slicer.left_line.theta2 = new_theta
+                    slicer.left_line.theta = new_theta + slicer.left_line.phi
+                    slicer.left_line.update()
 
-                    if hasattr(slicer, "right_line"):
-                        slicer.right_line.theta2 = new_theta
-                        slicer.right_line.theta = new_theta + slicer.right_line.phi
-                        slicer.right_line.update()
-
-                    if i > 0:
-                        try:
-                            # Temporarily enable updates
-                            old_update_model = slicer.update_model
-                            slicer.update_model = True
-                            slicer._post_data()
-                            slicer.update_model = old_update_model
-                        except Exception as e:
-                            logger.warning(f"Failed to post data: {e}")
+                    slicer.right_line.theta2 = new_theta
+                    slicer.right_line.theta = new_theta + slicer.right_line.phi
+                    slicer.right_line.update()
 
             elif param_name == "Delta_Phi [deg]":
                 # Angular width
@@ -960,34 +869,18 @@ class SectorInteractorMulti(MultiSlicerBase):
                 for i, slicer in enumerate(self.slicers):
                     slicer.phi = delta_phi
 
-                    if hasattr(slicer, "left_line"):
-                        slicer.left_line.phi = delta_phi
-                        slicer.left_line.theta = slicer.left_line.theta2 + delta_phi
-                        slicer.left_line.update()
+                    slicer.left_line.phi = delta_phi
+                    slicer.left_line.theta = slicer.left_line.theta2 + delta_phi
+                    slicer.left_line.update()
 
-                    if hasattr(slicer, "right_line"):
-                        slicer.right_line.phi = -delta_phi
-                        slicer.right_line.theta = slicer.right_line.theta2 - delta_phi
-                        slicer.right_line.update()
-
-                    if i > 0:
-                        try:
-                            slicer._post_data()
-                        except Exception as e:
-                            logger.warning(f"Failed to post data: {e}")
+                    slicer.right_line.phi = -delta_phi
+                    slicer.right_line.theta = slicer.right_line.theta2 - delta_phi
+                    slicer.right_line.update()
 
             elif param_name == "nbins":
                 nbins = int(toDouble(param_value_str))
                 if nbins < 1:
                     return
-
-                for i, slicer in enumerate(self.slicers):
-                    slicer.nbins = nbins
-                    if i > 0:
-                        try:
-                            slicer._post_data()
-                        except Exception as e:
-                            logger.warning(f"Failed to post data: {e}")
 
         except Exception as e:
             logger.error(f"Error in _on_model_changed: {e}")
