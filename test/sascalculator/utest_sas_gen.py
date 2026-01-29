@@ -226,15 +226,15 @@ class sas_gen_test(unittest.TestCase):
         """
         Test that the Debye algorithm supplied by the external AUSAXS library agrees with the default implementation.
         """
-        from pyausaxs import AUSAXS
+        import pyausaxs as ausaxs
 
         from sas.sascalc.calculator.ausaxs import ausaxs_sans_debye, sasview_sans_debye
 
         rng = np.random.default_rng(1984)
-        ausaxs = AUSAXS()
 
         # ensure the library is available and ready to run on all CI systems
-        assert ausaxs.ready(), "AUSAXS library not available, test cannot be run."
+        # this awkward syntax will be improved in a future version of pyausaxs ...
+        assert ausaxs.wrapper.AUSAXS.AUSAXS().ready(), "AUSAXS library not available, test cannot be run."
 
         # get all pdb files in the data folder
         import glob
