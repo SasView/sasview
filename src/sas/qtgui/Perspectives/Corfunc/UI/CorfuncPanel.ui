@@ -7,11 +7,11 @@
     <x>0</x>
     <y>0</y>
     <width>1080</width>
-    <height>680</height>
+    <height>640</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+   <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -19,7 +19,7 @@
   <property name="minimumSize">
    <size>
     <width>1080</width>
-    <height>680</height>
+    <height>640</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -28,6 +28,12 @@
   <layout class="QHBoxLayout" name="horizontalLayout_3">
    <item>
     <widget class="QScrollArea" name="scrollArea">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="frameShape">
       <enum>QFrame::Shape::NoFrame</enum>
      </property>
@@ -49,7 +55,7 @@
         <x>0</x>
         <y>0</y>
         <width>576</width>
-        <height>662</height>
+        <height>622</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
@@ -68,15 +74,15 @@
        <item>
         <widget class="QWidget" name="controlWidget" native="true">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
          <property name="minimumSize">
           <size>
-           <width>400</width>
-           <height>600</height>
+           <width>576</width>
+           <height>0</height>
           </size>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -108,67 +114,185 @@
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>277</height>
+               </size>
+              </property>
               <property name="title">
                <string>Input</string>
               </property>
               <layout class="QGridLayout" name="gridLayout_6">
-               <item row="4" column="0">
-                <widget class="QFrame" name="frame_5">
+               <property name="topMargin">
+                <number>0</number>
+               </property>
+               <item row="5" column="0" rowspan="2">
+                <widget class="QGroupBox" name="methods">
                  <property name="minimumSize">
                   <size>
                    <width>0</width>
                    <height>0</height>
                   </size>
                  </property>
-                 <layout class="QGridLayout" name="gridLayout_7">
+                 <property name="title">
+                  <string>Method</string>
+                 </property>
+                 <layout class="QGridLayout" name="gridLayout_2">
+                  <property name="topMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="rightMargin">
+                   <number>9</number>
+                  </property>
                   <property name="bottomMargin">
                    <number>0</number>
                   </property>
                   <property name="verticalSpacing">
-                   <number>6</number>
+                   <number>0</number>
                   </property>
-                  <item row="0" column="2">
-                   <widget class="QCheckBox" name="fitGuinier">
-                    <property name="text">
-                     <string>Fit Guinier</string>
-                    </property>
-                    <property name="checked">
-                     <bool>true</bool>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="1">
-                   <widget class="QCheckBox" name="fitBackground">
-                    <property name="text">
-                     <string>Fit Background</string>
-                    </property>
-                    <property name="checked">
-                     <bool>true</bool>
-                    </property>
-                   </widget>
-                  </item>
                   <item row="0" column="0">
-                   <widget class="QLabel" name="label_18">
-                    <property name="text">
-                     <string>Fitting:  </string>
-                    </property>
-                    <property name="alignment">
-                     <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="3">
-                   <widget class="QCheckBox" name="fitPorod">
-                    <property name="text">
-                     <string>Fit Porod</string>
-                    </property>
-                    <property name="checked">
-                     <bool>true</bool>
-                    </property>
-                   </widget>
+                   <layout class="QGridLayout" name="gridLayout_11">
+                    <item row="0" column="0">
+                     <widget class="QLabel" name="label_20">
+                      <property name="text">
+                       <string>Tangent:  </string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="2">
+                     <widget class="QRadioButton" name="radTangentMidpoint">
+                      <property name="text">
+                       <string>Use Halfway Point</string>
+                      </property>
+                      <attribute name="buttonGroup">
+                       <string notr="true">buttonGroup_2</string>
+                      </attribute>
+                     </widget>
+                    </item>
+                    <item row="0" column="1">
+                     <widget class="QRadioButton" name="radTangentInflection">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="text">
+                       <string>Use Inflection Point</string>
+                      </property>
+                      <attribute name="buttonGroup">
+                       <string notr="true">buttonGroup_2</string>
+                      </attribute>
+                     </widget>
+                    </item>
+                    <item row="0" column="3">
+                     <widget class="QRadioButton" name="radTangentAuto">
+                      <property name="text">
+                       <string>Automatic</string>
+                      </property>
+                      <property name="checked">
+                       <bool>true</bool>
+                      </property>
+                      <attribute name="buttonGroup">
+                       <string notr="true">buttonGroup_2</string>
+                      </attribute>
+                     </widget>
+                    </item>
+                    <item row="1" column="0">
+                     <widget class="QLabel" name="label_21">
+                      <property name="text">
+                       <string>Long Period:  </string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="1">
+                     <widget class="QRadioButton" name="radLongPeriodMax">
+                      <property name="text">
+                       <string>Use Maximum</string>
+                      </property>
+                      <attribute name="buttonGroup">
+                       <string notr="true">buttonGroup</string>
+                      </attribute>
+                     </widget>
+                    </item>
+                    <item row="1" column="2">
+                     <widget class="QRadioButton" name="radLongPeriodDouble">
+                      <property name="text">
+                       <string>Use 2x Minimum</string>
+                      </property>
+                      <attribute name="buttonGroup">
+                       <string notr="true">buttonGroup</string>
+                      </attribute>
+                     </widget>
+                    </item>
+                    <item row="1" column="3">
+                     <widget class="QRadioButton" name="radLongPeriodAuto">
+                      <property name="text">
+                       <string>Automatic</string>
+                      </property>
+                      <property name="checked">
+                       <bool>true</bool>
+                      </property>
+                      <attribute name="buttonGroup">
+                       <string notr="true">buttonGroup</string>
+                      </attribute>
+                     </widget>
+                    </item>
+                   </layout>
                   </item>
                  </layout>
                 </widget>
+               </item>
+               <item row="4" column="0">
+                <layout class="QGridLayout" name="gridLayout_10">
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="label_18">
+                   <property name="text">
+                    <string>Fitting:  </string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QCheckBox" name="fitBackground">
+                   <property name="text">
+                    <string>Fit Background</string>
+                   </property>
+                   <property name="checked">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="2">
+                  <widget class="QCheckBox" name="fitGuinier">
+                   <property name="text">
+                    <string>Fit Guinier</string>
+                   </property>
+                   <property name="checked">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="3">
+                  <widget class="QCheckBox" name="fitPorod">
+                   <property name="text">
+                    <string>Fit Porod</string>
+                   </property>
+                   <property name="checked">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
                </item>
                <item row="2" column="0">
                 <layout class="QGridLayout" name="gridLayout">
@@ -253,29 +377,6 @@
                  </item>
                 </layout>
                </item>
-               <item row="1" column="0">
-                <layout class="QHBoxLayout" name="sliderLayout">
-                 <property name="leftMargin">
-                  <number>5</number>
-                 </property>
-                 <property name="topMargin">
-                  <number>10</number>
-                 </property>
-                 <property name="rightMargin">
-                  <number>5</number>
-                 </property>
-                 <property name="bottomMargin">
-                  <number>10</number>
-                 </property>
-                 <item>
-                  <widget class="QLabel" name="label_3">
-                   <property name="text">
-                    <string>Adjust:</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
                <item row="0" column="0">
                 <layout class="QHBoxLayout" name="horizontalLayout_4">
                  <item>
@@ -306,28 +407,32 @@
                  </item>
                 </layout>
                </item>
-               <item row="7" column="0">
-                <layout class="QHBoxLayout" name="horizontalLayout_7">
+               <item row="1" column="0">
+                <layout class="QHBoxLayout" name="sliderLayout">
+                 <property name="leftMargin">
+                  <number>5</number>
+                 </property>
                  <property name="topMargin">
                   <number>10</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>5</number>
                  </property>
                  <property name="bottomMargin">
                   <number>10</number>
                  </property>
                  <item>
-                  <spacer name="horizontalSpacer_2">
-                   <property name="orientation">
-                    <enum>Qt::Orientation::Horizontal</enum>
+                  <widget class="QLabel" name="label_3">
+                   <property name="text">
+                    <string>Adjust:</string>
                    </property>
-                   <property name="sizeHint" stdset="0">
-                    <size>
-                     <width>40</width>
-                     <height>20</height>
-                    </size>
-                   </property>
-                  </spacer>
+                  </widget>
                  </item>
-                 <item>
+                </layout>
+               </item>
+               <item row="7" column="0">
+                <layout class="QVBoxLayout" name="verticalLayout_6">
+                 <item alignment="Qt::AlignmentFlag::AlignHCenter">
                   <widget class="QPushButton" name="cmdExtract">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -338,7 +443,7 @@
                    <property name="minimumSize">
                     <size>
                      <width>120</width>
-                     <height>24</height>
+                     <height>26</height>
                     </size>
                    </property>
                    <property name="toolTip">
@@ -349,137 +454,7 @@
                    </property>
                   </widget>
                  </item>
-                 <item>
-                  <spacer name="horizontalSpacer_3">
-                   <property name="orientation">
-                    <enum>Qt::Orientation::Horizontal</enum>
-                   </property>
-                   <property name="sizeHint" stdset="0">
-                    <size>
-                     <width>40</width>
-                     <height>20</height>
-                    </size>
-                   </property>
-                  </spacer>
-                 </item>
                 </layout>
-               </item>
-               <item row="5" column="0" rowspan="2">
-                <widget class="QGroupBox" name="methods">
-                 <property name="minimumSize">
-                  <size>
-                   <width>0</width>
-                   <height>80</height>
-                  </size>
-                 </property>
-                 <property name="title">
-                  <string>Method</string>
-                 </property>
-                 <widget class="QWidget" name="gridLayoutWidget">
-                  <property name="geometry">
-                   <rect>
-                    <x>0</x>
-                    <y>20</y>
-                    <width>551</width>
-                    <height>51</height>
-                   </rect>
-                  </property>
-                  <layout class="QGridLayout" name="gridLayout_11">
-                   <item row="0" column="0">
-                    <widget class="QLabel" name="label_20">
-                     <property name="text">
-                      <string>Tangent:  </string>
-                     </property>
-                     <property name="alignment">
-                      <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="0" column="2">
-                    <widget class="QRadioButton" name="radTangentMidpoint">
-                     <property name="text">
-                      <string>Use Halfway Point</string>
-                     </property>
-                     <attribute name="buttonGroup">
-                      <string notr="true">buttonGroup_2</string>
-                     </attribute>
-                    </widget>
-                   </item>
-                   <item row="0" column="1">
-                    <widget class="QRadioButton" name="radTangentInflection">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="text">
-                      <string>Use Inflection Point</string>
-                     </property>
-                     <attribute name="buttonGroup">
-                      <string notr="true">buttonGroup_2</string>
-                     </attribute>
-                    </widget>
-                   </item>
-                   <item row="0" column="3">
-                    <widget class="QRadioButton" name="radTangentAuto">
-                     <property name="text">
-                      <string>Automatic</string>
-                     </property>
-                     <property name="checked">
-                      <bool>true</bool>
-                     </property>
-                     <attribute name="buttonGroup">
-                      <string notr="true">buttonGroup_2</string>
-                     </attribute>
-                    </widget>
-                   </item>
-                   <item row="1" column="0">
-                    <widget class="QLabel" name="label_21">
-                     <property name="text">
-                      <string>Long Period:  </string>
-                     </property>
-                     <property name="alignment">
-                      <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="1">
-                    <widget class="QRadioButton" name="radLongPeriodMax">
-                     <property name="text">
-                      <string>Use Maximum</string>
-                     </property>
-                     <attribute name="buttonGroup">
-                      <string notr="true">buttonGroup</string>
-                     </attribute>
-                    </widget>
-                   </item>
-                   <item row="1" column="2">
-                    <widget class="QRadioButton" name="radLongPeriodDouble">
-                     <property name="text">
-                      <string>Use 2x Minimum</string>
-                     </property>
-                     <attribute name="buttonGroup">
-                      <string notr="true">buttonGroup</string>
-                     </attribute>
-                    </widget>
-                   </item>
-                   <item row="1" column="3">
-                    <widget class="QRadioButton" name="radLongPeriodAuto">
-                     <property name="text">
-                      <string>Automatic</string>
-                     </property>
-                     <property name="checked">
-                      <bool>true</bool>
-                     </property>
-                     <attribute name="buttonGroup">
-                      <string notr="true">buttonGroup</string>
-                     </attribute>
-                    </widget>
-                   </item>
-                  </layout>
-                 </widget>
-                </widget>
                </item>
               </layout>
              </widget>
@@ -498,6 +473,95 @@
               <layout class="QVBoxLayout" name="backgroundLayout">
                <item>
                 <layout class="QGridLayout" name="gridLayout_4">
+                 <item row="1" column="0" colspan="3">
+                  <layout class="QGridLayout" name="gridLayout_5">
+                   <property name="bottomMargin">
+                    <number>0</number>
+                   </property>
+                   <item row="0" column="0">
+                    <widget class="QLabel" name="label_8">
+                     <property name="text">
+                      <string>Guinier</string>
+                     </property>
+                     <property name="alignment">
+                      <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="0" column="1">
+                    <widget class="QLabel" name="label_6">
+                     <property name="text">
+                      <string>A:</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="0">
+                    <widget class="QLabel" name="label_9">
+                     <property name="text">
+                      <string>Porod</string>
+                     </property>
+                     <property name="alignment">
+                      <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="1">
+                    <widget class="QLabel" name="label_10">
+                     <property name="text">
+                      <string>K:</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="2">
+                    <widget class="QLineEdit" name="txtPorodK">
+                     <property name="readOnly">
+                      <bool>false</bool>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="0" column="3">
+                    <widget class="QLabel" name="label_7">
+                     <property name="text">
+                      <string>     B:</string>
+                     </property>
+                     <property name="alignment">
+                      <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="0" column="2">
+                    <widget class="QLineEdit" name="txtGuinierA">
+                     <property name="readOnly">
+                      <bool>false</bool>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="4">
+                    <widget class="QLineEdit" name="txtPorodSigma">
+                     <property name="readOnly">
+                      <bool>false</bool>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="3">
+                    <widget class="QLabel" name="label_11">
+                     <property name="text">
+                      <string>σ:</string>
+                     </property>
+                     <property name="alignment">
+                      <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="0" column="4">
+                    <widget class="QLineEdit" name="txtGuinierB">
+                     <property name="readOnly">
+                      <bool>false</bool>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
                  <item row="0" column="1">
                   <widget class="QLineEdit" name="txtBackground">
                    <property name="sizePolicy">
@@ -527,99 +591,6 @@
                     </size>
                    </property>
                   </spacer>
-                 </item>
-                </layout>
-               </item>
-               <item>
-                <layout class="QGridLayout" name="gridLayout_2">
-                 <item row="5" column="0" colspan="2">
-                  <layout class="QGridLayout" name="gridLayout_5">
-                   <property name="bottomMargin">
-                    <number>0</number>
-                   </property>
-                   <item row="3" column="4">
-                    <widget class="QLineEdit" name="txtGuinierB">
-                     <property name="readOnly">
-                      <bool>false</bool>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="3" column="0">
-                    <widget class="QLabel" name="label_8">
-                     <property name="text">
-                      <string>Guinier</string>
-                     </property>
-                     <property name="alignment">
-                      <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="3" column="3">
-                    <widget class="QLabel" name="label_7">
-                     <property name="text">
-                      <string>     B:</string>
-                     </property>
-                     <property name="alignment">
-                      <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="4" column="1">
-                    <widget class="QLabel" name="label_10">
-                     <property name="text">
-                      <string>K:</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="4" column="2">
-                    <widget class="QLineEdit" name="txtPorodK">
-                     <property name="readOnly">
-                      <bool>false</bool>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="3" column="1">
-                    <widget class="QLabel" name="label_6">
-                     <property name="text">
-                      <string>A:</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="3" column="2">
-                    <widget class="QLineEdit" name="txtGuinierA">
-                     <property name="readOnly">
-                      <bool>false</bool>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="4" column="0">
-                    <widget class="QLabel" name="label_9">
-                     <property name="text">
-                      <string>Porod</string>
-                     </property>
-                     <property name="alignment">
-                      <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="4" column="4">
-                    <widget class="QLineEdit" name="txtPorodSigma">
-                     <property name="readOnly">
-                      <bool>false</bool>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="4" column="3">
-                    <widget class="QLabel" name="label_11">
-                     <property name="text">
-                      <string>σ:</string>
-                     </property>
-                     <property name="alignment">
-                      <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
                  </item>
                 </layout>
                </item>
@@ -1100,13 +1071,9 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>cmdExtract</tabstop>
   <tabstop>txtLowerQMax</tabstop>
   <tabstop>txtUpperQMin</tabstop>
   <tabstop>txtUpperQMax</tabstop>
-  <tabstop>fitBackground</tabstop>
-  <tabstop>fitGuinier</tabstop>
-  <tabstop>fitPorod</tabstop>
   <tabstop>txtBackground</tabstop>
   <tabstop>txtGuinierA</tabstop>
   <tabstop>txtGuinierB</tabstop>
@@ -1127,7 +1094,7 @@
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroup"/>
   <buttongroup name="buttonGroup_2"/>
+  <buttongroup name="buttonGroup"/>
  </buttongroups>
 </ui>
