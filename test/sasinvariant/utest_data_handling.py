@@ -383,6 +383,52 @@ class TestInvariantCalculator(unittest.TestCase):
         self.assertRaises(ValueError, inv.set_extrapolation, 'high', npts=4,
                           function='guinier')
 
+    def test_volume_fraction_uncertainty_increases_with_contrast_err(self):
+        """
+        Checks if the uncertainty calculated for volume fraction scales with the uncertainty entered for contrast
+        """
+        inv = invariant.InvariantCalculator(self.data)
+        contrast = 2.2e-6
+        _, dv_small = inv.get_volume_fraction_with_error(contrast, contrast_err=0.1 * contrast)
+        _, dv_large = inv.get_volume_fraction_with_error(contrast, contrast_err=0.5 * contrast)
+        self.assertGreater(dv_large, dv_small)
+
+    def test_contrast_uncertainty_increases_with_volume_err(self):
+        """
+        Checks if the uncertainty calculated for contrast scales with the uncertainty entered for volume fraction
+        """
+        inv = invariant.InvariantCalculator(self.data)
+        volume = 0.01
+        _, dc_small = inv.get_contrast_with_error(volume, volume_err=0.001)
+        _, dc_large = inv.get_contrast_with_error(volume, volume_err=0.01)
+        self.assertGreater(dc_large, dc_small)
+
+    def test_surface_uncertainty_increases_with_input_err(self):
+        """
+        Checks if the uncertainty calculated for specific surface scales with the uncertainty entered for:
+            - SLD contrast
+            - Porod constant
+        """
+        inv = invariant.InvariantCalculator(self.data)
+        contrast = 2.2e-6
+        porod = 1.825e-7
+
+        _, ds_small_contrast = inv.get_surface_with_error(
+            contrast, porod, contrast_err=0.1 * contrast
+        )
+        _, ds_large_contrast = inv.get_surface_with_error(
+            contrast, porod, contrast_err=0.5 * contrast
+        )
+        self.assertGreater(ds_large_contrast, ds_small_contrast)
+
+        _, ds_small_porod = inv.get_surface_with_error(
+            contrast, porod, porod_const_err=0.1 * porod
+        )
+        _, ds_large_porod = inv.get_surface_with_error(
+            contrast, porod, porod_const_err=0.5 * porod
+        )
+        self.assertGreater(ds_large_porod, ds_small_porod)
+
 
 class TestGuinierExtrapolation(unittest.TestCase):
     """
