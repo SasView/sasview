@@ -241,6 +241,8 @@ class Plotter2DWidget(PlotterBase):
         self.actionToggleMenu = self.contextMenu.addAction("Toggle Navigation Menu")
         self.actionToggleMenu.triggered.connect(self.onToggleMenu)
 
+        self.addHelpToContextMenu()
+
     def createContextMenuQuick(self):
         """
         Define context menu and associated actions for the quickplot MPL widget
@@ -256,6 +258,8 @@ class Plotter2DWidget(PlotterBase):
         self.actionChangeScale.triggered.connect(self.onToggleScale)
         if self.dimension == 2:
             self.actionToggleGrid.triggered.connect(self.onGridToggle)
+
+        self.addHelpToContextMenu()
 
     def onToggleMaskedData(self, event):
         """ Toggle the visibility of masked data points."""

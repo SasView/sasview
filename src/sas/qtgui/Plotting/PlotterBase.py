@@ -267,6 +267,14 @@ class PlotterBase(QtWidgets.QWidget):
         self.actionPrintImage.triggered.connect(self.onImagePrint)
         self.actionCopyToClipboard.triggered.connect(self.onClipboardCopy)
 
+    def addHelpToContextMenu(self):
+        """
+        Add Help option at the end of the context menu
+        """
+        self.contextMenu.addSeparator()
+        self.actionHelp = self.contextMenu.addAction("Help")
+        self.actionHelp.triggered.connect(self.onHelp)
+
     def createContextMenu(self):
         """
         Define common context menu and associated actions for the MPL widget
@@ -399,6 +407,13 @@ class PlotterBase(QtWidgets.QWidget):
         pixmap = QtGui.QPixmap(self.canvas.size())
         self.canvas.render(pixmap)
         bmp.setPixmap(pixmap)
+
+    def onHelp(self):
+        """
+        Display plotting help documentation
+        """
+        location = "/user/qtgui/MainWindow/graph_help.html"
+        self._help_window = GuiUtils.showHelp(location)
 
     def onGridToggle(self):
         """
