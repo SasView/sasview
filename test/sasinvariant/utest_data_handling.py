@@ -354,6 +354,19 @@ class TestInvariantCalculator(unittest.TestCase):
         v_b, dv_b = inv.get_volume_fraction_with_error(2.2e-6, extrapolation="both")
         _check_values(v_b, 0.01)
 
+        # contrast
+        c, dc = inv.get_contrast_with_error(0.01, extrapolation=None)
+        _check_values(c, 2.2e-6)
+
+        c_l, dc_l = inv.get_contrast_with_error(0.01, extrapolation="low")
+        _check_values(c_l, 2.2e-6)
+
+        c_h, dc_h = inv.get_contrast_with_error(0.01, extrapolation="high")
+        _check_values(c_h, 2.2e-6)
+
+        c_b, dc_b = inv.get_contrast_with_error(0.01, extrapolation="both")
+        _check_values(c_b, 2.2e-6)
+
         # Specific Surface - though these are really redundant since
         # specific surface area does NOT use the invariant calculation
         # and thus independent of extrapolation.  Leaving the test alone
