@@ -1596,6 +1596,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
             # create local kernel_module
             kernel_module = FittingUtilities.updateKernelWithResults(self.logic.kernel_module, param_dict)
+            if kernel_module is None:
+                continue
             # pull out current data
             data = self._logic[res_index].data
 
