@@ -94,8 +94,9 @@ class DnDTableWidget(QtWidgets.QTableWidget):
         elif rect.bottom() - pos.y() < margin:
             return True
 
+        flags = self.model().flags(index)
         return rect.contains(pos, True) and not \
-            (int(self.model().flags(index)) & QtCore.Qt.ItemIsDropEnabled) and \
+            bool(flags & QtCore.Qt.ItemIsDropEnabled) and \
             pos.y() >= rect.center().y()
 
 
