@@ -1181,6 +1181,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Reset parameters to fit
         self.resetParametersToFit()
         self.has_error_column = False
+        self.polydispersity_widget.is2D = self.is2D
         self.polydispersity_widget.has_poly_error_column = False
         self.magnetism_widget.has_magnet_error_column = False
 
@@ -1596,6 +1597,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
             # create local kernel_module
             kernel_module = FittingUtilities.updateKernelWithResults(self.logic.kernel_module, param_dict)
+            if kernel_module is None:
+                continue
             # pull out current data
             data = self._logic[res_index].data
 

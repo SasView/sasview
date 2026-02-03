@@ -1,19 +1,20 @@
 # global
 import copy
 import logging
+import math
 
 import numpy as np
 from PySide6 import QtCore, QtGui, QtWidgets
 from twisted.internet import reactor, threads
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Perspectives.Corfunc.CorfuncSlider import CorfuncSlider
 from sas.qtgui.Plotting import PlotterData
 from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
-from sas.sascalc.corfunc.calculation_data import ExtrapolationParameters
+from sas.qtgui.Utilities.ExtrapolationSlider import ExtrapolationSlider
 
 # sas-global
 from sas.sascalc.invariant import invariant
+from sas.sascalc.util import ExtrapolationParameters
 
 # local
 from ..perspective import Perspective
@@ -29,6 +30,8 @@ Q_MAXIMUM = 10
 NPOINTS_Q_INTERP = 10
 # Default power law for interpolation
 DEFAULT_POWER_VALUE = 4
+# Small epsilon for floating point adjustments
+ADJUST_EPS = 1e-7
 
 # Background of line edits if settings OK or wrong
 BG_DEFAULT = ""
@@ -78,11 +81,12 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self._background: float = 0.0
         self._scale: float = 1.0
         self._contrast: float | None = None
+        self._contrast_err: float | None = None
         self._porod: float | None = None
+        self._porod_err: float | None = None
         self._volfrac1: float | None = None
-        self._volfrac2: float | None = None
+        self._volfrac1_err: float | None = None
 
-        # New extrapolation options
         self._low_extrapolate: bool = False
         self._low_guinier: bool = True
         self._low_fit: bool = False
@@ -99,10 +103,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.no_extrapolation_plot: PlotterData | None = None
 
         # Slider
-        self.slider: CorfuncSlider = CorfuncSlider(
-            lower_label="Low-Q",
-            upper_label="High-Q",
-        )
+        self.slider = ExtrapolationSlider(lower_label="Low-Q", upper_label="High-Q", perspective="Invariant")
         self.sliderLayout.insertWidget(1, self.slider)
 
         # no reason to have this widget resizable
@@ -111,11 +112,11 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         # Modify font in order to display Angstrom symbol correctly
         new_font = 'font-family: -apple-system, "Helvetica Neue", "Ubuntu";'
         self.lblTotalQUnits.setStyleSheet(new_font)
+        self.lblPorodCstUnits.setStyleSheet(new_font)
+        self.lblContrastUnits_in.setStyleSheet(new_font)
+        self.lblContrastUnits_out.setStyleSheet(new_font)
         self.lblSpecificSurfaceUnits.setStyleSheet(new_font)
         self.lblInvariantTotalQUnits.setStyleSheet(new_font)
-        self.lblContrastUnits.setStyleSheet(new_font)
-        self.lblPorodCstUnits.setStyleSheet(new_font)
-        self.lblBackgroundUnits.setStyleSheet(new_font)
 
         # To remove blue square around line edits
         self.txtBackgd.setAttribute(QtCore.Qt.WA_MacShowFocusRect, False)
@@ -141,10 +142,16 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
         # Validator: double
         self.txtBackgd.setValidator(GuiUtils.DoubleValidator())
+        self.txtPorodCst.setValidator(GuiUtils.DoubleValidator())
+        self.txtPorodCstErr.setValidator(GuiUtils.DoubleValidator())
         self.txtContrast.setValidator(GuiUtils.DoubleValidator())
+        self.txtContrastErr.setValidator(GuiUtils.DoubleValidator())
         self.txtScale.setValidator(GuiUtils.DoubleValidator())
         self.txtVolFrac1.setValidator(GuiUtils.DoubleValidator())
-        self.txtVolFrac2.setValidator(GuiUtils.DoubleValidator())
+        self.txtGuinierEnd_ex.setValidator(GuiUtils.DoubleValidator())
+        self.txtPorodStart_ex.setValidator(GuiUtils.DoubleValidator())
+        self.txtPorodEnd_ex.setValidator(GuiUtils.DoubleValidator())
+        self.txtVolFrac1Err.setValidator(GuiUtils.DoubleValidator())
 
         # Start with all Extrapolation options disabled
         self.enable_extrapolation_options(False)
@@ -154,7 +161,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
         # Default to using contrast for volume fraction
         self.rbContrast.setChecked(True)
-        self.contrastToggle(True)
+        self.contrast_volfrac_toggle()
 
         self.tabWidget.setCurrentIndex(0)
 
@@ -168,11 +175,13 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
     def extrapolation_parameters(self) -> ExtrapolationParameters | None:
         if self._data is not None:
             return ExtrapolationParameters(
-                safe_float(Q_MINIMUM),
-                safe_float(self.model.item(WIDGETS.W_GUINIER_END_EX).text()),
-                safe_float(self.model.item(WIDGETS.W_POROD_START_EX).text()),
-                safe_float(self.model.item(WIDGETS.W_POROD_END_EX).text()),
-                safe_float(Q_MAXIMUM),
+                ex_q_min=float(Q_MINIMUM),
+                data_q_min=safe_float(self.model.item(WIDGETS.W_QMIN).text()),
+                point_1=safe_float(self.model.item(WIDGETS.W_GUINIER_END_EX).text()),
+                point_2=safe_float(self.model.item(WIDGETS.W_POROD_START_EX).text()),
+                point_3=safe_float(self.model.item(WIDGETS.W_POROD_END_EX).text()),
+                data_q_max=safe_float(self.model.item(WIDGETS.W_QMAX).text()),
+                ex_q_max=float(Q_MAXIMUM),
             )
         else:
             return None
@@ -241,15 +250,26 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
     def update_from_model(self) -> None:
         """Update the globals based on the data in the model"""
         self._background = float(self.model.item(WIDGETS.W_BACKGROUND).text())
-        if self.model.item(WIDGETS.W_CONTRAST).text() != "None" and self.model.item(WIDGETS.W_CONTRAST).text() != "":
-            self._contrast = float(self.model.item(WIDGETS.W_CONTRAST).text())
+
+        contrast_text = self.model.item(WIDGETS.W_CONTRAST).text()
+        self._contrast = float(contrast_text) if contrast_text else None
+
+        contrast_err_text = self.model.item(WIDGETS.W_CONTRAST_ERR).text()
+        self._contrast_err = float(contrast_err_text) if contrast_err_text else None
+
         self._scale = float(self.model.item(WIDGETS.W_SCALE).text())
-        if self.model.item(WIDGETS.W_POROD_CST).text() != "None" and self.model.item(WIDGETS.W_POROD_CST).text() != "":
-            self._porod = float(self.model.item(WIDGETS.W_POROD_CST).text())
-        if self.model.item(WIDGETS.W_VOLFRAC1).text() != "None" and self.model.item(WIDGETS.W_VOLFRAC1).text() != "":
-            self._volfrac1 = float(self.model.item(WIDGETS.W_VOLFRAC1).text())
-        if self.model.item(WIDGETS.W_VOLFRAC2).text() != "None" and self.model.item(WIDGETS.W_VOLFRAC2).text() != "":
-            self._volfrac2 = float(self.model.item(WIDGETS.W_VOLFRAC2).text())
+
+        porod_text = self.model.item(WIDGETS.W_POROD_CST).text()
+        self._porod = float(porod_text) if porod_text else None
+
+        porod_err_text = self.model.item(WIDGETS.W_POROD_CST_ERR).text()
+        self._porod_err = float(porod_err_text) if porod_err_text else None
+
+        volfrac1_text = self.model.item(WIDGETS.W_VOLFRAC1).text()
+        self._volfrac1 = float(volfrac1_text) if volfrac1_text else None
+
+        volfrac1_err_text = self.model.item(WIDGETS.W_VOLFRAC1_ERR).text()
+        self._volfrac1_err = float(volfrac1_err_text) if volfrac1_err_text else None
 
         self._low_extrapolate = str(self.model.item(WIDGETS.W_ENABLE_LOWQ_EX).text()) == "true"
         self._low_guinier = self.rbLowQGuinier_ex.isChecked()
@@ -297,15 +317,27 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
     def allow_calculation(self) -> None:
         """Enable the calculate button if either volume fraction or contrast is selected"""
+
+        # Check if data is available
         if self._data is None:
             self.cmdCalculate.setEnabled(False)
             self.cmdCalculate.setText("Calculate (No data)")
             return
 
-        if self.rbVolFrac.isChecked() and self.txtVolFrac1.text() != "":
-            self.cmdCalculate.setEnabled(True)
-            self.cmdCalculate.setText("Calculate")
-        elif self.rbContrast.isChecked() and self.txtContrast.text() != "":
+        # Update from model first to ensure instance variables are current
+        self.update_from_model()
+
+        # Check ONLY the field that corresponds to the selected radio button
+        has_valid_input = False
+
+        if self.rbVolFrac.isChecked():
+            # In volume fraction mode, only check if volume fraction has a value
+            has_valid_input = self._volfrac1 is not None
+        elif self.rbContrast.isChecked():
+            # In contrast mode, only check if contrast has a value
+            has_valid_input = self._contrast is not None
+
+        if has_valid_input:
             self.cmdCalculate.setEnabled(True)
             self.cmdCalculate.setText("Calculate")
         else:
@@ -348,7 +380,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             self.low_extrapolation_plot.show_q_range_sliders = True
             self.low_extrapolation_plot.slider_update_on_move = False
             self.low_extrapolation_plot.slider_perspective_name = self.name
-            self.low_extrapolation_plot.slider_low_q_input = self.extrapolation_parameters.data_q_min
+            self.low_extrapolation_plot.slider_low_q_input = self.extrapolation_parameters.ex_q_min
             self.low_extrapolation_plot.slider_high_q_input = self.txtGuinierEnd_ex.text()
             self.low_extrapolation_plot.slider_high_q_setter = ["set_low_q_extrapolation_upper_limit"]
             self.low_extrapolation_plot.slider_high_q_getter = ["get_low_q_extrapolation_upper_limit"]
@@ -525,7 +557,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         if self.rbContrast.isChecked() and self._contrast:
             try:
                 volume_fraction, volume_fraction_error = self._calculator.get_volume_fraction_with_error(
-                    self._contrast, extrapolation=extrapolation
+                    self._contrast, contrast_err=self._contrast_err, extrapolation=extrapolation
                 )
             except (ValueError, ZeroDivisionError, RuntimeError, AttributeError, TypeError) as ex:
                 calculation_failed = True
@@ -543,7 +575,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         if self.rbVolFrac.isChecked() and self._volfrac1:
             try:
                 contrast_out, contrast_out_error = self._calculator.get_contrast_with_error(
-                    self._volfrac1, extrapolation=extrapolation
+                    self._volfrac1, volume_err=self._volfrac1_err, extrapolation=extrapolation
                 )
             except (ValueError, ZeroDivisionError, RuntimeError, AttributeError, TypeError) as ex:
                 calculation_failed: bool = True
@@ -558,12 +590,20 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         surface: float | str | None = ""
         surface_error: float | str | None = ""
 
-        if self._porod:
+        if self._porod and self._porod > 0:
             # Use calculated contrast if in volume fraction mode, otherwise use input contrast
             contrast_for_surface = contrast_out if self.rbVolFrac.isChecked() and self._volfrac1 else self._contrast
+            contrast_for_surface_err = (
+                contrast_out_error if self.rbVolFrac.isChecked() and self._volfrac1 else self._contrast_err
+            )
             if contrast_for_surface:
                 try:
-                    surface, surface_error = self._calculator.get_surface_with_error(contrast_for_surface, self._porod)
+                    surface, surface_error = self._calculator.get_surface_with_error(
+                        contrast_for_surface,
+                        self._porod,
+                        contrast_err=contrast_for_surface_err,
+                        porod_const_err=self._porod_err,
+                    )
                 except (ValueError, ZeroDivisionError, RuntimeError, AttributeError, TypeError) as ex:
                     calculation_failed: bool = True
                     msg += str(ex)
@@ -582,7 +622,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             return self.model
 
         if low_calculation_pass:
-            qmin_ext: float = float(self.extrapolation_parameters.data_q_min)
+            qmin_ext: float = float(self.extrapolation_parameters.ex_q_min)
             extrapolated_data = self._calculator.get_extra_data_low(self._low_points, q_start=qmin_ext)
             power_low: float | None = self._calculator.get_extrapolation_power(range="low")
 
@@ -688,26 +728,32 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.cmdHelp.clicked.connect(self.onHelp)
 
         # slots for the volume fraction and contrast radio buttons
-        self.rbVolFrac.toggled.connect(self.volFracToggle)
-        self.rbContrast.toggled.connect(self.contrastToggle)
+        self.rbVolFrac.toggled.connect(self.contrast_volfrac_toggle)
+        self.rbContrast.toggled.connect(self.contrast_volfrac_toggle)
+
+        # group radio buttons to make them exclusive
+        self.VolFracContrastGroup = QtWidgets.QButtonGroup(self)
+        self.VolFracContrastGroup.addButton(self.rbVolFrac)
+        self.VolFracContrastGroup.addButton(self.rbContrast)
 
         # update model from gui editing by users
-        self.txtBackgd.editingFinished.connect(self.updateFromGui)
-        self.txtScale.editingFinished.connect(self.updateFromGui)
-        self.txtContrast.editingFinished.connect(self.updateFromGui)
-        self.txtPorodCst.editingFinished.connect(self.updateFromGui)
-        self.txtVolFrac1.editingFinished.connect(self.updateFromGui)
+        self.txtBackgd.textEdited.connect(self.updateFromGui)
+        self.txtScale.textEdited.connect(self.updateFromGui)
+        self.txtContrast.textEdited.connect(self.updateFromGui)
+        self.txtContrastErr.textEdited.connect(self.updateFromGui)
+        self.txtPorodCst.textEdited.connect(self.updateFromGui)
+        self.txtVolFrac1.textEdited.connect(self.updateFromGui)
         self.txtVolFrac1.editingFinished.connect(self.checkVolFrac)
-        self.txtVolFrac2.editingFinished.connect(self.updateFromGui)
+        self.txtVolFrac1Err.textEdited.connect(self.updateFromGui)
 
         # Extrapolation parameters
         # Q range fields
-        self.txtGuinierEnd_ex.editingFinished.connect(self.on_extrapolation_text_changed_1)
-        self.txtPorodStart_ex.editingFinished.connect(self.on_extrapolation_text_changed_2)
-        self.txtPorodEnd_ex.editingFinished.connect(self.on_extrapolation_text_changed_3)
-        self.txtGuinierEnd_ex.setValidator(GuiUtils.DoubleValidator())
-        self.txtPorodStart_ex.setValidator(GuiUtils.DoubleValidator())
-        self.txtPorodEnd_ex.setValidator(GuiUtils.DoubleValidator())
+        self.txtGuinierEnd_ex.textEdited.connect(self.on_extrapolation_text_editing)
+        self.txtPorodStart_ex.textEdited.connect(self.on_extrapolation_text_editing)
+        self.txtPorodEnd_ex.textEdited.connect(self.on_extrapolation_text_editing)
+        self.txtGuinierEnd_ex.editingFinished.connect(self.on_extrapolation_text_edited)
+        self.txtPorodStart_ex.editingFinished.connect(self.on_extrapolation_text_edited)
+        self.txtPorodEnd_ex.editingFinished.connect(self.on_extrapolation_text_edited)
         self.enable_extrapolation_text(False)
 
         # Extrapolation Options
@@ -848,77 +894,173 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.update_from_model()
 
     def on_extrapolation_slider_changed(self, state: ExtrapolationParameters) -> None:
+        """Handle when user changes any of the extrapolation slider values"""
         format_string: str = "%.7g"
         self.model.setItem(WIDGETS.W_GUINIER_END_EX, QtGui.QStandardItem(format_string % state.point_1))
         self.model.setItem(WIDGETS.W_POROD_START_EX, QtGui.QStandardItem(format_string % state.point_2))
         self.model.setItem(WIDGETS.W_POROD_END_EX, QtGui.QStandardItem(format_string % state.point_3))
-        self.notify_extrapolation_text_box_validity(state, show_dialog=True)
+        self.correct_extrapolation_values()
 
-    def on_extrapolation_text_changed_1(self) -> None:
-        value: str = self.txtGuinierEnd_ex.text()
-        params = self.extrapolation_parameters._replace(point_1=safe_float(value))
-        self.slider.extrapolation_parameters = params
-        self.notify_extrapolation_text_box_validity(params, show_dialog=True)
+    def on_extrapolation_text_editing(self) -> None:
+        """Handle when user edits any of the extrapolation text boxes"""
+        if self.extrapolation_parameters is None or self._data is None:
+            return
+        self.check_extrapolation_values()
 
-    def on_extrapolation_text_changed_2(self) -> None:
-        value: str = self.txtPorodStart_ex.text()
-        params = self.extrapolation_parameters._replace(point_2=safe_float(value))
-        self.slider.extrapolation_parameters = params
-        self.notify_extrapolation_text_box_validity(params, show_dialog=True)
+    def on_extrapolation_text_edited(self) -> None:
+        """Handle when user finishes editing any of the extrapolation text boxes"""
+        # First update the model with new values
+        self.apply_parameters_from_ui()
+        # Then correct any invalid values
+        self.correct_extrapolation_values()
 
-    def on_extrapolation_text_changed_3(self) -> None:
-        value: str = self.txtPorodEnd_ex.text()
-        params = self.extrapolation_parameters._replace(point_3=safe_float(value))
-        self.slider.extrapolation_parameters = params
-        self.notify_extrapolation_text_box_validity(params, show_dialog=True)
+    def format_sig_fig(self, value: float) -> str:
+        """Format a float to 7 significant figures as a string"""
+        return f"{value:.7g}"
 
-    def notify_extrapolation_text_box_validity(
-        self, params: ExtrapolationParameters, show_dialog: bool = False
-    ) -> None:
-        # Round values to 8 significant figures to avoid floating point precision issues
-        p1: float = float(f"{params.point_1:.7g}")  # Guinier end
-        p2: float = float(f"{params.point_2:.7g}")  # Porod start
-        p3: float = float(f"{params.point_3:.7g}")  # Porod end
-        data_q_min: float = float(f"{self._data.x.min():.7g}")  # Actual data min
-        data_q_max: float = float(f"{self._data.x.max():.7g}")  # Actual data max
-        qmax: float = Q_MAXIMUM
+    def _get_live_extrapolation_values(self) -> tuple[float, float, float]:
+        """Read current text box values without correcting them."""
+        return (
+            safe_float(self.txtGuinierEnd_ex.text()),
+            safe_float(self.txtPorodStart_ex.text()),
+            safe_float(self.txtPorodEnd_ex.text()),
+        )
 
-        # Determine validity flags such that data_q_min < point_1 < point_2 < point_3 < qmax
-        # Also p2 < data_q_max so that Porod start is within data range
-        invalid_1: bool = p1 <= data_q_min or p1 >= p2
-        invalid_2: bool = p2 <= p1 or p2 >= p3 or p2 >= data_q_max
-        invalid_3: bool = p3 <= p2 or p3 > qmax
+    def check_extrapolation_values(self) -> None:
+        """
+        Check validity of extrapolation text boxes such that: data_q_min < point_1 < point_2 < point_3 < Q_MAXIMUM and point_2 < data_q_max
+        If invalid, set background color of text box to red
+        
+        """
+        # source of values: live text boxes
+        p1, p2, p3 = self._get_live_extrapolation_values()
 
-        # Make the background red if the text box is invalid
-        self.txtGuinierEnd_ex.setStyleSheet(BG_RED if invalid_1 else BG_DEFAULT)
-        self.txtPorodStart_ex.setStyleSheet(BG_RED if invalid_2 else BG_DEFAULT)
-        self.txtPorodEnd_ex.setStyleSheet(BG_RED if invalid_3 else BG_DEFAULT)
+        data_q_min = float(self._data.x.min())  # Actual data min
+        data_q_max = float(self._data.x.max())  # Actual data max
+        qmax       = Q_MAXIMUM                  # Extrapolation maximum
 
-        # If requested, show dialog if values are out of range
-        if show_dialog and (p1 <= data_q_min or p3 > qmax):
-            msg = "The slider values are out of range.\n"
-            msg += f"The minimum value is {data_q_min:.7g} and the maximum value is {qmax:.7g}"
-            dialog = QtWidgets.QMessageBox(self, text=msg)
-            dialog.setWindowTitle("Value out of range")
+        # Helper to test numeric presence
+        has_p1 = not math.isnan(p1)
+        has_p2 = not math.isnan(p2)
+        has_p3 = not math.isnan(p3)
+
+        invalid_p1_data_min: bool = has_p1 and p1 <= data_q_min
+        invalid_p1_high    : bool = has_p1 and has_p2 and p1 >= p2
+        invalid_p2_data_min: bool = has_p2 and p2 <= data_q_min
+        invalid_p2_data_max: bool = has_p2 and p2 >= data_q_max
+        invalid_p3_low     : bool = has_p3 and has_p2 and p3 <= p2
+        invalid_p3_ex_max  : bool = has_p3 and p3 > qmax
+
+        # UI feedback:
+        # - If a field has no numeric value (user still typing "1e-" or empty) keep default background.
+        # - If the numeric check says invalid -> red
+        self.txtGuinierEnd_ex.setStyleSheet(BG_RED if invalid_p1_data_min or invalid_p1_high else BG_DEFAULT)
+        self.txtPorodStart_ex.setStyleSheet(BG_RED if invalid_p2_data_min or invalid_p2_data_max else BG_DEFAULT)
+        self.txtPorodEnd_ex.setStyleSheet(BG_RED if invalid_p3_low or invalid_p3_ex_max else BG_DEFAULT)
+
+        self.validity_flags = [
+            invalid_p2_data_min,
+            invalid_p1_data_min,
+            invalid_p1_high,
+            invalid_p2_data_max,
+            invalid_p3_low,
+            invalid_p3_ex_max
+        ]
+
+        # Disable Calculate button if any invalid values
+        if any(self.validity_flags):
+            self.cmdCalculate.setEnabled(False)
+            self.cmdCalculate.setToolTip("Please correct invalid extrapolation values before calculating.")
+        else:
+            self.cmdCalculate.setToolTip("")
+            self.allow_calculation()
+
+    def correct_extrapolation_values(self) -> None:
+        """
+        Correct invalid extrapolation text box values to nearest valid value
+        """
+        # update validity flags first
+        self.check_extrapolation_values()
+
+        # if all values are valid, nothing to do
+        if not any(self.validity_flags):
+            return
+
+        data_q_min = float(self.format_sig_fig(self._data.x.min()))  # Actual data min
+        data_q_max = float(self.format_sig_fig(self._data.x.max()))  # Actual data max
+        qmax = Q_MAXIMUM                                             # Extrapolation maximum
+        messages = []
+
+        # block signals to avoid recursive calls
+        with QtCore.QSignalBlocker(self.txtGuinierEnd_ex), QtCore.QSignalBlocker(self.txtPorodStart_ex), QtCore.QSignalBlocker(self.txtPorodEnd_ex):
+
+            # start by updating p2 as it is used in multiple checks
+            if self.validity_flags[0]:  # point_2 <= data_q_min
+                messages.append(f"The minimum Q value of the data is {data_q_min:.7g}.")
+                new_p2: float = (data_q_min + data_q_max) / 2  # midpoint of data range
+                self.txtPorodStart_ex.setText(self.format_sig_fig(new_p2))
+                self.check_extrapolation_values()  # re-check validity after changing p2
+
+            p2 = safe_float(self.txtPorodStart_ex.text())
+
+            if self.validity_flags[1]:  # point_1 <= data_q_min
+                messages.append(f"The minimum value is {data_q_min:.7g}.")
+                new_p1: float = data_q_min + ADJUST_EPS
+                self.txtGuinierEnd_ex.setText(self.format_sig_fig(new_p1))
+
+            if self.validity_flags[2]:  # point_1 >= point_2
+                new_p1: float = p2 - ADJUST_EPS
+                messages.append(f"The Low-q end value must be less than the High-q start value ({p2:.7g}).")
+                self.txtGuinierEnd_ex.setText(self.format_sig_fig(new_p1))
+
+            if self.validity_flags[3]:  # point_2 >= data_q_max
+                new_p2: float = data_q_max - ADJUST_EPS
+                messages.append(f"The maximum Q value of the data is {data_q_max:.7g}.")
+                self.txtPorodStart_ex.setText(self.format_sig_fig(new_p2))
+
+            if self.validity_flags[4]:  # point_3 <= point_2
+                new_p3: float = data_q_max + ADJUST_EPS  # just above data max to extrapoalate
+                messages.append(f"The High-q end value must be greater than the High-q start value ({new_p3:.7g}).")
+                self.txtPorodEnd_ex.setText(self.format_sig_fig(new_p3))
+
+            if self.validity_flags[5]:  # point_3 > qmax
+                qmax: float = Q_MAXIMUM
+                messages.append(f"The maximum value is {qmax:.7g}.")
+                self.txtPorodEnd_ex.setText(self.format_sig_fig(qmax))
+
+        # update slider and model
+        self.apply_parameters_from_ui()
+
+        if messages:
+            messages.append("Values have been adjusted to the nearest valid value.")
+            dialog = QtWidgets.QMessageBox(self)
+            dialog.setWindowTitle("Invalid Extrapolation Values")
+            dialog.setIcon(QtWidgets.QMessageBox.Warning)
+            dialog.setText("\n".join(messages))
             dialog.setStandardButtons(QtWidgets.QMessageBox.Ok)
             dialog.exec_()
-            if p1 < data_q_min:
-                self.txtGuinierEnd_ex.setText(f"{data_q_min + 1e-7:.7g}")
-                self.on_extrapolation_text_changed_1()
-            if p3 > qmax:
-                self.txtPorodEnd_ex.setText(f"{qmax:.7g}")
-                self.on_extrapolation_text_changed_3()
 
-        # Show dialog if p2 is greater than data max
-        if show_dialog and (p2 > data_q_max):
-            msg = "The High-Q start value cannot be greater than the maximum Q value of the data.\n"
-            msg += f"The maximum Q value of the data is {data_q_max:.7g}"
-            dialog = QtWidgets.QMessageBox(self, text=msg)
-            dialog.setWindowTitle("Invalid High-Q Start Value")
-            dialog.setStandardButtons(QtWidgets.QMessageBox.Ok)
-            dialog.exec_()
-            self.txtPorodStart_ex.setText(str(data_q_max - 1e-7))
-            self.on_extrapolation_text_changed_2()
+    def apply_parameters_from_ui(self):
+        """Sets extrapolation parameters from the text boxes into the model and slider"""
+        p1: str = self.txtGuinierEnd_ex.text()
+        p2: str = self.txtPorodStart_ex.text()
+        p3: str = self.txtPorodEnd_ex.text()
+
+        if self.extrapolation_parameters is None:
+            return
+        # update the slider (this may emit a signal that will call on_extrapolation_slider_changed)
+        self.slider.extrapolation_parameters = self.extrapolation_parameters._replace(
+            point_1=safe_float(p1),
+            point_2=safe_float(p2),
+            point_3=safe_float(p3))
+
+        # update model item text too
+        self.model.setItem(WIDGETS.W_GUINIER_END_EX, QtGui.QStandardItem(p1))
+        self.model.setItem(WIDGETS.W_POROD_START_EX, QtGui.QStandardItem(p2))
+        self.model.setItem(WIDGETS.W_POROD_END_EX, QtGui.QStandardItem(p3))
+
+        # re-validate to update any UI flags
+        self.check_extrapolation_values()
 
     def stateChanged(self) -> None:
         """Catch modifications from low- and high-Q extrapolation check boxes"""
@@ -945,14 +1087,12 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         GuiUtils.updateModelItemStatus(self._manager.filesWidget.model, self._path, name, self.sender().checkState())
 
     def checkVolFrac(self) -> None:
-        """Check if volfrac1, volfrac2 are strictly between 0 and 1, and volfrac1 + volfrac2 = 1"""
-        if self.txtVolFrac1.text() and self.txtVolFrac2.text():
+        """Check if volfrac1 is strictly between 0 and 1"""
+        if self.txtVolFrac1.text().strip() != "":
             try:
                 vf1 = float(self.txtVolFrac1.text())
-                vf2 = float(self.txtVolFrac2.text())
             except ValueError:
                 self.txtVolFrac1.setStyleSheet(BG_RED)
-                self.txtVolFrac2.setStyleSheet(BG_RED)
                 self.cmdCalculate.setEnabled(False)
                 msg = "Volume fractions must be valid numbers."
                 dialog = QtWidgets.QMessageBox(self, text=msg)
@@ -961,15 +1101,13 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                 dialog.setStandardButtons(QtWidgets.QMessageBox.Ok)
                 dialog.exec_()
                 return
-            if 0 < vf1 < 1 and 0 < vf2 < 1 and round(vf1 + vf2, 3) == 1.0:
+            if 0 < vf1 < 1:
                 self.txtVolFrac1.setStyleSheet(BG_DEFAULT)
-                self.txtVolFrac2.setStyleSheet(BG_DEFAULT)
                 self.allow_calculation()
             else:
                 self.txtVolFrac1.setStyleSheet(BG_RED)
-                self.txtVolFrac2.setStyleSheet(BG_RED)
                 self.cmdCalculate.setEnabled(False)
-                msg = "Volume fractions must be between 0 and 1, and their sum must equal 1."
+                msg = "Volume fraction must be between 0 and 1."
                 dialog = QtWidgets.QMessageBox(self, text=msg)
                 dialog.setWindowTitle("Invalid Volume Fraction")
                 dialog.setIcon(QtWidgets.QMessageBox.Warning)
@@ -982,10 +1120,12 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         possible_senders: list[str] = [
             "txtBackgd",
             "txtContrast",
+            "txtContrastErr",
             "txtPorodCst",
+            "txtPorodCstErr",
             "txtScale",
             "txtVolFrac1",
-            "txtVolFrac2",
+            "txtVolFrac1Err",
             "txtLowQPower_ex",
             "txtHighQPower_ex",
         ]
@@ -993,10 +1133,12 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         related_widgets: list[WIDGETS] = [
             WIDGETS.W_BACKGROUND,
             WIDGETS.W_CONTRAST,
+            WIDGETS.W_CONTRAST_ERR,
             WIDGETS.W_POROD_CST,
+            WIDGETS.W_POROD_CST_ERR,
             WIDGETS.W_SCALE,
             WIDGETS.W_VOLFRAC1,
-            WIDGETS.W_VOLFRAC2,
+            WIDGETS.W_VOLFRAC1_ERR,
             WIDGETS.W_LOWQ_POWER_VALUE_EX,
             WIDGETS.W_HIGHQ_POWER_VALUE_EX,
         ]
@@ -1006,7 +1148,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         index_elt: int = possible_senders.index(sender_name)
 
         # Allow empty strings for optional fields like contrast and porod constant
-        optional_fields: list[str] = ["txtContrast", "txtPorodCst"]
+        optional_fields: list[str] = ["txtContrast", "txtContrastErr", "txtPorodCst", "txtPorodCstErr", "txtVolFrac1", "txtVolFrac1Err"]
 
         if text_value == "" and sender_name in optional_fields:
             # Set the corresponding attribute to None
@@ -1017,7 +1159,11 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             # Map sender names to instance variable names
             sender_to_attr = {
                 "txtContrast": "_contrast",
+                "txtContrastErr": "_contrast_err",
                 "txtPorodCst": "_porod",
+                "txtPorodCstErr": "_porod_err",
+                "txtVolFrac1": "_volfrac1",
+                "txtVolFrac1Err": "_volfrac1_err",
             }
             if sender_name in sender_to_attr:
                 setattr(self, sender_to_attr[sender_name], None)
@@ -1037,10 +1183,11 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             sender_to_attr = {
                 "txtBackgd": "_background",
                 "txtContrast": "_contrast",
+                "txtContrastErr": "_contrast_err",
                 "txtPorodCst": "_porod",
                 "txtScale": "_scale",
                 "txtVolFrac1": "_volfrac1",
-                "txtVolFrac2": "_volfrac2",
+                "txtVolFrac1Err": "_volfrac1_err",
                 "txtLowQPower_ex": "_low_power_value",
                 "txtHighQPower_ex": "_high_power_value",
             }
@@ -1048,67 +1195,45 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             if sender_name in sender_to_attr:
                 setattr(self, sender_to_attr[sender_name], new_value)
 
-            # Auto-set _volfrac2 to 1 - _volfrac1 when txtVolFrac1 changes
-            if sender_name == "txtVolFrac1":
-                self.txtVolFrac2.setEnabled(False)
-                self._volfrac2 = round(1 - self._volfrac1, 3)
-                # Update the model and UI for volfrac2
-                volfrac2_item = QtGui.QStandardItem(str(self._volfrac2))
-                self.model.setItem(WIDGETS.W_VOLFRAC2, volfrac2_item)
-                self.txtVolFrac2.setText(str(self._volfrac2))
-
             self.allow_calculation()
-        except ValueError:
-            # empty field, just skip
+        except (ValueError, TypeError):
+            # empty field or invalid input, just skip
             self.sender().setStyleSheet(BG_RED)
             self.cmdCalculate.setEnabled(False)
 
-    def contrastToggle(self, toggle: bool) -> None:
+    def contrast_volfrac_toggle(self) -> None:
         """
-        Enable editing of contrast and disable editing of volume fraction if Contrast is selected
+        Enable editing of the correct fields based on whether Contrast or VolFrac is selected
         """
-        self._update_contrast_volfrac_state(use_contrast=toggle)
+        use_contrast: bool = self.rbContrast.isChecked()
 
-    def volFracToggle(self, toggle: bool) -> None:
-        """
-        Enable editing of volume fraction and disable editing of contrast if VolFrac is selected
-        """
-        self._update_contrast_volfrac_state(use_contrast=not toggle)
-
-    def _update_contrast_volfrac_state(self, use_contrast: bool) -> None:
-        """
-        Update the enabled state of contrast and volume fraction fields.
-        
-        Args:
-            use_contrast: If True, contrast is input and volume fraction is output.
-                          If False, volume fraction is input and contrast is output.
-        """
-        # Update model items
-        self.model.setItem(WIDGETS.W_ENABLE_CONTRAST, QtGui.QStandardItem(str(use_contrast).lower()))
-        self.model.setItem(WIDGETS.W_ENABLE_VOLFRAC, QtGui.QStandardItem(str(not use_contrast).lower()))
+        # update model items
+        self.model.setItem(WIDGETS.W_ENABLE_CONTRAST, QtGui.QStandardItem(str(self.rbContrast.isChecked()).lower()))
+        self.model.setItem(WIDGETS.W_ENABLE_VOLFRAC, QtGui.QStandardItem(str(self.rbVolFrac.isChecked()).lower()))
 
         # Input fields
         self.txtContrast.setEnabled(use_contrast)
+        self.txtContrastErr.setEnabled(use_contrast)
         self.txtVolFrac1.setEnabled(not use_contrast)
-        self.txtVolFrac2.setEnabled(not use_contrast)
+        self.txtVolFrac1Err.setEnabled(not use_contrast)
 
-        # Output fields (grey out the one that's being used as input)
+        # Output fields
         self.txtVolFract.setEnabled(use_contrast)
         self.txtVolFractErr.setEnabled(use_contrast)
         self.txtContrastOut.setEnabled(not use_contrast)
         self.txtContrastOutErr.setEnabled(not use_contrast)
+
+        # allow calculation if the relevant fields are filled
+        self.allow_calculation()
 
     def update_progress_bars(self) -> None:
         """Update progress bars based on Q* values from the model"""
 
         def reset_progress_bars():
             """Helper to reset all progress bars to empty state"""
-            self.progressBarData.setValue(0)
-            self.progressBarData.setFormat("")
-            self.progressBarLowQ.setValue(0)
-            self.progressBarLowQ.setFormat("")
-            self.progressBarHighQ.setValue(0)
-            self.progressBarHighQ.setFormat("")
+        for bar in (self.progressBarLowQ, self.progressBarData, self.progressBarHighQ):
+            bar.setValue(0)
+            bar.setFormat("")
 
         def get_qstar_value(widget_id: int) -> float:
             """Extract Q* value from model item, return 0.0 if invalid"""
@@ -1120,7 +1245,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             except (ValueError, TypeError):
                 return 0.0
 
-        def set_progress_bar(progress_bar, percent: float):
+        def set_progress_bar(progress_bar: QtWidgets.QProgressBar, percent: float):
             """Set progress bar value and format string"""
             progress_bar.setValue(int(percent))
             progress_bar.setFormat("%6.2f %%" % percent)
@@ -1137,13 +1262,14 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                 return
 
             # Get Q* components
-            qstar_low = get_qstar_value(WIDGETS.D_LOW_QSTAR)
+            qdata      = get_qstar_value(WIDGETS.D_DATA_QSTAR)
+            qstar_low  = get_qstar_value(WIDGETS.D_LOW_QSTAR)
             qstar_high = get_qstar_value(WIDGETS.D_HIGH_QSTAR)
 
             # Calculate percentages
+            data_percent = (qdata / qstar_total) * 100.0
             low_percent = (qstar_low / qstar_total) * 100.0
             high_percent = (qstar_high / qstar_total) * 100.0
-            data_percent = 100.0 - low_percent - high_percent
 
             # Update all progress bars
             set_progress_bar(self.progressBarLowQ, low_percent)
@@ -1176,20 +1302,36 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         else:
             item: QtGui.QStandardItem = QtGui.QStandardItem("")
         self.model.setItem(WIDGETS.W_CONTRAST, item)
+        item: QtGui.QStandardItem = QtGui.QStandardItem(str(self._contrast_err))
+        self.model.setItem(WIDGETS.W_CONTRAST_ERR, item)
         item: QtGui.QStandardItem = QtGui.QStandardItem(str(self._scale))
         self.model.setItem(WIDGETS.W_SCALE, item)
-        # leave line edit empty if Porod constant not defined
-        if self._porod is not None:
-            item: QtGui.QStandardItem = QtGui.QStandardItem(str(self._porod))
-        else:
-            item: QtGui.QStandardItem = QtGui.QStandardItem("")
-        self.model.setItem(WIDGETS.W_POROD_CST, item)
 
-        # add volume fraction to the model
-        item: QtGui.QStandardItem = QtGui.QStandardItem(str(self._volfrac1))
+        # leave line edit empty if value is not defined
+        item: QtGui.QStandardItem = (
+            QtGui.QStandardItem(str(self._porod)) if self._porod is not None else QtGui.QStandardItem("")
+        )
+        self.model.setItem(WIDGETS.W_POROD_CST, item)
+        item: QtGui.QStandardItem = (
+            QtGui.QStandardItem(str(self._porod_err)) if self._porod_err is not None else QtGui.QStandardItem("")
+        )
+        self.model.setItem(WIDGETS.W_POROD_CST_ERR, item)
+        item: QtGui.QStandardItem = (
+            QtGui.QStandardItem(str(self._contrast)) if self._contrast is not None else QtGui.QStandardItem("")
+        )
+        self.model.setItem(WIDGETS.W_CONTRAST, item)
+        item: QtGui.QStandardItem = (
+            QtGui.QStandardItem(str(self._contrast_err)) if self._contrast_err is not None else QtGui.QStandardItem("")
+        )
+        self.model.setItem(WIDGETS.W_CONTRAST_ERR, item)
+        item: QtGui.QStandardItem = (
+            QtGui.QStandardItem(str(self._volfrac1)) if self._volfrac1 is not None else QtGui.QStandardItem("")
+        )
         self.model.setItem(WIDGETS.W_VOLFRAC1, item)
-        item: QtGui.QStandardItem = QtGui.QStandardItem(str(self._volfrac2))
-        self.model.setItem(WIDGETS.W_VOLFRAC2, item)
+        item: QtGui.QStandardItem = (
+            QtGui.QStandardItem(str(self._volfrac1_err)) if self._volfrac1_err is not None else QtGui.QStandardItem("")
+        )
+        self.model.setItem(WIDGETS.W_VOLFRAC1_ERR, item)
 
         # add enable contrast/volfrac to the model
         item: QtGui.QStandardItem = QtGui.QStandardItem("true")
@@ -1234,9 +1376,15 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
         # Contrast
         self.mapper.addMapping(self.txtContrast, WIDGETS.W_CONTRAST)
+        self.mapper.addMapping(self.txtContrastErr, WIDGETS.W_CONTRAST_ERR)
+
+        # Volume fraction
+        self.mapper.addMapping(self.txtVolFrac1, WIDGETS.W_VOLFRAC1)
+        self.mapper.addMapping(self.txtVolFrac1Err, WIDGETS.W_VOLFRAC1_ERR)
 
         # Porod constant
         self.mapper.addMapping(self.txtPorodCst, WIDGETS.W_POROD_CST)
+        self.mapper.addMapping(self.txtPorodCstErr, WIDGETS.W_POROD_CST_ERR)
 
         # Output
         self.mapper.addMapping(self.txtVolFract, WIDGETS.W_VOLUME_FRACTION)
@@ -1306,6 +1454,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
         def fractional_position(f):
             return np.exp(f * log_data_max + (1 - f) * log_data_min)
+
         self.model.setItem(WIDGETS.W_GUINIER_END_EX, QtGui.QStandardItem("%.7g" % fractional_position(0.15)))
         self.model.setItem(WIDGETS.W_POROD_START_EX, QtGui.QStandardItem("%.7g" % fractional_position(0.85)))
         self.model.setItem(WIDGETS.W_POROD_END_EX, QtGui.QStandardItem("%.7g" % Q_MAXIMUM))
@@ -1342,6 +1491,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.txtName.setText("")
         self.txtFileName.setText("")
         self._porod = None
+        self._porod_err = None
         # Pass an empty dictionary to set all inputs to their default values
         self.updateFromParameters({})
         # Disable buttons to return to base state
@@ -1430,8 +1580,13 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             "invariant_total_err": self.txtInvariantTotErr.text(),
             "background": self.txtBackgd.text(),
             "contrast": self.txtContrast.text(),
+            "contrast_err": self.txtContrastErr.text(),
             "scale": self.txtScale.text(),
             "porod": self.txtPorodCst.text(),
+            "volfrac1": self.txtVolFrac1.text(),
+            "volfrac1_err": self.txtVolFrac1Err.text(),
+            "enable_contrast": self.rbContrast.isChecked(),
+            "enable_volfrac": self.rbVolFrac.isChecked(),
             "total_q_min": self.txtTotalQMin.text(),
             "total_q_max": self.txtTotalQMax.text(),
             "guinier_end_low_q_ex": self.txtGuinierEnd_ex.text(),
@@ -1475,22 +1630,25 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.txtBackgd.setText(str(params.get("background", "0.0")))
         self.txtScale.setText(str(params.get("scale", "1.0")))
         self.txtContrast.setText(str(params.get("contrast", "")))
+        self.txtContrastErr.setText(str(params.get("contrast_err", "0.0")))
         self.txtPorodCst.setText(str(params.get("porod", "0.0")))
+        self.txtVolFrac1.setText(str(params.get("volfrac1", "0.0")))
+        self.txtVolFrac1Err.setText(str(params.get("volfrac1_err", "0.0")))
 
-        # Extrapolation tab
-        self.txtGuinierEnd_ex.setText(str(params.get("qmax_lowq", "")))
-        self.txtPorodStart_ex.setText(str(params.get("qmin_highq", "")))
-        self.txtPorodEnd_ex.setText(str(params.get("qmax_highq", "")))
-        self.txtLowQPower_ex.setText(str(params.get("lowQPower", DEFAULT_POWER_VALUE)))
-        self.txtHighQPower_ex.setText(str(params.get("highQPower", DEFAULT_POWER_VALUE)))
-        self.chkLowQ_ex.setChecked(params.get("lowQ", False))
-        self.chkHighQ_ex.setChecked(params.get("highQ", False))
-        self.rbLowQGuinier_ex.setChecked(params.get("lowQGuinier", False))
-        self.rbLowQPower_ex.setChecked(params.get("lowQPower", False))
-        self.rbLowQFit_ex.setChecked(params.get("lowQFit", False))
-        self.rbLowQFix_ex.setChecked(params.get("lowQFix", False))
-        self.rbHighQFit_ex.setChecked(params.get("highQFit", False))
-        self.rbHighQFix_ex.setChecked(params.get("highQFix", False))
+        # Extrapolation tab - use new _ex suffix variables
+        self.txtGuinierEnd_ex.setText(str(params.get("guinier_end_low_q_ex", "")))
+        self.txtPorodStart_ex.setText(str(params.get("porod_start_high_q_ex", "")))
+        self.txtPorodEnd_ex.setText(str(params.get("porod_end_high_q_ex", "")))
+        self.txtLowQPower_ex.setText(str(params.get("power_low_q_ex", DEFAULT_POWER_VALUE)))
+        self.txtHighQPower_ex.setText(str(params.get("power_high_q_ex", DEFAULT_POWER_VALUE)))
+        self.chkLowQ_ex.setChecked(params.get("enable_low_q_ex", False))
+        self.chkHighQ_ex.setChecked(params.get("enable_high_q_ex", False))
+        self.rbLowQGuinier_ex.setChecked(params.get("low_q_guinier_ex", False))
+        self.rbLowQPower_ex.setChecked(params.get("low_q_power_ex", False))
+        self.rbLowQFit_ex.setChecked(params.get("low_q_fit_ex", False))
+        self.rbLowQFix_ex.setChecked(params.get("low_q_fix_ex", False))
+        self.rbHighQFit_ex.setChecked(params.get("high_q_fit_ex", False))
+        self.rbHighQFix_ex.setChecked(params.get("high_q_fix_ex", False))
 
         # Update once all inputs are changed
         self.update_from_model()

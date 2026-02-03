@@ -35,13 +35,16 @@ Small Q
 The scattering data is extrapolated to :math:`q = 0` by fitting a Guinier function, defined as
 
 .. math::
-    I(q) = e^{A + Bq^2}
+    I(q) = I_{0}e^{R_{g}^2 q^2 / 3}
 
-to data up to :math:`q` value specified by `Guinier Start`.
+to data up to :math:`q` value specified by `Guinier Start`. The Guinier function has the general form:
+
+.. math::
+    I(q) = e^{A + Bq^2}
 
 This a Gaussian centred at :math:`q=0` (we only ever see the positive half).
 The natural logarithm of the parameter :math:`A` is a constant of proportionality
-equal to the scattering intensity at :math:`q=0`.
+equal to the scattering intensity at :math:`q=0`, i.e., :math:`A=ln(I_{0})`.
 The parameter :math:`B` describes the width of the function and is related to the
 size of the scattering object. For example, in systems of dispersed spherical
 particles it is related to the radius of gyration :math:`R_g` by :math:`B = R_g^2 / 3`.
