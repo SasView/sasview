@@ -15,7 +15,7 @@ from sas.qtgui.Perspectives.Corfunc.IDFCanvas import IDFCanvas
 from sas.qtgui.Perspectives.Corfunc.QSpaceCanvas import QSpaceCanvas
 from sas.qtgui.Perspectives.Corfunc.RealSpaceCanvas import RealSpaceCanvas
 from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Utilities.ExtrapolationSlider import ExtrapolationSlider
+from sas.qtgui.Utilities.ExtrapolationSlider import ExtrapolationSlider, SliderPerspective
 from sas.qtgui.Utilities.Reports import ReportBase
 from sas.qtgui.Utilities.Reports.reportdata import ReportData
 from sas.sascalc.corfunc.calculation_data import (
@@ -83,7 +83,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self._running = False
 
         # Add slider widget
-        self.slider = ExtrapolationSlider(lower_label="Guinier", upper_label="Porod", perspective ="Corfunc")
+        self.slider = ExtrapolationSlider(perspective=SliderPerspective.CORFUNC)
         self.sliderLayout.insertWidget(1, self.slider)
 
         # Plots

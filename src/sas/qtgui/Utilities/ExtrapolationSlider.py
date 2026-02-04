@@ -21,8 +21,6 @@ class ExtrapolationSlider(QtWidgets.QWidget):
     valueEditing = Signal(ExtrapolationInteractionState, name='valueEditing')
 
     def __init__(self,
-                 lower_label: str,
-                 upper_label: str,
                  perspective: SliderPerspective,
                  parameters: ExtrapolationParameters = ExtrapolationParameters(1,2,4,8,16,32,64),
                  enabled: bool = False,
@@ -50,10 +48,8 @@ class ExtrapolationSlider(QtWidgets.QWidget):
         if self._max is None:
             self._max = self._data_max
 
-        self._lower_label = lower_label
-        self._upper_label = upper_label
-
         self.perspective = perspective
+        self.set_labels()
 
         # Display Parameters
         self.vertical_size = 20
@@ -127,6 +123,16 @@ class ExtrapolationSlider(QtWidgets.QWidget):
 
         return None
 
+    def set_labels(self):
+        """ Set the labels according to perspective"""
+        if self.perspective == SliderPerspective.CORFUNC:
+            self._lower_label = "Guinier"
+            self._upper_label = "Porod"
+        elif self.perspective == SliderPerspective.INVARIANT:
+            self._lower_label = "Low-Q"
+            self._upper_label = "High-Q"
+        else:
+            raise ValueError(f"Unknown perspective: {self.perspective}")
 
     def enterEvent(self, a0: QtCore.QEvent) -> None:
         if self.isEnabled():
@@ -331,7 +337,7 @@ class ExtrapolationSlider(QtWidgets.QWidget):
         - Between point 2 and point 3 for invariant
         - Between point 3 and widget edge for corfunc
         """
-        if self.perspective == "Invariant":
+        if self.perspective == SliderPerspective.INVARIANT:
             return 0.5 * (self.transform(self._point_2) + self.transform(self._point_3))
 
         return 0.5 * (self.transform(self._point_3) + self.width())
