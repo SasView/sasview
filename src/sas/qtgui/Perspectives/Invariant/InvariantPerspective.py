@@ -23,7 +23,7 @@ from .InvariantDetails import DetailsDialog
 from .InvariantUtils import WIDGETS, safe_float
 from .UI.TabbedInvariantUI import Ui_tabbedInvariantUI
 
-# The minimmin/max q-values to be used when extrapolating
+# The minimum/max q-values to be used when extrapolating
 Q_MINIMUM = 1e-5
 Q_MAXIMUM = 10
 # Default power law for extrapolation
@@ -109,10 +109,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
     def initialize_variables(self) -> None:
         """Initialize class variables."""
-        # Data
-        self._data: Data1D | None = None
-        self._path: str = ""
-        self._calculator: invariant.InvariantCalculator | None = None
 
         # Initial input params
         self._background: float = 0.0
@@ -142,7 +138,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         """Setup the extrapolation slider."""
         self.slider = ExtrapolationSlider(perspective=SliderPerspective.INVARIANT)
         self.sliderLayout.insertWidget(1, self.slider)
-
 
     def setup_tooltips(self) -> None:
         """Setup tooltips for the widgets"""
@@ -176,10 +171,19 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
     def setup_default_enablement(self) -> None:
         """Setup the default enablement of the widgets."""
         self.tabWidget.setCurrentIndex(0)
-        self.enable_calculation(False, "Calculate (No data)")
-        self.enable_extrapolation_options(False)
         self.rbContrast.setChecked(True)
+
+        self.rbLowQGuinier_ex.setEnabled(False)
+        self.rbLowQPower_ex.setEnabled(False)
+        self.rbLowQFit_ex.setEnabled(False)
+        self.rbLowQFix_ex.setEnabled(False)
+        self.rbHighQFit_ex.setEnabled(False)
+        self.rbHighQFix_ex.setEnabled(False)
+        self.txtLowQPower_ex.setEnabled(False)
+        self.txtHighQPower_ex.setEnabled(False)
         self.update_progress_bars()
+
+        self.check_status()
 
     def enable_calculation(self, enabled: bool = True, display: str = "Calculate") -> None:
         """
@@ -201,26 +205,10 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.txtPorodStart_ex.setEnabled(state)
         self.txtPorodEnd_ex.setEnabled(state)
 
-    def enable_extrapolation_options(self, state: bool) -> None:
-        ## SS: removable
-        """
-        Enable or disable the options in the extrapolation tab
-
-        :param state: enable or disable the options
-        """
-        self.rbLowQGuinier_ex.setEnabled(state)
-        self.rbLowQPower_ex.setEnabled(state)
-        self.rbLowQFit_ex.setEnabled(state)
-        self.rbLowQFix_ex.setEnabled(state)
-        self.rbHighQFit_ex.setEnabled(state)
-        self.rbHighQFix_ex.setEnabled(state)
-        self.txtLowQPower_ex.setEnabled(self.rbLowQFix_ex.isChecked())
-        self.txtHighQPower_ex.setEnabled(self.rbHighQFix_ex.isChecked())
-
     def get_low_q_extrapolation_upper_limit(self) -> float:
         """
         Get the low Q extrapolation upper limit
-    
+
         :return: low Q extrapolation upper limit
         """
         q_value: float = self._data.x[int(self._low_points) - 1]
@@ -295,7 +283,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
         contrast_err_text = self.model.item(WIDGETS.W_CONTRAST_ERR).text()
         self._contrast_err = float(contrast_err_text) if contrast_err_text else None
-
 
         volfrac1_text = self.model.item(WIDGETS.W_VOLFRAC1).text()
         self._volfrac1 = float(volfrac1_text) if volfrac1_text else None
@@ -569,10 +556,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         reactor.callFromThread(self.update_model_from_thread, WIDGETS.D_DATA_QSTAR_ERR, qstar_data_err)
 
         # Volume Fraction calculations
-        volume_fraction: float | Literal["ERROR"]
-        volume_fraction_error: float | Literal["ERROR"]
-
         if self.rbContrast.isChecked() and self._contrast:
+            volume_fraction: float | Literal["ERROR"]
+            volume_fraction_error: float | Literal["ERROR"]
             try:
                 volume_fraction, volume_fraction_error = self._calculator.get_volume_fraction_with_error(
                     self._contrast, contrast_err=self._contrast_err, extrapolation=extrapolation
@@ -586,10 +572,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             reactor.callFromThread(self.update_model_from_thread, WIDGETS.W_VOLUME_FRACTION_ERR, volume_fraction_error)
 
         # Contrast calculations
-        contrast_out: float | Literal["ERROR"]
-        contrast_out_error: float | Literal["ERROR"]
-
         if self.rbVolFrac.isChecked() and self._volfrac1:
+            contrast_out: float | Literal["ERROR"]
+            contrast_out_error: float | Literal["ERROR"]
             try:
                 contrast_out, contrast_out_error = self._calculator.get_contrast_with_error(
                     self._volfrac1, volume_err=self._volfrac1_err, extrapolation=extrapolation
@@ -603,10 +588,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             reactor.callFromThread(self.update_model_from_thread, WIDGETS.W_CONTRAST_OUT_ERR, contrast_out_error)
 
         # Surface Error calculations
-        surface: float | Literal["ERROR"] | None = None
-        surface_error: float | Literal["ERROR"] | None = None
-
         if self._porod and self._porod > 0:
+            surface: float | Literal["ERROR"]
+            surface_error: float | Literal["ERROR"]
             if self.rbContrast.isChecked():
                 contrast_for_surface = self._contrast
                 contrast_for_surface_err = self._contrast_err
@@ -855,11 +839,11 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
     def lowGuinierAndPowerToggle_ex(self) -> None:
         """If Power is selected, Fit and Fix radio buttons are visible."""
         if self.rbLowQPower_ex.isChecked():
-            self.showLowQPowerOptions(True)
+            self.enable_low_q_power_options(True)
             # Set default to Fit
             self.rbLowQFit_ex.setChecked(True)
         else:
-            self.showLowQPowerOptions(False)
+            self.enable_low_q_power_options(False)
 
         # Update model to reflect the radio button states
         self.model.setItem(
@@ -869,7 +853,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
         self.update_from_model()
 
-    def showLowQPowerOptions(self, state: bool) -> None:
+    def enable_low_q_power_options(self, state: bool) -> None:
         """Show and enable the Fit and Fix options if Power is selected."""
         self.rbLowQFit_ex.setEnabled(state)
         self.rbLowQFix_ex.setEnabled(state)
@@ -997,7 +981,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
         data_q_min = float(self.format_sig_fig(self._data.x.min()))  # Actual data min
         data_q_max = float(self.format_sig_fig(self._data.x.max()))  # Actual data max
-        qmax = Q_MAXIMUM  # Extrapolation maximum
         messages = []
 
         # block signals to avoid recursive calls
@@ -1119,7 +1102,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                 self.txtVolFrac1.setStyleSheet(BG_RED)
                 self.enable_calculation(False, "Calculate (Invalid volume fraction)")
                 msg = "Volume fraction must be between 0 and 1."
-                msg += "Ideally, the volume fraction should be between 0 and 0.5 (minority phase)."
                 dialog = QtWidgets.QMessageBox(self, text=msg)
                 dialog.setWindowTitle("Invalid Volume Fraction")
                 dialog.setIcon(QtWidgets.QMessageBox.Warning)
