@@ -10,7 +10,7 @@ from twisted.internet import reactor, threads
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting import PlotterData
 from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
-from sas.qtgui.Utilities.ExtrapolationSlider import ExtrapolationSlider
+from sas.qtgui.Utilities.ExtrapolationSlider import ExtrapolationSlider, SliderPerspective
 
 # sas-global
 from sas.sascalc.invariant import invariant
@@ -103,7 +103,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.no_extrapolation_plot: PlotterData | None = None
 
         # Slider
-        self.slider = ExtrapolationSlider(lower_label="Low-Q", upper_label="High-Q", perspective="Invariant")
+        self.slider = ExtrapolationSlider(perspective=SliderPerspective.INVARIANT)
         self.sliderLayout.insertWidget(1, self.slider)
 
         # no reason to have this widget resizable
