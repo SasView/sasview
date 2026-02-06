@@ -7,3 +7,7 @@ updates:
     schedule:
       # Check for updates to GitHub Actions every week
       interval: "weekly"
+    groups:
+      all-dependencies:
+        patterns:
+          - "*"  # include all actions in a single PR to ensure tied updates are able to work together.

@@ -25,26 +25,18 @@ class CustomToolbar(NavigationToolbar):
 
     def add_custom_button(self):
         # I have been told that a Button is better
-        # But all NavitaionToolbar interactions are Actions
+        # But all NavigationToolbar interactions are Actions
         # This way all can be called with:
         #   self._actions['xxx']
         custom_icon = QtGui.QIcon()  # You can load an icon here if you want e.g., QtGui.QIcon("path/to/icon.png")
-        custom_action = QtGui.QAction(custom_icon, "Send to Fitting", self)
-        custom_action.setToolTip("Send all data to Fitting in seperate tabs")
-        custom_action.triggered.connect(self.sendToFitting)
+        custom_action = QtGui.QAction(custom_icon, "Send to Data Explorer", self)
+        custom_action.setToolTip("Send all data to the Data Explorer")
+        custom_action.triggered.connect(self.sendToDataExplorer)
         self.insertAction(self.actions()[-1], custom_action)
-        #self.addAction(custom_action)
-        self._actions['fitting'] = custom_action
-        self._actions['fitting'].setVisible(False)
 
-    def sendToFitting(self):
-        search_name = self.parent.data
-        for item in search_name:
+    def sendToDataExplorer(self):
+        for item in self.parent.data:
             self.parent.manager.communicator.freezeDataNameSignal.emit(item.name)
-        self._actions["fitting"].setEnabled(False)
-
-        # Re-enable after 3 seconds
-        QtCore.QTimer.singleShot(3000, lambda: self._actions["fitting"].setEnabled(True))
 
 class PlotterBase(QtWidgets.QWidget):
     #TODO: Describe what this class is
@@ -275,6 +267,14 @@ class PlotterBase(QtWidgets.QWidget):
         self.actionPrintImage.triggered.connect(self.onImagePrint)
         self.actionCopyToClipboard.triggered.connect(self.onClipboardCopy)
 
+    def addHelpToContextMenu(self):
+        """
+        Add Help option at the end of the context menu
+        """
+        self.contextMenu.addSeparator()
+        self.actionHelp = self.contextMenu.addAction("Help")
+        self.actionHelp.triggered.connect(self.onHelp)
+
     def createContextMenu(self):
         """
         Define common context menu and associated actions for the MPL widget
@@ -407,6 +407,13 @@ class PlotterBase(QtWidgets.QWidget):
         pixmap = QtGui.QPixmap(self.canvas.size())
         self.canvas.render(pixmap)
         bmp.setPixmap(pixmap)
+
+    def onHelp(self):
+        """
+        Display plotting help documentation
+        """
+        location = "/user/qtgui/MainWindow/graph_help.html"
+        self._help_window = GuiUtils.showHelp(location)
 
     def onGridToggle(self):
         """
