@@ -342,7 +342,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.page_parameters = None
 
         # signal communicator
-        self.communicate = self.parent.communicate
+        self.communicate = GuiUtils.communicate
 
     def initializeWidgets(self) -> None:
         """

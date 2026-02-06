@@ -7,6 +7,7 @@ from sas.qtgui.MainWindow.UI.DataExplorerUI import Ui_DataLoadWidget
 
 # UI
 from sas.qtgui.UI import main_resources_rc  # noqa: F401
+from sas.qtgui.Utilities.GuiUtils import communicate
 
 
 class DroppableDataLoadWidget(QtWidgets.QTabWidget, Ui_DataLoadWidget):
@@ -20,7 +21,7 @@ class DroppableDataLoadWidget(QtWidgets.QTabWidget, Ui_DataLoadWidget):
 
         # Enable file drag-drop on treeView
         self.setAcceptDrops(True)
-        self.communicator = guimanager.communicator()
+        self.communicator = communicate
         flags = QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowSystemMenuHint
         self.setWindowFlags(flags)
 

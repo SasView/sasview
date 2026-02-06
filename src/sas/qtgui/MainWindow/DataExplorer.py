@@ -98,7 +98,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.cbSelect.activated.connect(self.selectData)
 
         self.currentChanged.connect(self.onTabSwitch)
-        self.communicator = self.parent.communicator()
+        self.communicator = GuiUtils.communicate
         self.communicator.fileTriggerSignal.connect(self.loadFromArbitraryPath)
         self.communicator.fileReadSignal.connect(self.loadFromURL)
         self.communicator.activeGraphsSignal.connect(self.updateGraphCount)

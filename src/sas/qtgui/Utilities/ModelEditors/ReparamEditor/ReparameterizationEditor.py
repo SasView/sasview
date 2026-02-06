@@ -296,7 +296,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         # Write the new model to the file
         model_text = self.generateModelText()
         self.writeModel(output_file_path, model_text)
-        self.parent.communicate.customModelDirectoryChanged.emit()  # Refresh the list of custom models
+        GuiUtils.communicate.customModelDirectoryChanged.emit()  # Refresh the list of custom models
 
         # Test the model for errors (file must be generated first)
         error_line = self.checkModel(output_file_path)
@@ -308,7 +308,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
 
         # Notify user that model was written sucessfully
         msg = f"Reparameterized model {model_name} successfully created."
-        self.parent.communicate.statusBarUpdateSignal.emit(msg)
+        GuiUtils.communicate.statusBarUpdateSignal.emit(msg)
         logger.info(msg)
 
         self.is_modified = False
@@ -454,7 +454,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
 
             # Set the status bar message
             # GuiUtils.Communicate.statusBarUpdateSignal.emit("Model check failed")
-            self.parent.communicate.statusBarUpdateSignal.emit("Model check failed")
+            GuiUtils.communicate.statusBarUpdateSignal.emit("Model check failed")
 
             # Format text box with error indicators
             self.txtFunction.setStyleSheet("border: 5px solid red")

@@ -57,7 +57,7 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         self.lastTabClosed = None
         self.installEventFilter(self)
 
-        self.communicate = self.parent.communicator()
+        self.communicate = GuiUtils.communicate
 
         # Initialize the first tab
         self.addFit(None)

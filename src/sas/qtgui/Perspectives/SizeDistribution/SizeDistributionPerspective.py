@@ -68,7 +68,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self._parent = parent
         self._model_item = QtGui.QStandardItem()
 
-        self.communicate = parent.communicator()
+        self.communicate = GuiUtils.communicate
         self.communicate.dataDeletedSignal.connect(self.removeData)
 
         self.logic = SizeDistributionLogic()

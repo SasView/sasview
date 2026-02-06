@@ -145,7 +145,7 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
             return
         # everything converted, notify the user
         logger.info("File successfully converted.")
-        self.parent.communicate.statusBarUpdateSignal.emit("File converted successfully.")
+        GuiUtils.communicate.statusBarUpdateSignal.emit("File converted successfully.")
 
         # Optionally, load the freshly converted file into Data Explorer
         if self.chkLoadFile.isChecked():

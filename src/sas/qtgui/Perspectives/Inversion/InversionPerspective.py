@@ -43,7 +43,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         self.maxIndex = 1
         # Needed for Batch inversion
         self.parent = parent
-        self.communicate = self.parent.communicate
+        self.communicate = GuiUtils.communicate
         #self.communicate = self.parent.communicator()
         self.communicate.dataDeletedSignal.connect(self.removeData)
         self.tabCloseRequested.connect(self.tabCloses)
@@ -192,7 +192,7 @@ that in the meantime, these tabs will be excluded from the saved project.""")
         return False
 
     def communicator(self):
-        return self.filesWidget.communicate
+        return self.communicate
 
 
     def allowBatch(self):

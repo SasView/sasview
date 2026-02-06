@@ -66,7 +66,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.mapper = None
         self._path = ""
         self.model = QtGui.QStandardItemModel(self)
-        self.communicate = self.parent.communicator()
+        self.communicate = GuiUtils.communicate
         self.communicate.dataDeletedSignal.connect(self.removeData)
 
         self._allow_close = False

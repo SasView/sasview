@@ -59,7 +59,7 @@ class PluginManager(QtWidgets.QDialog, Ui_PluginManagerUI):
         self.cmdEdit.clicked.connect(self.onEdit)
         self.cmdHelp.clicked.connect(self.onHelp)
         self.lstModels.selectionModel().selectionChanged.connect(self.onSelectionChanged)
-        self.parent.communicate.customModelDirectoryChanged.connect(self.readModels)
+        GuiUtils.communicate.customModelDirectoryChanged.connect(self.readModels)
 
     def onSelectionChanged(self):
         """
@@ -162,7 +162,7 @@ class PluginManager(QtWidgets.QDialog, Ui_PluginManagerUI):
         if os.path.isfile(c_file):
             copy(c_file, plugin_dir)
 
-        self.parent.communicate.customModelDirectoryChanged.emit()
+        GuiUtils.communicate.customModelDirectoryChanged.emit()
         log_msg = "New plugin added: %s" % file_name
         logger.info(log_msg)
 
@@ -190,7 +190,7 @@ class PluginManager(QtWidgets.QDialog, Ui_PluginManagerUI):
                 logger.error("Could not find appropriate filename for " + src_file)
             dst_file = os.path.join(plugin_dir, dst_filename)
             copyfile(src_file, dst_file)
-            self.parent.communicate.customModelDirectoryChanged.emit()
+            GuiUtils.communicate.customModelDirectoryChanged.emit()
 
     def onEdit(self):
         """

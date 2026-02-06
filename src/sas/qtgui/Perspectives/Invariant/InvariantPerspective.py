@@ -66,7 +66,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self._allow_close: bool = False
 
         # Communication
-        self.communicate = self._manager.communicator()
+        self.communicate = GuiUtils.communicate
         self.communicate.dataDeletedSignal.connect(self.removeData)
 
         self.detailsDialog = DetailsDialog(self)

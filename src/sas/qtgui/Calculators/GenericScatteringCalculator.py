@@ -52,7 +52,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.setFixedSize(self.minimumSizeHint())
 
         self.manager = parent
-        self.communicator = self.manager.communicator()
+        self.communicator = GuiUtils.communicate
         self.model = sas_gen.GenSAS()
         self.omf_reader = sas_gen.OMFReader()
         self.sld_reader = sas_gen.SLDReader()

@@ -169,7 +169,7 @@ class FittingController:
             np.any(pvec is None) or \
             not np.all(np.isfinite(pvec)):
             msg = "Fitting did not converge!"
-            self.widget.communicate.statusBarUpdateSignal.emit(msg)
+            GuiUtils.communicate.statusBarUpdateSignal.emit(msg)
             msg += results.mesg
             logger.error(msg)
             return None

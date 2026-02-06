@@ -222,20 +222,20 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
             logger.error(traceback_to_show)
 
             # Set the status bar message
-            self.parent.communicate.statusBarUpdateSignal.emit("Model check failed")
+            GuiUtils.communicate.statusBarUpdateSignal.emit("Model check failed")
             return
 
         if not success:
             return
 
         # Update list of models in FittingWidget and AddMultEditor
-        self.parent.communicate.customModelDirectoryChanged.emit()
+        GuiUtils.communicate.customModelDirectoryChanged.emit()
         self.updateModels()
 
         # Notify the user
         title = self.txtName.text().lstrip().rstrip()
         msg = "Custom model "+title + " successfully created."
-        self.parent.communicate.statusBarUpdateSignal.emit(msg)
+        GuiUtils.communicate.statusBarUpdateSignal.emit(msg)
         logger.info(msg)
 
     def write_new_model_to_file(self, fname, model1_name, model2_name, operator):
