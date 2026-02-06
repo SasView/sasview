@@ -1,5 +1,6 @@
 from sas.system import config
 
+from ..BackgroundColor import BG_DEFAULT
 from .PreferencesWidget import PreferencesWidget
 
 
@@ -64,7 +65,7 @@ class PlottingPreferencesWidget(PreferencesWidget):
         self.legendFullWidth.setChecked(bool(config.FITTING_PLOT_FULL_WIDTH_LEGENDS))
         self.legendTruncate.setChecked(bool(config.FITTING_PLOT_LEGEND_TRUNCATE))
         self.legendLineLength.setText(str(config.FITTING_PLOT_LEGEND_MAX_LINE_LENGTH))
-        self.legendLineLength.setStyleSheet("background-color: white")
+        self.legendLineLength.setStyleSheet(BG_DEFAULT)
         self.disableResidualPlot.setChecked(config.DISABLE_RESIDUAL_PLOT)
         self.disablePolydispersityPlot.setChecked(config.DISABLE_POLYDISPERSITY_PLOT)
         self.useMatplotlibToolbar.setChecked(config.USE_MATPLOTLIB_TOOLBAR)
