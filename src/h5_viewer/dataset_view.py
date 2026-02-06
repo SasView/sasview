@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
-from PySide6.QtWidgets import QHeaderView, QLabel, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget
 from h5py import Dataset
 from numpy import ndarray
+from PySide6.QtWidgets import QHeaderView, QLabel, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget
 
 
 class DatasetViewWidget(QWidget):

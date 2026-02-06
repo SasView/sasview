@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 
-import os
-from PySide6.QtCore import Signal, Qt
-from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QTreeWidget, QTreeWidgetItem
-from h5py import File as H5File, HLObject
+from importlib import resources
+
+from h5py import Dataset, HLObject
+from h5py import File as H5File
 from h5py import Group as H5Group
-from h5py import Dataset
 from h5py._hl.attrs import AttributeManager
 from h5py._hl.group import Group
-from importlib import resources
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QIcon
+from PySide6.QtWidgets import QTreeWidget, QTreeWidgetItem
+
 
 class Hd5TreeWidget(QTreeWidget):
     selection_changed = Signal()
