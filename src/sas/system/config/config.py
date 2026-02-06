@@ -162,8 +162,6 @@ class Config(ConfigBase, metaclass=ConfigMeta):
 
         self.SHOW_WELCOME_PANEL = False
 
-
-
         # OpenCL option - should be a string, either, "none", a number, or pair of form "A:B"
         self.SAS_OPENCL = "none"
 
@@ -216,6 +214,9 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         # Stack plots when using slicers
         # If true, plots generated when using slicers will be on the same canvas
         self.STACK_PLOTS = True
+
+        # Developer menu
+        self.DEV_MENU = False
 
         #
         # Lock the class down, this is necessary both for
