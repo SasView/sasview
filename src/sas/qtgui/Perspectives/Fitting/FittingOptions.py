@@ -117,7 +117,7 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
         validator = sender.validator()
         state = validator.validate(sender.text(), 0)[0]
         style = BG_DEFAULT if state == QtGui.QValidator.Acceptable else BG_WARNING
-        sender.setStyleSheet(f"QLineEdit {{ {style} }}")
+        sender.setStyleSheet(style)
 
     def onDefaultAlgorithmChange(self):
         text = self.cbAlgorithmDefault.currentText()

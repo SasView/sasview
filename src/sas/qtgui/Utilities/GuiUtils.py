@@ -744,15 +744,15 @@ class FormulaValidator(QtGui.QValidator):
 
     def validate(self, input, pos):
 
-        self._setStyleSheet(f"QLineEdit {{ {BG_DEFAULT} }}")
+        self._setStyleSheet(BG_DEFAULT)
 
         try:
             Formula(str(input))
-            self._setStyleSheet(f"QLineEdit {{ {BG_DEFAULT} }}")
+            self._setStyleSheet(BG_DEFAULT)
             return QtGui.QValidator.Acceptable
 
         except Exception:
-            self._setStyleSheet(f"QLineEdit {{ {BG_WARNING} }}")
+            self._setStyleSheet(BG_WARNING)
             return QtGui.QValidator.Intermediate
 
     def _setStyleSheet(self, value):
