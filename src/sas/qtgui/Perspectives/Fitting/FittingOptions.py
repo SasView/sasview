@@ -7,6 +7,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Perspectives.Fitting.UI.FittingOptionsUI import Ui_FittingOptions
+from sas.qtgui.Utilities.BackgroundColor import BG_DEFAULT, BG_WARNING
 from sas.qtgui.Utilities.Preferences.PreferencesWidget import PreferencesWidget
 from sas.system.config.config import config as sasview_config
 
@@ -115,8 +116,8 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
         sender = self.sender()
         validator = sender.validator()
         state = validator.validate(sender.text(), 0)[0]
-        color = '' if state == QtGui.QValidator.Acceptable else '#fff79a'
-        sender.setStyleSheet('QLineEdit { background-color: %s }' % color)
+        style = BG_DEFAULT if state == QtGui.QValidator.Acceptable else BG_WARNING
+        sender.setStyleSheet(f"QLineEdit {{ {style} }}")
 
     def onDefaultAlgorithmChange(self):
         text = self.cbAlgorithmDefault.currentText()

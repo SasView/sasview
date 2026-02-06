@@ -39,6 +39,7 @@ from sas.qtgui.Plotting import DataTransform
 from sas.qtgui.Plotting.ConvertUnits import convertUnit
 from sas.qtgui.Plotting.Plottables import Chisq, Plottable, PlottableFit1D, PlottableTheory1D, Text, View
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
+from sas.qtgui.Utilities.BackgroundColor import BG_DEFAULT, BG_WARNING
 from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
 from sas.sascalc.fit.AbstractFitEngine import FitData1D, FitData2D, FResult
 from sas.system import HELP_SYSTEM
@@ -743,15 +744,15 @@ class FormulaValidator(QtGui.QValidator):
 
     def validate(self, input, pos):
 
-        self._setStyleSheet("")
+        self._setStyleSheet(f"QLineEdit {{ {BG_DEFAULT} }}")
 
         try:
             Formula(str(input))
-            self._setStyleSheet("")
+            self._setStyleSheet(f"QLineEdit {{ {BG_DEFAULT} }}")
             return QtGui.QValidator.Acceptable
 
         except Exception:
-            self._setStyleSheet("background-color:pink;")
+            self._setStyleSheet(f"QLineEdit {{ {BG_WARNING} }}")
             return QtGui.QValidator.Intermediate
 
     def _setStyleSheet(self, value):

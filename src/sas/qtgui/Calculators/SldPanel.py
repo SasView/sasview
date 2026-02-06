@@ -10,6 +10,7 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 # Local UI
 from sas.qtgui.Calculators.UI.SldPanel import Ui_SldPanel
 from sas.qtgui.UI import main_resources_rc  # noqa: F401
+from sas.qtgui.Utilities.BackgroundColor import BG_DEFAULT, BG_ERROR, BG_WARNING
 from sas.qtgui.Utilities.GuiUtils import enum
 
 MODEL = enum(
@@ -165,8 +166,8 @@ class SldPanel(QtWidgets.QDialog):
             self.recalculateSLD()
 
     def recalculateSLD(self):
-        self.ui.editMolecularFormula.setStyleSheet("background-color: white")
-        self.ui.editMassDensity.setStyleSheet("background-color: white; color: black")
+        self.ui.editMolecularFormula.setStyleSheet(BG_DEFAULT)
+        self.ui.editMassDensity.setStyleSheet(BG_DEFAULT)
         formula = self.ui.editMolecularFormula.text()
         density = float(self.ui.editMassDensity.text()) if self.ui.editMassDensity.text() else None
         self.ui.editMassDensity.setToolTip("The density can either be specified here or will be calculated if all "
@@ -177,11 +178,11 @@ class SldPanel(QtWidgets.QDialog):
         if not formula:
             return
         if not density and '@' not in formula:
-            self.ui.editMassDensity.setStyleSheet("background-color: yellow")
+            self.ui.editMassDensity.setStyleSheet(BG_ERROR)
             return
         if density and '//' in formula and '@' in formula:
             # Ignore density input when all individual densities are specified
-            self.ui.editMassDensity.setStyleSheet("color: orange")
+            self.ui.editMassDensity.setStyleSheet(BG_WARNING)
             self.ui.editMassDensity.setToolTip("The input density is overriding the density calculated from the "
                                                "individual components. Clear the density field if you want the "
                                                "calculation to take precedence.")
@@ -193,7 +194,7 @@ class SldPanel(QtWidgets.QDialog):
             try:
                 results = neutronSldAlgorithm(str(formula), density, float(neutronWavelength))
             except (ValueError, ParseException, AssertionError, KeyError):
-                self.ui.editMolecularFormula.setStyleSheet("background-color: yellow")
+                self.ui.editMolecularFormula.setStyleSheet(BG_ERROR)
                 return
 
             self.model.item(MODEL.NEUTRON_SLD_REAL).setText(format(results.neutron_sld_real))
@@ -223,7 +224,7 @@ class SldPanel(QtWidgets.QDialog):
             try:
                 results = xraySldAlgorithm(str(formula), density, float(xrayWavelength))
             except (ValueError, ParseException, AssertionError, KeyError):
-                self.ui.editMolecularFormula.setStyleSheet("background-color: yellow")
+                self.ui.editMolecularFormula.setStyleSheet(BG_ERROR)
                 return
 
             self.model.item(MODEL.XRAY_SLD_REAL).setText(format(results.xray_sld_real))
