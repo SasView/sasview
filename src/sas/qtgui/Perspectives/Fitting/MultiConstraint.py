@@ -13,6 +13,7 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # Local UI
 from sas.qtgui.Perspectives.Fitting.UI.MultiConstraintUI import Ui_MultiConstraintUI
+from sas.qtgui.Utilities.BackgroundColor import BG_DEFAULT, BG_ERROR
 
 
 class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
@@ -112,10 +113,10 @@ class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
         formula_is_valid = self.validateConstraint(self.txtConstraint.text())
         if not formula_is_valid:
             self.cmdOK.setEnabled(False)
-            self.txtConstraint.setStyleSheet("QLineEdit {background-color: red;}")
+            self.txtConstraint.setStyleSheet(BG_ERROR)
         else:
             self.cmdOK.setEnabled(True)
-            self.txtConstraint.setStyleSheet("QLineEdit {background-color: white;}")
+            self.txtConstraint.setStyleSheet(BG_DEFAULT)
 
     def validateConstraint(self, constraint_text):
         """

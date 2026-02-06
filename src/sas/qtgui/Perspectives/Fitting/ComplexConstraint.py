@@ -12,6 +12,7 @@ from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 
 # Local UI
 from sas.qtgui.Perspectives.Fitting.UI.ComplexConstraintUI import Ui_ComplexConstraintUI
+from sas.qtgui.Utilities.BackgroundColor import BG_DEFAULT, BG_ERROR
 
 #ALLOWED_OPERATORS = ['=','<','>','>=','<=']
 ALLOWED_OPERATORS = ['=']
@@ -209,11 +210,11 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         if not formula_is_valid:
             self.cmdOK.setEnabled(False)
             self.cmdAddAll.setEnabled(False)
-            self.txtConstraint.setStyleSheet("QLineEdit {background-color: red;}")
+            self.txtConstraint.setStyleSheet(BG_ERROR)
         else:
             self.cmdOK.setEnabled(True)
             self.cmdAddAll.setEnabled(True)
-            self.txtConstraint.setStyleSheet("QLineEdit {background-color: white;}")
+            self.txtConstraint.setStyleSheet(BG_DEFAULT)
 
     def validateConstraint(self, constraint_text):
         """
