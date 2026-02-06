@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
 
-from PySide6.QtCore import Slot
-import h5py
-from PySide6.QtWidgets import QApplication, QHBoxLayout, QSizePolicy, QStackedWidget, QWidget
-from h5py._hl.dataset import Dataset
-from h5_viewer.h5_tree import Hd5TreeWidget
-from h5py import File as H5File
+from json import loads
+from re import search
 from sys import argv
+
+from h5py import File as H5File
+from h5py._hl.dataset import Dataset
+from PySide6.QtCore import Slot
+from PySide6.QtWidgets import QApplication, QHBoxLayout, QSizePolicy, QStackedWidget, QWidget
+
 from h5_viewer.dataset_view import DatasetViewWidget
+from h5_viewer.h5_tree import Hd5TreeWidget
 from h5_viewer.json_view import JsonViewWidget
 from h5_viewer.str_view import StrViewWidget
-from re import search
-from json import loads
+
 
 class Hd5Viewer(QWidget):
     def __init__(self, hd5_file: H5File):
@@ -44,7 +46,7 @@ class Hd5Viewer(QWidget):
             if new_selection.shape == (1,):
                 try:
                     new_selection_str = str(new_selection[0], 'utf8')
-                    if not search(r'{|}|\[|\]', new_selection_str) is None:
+                    if search(r'{|}|\[|\]', new_selection_str) is not None:
                         self.json_viewer.current_json_dict = loads(new_selection_str)
                         self.stacked_viewers.setCurrentIndex(2)
                     else:

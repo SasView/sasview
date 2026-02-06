@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 
-from PySide6.QtCore import Slot
-from PySide6.QtGui import QTextOption
-from PySide6.QtWidgets import QLabel, QTextEdit, QVBoxLayout, QWidget
+from json import dumps
+
 from pygments import highlight
 from pygments.formatters import HtmlFormatter
 from pygments.lexers import JsonLexer
-from json import dumps
-from pprint import pformat
+from PySide6.QtCore import Slot
+from PySide6.QtGui import QTextOption
+from PySide6.QtWidgets import QLabel, QTextEdit, QVBoxLayout, QWidget
+
 
 class JsonViewWidget(QWidget):
     def __init__(self, initial_json_dict: dict[str, object] | None):
@@ -34,7 +35,7 @@ class JsonViewWidget(QWidget):
 
     @property
     def formatted_json(self) -> str:
-        if not self._json_dict is None:
+        if self._json_dict is not None:
             return dumps(self._json_dict, indent=4)
         else:
             return ''
