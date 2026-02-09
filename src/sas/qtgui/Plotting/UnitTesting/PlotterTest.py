@@ -121,9 +121,9 @@ class PlotterTest:
         self.clipboard_called = False
         def done():
             self.clipboard_called = True
-        QtCore.QObject.connect(QtWidgets.qApp.clipboard(), QtCore.SIGNAL("dataChanged()"), done)
+        QtCore.QObject.connect(QtWidgets.QApplication.clipboard(), QtCore.SIGNAL("dataChanged()"), done)
         actions[2].trigger()
-        QtWidgets.qApp.processEvents()
+        QtWidgets.QApplication.processEvents()
         # Make sure clipboard got updated.
         assert self.clipboard_called
 
