@@ -67,12 +67,9 @@ class DataOperationUtilityTest:
                                 ['+', '-', '*', '/', '|']
 
         # Tooltips
-        assert str(widget.cmdCompute.toolTip()) == "Generate the Data " \
-                                                            "and send to Data " \
-                                                            "Explorer."
+        assert str(widget.cmdCompute.toolTip()) == "Generate the Data and show the preview."
         assert str(widget.cmdClose.toolTip()) == "Close this panel."
-        assert str(widget.cmdHelp.toolTip()) == \
-                            "Get help on Data Operations."
+        assert str(widget.cmdHelp.toolTip()) == "Get help on Data Operations."
         assert widget.txtNumber.toolTip() == "If no Data2 loaded, " \
                                                 "enter a number to be " \
                                                 "applied to Data1 using " \
@@ -133,6 +130,7 @@ class DataOperationUtilityTest:
 
         # mock update of plot
         mocker.patch.object(widget, 'updatePlot')
+        mocker.patch.object(widget, 'onPrepareOutputData')
 
         # enable onCompute to run (check on data type)
         mocker.patch.object(widget, 'onCheckChosenData', return_value=True)
@@ -379,10 +377,10 @@ class DataOperationUtilityTest:
         widget.filenames = {'datafile2': DataState(data2),
                                     'datafile1': DataState(data1)}
         output1D = widget._extractData('datafile1')
-        assert isinstance(output1D, Data1D)
+        assert isinstance(output1D.data, Data1D)
 
         output2D = widget._extractData('datafile2')
-        assert isinstance(output2D, Data2D)
+        assert isinstance(output2D.data, Data2D)
 
     # TODO
     def testOnPrepareOutputData(self, widget):
