@@ -150,7 +150,7 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
         # Optionally, load the freshly converted file into Data Explorer
         if self.chkLoadFile.isChecked():
             # awful climbing up the hierarchy... don't do that. please.
-            self.parent.filesWidget.loadFromURL([self.ofile])
+            GuiUtils.communicator.fileReadSignal.emit([self.ofile])
 
     def onHelp(self):
         """
