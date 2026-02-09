@@ -1,6 +1,6 @@
 import inspect
 
-from PySide6.QtCore import QObject, pyqtBoundSignal, slot
+from PySide6.QtCore import QObject, Signal, Slot
 
 
 def WarningTestNotImplemented(method_name=None):
@@ -30,12 +30,12 @@ class QtSignalSpy(QObject):
 
         # Assign our own slot to the emitted signal
         try:
-            if isinstance(signal, pyqtBoundSignal):
+            if isinstance(signal, Signal):
                 signal.connect(self.slot)
             elif hasattr(widget, signal):
                 getattr(widget, signal).connect(self.slot)
             else:
-                widget.signal.connect(slot)
+                widget.signal.connect(Slot)
         except AttributeError:
             msg = "Wrong construction of QtSignalSpy instance"
             raise RuntimeError(msg)
