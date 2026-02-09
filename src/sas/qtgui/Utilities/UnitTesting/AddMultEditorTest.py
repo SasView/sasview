@@ -5,7 +5,7 @@ import webbrowser
 import pytest
 from PySide6 import QtGui, QtWidgets
 
-from sas.qtgui.Utilities.GuiUtils import Communicate
+from sas.qtgui.Utilities.GuiUtils import communicator
 
 # Local
 from sas.qtgui.Utilities.ModelEditors.AddMultEditor.AddMultEditor import AddMultEditor
@@ -19,7 +19,7 @@ class AddMultEditorTest:
         '''Create/Destroy the AddMultEditor'''
         class dummy_manager:
             HELP_DIRECTORY_LOCATION = "html"
-            communicate = Communicate()
+            communicator = communicator
             _parent = QtWidgets.QDialog()
 
         # mock models from plugin folder

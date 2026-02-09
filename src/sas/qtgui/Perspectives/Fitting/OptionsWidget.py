@@ -138,7 +138,7 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         Callback for running the mask editor
         """
         if isinstance(self.logic.data, Data2D):
-            GuiUtils.communicate.maskEditorSignal.emit(self.logic.data)
+            GuiUtils.communicator.maskEditorSignal.emit(self.logic.data)
 
     def onRangeReset(self):
         """

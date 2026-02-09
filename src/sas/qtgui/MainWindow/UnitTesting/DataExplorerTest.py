@@ -18,7 +18,7 @@ from sas.qtgui.Plotting.Plotter2D import Plotter2D
 # Local
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
-from sas.qtgui.Utilities.GuiUtils import Communicate, HashableStandardItem
+from sas.qtgui.Utilities.GuiUtils import HashableStandardItem, communicator
 from sas.system.version import __version__ as SASVIEW_VERSION
 
 
@@ -27,7 +27,7 @@ class MyPerspective:
         self.name = "Dummy Perspective"
 
     def communicator(self):
-        return Communicate()
+        return communicator
 
     def allowBatch(self):
         return True
@@ -50,7 +50,7 @@ class dummy_manager:
         self._perspective = MyPerspective()
 
     def communicator(self):
-        return Communicate()
+        return communicator
 
     def perspective(self):
         return self._perspective

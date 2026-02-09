@@ -12,7 +12,7 @@ from PySide6.QtTest import QTest
 
 from sas.qtgui.Calculators.GenericScatteringCalculator import GenericScatteringCalculator, Plotter3D
 from sas.qtgui.Plotting.PlotterBase import PlotHelper
-from sas.qtgui.Utilities.GuiUtils import Communicate
+from sas.qtgui.Utilities.GuiUtils import communicator
 from sas.sascalc.calculator import sas_gen
 
 
@@ -24,7 +24,7 @@ class GenericScatteringCalculatorTest:
         """Create/Destroy the GenericScatteringCalculator"""
         class dummy_manager:
             def communicator(self):
-                return Communicate()
+                return communicator
 
         w = GenericScatteringCalculator(dummy_manager())
 

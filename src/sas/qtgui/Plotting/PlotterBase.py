@@ -36,7 +36,7 @@ class CustomToolbar(NavigationToolbar):
 
     def sendToDataExplorer(self):
         for item in self.parent.data:
-            GuiUtils.communicate.freezeDataNameSignal.emit(item.name)
+            GuiUtils.communicator.freezeDataNameSignal.emit(item.name)
 
 class PlotterBase(QtWidgets.QWidget):
     #TODO: Describe what this class is
@@ -248,7 +248,7 @@ class PlotterBase(QtWidgets.QWidget):
         # Notify the helper
         PlotHelper.addPlot(self)
         # Notify the listeners about a new graph
-        GuiUtils.communicate.activeGraphsSignal.emit([self, False])
+        GuiUtils.communicator.activeGraphsSignal.emit([self, False])
 
     def defaultContextMenu(self):
         """
@@ -354,7 +354,7 @@ class PlotterBase(QtWidgets.QWidget):
         PlotHelper.deletePlot(PlotHelper.idOfPlot(self))
 
         # Notify the listeners
-        GuiUtils.communicate.activeGraphsSignal.emit([self, True])
+        GuiUtils.communicator.activeGraphsSignal.emit([self, True])
 
         event.accept()
 
@@ -436,7 +436,7 @@ class PlotterBase(QtWidgets.QWidget):
         title = titleWidget.title()
         self.setWindowTitle(title)
         # Notify the listeners about a new graph title
-        GuiUtils.communicate.activeGraphName.emit((current_title, title))
+        GuiUtils.communicator.activeGraphName.emit((current_title, title))
 
     def onToggleMenu(self):
         """

@@ -22,7 +22,7 @@ class ComplexConstraintTest:
         '''Create/Destroy the ComplexConstraint'''
         class dummy_manager:
             HELP_DIRECTORY_LOCATION = "html"
-            communicate = GuiUtils.Communicate()
+            communicator = GuiUtils.communicator
 
         '''Create ComplexConstraint dialog'''
         # need to ensure that categories exist first

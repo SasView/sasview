@@ -184,7 +184,7 @@ class ConstraintManager:
         # update the main parameter list so the constrained parameter gets
         # updated when fitting
         self.widget.checkboxSelected(model.item(row, 0), model_key=model_key)
-        self.widget.communicate.statusBarUpdateSignal.emit('Constraint added')
+        self.widget.communicator.statusBarUpdateSignal.emit('Constraint added')
 
         if constraint_tab:
             # Set the constraint_accepted flag to True to inform the
@@ -246,7 +246,7 @@ class ConstraintManager:
             brush = QtGui.QBrush(QtGui.QColor('blue'))
             self.widget.modifyViewOnRow(row, font=font, brush=brush, model_key=model_key)
 
-        self.widget.communicate.statusBarUpdateSignal.emit('Constraint added')
+        self.widget.communicator.statusBarUpdateSignal.emit('Constraint added')
 
     def editConstraint(self) -> None:
         """
@@ -370,7 +370,7 @@ class ConstraintManager:
             self.widget.constraintAddedSignal.emit([row], model_key)
             self.widget.modifyViewOnRow(row, model_key=model_key)
 
-        self.widget.communicate.statusBarUpdateSignal.emit('Constraint removed')
+        self.widget.communicator.statusBarUpdateSignal.emit('Constraint removed')
 
     def getConstraintForRow(self, row: int, model_key: str = "standard") -> Constraint | None:
         """

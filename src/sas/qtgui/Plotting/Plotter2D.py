@@ -374,7 +374,7 @@ class Plotter2DWidget(PlotterBase):
         self.slicer_widget = SlicerParameters(self, model=self.param_model,
                                               active_plots=self.getActivePlots(),
                                               validate_method=validator,
-                                              communicator=GuiUtils.communicate)
+                                              communicator=GuiUtils.communicator)
         self.slicer_widget.closeWidgetSignal.connect(slicer_closed)
         # Add the plot to the workspace
         self.slicer_subwindow = self.manager.parent.workspace().addSubWindow(self.slicer_widget)
@@ -436,8 +436,8 @@ class Plotter2DWidget(PlotterBase):
 
         GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
 
-        GuiUtils.communicate.plotUpdateSignal.emit([new_plot])
-        GuiUtils.communicate.forcePlotDisplaySignal.emit([item, new_plot])
+        GuiUtils.communicator.plotUpdateSignal.emit([new_plot])
+        GuiUtils.communicator.forcePlotDisplaySignal.emit([item, new_plot])
 
     def updateCircularAverage(self):
         """
@@ -471,7 +471,7 @@ class Plotter2DWidget(PlotterBase):
         # Overwrite existing plot
         GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
         # Show the new plot, if already visible
-        GuiUtils.communicate.plotUpdateSignal.emit([new_plot])
+        GuiUtils.communicator.plotUpdateSignal.emit([new_plot])
 
     def updateSlicer(self):
         """
@@ -878,7 +878,7 @@ class Plotter2DWidget(PlotterBase):
         x_str = GuiUtils.formatNumber(x_click)
         y_str = GuiUtils.formatNumber(y_click)
         coord_str = f"x: {x_str}, y: {y_str}"
-        GuiUtils.communicate.statusBarUpdateSignal.emit(coord_str)
+        GuiUtils.communicator.statusBarUpdateSignal.emit(coord_str)
 
 class Plotter2D(QtWidgets.QDialog, Plotter2DWidget):
     """

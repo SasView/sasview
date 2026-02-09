@@ -98,7 +98,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.cbSelect.activated.connect(self.selectData)
 
         self.currentChanged.connect(self.onTabSwitch)
-        self.communicator = GuiUtils.communicate
+        self.communicator = GuiUtils.communicator
         self.communicator.fileTriggerSignal.connect(self.loadFromArbitraryPath)
         self.communicator.fileReadSignal.connect(self.loadFromURL)
         self.communicator.activeGraphsSignal.connect(self.updateGraphCount)
@@ -110,9 +110,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.communicator.forcePlotDisplaySignal.connect(self.displayData)
         self.communicator.updateModelFromPerspectiveSignal.connect(self.updateModelFromPerspective)
         self.communicator.freezeDataNameSignal.connect(self.freezeFromName)
-
-        # fixing silly naming clash in other managers
-        self.communicate = self.communicator
 
         self.cbgraph.editTextChanged.connect(self.enableGraphCombo)
         self.cbgraph.currentIndexChanged.connect(self.enableGraphCombo)

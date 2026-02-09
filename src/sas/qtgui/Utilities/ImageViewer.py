@@ -251,7 +251,7 @@ class ImageViewer(QtWidgets.QMainWindow, Ui_ImageViewerUI):
         # Create item and add to the data explorer
         try:
             item = GuiUtils.createModelItemWithPlot(output, output.filename)
-            self.parent.communicate.updateModelFromPerspectiveSignal.emit(item)
+            GuiUtils.communicator.updateModelFromPerspectiveSignal.emit(item)
         except Exception as ex:
             err_msg = "Failed to create new index '%s'.\n" % str(ex)
             logger.error(err_msg)

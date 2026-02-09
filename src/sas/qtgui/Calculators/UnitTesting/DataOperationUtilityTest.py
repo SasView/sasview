@@ -7,7 +7,7 @@ from PySide6.QtTest import QTest
 from sas.qtgui.Calculators.DataOperationUtilityPanel import DataOperationUtilityPanel
 from sas.qtgui.MainWindow.DataState import DataState
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
-from sas.qtgui.Utilities.GuiUtils import Communicate
+from sas.qtgui.Utilities.GuiUtils import communicator
 
 BG_COLOR_ERR = 'background-color: rgb(244, 170, 164);'
 
@@ -18,7 +18,7 @@ class DataOperationUtilityTest:
         """Create/Destroy the DataOperationUtilityPanel"""
         class dummy_manager:
             def communicator(widget):
-                return Communicate()
+                return communicator
 
         w = DataOperationUtilityPanel(dummy_manager())
 

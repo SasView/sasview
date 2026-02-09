@@ -342,7 +342,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.page_parameters = None
 
         # signal communicator
-        self.communicate = GuiUtils.communicate
+        self.communicator = GuiUtils.communicator
 
     def initializeWidgets(self) -> None:
         """
@@ -680,7 +680,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.options_widget.txtMaxRange.editingFinished.connect(self.options_widget.updateMaxQ)
 
         # Signals from other widgets
-        self.communicate.customModelDirectoryChanged.connect(self.onCustomModelChange)
+        self.communicator.customModelDirectoryChanged.connect(self.onCustomModelChange)
         self.smearing_widget.smearingChangedSignal.connect(self.onSmearingOptionsUpdate)
         self.polydispersity_widget.cmdFitSignal.connect(lambda: self.cmdFit.setEnabled(self.haveParamsToFit()))
         self.polydispersity_widget.updateDataSignal.connect(lambda: self.updateData())
@@ -691,8 +691,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.magnetism_widget.toggledSignal.connect(self.onMagnetismToggled)
 
         # Communicator signal
-        self.communicate.updateModelCategoriesSignal.connect(self.onCategoriesChanged)
-        self.communicate.updateMaskedDataSignal.connect(self.onMaskedData)
+        self.communicator.updateModelCategoriesSignal.connect(self.onCategoriesChanged)
+        self.communicator.updateMaskedDataSignal.connect(self.onMaskedData)
 
         # Catch all key press events
         self.keyPressedSignal.connect(self.onKey)
@@ -1279,7 +1279,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         rows = current_list.selectionModel().selectedRows()
         # Clean previous messages
-        self.communicate.statusBarUpdateSignal.emit("")
+        self.communicator.statusBarUpdateSignal.emit("")
         if len(rows) == 1:
             # Show constraint, if present
             row = rows[0].row()
@@ -1296,7 +1296,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             else:
                 # ill defined constraint
                 return
-            self.communicate.statusBarUpdateSignal.emit(update_text)
+            self.communicator.statusBarUpdateSignal.emit(update_text)
 
     def onSesansData(self) -> None:
         """
@@ -1499,7 +1499,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             fitters, _ = self.fitting_controller.prepareFitters()
         except ValueError as ex:
             # This should not happen! GUI explicitly forbids this situation
-            self.communicate.statusBarUpdateSignal.emit(str(ex))
+            self.communicator.statusBarUpdateSignal.emit(str(ex))
             return
 
         # keep local copy of kernel parameters, as they will change during the update
@@ -1527,7 +1527,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.calc_fit.queue()
             self.calc_fit.ready(2.5)
 
-        self.communicate.statusBarUpdateSignal.emit('Fitting started...')
+        self.communicator.statusBarUpdateSignal.emit('Fitting started...')
         self.fit_started = True
 
         # Disable some elements
@@ -1544,7 +1544,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.enableInteractiveElements()
 
         msg = "Fitting cancelled."
-        self.communicate.statusBarUpdateSignal.emit(msg)
+        self.communicator.statusBarUpdateSignal.emit(msg)
 
     def updateFit(self) -> None:
         """
@@ -1557,7 +1557,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         self.enableInteractiveElements()
         msg = "Fitting failed with: "+ str(reason)
-        self.communicate.statusBarUpdateSignal.emit(msg)
+        self.communicator.statusBarUpdateSignal.emit(msg)
 
     def batchFittingCompleted(self, result: tuple | None) -> None:
         """
@@ -1576,18 +1576,18 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         if len(result) == 0:
             msg = "Fitting failed."
-            self.communicate.statusBarUpdateSignal.emit(msg)
+            self.communicator.statusBarUpdateSignal.emit(msg)
             return
 
         # Show the grid panel
         page_name = "BatchPage" + str(self.tab_id)
         results = copy.deepcopy(result[0])
         results.append(page_name)
-        self.communicate.sendDataToGridSignal.emit(results)
+        self.communicator.sendDataToGridSignal.emit(results)
 
         elapsed = result[1]
         msg = "Fitting completed successfully in: %s s.\n" % GuiUtils.formatNumber(elapsed)
-        self.communicate.statusBarUpdateSignal.emit(msg)
+        self.communicator.statusBarUpdateSignal.emit(msg)
 
         # Run over the list of results and update the items
         for res_index, res_list in enumerate(result[0]):
@@ -1639,7 +1639,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         if not result or not result[0] or not result[0][0]:
             msg = "Fitting failed."
-            self.communicate.statusBarUpdateSignal.emit(msg)
+            self.communicator.statusBarUpdateSignal.emit(msg)
             # reload the kernel_module in case it's corrupted
             self.kernel_module = copy.deepcopy(self.kernel_module_copy)
             return
@@ -1648,7 +1648,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.fitResults = True
         if result is None or len(result) == 0 or len(result[0]) == 0:
             msg = "Fitting failed."
-            self.communicate.statusBarUpdateSignal.emit(msg)
+            self.communicator.statusBarUpdateSignal.emit(msg)
             return
         res_list = result[0][0]
         res = res_list[0]
@@ -1659,7 +1659,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return
 
         # Show bumps convergence plots
-        self.communicate.resultPlotUpdateSignal.emit(result[0])
+        self.communicator.resultPlotUpdateSignal.emit(result[0])
 
         elapsed = result[1]
         if self.calc_fit is not None and self.calc_fit._interrupting:
@@ -1667,7 +1667,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             logger.warning("\n"+msg+"\n")
         else:
             msg = "Fitting completed successfully in: %s s." % GuiUtils.formatNumber(elapsed)
-        self.communicate.statusBarUpdateSignal.emit(msg)
+        self.communicator.statusBarUpdateSignal.emit(msg)
 
         # Dictionary of fitted parameter: value, error
         # e.g. param_dic = {"sld":(1.703, 0.0034), "length":(33.455, -0.0983)}
@@ -1791,7 +1791,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         item = self._requestPlots(self.data.name, current_index.model())
         if item:
             # fit+data has not been shown - show just data
-            self.communicate.plotRequestedSignal.emit([item, data_to_show])
+            self.communicator.plotRequestedSignal.emit([item, data_to_show])
 
     def _requestPlots(self, item_name: str, item_model: Any) -> Any | None:
         """
@@ -1805,7 +1805,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         for item, plot in plots.items():
             if plot.plot_role != DataRole.ROLE_DATA and fitpage_name in plot.name:
                 data_shown = True
-                self.communicate.plotRequestedSignal.emit([item, plot])
+                self.communicator.plotRequestedSignal.emit([item, plot])
         # return the last data item seen, if nothing was plotted; supposed to be just data)
         return None if data_shown else item
 
@@ -2380,7 +2380,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             fitted_data.symbol = "Line"
             self.createTheoryIndex(fitted_data)
             # Switch to the theory tab for user's glee
-            self.communicate.changeDataExplorerTabSignal.emit(1)
+            self.communicator.changeDataExplorerTabSignal.emit(1)
 
     def updateModelIndex(self, fitted_data: Data1D | Data2D) -> None:
         """
@@ -2406,7 +2406,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         fitted_data = temp_reader._remove_nans_in_data(fitted_data)
         # Modify the item or add it if new
         theory_item = GuiUtils.createModelItemWithPlot(fitted_data, name=name)
-        self.communicate.updateTheoryFromPerspectiveSignal.emit(theory_item)
+        self.communicator.updateTheoryFromPerspectiveSignal.emit(theory_item)
 
     def setTheoryItem(self, item: Any) -> None:
         """
@@ -2581,7 +2581,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         else:
             # delete theory items for the model, in order to get rid of any
             # redundant items, e.g. beta(Q), S_eff(Q)
-            self.communicate.deleteIntermediateTheoryPlotsSignal.emit(str(self.tab_id))
+            self.communicator.deleteIntermediateTheoryPlotsSignal.emit(str(self.tab_id))
 
         self._appendPlotsPolyDisp(new_plots, return_data, fitted_data)
 
@@ -2593,7 +2593,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             new_plots.append(plot)
 
         for plot in new_plots:
-            self.communicate.plotUpdateSignal.emit([plot])
+            self.communicator.plotUpdateSignal.emit([plot])
             QtWidgets.QApplication.processEvents()
 
         # Update radius_effective if relevant
@@ -2626,7 +2626,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Update/generate plots
         for plot in new_plots:
-            self.communicate.plotUpdateSignal.emit([plot])
+            self.communicator.plotUpdateSignal.emit([plot])
 
     def updateEffectiveRadius(self, return_data: dict) -> None:
         """

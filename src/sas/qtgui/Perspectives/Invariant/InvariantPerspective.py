@@ -66,8 +66,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self._allow_close: bool = False
 
         # Communication
-        self.communicate = GuiUtils.communicate
-        self.communicate.dataDeletedSignal.connect(self.removeData)
+        self.communicator = GuiUtils.communicator
+        self.communicator.dataDeletedSignal.connect(self.removeData)
 
         self.detailsDialog = DetailsDialog(self)
         self.detailsDialog.cmdOK.clicked.connect(self.enableStatus)
@@ -390,7 +390,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             plots.append(self.low_extrapolation_plot)
 
         if len(plots) > 1:
-            self.communicate.plotRequestedSignal.emit(plots)
+            self.communicator.plotRequestedSignal.emit(plots)
 
         # Update the details dialog in case it is open
         self.update_details_widget()

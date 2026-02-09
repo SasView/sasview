@@ -7,7 +7,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from sasmodels.sasview_model import load_standard_models
 
 from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
-from sas.qtgui.Utilities.GuiUtils import communicate
+from sas.qtgui.Utilities.GuiUtils import communicator
 
 from .UI.CategoryManagerUI import Ui_CategoryManagerUI
 from .UI.ChangeCategoryUI import Ui_ChangeCategoryUI
@@ -135,7 +135,7 @@ class CategoryManager(QtWidgets.QDialog, Ui_CategoryManagerUI):
         super(CategoryManager, self).__init__(parent)
         self.setupUi(self)
 
-        self.communicator = communicate
+        self.communicator = communicator
 
         self.manager = manager
 

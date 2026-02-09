@@ -35,11 +35,11 @@ class GuiUtilsTest:
         pass
 
 
-    def testCommunicate(self, qapp):
+    def testCommunicator(self, qapp):
         """
         Test the container class with signal definitions
         """
-        com = GuiUtils.Communicate()
+        com = GuiUtils.communicator
 
         # All defined signals
         list_of_signals = [
