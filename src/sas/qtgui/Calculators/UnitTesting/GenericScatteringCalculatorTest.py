@@ -98,7 +98,7 @@ class GenericScatteringCalculatorTest:
         """ Assure help file is shown """
         mocker.patch.object(widget.manager, 'showHelp', create=True)
         widget.onHelp()
-        assert widget.manager.showHelp.called_once()
+        widget.manager.showHelp.assert_called_once()
         args = widget.manager.showHelp.call_args
         assert 'sas_calculator_help.html' in args[0][0]
 
@@ -485,5 +485,5 @@ class Plotter3DTest:
 
         plotter.data = data
         plotter.showPlot(data=data)
-        assert Axes3D.plot.called
-        assert FigureCanvas.draw.called
+        Axes3D.plot.assert_called()
+        FigureCanvas.draw.assert_called()

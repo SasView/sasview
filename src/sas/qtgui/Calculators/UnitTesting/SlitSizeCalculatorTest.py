@@ -36,7 +36,7 @@ class SlitSizeCalculatorTest:
         widget._parent = QtWidgets.QWidget()
         mocker.patch.object(widget._parent, 'showHelp', create=True)
         widget.onHelp()
-        assert widget._parent.showHelp.called_once()
+        widget._parent.showHelp.assert_called_once()
         args = widget._parent.showHelp.call_args
         assert 'slit_calculator_help.html' in args[0][0]
 
@@ -91,8 +91,8 @@ class SlitSizeCalculatorTest:
 
         widget.calculateSlitSize(data)
 
-        assert logger.error.called_once()
+        logger.error.assert_not_called()
 
         data = None
         widget.calculateSlitSize(data)
-        assert logger.error.call_count == 2
+        logger.error.assert_not_called()

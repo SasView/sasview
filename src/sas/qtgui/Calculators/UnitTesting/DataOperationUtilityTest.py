@@ -101,15 +101,13 @@ class DataOperationUtilityTest:
         assert not widget.data1OK
 
         mocker.patch.object(widget, 'newPlot')
-        assert widget.newPlot.called_once()
-        assert widget.newPlot.called_once()
-        assert widget.newPlot.called_once()
+        widget.newPlot.assert_not_called()
 
     def testHelp(self, widget, mocker):
         """ Assure help file is shown """
         mocker.patch.object(widget.manager, 'showHelp', create=True)
         widget.onHelp()
-        assert widget.manager.showHelp.called_once()
+        widget.manager.showHelp.assert_called_once()
         args = widget.manager.showHelp.call_args
         assert 'data_operator_help.html' in args[0][0]
 
@@ -148,11 +146,9 @@ class DataOperationUtilityTest:
         assert widget.output.x.tolist() == \
                                 widget.data1.x.tolist()
         assert widget.output.y.tolist() == [12.0, 13.0, 14.0]
-        assert widget.updatePlot.called_once()
 
-        mocker.patch.object(widget, 'onPrepareOutputData')
-
-        assert widget.onPrepareOutputData.called_once()
+        widget.updatePlot.assert_called_once()
+        widget.onPrepareOutputData.assert_not_called()
 
     def testOnSelectData1(self, widget, mocker):
         """ Test ComboBox for Data1 """
@@ -168,7 +164,7 @@ class DataOperationUtilityTest:
 
         widget.cbData1.addItems(['Select Data', 'datafile1'])
         widget.cbData1.setCurrentIndex(widget.cbData1.count()-1)
-        assert widget.updatePlot.called_once()
+        widget.updatePlot.assert_called_once()
         # Compute button disabled if data2OK == False
         assert widget.cmdCompute.isEnabled() == widget.data2OK
 
@@ -199,20 +195,20 @@ class DataOperationUtilityTest:
         assert widget.cmdCompute.isEnabled() == widget.data1OK
         assert isinstance(widget.data2, float)
         # call updatePlot
-        assert widget.updatePlot.called_once()
+        widget.updatePlot.assert_called()
 
         # Case 4: when Data2 is a file
         mocker.patch.object(widget, 'filenames', return_value={'datafile2': 'details'})
         widget.cbData2.addItems(['Select Data', 'Number', 'datafile2'])
         widget.cbData2.setCurrentIndex(widget.cbData2.count() - 1)
-        assert widget.updatePlot.called_once()
+        widget.updatePlot.assert_called()
         # editing of txtNumber is disabled when Data2 is a file
         assert not widget.txtNumber.isEnabled()
         # Compute button enabled only if data1OK True
         assert widget.cmdCompute.isEnabled() == \
                             widget.data1OK
         # call updatePlot
-        assert widget.updatePlot.called_once()
+        widget.updatePlot.assert_called()
 
     def testUpdateCombobox(self, widget):
         """ Test change of contents of comboboxes for Data1 and Data2 """

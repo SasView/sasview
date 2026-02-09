@@ -97,7 +97,7 @@ class PreferencesPanelTest:
         widget.addWidget(pref)
 
         widget.restoreDefaultPreferences()
-        assert widget.resetPref.called_once()
+        widget.resetPref.assert_called_once()
 
         # Explicitly modify each input type
         text_input.setText("new text")
@@ -106,7 +106,7 @@ class PreferencesPanelTest:
         check_box.setChecked(not check_box.checkState())
         combo_box.setCurrentIndex(1)
 
-        assert widget.textified.called_once()
-        assert widget._validate_input_and_stage.called_once()
-        assert widget.combo.called_once()
-        assert widget.checked.called_once()
+        widget.textified.assert_called_once()
+        widget._validate_input_and_stage.assert_called_once()
+        widget.combo.assert_called_once()
+        widget.checked.assert_called_once()

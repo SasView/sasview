@@ -153,6 +153,6 @@ class DensityCalculatorTest:
         widget.manager = QtWidgets.QWidget()
         mocker.patch.object(widget.manager, 'showHelp', create=True)
         widget.displayHelp()
-        assert widget.manager.showHelp.called_once()
+        widget.manager.showHelp.assert_called_once()
         args = widget.manager.showHelp.call_args
         assert 'density_calculator_help.html' in args[0][0]
