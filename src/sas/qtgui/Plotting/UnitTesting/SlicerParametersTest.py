@@ -84,7 +84,6 @@ class SlicerParametersTest:
         assert widget.cbSlicer.count(), 3
         assert widget.cbSlicer.itemText(0), 'No fitting'
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testLstParams(self, widget, data):
         ''' test lstParams with content '''
         item1 = QtGui.QStandardItem('t1')
@@ -111,7 +110,6 @@ class SlicerParametersTest:
         assert flags & QtCore.Qt.ItemIsSelectable
         assert flags & QtCore.Qt.ItemIsEnabled
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testClose(self, widget, qtbot):
         ''' Assure that clicking on Close triggers right behaviour'''
         widget.show()
@@ -125,7 +123,6 @@ class SlicerParametersTest:
         # Check the signal
         assert spy_close.count() == 1
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testOnHelp(self, widget, mocker):
         ''' Assure clicking on help returns QtWeb view on requested page'''
         widget.show()
@@ -142,7 +139,6 @@ class SlicerParametersTest:
         # Assure the filename is correct
         assert "graph_help.html" in webbrowser.open.call_args[0][0]
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testSetModel(self, widget):
         ''' Test if resetting the model works'''
         item1 = QtGui.QStandardItem("s1")
@@ -161,7 +157,6 @@ class SlicerParametersTest:
         assert widget.model.item(0, 0).text() == 's1'
         assert widget.model.item(1, 0).text() == 's2'
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testPlotSave(self, widget):
         ''' defaults for the Auto Save options '''
         assert not widget.cbSave1DPlots.isChecked()
@@ -177,14 +172,12 @@ class SlicerParametersTest:
         assert widget.cbFitOptions.isEnabled()
         assert widget.cbSaveExt.isEnabled()
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testPlotList(self, widget):
         ''' check if the plot list shows correct content '''
         assert widget.lstPlots.count() == 1
         assert widget.lstPlots.item(0).text() == "test_plot"
         assert not widget.lstPlots.item(0).checkState()
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testOnSlicerChange(self, widget, mocker):
         ''' change the slicer '''
         mocker.patch.object(widget, 'onApply')
@@ -192,7 +185,6 @@ class SlicerParametersTest:
         assert widget.lstParams.model().columnCount() == 0
         assert widget.lstParams.model().index(0, 0).data() is None
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testOnApply(self, widget, mocker):
         widget.lstPlots.item(0).setCheckState(True)
         mocker.patch.object(widget, 'applyPlotter')

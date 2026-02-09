@@ -143,7 +143,6 @@ class QRangeSlidersTest:
         # Move slider and ensure text input matches
         self.moveSliderAndInputs(widget.minQInput, widget.maxQInput)
 
-
     def testLinearFitSliders(self, slidersetup):
         '''Test the QRangeSlider class within the context of the Linear Fit tool'''
         self.plotter.plot(self.data)

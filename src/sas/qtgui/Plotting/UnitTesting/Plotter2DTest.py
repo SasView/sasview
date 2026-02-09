@@ -67,7 +67,6 @@ class Plotter2DTest:
         plotter.plot()
         assert plotter.plot.called_once()
 
-    @pytest.mark.skip(reason="2022-09 already broken")
     def testCalculateDepth(self, plotter):
         ''' Test the depth calculator '''
         plotter.data = self.data
@@ -82,7 +81,6 @@ class Plotter2DTest:
         assert depth[0] == -32.
         assert depth[1] == pytest.approx(1.30103, abs=1e-5)
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testOnColorMap(self, plotter, mocker):
         ''' Respond to the color map event '''
         plotter.data = self.data
@@ -101,7 +99,6 @@ class Plotter2DTest:
         assert plotter.vmin == pytest.approx(0.1, abs=1e-6)
         assert plotter.vmax == pytest.approx(1e+20, abs=1e-6)
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testOnToggleScale(self, plotter, mocker):
         """ Respond to the event by replotting """
         plotter.data = self.data
@@ -133,7 +130,6 @@ class Plotter2DTest:
         assert plotter._show_masked_data
         assert plotter.plot.called_once()
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testOnBoxSum(self, plotter, mocker):
         """ Test the box sum display and functionality """
 
@@ -154,7 +150,6 @@ class Plotter2DTest:
         assert plotter.boxwidget.isVisible()
         assert isinstance(plotter.boxwidget.model, QtGui.QStandardItemModel)
 
-    @pytest.mark.skip(reason="2022-09 already broken")
     def testContextMenuQuickPlot(self, plotter, mocker):
         """ Test the right click menu """
         plotter.data = self.data
@@ -195,7 +190,6 @@ class Plotter2DTest:
         # Make sure clipboard got updated.
         assert self.clipboard_called
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testShowNoPlot(self, plotter, mocker):
         """ Test the plot rendering and generation """
 
@@ -215,7 +209,6 @@ class Plotter2DTest:
         assert not FigureCanvas.draw_idle.called
         assert not FigureCanvas.draw.called
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testShow3DPlot(self, plotter, mocker):
         """ Test the 3Dplot rendering and generation """
         # Test 3D printout
@@ -236,7 +229,6 @@ class Plotter2DTest:
         assert Axes3D.plot_surface.called
         assert FigureCanvas.draw.called
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testShow2DPlot(self, plotter, mocker):
         """ Test the 2Dplot rendering and generation """
         # Test 2D printout

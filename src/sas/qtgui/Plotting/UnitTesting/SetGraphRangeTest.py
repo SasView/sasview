@@ -32,7 +32,6 @@ class SetGraphRangeTest:
         assert new_widget.xrange() == (1.0, 2.0)
         assert new_widget.yrange() == (8.0, -2.0)
 
-
     def testBadRanges(self, widget):
         '''Test the incorrect X range values set by caller'''
         with pytest.raises(ValueError):

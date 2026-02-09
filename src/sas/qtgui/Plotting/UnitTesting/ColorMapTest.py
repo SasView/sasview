@@ -49,7 +49,6 @@ class ColorMapTest:
         '''Destroy the GUI'''
         w.close()
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testDefaults(self, widget):
         '''Test the GUI in its default state'''
         assert isinstance(widget, QtWidgets.QDialog)
@@ -76,7 +75,6 @@ class ColorMapTest:
         assert widget.txtMaxAmplitude.text() == "100"
         assert isinstance(widget.slider, QtWidgets.QSlider)
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testOnReset(self, widget):
         '''Check the dialog reset function'''
         # Set some controls to non-default state
@@ -92,7 +90,6 @@ class ColorMapTest:
         assert not widget.chkReverse.isChecked()
         assert widget.txtMinAmplitude.text() == "0"
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testOnApply(self, widget):
         '''Check the dialog apply function'''
         # Set some controls to non-default state
@@ -110,7 +107,6 @@ class ColorMapTest:
         assert spy_apply.count() == 1
         assert 'PuRd_r' in spy_apply.called()[0]['args'][1]
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testInitMapCombobox(self, widget):
         '''Test the combo box initializer'''
         # Set a color map from the direct list
@@ -128,7 +124,6 @@ class ColorMapTest:
         assert widget.cbColorMap.currentIndex() == 56
         assert widget.chkReverse.isChecked()
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testInitRangeSlider(self, widget):
         '''Test the range slider initializer'''
         # Set a color map from the direct list
@@ -150,7 +145,6 @@ class ColorMapTest:
         # Assure the widget received changes
         assert widget.txtMaxAmplitude.text() == "45"
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testOnMapIndexChange(self, widget, mocker):
         '''Test the response to the combo box index change'''
 
@@ -164,7 +158,6 @@ class ColorMapTest:
         assert widget.canvas.draw.called
         assert mpl.colorbar.ColorbarBase.called
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testOnColorMapReversed(self, widget, mocker):
         '''Test reversing the color map functionality'''
         # Check the defaults
@@ -178,7 +171,6 @@ class ColorMapTest:
         assert widget._cmap == "jet_r"
         assert widget.cbColorMap.addItems.called
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testOnAmplitudeChange(self, widget, mocker):
         '''Check the callback method for responding to changes in textboxes'''
         mocker.patch.object(widget.canvas, 'draw')
