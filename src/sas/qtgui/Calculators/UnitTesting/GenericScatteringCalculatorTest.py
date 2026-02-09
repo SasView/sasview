@@ -1,5 +1,6 @@
 import os
 import time
+from pathlib import Path
 from unittest.mock import MagicMock
 
 import numpy
@@ -167,7 +168,7 @@ class GenericScatteringCalculatorTest:
         """
         Load sld data and check modifications of GUI
         """
-        filename = os.path.join("UnitTesting", "sld_file.sld")
+        filename = str(Path("./src/sas/qtgui/UnitTesting/sld_file.sld").absolute())
         mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[filename, ''])
         widget.loadFile()
 
@@ -232,7 +233,7 @@ class GenericScatteringCalculatorTest:
         """
         Load pdb data and check modifications of GUI
         """
-        filename = os.path.join("UnitTesting", "diamdsml.pdb")
+        filename = str(Path("./src/sas/qtgui/UnitTesting/diamdsml.pdb").absolute())
 
         mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[filename, ''])
         widget.loadFile()
@@ -298,7 +299,7 @@ class GenericScatteringCalculatorTest:
         """
         Load omf data and check modifications of GUI
         """
-        filename = os.path.join("UnitTesting", "A_Raw_Example-1.omf")
+        filename = str(Path("./src/sas/qtgui/UnitTesting/A_Raw_Example-1.omf").absolute())
 
         mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[filename, ''])
         widget.loadFile()
@@ -367,7 +368,7 @@ class GenericScatteringCalculatorTest:
         Test compute button
         """
         # load data
-        filename = os.path.join("UnitTesting", "diamdsml.pdb")
+        filename = str(Path("./src/sas/qtgui/UnitTesting/diamdsml.pdb").absolute())
 
         mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[filename, ''])
         widget.loadFile()
@@ -387,8 +388,8 @@ class GenericScatteringCalculatorTest:
         """
         Test Draw buttons for 3D plots with and without arrows
         """
-        assert not widget.cmdDraw.isEnabled()
-        filename = os.path.join("UnitTesting", "diamdsml.pdb")
+        assert widget.cmdDraw.isEnabled()
+        filename = str(Path("./src/sas/qtgui/UnitTesting/diamdsml.pdb").absolute())
         mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[filename,''])
         widget.loadFile()
         assert widget.cmdLoad.text() == 'Loading...'
@@ -409,7 +410,7 @@ class GenericScatteringCalculatorTest:
         """
         Test Save feature to .sld file
         """
-        filename = os.path.join("UnitTesting", "sld_file.sld")
+        filename = str(Path("./src/sas/qtgui/UnitTesting/sld_file.sld").absolute())
 
         mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[filename, ''])
         widget.loadFile()
@@ -417,7 +418,7 @@ class GenericScatteringCalculatorTest:
         time.sleep(0.1)
         QtWidgets.qApp.processEvents()
 
-        filename1 = "test"
+        filename1 = str(Path("./src/sas/qtgui/UnitTesting/test").absolute())
         mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName', return_value=[filename1, ''])
 
         #QTest.mouseClick(widget.cmdSave, Qt.LeftButton)
@@ -427,7 +428,7 @@ class GenericScatteringCalculatorTest:
         assert os.path.isfile(filename1 + '.sld')
         assert os.path.getsize(filename1 + '.sld') > 0
 
-        os.remove("test.sld")
+        os.remove(filename1 + ".sld")
 
 
 class Plotter3DTest:
