@@ -29,7 +29,9 @@ class SlitSizeCalculatorTest:
         """Test the GUI in its default state"""
         assert isinstance(widget, QtWidgets.QWidget)
         assert widget.windowTitle() == "Slit Size Calculator"
-        assert widget.sizePolicy().Policy() == QtWidgets.QSizePolicy.Fixed
+        sp = widget.sizePolicy()
+        assert sp.horizontalPolicy() == QtWidgets.QSizePolicy.Policy.Preferred
+        assert sp.verticalPolicy() == QtWidgets.QSizePolicy.Policy.Preferred
 
     def testHelp(self, widget, mocker):
         """ Assure help file is shown """

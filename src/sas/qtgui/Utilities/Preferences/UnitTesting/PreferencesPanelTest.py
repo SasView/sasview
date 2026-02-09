@@ -72,7 +72,7 @@ class PreferencesPanelTest:
     def testHelp(self, widget, mocker):
         mocker.patch.object(widget, 'close')
         widget.buttonBox.buttons()[0].click()
-        assert widget.close.called_once()
+        widget.close.assert_called_once()
 
     def testPreferencesWidget(self, widget, mocker):
         mocker.patch.object(widget, 'checked', create=True)

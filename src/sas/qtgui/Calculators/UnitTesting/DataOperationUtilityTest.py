@@ -42,7 +42,7 @@ class DataOperationUtilityTest:
                                                         "| (append)]"
         # size
         assert widget.size().height() == 425
-        assert widget.size().width() == 951
+        assert widget.size().width() == 1168
 
         # content of line edits
         assert widget.txtNumber.text() == '1.0'

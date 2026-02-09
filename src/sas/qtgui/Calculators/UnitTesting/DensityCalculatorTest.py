@@ -47,7 +47,9 @@ class DensityCalculatorTest:
         assert widget.ui.editMolecularFormula.styleSheet() == ''
         assert widget.model.columnCount() == 1
         assert widget.model.rowCount() == 4
-        assert widget.sizePolicy().Policy() == QtWidgets.QSizePolicy.Fixed
+        sp = widget.sizePolicy()
+        assert sp.horizontalPolicy() == QtWidgets.QSizePolicy.Policy.Fixed
+        assert sp.verticalPolicy() == QtWidgets.QSizePolicy.Policy.Fixed
 
 
     def testModelMolecularFormula(self, widget, qtbot):

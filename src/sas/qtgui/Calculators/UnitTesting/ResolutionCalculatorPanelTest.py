@@ -41,8 +41,8 @@ class ResolutionCalculatorPanelTest:
         assert isinstance(widget, QtWidgets.QDialog)
         assert widget.windowTitle() == "Q Resolution Estimator"
         # size
-        assert widget.size().height() == 540
-        assert widget.size().width() == 876
+        assert widget.size().height() == 566
+        assert widget.size().width() == 857
 
         # visibility
         assert not widget.lblSpectrum.isVisible()
