@@ -33,7 +33,6 @@ class GenericScatteringCalculatorTest:
 
         w.close()
 
-    @pytest.mark.xfail(reason="2022-09 already broken")
     def testDefaults(self, widget):
         """Test the GUI in its default state"""
         assert isinstance(widget, QtWidgets.QWidget)
@@ -163,7 +162,6 @@ class GenericScatteringCalculatorTest:
         assert widget.txtQxMax.validator().validate(item.text(), 0)[0] == \
             QtGui.QValidator.Acceptable
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testLoadedSLDData(self, widget, mocker):
         """
         Load sld data and check modifications of GUI
@@ -228,7 +226,6 @@ class GenericScatteringCalculatorTest:
 
         # assert widget.trigger_plot_3d
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testLoadedPDBButton(self, widget, mocker):
         """
         Load pdb data and check modifications of GUI
@@ -293,8 +290,6 @@ class GenericScatteringCalculatorTest:
 
         assert widget.sld_data.is_data
 
-    # TODO
-    @pytest.mark.xfail(reason="2022-09 already broken")
     def testLoadedOMFButton(self, widget, mocker):
         """
         Load omf data and check modifications of GUI
@@ -361,8 +356,6 @@ class GenericScatteringCalculatorTest:
         # check that we get back to the initial state
         assert widget.txtBackground.text() == '0.0'
 
-    # TODO check plots
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testCompute(self, widget, mocker):
         """
         Test compute button
@@ -470,7 +463,6 @@ class Plotter3DTest:
         assert plotter.graph_title, 'test'
         assert not plotter.data.has_conect
 
-    @pytest.mark.skip(reason="setting the mocker on FigureCanvas causes exceptions on Windows")
     def testShowNoPlot(self, plotter, mocker):
         mocker.patch.object(FigureCanvas, 'draw_idle')
         mocker.patch.object(FigureCanvas, 'draw')
@@ -478,7 +470,6 @@ class Plotter3DTest:
         assert not FigureCanvas.draw_idle.called
         assert not FigureCanvas.draw.called
 
-    @pytest.mark.skip(reason="setting the mocker on FigureCanvas causes exceptions on Windows")
     def testShow3DPlot(self, plotter, data, mocker):
         mocker.patch.object(FigureCanvas, 'draw')
         mocker.patch.object(Axes3D, 'plot')

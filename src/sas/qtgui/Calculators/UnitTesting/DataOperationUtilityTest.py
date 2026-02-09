@@ -123,7 +123,6 @@ class DataOperationUtilityTest:
         closeButton = widget.cmdClose
         QTest.mouseClick(closeButton, Qt.LeftButton)
 
-    @pytest.mark.xfail(reason="2022-09 already broken")
     def testOnCompute(self, widget, mocker):
         """ Test onCompute function """
 
@@ -360,7 +359,6 @@ class DataOperationUtilityTest:
         id_out = widget._findId('datafile2')
         assert id_out == 'datafile2'
 
-    @pytest.mark.xfail(reason="2022-09 already broken")
     def testExtractData(self, widget):
         """
         Test function to extract data to be computed from input filenames

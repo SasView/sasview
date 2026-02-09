@@ -11,7 +11,6 @@ from sas.qtgui.Calculators.SldPanel import SldPanel, neutronSldAlgorithm
 class SldAlgorithmTest:
     """ Test the periodictable wrapper """
 
-    @pytest.mark.xfail(reason="2022-09 already broken")
     def testSldAlgorithm1(self):
         molecular_formula = "H2O"
         mass_density = 1.0
@@ -25,7 +24,6 @@ class SldAlgorithmTest:
         assert results.neutron_inc_xs == pytest.approx(5.365857, abs=1e-5)
         assert results.neutron_abs_xs == pytest.approx(0.074224, abs=1e-5)
 
-    @pytest.mark.xfail(reason="2022-09 already broken")
     def testSldAlgorithm2(self):
         molecular_formula = "C29O[18]5+7NH[2]3"
         mass_density = 3.0
