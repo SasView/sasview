@@ -239,7 +239,7 @@ class GenericScatteringCalculatorTest:
         assert widget.cmdLoad.text() == 'Loading...'
 
         time.sleep(1)
-        QtWidgets.qApp.processEvents()
+        QtWidgets.QApplication.processEvents()
 
         # check updated values in ui, read from loaded file
         # TODO to be changed
@@ -364,8 +364,13 @@ class GenericScatteringCalculatorTest:
         filename = str(Path("./src/sas/qtgui/UnitTesting/diamdsml.pdb").absolute())
 
         mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[filename, ''])
-        widget.loadFile()
-        time.sleep(1)
+        widget.cmdNucLoad.click()
+
+        # check modification of text in Load button
+        assert widget.cmdNucLoad.text() == 'Loading...'
+        # wait a bit for data to be loaded
+        time.sleep(0.1)
+        QtWidgets.QApplication.processEvents()
         QTest.mouseClick(widget.cmdCompute, Qt.LeftButton)
         # check modification of text of Compute button
         assert widget.cmdCompute.text() == 'Wait...'
@@ -384,10 +389,13 @@ class GenericScatteringCalculatorTest:
         assert widget.cmdDraw.isEnabled()
         filename = str(Path("./src/sas/qtgui/UnitTesting/diamdsml.pdb").absolute())
         mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[filename,''])
-        widget.loadFile()
-        assert widget.cmdLoad.text() == 'Loading...'
-        time.sleep(1)
-        QtWidgets.qApp.processEvents()
+        widget.cmdNucLoad.click()
+
+        # check modification of text in Load button
+        assert widget.cmdNucLoad.text() == 'Loading...'
+        # wait a bit for data to be loaded
+        time.sleep(0.1)
+        QtWidgets.QApplication.processEvents()
 
         assert widget.cmdDraw.isEnabled()
         QTest.mouseClick(widget.cmdDraw, Qt.LeftButton)
@@ -409,14 +417,14 @@ class GenericScatteringCalculatorTest:
         widget.loadFile()
 
         time.sleep(0.1)
-        QtWidgets.qApp.processEvents()
+        QtWidgets.QApplication.processEvents()
 
         filename1 = str(Path("./src/sas/qtgui/UnitTesting/test").absolute())
         mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName', return_value=[filename1, ''])
 
         #QTest.mouseClick(widget.cmdSave, Qt.LeftButton)
-        widget.onSaveFile()
-        QtWidgets.qApp.processEvents()
+        widget.cmdSave.click()
+        QtWidgets.QApplication.processEvents()
 
         assert os.path.isfile(filename1 + '.sld')
         assert os.path.getsize(filename1 + '.sld') > 0

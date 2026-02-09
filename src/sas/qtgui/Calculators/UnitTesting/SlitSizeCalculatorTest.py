@@ -62,7 +62,7 @@ class SlitSizeCalculatorTest:
 
         # Click on the Load button
         QTest.mouseClick(browseButton, Qt.LeftButton)
-        QtWidgets.qApp.processEvents()
+        QtWidgets.QApplication.processEvents()
 
         # Test the getOpenFileName() dialog called once
         assert QtWidgets.QFileDialog.getOpenFileName.called

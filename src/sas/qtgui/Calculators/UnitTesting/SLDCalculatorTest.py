@@ -1,6 +1,6 @@
 
 import pytest
-from PySide6 import QtCore, QtWidgets
+from PySide6 import QtWidgets
 from PySide6.QtTest import QTest
 
 # Local
@@ -71,10 +71,8 @@ class SLDCalculatorTest:
         widget.ui.editMassDensity.clear()
         widget.ui.editMassDensity.insert("1.0")
         # Send tab x3
-        key = QtCore.Qt.Key_Tab
-        QTest.keyEvent(QTest.Press, widget, key, QtCore.Qt.NoModifier)
-        QTest.keyEvent(QTest.Press, widget, key, QtCore.Qt.NoModifier)
-        QtWidgets.qApp.processEvents()
+        widget.ui.calculateButton.click()
+        QtWidgets.QApplication.processEvents()
         QTest.qWait(100)
 
         # Assure the output fields are set
@@ -85,9 +83,8 @@ class SLDCalculatorTest:
         widget.ui.editNeutronWavelength.setText("666.0")
 
         # Send shift-tab to update the molar volume field
-        QTest.keyEvent(QTest.Press, widget, key, QtCore.Qt.NoModifier)
-        QTest.keyEvent(QTest.Press, widget, key, QtCore.Qt.NoModifier)
-        QtWidgets.qApp.processEvents()
+        widget.ui.calculateButton.click()
+        QtWidgets.QApplication.processEvents()
         QTest.qWait(100)
 
         # Assure the molar volume field got updated
@@ -102,11 +99,9 @@ class SLDCalculatorTest:
 
         widget.show()
         # Send tab x2
-        key = QtCore.Qt.Key_Tab
-        QTest.keyEvent(QTest.Press, widget, key, QtCore.Qt.NoModifier)
-        QTest.keyEvent(QTest.Press, widget, key, QtCore.Qt.NoModifier)
+        widget.ui.calculateButton.click()
+        QtWidgets.QApplication.processEvents()
         QTest.qWait(100)
-        QTest.keyEvent(QTest.Press, widget, key, QtCore.Qt.NoModifier)
 
         # Assure the mass density field is set
         assert widget.ui.editNeutronIncXs.text() == '2.89'

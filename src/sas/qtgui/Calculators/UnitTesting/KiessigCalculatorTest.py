@@ -1,8 +1,6 @@
 
 import pytest
 from PySide6 import QtWidgets
-from PySide6.QtCore import Qt
-from PySide6.QtTest import QTest
 
 from sas.qtgui.Calculators.KiessigPanel import KiessigPanel
 
@@ -43,10 +41,7 @@ class KiessigCalculatorTest:
 
         widget.deltaq_in.clear()
         widget.deltaq_in.insert('0.05')
-        #
-        # Push Compute with the left mouse button
-        computeButton = widget.computeButton
-        QTest.mouseClick(computeButton, Qt.LeftButton)
+        QtWidgets.QApplication.processEvents()
         assert widget.lengthscale_out.text() == '125.664'
 
     def testComplexEntryNumbers2(self, widget):
@@ -54,10 +49,7 @@ class KiessigCalculatorTest:
 
         widget.deltaq_in.clear()
         widget.deltaq_in.insert('1.0')
-        #
-        # Push Compute with the left mouse button
-        computeButton = widget.computeButton
-        QTest.mouseClick(computeButton, Qt.LeftButton)
+        QtWidgets.QApplication.processEvents()
         assert widget.lengthscale_out.text() == '6.283'
 
     def testComplexEntryNumbers3(self, widget):
@@ -65,19 +57,13 @@ class KiessigCalculatorTest:
 
         widget.deltaq_in.clear()
         widget.deltaq_in.insert('2.0')
-        #
-        # Push Compute with the left mouse button
-        computeButton = widget.computeButton
-        QTest.mouseClick(computeButton, Qt.LeftButton)
+        QtWidgets.QApplication.processEvents()
         assert widget.lengthscale_out.text() == '3.142'
 
     def testComplexEntryLetters(self, widget):
         """ User entered compound calculations and subsequent reset"""
         widget.deltaq_in.clear()
         widget.deltaq_in.insert("xyz")
-
-        # Push Compute with the left mouse button
-        computeButton = widget.computeButton
-        QTest.mouseClick(computeButton, Qt.LeftButton)
+        QtWidgets.QApplication.processEvents()
         assert widget.deltaq_in.text() == ''
         assert widget.lengthscale_out.text() == ''
