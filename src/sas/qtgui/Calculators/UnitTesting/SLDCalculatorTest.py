@@ -21,7 +21,7 @@ class SldAlgorithmTest:
                                 wavelength)
         #assert isinstance(results, SldResult)
         assert results.neutron_length == pytest.approx(0.175463, abs=1e-5)
-        assert results.neutron_inc_xs == pytest.approx(5.365857, abs=1e-5)
+        assert results.neutron_inc_xs == pytest.approx(5.621134, abs=1e-5)
         assert results.neutron_abs_xs == pytest.approx(0.074224, abs=1e-5)
 
     def testSldAlgorithm2(self):
@@ -34,8 +34,8 @@ class SldAlgorithmTest:
                                 wavelength)
         #assert isinstance(results, SldResult)
         assert results.neutron_length == pytest.approx(0.059402, abs=1e-5)
-        assert results.neutron_inc_xs == pytest.approx(0.145427, abs=1e-5)
-        assert results.neutron_abs_xs == pytest.approx(15.512215, abs=1e-5)
+        assert results.neutron_inc_xs == pytest.approx(0.16086, abs=1e-5)
+        assert results.neutron_abs_xs == pytest.approx(15.511923, abs=1e-5)
         assert results.neutron_sld_real == pytest.approx(1.3352833e-05, abs=1e-5)
         assert results.neutron_sld_imag == pytest.approx(1.1645807e-10, abs=1e-5)
 

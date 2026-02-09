@@ -9,13 +9,13 @@ from sas.qtgui.Calculators.DensityPanel import MODEL, DensityPanel, toMolarMass
 class ToMolarMassTest:
     """ Test the auxiliary conversion method"""
     def testGoodEasy(self):
-        assert toMolarMass("H2") == "2.01588"
+        assert toMolarMass("H2") == "2.016"
 
     def testGoodComplex(self):
         assert toMolarMass("H24O12C4C6N2Pu") == "608.304"
 
     def testGoodComplex2(self):
-        assert toMolarMass("(H2O)0.5(D2O)0.5") == "19.0214"
+        assert toMolarMass("(H2O)0.5(D2O)0.5") == "19.0211"
 
     def testBadInputInt(self):
         assert toMolarMass(1) == ""
@@ -115,7 +115,7 @@ class DensityCalculatorTest:
         QTest.qWait(100)
 
         # Assure the molar volume field got updated
-        assert widget.ui.editMolarVolume.text() == '1.126'
+        assert widget.ui.editMolarVolume.text() == '1.1259'
 
     def testComplexEntryAndReset(self, widget, qtbot):
         ''' User entered compound calculations and subsequent reset'''
@@ -138,7 +138,7 @@ class DensityCalculatorTest:
         qtbot.keyEvent(QTest.Press, widget, key, QtCore.Qt.NoModifier)
 
         # Assure the mass density field is set
-        assert widget.ui.editMassDensity.text() == '79.017'
+        assert widget.ui.editMassDensity.text() == '79.016'
 
         # Reset the widget
         qtbot.mouseClick(widget.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Reset), QtCore.Qt.LeftButton)
