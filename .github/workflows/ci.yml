@@ -23,6 +23,7 @@ on:
         type: string
   pull_request:
   push:
+    branches: [main]
 
 defaults:
   run:
