@@ -10,15 +10,15 @@ from PySide6.QtWidgets import QApplication, QFileDialog, QMessageBox, QTabWidget
 from sasdata.dataloader.loader import Loader
 
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
+
+# Local
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
 from sas.qtgui.MainWindow.DataManager import DataManager
 from sas.qtgui.Plotting.Plotter import Plotter
 from sas.qtgui.Plotting.Plotter2D import Plotter2D
-
-# Local
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
-from sas.qtgui.Utilities.GuiUtils import Communicate, HashableStandardItem
 from sas.system.version import __version__ as SASVIEW_VERSION
 
 
@@ -27,7 +27,7 @@ class MyPerspective:
         self.name = "Dummy Perspective"
 
     def communicator(self):
-        return Communicate()
+        return GuiUtils.Communicate()
 
     def allowBatch(self):
         return True
@@ -50,7 +50,7 @@ class dummy_manager:
         self._perspective = MyPerspective()
 
     def communicator(self):
-        return Communicate()
+        return GuiUtils.Communicate()
 
     def perspective(self):
         return self._perspective
@@ -236,12 +236,12 @@ class DataExplorerTest:
         mocker.patch.object(QMessageBox, 'question', return_value=QMessageBox.No)
 
         # Populate the model
-        item1 = HashableStandardItem(True)
+        item1 = GuiUtils.HashableStandardItem(True)
         item1.setCheckable(True)
         item1.setCheckState(Qt.Checked)
         item1.setText("item 1")
         form.theory_model.appendRow(item1)
-        item2 = HashableStandardItem(True)
+        item2 = GuiUtils.HashableStandardItem(True)
         item2.setCheckable(True)
         item2.setCheckState(Qt.Unchecked)
         item2.setText("item 2")
@@ -579,7 +579,7 @@ class DataExplorerTest:
                         test_data.notes
 
         # Mask retrieval of the data
-        mocker.patch.object(sas.qtgui.Utilities.GuiUtils, 'plotsFromCheckedItems', return_value=new_data)
+        mocker.patch.object(GuiUtils, 'plotsFromCheckedItems', return_value=new_data)
 
         # Mask plotting
         mocker.patch.object(form.parent, 'workspace')
@@ -615,7 +615,7 @@ class DataExplorerTest:
         new_data = [(None, manager.create_gui_data(output_object[0], p_file))]
 
         # Mask retrieval of the data
-        mocker.patch.object(sas.qtgui.Utilities.GuiUtils, 'plotsFromCheckedItems', return_value=new_data)
+        mocker.patch.object(GuiUtils, 'plotsFromCheckedItems', return_value=new_data)
 
         # Mask plotting
         mocker.patch.object(form.parent, 'workspace')
@@ -657,7 +657,7 @@ class DataExplorerTest:
         mocker.patch.object(Plotter, 'show')
 
         # Mask retrieval of the data
-        mocker.patch.object(sas.qtgui.Utilities.GuiUtils, 'plotsFromCheckedItems', return_value=new_data)
+        mocker.patch.object(GuiUtils, 'plotsFromCheckedItems', return_value=new_data)
 
         # Call the plotting method
         form.newPlot()
