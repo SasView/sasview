@@ -79,12 +79,12 @@ class Plotter2DTest:
 
         # Default, log scale
         depth = plotter.calculateDepth()
-        assert depth == (0.1, 1.e20)
+        assert depth == (10.0, 1.e20)
 
         # Change the scale to linear
         plotter.scale = 'linear'
         depth = plotter.calculateDepth()
-        assert depth[0] == -32.
+        assert depth[0] == 0.0
         assert depth[1] == pytest.approx(1.30103, abs=1e-5)
 
     def testOnColorMap(self, plotter, mocker):
@@ -101,7 +101,7 @@ class Plotter2DTest:
         QtWidgets.QDialog.exec_.assert_called()
 
         assert plotter.cmap == "jet"
-        assert plotter.vmin == pytest.approx(0.1, abs=1e-6)
+        assert plotter.vmin == pytest.approx(10.0, abs=1e-6)
         assert plotter.vmax == pytest.approx(1e+20, abs=1e-6)
 
     def testOnToggleScale(self, plotter, mocker):
@@ -140,7 +140,7 @@ class Plotter2DTest:
         # hacky way to make things work in manipulations._sum
         data = plotter.data0
         data.detector = [1]
-        data.err_data = numpy.array([0.0, 0.0, 0.1, 0.0])
+        data.err_data = numpy.array([[1.0, 2.0, 3.0, 4.0]]*4)
         plotter.data = data
         plotter.show()
 
@@ -207,11 +207,11 @@ class Plotter2DTest:
                               xmin=plotter.data0.xmin,
                               xmax=plotter.data0.xmax,
                               ymin=plotter.data0.ymin, ymax=plotter.data0.ymax,
-                              cmap=None, zmin=None,
+                              cmap=None, zmin=0.0,
                               zmax=None)
 
-        assert not FigureCanvas.draw_idle.called
-        assert not FigureCanvas.draw.called
+        FigureCanvas.draw_idle.assert_not_called()
+        FigureCanvas.draw.assert_not_called()
 
     def testShow3DPlot(self, plotter, mocker):
         """ Test the 3Dplot rendering and generation """
@@ -222,16 +222,16 @@ class Plotter2DTest:
 
         data = plotter.data0
         plotter.dimension = 3
-        plotter.showPlot(data=data,
+        plotter.showPlot(data=data.data,
                               qx_data=data.qx_data,
                               qy_data=data.qy_data,
                               xmin=data.xmin,
                               xmax=data.xmax,
                               ymin=data.ymin, ymax=data.ymax,
-                              cmap=None, zmin=None,
+                              cmap=None, zmin=0.0,
                               zmax=None)
-        assert Axes3D.plot_surface.called
-        assert FigureCanvas.draw.called
+        Axes3D.plot_surface.assert_called()
+        FigureCanvas.draw.assert_called()
 
     def testShow2DPlot(self, plotter, mocker):
         """ Test the 2Dplot rendering and generation """
@@ -246,6 +246,6 @@ class Plotter2DTest:
                               xmin=plotter.data0.xmin,
                               xmax=plotter.data0.xmax,
                               ymin=plotter.data0.ymin, ymax=plotter.data0.ymax,
-                              cmap=None, zmin=None,
+                              cmap=None, zmin=0.0,
                               zmax=None)
-        assert FigureCanvas.draw_idle.called
+        FigureCanvas.draw_idle.assert_called()
