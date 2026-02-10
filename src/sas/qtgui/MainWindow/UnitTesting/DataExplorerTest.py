@@ -1,5 +1,6 @@
 import random
 import time
+from pathlib import Path
 
 import pytest
 from PySide6.QtCore import QItemSelectionModel, QPoint, QSize, QSortFilterProxyModel, Qt
@@ -127,7 +128,7 @@ class DataExplorerTest:
     def testLoadButton(self, form, mocker):
         loadButton = form.cmdLoad
 
-        filename = "cyl_400_20.txt"
+        filename = [str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute())]
         # Initialize signal spy instances
         spy_file_read = QtSignalSpy(form, form.communicator.fileReadSignal)
 
@@ -168,7 +169,11 @@ class DataExplorerTest:
             form.communicator.progressBarUpdateSignal)
 
         # Populate the model
-        filename = ["cyl_400_20.txt", "P123_D2O_10_percent.dat", "cyl_400_20.txt"]
+        filename = [
+            str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute()),
+            str(Path("./src/sas/qtgui/UnitTesting/P123_D2O_10_percent.dat").absolute()),
+            str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute()),
+        ]
         form.readData(filename)
 
         # 0, 0, 33, 66, -1 -> 5 signals reaching progressBar
@@ -188,7 +193,11 @@ class DataExplorerTest:
         mocker.patch.object(QMessageBox, 'question', return_value=QMessageBox.No)
 
         # Populate the model
-        filename = ["cyl_400_20.txt", "cyl_400_20.txt", "cyl_400_20.txt"]
+        filename = [
+            str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute()),
+            str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute()),
+            str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute()),
+        ]
         form.readData(filename)
 
         # Assure the model contains three items
@@ -302,7 +311,7 @@ class DataExplorerTest:
         assert not mocked_perspective.setData.called
 
         # Populate the model
-        filename = ["cyl_400_20.txt"]
+        filename = [str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute())]
         form.readData(filename)
 
         QApplication.processEvents()
@@ -348,7 +357,7 @@ class DataExplorerTest:
         QMessageBox.setText.assert_called_with("foo")
 
         # open another file
-        filename = ["cyl_400_20.txt"]
+        filename = [str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute())]
         form.readData(filename)
 
         # Mock the warning message and the swapData method
@@ -370,7 +379,10 @@ class DataExplorerTest:
         Tests the functionality of the Selection Option combobox
         """
         # Populate the model with 1d and 2d data
-        filename = ["cyl_400_20.txt", "P123_D2O_10_percent.dat"]
+        filename = [
+            str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute()),
+            str(Path("./src/sas/qtgui/UnitTesting/P123_D2O_10_percent.dat").absolute())
+        ]
         form.readData(filename)
 
         # Wait a moment for data to load
@@ -456,7 +468,7 @@ class DataExplorerTest:
         """
         Test the low level readData() method
         """
-        filename = ["cyl_400_20.txt"]
+        filename = [str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute())]
         mocker.patch.object(form.manager, 'add_data')
 
         # Initialize signal spy instances
@@ -966,7 +978,7 @@ class DataExplorerTest:
         Quick data plot generation.
         """
         # get Data1D
-        p_file=["cyl_400_20.txt"]
+        p_file = [str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute())]
         # Read in the file
         output, message = form.readData(p_file)
         form.loadComplete((output, message))
@@ -984,7 +996,7 @@ class DataExplorerTest:
         Slow(er) 3D data plot generation.
         """
         # get Data1D
-        p_file=["P123_D2O_10_percent.dat"]
+        p_file = [str(Path("./src/sas/qtgui/UnitTesting/P123_D2O_10_percent.dat").absolute())]
         # Read in the file
         output, message = form.readData(p_file)
         form.loadComplete((output, message))
@@ -1015,7 +1027,11 @@ class DataExplorerTest:
         mocker.patch.object(QMessageBox, 'question', return_value=QMessageBox.No)
 
         # Populate the model
-        filename = ["cyl_400_20.txt", "cyl_400_20.txt", "cyl_400_20.txt"]
+        filename = [
+            str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute()),
+            str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute()),
+            str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute())
+        ]
         form.readData(filename)
         assert len(form.manager.data_name_dict) == 1
         assert len(form.manager.data_name_dict["cyl_400_20.txt"]) == 3
@@ -1083,7 +1099,7 @@ class DataExplorerTest:
         assert not form.cmdAppend.isEnabled()
 
         # Populate the model
-        filename = ["cyl_400_20.txt"]
+        filename = [str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute())]
         form.readData(filename)
 
         # Mask plotting
