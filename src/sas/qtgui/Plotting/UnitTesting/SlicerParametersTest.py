@@ -16,7 +16,7 @@ from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 from sas.qtgui.Utilities.GuiUtils import Communicate
 
 
-class dummy_manager:
+class dummy_manager(QtWidgets.QWidget):
     # def communicator(self):
     #     return Communicate()
     communicator = Communicate()
