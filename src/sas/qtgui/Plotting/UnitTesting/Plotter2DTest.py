@@ -159,7 +159,7 @@ class Plotter2DTest:
         """ Test the right click menu """
         plotter.createContextMenuQuick()
         actions = plotter.contextMenu.actions()
-        assert len(actions) == 7
+        assert len(actions) == 9
 
         # Trigger Print Image and make sure the method is called
         assert actions[1].text() == "Print Image"
