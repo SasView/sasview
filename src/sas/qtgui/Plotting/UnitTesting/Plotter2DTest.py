@@ -44,6 +44,13 @@ class Plotter2DTest:
                       zmin=1.0, zmax=20.0,
                       )
 
+        data.xmin = 1.0
+        data.xmax = 5.0
+        data.ymin = 1.0
+        data.ymax = 15.0
+        data.zmin = 1.0
+        data.zmax = 20.0
+
         data.title = "Test data"
         data.id = 1
         data.ndim = 2
