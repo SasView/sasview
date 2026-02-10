@@ -1,7 +1,7 @@
 
 import matplotlib as mpl
 import pytest
-from PySide6 import QtGui, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 
 mpl.use("Qt5Agg")
 
@@ -32,10 +32,12 @@ class ColorMapTest:
                            ymin=-1.0, ymax=15.0,
                            zmin=-1.0, zmax=20.0)
 
-        data.xmin = 0.0
+        data.xmin = 1.0
         data.xmax = 5.0
-        data.ymin = 0.0
-        data.ymax = 5.0
+        data.ymin = 1.0
+        data.ymax = 15.0
+        data.zmin = 1.0
+        data.zmax = 20.0
 
         # setup failure: 2022-09
         # The data object does not have xmin/xmax etc set in it; the values
@@ -65,11 +67,11 @@ class ColorMapTest:
 
         assert widget.lblWidth.text() == "0"
         assert widget.lblHeight.text() == "0"
-        assert widget.lblQmax.text() == "18"
-        assert widget.lblStopRadius.text() == "-1"
+        assert widget.lblQmax.text() == "15.8"
+        assert widget.lblStopRadius.text() == "1"
         assert not widget.chkReverse.isChecked()
         assert widget.cbColorMap.count() == 75
-        assert widget.cbColorMap.currentIndex() == 60
+        assert widget.cbColorMap.currentIndex() == 52
 
         # validators
         assert isinstance(widget.txtMinAmplitude.validator(), QtGui.QDoubleValidator)
@@ -99,7 +101,7 @@ class ColorMapTest:
         '''Check the dialog apply function'''
         # Set some controls to non-default state
         widget.show()
-        widget.cbColorMap.setCurrentIndex(20) # PuRd_r
+        widget.cbColorMap.setCurrentIndex(20) # RdYlBu_r
         widget.chkReverse.setChecked(True)
         widget.txtMinAmplitude.setText("20.0")
 
@@ -110,7 +112,7 @@ class ColorMapTest:
         # Assure the widget is still up and the signal was sent.
         assert widget.isVisible()
         assert spy_apply.count() == 1
-        assert 'PuRd_r' in spy_apply.called()[0]['args'][1]
+        assert 'RdYlBu_r' in spy_apply.called()[0]['args'][1]
 
     def testInitMapCombobox(self, widget):
         '''Test the combo box initializer'''
@@ -119,14 +121,14 @@ class ColorMapTest:
         widget.initMapCombobox()
 
         # Check the combobox
-        assert widget.cbColorMap.currentIndex() == 55
+        assert widget.cbColorMap.currentIndex() == 47
         assert not widget.chkReverse.isChecked()
 
         # Set a reversed value
         widget._cmap = "hot_r"
         widget.initMapCombobox()
         # Check the combobox
-        assert widget.cbColorMap.currentIndex() == 56
+        assert widget.cbColorMap.currentIndex() == 47
         assert widget.chkReverse.isChecked()
 
     def testInitRangeSlider(self, widget):
@@ -138,15 +140,15 @@ class ColorMapTest:
         # Check the values
         assert widget.slider.minimum() == 0
         assert widget.slider.maximum() == 100
-        assert widget.slider.orientation() == 1
+        assert widget.slider.orientation() == QtCore.Qt.Orientation.Horizontal
 
         # Emit new low value
-        widget.slider.lowValueChanged.emit(5)
+        widget.slider.setSliderPosition([5, 100])
         # Assure the widget received changes
         assert widget.txtMinAmplitude.text() == "5"
 
         # Emit new high value
-        widget.slider.highValueChanged.emit(45)
+        widget.slider.setSliderPosition([5, 45])
         # Assure the widget received changes
         assert widget.txtMaxAmplitude.text() == "45"
 
