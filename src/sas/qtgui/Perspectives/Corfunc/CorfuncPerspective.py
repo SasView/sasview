@@ -15,6 +15,7 @@ from sas.qtgui.Perspectives.Corfunc.IDFCanvas import IDFCanvas
 from sas.qtgui.Perspectives.Corfunc.QSpaceCanvas import QSpaceCanvas
 from sas.qtgui.Perspectives.Corfunc.RealSpaceCanvas import RealSpaceCanvas
 from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.Utilities.BackgroundColor import BG_DEFAULT, BG_ERROR
 from sas.qtgui.Utilities.ExtrapolationSlider import ExtrapolationSlider, SliderPerspective
 from sas.qtgui.Utilities.Reports import ReportBase
 from sas.qtgui.Utilities.Reports.reportdata import ReportData
@@ -34,9 +35,6 @@ from .UI.CorfuncPanel import Ui_CorfuncDialog
 from .util import WIDGETS, safe_float
 
 logger = logging.getLogger(__name__)
-
-RED = "QLineEdit { background-color: rgb(244, 170, 164) }"
-NORMAL = ""
 
 # Small epsilon to adjust extrapolation values
 ADJUST_EPS = 1e-7
@@ -138,7 +136,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             show_warning = False
 
         if show_warning:
-            self.txtBackground.setStyleSheet(RED)
+            self.txtBackground.setStyleSheet(BG_ERROR)
             msgbox = QtWidgets.QMessageBox()
             msgbox.setIcon(QtWidgets.QMessageBox.Warning)
             msgbox.setWindowTitle('Warning')
@@ -146,7 +144,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
             _ = msgbox.exec_()
         else:
-            self.txtBackground.setStyleSheet(NORMAL)
+            self.txtBackground.setStyleSheet(BG_DEFAULT)
 
     def isSerializable(self):
         """
@@ -722,9 +720,9 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         # UI feedback:
         # - If a field has no numeric value (user still typing "1e-" or empty) keep default background.
         # - If the numeric check says invalid -> red
-        self.txtLowerQMax.setStyleSheet(RED if invalid_p1_low or invalid_p1_high else NORMAL)
-        self.txtUpperQMin.setStyleSheet(RED if invalid_p2_low or invalid_p2_high else NORMAL)
-        self.txtUpperQMax.setStyleSheet(RED if invalid_p3_low or invalid_p3_high else NORMAL)
+        self.txtLowerQMax.setStyleSheet(BG_ERROR if invalid_p1_low or invalid_p1_high else BG_DEFAULT)
+        self.txtUpperQMin.setStyleSheet(BG_ERROR if invalid_p2_low or invalid_p2_high else BG_DEFAULT)
+        self.txtUpperQMax.setStyleSheet(BG_ERROR if invalid_p3_low or invalid_p3_high else BG_DEFAULT)
 
         self.validity_flags = [
             invalid_p1_low,

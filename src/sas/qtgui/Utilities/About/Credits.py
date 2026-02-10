@@ -1,13 +1,22 @@
+import logging
+
 from PySide6.QtCore import QSize
-from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import (
-    QDialog,
-    QSizePolicy,
-    QTextBrowser,
-    QVBoxLayout,
-)
+from PySide6.QtGui import QIcon, QPalette
+from PySide6.QtWidgets import QApplication, QDialog, QSizePolicy, QTextBrowser, QVBoxLayout
 
 from sas.system import SAS_RESOURCES
+
+logger = logging.getLogger(__name__)
+
+
+def is_dark_mode() -> bool:
+    """Returns True if the application is in dark mode (window color is dark)."""
+    app = QApplication.instance()
+    if not app:
+        return False
+    window_color = app.palette().color(QPalette.Window)
+    # QColor.lightness() returns 0 (dark) to 255 (light)
+    return window_color.lightness() < 128
 
 
 class Credits(QDialog):
@@ -47,13 +56,26 @@ class Credits(QDialog):
         """
         with SAS_RESOURCES.resource("system/credits.html") as path:
             credits = path.read_text()
-        self.creditsText.setText(credits)
+
+        if is_dark_mode():
+            # Inject dark mode CSS into the credits HTML
+            dark_css = """
+            <style>
+            body { background-color: #000000; color: #e0e0e0; }
+            pre { background-color: #2b2b2b; color: #f4f4f4; }
+            a { color: #4da3ff; }
+            </style>
+            """
+            if "</head>" in credits:
+                credits = credits.replace("</head>", dark_css + "</head>", 1)
+            else:
+                logger.error("Could not find </head> in credits.html.")
+
+        self.creditsText.setHtml(credits)
 
 
 if __name__ == "__main__":
     import sys
-
-    from PySide6.QtWidgets import QApplication
 
     app = QApplication([])
 

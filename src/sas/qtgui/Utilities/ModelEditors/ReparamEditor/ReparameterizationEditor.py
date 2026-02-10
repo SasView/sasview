@@ -11,6 +11,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from sasmodels.modelinfo import Parameter
 
 from sas.qtgui.Utilities import GuiUtils
+from sas.qtgui.Utilities.BackgroundColor import BG_DEFAULT, BG_ERROR
 from sas.qtgui.Utilities.ModelEditors.Dialogs.ModelSelector import ModelSelector
 from sas.qtgui.Utilities.ModelEditors.Dialogs.ParameterEditDialog import ParameterEditDialog
 from sas.qtgui.Utilities.ModelEditors.ReparamEditor.UI.ReparameterizationEditorUI import Ui_ReparameterizationEditor
@@ -303,7 +304,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         if error_line > 0:
             return
 
-        self.txtFunction.setStyleSheet("")
+        self.txtFunction.setStyleSheet(BG_DEFAULT)
         self.addTooltips()  # Reset the tooltips
 
         # Notify user that model was written sucessfully
@@ -457,7 +458,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
             self.parent.communicate.statusBarUpdateSignal.emit("Model check failed")
 
             # Format text box with error indicators
-            self.txtFunction.setStyleSheet("border: 5px solid red")
+            self.txtFunction.setStyleSheet(BG_ERROR)
             # last_lines = traceback.format_exc().split('\n')[-4:]
             traceback_to_show = '\n'.join(last_lines)
             self.txtFunction.setToolTip(traceback_to_show)
