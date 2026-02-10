@@ -47,6 +47,6 @@ class AddTextTest:
         # Call the method
         widget.onColorChange(None)
         # Check that the text field got the new color info for text
-        assert widget.textEdit.palette().setColor(role, new_color)
+        widget.textEdit.palette().setColor(role, new_color)
         # ... and the hex value of this color is correct
         assert widget.color() == "#ff0000"
