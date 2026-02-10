@@ -65,7 +65,7 @@ class Plotter2DTest:
         """ Look at the plotting """
         mocker.patch.object(plotter, 'plot')
         plotter.plot()
-        assert plotter.plot.called_once()
+        plotter.plot.assert_called_once()
 
     def testCalculateDepth(self, plotter):
         ''' Test the depth calculator '''
@@ -93,7 +93,7 @@ class Plotter2DTest:
         plotter.onColorMap()
 
         # Check that exec_ got called
-        assert QtWidgets.QDialog.exec_.called
+        QtWidgets.QDialog.exec_.assert_called()
 
         assert plotter.cmap == "jet"
         assert plotter.vmin == pytest.approx(0.1, abs=1e-6)
@@ -107,7 +107,7 @@ class Plotter2DTest:
 
         plotter.onToggleScale(None)
 
-        assert FigureCanvas.draw_idle.called
+        FigureCanvas.draw_idle.assert_called()
 
     def testOnToggleMaskedPoints(self, plotter, mocker):
         """ Respond to the masked data event by replotting """
@@ -128,7 +128,7 @@ class Plotter2DTest:
         mocker.patch.object(plotter, 'plot')
         plotter.onToggleMaskedData(None)
         assert plotter._show_masked_data
-        assert plotter.plot.called_once()
+        plotter.plot.assert_called_once()
 
     def testOnBoxSum(self, plotter, mocker):
         """ Test the box sum display and functionality """

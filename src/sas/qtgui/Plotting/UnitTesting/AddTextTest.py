@@ -42,10 +42,11 @@ class AddTextTest:
     def testOnColorChange(self, widget, mocker):
         ''' Test the QColorDialog output'''
         new_color = QtGui.QColor("red")
+        role = QtGui.QPalette.ColorRole.Text
         mocker.patch.object(QtWidgets.QColorDialog, 'getColor', return_value=new_color)
         # Call the method
         widget.onColorChange(None)
         # Check that the text field got the new color info for text
-        assert widget.textEdit.palette().vertex_coloring(QtGui.QPalette.Text) == new_color
+        assert widget.textEdit.palette().setColor(role, new_color)
         # ... and the hex value of this color is correct
         assert widget.color() == "#ff0000"

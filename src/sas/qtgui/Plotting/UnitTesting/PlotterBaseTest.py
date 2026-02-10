@@ -75,7 +75,7 @@ class PlotterBaseTest:
         ''' test the plotter close behaviour '''
         mocker.patch.object(PlotHelper, 'deletePlot')
         plotter.closeEvent(None)
-        assert PlotHelper.deletePlot.called
+        PlotHelper.deletePlot.assert_called()
 
     def notestOnImagePrint(self, plotter, mocker):
         ''' test the workspace print '''
@@ -85,20 +85,20 @@ class PlotterBaseTest:
         # First, let's cancel printing
         mocker.patch.object(QtPrintSupport.QPrintDialog, 'exec_', return_value=QtWidgets.QDialog.Rejected)
         plotter.onImagePrint()
-        assert not QtGui.QPainter.end.called
-        assert not QtWidgets.QLabel.render.called
+        QtGui.QPainter.end.assert_not_called()
+        QtWidgets.QLabel.render.assert_not_called()
 
         # Let's print now
         mocker.patch.object(QtPrintSupport.QPrintDialog, 'exec_', return_value=QtWidgets.QDialog.Accepted)
         plotter.onImagePrint()
-        assert QtGui.QPainter.end.called
-        assert QtWidgets.QLabel.render.called
+        QtGui.QPainter.end.assert_called()
+        QtWidgets.QLabel.render.assert_called()
 
     def testOnClipboardCopy(self, plotter, mocker):
         ''' test the workspace screen copy '''
         mocker.patch.object(QtGui.QClipboard, 'setPixmap')
         plotter.onClipboardCopy()
-        assert QtGui.QClipboard.setPixmap.called
+        QtGui.QClipboard.setPixmap.assert_called()
 
     def testOnGridToggle(self, plotter, mocker):
         ''' test toggling the grid lines '''
@@ -108,7 +108,7 @@ class PlotterBaseTest:
         mocker.patch.object(FigureCanvas, 'draw_idle')
         plotter.onGridToggle()
 
-        assert FigureCanvas.draw_idle.called
+        FigureCanvas.draw_idle.assert_called()
         assert plotter.grid_on != orig_toggle
 
     def testDefaultContextMenu(self, plotter, mocker):
@@ -123,7 +123,7 @@ class PlotterBaseTest:
         assert actions[1].text() == "Print Image"
         mocker.patch.object(QtPrintSupport.QPrintDialog, 'exec_', return_value=QtWidgets.QDialog.Rejected)
         actions[1].trigger()
-        assert QtPrintSupport.QPrintDialog.exec_.called
+        QtPrintSupport.QPrintDialog.exec_.assert_called()
 
         # Trigger Copy to Clipboard and make sure the method is called
         assert actions[2].text() == "Copy to Clipboard"

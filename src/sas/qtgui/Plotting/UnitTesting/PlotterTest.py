@@ -50,7 +50,7 @@ class PlotterTest:
         plotter.plot(hide_error=False)
 
         assert plotter.ax.get_xscale() == 'linear'
-        assert FigureCanvas.draw_idle.called
+        FigureCanvas.draw_idle.assert_called()
 
         plotter.figure.clf()
 
@@ -63,7 +63,7 @@ class PlotterTest:
         plotter.plot(hide_error=True)
 
         assert plotter.ax.get_yscale() == 'linear'
-        assert FigureCanvas.draw_idle.called
+        FigureCanvas.draw_idle.assert_called()
         plotter.figure.clf()
 
     def testPlotWithSesans(self, plotter, mocker):
@@ -86,7 +86,7 @@ class PlotterTest:
         assert plotter.ax.get_xscale() == 'linear'
         assert plotter.ax.get_yscale() == 'linear'
         #assert plotter.data[0].ytransform == "y"
-        assert FigureCanvas.draw_idle.called
+        FigureCanvas.draw_idle.assert_called()
 
     def testCreateContextMenuQuick(self, plotter, mocker):
         """ Test the right click menu """
@@ -98,7 +98,7 @@ class PlotterTest:
         assert actions[1].text() == "Print Image"
         mocker.patch.object(QtPrintSupport.QPrintDialog, 'exec_', return_value=QtWidgets.QDialog.Rejected)
         actions[1].trigger()
-        assert QtPrintSupport.QPrintDialog.exec_.called
+        QtPrintSupport.QPrintDialog.exec_.assert_called()
 
         # Trigger Copy to Clipboard and make sure the method is called
         assert actions[2].text() == "Copy to Clipboard"
@@ -107,13 +107,13 @@ class PlotterTest:
         assert actions[4].text() == "Toggle Grid On/Off"
         mocker.patch.object(plotter.ax, 'grid')
         actions[4].trigger()
-        assert plotter.ax.grid.called
+        plotter.ax.grid.assert_called()
 
         # Trigger Change Scale and make sure the method is called
         assert actions[6].text() == "Change Scale"
         mocker.patch.object(plotter.properties, 'exec_', return_value=QtWidgets.QDialog.Rejected)
         actions[6].trigger()
-        assert plotter.properties.exec_.called
+        plotter.properties.exec_.assert_called()
 
         # Spy on cliboard's dataChanged() signal
         if not self.isWindows:
@@ -254,7 +254,7 @@ class PlotterTest:
         plotter.onLinearFit('Test name')
 
         # Check that exec_ got called
-        assert QtWidgets.QDialog.exec_.called
+        QtWidgets.QDialog.exec_.assert_called()
         plotter.figure.clf()
 
     def testOnRemovePlot(self, plotter, mocker):
@@ -363,9 +363,8 @@ class PlotterTest:
         # fudge some init data
         fit_data = [[0.0,0.0], [5.0,5.0]]
         # Call the method
-        mocker.patch.object(plotter, 'plot')
-        plotter.onFitDisplay(fit_data)
-        assert plotter.plot.called
+        plotter.onFitDisplay(fit_data[0], fit_data[1])
+        plotter.plot.assert_called()
         # Look at arguments passed to .plot()
         plotter.plot.assert_called_with(data=plotter.fit_result,
                                              hide_error=True, marker='-')

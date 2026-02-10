@@ -134,7 +134,7 @@ class SlicerParametersTest:
         widget.onHelp()
 
         # Check if show() got called
-        assert webbrowser.open.called
+        webbrowser.open.assert_called()
 
         # Assure the filename is correct
         assert "graph_help.html" in webbrowser.open.call_args[0][0]
