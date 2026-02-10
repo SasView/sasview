@@ -206,7 +206,7 @@ class Plotter2DTest:
                               qy_data=plotter.data0.qy_data,
                               xmin=plotter.data0.xmin,
                               xmax=plotter.data0.xmax,
-                              ymin=plotter.data0.ymin, ymax=plotter0.data.ymax,
+                              ymin=plotter.data0.ymin, ymax=plotter.data0.ymax,
                               cmap=None, zmin=None,
                               zmax=None)
 
@@ -245,7 +245,7 @@ class Plotter2DTest:
                               qy_data=plotter.data0.qy_data,
                               xmin=plotter.data0.xmin,
                               xmax=plotter.data0.xmax,
-                              ymin=plotter.data0.ymin, ymax=plotter0.data.ymax,
+                              ymin=plotter.data0.ymin, ymax=plotter.data0.ymax,
                               cmap=None, zmin=None,
                               zmax=None)
         assert FigureCanvas.draw_idle.called
