@@ -102,10 +102,10 @@ class QRangeSlidersTest:
         widget._data = self.data
         # Create slider on base data set
         self.data.slider_perspective_name = self.current_perspective
-        self.data.slider_low_q_input = ['txtNptsHighQ']
+        self.data.slider_low_q_input = [widget.txtPorodStart_ex.text()]
         self.data.slider_low_q_setter = ['set_high_q_extrapolation_lower_limit']
         self.data.slider_low_q_getter = ['get_high_q_extrapolation_lower_limit']
-        self.data.slider_high_q_input = ['txtExtrapolQMax']
+        self.data.slider_high_q_input = [widget.txtPorodEnd_ex.text()]
         self.plotter.plot(self.data)
         self.slider = QRangeSlider(self.plotter, self.plotter.ax, data=self.data)
         # Check inputs are linked properly.
