@@ -1,5 +1,3 @@
-import webbrowser
-
 import matplotlib as mpl
 import pytest
 
@@ -56,10 +54,11 @@ class SlicerParametersTest:
         ## Every single test passes on its own, but none of them together.
 
         model = QtGui.QStandardItemModel()
-        plotter = Plotter2D(parent=dummy_manager(), quickplot=False)
+        manager = dummy_manager()
+        plotter = Plotter2D(parent=manager, quickplot=False)
         plotter.data = data
         active_plots = {"test_plot": plotter}
-        plotter.parent.active_plots = active_plots
+        manager.active_plots = active_plots
         w = SlicerParameters(model=model, parent=plotter,
                                        active_plots=active_plots,
                                        communicator=dummy_manager().communicate)
@@ -132,16 +131,17 @@ class SlicerParametersTest:
         widget.show()
 
         #Mock the webbrowser.open method
-        mocker.patch.object(webbrowser, 'open')
+        mocker.patch.object(widget.manager, 'parent')
+        mocker.patch.object(widget.manager.parent, 'showHelp')
 
         # Invoke the action
         widget.onHelp()
 
         # Check if show() got called
-        webbrowser.open.assert_called()
+        widget.manager.parent.showHelp.assert_called()
 
         # Assure the filename is correct
-        assert "graph_help.html" in webbrowser.open.call_args[0][0]
+        assert "graph_help.html" in widget.manager.parent.showHelp.call_args[0][0]
 
     def testSetModel(self, widget):
         ''' Test if resetting the model works'''
@@ -180,7 +180,7 @@ class SlicerParametersTest:
         ''' check if the plot list shows correct content '''
         assert widget.lstPlots.count() == 1
         assert widget.lstPlots.item(0).text() == "test_plot"
-        assert not widget.lstPlots.item(0).checkState()
+        assert widget.lstPlots.item(0).checkState() == QtCore.Qt.CheckState.Unchecked
 
     def testOnSlicerChange(self, widget, mocker):
         ''' change the slicer '''
@@ -190,7 +190,7 @@ class SlicerParametersTest:
         assert widget.lstParams.model().index(0, 0).data() is None
 
     def testOnApply(self, widget, mocker):
-        widget.lstPlots.item(0).setCheckState(True)
+        widget.lstPlots.item(0).setCheckState(QtCore.Qt.CheckState.Checked)
         mocker.patch.object(widget, 'applyPlotter')
         mocker.patch.object(widget, 'save1DPlotsForPlot')
         assert not widget.isSave
@@ -200,7 +200,7 @@ class SlicerParametersTest:
         widget.save1DPlotsForPlot.assert_not_called()
 
         # Apply with 1D data saved
-        widget.cbSave1DPlots.setCheckState(True)
+        widget.cbSave1DPlots.setCheckState(QtCore.Qt.CheckState.Checked)
         assert widget.isSave
         widget.onApply()
         assert widget.model is not None
