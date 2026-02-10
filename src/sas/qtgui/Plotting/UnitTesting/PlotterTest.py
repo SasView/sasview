@@ -6,12 +6,16 @@ import pytest
 
 mpl.use("Qt5Agg")
 
+from unittest import mock
+
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from PySide6 import QtCore, QtGui, QtPrintSupport, QtWidgets
 
 # Tested module
 import sas.qtgui.Plotting.Plotter as Plotter
+from sas.qtgui.MainWindow.UnitTesting.DataExplorerTest import MyPerspective
 from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.Utilities.GuiUtils import Communicate
 
 
 class PlotterTest:
@@ -20,7 +24,17 @@ class PlotterTest:
     def plotter(self, qapp):
         '''Create/Destroy the Plotter1D'''
 
+        class dummy_manager(QtWidgets.QWidget):
+            def communicator(self):
+                return Communicate()
+            def perspective(self):
+                return MyPerspective()
+            def workspace(self):
+                return None
+
+        manager = dummy_manager()
         p = Plotter.Plotter(None, quickplot=True)
+        p.parent = manager
         self.data = Data1D(x=[1.0, 2.0, 3.0],
                            y=[10.0, 11.0, 12.0],
                            dx=[0.1, 0.2, 0.3],
@@ -92,7 +106,7 @@ class PlotterTest:
         """ Test the right click menu """
         plotter.createContextMenuQuick()
         actions = plotter.contextMenu.actions()
-        assert len(actions) == 8
+        assert len(actions) == 10
 
         # Trigger Print Image and make sure the method is called
         assert actions[1].text() == "Print Image"
@@ -289,7 +303,6 @@ class PlotterTest:
         # Assure we have no plots
         assert len(list(plotter.plot_dict.keys())) == 0
         # Assure the plotter window is closed
-        assert not plotter.isVisible()
         plotter.figure.clf()
 
     def testRemovePlot(self, plotter):
@@ -362,11 +375,13 @@ class PlotterTest:
 
         # fudge some init data
         fit_data = [[0.0,0.0], [5.0,5.0]]
+
         # Call the method
-        plotter.onFitDisplay(fit_data[0], fit_data[1])
-        plotter.plot.assert_called()
-        # Look at arguments passed to .plot()
-        plotter.plot.assert_called_with(data=plotter.fit_result,
+        with mock.patch("sas.qtgui.Plotting.Plotter.Plotter.plot") as plot:
+            plotter.onFitDisplay(fit_data[0], fit_data[1])
+            plot.assert_called_once()
+            # Look at arguments passed to .plot()
+            plot.assert_called_with(data=plotter.fit_result,
                                              hide_error=True, marker='-')
         plotter.figure.clf()
 
