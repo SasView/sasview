@@ -149,7 +149,7 @@ class DataExplorerTest:
 
         # Click on the Load button
         QTest.mouseClick(loadButton, Qt.LeftButton)
-        qApp.processEvents()
+        QApplication.processEvents()
 
         # Test the getOpenFileName() dialog called once
         assert QFileDialog.getOpenFileNames.called
@@ -490,7 +490,7 @@ class DataExplorerTest:
 
         # Click on the Help button
         QTest.mouseClick(button1, Qt.LeftButton)
-        qApp.processEvents()
+        QApplication.processEvents()
 
         # Check the browser
         assert partial_url in str(form._helpView.web())
@@ -499,7 +499,7 @@ class DataExplorerTest:
 
         # Click on the Help_2 button
         QTest.mouseClick(button2, Qt.LeftButton)
-        qApp.processEvents()
+        QApplication.processEvents()
         # Check the browser
         assert partial_url in str(form._helpView.web())
 
