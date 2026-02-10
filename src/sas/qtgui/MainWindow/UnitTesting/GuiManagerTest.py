@@ -82,8 +82,6 @@ class GuiManagerTest:
         logger.error(message)
         assert message_logged in manager.logDockWidget.widget().toPlainText()
 
-    @pytest.mark.skip("2022-09 already broken - generates runtime error")
-    # IPythonWidget.py:38: RuntimeWarning: coroutine 'InteractiveShell.run_code' was never awaited
     def testConsole(self, manager):
         """
         Test the docked QtConsole
@@ -137,7 +135,6 @@ class GuiManagerTest:
         # See that the HidableDialog.exec method got called
         assert HidableDialog.exec.called
 
-    @pytest.mark.xfail(reason="2022-09 already broken")
     def testCheckUpdate(self, manager, mocker):
         """
         Tests the SasView website version polling
@@ -239,9 +236,6 @@ class GuiManagerTest:
         assert QFileDialog.getExistingDirectory.called
 
     #### VIEW ####
-    @pytest.mark.xfail(reason="2022-10 - broken by config refactoring")
-    # default show/hide for toolbar (accidentally?) changed during
-    # refactoring of config code in a32de61ba038da9a1435c15875d6ce764262cea9
     def testActionHideToolbar(self, manager):
         """
         Menu View/Hide Toolbar

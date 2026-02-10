@@ -124,7 +124,6 @@ class DataExplorerTest:
         Test if all required widgets got added
         """
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testLoadButton(self, form, mocker):
         loadButton = form.cmdLoad
 
@@ -160,7 +159,6 @@ class DataExplorerTest:
         #assert spy_file_read.count() == 1
         #assert filename in str(spy_file_read.called()[0]['args'][0])
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testLoadFiles(self, form):
         """
         Test progress bar update while loading of multiple files
@@ -180,7 +178,6 @@ class DataExplorerTest:
         spied_list = [spy_progress_bar_update.called()[i]['args'][0] for i in range(5)]
         assert expected_list == spied_list
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testDeleteButton(self, form, mocker):
         """
         Functionality of the delete button
@@ -290,7 +287,6 @@ class DataExplorerTest:
         # Click delete once again to assure no nasty behaviour on empty model
         QTest.mouseClick(deleteButton, Qt.LeftButton)
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testSendToButton(self, form, mocker):
         """
         Test that clicking the Send To button sends checked data to a perspective
@@ -369,7 +365,6 @@ class DataExplorerTest:
         QMessageBox.setText.assert_called_with(
             "Dummy Perspective does not allow replacing multiple data.")
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testDataSelection(self, form):
         """
         Tests the functionality of the Selection Option combobox
@@ -457,7 +452,6 @@ class DataExplorerTest:
         assert item1.child(1).rowCount() == new_item.child(1).rowCount()
         assert item1.child(0).child(0).rowCount() == new_item.child(0).child(0).rowCount()
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testReadData(self, form, mocker):
         """
         Test the low level readData() method
@@ -563,7 +557,6 @@ class DataExplorerTest:
         # Assure add_data on data_manager was called (last call)
         assert form.manager.add_data.called
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testNewPlot1D(self, form, mocker):
         """
         Creating new plots from Data1D/2D
@@ -603,7 +596,6 @@ class DataExplorerTest:
         assert form.cbgraph.isEnabled()
         assert form.cmdAppend.isEnabled()
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testNewPlot2D(self, form, mocker):
         """
         Creating new plots from Data1D/2D
@@ -638,7 +630,6 @@ class DataExplorerTest:
         #assert form.cbgraph.isEnabled()
         #assert form.cmdAppend.isEnabled()
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testAppendPlot(self, form, mocker):
         """
         Creating new plots from Data1D/2D
@@ -719,7 +710,6 @@ class DataExplorerTest:
         with pytest.raises(Exception):
             form.updateModelFromPerspective(bad_item)
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testContextMenu(self, form, mocker):
         """
         See if the context menu is present
@@ -817,7 +807,6 @@ class DataExplorerTest:
         # Data name dictionary should be empty at this point
         assert len(form.manager.data_name_dict) == 0
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testNameChange(self, form):
         """
         Test the display name change routines
@@ -900,7 +889,6 @@ class DataExplorerTest:
         form.nameChangeBox.removeData([form.nameChangeBox.model_item])  # Should return to base state
         self.baseNameStateCheck()
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testShowDataInfo(self, form):
         """
         Test of the showDataInfo method
@@ -925,7 +913,6 @@ class DataExplorerTest:
         # Slider moved all the way up
         assert form.txt_widget.verticalScrollBar().sliderPosition() == 0
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testSaveDataAs(self, form, mocker):
         """
         Test the Save As context menu action
@@ -974,7 +961,6 @@ class DataExplorerTest:
                                 parent=None)
         QFileDialog.getSaveFileName.assert_called_once()
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testQuickDataPlot(self, form, mocker):
         """
         Quick data plot generation.
@@ -1020,7 +1006,6 @@ class DataExplorerTest:
         """
         pass
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testDeleteItem(self, form, mocker):
         """
         Delete selected item from data explorer
@@ -1081,7 +1066,6 @@ class DataExplorerTest:
         # Assure the model contains no items
         assert form.model.rowCount() == 3
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testClosePlotsForItem(self, form, mocker):
         """
         Delete selected item from data explorer should also delete corresponding plots

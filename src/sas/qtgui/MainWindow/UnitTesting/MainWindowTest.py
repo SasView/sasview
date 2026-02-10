@@ -55,7 +55,6 @@ class MainWindowTest:
         # Assure it is visible and a part of the MdiArea
         assert len(tmp_main.workspace.subWindowList()) == 3
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testPerspectiveChanges(self, widget):
         """
         Test all information is retained on perspective change
