@@ -64,7 +64,7 @@ class LinearFitTest:
 
         return_values = spy_update.called()[0]['args'][0]
         # Compare
-        assert sorted(return_values[0]) == [1.0, 3.0]
+        assert sorted(return_values) == [1.0, 3.0]
         assert return_values[1] == pytest.approx([10.004054329, 12.030439848], abs=1e-6)
 
         # Set the log scale
