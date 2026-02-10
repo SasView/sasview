@@ -69,7 +69,6 @@ class Plotter2DTest:
 
     def testCalculateDepth(self, plotter):
         ''' Test the depth calculator '''
-        plotter.data = self.data
 
         # Default, log scale
         depth = plotter.calculateDepth()
@@ -83,7 +82,6 @@ class Plotter2DTest:
 
     def testOnColorMap(self, plotter, mocker):
         ''' Respond to the color map event '''
-        plotter.data = self.data
         plotter.plot()
         plotter.show()
 
@@ -101,7 +99,6 @@ class Plotter2DTest:
 
     def testOnToggleScale(self, plotter, mocker):
         """ Respond to the event by replotting """
-        plotter.data = self.data
         plotter.show()
         mocker.patch.object(FigureCanvas, 'draw_idle')
 
@@ -134,9 +131,10 @@ class Plotter2DTest:
         """ Test the box sum display and functionality """
 
         # hacky way to make things work in manipulations._sum
-        self.data.detector = [1]
-        self.data.err_data = numpy.array([0.0, 0.0, 0.1, 0.0])
-        plotter.data = self.data
+        data = plotter.data0
+        data.detector = [1]
+        data.err_data = numpy.array([0.0, 0.0, 0.1, 0.0])
+        plotter.data = data
         plotter.show()
 
         # Mock the main window
@@ -152,7 +150,6 @@ class Plotter2DTest:
 
     def testContextMenuQuickPlot(self, plotter, mocker):
         """ Test the right click menu """
-        plotter.data = self.data
         plotter.createContextMenuQuick()
         actions = plotter.contextMenu.actions()
         assert len(actions) == 7
@@ -198,11 +195,11 @@ class Plotter2DTest:
 
         # Test early return on no data
         plotter.showPlot(data=None,
-                              qx_data=self.data.qx_data,
-                              qy_data=self.data.qy_data,
-                              xmin=self.data.xmin,
-                              xmax=self.data.xmax,
-                              ymin=self.data.ymin, ymax=self.data.ymax,
+                              qx_data=plotter.data0.qx_data,
+                              qy_data=plotter.data0.qy_data,
+                              xmin=plotter.data0.xmin,
+                              xmax=plotter.data0.xmax,
+                              ymin=plotter.data0.ymin, ymax=plotter0.data.ymax,
                               cmap=None, zmin=None,
                               zmax=None)
 
@@ -216,14 +213,14 @@ class Plotter2DTest:
         mocker.patch.object(Axes3D, 'plot_surface')
         mocker.patch.object(plotter.figure, 'colorbar')
 
+        data = plotter.data0
         plotter.dimension = 3
-        plotter.data = self.data
-        plotter.showPlot(data=plotter.data0.data,
-                              qx_data=self.data.qx_data,
-                              qy_data=self.data.qy_data,
-                              xmin=self.data.xmin,
-                              xmax=self.data.xmax,
-                              ymin=self.data.ymin, ymax=self.data.ymax,
+        plotter.showPlot(data=data,
+                              qx_data=data.qx_data,
+                              qy_data=data.qy_data,
+                              xmin=data.xmin,
+                              xmax=data.xmax,
+                              ymin=data.ymin, ymax=data.ymax,
                               cmap=None, zmin=None,
                               zmax=None)
         assert Axes3D.plot_surface.called
@@ -236,13 +233,12 @@ class Plotter2DTest:
         mocker.patch.object(plotter.figure, 'colorbar')
 
         plotter.dimension = 2
-        plotter.data = self.data
-        plotter.showPlot(data=self.data.data,
-                              qx_data=self.data.qx_data,
-                              qy_data=self.data.qy_data,
-                              xmin=self.data.xmin,
-                              xmax=self.data.xmax,
-                              ymin=self.data.ymin, ymax=self.data.ymax,
+        plotter.showPlot(data=plotter.data0.data,
+                              qx_data=plotter.data0.qx_data,
+                              qy_data=plotter.data0.qy_data,
+                              xmin=plotter.data0.xmin,
+                              xmax=plotter.data0.xmax,
+                              ymin=plotter.data0.ymin, ymax=plotter0.data.ymax,
                               cmap=None, zmin=None,
                               zmax=None)
         assert FigureCanvas.draw_idle.called
