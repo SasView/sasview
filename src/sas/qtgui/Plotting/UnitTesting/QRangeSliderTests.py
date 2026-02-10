@@ -138,8 +138,9 @@ class QRangeSlidersTest:
         self.slider = QRangeSlider(self.plotter, self.plotter.ax, data=self.data)
         # Check inputs are linked properly.
         assert len(self.plotter.sliders) == 1
-        assert self.slider.line_min.setter == widget.updateMinQ()
-        assert self.slider.line_max.setter == widget.updateMaxQ()
+        slider = self.plotter.sliders.pop(list(self.plotter.sliders.keys())[0])
+        assert slider.line_min.setter == widget.updateMinQ
+        assert slider.line_max.setter == widget.updateMaxQ
         # Move slider and ensure text input matches
         self.moveSliderAndInputs(widget.minQInput, widget.maxQInput)
 
