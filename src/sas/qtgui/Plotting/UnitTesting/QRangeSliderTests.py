@@ -130,10 +130,10 @@ class QRangeSlidersTest:
         self._allowPlots = True
         # Create slider on base data set
         self.data.slider_perspective_name = self.current_perspective
-        self.data.slider_low_q_input = ['minQInput']
-        self.data.slider_low_q_setter = ['updateMinQ']
-        self.data.slider_high_q_input = ['maxQInput']
-        self.data.slider_high_q_setter = ['updateMaxQ']
+        self.data.slider_low_q_input = ['currentTab', 'minQInput']
+        self.data.slider_low_q_setter = ['currentTab', 'updateMinQ']
+        self.data.slider_high_q_input = ['currentTab', 'maxQInput']
+        self.data.slider_high_q_setter = ['currentTab', 'updateMaxQ']
         self.plotter.plot(self.data)
         self.slider = QRangeSlider(self.plotter, self.plotter.ax, data=self.data)
         # Check inputs are linked properly.
