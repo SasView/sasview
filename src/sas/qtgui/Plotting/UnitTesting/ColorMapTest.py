@@ -32,6 +32,11 @@ class ColorMapTest:
                            ymin=-1.0, ymax=15.0,
                            zmin=-1.0, zmax=20.0)
 
+        data.xmin = 0.0
+        data.xmax = 5.0
+        data.ymin = 0.0
+        data.ymax = 5.0
+
         # setup failure: 2022-09
         # The data object does not have xmin/xmax etc set in it; the values
         # are initially set by Data2D's call to PlottableData2D.__init__
@@ -42,7 +47,7 @@ class ColorMapTest:
 
         data.title="Test data"
         data.id = 1
-        w = ColorMap(parent=plotter, data=data)
+        w = ColorMap(data=data)
 
         yield w
 
