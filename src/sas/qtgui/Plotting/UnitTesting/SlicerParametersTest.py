@@ -23,6 +23,9 @@ class dummy_manager(QtWidgets.QWidget):
     communicate = Communicate()
     active_plots = {}
 
+    def getActivePlots(self):
+        return self.active_plots
+
 
 class SlicerParametersTest:
     '''Test the SlicerParameters dialog'''
@@ -56,6 +59,7 @@ class SlicerParametersTest:
         plotter = Plotter2D(parent=dummy_manager(), quickplot=False)
         plotter.data = data
         active_plots = {"test_plot": plotter}
+        plotter.parent.active_plots = active_plots
         w = SlicerParameters(model=model, parent=plotter,
                                        active_plots=active_plots,
                                        communicator=dummy_manager().communicate)
