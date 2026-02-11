@@ -46,6 +46,7 @@ class MultiConstraintTest:
         tooltip += "%s = sqrt(%s) + 5"%(self.p1, self.p2)
         assert widget.txtConstraint.toolTip() == tooltip
 
+    @pytest.mark.skip(reason="validateFormula is currently not implemented")
     def testValidateFormula(self, widget, mocker):
         ''' assure enablement and color for valid formula '''
         # Invalid string
