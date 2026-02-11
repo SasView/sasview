@@ -1,4 +1,5 @@
 import sys
+from pathlib import Path
 
 import pytest
 from PySide6 import QtCore, QtWidgets
@@ -14,15 +15,12 @@ from sas.system import config
 class MainWindowTest:
     """Test the Main Window GUI"""
 
-    def __init__(self):
-        config.override_with_defaults() # Disable saving of test file
-        config.LAST_WHATS_NEW_HIDDEN_VERSION = "999.999.999" # Give a very large version number
-
     @pytest.fixture(autouse=True)
     def widget(self, qapp):
         '''Create/Destroy the GUI'''
-        screen_resolution = QtCore.QRect(0, 0, 640, 480)
-        w = MainSasViewWindow(screen_resolution, None)
+        w = MainSasViewWindow(None)
+        config.override_with_defaults()  # Disable saving of test file
+        config.LAST_WHATS_NEW_HIDDEN_VERSION = "999.999.999"  # Give a very large version number
 
         yield w
 
@@ -43,8 +41,7 @@ class MainWindowTest:
     def testWidgets(self, qapp):
         """ Test enablement/disablement of widgets """
         # Open the main window
-        screen_resolution = QtCore.QRect(0, 0, 640, 480)
-        tmp_main = MainSasViewWindow(screen_resolution, None)
+        tmp_main = MainSasViewWindow(None)
         tmp_main.showMaximized()
         # See that only one subwindow is up
         assert len(tmp_main.workspace.subWindowList()) == 3
@@ -73,9 +70,9 @@ class MainWindowTest:
         sendDataButton = filesWidget.cmdSendTo
         # Verify defaults
         assert hasattr(gui, 'loadedPerspectives')
-        assert len(gui.loadedPerspectives) == 4
+        assert len(gui.loadedPerspectives) == 5
         # Load data
-        file = ["cyl_400_20.txt"]
+        file = [str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute())]
         filesWidget.readData(file)
         data, _ = filesWidget.getAllData()
         dataIDList = list(data.keys())
@@ -104,9 +101,8 @@ class MainWindowTest:
         mocker.patch.object(HidableDialog, 'exec', return_value=1)
 
         # Open, then close the main window
-        screen_resolution = QtCore.QRect(0, 0, 640, 480)
-        tmp_main = MainSasViewWindow(screen_resolution, None)
+        tmp_main = MainSasViewWindow(None)
         tmp_main.close()
 
         # See that the MessageBox method got called
-        assert HidableDialog.exec.called_once()
+        HidableDialog.exec.assert_called_once()
