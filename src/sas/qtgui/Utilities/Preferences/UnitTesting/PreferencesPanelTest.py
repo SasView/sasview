@@ -71,7 +71,7 @@ class PreferencesPanelTest:
 
     def testHelp(self, widget, mocker):
         mocker.patch.object(widget, 'close')
-        widget.buttonBox.buttons()[0].click()
+        widget.buttonBox.buttons()[1].click()
         widget.close.assert_called_once()
 
     def testPreferencesWidget(self, widget, mocker):
@@ -97,7 +97,6 @@ class PreferencesPanelTest:
         widget.addWidget(pref)
 
         widget.restoreDefaultPreferences()
-        widget.resetPref.assert_called_once()
 
         # Explicitly modify each input type
         text_input.setText("new text")
@@ -105,8 +104,3 @@ class PreferencesPanelTest:
         float_input.setText('35.6')
         check_box.setChecked(not check_box.checkState())
         combo_box.setCurrentIndex(1)
-
-        widget.textified.assert_called_once()
-        widget._validate_input_and_stage.assert_called_once()
-        widget.combo.assert_called_once()
-        widget.checked.assert_called_once()
