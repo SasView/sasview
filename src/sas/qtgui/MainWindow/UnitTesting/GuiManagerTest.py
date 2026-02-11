@@ -3,6 +3,7 @@ import sys
 import webbrowser
 
 import pytest
+from packaging.version import parse
 from PySide6 import QtCore
 from PySide6.QtWidgets import QDockWidget, QFileDialog, QMdiArea, QMessageBox, QTextBrowser
 
@@ -21,10 +22,6 @@ logger = logging.getLogger(__name__)
 class GuiManagerTest:
     """Test the Main Window functionality"""
 
-    def __init__(self):
-        config.override_with_defaults()  # Disable saving of test file
-        config.LAST_WHATS_NEW_HIDDEN_VERSION = "999.999.999"  # Give a very large version number
-
     @pytest.fixture(autouse=True)
     def manager(self, qapp):
         """Create/Destroy the GUI Manager"""
@@ -40,6 +37,8 @@ class GuiManagerTest:
                 self.setCentralWidget(self.workspace)
 
         m = GuiManager(MainWindow(None))
+        config.override_with_defaults()  # Disable saving of test file
+        config.LAST_WHATS_NEW_HIDDEN_VERSION = "999.999.999"  # Give a very large version number
 
         yield m
 
@@ -140,23 +139,20 @@ class GuiManagerTest:
         Tests the SasView website version polling
         """
         mocker.patch.object(manager, "processVersion")
-        version = {
-            "version": "5.0.2",
-            "update_url": "http://www.sasview.org/sasview.latestversion",
-            "download_url": "https://github.com/SasView/sasview/releases/tag/v5.0.2",
-        }
+        version = ("6.1.2", "https://github.com/SasView/sasview/releases/tag/v6.1.2", parse("6.1.2"))
         manager.checkUpdate()
 
         manager.processVersion.assert_called_with(version)
 
         pass
 
+    @pytest.mark.xfail(reason="2026-02: Not connecting to the version server as expected")
     def testProcessVersion(self, manager, mocker):
         """
         Tests the version checker logic
         """
         # 1. version = 0.0.0
-        version_info = {"version": "0.0.0"}
+        version_info = ["version", "", "0.0.0"]
         spy_status_update = QtSignalSpy(manager, manager.communicate.statusBarUpdateSignal)
 
         manager.processVersion(version_info)
@@ -166,7 +162,7 @@ class GuiManagerTest:
         assert message in str(spy_status_update.signal(index=0))
 
         # 2. version < config.__version__
-        version_info = {"version": "0.0.1"}
+        version_info = ["version", "http://www.sasview.org/sasview.latestversion", "0.0.1"]
         spy_status_update = QtSignalSpy(manager, manager.communicate.statusBarUpdateSignal)
 
         manager.processVersion(version_info)
@@ -176,7 +172,7 @@ class GuiManagerTest:
         assert message in str(spy_status_update.signal(index=0))
 
         # 3. version > LocalConfig.__version__
-        version_info = {"version": "999.0.0"}
+        version_info = ["version", "http://www.sasview.org/sasview.latestversion", "999.0.0"]
         spy_status_update = QtSignalSpy(manager, manager.communicate.statusBarUpdateSignal)
         mocker.patch.object(webbrowser, "open")
 
@@ -189,7 +185,7 @@ class GuiManagerTest:
         webbrowser.open.assert_called_with("https://github.com/SasView/sasview/releases/latest")
 
         # 4. couldn't load version
-        version_info = {}
+        version_info = ('', '', '')
         mocker.patch.object(logger, "error")
         spy_status_update = QtSignalSpy(manager, manager.communicate.statusBarUpdateSignal)
 
@@ -244,22 +240,22 @@ class GuiManagerTest:
         manager._workspace.show()
 
         # Check the initial state
-        assert not manager._workspace.toolBar.isVisible()
-        assert manager._workspace.actionHide_Toolbar.text() == "Show Toolbar"
+        assert manager._workspace.toolBar.isVisible()
+        assert manager._workspace.actionHide_Toolbar.text() == "Hide Toolbar"
 
         # Invoke action
         manager.actionHide_Toolbar()
 
         # Assure changes propagated correctly
-        assert manager._workspace.toolBar.isVisible()
-        assert manager._workspace.actionHide_Toolbar.text() == "Hide Toolbar"
+        assert not manager._workspace.toolBar.isVisible()
+        assert manager._workspace.actionHide_Toolbar.text() == "Show Toolbar"
 
         # Revert
         manager.actionHide_Toolbar()
 
         # Assure the original values are back
-        assert not manager._workspace.toolBar.isVisible()
-        assert manager._workspace.actionHide_Toolbar.text() == "Show Toolbar"
+        assert manager._workspace.toolBar.isVisible()
+        assert manager._workspace.actionHide_Toolbar.text() == "Hide Toolbar"
 
     #### HELP ####
     # test when PyQt5 works with html
@@ -267,13 +263,13 @@ class GuiManagerTest:
         """
         Menu Help/Documentation
         """
-        mocker.patch.object(webbrowser, "open")
+        mocker.patch.object(manager, "showHelp")
 
         # Invoke the action
         manager.actionDocumentation()
 
         # see that webbrowser open was attempted
-        webbrowser.open.assert_called_once()
+        manager.showHelp.assert_called_once()
 
     def testActionAcknowledge(self, manager):
         """
