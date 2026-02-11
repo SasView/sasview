@@ -208,6 +208,7 @@ pythonpath = "src"
 norecursedirs = [
     "test/sasrealspace",
     "test/calculatorview",
+    "src/sas/qtgui/Perspectives/Inversion",
     "src/sas/qtgui/Perspectives/ParticleEditor"
 ]
 
