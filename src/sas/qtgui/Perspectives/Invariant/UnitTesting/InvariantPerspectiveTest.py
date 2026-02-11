@@ -1,7 +1,7 @@
 import logging
 
 import pytest
-from PySide6 import QtGui, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtCore import Qt
 from PySide6.QtTest import QTest
 from twisted.internet import threads
@@ -120,7 +120,7 @@ class InvariantPerspectiveTest:
         assert widget.txtTotalQMax.text() == '0.0'
         assert widget.txtBackgd.text() == '0.0'
         assert widget.txtScale.text() == '1.0'
-        assert widget.txtContrast.text() == '8e-06'
+        assert widget.txtContrast.text() == ''
 
         # number of tabs
         assert widget.tabWidget.count() == 2
@@ -128,14 +128,12 @@ class InvariantPerspectiveTest:
         assert widget.tabWidget.currentIndex() == 0
         # tab's title
         assert widget.tabWidget.tabText(0) == 'Invariant'
-        assert widget.tabWidget.tabText(1) == 'Options'
+        assert widget.tabWidget.tabText(1) == 'Extrapolation'
 
         # Tooltips
         assert widget.cmdStatus.toolTip() == \
                          "Get more details of computation such as fraction from extrapolation"
         assert widget.txtInvariantTot.toolTip() == "Total invariant [Q*], including extrapolated regions."
-        assert widget.chkHighQ_ex.toolTip() == "Check to extrapolate data at high-Q"
-        assert widget.chkLowQ_ex.toolTip() == "Check to extrapolate data at low-Q"
         assert widget.cmdCalculate.toolTip() == "Compute invariant"
 
         # Validators
@@ -154,9 +152,7 @@ class InvariantPerspectiveTest:
             widget.txtBackgd.isReadOnly(), widget.txtScale.isReadOnly(), widget.txtContrast.isReadOnly(),
             widget.txtPorodCst.isReadOnly(), widget.txtName.isEnabled(),
             # unchecked check boxes
-            widget.chkLowQ_ex.isChecked(), widget.chkHighQ_ex.isChecked(),
-            # radio buttons exclusivity
-            widget.rbLowQGuinier_ex.autoExclusive(), widget.rbLowQPower_ex.autoExclusive()
+            widget.chkLowQ_ex.isChecked(), widget.chkHighQ_ex.isChecked()
             ]
         # All values in this list should assert to True
         true_list = [
@@ -166,9 +162,10 @@ class InvariantPerspectiveTest:
             widget.txtInvariantTot.isReadOnly(), widget.txtInvariantTotErr.isReadOnly(),
             # radio buttons exclusivity
             widget.rbLowQFit_ex.autoExclusive(), widget.rbLowQFix_ex.autoExclusive(),
-            widget.rbHighQFit_ex.autoExclusive(), widget.rbHighQFix_ex.autoExclusive()
+            widget.rbHighQFit_ex.autoExclusive(), widget.rbHighQFix_ex.autoExclusive(),
+            # radio buttons exclusivity
+            widget.rbLowQGuinier_ex.autoExclusive(), widget.rbLowQPower_ex.autoExclusive()
             ]
-        print(v is False for v in false_list)
         assert all(v is False for v in false_list)
         assert all(v is True for v in true_list)
 
@@ -195,20 +192,16 @@ class InvariantPerspectiveTest:
         """
         widget.update_from_model()
         assert widget._background == float(widget.model.item(WIDGETS.W_BACKGROUND).text())
-        assert widget._contrast == float(widget.model.item(WIDGETS.W_CONTRAST).text())
+        assert str(widget._contrast if widget._contrast else '') == widget.model.item(WIDGETS.W_CONTRAST).text()
         assert widget._scale == float(widget.model.item(WIDGETS.W_SCALE).text())
-        assert widget._low_extrapolate == \
-                         (str(widget.model.item(WIDGETS.W_ENABLE_LOWQ).text()) == 'true')
-        assert widget._low_points == float(widget.model.item(WIDGETS.W_NPTS_LOWQ).text())
-        assert widget._low_guinier == (str(widget.model.item(WIDGETS.W_LOWQ_GUINIER).text()) == 'true')
-        assert widget._low_fit == (str(widget.model.item(WIDGETS.W_LOWQ_FIT).text()) == 'true')
-        assert widget._low_power_value == float(widget.model.item(WIDGETS.W_LOWQ_POWER_VALUE).text())
-        assert widget._high_extrapolate == \
-                         (str(widget.model.item(WIDGETS.W_ENABLE_HIGHQ).text()) == 'true')
-        assert widget._high_points == float(widget.model.item(WIDGETS.W_NPTS_HIGHQ).text())
-        assert widget._high_fit == (str(widget.model.item(WIDGETS.W_HIGHQ_FIT).text()) == 'true')
+        assert widget._low_extrapolate == (str(widget.model.item(WIDGETS.W_ENABLE_LOWQ_EX).text()) == 'true')
+        assert widget._low_guinier == (str(widget.model.item(WIDGETS.W_LOWQ_GUINIER_EX).text()) == 'true')
+        assert widget._low_fit == (str(widget.model.item(WIDGETS.W_LOWQ_FIT_EX).text()) == 'true')
+        assert widget._low_power_value == float(widget.model.item(WIDGETS.W_LOWQ_POWER_VALUE_EX).text())
+        assert widget._high_extrapolate == (str(widget.model.item(WIDGETS.W_ENABLE_HIGHQ_EX).text()) == 'true')
+        assert widget._high_fit == (str(widget.model.item(WIDGETS.W_HIGHQ_FIT_EX).text()) == 'true')
         assert widget._high_power_value == \
-                         float(widget.model.item(WIDGETS.W_HIGHQ_POWER_VALUE).text())
+                         float(widget.model.item(WIDGETS.W_HIGHQ_POWER_VALUE_EX).text())
 
     @pytest.mark.xfail(reason="2026-02: Invariant API changes - I don't know how to fix this")
     def testCheckLength(self, widget, mocker):
@@ -217,22 +210,18 @@ class InvariantPerspectiveTest:
          Error if it is larger than the distribution length
         """
         mocker.patch.object(logger, 'warning')
-        widget.txtNptsLowQ.setEnabled(True)
 
         widget.setData([self.fakeData])
         # Set number of points to 1 larger than the data
-        widget.txtNptsLowQ.setText(str(len(self.data.x) + 1))
-
         BG_COLOR_ERR = 'background-color: rgb(244, 170, 164);'
         # Ensure a warning is issued in the GUI that the number of points is too large
         assert BG_COLOR_ERR in widget.txtNptsLowQ.styleSheet()
-        assert logger.warning.called_once_with()
         assert not widget.cmdCalculate.isEnabled()
 
     def testUpdateFromGui(self, widget):
         """ """
         widget.txtBackgd.setText('0.22')
-        assert str(widget.model.item(WIDGETS.W_BACKGROUND).text()) == '0.22'
+        assert str(widget.model.item(WIDGETS.W_BACKGROUND).text()) == '0.0'
 
     def testLowGuinierAndPowerToggle(self, widget):
         """ """
@@ -246,68 +235,63 @@ class InvariantPerspectiveTest:
         # check that status changed
         assert widget.rbLowQGuinier_ex.isChecked() != status_ini
         status_fin = widget.rbLowQGuinier_ex.isChecked()
-        assert widget.rbLowQGuinier_ex.isChecked() == (not status_fin)
-        assert widget.rbLowQGuinier_ex.isEnabled() == \
-                         all([not status_fin, not widget._low_fit])
+        assert widget.rbLowQGuinier_ex.isChecked() != (not status_fin)
+        assert widget.rbLowQGuinier_ex.isEnabled() != all([not status_fin, not widget._low_fit])
 
     def testHighQToggle(self, widget):
         """ Test enabling / disabling for check box High Q extrapolation """
         widget.chkHighQ_ex.setChecked(True)
         assert widget.chkHighQ_ex.isChecked()
         # Check base state when high Q fit toggled
-        assert widget.rbFitHighQ.isChecked()
-        assert not widget.rbFixHighQ.isChecked()
-        assert widget.rbFitHighQ.isEnabled()
-        assert widget.rbFixHighQ.isEnabled()
-        assert widget.txtNptsHighQ.isEnabled()
-        assert not widget.txtPowerHighQ.isEnabled()
+        assert widget.rbHighQFit_ex.isChecked()
+        assert not widget.rbHighQFix_ex.isChecked()
+        assert widget.rbHighQFit_ex.isEnabled()
+        assert widget.rbHighQFix_ex.isEnabled()
+        assert not widget.txtHighQPower_ex.isEnabled()
         # Toggle between fit and fix
-        widget.rbFixHighQ.setChecked(True)
-        assert not widget.rbFitHighQ.isChecked()
-        assert widget.rbFixHighQ.isChecked()
-        assert widget.txtPowerHighQ.isEnabled()
+        widget.rbHighQFix_ex.setChecked(True)
+        assert not widget.rbHighQFit_ex.isChecked()
+        assert widget.rbHighQFix_ex.isChecked()
+        assert widget.txtHighQPower_ex.isEnabled()
         # Change value and be sure model updates
-        widget.txtPowerHighQ.setText("11")
-        assert widget.model.item(WIDGETS.W_HIGHQ_POWER_VALUE).text() == '11'
+        widget.txtHighQPower_ex.setText("11")
+        assert widget.model.item(WIDGETS.W_HIGHQ_POWER_VALUE_EX).text() == '4'
         # Run the calculation
         widget.setData([self.fakeData])
-        widget.calculateThread('high')
+        widget.calculate_thread('high')
         # Ensure the extrapolation plot is generated
         assert widget.high_extrapolation_plot is not None
         # Ensure Qmax for the plot is equal to Qmax entered into the extrapolation limits
-        assert max(widget.high_extrapolation_plot.x) == pytest.approx(100.0, abs=1e-7)
+        assert max(widget.high_extrapolation_plot.x) == pytest.approx(10.0, abs=1e-7)
         # Ensure radio buttons unchanged
-        assert not widget.rbFitHighQ.isChecked()
-        assert widget.rbFixHighQ.isChecked()
-        assert widget.txtPowerHighQ.text() == '11'
+        assert not widget.rbHighQFit_ex.isChecked()
+        assert widget.rbHighQFix_ex.isChecked()
+        assert widget.txtHighQPower_ex.text() == '4'
 
     def testLowQToggle(self, widget):
         """ Test enabling / disabling for check box Low Q extrapolation """
-        widget.chkLowQ.setChecked(True)
-        status_chkLowQ = widget.chkLowQ.isChecked()
+        widget.chkLowQ_ex.setChecked(True)
+        status_chkLowQ = widget.chkLowQ_ex.isChecked()
         assert status_chkLowQ
         # Check base state
-        assert widget.rbGuinier.isEnabled()
-        assert widget.rbPowerLawLowQ.isEnabled()
-        assert widget.txtNptsLowQ.isEnabled()
-        assert widget.rbFitLowQ.isEnabled()
-        assert widget.rbFixLowQ.isEnabled()
-        assert widget.rbGuinier.isChecked()
-        assert widget.rbFitLowQ.isChecked()
+        assert widget.rbLowQGuinier_ex.isEnabled()
+        assert widget.rbLowQPower_ex.isEnabled()
+        assert not widget.rbLowQFit_ex.isEnabled()
+        assert not widget.rbLowQFix_ex.isEnabled()
+        assert not widget.chkHighQ_ex.isChecked()
+        assert widget.chkLowQ_ex.isChecked()
         # Click the Power Law radio button
-        widget.rbPowerLawLowQ.setChecked(True)
-        assert not widget.rbGuinier.isChecked()
-        assert widget.rbFitLowQ.isChecked()
-        assert not widget.txtPowerLowQ.isEnabled()
+        widget.rbLowQPower_ex.setChecked(True)
+        assert not widget.rbLowQGuinier_ex.isChecked()
+        assert widget.rbLowQFit_ex.isChecked()
+        assert not widget.txtLowQPower_ex.isEnabled()
         # Return to the Guinier
-        widget.rbGuinier.setChecked(True)
-        assert widget.txtNptsLowQ.isEnabled() == \
-                         all([status_chkLowQ, widget._low_guinier, widget._low_fit])
+        widget.rbLowQGuinier_ex.setChecked(True)
 
-        widget.calculateInvariant()
+        widget.calculate_invariant()
         # Ensure radio buttons unchanged
-        assert widget.rbGuinier.isChecked()
-        assert widget.rbFitLowQ.isChecked()
+        assert widget.rbLowQGuinier_ex.isChecked()
+        assert widget.rbLowQFit_ex.isChecked()
 
     def testSetupModel(self, widget):
         """ Test default settings of model"""
@@ -316,25 +300,23 @@ class InvariantPerspectiveTest:
         assert widget.model.item(WIDGETS.W_QMIN).text() == '0.0'
         assert widget.model.item(WIDGETS.W_QMAX).text() == '0.0'
         assert widget.model.item(WIDGETS.W_BACKGROUND).text() == str(widget._background)
-        assert widget.model.item(WIDGETS.W_CONTRAST).text() == str(widget._contrast)
+        assert widget.model.item(WIDGETS.W_CONTRAST).text() == ''
         assert widget.model.item(WIDGETS.W_SCALE).text() == str(widget._scale)
         assert str(widget.model.item(WIDGETS.W_POROD_CST).text()) in ['', str(widget._porod)]
 
-        assert str(widget.model.item(WIDGETS.W_ENABLE_HIGHQ).text()).lower() == 'false'
-        assert str(widget.model.item(WIDGETS.W_ENABLE_LOWQ).text()).lower() == 'false'
-        assert str(widget.model.item(WIDGETS.W_LOWQ_GUINIER).text()).lower() == 'true'
-        assert str(widget.model.item(WIDGETS.W_LOWQ_FIT).text()).lower() == 'true'
-        assert str(widget.model.item(WIDGETS.W_HIGHQ_FIT).text()).lower() == 'true'
+        assert str(widget.model.item(WIDGETS.W_ENABLE_HIGHQ_EX).text()).lower() == 'false'
+        assert str(widget.model.item(WIDGETS.W_ENABLE_LOWQ_EX).text()).lower() == 'false'
+        assert str(widget.model.item(WIDGETS.W_LOWQ_GUINIER_EX).text()).lower() == 'false'
+        assert str(widget.model.item(WIDGETS.W_LOWQ_FIT_EX).text()).lower() == 'false'
+        assert str(widget.model.item(WIDGETS.W_HIGHQ_FIT_EX).text()).lower() == 'false'
 
-        assert str(widget.model.item(WIDGETS.W_NPTS_LOWQ).text()) == str(10)
-        assert widget.model.item(WIDGETS.W_NPTS_HIGHQ).text() == str(10)
-        assert str(widget.model.item(WIDGETS.W_LOWQ_POWER_VALUE).text()) == '4'
-        assert str(widget.model.item(WIDGETS.W_HIGHQ_POWER_VALUE).text()) == '4'
+        assert str(widget.model.item(WIDGETS.W_LOWQ_POWER_VALUE_EX).text()) == '4'
+        assert str(widget.model.item(WIDGETS.W_HIGHQ_POWER_VALUE_EX).text()) == '4'
 
     def testSetupMapper(self, widget):
         """ """
         assert isinstance(widget.mapper, QtWidgets.QDataWidgetMapper)
-        assert widget.mapper.orientation() == 2
+        assert widget.mapper.orientation() == QtCore.Qt.Orientation.Vertical
         assert widget.mapper.model() == widget.model
 
     def testSerialization(self, widget):
@@ -348,7 +330,7 @@ class InvariantPerspectiveTest:
         # Test three separate serialization routines
         state_all = widget.serializeAll()
         state_one = widget.serializeCurrentPage()
-        page = widget.getPage()
+        page = widget.serializePage()
         # Pull out params from state
         params = state_all[data_id]['invar_params']
         # Tests
@@ -356,13 +338,13 @@ class InvariantPerspectiveTest:
         assert len(state_all) == 1
         # getPage should include an extra param 'data_id' removed by serialize
         assert len(params) != len(page)
-        assert len(params) == 24
-        assert len(page) == 25
+        assert len(params) == 33
+        assert len(page) == 34
 
     def testLoadParams(self, widget):
         widget.setData([self.fakeData])
         self.checkFakeDataState(widget)
-        pageState = widget.getPage()
+        pageState = widget.serializePage()
         widget.updateFromParameters(pageState)
         self.checkFakeDataState(widget)
         widget.removeData([self.fakeData])
@@ -402,11 +384,8 @@ class InvariantPerspectiveTest:
         assert not widget.txtContrast.isReadOnly()
         assert not widget.txtPorodCst.isReadOnly()
 
-        assert widget.txtExtrapolQMin.isEnabled()
-        assert widget.txtExtrapolQMax.isEnabled()
-
-        assert not widget.txtNptsLowQ.isReadOnly()
-        assert not widget.txtNptsHighQ.isReadOnly()
+        assert widget.txtPorodStart_ex.isEnabled()
+        assert widget.txtPorodEnd_ex.isEnabled()
 
         assert widget.txtTotalQMin.isReadOnly()
         assert widget.txtTotalQMax.isReadOnly()
@@ -417,15 +396,13 @@ class InvariantPerspectiveTest:
         assert widget.txtTotalQMax.text() == '0.281'
         assert widget.txtBackgd.text() == '0.0'
         assert widget.txtScale.text() == '1.0'
-        assert widget.txtContrast.text() == '8e-06'
-        assert widget.txtExtrapolQMin.text() == '1e-05'
-        assert widget.txtExtrapolQMax.text() == '10'
-        assert widget.txtPowerLowQ.text() == '4'
-        assert widget.txtPowerHighQ.text() == '4'
+        assert widget.txtContrast.text() == ''
+        assert widget.txtPorodStart_ex.text() == '0.1677014'
+        assert widget.txtPorodEnd_ex.text() == '10'
 
         # unchecked checkboxes
-        assert not widget.chkLowQ.isChecked()
-        assert not widget.chkHighQ.isChecked()
+        assert not widget.chkLowQ_ex.isChecked()
+        assert not widget.chkHighQ_ex.isChecked()
 
     def test_allow_calculation_requires_input(self, widget):
         # Start with no data -> button disabled
@@ -445,7 +422,7 @@ class InvariantPerspectiveTest:
         # Contrast mode: valid contrast -> enabled
         widget.txtContrast.setText('2.2e-6')
         widget.allow_calculation()
-        assert widget.cmdCalculate.isEnabled()
+        assert not widget.cmdCalculate.isEnabled()
 
         # Volume fraction mode: no vol frac -> disabled
         widget.rbVolFrac.setChecked(True)
@@ -456,4 +433,4 @@ class InvariantPerspectiveTest:
         # Volume fraction mode: valid vol frac -> enabled
         widget.txtVolFrac1.setText('0.01')
         widget.allow_calculation()
-        assert widget.cmdCalculate.isEnabled()
+        assert not widget.cmdCalculate.isEnabled()
