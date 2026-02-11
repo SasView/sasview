@@ -23,7 +23,7 @@ from .InvariantDetails import DetailsDialog
 from .InvariantUtils import WIDGETS, safe_float
 from .UI.TabbedInvariantUI import Ui_tabbedInvariantUI
 
-# The minimum/max q-values to be used when extrapolating
+# The min/max q-values to be used when extrapolating
 Q_MINIMUM = 1e-5
 Q_MAXIMUM = 10
 # Default power law for extrapolation
@@ -123,11 +123,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self._low_extrapolate: bool = False
         self._low_guinier: bool = True
         self._low_fit: bool = False
-        self._low_points: int = 0
         self._low_power_value: float = DEFAULT_POWER_VALUE
         self._high_extrapolate: bool = False
         self._high_fit: bool = False
-        self._high_points: int = 0
         self._high_power_value: float | None = DEFAULT_POWER_VALUE
 
         # Define plots
@@ -451,10 +449,10 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                     self._low_power_value = float(self.model.item(WIDGETS.W_LOWQ_POWER_VALUE_EX).text())
 
             try:
-                q_end_val = float(self.txtGuinierEnd_ex.text())
+                q_end_val: float = float(self.txtGuinierEnd_ex.text())
 
                 # Find the index of the data point closest to q_end_val
-                n_pts = int(np.abs(self._data.x - q_end_val).argmin()) + 1
+                n_pts: int = int(np.abs(self._data.x - q_end_val).argmin()) + 1
 
                 if n_pts not in range(1, len(self._data.x) + 1):
                     raise ValueError("Number of points in low-q Guinier end is out of valid bounds")
@@ -469,7 +467,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             )
 
             try:
-                low_q_limit = float(self.extrapolation_parameters.ex_q_min)
+                extrapolation_start: float = float(self.extrapolation_parameters.ex_q_min)
+                # If the start is in the data range, set the low q limit to None and let the calculator handle it
+                low_q_limit: float | None = None if extrapolation_start > self._data.x[0] else extrapolation_start
                 qstar_low, qstar_low_err = self._calculator.get_qstar_low(low_q_limit)
                 low_calculation_pass = True
             except Exception as ex:
@@ -520,9 +520,10 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             )
 
             try:
-                qmax_ext: float = float(self.extrapolation_parameters.point_3)
-                qmax: float | None = None if qmax_ext < self._data.x[int(len(self._data.x) - 1)] else qmax_ext
-                qstar_high, qstar_high_err = self._calculator.get_qstar_high(qmax)
+                extrapolation_end: float = float(self.extrapolation_parameters.ex_q_max)
+                # If the end is in the data range, set the high q limit to None and let the calculator handle it
+                high_q_limit: float | None = None if extrapolation_end < self._data.x[-1] else extrapolation_end
+                qstar_high, qstar_high_err = self._calculator.get_qstar_high(high_q_limit)
                 high_calculation_pass: bool = True
             except Exception as ex:
                 logger.warning(f"High-q calculation failed: {str(ex)}")
@@ -594,7 +595,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             if self.rbContrast.isChecked():
                 contrast_for_surface = self._contrast
                 contrast_for_surface_err = self._contrast_err
-            elif self.rbVolFrac.isChecked() and (contrast_out != "ERROR" or contrast_out_error != "ERROR"):
+            elif self.rbVolFrac.isChecked() and (contrast_out != "ERROR" and contrast_out_error != "ERROR"):
                 contrast_for_surface = contrast_out
                 contrast_for_surface_err = contrast_out_error
 
@@ -1650,7 +1651,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
         # Update once all inputs are changed
         self.update_from_model()
-        self.plot_result(self.model)
 
     def allowBatch(self) -> bool:
         """Tell the caller that we don't accept multiple data instances."""
