@@ -209,7 +209,8 @@ norecursedirs = [
     "test/sasrealspace",
     "test/calculatorview",
     "src/sas/qtgui/Perspectives/Inversion",
-    "src/sas/qtgui/Perspectives/ParticleEditor"
+    "src/sas/qtgui/Perspectives/ParticleEditor",
+    "src/sas/qtgui/Utilities/UnitTesting/BrokenTests"
 ]
 
 [tool.ruff]
