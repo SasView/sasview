@@ -16,7 +16,7 @@ from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
 
 
 # TODO: Turn this back on once we figure out the cause of the fatal exceptions
-class ConstraintWidgetShutOff:
+class ConstraintWidgetTest:
     '''Test the ConstraintWidget dialog'''
 
     @pytest.fixture(autouse=True)
