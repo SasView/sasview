@@ -131,6 +131,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         # Define plots
         self.high_extrapolation_plot: PlotterData | None = None
         self.low_extrapolation_plot: PlotterData | None = None
+        self.extrapolation_made: bool = False
 
     def setup_slider(self) -> None:
         """Setup the extrapolation slider."""
@@ -318,7 +319,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         d = threads.deferToThread(self.calculate_thread, extrapolation)
 
         # Add deferred callback for call return
-        d.addCallback(self.deferredPlot)
+        d.addCallback(lambda model: self.deferredPlot(model, extrapolation))
         d.addErrback(self.on_calculation_failed)
 
     def on_calculation_failed(self, reason: Exception) -> None:
@@ -326,9 +327,15 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         logger.error(f"calculation failed: {reason}")
         self.check_status()
 
-    def deferredPlot(self, model: QtGui.QStandardItemModel) -> None:
+    def deferredPlot(self, model: QtGui.QStandardItemModel, extrapolation: str | None = None) -> None:
         """Run the GUI/model update in the main thread"""
         reactor.callFromThread(lambda: self.plot_result(model))
+
+        # Recreate the initial plot if no extrapolation was used and plot was previously closed
+        if extrapolation is None and self.extrapolation_made:
+            reactor.callFromThread(lambda: self._manager.filesWidget.newPlot())
+            self.extrapolation_made = False
+
         self.check_status()
 
     def check_status(self) -> None:
@@ -362,8 +369,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self._data = GuiUtils.dataFromItem(self._model_item)
 
         # Close the initial data plot that was created in setData()
-        if self._model_item is not None and (self.high_extrapolation_plot or self.low_extrapolation_plot):
+        if (self.high_extrapolation_plot or self.low_extrapolation_plot) and not self.extrapolation_made:
             self._manager.filesWidget.closePlotsForItem(self._model_item)
+            self.extrapolation_made = True
 
         # Send the modified model item to replace initial plot
         plots = [self._model_item]
