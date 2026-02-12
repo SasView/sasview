@@ -740,6 +740,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.txtContrast.textEdited.connect(self.updateFromGui)
         self.txtContrastErr.textEdited.connect(self.updateFromGui)
         self.txtPorodCst.textEdited.connect(self.updateFromGui)
+        self.txtPorodCstErr.textEdited.connect(self.updateFromGui)
         self.txtVolFrac1.textEdited.connect(self.updateFromGui)
         self.txtVolFrac1.editingFinished.connect(self.checkVolFrac)
         self.txtVolFrac1Err.textEdited.connect(self.updateFromGui)
@@ -776,6 +777,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.LowQPowerGroup.addButton(self.rbLowQFit_ex)
         self.HighQGroup.addButton(self.rbHighQFix_ex)
         self.HighQGroup.addButton(self.rbHighQFit_ex)
+
+        self.txtLowQPower_ex.textEdited.connect(self.updateFromGui)
+        self.txtHighQPower_ex.textEdited.connect(self.updateFromGui)
 
         # Slider values
         self.slider.valueEdited.connect(self.on_extrapolation_slider_changed)
@@ -1150,6 +1154,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             "txtPorodCstErr",
             "txtVolFrac1",
             "txtVolFrac1Err",
+            "txtLowQPower_ex",
+            "txtHighQPower_ex",
         ]
 
         if text_value == "" and sender_name in optional_fields:
@@ -1166,6 +1172,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                 "txtPorodCstErr": "_porod_err",
                 "txtVolFrac1": "_volfrac1",
                 "txtVolFrac1Err": "_volfrac1_err",
+                "txtLowQPower_ex": "_low_q_power_ex",
+                "txtHighQPower_ex": "_high_q_power_ex",
             }
             if sender_name in sender_to_attr:
                 setattr(self, sender_to_attr[sender_name], None)
