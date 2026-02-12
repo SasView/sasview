@@ -1,4 +1,3 @@
-import sys
 import webbrowser
 
 import numpy as np
@@ -8,14 +7,12 @@ from PySide6 import QtWidgets
 # Local
 from sas.qtgui.Perspectives.Fitting.MultiConstraint import MultiConstraint
 
-if not QtWidgets.QApplication.instance():
-    app = QtWidgets.QApplication(sys.argv)
 
 class MultiConstraintTest:
     '''Test the MultiConstraint dialog'''
 
     @pytest.fixture(autouse=True)
-    def widget(self, qapp):
+    def widget(self):
         '''Create/Destroy the MultiConstraint'''
         params = ['p1', 'p2']
         self.p1 = params[0]
