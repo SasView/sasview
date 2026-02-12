@@ -322,12 +322,7 @@ jobs:
         if: ${{ matrix.os == 'windows-latest' }}
         env:
           PYOPENCL_COMPILER_OUTPUT: 1
-        run: |
-          # Suppress SIGSEGV from the tests until they can be fixed
-          retval=0
-          xvfb-run -a --server-args="-screen 0 1600x900x24" python -m pytest -rsx -v src/sas/qtgui/ || retval=$?
-          if [ $retval -eq 139 ]; then echo "WARNING: Python interpreter exited with Segmentation Fault. This normally indicates that Qt objects were not correctly deleted. This error is currently suppressed in SasView's test suite."; retval=0; fi
-          exit $retval
+        run: python -m pytest -rsx -v src/sas/qtgui/
 
   installer-matrix:
     needs: [matrix, build-sasview]
