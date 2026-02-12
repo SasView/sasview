@@ -318,8 +318,8 @@ jobs:
           cd $RUNNER_TEMP
           python -m pytest -v -s test
 
-      - name: Test GUI (Linux)
-        if: ${{ matrix.os == 'ubuntu-latest' }}
+      - name: Test GUI (Windows)
+        if: ${{ matrix.os == 'windows-latest' }}
         env:
           PYOPENCL_COMPILER_OUTPUT: 1
         run: |
