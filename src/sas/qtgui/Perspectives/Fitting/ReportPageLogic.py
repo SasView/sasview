@@ -178,8 +178,6 @@ class ReportPageLogic:
             results_panel = self.parent.parent.results_panel
             if results_panel.correlationTable.state:
                 headers, rows = results_panel.correlationTable._parse_stats()
-                print(headers)
-                print(rows)
                 results_table += '<table>\n<tr><th>' + '</th><th>'.join(headers) + '</th></tr>'
                 for row in rows:
                     results_table += '<tr><td>' + '</td><td>'.join(row) + '</td></tr>'
