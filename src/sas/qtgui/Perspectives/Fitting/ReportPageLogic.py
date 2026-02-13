@@ -22,45 +22,31 @@ logger = logging.getLogger(__name__)
 class ReportPageLogic:
     """Logic for the Report Page functionality. Refactored from FittingWidget."""
     def __init__(self, parent=None, kernel_module=None, data=None, index=None, params=None):
-
         self.parent = parent
         self.kernel_module = kernel_module
         self.data = data
         self._index = index
         self.params = params
 
-
     def reportList(self) -> ReportData:
         """Return the HTML version of the full report"""
         if self.kernel_module is None:
-
             text = "No model defined"
-
             return ReportData(
-                html=HEADER % text,
+                html=HEADER.format(text),
                 text=text)
 
         # Get plot image from plotpanel
         images = self.getImages()
-
-        imagesHTML = ""
-        if images is not None:
-            imagesHTML = self.buildPlotsForReport(images)
-
+        images_html = self.buildPlotsForReport(images) if images is not None and any(images) else ""
         report_header = self.reportHeader()
-
         report_parameters = self.reportParams()
-
         results_table = self.getResultsTable()
 
-        report_html = report_header + report_parameters + imagesHTML + results_table
-
+        report_html = report_header + report_parameters + images_html + results_table
         report_txt = html2text.html2text(GuiUtils.replaceHTMLwithASCII(report_html))
 
-        # report_list = ReportData(html=report_html, text=report_txt, images=images)
-        report_list = ReportData(html=report_html, text=report_txt)
-
-        return report_list
+        return ReportData(html=report_html, text=report_txt)
 
     def reportHeader(self) -> str:
         """Look at widget state and extract report header info"""
@@ -78,43 +64,36 @@ class ReportPageLogic:
         data_qrange = f"min = {data_qrange_min}, max = {data_qrange_max}"
         fit_qrange = f"min = {self.parent.q_range_min}, max = {self.parent.q_range_max}"
 
-        title = title + " [" + current_time + "]"
-        title_name = HEADER % title
-        report = title_name
-        report += CENTRE % f"File name: {filename}\n"
-        report += CENTRE % f"SasView version: {SASVIEW_VERSION}\n"
-        report += CENTRE % f"SasModels version: {SASMODELS_VERSION}\n"
-        report += CENTRE % f"Fit optimizer used: {optimizer}\n"
-        report += CENTRE % f"Model name: {modelname}\n"
-        report += CENTRE % f"Q Range of the Data: {data_qrange}\n"
-        report += CENTRE % f"Q Range of the Fit: {fit_qrange}\n"
+        report = HEADER.format(title + " [" + current_time + "]")
+        report += CENTRE.format(f"File name: {filename}")
+        report += CENTRE.format(f"SasView version: {SASVIEW_VERSION}")
+        report += CENTRE.format(f"SasModels version: {SASMODELS_VERSION}")
+        report += CENTRE.format(f"Fit optimizer used: {optimizer}")
+        report += CENTRE.format(f"Model name: {modelname}")
+        report += CENTRE.format(f"Q Range of the Data: {data_qrange}")
+        report += CENTRE.format(f"Q Range of the Fit: {fit_qrange}")
         chi2_repr = GuiUtils.formatNumber(self.parent.chi2, high=True)
-        report += CENTRE % f"Chi2/Npts: {chi2_repr}\n"
+        report += CENTRE.format(f"Chi2/Npts: {chi2_repr}")
 
         return report
 
-    def buildPlotsForReport(self, images: list[FigureCanvas]) -> str:
+    def buildPlotsForReport(self, images: list[PlotterBase]) -> str:
         """ Convert Matplotlib figure 'fig' into a <img> tag for HTML use using base64 encoding. """
-        html = FEET_1 % self.data.name
+        html = FEET_1.format(self.data.name)
 
         for fig in images:
             canvas = FigureCanvas(fig)
             png_output = BytesIO()
             try:
-                if sys.platform == "darwin":
-                    fig.savefig(png_output, format="png", dpi=150)
-                else:
-                    fig.savefig(png_output, format="png", dpi=75)
+                dpi = 150 if sys.platform == "darwin" else 75
+                fig.savefig(png_output, format="png", dpi=dpi)
             except PermissionError as ex:
-                logger.error("Creating of the report failed: %s"%str(ex))
-                return
+                logger.error(f"Creating of the report failed: {str(ex)}")
+                return ''
             data64 = base64.b64encode(png_output.getvalue())
             data_to_print = urllib.parse.quote(data64)
-            feet = FEET_2
-            if sys.platform == "darwin":  # Mac
-                feet = FEET_3
-            html += feet.format(data_to_print)
-            html += ELINE
+            feet = FEET_3 if sys.platform == "darwin" else FEET_2
+            html += feet.format(data_to_print) + ELINE
             png_output.close()
             del canvas
         return html
@@ -132,8 +111,7 @@ class ReportPageLogic:
                 par_dispersion_type = ""
                 if 'Distribution of' in par_name:
                     par_name_original = par_name.replace('Distribution of ', '')
-                    par_dispersion_type = self.kernel_module.dispersion[
-                        par_name_original.strip()]['type']
+                    par_dispersion_type = self.kernel_module.dispersion[par_name_original.strip()]['type']
                 par_fixed = not value[0]
                 par_value = value[2]
                 par_unit = value[7]
@@ -150,7 +128,7 @@ class ReportPageLogic:
                 # corrupted model. Complain and skip the line
                 logger.error("Error in parsing parameters: "+str(ex))
                 continue
-            report += CENTRE % param + "\n"
+            report += CENTRE.format(param)
 
         return report
 
@@ -217,10 +195,10 @@ HEADER += "<meta http-equiv=Content-Type content='text/html; charset=utf-8'> \n"
 HEADER += "</head>\n"
 HEADER += "<body lang=EN-US>\n"
 HEADER += "<div>\n"
-HEADER += "<p><b><span><center> %s </center></span></center></b></p>"
+HEADER += "<p><b><span><center> {} </center></span></center></b></p>"
 HEADER += "<p>&nbsp;</p>"
-PARA = "<p> %s \n</p>"
-CENTRE = "<p><center> %s \n</center></p>"
+PARA = "<p> {} \n</p>"
+CENTRE = "<p><center>{}</center></p>\n"
 FEET_1 = \
 """
 <p>&nbsp;</p>
@@ -229,7 +207,7 @@ FEET_1 = \
 <p>&nbsp;</p>
 <center>
 <br>Model Computation
-<br>Data: "%s"<br>
+<br>Data: "{}"<br>
 """
 FEET_2 = '<img src="data:image/png;base64,{}"></img>\n'
 FEET_3 = '<img width="540" src="data:image/png;base64,{}"></img>\n'
