@@ -1,8 +1,9 @@
-from PySide6.QtWidgets import QDialog
 from PySide6.QtCore import QObject, Signal
+from PySide6.QtWidgets import QDialog
+
 from sasdata.data import SasData
 
-from src.sas.refactored import Perspective
+from sas.refactored import Perspective
 
 # TODO: Add plots to this type.
 TrackedData = SasData | Perspective

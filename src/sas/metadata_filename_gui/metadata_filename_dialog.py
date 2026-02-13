@@ -14,7 +14,7 @@ from PySide6.QtWidgets import (
 
 from sasdata.ascii_reader_metadata import AsciiReaderMetadata
 
-from metadata_filename_gui.metadata_tree_widget import MetadataTreeWidget
+from sas.metadata_filename_gui.metadata_tree_widget import MetadataTreeWidget
 
 
 def build_font(text: str, classname: str = '') -> str:

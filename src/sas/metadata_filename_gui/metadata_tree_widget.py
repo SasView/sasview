@@ -2,7 +2,7 @@ from PySide6.QtWidgets import QTreeWidget, QTreeWidgetItem
 
 from sasdata.ascii_reader_metadata import AsciiReaderMetadata, initial_metadata
 
-from metadata_filename_gui.metadata_selector import MetadataSelector
+from sas.metadata_filename_gui.metadata_selector import MetadataSelector
 
 
 class MetadataTreeWidget(QTreeWidget):
