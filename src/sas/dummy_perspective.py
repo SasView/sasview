@@ -1,8 +1,11 @@
 from typing import override
-from PySide6.QtWidgets import QDialog, QListWidget, QVBoxLayout, QWidget
+
+from PySide6.QtWidgets import QListWidget, QVBoxLayout, QWidget
 from qtpy.QtWidgets import QLabel
-from sas.refactored import Perspective
+
 from sas.data_manager import NewDataManager as DataManager
+from sas.refactored import Perspective
+
 
 class DummyPerspective(Perspective):
     def __init__(self, data_manager: DataManager, parent: QWidget | None = None) -> None:

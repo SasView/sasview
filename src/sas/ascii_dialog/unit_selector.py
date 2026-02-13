@@ -3,7 +3,7 @@ from PySide6.QtWidgets import QApplication, QComboBox, QDialog, QLineEdit, QPush
 
 from sasdata.quantities.units import NamedUnit, UnitGroup, unit_group_names, unit_groups
 
-from ascii_dialog.unit_list_widget import UnitListWidget
+from sas.ascii_dialog.unit_list_widget import UnitListWidget
 
 all_unit_groups = list(unit_groups.values())
 

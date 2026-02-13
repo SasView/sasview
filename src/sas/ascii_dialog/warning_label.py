@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QLabel
 
-from ascii_dialog.constants import TABLE_MAX_ROWS
+from sas.ascii_dialog.constants import TABLE_MAX_ROWS
 
 
 class WarningLabel(QLabel):
@@ -31,7 +31,7 @@ class WarningLabel(QLabel):
                     try:
                         for item in line:
                             _ = float(item)
-                    except:
+                    except ValueError:
                         unparsable += 1
 
         if len(missing_columns) != 0:
