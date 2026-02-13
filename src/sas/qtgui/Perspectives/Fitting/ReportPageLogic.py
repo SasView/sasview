@@ -19,11 +19,8 @@ from sas.system.version import __version__ as SASVIEW_VERSION
 logger = logging.getLogger(__name__)
 
 
-# TODO: Integrate with other reports
 class ReportPageLogic:
-    """
-    Logic for the Report Page functionality. Refactored from FittingWidget.
-    """
+    """Logic for the Report Page functionality. Refactored from FittingWidget."""
     def __init__(self, parent=None, kernel_module=None, data=None, index=None, params=None):
 
         self.parent = parent
@@ -33,10 +30,8 @@ class ReportPageLogic:
         self.params = params
 
 
-    def reportList(self) -> ReportData: # TODO: Rename to reference report object
-        """
-        Return the HTML version of the full report
-        """
+    def reportList(self) -> ReportData:
+        """Return the HTML version of the full report"""
         if self.kernel_module is None:
 
             text = "No model defined"
@@ -67,10 +62,8 @@ class ReportPageLogic:
 
         return report_list
 
-    def reportHeader(self):
-        """
-        Look at widget state and extract report header info
-        """
+    def reportHeader(self) -> str:
+        """Look at widget state and extract report header info"""
         title = self.data.name
         current_time = datetime.datetime.now().strftime("%I:%M%p, %B %d, %Y")
         filename = self.data.filename
@@ -100,7 +93,7 @@ class ReportPageLogic:
 
         return report
 
-    def buildPlotsForReport(self, images): # TODO: Unify with other report image to html conversion
+    def buildPlotsForReport(self, images: list[FigureCanvas]) -> str:
         """ Convert Matplotlib figure 'fig' into a <img> tag for HTML use using base64 encoding. """
         html = FEET_1 % self.data.name
 
@@ -126,10 +119,8 @@ class ReportPageLogic:
             del canvas
         return html
 
-    def reportParams(self):
-        """
-        Look at widget state and extract parameters
-        """
+    def reportParams(self) -> str:
+        """Look at widget state and extract parameters"""
         if self.params is None:
             return ""
 
@@ -164,6 +155,7 @@ class ReportPageLogic:
         return report
 
     def getResultsPlots(self) -> list[FigureCanvas]:
+        """Gather the plots from the bumps results panel."""
         plots = []
         if hasattr(self.parent, 'parent') and hasattr(self.parent.parent, 'results_panel'):
             results_panel = self.parent.parent.results_panel
@@ -180,6 +172,7 @@ class ReportPageLogic:
         return plots
 
     def getResultsTable(self) -> str:
+        """Format the bumps results correlation table into html."""
         results_table = ''
         if hasattr(self.parent, 'parent') and hasattr(self.parent.parent, 'results_panel'):
             results_panel = self.parent.parent.results_panel
@@ -194,9 +187,7 @@ class ReportPageLogic:
         return results_table
 
     def getImages(self) -> list[PlotterBase]:
-        """
-        Create MPL figures for the current fit
-        """
+        """Create MPL figures for the current fit"""
         graphs = []
         modelname = self.kernel_module.name
         if not modelname or self._index is None:
