@@ -69,20 +69,19 @@ class ReportPageLogic:
         """
         Look at widget state and extract report header info
         """
-        report = ""
-
         title = self.data.name
         current_time = datetime.datetime.now().strftime("%I:%M%p, %B %d, %Y")
         filename = self.data.filename
         modelname = self.kernel_module.id
         optimizer = options.FIT_CONFIG.selected_fitter.name
         if hasattr(self.data, 'xmin'):
-            qrange_min = self.data.xmin
-            qrange_max = self.data.xmax
+            data_qrange_min = self.data.xmin
+            data_qrange_max = self.data.xmax
         else:
-            qrange_min = min(self.data.x)
-            qrange_max = max(self.data.x)
-        qrange = f"min = {qrange_min}, max = {qrange_max}"
+            data_qrange_min = min(self.data.x)
+            data_qrange_max = max(self.data.x)
+        data_qrange = f"min = {data_qrange_min}, max = {data_qrange_max}"
+        fit_qrange = f"min = {self.parent.q_range_min}, max = {self.parent.q_range_max}"
 
         title = title + " [" + current_time + "]"
         title_name = HEADER % title
@@ -92,7 +91,8 @@ class ReportPageLogic:
         report += CENTRE % f"SasModels version: {SASMODELS_VERSION}\n"
         report += CENTRE % f"Fit optimizer used: {optimizer}\n"
         report += CENTRE % f"Model name: {modelname}\n"
-        report += CENTRE % f"Q Range: {qrange}\n"
+        report += CENTRE % f"Q Range of the Data: {data_qrange}\n"
+        report += CENTRE % f"Q Range of the Fit: {fit_qrange}\n"
         chi2_repr = GuiUtils.formatNumber(self.parent.chi2, high=True)
         report += CENTRE % f"Chi2/Npts: {chi2_repr}\n"
 
