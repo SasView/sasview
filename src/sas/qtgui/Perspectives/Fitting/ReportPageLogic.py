@@ -56,7 +56,9 @@ class ReportPageLogic:
 
         report_parameters = self.reportParams()
 
-        report_html = report_header + report_parameters + imagesHTML
+        results_table = self.getResultsTable()
+
+        report_html = report_header + report_parameters + imagesHTML + results_table
 
         report_txt = html2text.html2text(GuiUtils.replaceHTMLwithASCII(report_html))
 
@@ -161,6 +163,36 @@ class ReportPageLogic:
 
         return report
 
+    def getResultsPlots(self) -> list[FigureCanvas]:
+        plots = []
+        if hasattr(self.parent, 'parent') and hasattr(self.parent.parent, 'results_panel'):
+            results_panel = self.parent.parent.results_panel
+            results_plot_list = [
+                results_panel.convergenceView.figure,
+                results_panel.correlationView.figure,
+                results_panel.uncertaintyView.figure,
+                results_panel.traceView.figure
+            ]
+            for result in results_plot_list:
+                if result.canvas is not None:
+                    plots.append(result)
+
+        return plots
+
+    def getResultsTable(self) -> str:
+        results_table = ''
+        if hasattr(self.parent, 'parent') and hasattr(self.parent.parent, 'results_panel'):
+            results_panel = self.parent.parent.results_panel
+            if results_panel.correlationTable.state:
+                headers, rows = results_panel.correlationTable._parse_stats()
+                print(headers)
+                print(rows)
+                results_table += '<table>\n<tr><th>' + '</th><th>'.join(headers) + '</th></tr>'
+                for row in rows:
+                    results_table += '<tr><td>' + '</td><td>'.join(row) + '</td></tr>'
+                results_table += '</table>'
+        return results_table
+
     def getImages(self) -> list[PlotterBase]:
         """
         Create MPL figures for the current fit
@@ -183,6 +215,8 @@ class ReportPageLogic:
             # get the plotter object first
             plotter = PlotHelper.plotById(name)
             graphs.append(plotter.figure)
+
+        graphs.extend(self.getResultsPlots())
 
         return graphs
 
