@@ -42,8 +42,9 @@ class ReportPageLogic:
         report_header = self.reportHeader()
         report_parameters = self.reportParams()
         results_table = self.getResultsTable()
+        batch_table = self.getBatchResults()
 
-        report_html = report_header + report_parameters + images_html + results_table
+        report_html = report_header + report_parameters + images_html + results_table + batch_table
         report_txt = html2text.html2text(GuiUtils.replaceHTMLwithASCII(report_html))
 
         return ReportData(html=report_html, text=report_txt)
@@ -180,6 +181,18 @@ class ReportPageLogic:
                     results_table += '<tr><td>' + '</td><td>'.join(row) + '</td></tr>'
                 results_table += '</table>'
         return results_table
+
+    def getBatchResults(self) -> str:
+        """Format the bumps results correlation table into html."""
+        batch_results_table = ''
+        if hasattr(self.parent, 'is_batch_fitting') and self.parent.is_batch_fitting:
+            batch_results_table += CENTRE.format("Batch Results") + "<table>"
+            batch_panel = self.parent.parent.grid_window
+            if batch_table := batch_panel.dataFromTable(batch_panel.currentTable()):
+                for row in batch_table:
+                    batch_results_table += '<tr><td>' + '</td><td>'.join(row) + '</td></tr>'
+                batch_results_table += '</table>'
+        return batch_results_table
 
     def getImages(self) -> list[PlotterBase]:
         """Create MPL figures for the current fit"""
