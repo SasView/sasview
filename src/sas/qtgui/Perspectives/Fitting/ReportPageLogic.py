@@ -137,15 +137,16 @@ class ReportPageLogic:
         plots = []
         if hasattr(self.parent, 'parent') and hasattr(self.parent.parent, 'results_panel'):
             results_panel = self.parent.parent.results_panel
-            results_plot_list = [
-                results_panel.convergenceView.figure,
-                results_panel.correlationView.figure,
-                results_panel.uncertaintyView.figure,
-                results_panel.traceView.figure
+            results_panels = [
+                results_panel.convergenceView,
+                results_panel.correlationView,
+                results_panel.uncertaintyView,
+                results_panel.traceView
             ]
-            for result in results_plot_list:
-                if result.canvas is not None:
-                    plots.append(result)
+            for panel in results_panels:
+                # Only include the plot if it has recent results
+                if panel.state is not None:
+                    plots.append(panel.figure)
 
         return plots
 
