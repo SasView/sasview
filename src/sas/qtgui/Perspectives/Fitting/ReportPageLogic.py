@@ -211,39 +211,27 @@ class ReportPageLogic:
 
 
 # Simple html report template
-# TODO Remove microsoft based stuff - probably implicit in the refactoring to come
 HEADER = "<html>\n"
 HEADER += "<head>\n"
-HEADER += "<meta http-equiv=Content-Type content='text/html; "
-HEADER += "charset=utf-8'> \n"
-HEADER += "<meta name=Generator >\n"
+HEADER += "<meta http-equiv=Content-Type content='text/html; charset=utf-8'> \n"
 HEADER += "</head>\n"
 HEADER += "<body lang=EN-US>\n"
-HEADER += "<div class=WordSection1>\n"
-HEADER += "<p class=MsoNormal><b><span ><center><font size='4' >"
-HEADER += "%s</font></center></span></center></b></p>"
-HEADER += "<p class=MsoNormal>&nbsp;</p>"
-PARA = "<p class=MsoNormal><font size='4' > %s \n"
-PARA += "</font></p>"
-CENTRE = "<p class=MsoNormal><center><font size='4' > %s \n"
-CENTRE += "</font></center></p>"
+HEADER += "<div>\n"
+HEADER += "<p><b><span><center> %s </center></span></center></b></p>"
+HEADER += "<p>&nbsp;</p>"
+PARA = "<p> %s \n</p>"
+CENTRE = "<p><center> %s \n</center></p>"
 FEET_1 = \
 """
-<p class=MsoNormal>&nbsp;</p>
+<p>&nbsp;</p>
 <br>
-<p class=MsoNormal><b><span ><center> <font size='4' > Graph
-</font></span></center></b></p>
-<p class=MsoNormal>&nbsp;</p>
+<p><b><span><center>Graph</span></center></b></p>
+<p>&nbsp;</p>
 <center>
-<br><font size='4' >Model Computation</font>
-<br><font size='4' >Data: "%s"</font><br>
+<br>Model Computation
+<br>Data: "%s"<br>
 """
-FEET_2 = \
-'''<img src="data:image/png;base64,{}"></img>
-'''
-FEET_3 = \
-'''<img width="540" src="data:image/png;base64,{}"></img>
-'''
-ELINE = """<p class=MsoNormal>&nbsp;</p>
-"""
+FEET_2 = '<img src="data:image/png;base64,{}"></img>\n'
+FEET_3 = '<img width="540" src="data:image/png;base64,{}"></img>\n'
+ELINE = "<p>&nbsp;</p>\n"
 
