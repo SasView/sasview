@@ -1,4 +1,6 @@
 import logging
+from os.path import basename
+
 from PySide6.QtCore import Signal, Slot
 from PySide6.QtWidgets import (
     QComboBox,
@@ -10,18 +12,18 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-from sasdata.temp_xml_reader import load_data as load_xml_data
-from sasdata.temp_hdf5_reader import load_data as load_hdf5_data
-from sasdata.temp_ascii_reader import load_data_default_params as load_ascii_data
-from sasdata.temp_ascii_reader import load_data as load_advanced_ascii_data
-from os.path import basename
 
+from sasdata.temp_ascii_reader import load_data as load_advanced_ascii_data
+from sasdata.temp_ascii_reader import load_data_default_params as load_ascii_data
+from sasdata.temp_hdf5_reader import load_data as load_hdf5_data
+from sasdata.temp_xml_reader import load_data as load_xml_data
+
+from sas.ascii_dialog.dialog import AsciiDialog
+from sas.data_explorer_error_message import DataExplorerErrorMessage
 from sas.data_explorer_tree import DataExplorerTree
+from sas.data_manager import NewDataManager as DataManager
 from sas.dummy_perspective import DummyPerspective
 from sas.refactored import Perspective
-from sas.data_manager import NewDataManager as DataManager
-from ascii_dialog.dialog import AsciiDialog
-from src.sas.data_explorer_error_message import DataExplorerErrorMessage
 
 # TODO: Eventually, the values (should) never be None.
 # FIXME: Linter is complaining about DummyPew
@@ -56,7 +58,7 @@ class NewDataExplorer(QWidget):
         # registered somewhere so its easy to add a new one.
         self.add_perspective_button = QComboBox(self)
         self.add_perspective_button.addItem("+ New Perspectives")
-        for p in perspectives.keys():
+        for p in perspectives:
             self.add_perspective_button.addItem(p)
         self.add_perspective_button.currentTextChanged.connect(self.add_perspective)
 

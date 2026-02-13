@@ -6,7 +6,7 @@ from PySide6.QtWidgets import QHBoxLayout, QWidget
 from sasdata.ascii_reader_metadata import bidirectional_pairings
 from sasdata.quantities.units import NamedUnit
 
-from ascii_dialog.column_unit import ColumnUnit
+from sas.ascii_dialog.column_unit import ColumnUnit
 
 
 class ColEditor(QWidget):

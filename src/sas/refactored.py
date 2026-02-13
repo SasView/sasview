@@ -1,11 +1,13 @@
-from abc import abstractmethod
 import logging
-from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QDialog, QWidget
-from sasdata.data import SasData
+from abc import abstractmethod
 
 # This is ugly but necessary to avoid a cyclic dependency
 from typing import TYPE_CHECKING, cast
+
+from PySide6.QtWidgets import QDialog, QWidget
+
+from sasdata.data import SasData
+
 if TYPE_CHECKING:
     from sas.data_manager import NewDataManager as DataManager
 
@@ -70,7 +72,7 @@ class Perspective(QDialog):
     def associatedData(self) -> list[SasData]:
         return cast(list[SasData], self._data_manager.get_all_associations(self))
 
-class Theory():
+class Theory:
     # TODO: Need to put stuff here that is unique to Theory. Right now, looking
     # at the current SasView codebase, it seems they are all just Data1Ds with
     # nothing else special.

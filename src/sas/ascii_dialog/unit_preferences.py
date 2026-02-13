@@ -8,7 +8,7 @@ from PySide6.QtWidgets import QApplication, QScrollArea, QVBoxLayout, QWidget
 from sasdata.dataset_types import unit_kinds
 from sasdata.quantities.units import NamedUnit
 
-from ascii_dialog.unit_preference_line import UnitPreferenceLine
+from sas.ascii_dialog.unit_preference_line import UnitPreferenceLine
 
 
 class UnitPreferences(QWidget):
