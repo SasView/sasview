@@ -55,6 +55,7 @@ class ReportPageLogic:
         filename = self.data.filename
         modelname = self.kernel_module.id
         optimizer = options.FIT_CONFIG.selected_fitter.name
+        smear_format = self.getFitSmearing()
         if hasattr(self.data, 'xmin'):
             data_qrange_min = self.data.xmin
             data_qrange_max = self.data.xmax
@@ -72,6 +73,7 @@ class ReportPageLogic:
         report += CENTRE.format(f"Model name: {modelname}")
         report += CENTRE.format(f"Q Range of the Data: {data_qrange}")
         report += CENTRE.format(f"Q Range of the Fit: {fit_qrange}")
+        report += smear_format
         chi2_repr = GuiUtils.formatNumber(self.parent.chi2, high=True)
         report += CENTRE.format(f"Chi2/Npts: {chi2_repr}")
 
@@ -131,6 +133,22 @@ class ReportPageLogic:
             report += CENTRE.format(param)
 
         return report
+
+    def getFitSmearing(self) -> str:
+        """Format the smearing information and return """
+        smearing, accuracy, smearing_min, smearing_max = self.parent.smearing_widget.state()
+        smear_format = ""
+        if self.parent.smearing_widget.smear_type and smearing != "None":
+            smear_format = f"Type = {self.parent.smearing_widget.smear_type} {smearing}"
+            if accuracy:
+                smear_format += f"Accuracy = {accuracy}"
+            if self.parent.smearing_widget.smear_type == "Slit":
+                smear_format += f", dQl = {smearing_max}, dqw = {smearing_min}"
+            elif self.parent.smearing_widget.smear_type == "Pinhole":
+                # The boxes are labelled backwards in the smearing widget.
+                smear_format += f", dQ/Q_max = {smearing_min}, dQ/Q_min = {smearing_max}"
+            smear_format = CENTRE.format(f"Smearing Information: {smear_format}")
+        return smear_format
 
     def getResultsPlots(self) -> list[FigureCanvas]:
         """Gather the plots from the bumps results panel."""
