@@ -1,4 +1,5 @@
-from typing_extensions import cast
+from typing import cast
+
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QCursor
 from PySide6.QtWidgets import (
@@ -7,12 +8,15 @@ from PySide6.QtWidgets import (
     QTreeWidgetItem,
     QWidget,
 )
+
 from sasdata.data import SasData
-from sas.data_manager import NewDataManager as DataManager, TrackedData
-from sas.refactored import Perspective
-from src.sas.data_explorer_error_message import DataExplorerErrorMessage
-from src.sas.data_explorer_menu import DataExplorerMenu, DataExplorerMenuAction
+
+from sas.data_explorer_error_message import DataExplorerErrorMessage
+from sas.data_explorer_menu import DataExplorerMenu, DataExplorerMenuAction
+from sas.data_manager import NewDataManager as DataManager
+from sas.data_manager import TrackedData
 from sas.qtgui.MainWindow.DataViewer import DataViewer
+from sas.refactored import Perspective
 
 
 # TODO: Is this the right place for this?

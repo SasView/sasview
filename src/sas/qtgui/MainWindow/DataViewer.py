@@ -1,12 +1,15 @@
 from PySide6.QtWidgets import (
-    QDialog, QGridLayout, QLabel,
+    QDialog,
+    QGridLayout,
+    QHeaderView,
+    QLabel,
     QPushButton,
     QTableWidget,
     QTableWidgetItem,
-    QHeaderView,
 )
 
 from sasdata.data import SasData
+
 from sas.qtgui.MainWindow.MetadataExplorer import MetadataExplorer
 
 

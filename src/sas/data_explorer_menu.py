@@ -1,10 +1,11 @@
+from dataclasses import dataclass
 from typing import Literal
+
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QMenu, QWidget
 
 from sas.data_manager import NewDataManager
-from src.sas.refactored import Perspective
-from dataclasses import dataclass
+from sas.refactored import Perspective
 
 
 # TODO: Could we perhaps enforce that, if the action is send_to, the action_data

@@ -1,11 +1,3 @@
-
-
-
-
-
-
-
-
 import logging
 import os
 import sys
@@ -17,7 +9,7 @@ from typing import cast
 from packaging.version import Version
 from PySide6.QtCore import QLocale, Qt, Slot
 from PySide6.QtGui import QStandardItem, QTextCursor
-from PySide6.QtWidgets import QDialog, QDockWidget, QLabel, QMessageBox, QProgressBar, QTextBrowser
+from PySide6.QtWidgets import QDialog, QDockWidget, QLabel, QMdiSubWindow, QMessageBox, QProgressBar, QTextBrowser
 from shiboken6 import isValid
 
 from sasdata.temp_ascii_reader import load_data
@@ -33,6 +25,7 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 import sas.system.version
 from sas import config
+from sas.data_manager import NewDataManager, TrackedData
 from sas.qtgui.Calculators.DataOperationUtilityPanel import DataOperationUtilityPanel
 from sas.qtgui.Calculators.DensityPanel import DensityPanel
 from sas.qtgui.Calculators.KiessigPanel import KiessigPanel
@@ -42,12 +35,8 @@ from sas.qtgui.Calculators.SldPanel import SldPanel
 from sas.qtgui.Calculators.SlitSizeCalculator import SlitSizeCalculator
 from sas.qtgui.MainWindow.Acknowledgements import Acknowledgements
 from sas.qtgui.MainWindow.CategoryManager import CategoryManager
-from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
-from sas.qtgui.MainWindow.DataManager import DataManager
 from sas.qtgui.MainWindow.PackageGatherer import PackageGatherer
 from sas.qtgui.MainWindow.WelcomePanel import WelcomePanel
-from sas.refactored import Perspective as NewPerspective
-
 from sas.qtgui.Perspectives.Corfunc.CorfuncPerspective import CorfuncWindow
 from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
 from sas.qtgui.Perspectives.Invariant.InvariantPerspective import InvariantWindow
@@ -76,12 +65,12 @@ from sas.qtgui.Utilities.SASBDB.SASBDBDownloadDialog import SASBDBDownloadDialog
 # General SAS imports
 from sas.qtgui.Utilities.SasviewLogger import setup_qt_logging
 from sas.qtgui.Utilities.WhatsNew.WhatsNew import WhatsNewWidget
+from sas.refactored import Perspective as NewPerspective
+from sas.refactored_data_explorer import NewDataExplorer
 from sas.system import HELP_SYSTEM, web
 from sas.system.user import create_user_files_if_needed
 from sas.system.version import __release_date__ as SASVIEW_RELEASE_DATE
 from sas.system.version import __version__ as SASVIEW_VERSION
-from sas.data_manager import NewDataManager, TrackedData
-from sas.refactored_data_explorer import NewDataExplorer
 
 logger = logging.getLogger(__name__)
 
@@ -143,11 +132,6 @@ class GuiManager:
 
         # Set up the status bar
         self.statusBarSetup()
-
-        # Current tutorial location
-        self._tutorialLocation = os.path.abspath(os.path.join(HELP_DIRECTORY_LOCATION,
-                                              "_downloads",
-                                              "Tutorial.pdf"))
 
         if self.WhatsNew.has_new_messages():
             self.actionWhatsNew()
@@ -1779,7 +1763,7 @@ class GuiManager:
 
 
     def asciiLoader(self):
-        from ascii_dialog.dialog import AsciiDialog
+        from sas.ascii_dialog.dialog import AsciiDialog
         dialog = AsciiDialog()
         status = dialog.exec()
         if status == 1:
