@@ -1,0 +1,94 @@
+demo integration into sasview:
+
+what is needed?
+DataIDs from DataViewer/DataCollector, where are these saved in SasView?
+What does the current displaying system look like?
+
+How is a fit linked with the underlying data?
+How are residuals linked?
+How is polydispersity linked?
+First layer of the model QStandardItemModel would be Data nodes
+	children of these nodes would be e.g. the polydispersity, fit, residuals, etc.
+
+
+Relation datasets/fitpages <--> existing plots?
+How is the current logic behind plotting something new and replotting an existing plot
+Checking if certain id already exists in the model/the dictionary for plotted objects
+
+plotting tools for 1d and 2d exist and can keep functioning that way?
+They just produce QWidgets that can be embedded inside the tabs afterwards
+GuiManager-filesWidget.plotData creates an instance of PlotterWidget, which is a QWidget and
+
+
+Where are the QWidgets from the Plotting generated? Where is explicitly show() stated?
+
+dataID generation is in sas.qtgui.MainWindow.DataManager on line 124
+The ID is a cocatenated string of the data object name 
+(another GUI-only element that will move to sasdata) and 
+1 plus the time stamp when SasView​ was loaded, not when the data file was loaded. 
+The time stamp will be relative to the data load time, 
+not the loader instance creation time when fully implemented into 
+the sasdata object.
+
+
+What is a model?
+How can the plot for a model with a certain name already exist in the GuiUtils,
+if the plotRequested Signal has not been emitted in the first place?
+Why is _requestPlots applying plot.plot_role != DataRole.ROLE_DATA and only giving signals where this is not true/true?
+Where does self.communicate.plotRequestedSignal go? What does this signal invoke?
+	self.communicate is coming from the parent through initialize globals
+	in initializeGlobals, the self.communicate = self.parent.communicate
+	communicate comes from GuiUtils.Communicate()?
+	How is this initialized if i create a new fitpage by hitting new fitpage?
+	Where is the original GuiUtils coming from? -maybe from GuiManager?
+
+
+
+
+
+
+Tree of what happens if python run.py is executed:
+run.py
+  run.__main__
+    sas.cli.main
+      sas.qtgui.MainWindow.MainWindow.run_sasview()
+	QApplication is setup
+	QtReactor is installed -> sasview can then listen to client/server calls
+		and process them. 
+		this is handled in sas.qtgui.Utilities.ReactorCore.install(),
+		where install is only defined at the very bottom and is dependent
+		on the system the user is using to start sasview (win32 or else?)
+	mainwindow is initialized with mainwindow = MainSasViewWindow():
+		self.guimanager = GuiManager(self) (it says main sassview window functionality itself)
+			ALOT of stuff is done and a lot of stuff is imported
+			self._datamanger = DataManager()
+			self.addWidgets()
+			What signal callbacks? l.106
+				addCallbacks() l.670
+					self.communicate = GuiUtils.Communicate()
+					a big bunch of signals that are connected with methods
+					e.g. self.communicate.plotRequestedSignal.connect(self.showPlot)
+						showPlot(self, plot, id)
+							self.filesWidget.displayData(plot, id)
+			What Categories? 
+				All categories are listed in (user folder)
+				~/sasview/categories.json and are built there
+				by the sas.qtgui.utilities.categoryinstaller.categoryinstaller
+				And all the existing models come from 
+				sas.sascalc.fit.models.ModelManager.cat_model_list()
+					this gives back a listed variant of all models
+					that are existing in the standard library. but it only goes through
+					sasmodels.sasmodels.sasview_model.load_standard_models() (and before it goes through sasview.src.sas.sascalc.fit.models.ModelManagerBase and ModelManagers
+			what action triggers? l116
+			
+
+
+Where does the data come from?
+DataManager manages all the data that is loaded from a certain path and the ones
+from creation at loading time
+DataManager.create_gui_data can receive data from loader and create a data to use for guiframe
+This will depend on Data2D and Data1D objects from PlotterData
+
+	
+
+	

@@ -1,0 +1,21 @@
+stream object without Qdatastream but directly using the object
+
+transfer towards pyside instead of pyqt6
+
+2D plotting
+    Generate mock-ups (done 5/31)
+    Create functional systems based on mock ups
+    3 plotting groups
+       Group 1 - main plot group - Initially show fit with residuals and data as subplots (all with the same color scale)
+           Clicking on one of the subplots swaps it with the primary plot
+       Group 2 - multiple main plots with the same color scale bar
+       Group 3 - multiple main plots with different scale bars
+    Each plot/subplot could be moved/added to any other group and scale bars would automatically update
+Drag-drop plots
+    Drag any plot(s) into a plot subgroup 
+    Visual feedback where the plot(s) would go (e.g. a template box would appear where the plot will go as the plot group is dragged)
+Polydispertiy plots and where they should go
+plan for next week:
+ - continue with d&d (with no datastream, if possible)
+ - start with 2D implementation based on the general mockup
+ - dockable tabs for fitting
