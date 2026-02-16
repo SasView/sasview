@@ -48,7 +48,7 @@ class DummyManager:
         return GuiUtils.Communicate()
 
     def createGuiData(self, data: Data1D) -> QtGui.QStandardItem:
-        item = QtGui.QStandardItem("test")
+        item = QtGui.QStandardItem(data.name)
         item.setData(data, Qt.UserRole)  # store the Data1D on the item
         return item
 
@@ -123,6 +123,8 @@ def real_data() -> Data1D:
     ],
     # fmt: on
 )
+    data.name = "Real Data"
+    data.filename = "real_data.txt"
     return data
 
 
@@ -159,3 +161,15 @@ def window_class(qapp, mocker, small_data: Data1D, request: SubRequest) -> Itera
 
     w.close()
     qapp.processEvents()
+
+
+@pytest.fixture
+def window_with_small_data(window_class, small_data: Data1D, dummy_manager):
+    """Creates an InvariantWindow with data loaded."""
+    data_item = dummy_manager.createGuiData(small_data)
+    window_class.setData([data_item])
+    yield window_class
+
+    # Clean up
+    window_class.close()
+

@@ -1033,12 +1033,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
         if messages:
             messages.append("Values have been adjusted to the nearest valid value.")
-            dialog = QtWidgets.QMessageBox(self)
-            dialog.setWindowTitle("Invalid Extrapolation Values")
-            dialog.setIcon(QtWidgets.QMessageBox.Warning)
-            dialog.setText("\n".join(messages))
-            dialog.setStandardButtons(QtWidgets.QMessageBox.Ok)
-            dialog.exec_()
+            QtWidgets.QMessageBox.warning(self, "Invalid Extrapolation Values", "\n".join(messages))
 
     def apply_parameters_from_ui(self):
         """Sets extrapolation parameters from the text boxes into the model and slider."""
@@ -1094,11 +1089,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                 self.txtVolFrac1.setStyleSheet(BG_RED)
                 self.enable_calculation(False, "Calculate (Invalid volume fraction)")
                 msg = "Volume fractions must be valid numbers."
-                dialog = QtWidgets.QMessageBox(self, text=msg)
-                dialog.setWindowTitle("Invalid Volume Fraction")
-                dialog.setIcon(QtWidgets.QMessageBox.Warning)
-                dialog.setStandardButtons(QtWidgets.QMessageBox.Ok)
-                dialog.exec_()
+                QtWidgets.QMessageBox.warning(self, "Invalid Volume Fraction", msg)
                 return
             if 0 < vf1 < 1:
                 self.txtVolFrac1.setStyleSheet(BG_DEFAULT)
@@ -1107,11 +1098,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                 self.txtVolFrac1.setStyleSheet(BG_RED)
                 self.enable_calculation(False, "Calculate (Invalid volume fraction)")
                 msg = "Volume fraction must be between 0 and 1."
-                dialog = QtWidgets.QMessageBox(self, text=msg)
-                dialog.setWindowTitle("Invalid Volume Fraction")
-                dialog.setIcon(QtWidgets.QMessageBox.Warning)
-                dialog.setStandardButtons(QtWidgets.QMessageBox.Ok)
-                dialog.exec_()
+                QtWidgets.QMessageBox.warning(self, "Invalid Volume Fraction", msg)
 
     def updateFromGui(self) -> None:
         """Update model when new user inputs."""
