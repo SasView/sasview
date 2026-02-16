@@ -19,115 +19,90 @@ from sas.system.version import __version__ as SASVIEW_VERSION
 logger = logging.getLogger(__name__)
 
 
-# TODO: Integrate with other reports
 class ReportPageLogic:
-    """
-    Logic for the Report Page functionality. Refactored from FittingWidget.
-    """
+    """Logic for the Report Page functionality. Refactored from FittingWidget."""
     def __init__(self, parent=None, kernel_module=None, data=None, index=None, params=None):
-
         self.parent = parent
         self.kernel_module = kernel_module
         self.data = data
         self._index = index
         self.params = params
 
-
-    def reportList(self) -> ReportData: # TODO: Rename to reference report object
-        """
-        Return the HTML version of the full report
-        """
+    def reportList(self) -> ReportData:
+        """Return the HTML version of the full report"""
         if self.kernel_module is None:
-
             text = "No model defined"
-
             return ReportData(
-                html=HEADER % text,
+                html=HEADER.format(text),
                 text=text)
 
         # Get plot image from plotpanel
         images = self.getImages()
-
-        imagesHTML = ""
-        if images is not None:
-            imagesHTML = self.buildPlotsForReport(images)
-
+        images_html = self.buildPlotsForReport(images) if images is not None and any(images) else ""
         report_header = self.reportHeader()
-
         report_parameters = self.reportParams()
+        results_table = self.getResultsTable()
+        batch_table = self.getBatchResults()
 
-        report_html = report_header + report_parameters + imagesHTML
-
+        report_html = report_header + report_parameters + images_html + results_table + batch_table
         report_txt = html2text.html2text(GuiUtils.replaceHTMLwithASCII(report_html))
 
-        # report_list = ReportData(html=report_html, text=report_txt, images=images)
-        report_list = ReportData(html=report_html, text=report_txt)
+        return ReportData(html=report_html, text=report_txt)
 
-        return report_list
-
-    def reportHeader(self):
-        """
-        Look at widget state and extract report header info
-        """
-        report = ""
-
+    def reportHeader(self) -> str:
+        """Look at widget state and extract report header info"""
         title = self.data.name
         current_time = datetime.datetime.now().strftime("%I:%M%p, %B %d, %Y")
         filename = self.data.filename
         modelname = self.kernel_module.id
         optimizer = options.FIT_CONFIG.selected_fitter.name
+        smear_format = self.getFitSmearing()
         if hasattr(self.data, 'xmin'):
-            qrange_min = self.data.xmin
-            qrange_max = self.data.xmax
+            data_qrange_min = self.data.xmin
+            data_qrange_max = self.data.xmax
         else:
-            qrange_min = min(self.data.x)
-            qrange_max = max(self.data.x)
-        qrange = f"min = {qrange_min}, max = {qrange_max}"
+            data_qrange_min = min(self.data.x)
+            data_qrange_max = max(self.data.x)
+        data_qrange = f"min = {data_qrange_min}, max = {data_qrange_max}"
+        fit_qrange = f"min = {self.parent.q_range_min}, max = {self.parent.q_range_max}"
 
-        title = title + " [" + current_time + "]"
-        title_name = HEADER % title
-        report = title_name
-        report += CENTRE % f"File name: {filename}\n"
-        report += CENTRE % f"SasView version: {SASVIEW_VERSION}\n"
-        report += CENTRE % f"SasModels version: {SASMODELS_VERSION}\n"
-        report += CENTRE % f"Fit optimizer used: {optimizer}\n"
-        report += CENTRE % f"Model name: {modelname}\n"
-        report += CENTRE % f"Q Range: {qrange}\n"
+        report = HEADER.format(title + " [" + current_time + "]")
+        report += CENTRE.format(f"File name: {filename}")
+        report += CENTRE.format(f"SasView version: {SASVIEW_VERSION}")
+        report += CENTRE.format(f"SasModels version: {SASMODELS_VERSION}")
+        report += CENTRE.format(f"Fit optimizer used: {optimizer}")
+        report += CENTRE.format(f"Model name: {modelname}")
+        report += CENTRE.format(f"Q Range of the Data: {data_qrange}")
+        report += CENTRE.format(f"Q Range of the Fit: {fit_qrange}")
+        report += smear_format
         chi2_repr = GuiUtils.formatNumber(self.parent.chi2, high=True)
-        report += CENTRE % f"Chi2/Npts: {chi2_repr}\n"
+        report += CENTRE.format(f"Chi2/Npts: {chi2_repr}")
 
         return report
 
-    def buildPlotsForReport(self, images): # TODO: Unify with other report image to html conversion
+    def buildPlotsForReport(self, images: list[PlotterBase]) -> str:
         """ Convert Matplotlib figure 'fig' into a <img> tag for HTML use using base64 encoding. """
-        html = FEET_1 % self.data.name
+        html = FEET_1.format(self.data.name)
 
         for fig in images:
             canvas = FigureCanvas(fig)
             png_output = BytesIO()
             try:
-                if sys.platform == "darwin":
-                    fig.savefig(png_output, format="png", dpi=150)
-                else:
-                    fig.savefig(png_output, format="png", dpi=75)
+                dpi = 150 if sys.platform == "darwin" else 75
+                fig.savefig(png_output, format="png", dpi=dpi)
             except PermissionError as ex:
-                logger.error("Creating of the report failed: %s"%str(ex))
-                return
+                logger.error(f"Creating of the report failed: {str(ex)}")
+                return ''
             data64 = base64.b64encode(png_output.getvalue())
             data_to_print = urllib.parse.quote(data64)
-            feet = FEET_2
-            if sys.platform == "darwin":  # Mac
-                feet = FEET_3
-            html += feet.format(data_to_print)
-            html += ELINE
+            feet = FEET_3 if sys.platform == "darwin" else FEET_2
+            html += feet.format(data_to_print) + ELINE
             png_output.close()
             del canvas
         return html
 
-    def reportParams(self):
-        """
-        Look at widget state and extract parameters
-        """
+    def reportParams(self) -> str:
+        """Look at widget state and extract parameters"""
         if self.params is None:
             return ""
 
@@ -139,8 +114,7 @@ class ReportPageLogic:
                 par_dispersion_type = ""
                 if 'Distribution of' in par_name:
                     par_name_original = par_name.replace('Distribution of ', '')
-                    par_dispersion_type = self.kernel_module.dispersion[
-                        par_name_original.strip()]['type']
+                    par_dispersion_type = self.kernel_module.dispersion[par_name_original.strip()]['type']
                 par_fixed = not value[0]
                 par_value = value[2]
                 par_unit = value[7]
@@ -157,14 +131,71 @@ class ReportPageLogic:
                 # corrupted model. Complain and skip the line
                 logger.error("Error in parsing parameters: "+str(ex))
                 continue
-            report += CENTRE % param + "\n"
+            report += CENTRE.format(param)
 
         return report
 
+    def getFitSmearing(self) -> str:
+        """Format the smearing information and return """
+        smearing, accuracy, smearing_min, smearing_max = self.parent.smearing_widget.state()
+        smear_format = ""
+        if self.parent.smearing_widget.smear_type and smearing != "None":
+            smear_format = f"Type = {self.parent.smearing_widget.smear_type} {smearing}"
+            if accuracy:
+                smear_format += f"Accuracy = {accuracy}"
+            if self.parent.smearing_widget.smear_type == "Slit":
+                smear_format += f", dQl = {smearing_max}, dqw = {smearing_min}"
+            elif self.parent.smearing_widget.smear_type == "Pinhole":
+                # The boxes are labelled backwards in the smearing widget.
+                smear_format += f", dQ/Q_max = {smearing_min}, dQ/Q_min = {smearing_max}"
+            smear_format = CENTRE.format(f"Smearing Information: {smear_format}")
+        return smear_format
+
+    def getResultsPlots(self) -> list[FigureCanvas]:
+        """Gather the plots from the bumps results panel."""
+        plots = []
+        if hasattr(self.parent, 'parent') and hasattr(self.parent.parent, 'results_panel'):
+            results_panel = self.parent.parent.results_panel
+            results_panels = [
+                results_panel.convergenceView,
+                results_panel.correlationView,
+                results_panel.uncertaintyView,
+                results_panel.traceView
+            ]
+            for panel in results_panels:
+                # Only include the plot if it has recent results
+                if panel.state is not None:
+                    plots.append(panel.figure)
+
+        return plots
+
+    def getResultsTable(self) -> str:
+        """Format the bumps results correlation table into html."""
+        results_table = ''
+        if hasattr(self.parent, 'parent') and hasattr(self.parent.parent, 'results_panel'):
+            results_panel = self.parent.parent.results_panel
+            if results_panel.correlationTable.state:
+                headers, rows = results_panel.correlationTable._parse_stats()
+                results_table += '<table>\n<tr><th>' + '</th><th>'.join(headers) + '</th></tr>'
+                for row in rows:
+                    results_table += '<tr><td>' + '</td><td>'.join(row) + '</td></tr>'
+                results_table += '</table>'
+        return results_table
+
+    def getBatchResults(self) -> str:
+        """Format the bumps results correlation table into html."""
+        batch_results_table = ''
+        if hasattr(self.parent, 'is_batch_fitting') and self.parent.is_batch_fitting:
+            batch_results_table += CENTRE.format("Batch Results") + "<table>"
+            batch_panel = self.parent.parent.grid_window
+            if batch_table := batch_panel.dataFromTable(batch_panel.currentTable()):
+                for row in batch_table:
+                    batch_results_table += '<tr><td>' + '</td><td>'.join(row) + '</td></tr>'
+                batch_results_table += '</table>'
+        return batch_results_table
+
     def getImages(self) -> list[PlotterBase]:
-        """
-        Create MPL figures for the current fit
-        """
+        """Create MPL figures for the current fit"""
         graphs = []
         modelname = self.kernel_module.name
         if not modelname or self._index is None:
@@ -184,43 +215,33 @@ class ReportPageLogic:
             plotter = PlotHelper.plotById(name)
             graphs.append(plotter.figure)
 
+        graphs.extend(self.getResultsPlots())
+
         return graphs
 
 
 # Simple html report template
-# TODO Remove microsoft based stuff - probably implicit in the refactoring to come
 HEADER = "<html>\n"
 HEADER += "<head>\n"
-HEADER += "<meta http-equiv=Content-Type content='text/html; "
-HEADER += "charset=utf-8'> \n"
-HEADER += "<meta name=Generator >\n"
+HEADER += "<meta http-equiv=Content-Type content='text/html; charset=utf-8'> \n"
 HEADER += "</head>\n"
 HEADER += "<body lang=EN-US>\n"
-HEADER += "<div class=WordSection1>\n"
-HEADER += "<p class=MsoNormal><b><span ><center><font size='4' >"
-HEADER += "%s</font></center></span></center></b></p>"
-HEADER += "<p class=MsoNormal>&nbsp;</p>"
-PARA = "<p class=MsoNormal><font size='4' > %s \n"
-PARA += "</font></p>"
-CENTRE = "<p class=MsoNormal><center><font size='4' > %s \n"
-CENTRE += "</font></center></p>"
+HEADER += "<div>\n"
+HEADER += "<p><b><span><center> {} </center></span></center></b></p>"
+HEADER += "<p>&nbsp;</p>"
+PARA = "<p> {} \n</p>"
+CENTRE = "<p><center>{}</center></p>\n"
 FEET_1 = \
 """
-<p class=MsoNormal>&nbsp;</p>
+<p>&nbsp;</p>
 <br>
-<p class=MsoNormal><b><span ><center> <font size='4' > Graph
-</font></span></center></b></p>
-<p class=MsoNormal>&nbsp;</p>
+<p><b><span><center>Graph</span></center></b></p>
+<p>&nbsp;</p>
 <center>
-<br><font size='4' >Model Computation</font>
-<br><font size='4' >Data: "%s"</font><br>
+<br>Model Computation
+<br>Data: "{}"<br>
 """
-FEET_2 = \
-'''<img src="data:image/png;base64,{}"></img>
-'''
-FEET_3 = \
-'''<img width="540" src="data:image/png;base64,{}"></img>
-'''
-ELINE = """<p class=MsoNormal>&nbsp;</p>
-"""
+FEET_2 = '<img src="data:image/png;base64,{}"></img>\n'
+FEET_3 = '<img width="540" src="data:image/png;base64,{}"></img>\n'
+ELINE = "<p>&nbsp;</p>\n"
 
