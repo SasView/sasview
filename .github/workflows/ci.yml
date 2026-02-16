@@ -23,7 +23,6 @@ on:
         type: string
   pull_request:
   push:
-    branches: [main]
 
 defaults:
   run:
@@ -47,6 +46,11 @@ env:
   INSTALLER_OLD_RUNID: 3204825457
   # The test-installer job can run with the pyinstaller debug bundle
   INSTALLER_USE_DEBUG: false
+
+# Stop existing workflows for branches and pull requests with the same ref
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
 
@@ -113,11 +117,6 @@ jobs:
     #if: false    # uncomment to prevent the rest of the workflow running
 
     runs-on: ubuntu-latest
-
-    # Stop existing workflows for matching branches and pull requests
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-      cancel-in-progress: true
 
     outputs:
       test-matrix-json: ${{ steps.set-matrix.outputs.test_matrix }}
