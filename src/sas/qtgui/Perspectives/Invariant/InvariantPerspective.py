@@ -1038,12 +1038,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
         if messages:
             messages.append("Values have been adjusted to the nearest valid value.")
-            dialog = QtWidgets.QMessageBox(self)
-            dialog.setWindowTitle("Invalid Extrapolation Values")
-            dialog.setIcon(QtWidgets.QMessageBox.Warning)
-            dialog.setText("\n".join(messages))
-            dialog.setStandardButtons(QtWidgets.QMessageBox.Ok)
-            dialog.exec_()
+            QtWidgets.QMessageBox.warning(self, "Invalid Extrapolation Values", "\n".join(messages))
 
     def apply_parameters_from_ui(self):
         """Sets extrapolation parameters from the text boxes into the model and slider."""
@@ -1066,30 +1061,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         # re-validate to update any UI flags
         self.check_extrapolation_values()
 
-    def stateChanged(self) -> None:
-        """Catch modifications from low- and high-Q extrapolation check boxes"""
-        sender: QtWidgets.QWidget = self.sender()
-        itemf: QtGui.QStandardItem = QtGui.QStandardItem(str(sender.isChecked()).lower())
-        if sender.text() == "Enable Low-Q extrapolation":
-            self.model.setItem(WIDGETS.W_ENABLE_LOWQ, itemf)
-
-        if sender.text() == "Enable High-Q extrapolation":
-            self.model.setItem(WIDGETS.W_ENABLE_HIGHQ, itemf)
-
-    def checkQExtrapolatedData(self) -> None:
-        """
-        Match status of low or high-Q extrapolated data checkbox in
-        DataExplorer with low or high-Q extrapolation checkbox in invariant
-        panel.
-        """
-        # name to search in DataExplorer
-        if "Low" in str(self.sender().text()):
-            name: str = "Low-Q extrapolation"
-        if "High" in str(self.sender().text()):
-            name: str = "High-Q extrapolation"
-
-        GuiUtils.updateModelItemStatus(self._manager.filesWidget.model, self._path, name, self.sender().checkState())
-
     def checkVolFrac(self) -> None:
         """Check if volfrac1 is strictly between 0 and 1."""
         if self.txtVolFrac1.text().strip() != "":
@@ -1099,11 +1070,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                 self.txtVolFrac1.setStyleSheet(BG_ERROR)
                 self.cmdCalculate.setEnabled(False)
                 msg = "Volume fractions must be valid numbers."
-                dialog = QtWidgets.QMessageBox(self, text=msg)
-                dialog.setWindowTitle("Invalid Volume Fraction")
-                dialog.setIcon(QtWidgets.QMessageBox.Warning)
-                dialog.setStandardButtons(QtWidgets.QMessageBox.Ok)
-                dialog.exec_()
+                QtWidgets.QMessageBox.warning(self, "Invalid Volume Fraction", msg)
                 return
             if 0 < vf1 < 1:
                 self.txtVolFrac1.setStyleSheet(BG_DEFAULT)
@@ -1112,11 +1079,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                 self.txtVolFrac1.setStyleSheet(BG_ERROR)
                 self.cmdCalculate.setEnabled(False)
                 msg = "Volume fraction must be between 0 and 1."
-                dialog = QtWidgets.QMessageBox(self, text=msg)
-                dialog.setWindowTitle("Invalid Volume Fraction")
-                dialog.setIcon(QtWidgets.QMessageBox.Warning)
-                dialog.setStandardButtons(QtWidgets.QMessageBox.Ok)
-                dialog.exec_()
+                QtWidgets.QMessageBox.warning(self, "Invalid Volume Fraction", msg)
 
     def updateFromGui(self) -> None:
         """Update model when new user inputs."""
