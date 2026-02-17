@@ -145,11 +145,25 @@ def qapp() -> Iterator[QApplication]:
 
 
 @pytest.fixture
-def window_class(qapp, mocker, small_data: Data1D, request: SubRequest) -> Iterator[InvariantWindow]:
+def window_class(qapp, mocker, request: SubRequest) -> Iterator[InvariantWindow]:
     """Creates an InvariantWindow; attaches the window to the test class as self.window."""
     mgr = DummyManager()
     w = InvariantWindow(mgr)
-    mocker.patch.object(GuiUtils, "dataFromItem", return_value=small_data)
+
+    param = getattr(request, "param", None)
+    data_obj = None
+    if param is not None:
+        if isinstance(param, str):
+            data_obj = request.getfixturevalue(param)
+        elif isinstance(param, Data1D):
+            data_obj = param
+        else:
+            raise ValueError("Invalid parameter type")
+
+    if data_obj is not None:
+        mocker.patch.object(GuiUtils, "dataFromItem", return_value=data_obj)
+        data_item = mgr.createGuiData(data_obj)
+        w.setData([data_item])
 
     # attach to the test class so methods can use self.window
     if request.cls is not None:
@@ -173,3 +187,13 @@ def window_with_small_data(window_class, small_data: Data1D, dummy_manager):
     # Clean up
     window_class.close()
 
+
+@pytest.fixture
+def window_with_real_data(window_class, real_data: Data1D, dummy_manager):
+    """Creates an InvariantWindow with data loaded."""
+    data_item = dummy_manager.createGuiData(real_data)
+    window_class.setData([data_item])
+    yield window_class
+
+    # Clean up
+    window_class.close()
