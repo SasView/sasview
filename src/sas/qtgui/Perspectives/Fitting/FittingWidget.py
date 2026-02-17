@@ -186,6 +186,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 self._logic.append(logic)
             # Option widget logic was destroyed - reestablish
             self.options_widget.logic = self._logic[0]
+            # Ensure auxiliary widgets point at the new logic instance
+            self.polydispersity_widget.logic = self._logic[0]
+            self.magnetism_widget.logic = self._logic[0]
             # update the ordering tab
             self.order_widget.updateData(self.all_data)
 
