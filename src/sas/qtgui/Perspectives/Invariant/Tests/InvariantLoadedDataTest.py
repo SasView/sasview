@@ -14,11 +14,12 @@ BG_DEFAULT = ""
 BG_ERROR   = "background-color: rgb(244, 170, 164);"
 
 
-@pytest.mark.usefixtures("window_with_small_data")
+@pytest.mark.parametrize("window_class", ["small_data"], indirect=True)
+@pytest.mark.usefixtures("window_class")
 class TestInvariantWithData:
     """Test the Invariant perspective behavior when data is loaded."""
 
-    def test_data_loading(self, small_data):
+    def test_data_loading(self, small_data: Data1D):
         """Test that data can be loaded into the perspective."""
         assert self.window._data is not None, "Data not loaded."
         assert self.window._data == small_data, "Data is not the same as loaded."
@@ -103,7 +104,8 @@ class TestInvariantWithData:
         assert not self.window.txtPorodEnd_ex.text() == ""
 
 
-@pytest.mark.usefixtures("window_with_real_data")
+@pytest.mark.parametrize("window_class", ["real_data"], indirect=True)
+@pytest.mark.usefixtures("window_class")
 class TestInvariantCalculationPrerequisites:
     """Test the conditions required for calculation to be enabled."""
 
