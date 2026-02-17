@@ -22,6 +22,7 @@ on:
         required: false
         type: string
   pull_request:
+    types: [opened, reopened]
   push:
 
 defaults:
@@ -46,11 +47,6 @@ env:
   INSTALLER_OLD_RUNID: 3204825457
   # The test-installer job can run with the pyinstaller debug bundle
   INSTALLER_USE_DEBUG: false
-
-# Stop existing workflows for branches and pull requests with the same branch name
-concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
-  cancel-in-progress: true
 
 jobs:
 
