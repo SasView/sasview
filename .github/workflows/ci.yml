@@ -49,6 +49,9 @@ env:
 
 jobs:
 
+  # This job filters out runs that are triggered on pull request from branches
+  # in the base repository, since the CI will also run on the push event.
+  # For pull requests from forks, the CI should run to ensure changes are tested.
   filter_duplicated_jobs:
     runs-on: ubuntu-latest
     outputs:
