@@ -205,6 +205,7 @@ class TestInvariantDefaults:
         line_edit = self.window.findChild(QtWidgets.QLineEdit, gui_widget)
         assert line_edit is not None, f"Line edit not found: {gui_widget}"
 
+        line_edit.setText("5.0")
         line_edit.textEdited.emit("5.0")
         QtWidgets.QApplication.processEvents()
 
