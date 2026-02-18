@@ -49,7 +49,16 @@ env:
 
 jobs:
 
+  filter_duplicated_jobs:
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork) }}
+    steps:
+      - run: echo "Filter evaluated"
+
   ruff:
+    needs: [filter_duplicated_jobs]
+    if: needs.filter_duplicated_jobs.outputs.should_run == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -112,11 +121,6 @@ jobs:
     #if: false    # uncomment to prevent the rest of the workflow running
 
     runs-on: ubuntu-latest
-
-    # Stop existing workflows for matching branches and pull requests
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-      cancel-in-progress: true
 
     outputs:
       test-matrix-json: ${{ steps.set-matrix.outputs.test_matrix }}
