@@ -27,9 +27,7 @@ class BatchOutputPanelTest:
         class dummy_manager:
             _parent = QtWidgets.QWidget()
             def communicator(self):
-                return GuiUtils.Communicate()
-            def communicate(self):
-                return GuiUtils.Communicate()
+                return GuiUtils.communicator
         w = BatchOutputPanel(parent=dummy_manager(), output_data=self.output_for_test())
         test_table = {"p1":[1,2,3],
                       "p2":[4,5,None],
@@ -103,8 +101,8 @@ Chi2,Data,scale,background,radius_equat_core,x_core,thick_shell,x_polar_shell,sl
     def notestPlotFits(self, widget):
         '''Test plot generation from selected table rows'''
         # mock tested calls
-        #GuiUtils.Communicate.plot
-        spy_plot_signal = QtSignalSpy(widget.communicate, widget.communicate().plotFromNameSignal)
+        #GuiUtils.communicator.plot
+        spy_plot_signal = QtSignalSpy(widget.communicator, widget.communicator.plotFromNameSignal)
         # Select row #1
         widget.tblParams.selectRow(0)
         QtWidgets.QApplication.processEvents()

@@ -183,7 +183,7 @@ class Communicate(QtCore.QObject):
     # Notify about a data name to be frozen and send to fitting perspective
     freezeDataNameSignal = QtCore.Signal(str)
 
-communicate = Communicate()
+communicator = Communicate()
 
 
 def updateModelItemWithPlot(item, update_data, name="", checkbox_state=None):

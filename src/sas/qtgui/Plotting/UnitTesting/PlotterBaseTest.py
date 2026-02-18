@@ -15,7 +15,7 @@ import sas.qtgui.Plotting.PlotterBase as PlotterBase
 from sas.qtgui.MainWindow.UnitTesting.DataExplorerTest import MyPerspective
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
 from sas.qtgui.Plotting.WindowTitle import WindowTitle
-from sas.qtgui.Utilities.GuiUtils import Communicate
+from sas.qtgui.Utilities.GuiUtils import communicator
 
 
 class PlotterBaseTest:
@@ -26,7 +26,7 @@ class PlotterBaseTest:
         '''Create/Destroy the AboutBox'''
         class dummy_manager:
             def communicator(self):
-                return Communicate()
+                return communicator
             def perspective(self):
                 return MyPerspective()
 
