@@ -394,7 +394,9 @@ class PageState:
         """
         p = dict()
         for fittable, name, value, _, uncert, lower, upper, units in params:
-            if not value:
+            # Use explicit None/empty check instead of truthiness to allow 0 values
+            # Fixes issue #3053 where theta/phi stuck at zero in 2D theory calculations
+            if value is None or value == '':
                 value = np.nan
             if not uncert or uncert[1] == '' or uncert[1] == 'None':
                 uncert[0] = False
