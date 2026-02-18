@@ -100,11 +100,14 @@ class NewDataExplorer(QWidget):
 
     @Slot()
     def add_perspective(self):
-        # This is here because, when we reset the index to 0, this evert gets
+        # This is here because, when we reset the index to 0, this event gets
         # triggered again which we don't want.
         if self.add_perspective_button.currentIndex() == 0:
             return
         to_add = self.add_perspective_button.currentText()
+        # TODO: temporary fix for errors until perspectives are re-enabled
+        if not perspectives[to_add]:
+            return
         # TODO: Placeholder
         new_perspective_dialog = perspectives[to_add](self._data_manager)
         self._data_manager.add_data(new_perspective_dialog)
