@@ -17,15 +17,13 @@ class DataExplorerMenuAction:
 
 
 class DataExplorerMenu(QMenu):
-    def __init__(self, parent: QWidget, data_manager: NewDataManager, send_to: bool):
+    def __init__(self, parent: QWidget, data_manager: NewDataManager, send_to: bool, view_data: bool):
         super().__init__(parent)
 
-        remove_data = QAction("Remove", parent)
-        # remove_data.setData('remove')
-        remove_data.setData(DataExplorerMenuAction("remove"))
+        remove_action = QAction("Remove", parent)
+        remove_action.setData(DataExplorerMenuAction("remove"))
+        self.addAction(remove_action)
 
-        view_data = QAction("View Data", parent)
-        view_data.setData(DataExplorerMenuAction("view_data"))
         # TODO: There will be loads more
 
         if send_to:
@@ -35,5 +33,8 @@ class DataExplorerMenu(QMenu):
                 new_action = QAction(perspective.formatName, parent)
                 new_action.setData(DataExplorerMenuAction("send_to", perspective))
                 send_to_menu.addAction(new_action)
-        self.addAction(remove_data)
-        self.addAction(view_data)
+
+        if view_data:
+            view_data_action = QAction("View Data", parent)
+            view_data_action.setData(DataExplorerMenuAction("view_data"))
+            self.addAction(view_data_action)
