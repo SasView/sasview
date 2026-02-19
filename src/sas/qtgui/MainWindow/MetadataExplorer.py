@@ -29,7 +29,7 @@ def convert_raw_to_dict(to_convert: MetaNode) -> dict:
 
 
 def metadata_as_dict(to_convert: object):
-    converted = to_convert.__dict__
+    converted = to_convert.__dict__.copy()
     converted["raw"] = convert_raw_to_dict(converted["raw"])
     return converted
 
@@ -46,7 +46,7 @@ class MetadataExplorer(QDialog):
         self.buildTree()
 
         self.closeButton = QPushButton("Close")
-        self.closeButton.clicked.connect(self.onClose)
+        self.closeButton.clicked.connect(self.closeEvent)
 
         self.layout = QVBoxLayout(self)
         self.layout.addWidget(self.filenameLabel)
@@ -54,6 +54,9 @@ class MetadataExplorer(QDialog):
         self.layout.addWidget(self.closeButton)
 
         self.setWindowTitle("Metadata Explorer")
+
+    def closeEvent(self, event):
+        self.close()
 
     def buildTree(
         self,
@@ -90,9 +93,6 @@ class MetadataExplorer(QDialog):
                     # TODO: Implement. Just show the contents for now.
                     node_item = QTreeWidgetItem([key, str(value.contents)])
                     table_root.addChild(node_item)
-
-    def onClose(self):
-        self.close()
 
 
 if __name__ == "__main__":
