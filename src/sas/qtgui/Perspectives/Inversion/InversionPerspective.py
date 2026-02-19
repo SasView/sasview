@@ -30,7 +30,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
     ext = "pr"
 
     @property
-    def title(self):
+    def title(self) -> str:
         return "P(r) Inversion"
 
     def __init__(self, parent=None, data=None):
@@ -39,11 +39,10 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         self.setWindowTitle("P(r) Inversion Perspective")
 
         # Max index for adding new, non-clashing tab names
-        self.maxIndex = 1
+        self.maxIndex: int = 1
         # Needed for Batch inversion
         self.parent = parent
         self.communicate = self.parent.communicate
-        # self.communicate = self.parent.communicator()
         self.communicate.dataDeletedSignal.connect(self.removeData)
         self.tabCloseRequested.connect(self.tabCloses)
 
@@ -52,7 +51,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         self.setTabsClosable(True)
 
         # The window should not close
-        self._allowClose = False
+        self._allowClose: bool = False
 
         # Visible data items
         # current QStandardItem showing on the panel
@@ -60,17 +59,17 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
 
         # Mapping for all data items
         # Dictionary mapping data to all parameters
-        self._dataList = {}
+        self._dataList: dict = {}
 
-        self.dataDeleted = False
+        self.dataDeleted: bool = False
 
         self.model = QtGui.QStandardItemModel(self)
         self.mapper = QtWidgets.QDataWidgetMapper(self)
 
         # Batch parameters
-        self.is_batch = False
+        self.is_batch: bool = False
         self.batchResultsWindow = None
-        self.batchResults = {}
+        self.batchResults: dict = {}
 
         self.logic = InversionLogic()
 
@@ -86,7 +85,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
     ######################################################################
     # Batch Mode and Tab Functions
 
-    def resetTab(self, index):
+    def resetTab(self, index: int) -> None:
         """
         Adds a new tab and removes the last tab
         as a way of resetting the tabs
@@ -99,7 +98,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         # Remove the previous last tab
         self.tabCloses(index)
 
-    def tabCloses(self, index):
+    def tabCloses(self, index: int) -> None:
         """
         Update local bookkeeping on tab close
         """
@@ -108,7 +107,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
             self.addData(None)
         self.closeTabByIndex(index)
 
-    def closeTabByIndex(self, index):
+    def closeTabByIndex(self, index: int) -> None:
         """
         Close/delete a tab with the given index.
         No checks on validity of the index.
@@ -121,7 +120,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
             # The tab might have already been deleted previously
             pass
 
-    def closeTabByName(self, tab_name):
+    def closeTabByName(self, tab_name: str) -> None:
         """
         Given name of the tab - close it
         """
@@ -132,7 +131,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
 
     ######################################################################
 
-    def serializeAll(self):
+    def serializeAll(self) -> dict:
         """
         Serialize the inversion state so data can be saved
         serialize all active inversion pages and return
@@ -148,18 +147,16 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
                 _ = QtWidgets.QMessageBox.warning(
                     self,
                     "Batch Serialisation",
-                    """Saving of projects with batch inversion
-tabs is currently not supported. Support will be added in a later version of SasView but please note
-that in the meantime, these tabs will be excluded from the saved project.""",
+                    "Saving of projects with batch inversion tabs is currently not supported.Support will be added in a later version of SasView but please note that in the meantime, these tabs will be excluded from the saved project.",
                 )
             state.update(tab_state)
         return state
 
-    def serializeCurrentPage(self):
+    def serializeCurrentPage(self) -> tuple[dict, bool]:
         # serialize current (active) page
         return self.getSerializePage(self.currentIndex())
 
-    def getSerializePage(self, index=None) -> tuple[dict, bool]:
+    def getSerializePage(self, index: int | None = None) -> tuple[dict, bool]:
         """
         Serialize and return a dictionary of {tab_id: inversion-state}
         Return original dictionary if no data
@@ -182,48 +179,48 @@ that in the meantime, these tabs will be excluded from the saved project.""",
     # Base Perspective Class Definitions
 
     @property
-    def supports_reports(self):
+    def supports_reports(self) -> bool:
         return True
 
     @property
-    def supports_fitting(self):
+    def supports_fitting(self) -> bool:
         return False
 
     def communicator(self):
         return self.filesWidget.communicate
 
-    def allowBatch(self):
+    def allowBatch(self) -> bool:
         """
         Tell the caller we accept batch mode
         """
         return True
 
-    def allowSwap(self):
+    def allowSwap(self) -> bool:
         """
         Tell the caller we accept swapping data
         """
         return True
 
-    def setClosable(self, value=True):
+    def setClosable(self, value: bool = True) -> None:
         """
         Allow outsiders close this widget
         """
         assert isinstance(value, bool)
         self._allowClose = value
 
-    def isClosable(self):
+    def isClosable(self) -> bool:
         """
         Allow outsiders close this widget
         """
         return self._allowClose
 
-    def isSerializable(self):
+    def isSerializable(self) -> bool:
         """
         Tell the caller that this perspective writes its state
         """
         return True
 
-    def closeEvent(self, event):
+    def closeEvent(self, event: QtCore.QEvent) -> None:
         """
         Overwrite QDialog close method to allow for custom widget close
         """
@@ -242,17 +239,17 @@ that in the meantime, these tabs will be excluded from the saved project.""",
             # Maybe we should just minimize
             self.setWindowState(QtCore.Qt.WindowMinimized)
 
-    def closeDMax(self):
+    def closeDMax(self) -> None:
         if self.currentTab.dmaxWindow is not None:
             self.currentTab.dmaxWindow.close()
 
-    def closeBatchResults(self):
+    def closeBatchResults(self) -> None:
         if self.batchResultsWindow is not None:
             self.batchResultsWindow.close()
 
     ######################################################################
 
-    def getTabName(self, is_batch=False):
+    def getTabName(self, is_batch: bool = False) -> str:
         """
         Get the new tab name, based on the number of fitting tabs so far
         """
@@ -263,7 +260,7 @@ that in the meantime, these tabs will be excluded from the saved project.""",
     ######################################################################
     # GUI Interaction Events
 
-    def help(self):
+    def help(self) -> None:
         """
         Open the P(r) Inversion help browser
         """
@@ -277,7 +274,9 @@ that in the meantime, these tabs will be excluded from the saved project.""",
     ######################################################################
     # Response Actions
 
-    def setData(self, data_item=None, is_batch=False, tab_index=None):
+    def setData(
+        self, data_item: list[QtGui.QStandardItem] | None = None, is_batch: bool = False, tab_index: int | None = None
+    ) -> None:
         """
         Assign new data set(s) to the P(r) perspective
         Obtain a QStandardItem object and parse it to get Data1D/2D
@@ -325,7 +324,7 @@ that in the meantime, these tabs will be excluded from the saved project.""",
             else:
                 self.addData(data=data, is_batch=is_batch, tab_index=tab_index)
 
-    def swapData(self, data=None, tab_index=None):
+    def swapData(self, data: QtGui.QStandardItem | None = None, tab_index: int | None = None) -> None:
         """
         Replace the data from the current tab
         """
@@ -351,7 +350,7 @@ that in the meantime, these tabs will be excluded from the saved project.""",
         """
         return self.currentWidget()
 
-    def currentTabDataId(self):
+    def currentTabDataId(self) -> list:
         """
         Returns the data ID of the current tab
         """
@@ -364,7 +363,7 @@ that in the meantime, these tabs will be excluded from the saved project.""",
 
         return tab_id
 
-    def removeData(self, data_list: list[QtGui.QStandardItem]):
+    def removeData(self, data_list: list[QtGui.QStandardItem]) -> None:
         # We need this list because we can't modify the tabs list while looping over it.
         tabs_to_remove: list[InversionWidget] = []
         for datum in data_list:
@@ -374,7 +373,9 @@ that in the meantime, these tabs will be excluded from the saved project.""",
         for to_remove in tabs_to_remove:
             self.closeTabByName(to_remove.tab_name)
 
-    def addData(self, data=None, is_batch=False, tab_index=None):
+    def addData(
+        self, data: QtGui.QStandardItem | None = None, is_batch: bool = False, tab_index: int | None = None
+    ) -> None:
         """
         Add a new tab for passed data
         """
@@ -404,12 +405,12 @@ that in the meantime, these tabs will be excluded from the saved project.""",
         self.maxIndex = max([tab.tab_id for tab in self.tabs], default=0) + 1
         self.setCurrentWidget(tab)
 
-    def updateFromParameters(self, params):
+    def updateFromParameters(self, params: dict) -> None:
         inversion_widget = self.currentWidget()
         if isinstance(inversion_widget, InversionWidget):
             inversion_widget.updateFromParameters(params)
 
-    def reset(self):
+    def reset(self) -> None:
         """
         Reset the Inversion perspective to an empty state
         """
