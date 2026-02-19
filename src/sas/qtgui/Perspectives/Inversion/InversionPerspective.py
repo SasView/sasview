@@ -18,13 +18,13 @@ from .InversionLogic import InversionLogic
 
 logger = logging.getLogger(__name__)
 
+
 class InversionWindow(QtWidgets.QTabWidget, Perspective):
     """
     The main window for the P(r) Inversion perspective.
     This is the main window where the tabs for each of the widgets are shown
 
     """
-
 
     name = "Inversion"
     ext = "pr"
@@ -33,9 +33,8 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
     def title(self):
         return "P(r) Inversion"
 
-    def __init__(self, parent=None,data=None):
+    def __init__(self, parent=None, data=None):
         super().__init__()
-
 
         self.setWindowTitle("P(r) Inversion Perspective")
 
@@ -44,7 +43,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         # Needed for Batch inversion
         self.parent = parent
         self.communicate = self.parent.communicate
-        #self.communicate = self.parent.communicator()
+        # self.communicate = self.parent.communicator()
         self.communicate.dataDeletedSignal.connect(self.removeData)
         self.tabCloseRequested.connect(self.tabCloses)
 
@@ -52,15 +51,12 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         self.tabs: list[InversionWidget] = []
         self.setTabsClosable(True)
 
-
         # The window should not close
         self._allowClose = False
 
         # Visible data items
         # current QStandardItem showing on the panel
         self._data = data
-
-
 
         # Mapping for all data items
         # Dictionary mapping data to all parameters
@@ -77,7 +73,6 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         self.batchResults = {}
 
         self.logic = InversionLogic()
-
 
         # The tabs need to be closeable
         self.setTabsClosable(True)
@@ -133,7 +128,8 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         for tab_index in range(len(self.tabs)):
             if self.tabText(tab_index) == tab_name:
                 self.tabCloses(tab_index)
-        pass # debug hook
+        pass  # debug hook
+
     ######################################################################
 
     def serializeAll(self):
@@ -149,9 +145,13 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
             tab_state, warn_batch = self.getSerializePage(index)
             if not batch_warned and warn_batch:
                 batch_warned = True
-                _ = QtWidgets.QMessageBox.warning(self, "Batch Serialisation", """Saving of projects with batch inversion
+                _ = QtWidgets.QMessageBox.warning(
+                    self,
+                    "Batch Serialisation",
+                    """Saving of projects with batch inversion
 tabs is currently not supported. Support will be added in a later version of SasView but please note
-that in the meantime, these tabs will be excluded from the saved project.""")
+that in the meantime, these tabs will be excluded from the saved project.""",
+                )
             state.update(tab_state)
         return state
 
@@ -174,14 +174,12 @@ that in the meantime, these tabs will be excluded from the saved project.""")
             if tab.is_batch:
                 return {}, True
             tab_data = tab.getPage()
-            data_id = tab_data.pop('data_id', '')
-            state[data_id] = {'pr_params': tab_data}
+            data_id = tab_data.pop("data_id", "")
+            state[data_id] = {"pr_params": tab_data}
         return state, False
-
 
     ######################################################################
     # Base Perspective Class Definitions
-
 
     @property
     def supports_reports(self):
@@ -193,7 +191,6 @@ that in the meantime, these tabs will be excluded from the saved project.""")
 
     def communicator(self):
         return self.filesWidget.communicate
-
 
     def allowBatch(self):
         """
@@ -263,12 +260,8 @@ that in the meantime, these tabs will be excluded from the saved project.""")
         page_name = page_name + str(self.maxIndex)
         return page_name
 
-
-
-
     ######################################################################
     # GUI Interaction Events
-
 
     def help(self):
         """
@@ -281,25 +274,16 @@ that in the meantime, these tabs will be excluded from the saved project.""")
         # will just make the page displayed from the top
         self.parent.showHelp(tree_location)
 
-
-
-
-
-
-
     ######################################################################
     # Response Actions
 
     def setData(self, data_item=None, is_batch=False, tab_index=None):
-
         """
         Assign new data set(s) to the P(r) perspective
         Obtain a QStandardItem object and parse it to get Data1D/2D
         Pass it over to the calculator
         """
         assert data_item is not None
-
-
 
         if not isinstance(data_item, list):
             msg = "Incorrect type passed to the P(r) Perspective"
@@ -309,19 +293,17 @@ that in the meantime, these tabs will be excluded from the saved project.""")
             msg = "Incorrect type passed to the P(r) Perspective"
             raise AttributeError(msg)
 
-#        if is_batch:
-#            # Just create a new fit tab. No empty batchFit tabs
-#            self.addData(data_item, is_batch=is_batch)
-#            return
+        #        if is_batch:
+        #            # Just create a new fit tab. No empty batchFit tabs
+        #            self.addData(data_item, is_batch=is_batch)
+        #            return
 
-
-        items = [data_item] if (is_batch and len(data_item)>1) else data_item
+        items = [data_item] if (is_batch and len(data_item) > 1) else data_item
         for data in items:
             logic_data = GuiUtils.dataFromItem(data)
             if logic_data is not None and not isinstance(logic_data, Data1D):
                 msg = "Inversion cannot be computed with 2D data."
                 raise ValueError(msg)
-
 
             # Find the first unassigned tab.
             # If none, open a new tab.
@@ -329,25 +311,21 @@ that in the meantime, these tabs will be excluded from the saved project.""")
             tab_ids = [tab.tab_id for tab in self.tabs]
             if tab_index is not None:
                 if tab_index not in tab_ids:
-                    self.addData(data = data, is_batch=is_batch, tab_index=tab_index)
+                    self.addData(data=data, is_batch=is_batch, tab_index=tab_index)
                 else:
-                    self.setCurrentIndex(tab_index-1)
-                    self.swapData(data = data,tab_index=self.currentIndex())
+                    self.setCurrentIndex(tab_index - 1)
+                    self.swapData(data=data, tab_index=self.currentIndex())
                     return
-            #debug Batch mode, gives none Type has no attribute name
+            # debug Batch mode, gives none Type has no attribute name
             if not is_batch and np.any(available_tabs):
                 first_good_tab = available_tabs.index(True)
                 self.tabs[first_good_tab].data = data
-                self.tabs[first_good_tab].updateTab(data = data, tab_id=first_good_tab)
+                self.tabs[first_good_tab].updateTab(data=data, tab_id=first_good_tab)
 
             else:
-                self.addData(data = data, is_batch=is_batch, tab_index = tab_index)
+                self.addData(data=data, is_batch=is_batch, tab_index=tab_index)
 
-
-
-
-
-    def swapData(self, data = None, tab_index=None):
+    def swapData(self, data=None, tab_index=None):
         """
         Replace the data from the current tab
         """
@@ -364,10 +342,7 @@ that in the meantime, these tabs will be excluded from the saved project.""")
             raise RuntimeError(msg)
 
         self.currentTab.data = data
-        self.currentTab.updateTab(data = data, tab_id= tab_index)
-
-
-
+        self.currentTab.updateTab(data=data, tab_id=tab_index)
 
     @property
     def currentTab(self) -> InversionWidget:
@@ -400,7 +375,6 @@ that in the meantime, these tabs will be excluded from the saved project.""")
             self.closeTabByName(to_remove.tab_name)
 
     def addData(self, data=None, is_batch=False, tab_index=None):
-
         """
         Add a new tab for passed data
         """
@@ -414,13 +388,13 @@ that in the meantime, these tabs will be excluded from the saved project.""")
         # tab = InversionWidget(parent=self.parent, data=data, tab_id=tab_index)
         tab_name = self.getTabName(is_batch=is_batch)
         tab = InversionWidget(self, self.parent, data, tab_index, tab_name)
-        #ObjectLibrary.addObject(tab_name, tab)
+        # ObjectLibrary.addObject(tab_name, tab)
         icon = QtGui.QIcon()
         # Setting UP batch Mode for 1D data
         if is_batch:
             icon.addPixmap(QtGui.QPixmap("src/sas/qtgui/images/icons/layers.svg"))
         if data is not None:
-            tab.updateTab(data = data, tab_id=tab_index)
+            tab.updateTab(data=data, tab_id=tab_index)
 
         self.addTab(tab, icon, tab.tab_name)
         tab.enableButtons()
