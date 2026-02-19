@@ -281,7 +281,7 @@ class GuiManager:
 
     @Slot(QMdiSubWindow)
     def current_window_perspective_changed(self, perspective_window: QMdiSubWindow | None):
-        if isinstance(perspective_window.widget(), NewPerspective):
+        if perspective_window is not None and isinstance(perspective_window.widget(), NewPerspective):
             perspective = cast(Perspective, perspective_window.widget())
             self.filesWidget.tree_view.setCurrentTrackedDatum(perspective)
 
