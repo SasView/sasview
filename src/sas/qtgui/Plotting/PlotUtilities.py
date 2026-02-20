@@ -130,7 +130,7 @@ def get_bins(qx_data, qy_data):
     # No qx or qy given in a vector format
     if qx_data is None or qy_data is None \
             or qx_data.ndim != 1 or qy_data.ndim != 1:
-        return data
+        return qx_data, qy_data
 
     # find max and min values of qx and qy
     xmax = qx_data.max()
