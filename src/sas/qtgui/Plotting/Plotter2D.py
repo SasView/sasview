@@ -561,9 +561,12 @@ class Plotter2DWidget(PlotterBase):
         if stack is not None:
             self.stackplots = stack
 
-        # Generate a unique name for this slicer
-        slicer_name = f"{slicer.__name__}_{self.data0.name}_{len(self.slicers)}"
-
+        # Use the plot ID already assigned during slicer initialisation
+        if hasattr(self.slicer, '_actual_plot_id'):
+            slicer_name = self.slicer._actual_plot_id
+        else:
+            # Fall back to a class-name-based label
+            slicer_name = f"{slicer.__name__}_{self.data0.name}_{len(self.slicers)}"
         # Store in dictionary with unique name as key
         self.slicers[slicer_name] = self.slicer
 
