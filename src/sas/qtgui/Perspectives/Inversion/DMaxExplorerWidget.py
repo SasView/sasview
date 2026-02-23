@@ -42,7 +42,7 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
 
     name = "Dmax Explorer"  # For displaying in the combo box
 
-    def __init__(self, pr_state, nfunc: int, parent=None):
+    def __init__(self, pr_state: "Invertor", nfunc: int, parent=None):
         super().__init__()
         self.setupUi(self)
         self.parent = parent
@@ -139,7 +139,7 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
             npts = int(self.model.item(W.NPTS).text())
             xs = np.linspace(dmin, dmax, npts)
         except ValueError as e:
-            msg = f"An input value is not correctly formatted. Please check {e.message}"
+            msg = f"An input value is not correctly formatted. Please check {e}"
             logger.error(msg)
 
         original = self.pr_state.dmax
