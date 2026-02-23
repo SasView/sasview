@@ -115,7 +115,7 @@ class InversionLogic:
 
         return new_plot
 
-    def newPRPlot(self, out, pr, cov=None) -> Data1D:
+    def newPRPlot(self, out: np.ndarray, pr: "Invertor", cov: np.ndarray | None = None) -> Data1D:
         """Create a new P(r) plot from the inversion results."""
         x = np.arange(0.0, pr.dmax, pr.dmax / PR_PLOT_PTS)
 

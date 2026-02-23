@@ -122,7 +122,11 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
     ######################################################################
 
     def serializeAll(self) -> dict:
-        """Serialize the inversion state so data can be saved. Serialize all active inversion pages and return a dictionary: {data-id: {self.name: {inversion-state}}}"""
+        """Serialize the inversion state for all active inversion pages.
+
+        Returns a dictionary mapping data IDs to inversion state:
+        {data-id: {self.name: {inversion-state}}}.
+        """
         state = {}
         tab_ids = [tab.tab_id for tab in self.tabs]
         batch_warned = False
@@ -368,13 +372,13 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         self.setCurrentWidget(tab)
 
     def updateFromParameters(self, params: dict) -> None:
-        """"Update the current tab from parameters"""
+        """Update the current tab from parameters"""
         inversion_widget = self.currentWidget()
         if isinstance(inversion_widget, InversionWidget):
             inversion_widget.updateFromParameters(params)
 
     def reset(self) -> None:
-        """Reset the Inversion perspective to an empty state"""
+        """Reset the Inversion perspective to an empty state."""
         self.tabs.clear()
         self.clear()
         self.maxIndex = 1
