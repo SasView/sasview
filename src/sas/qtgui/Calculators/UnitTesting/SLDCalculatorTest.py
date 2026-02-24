@@ -97,7 +97,6 @@ class SLDCalculatorTest:
         widget.ui.editMolecularFormula.insert("CaCO[18]3+6H2O")
         widget.ui.editMassDensity.insert("5.0")
 
-        widget.show()
         # Send tab x2
         widget.ui.calculateButton.click()
         QtWidgets.QApplication.processEvents()

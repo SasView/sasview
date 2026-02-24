@@ -76,7 +76,7 @@ class CorfuncTest:
     def testProcess(self, widget, mocker):
         """Test the full analysis path"""
 
-        filename = str(Path("./src/sas/qtgui/UnitTesting/ISIS_98929.TXT").absolute())
+        filename = str(Path(__file__).parent.parent.parent.parent / "UnitTesting" / "ISIS_98929.TXT")
         try:
             os.stat(filename)
         except OSError:

@@ -321,8 +321,7 @@ class GuiUtilsTest:
         if os.path.isfile(save_path):
             os.remove(save_path)
 
-    @pytest.mark.skip(reason="2026-02: What is caplog? Doesn't exist anymore")
-    def testSaveAnyData(self, qapp, caplog, mocker):
+    def testSaveAnyData(self, caplog, mocker):
         """
         Test the generic GUIUtils.saveAnyData method
         """
@@ -348,8 +347,7 @@ class GuiUtilsTest:
         data.filename = "test123.dat"
         self.genericFileSaveTest(data, file_name, file_name_save, "IGOR", caplog=caplog)
 
-    @pytest.mark.skip(reason="2026-02: What is caplog? Doesn't exist anymore")
-    def testSaveData1D(self, qapp, caplog, mocker):
+    def testSaveData1D(self, caplog, mocker):
         """
         Test the 1D file save method
         """
@@ -374,8 +372,7 @@ class GuiUtilsTest:
         data.filename = "test123.mp3"
         self.genericFileSaveTest(data, file_name, file_name, "ASCII", "1D", caplog=caplog)
 
-    @pytest.mark.skip(reason="2026-02: What is caplog? Doesn't exist anymore")
-    def testSaveData2D(self, qapp, caplog, mocker):
+    def testSaveData2D(self, caplog, mocker):
         """
         Test the 1D file save method
         """
@@ -407,7 +404,7 @@ class GuiUtilsTest:
         name_full = name if name_full == "" else name_full
 
         if caplog:
-            with caplog.at_level(logger.WARNING):
+            with caplog.at_level(logging.WARNING):
                 saveMethod(data)
                 #assert len(cm.output) == 1
                 assert (f"Unknown file type specified when saving {name}."

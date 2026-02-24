@@ -91,8 +91,6 @@ class DensityCalculatorTest:
         ''' Default compound calculations '''
         qtbot.addWidget(widget)
 
-        widget.show()
-
         qtbot.keyClicks(widget.ui.editMolarVolume, "1.0")
 
         # Send tab x3
@@ -120,8 +118,6 @@ class DensityCalculatorTest:
     def testComplexEntryAndReset(self, widget, qtbot):
         ''' User entered compound calculations and subsequent reset'''
         qtbot.addWidget(widget)
-
-        widget.show()
 
         widget.ui.editMolecularFormula.clear()
         qtbot.keyClicks(widget.ui.editMolecularFormula, "KMnO4")

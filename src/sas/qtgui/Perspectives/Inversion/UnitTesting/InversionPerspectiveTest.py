@@ -219,20 +219,20 @@ class InversionTest:
     def testGetNFunc(self, widget, caplog):
         """ test nfunc getter """
         # Float
-        widget.noOfTermsInput.setText("10")
+        widget.currentTab.noOfTermsInput.setText("10")
         assert widget.getNFunc() == 10
         # Int
-        widget.noOfTermsInput.setText("980")
+        widget.currentTab.noOfTermsInput.setText("980")
         assert widget.getNFunc() == 980
         # Empty
-        with caplog.at_level(logger.ERROR):
-            widget.noOfTermsInput.setText("")
+        with caplog.at_level(logging.ERROR):
+            widget.currentTab.noOfTermsInput.setText("")
             n = widget.getNFunc()
         assert 'Incorrect number of terms specified:' in caplog.text
         assert widget.getNFunc() == 10
         # string
-        with caplog.at_level(logger.ERROR):
-            widget.noOfTermsInput.setText("Nordvest Pizza")
+        with caplog.at_level(logging.ERROR):
+            widget.currentTab.noOfTermsInput.setText("Nordvest Pizza")
             n = widget.getNFunc()
         assert "Incorrect number of terms specified: Nordvest Pizza" in caplog.text
         assert widget.getNFunc() == 10

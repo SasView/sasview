@@ -738,7 +738,6 @@ class DataExplorerTest:
 
         # Pick up the treeview index corresponding to that file
         index = form.treeView.indexAt(QPoint(5,5))
-        form.show()
 
         # Find out the center pointof the treeView row
         rect = form.treeView.visualRect(index).center()

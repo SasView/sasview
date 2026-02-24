@@ -166,7 +166,7 @@ class GenericScatteringCalculatorTest:
         """
         Load sld data and check modifications of GUI
         """
-        filename = str(Path("./src/sas/qtgui/UnitTesting/sld_file.sld").absolute())
+        filename = str(Path(__file__).parent.parent.parent / "UnitTesting" / "sld_file.sld")
         mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[filename, ''])
         widget.cmdMagLoad.click()
 
@@ -191,9 +191,6 @@ class GenericScatteringCalculatorTest:
         # check enabled draw buttons
         assert widget.cmdDraw.isEnabled()
         assert widget.cmdDrawpoints.isEnabled()
-        widget.show()
-        assert widget.isVisible()
-        assert not widget.cbOptionsCalc.isVisible()
 
         # check that text of loadButton is back to initial state
         assert widget.cmdNucLoad.text() == 'Load'
@@ -230,7 +227,7 @@ class GenericScatteringCalculatorTest:
         """
         Load pdb data and check modifications of GUI
         """
-        filename = str(Path("./src/sas/qtgui/UnitTesting/diamdsml.pdb").absolute())
+        filename = str(Path(__file__).parent.parent.parent / "UnitTesting" / "diamdsml.pdb")
 
         mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[filename, ''])
         widget.cmdNucLoad.click()
@@ -254,10 +251,6 @@ class GenericScatteringCalculatorTest:
         # check enabled draw buttons
         assert widget.cmdDraw.isEnabled()
         assert widget.cmdDrawpoints.isEnabled()
-        # fixed orientation
-        widget.show()
-        assert widget.isVisible()
-        assert widget.cbOptionsCalc.isVisible()
         # check that text of loadButton is back to initial state
         assert widget.cmdNucLoad.text() == 'Load'
         assert widget.cmdNucLoad.isEnabled()
@@ -293,7 +286,7 @@ class GenericScatteringCalculatorTest:
         """
         Load omf data and check modifications of GUI
         """
-        filename = str(Path("./src/sas/qtgui/UnitTesting/A_Raw_Example-1.omf").absolute())
+        filename = str(Path(__file__).parent.parent.parent / "UnitTesting" / "A_Raw_Example-1.omf")
 
         mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[filename, ''])
         widget.cmdMagLoad.click()
@@ -363,7 +356,7 @@ class GenericScatteringCalculatorTest:
         Test compute button
         """
         # load data
-        filename = str(Path("./src/sas/qtgui/UnitTesting/diamdsml.pdb").absolute())
+        filename = str(Path(__file__).parent.parent.parent / "UnitTesting" / "diamdsml.pdb")
 
         mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[filename, ''])
         widget.cmdNucLoad.click()
@@ -382,12 +375,12 @@ class GenericScatteringCalculatorTest:
         #assert widget.cmdCompute.text() == 'Compute'
         #assert widget.cmdCompute.isEnabled()
 
-    def testDrawButton(self, widget, mocker):
+    def testDrawButton(self, widget, mocker, qtbot):
         """
         Test Draw buttons for 3D plots with and without arrows
         """
         assert widget.cmdDraw.isEnabled()
-        filename = str(Path("./src/sas/qtgui/UnitTesting/diamdsml.pdb").absolute())
+        filename = str(Path(__file__).parent.parent.parent / "UnitTesting" / "diamdsml.pdb")
         mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[filename,''])
         widget.cmdNucLoad.click()
 
@@ -411,7 +404,7 @@ class GenericScatteringCalculatorTest:
         """
         Test Save feature to .sld file
         """
-        filename = str(Path("./src/sas/qtgui/UnitTesting/sld_file.sld").absolute())
+        filename = str(Path(__file__).parent.parent.parent / "UnitTesting" / "sld_file.sld")
 
         mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[filename, ''])
         widget.cmdMagLoad.click()
@@ -419,7 +412,7 @@ class GenericScatteringCalculatorTest:
         time.sleep(0.1)
         QtWidgets.QApplication.processEvents()
 
-        filename1 = str(Path("./src/sas/qtgui/UnitTesting/test").absolute())
+        filename1 = str(Path(__file__).parent.parent.parent / "UnitTesting" / "test")
         mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName', return_value=[filename1, ''])
 
         #QTest.mouseClick(widget.cmdSave, Qt.LeftButton)

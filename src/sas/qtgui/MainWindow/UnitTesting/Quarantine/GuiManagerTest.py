@@ -129,6 +129,9 @@ class GuiManagerTest:
         mocker.patch.object(QMessageBox, "question", return_value=QMessageBox.Yes)
         mocker.patch.object(HidableDialog, "exec", return_value=1)
 
+        # Don't save the config to file when closing the application
+        mocker.patch("sas.system.config.config_meta.ConfigBase.save")
+
         # Open, then close the manager
         manager.quitApplication()
 

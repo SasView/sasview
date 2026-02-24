@@ -102,6 +102,9 @@ class MainWindowTest:
         # mocker.patch.object(QtWidgets.QMessageBox, 'question', return_value=QtWidgets.QMessageBox.Yes)
         mocker.patch.object(HidableDialog, 'exec', return_value=1)
 
+        # Don't save the config to file to disk when closing the application
+        mocker.patch("sas.system.config.config_meta.ConfigBase.save")
+
         # Open, then close the main window
         tmp_main = MainSasViewWindow(None)
         tmp_main.close()
