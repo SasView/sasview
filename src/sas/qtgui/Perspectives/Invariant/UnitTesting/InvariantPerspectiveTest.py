@@ -407,7 +407,7 @@ class InvariantPerspectiveTest:
     def test_allow_calculation_requires_input(self, widget):
         # Start with no data -> button disabled
         widget._data = None
-        widget.allow_calculation()
+        widget.check_status()
         assert not widget.cmdCalculate.isEnabled()
 
         # Fake that we have data
@@ -416,21 +416,21 @@ class InvariantPerspectiveTest:
         # Contrast mode: no contrast -> disabled
         widget.rbContrast.setChecked(True)
         widget.txtContrast.setText('')
-        widget.allow_calculation()
+        widget.check_status()
         assert not widget.cmdCalculate.isEnabled()
 
         # Contrast mode: valid contrast -> enabled
         widget.txtContrast.setText('2.2e-6')
-        widget.allow_calculation()
+        widget.check_status()
         assert not widget.cmdCalculate.isEnabled()
 
         # Volume fraction mode: no vol frac -> disabled
         widget.rbVolFrac.setChecked(True)
         widget.txtVolFrac1.setText('')
-        widget.allow_calculation()
+        widget.check_status()
         assert not widget.cmdCalculate.isEnabled()
 
         # Volume fraction mode: valid vol frac -> enabled
         widget.txtVolFrac1.setText('0.01')
-        widget.allow_calculation()
+        widget.check_status()
         assert not widget.cmdCalculate.isEnabled()
