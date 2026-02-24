@@ -324,6 +324,7 @@ jobs:
         if: ${{ matrix.os == 'ubuntu-latest' }}
         env:
           PYOPENCL_COMPILER_OUTPUT: 1
+          QT_QPA_PLATFORM: offscreen
         run: |
           # Ensure all test running dependencies are installed (https://pytest-qt.readthedocs.io/en/latest/troubleshooting.html)
           sudo apt install -y libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils
