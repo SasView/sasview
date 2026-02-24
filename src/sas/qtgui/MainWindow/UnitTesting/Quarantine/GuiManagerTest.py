@@ -19,6 +19,7 @@ from sas.system import config
 logger = logging.getLogger(__name__)
 
 
+# TODO: This unit test suite has been quarantined for now due to a segfault issue.
 class GuiManagerTest:
     """Test the Main Window functionality"""
 
