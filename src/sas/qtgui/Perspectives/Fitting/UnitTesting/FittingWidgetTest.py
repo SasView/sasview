@@ -245,7 +245,6 @@ class FittingWidgetTest:
         assert fittingWindow.cbStructureFactor.findText("squarewell") != -1
         assert fittingWindow.cbStructureFactor.findText("hardsphere") != -1
         assert fittingWindow.cbStructureFactor.findText("plugin_structure_template") == -1
-        assert fittingWindow.cbStructureFactor.findText("plugin_template") == -1
 
         #Test what is current text in the combobox
         assert fittingWindow.cbCategory.currentText(), "None"

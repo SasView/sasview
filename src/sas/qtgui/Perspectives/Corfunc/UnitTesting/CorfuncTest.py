@@ -76,11 +76,11 @@ class CorfuncTest:
     def testProcess(self, widget, mocker):
         """Test the full analysis path"""
 
-        filename = str(Path("./src/sas/qtgui/UnitTesting/ISIS_98929.txt").absolute())
+        filename = str(Path("./src/sas/qtgui/UnitTesting/ISIS_98929.TXT").absolute())
         try:
             os.stat(filename)
         except OSError:
-            assert False, "ISIS_98929.txt does not exist"
+            assert False, "ISIS_98929.TXT does not exist"
         f = Loader().load(filename)
         mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=(filename, ''))
 
