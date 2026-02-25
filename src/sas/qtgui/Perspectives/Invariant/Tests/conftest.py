@@ -5,7 +5,6 @@ import os
 # Ensure Qt runs headless in CI environments
 os.environ.setdefault("QT_QPA_PLATFORM", os.environ.get("QT_QPA_PLATFORM", "offscreen"))
 
-import sys
 from collections.abc import Iterator
 
 import pytest
@@ -127,7 +126,6 @@ def real_data() -> Data1D:
     data.filename = "real_data.txt"
     return data
 
-
 @pytest.fixture
 def dummy_manager() -> DummyManager:
     return DummyManager()
@@ -140,7 +138,7 @@ def qapp() -> Iterator[QApplication]:
     """
     app = QApplication.instance()
     if app is None:
-        app = QApplication(sys.argv)
+        app = QApplication([])
     yield app
 
 
@@ -170,30 +168,8 @@ def window_class(qapp, mocker, request: SubRequest) -> Iterator[InvariantWindow]
         request.cls.window = w
 
     w.show()
-    qapp.processEvents()
+    QApplication.processEvents()
     yield w
 
     w.close()
-    qapp.processEvents()
-
-
-@pytest.fixture
-def window_with_small_data(window_class, small_data: Data1D, dummy_manager):
-    """Creates an InvariantWindow with data loaded."""
-    data_item = dummy_manager.createGuiData(small_data)
-    window_class.setData([data_item])
-    yield window_class
-
-    # Clean up
-    window_class.close()
-
-
-@pytest.fixture
-def window_with_real_data(window_class, real_data: Data1D, dummy_manager):
-    """Creates an InvariantWindow with data loaded."""
-    data_item = dummy_manager.createGuiData(real_data)
-    window_class.setData([data_item])
-    yield window_class
-
-    # Clean up
-    window_class.close()
+    QApplication.processEvents()
