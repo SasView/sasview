@@ -7,6 +7,7 @@ from typing import Literal
 import numpy as np
 from PySide6 import QtCore, QtGui, QtWidgets
 from twisted.internet import reactor, threads
+from twisted.python.failure import Failure
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting import PlotterData
@@ -218,7 +219,10 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
         :param value: low Q extrapolation upper limit
         """
-        self._low_points = (np.abs(self._data.x - value)).argmin() + 1
+        # index of the value closest to the input value
+        idx = (np.abs(self._data.x - value)).argmin()
+        npts = idx + 1
+        self._low_points = npts
 
     def get_high_q_extrapolation_lower_limit(self) -> float:
         """
@@ -235,7 +239,10 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
         :param value: high Q extrapolation lower limit
         """
-        self._high_points = len(self._data.x) - (np.abs(self._data.x - value)).argmin() + 1
+        # index of the value closest to the input value
+        idx = (np.abs(self._data.x - value)).argmin()
+        npts = (len(self._data.x) - idx) + 1
+        self._high_points = npts
 
     def enableStatus(self) -> None:
         """Enable the status button."""
@@ -321,7 +328,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         d.addCallback(self.deferredPlot)
         d.addErrback(self.on_calculation_failed)
 
-    def on_calculation_failed(self, reason: Exception) -> None:
+    def on_calculation_failed(self, reason: Failure) -> None:
         """Handle calculation failure."""
         logger.error(f"calculation failed: {reason}")
         self.check_status()
@@ -415,6 +422,76 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         if self.detailsDialog.isVisible():
             self.onStatus()
 
+    def compute_low(self) -> tuple[float | Literal["ERROR"], float | Literal["ERROR"], bool]:
+        """Compute low-q extrapolation and return (qstar, qstar_err, success)."""
+        qstar, qstar_err = 0.0, 0.0
+        success = False
+
+        if not self._low_extrapolate:
+            return qstar, qstar_err, success
+
+        # choose function and power value
+        if self._low_guinier:
+            function_low = "guinier"
+            self._low_power_value = None
+        else:
+            function_low = "power_law"
+            if self._low_fit:
+                self._low_power_value = None
+            elif self._low_fix:
+                self._low_power_value = float(self.model.item(WIDGETS.W_LOWQ_POWER_VALUE_EX).text())
+
+        # determine number of points
+        q_end_val: float = float(self.txtGuinierEnd_ex.text())
+        self.set_low_q_extrapolation_upper_limit(q_end_val)
+
+        self._calculator.set_extrapolation(
+            range="low", npts=self._low_points, function=function_low, power=self._low_power_value
+        )
+
+        try:
+            extrapolation_start = float(self.extrapolation_parameters.ex_q_min)
+            low_q_limit: float | None = None if extrapolation_start > self._data.x[0] else extrapolation_start
+            qstar, qstar_err = self._calculator.get_qstar_low(low_q_limit)
+            success = True
+        except Exception as ex:
+            logger.warning(f"Low-q calculation failed: {ex}")
+            qstar, qstar_err = "ERROR", "ERROR"
+
+        return qstar, qstar_err, success
+
+    def compute_high(self) -> tuple[float | Literal["ERROR"], float | Literal["ERROR"], bool]:
+        """Compute high-q extrapolation and return (qstar, qstar_err, success)."""
+        qstar, qstar_err = 0.0, 0.0
+        success = False
+
+        if not self._high_extrapolate:
+            return qstar, qstar_err, success
+
+        function_high = "power_law"
+        if self._high_fit:
+            self._high_power_value = None
+        elif self._high_fix:
+            self._high_power_value = float(self.model.item(WIDGETS.W_HIGHQ_POWER_VALUE_EX).text())
+
+        q_start_val = float(self.txtPorodStart_ex.text())
+        self.set_high_q_extrapolation_lower_limit(q_start_val)
+
+        self._calculator.set_extrapolation(
+            range="high", npts=self._high_points, function=function_high, power=self._high_power_value
+        )
+
+        try:
+            extrapolation_end = float(self.extrapolation_parameters.ex_q_max)
+            high_q_limit: float | None = None if extrapolation_end < self._data.x[-1] else extrapolation_end
+            qstar, qstar_err = self._calculator.get_qstar_high(high_q_limit)
+            success = True
+        except Exception as ex:
+            logger.warning(f"High-q calculation failed: {ex}")
+            qstar, qstar_err = "ERROR", "ERROR"
+
+        return qstar, qstar_err, success
+
     def calculate_thread(self, extrapolation: str) -> None:
         """Perform Invariant calculations.
 
@@ -427,89 +504,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
         def _safe_update_model(widget_const, value):
             _ui(self.update_model_from_thread, widget_const, value)
-
-        def _compute_low() -> tuple[float | Literal["ERROR"], float | Literal["ERROR"], bool]:
-            """Compute low-q extrapolation and return (qstar, qstar_err, success)."""
-            qstar, qstar_err = 0.0, 0.0
-            success = False
-
-            if not self._low_extrapolate:
-                return qstar, qstar_err, success
-
-            # choose function and power value
-            if self._low_guinier:
-                function_low = "guinier"
-                self._low_power_value = None
-            else:
-                function_low = "power_law"
-                if self._low_fit:
-                    self._low_power_value = None
-                elif self._low_fix:
-                    self._low_power_value = float(self.model.item(WIDGETS.W_LOWQ_POWER_VALUE_EX).text())
-
-            # determine number of points
-            try:
-                q_end_val: float = float(self.txtGuinierEnd_ex.text())
-                n_pts: int = int(np.abs(self._data.x - q_end_val).argmin()) + 1
-                if n_pts not in range(1, len(self._data.x) + 1):
-                    raise ValueError("Number of points in low-q Guinier end is out of valid bounds")
-                self._low_points = n_pts
-            except ValueError as ex:
-                logger.warning(f"Could not convert low-q Guinier end: {ex}")
-
-            self._calculator.set_extrapolation(
-                range="low", npts=int(self._low_points), function=function_low, power=self._low_power_value
-            )
-
-            try:
-                extrapolation_start = float(self.extrapolation_parameters.ex_q_min)
-                low_q_limit: float | None = None if extrapolation_start > self._data.x[0] else extrapolation_start
-                qstar, qstar_err = self._calculator.get_qstar_low(low_q_limit)
-                success = True
-            except Exception as ex:
-                logger.warning(f"Low-q calculation failed: {ex}")
-                qstar, qstar_err = "ERROR", "ERROR"
-
-            return qstar, qstar_err, success
-
-        def _compute_high() -> tuple[float | Literal["ERROR"], float | Literal["ERROR"], bool]:
-            """Compute high-q extrapolation and return (qstar, qstar_err, success)."""
-            qstar, qstar_err = 0.0, 0.0
-            success = False
-
-            if not self._high_extrapolate:
-                return qstar, qstar_err, success
-
-            function_high = "power_law"
-            if self._high_fit:
-                self._high_power_value = None
-            elif self._high_fix:
-                self._high_power_value = float(self.model.item(WIDGETS.W_HIGHQ_POWER_VALUE_EX).text())
-
-            try:
-                q_start_val = float(self.txtPorodStart_ex.text())
-                idx = int((np.abs(self._data.x - q_start_val)).argmin())
-                n_pts_high: int = len(self._data.x) - idx
-                if n_pts_high not in range(1, len(self._data.x) + 1):
-                    raise ValueError("Number of points in high-q Porod start is out of valid bounds")
-                self._high_points = n_pts_high
-            except ValueError as ex:
-                logger.warning(f"Could not convert Porod start: {ex}")
-
-            self._calculator.set_extrapolation(
-                range="high", npts=int(self._high_points), function=function_high, power=self._high_power_value
-            )
-
-            try:
-                extrapolation_end = float(self.extrapolation_parameters.ex_q_max)
-                high_q_limit: float | None = None if extrapolation_end < self._data.x[-1] else extrapolation_end
-                qstar, qstar_err = self._calculator.get_qstar_high(high_q_limit)
-                success = True
-            except Exception as ex:
-                logger.warning(f"High-q calculation failed: {ex}")
-                qstar, qstar_err = "ERROR", "ERROR"
-
-            return qstar, qstar_err, success
 
         try:
             self.update_from_model()
@@ -528,7 +522,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             self._calculator.set_data(temp_data)
 
             # low / high computations
-            qstar_low, qstar_low_err, low_success = _compute_low()
+            qstar_low, qstar_low_err, low_success = self.compute_low()
             if not low_success and self.low_extrapolation_plot:
                 # safely remove plot from GUI thread
                 model_items: list[QtGui.QStandardItem] = GuiUtils.getChildrenFromItem(self._model_item)
@@ -542,7 +536,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             _safe_update_model(WIDGETS.D_LOW_QSTAR, qstar_low)
             _safe_update_model(WIDGETS.D_LOW_QSTAR_ERR, qstar_low_err)
 
-            qstar_high, qstar_high_err, high_success = _compute_high()
+            qstar_high, qstar_high_err, high_success = self.compute_high()
             if not high_success and self.high_extrapolation_plot:
                 model_items: list[QtGui.QStandardItem] = GuiUtils.getChildrenFromItem(self._model_item)
                 for item in model_items:
