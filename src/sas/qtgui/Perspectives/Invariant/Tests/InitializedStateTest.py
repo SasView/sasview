@@ -9,7 +9,6 @@ from sas.qtgui.Utilities import GuiUtils
 
 @pytest.mark.usefixtures("window_class")
 class TestInvariantDefaults:
-
     def test_window_identity(self):
         """Test the InvariantWindow identity."""
         assert isinstance(self.window, QtWidgets.QDialog)
@@ -33,11 +32,27 @@ class TestInvariantDefaults:
         assert widget is not None, f"UI widget not found: {field_name}"
         assert float(widget.text()) == pytest.approx(expected), f"Expected default text '{expected}' in {field_name}"
 
-    NULL_CASES: list[str] = ["txtName", "txtPorodCst", "txtPorodCstErr", "txtContrast", "txtContrastErr",
-        "txtVolFrac1", "txtVolFrac1Err", "txtVolFract", "txtVolFractErr",
-        "txtContrastOut", "txtContrastOutErr", "txtSpecSurf", "txtSpecSurfErr",
-        "txtInvariantTot", "txtInvariantTotErr", "txtFileName",
-        "txtGuinierEnd_ex", "txtPorodStart_ex", "txtPorodEnd_ex"]
+    NULL_CASES: list[str] = [
+        "txtName",
+        "txtPorodCst",
+        "txtPorodCstErr",
+        "txtContrast",
+        "txtContrastErr",
+        "txtVolFrac1",
+        "txtVolFrac1Err",
+        "txtVolFract",
+        "txtVolFractErr",
+        "txtContrastOut",
+        "txtContrastOutErr",
+        "txtSpecSurf",
+        "txtSpecSurfErr",
+        "txtInvariantTot",
+        "txtInvariantTotErr",
+        "txtFileName",
+        "txtGuinierEnd_ex",
+        "txtPorodStart_ex",
+        "txtPorodEnd_ex",
+    ]
 
     @pytest.mark.parametrize("field_name", NULL_CASES, ids=lambda name: name)
     def test_null_line_edit_defaults(self, field_name):
@@ -76,11 +91,20 @@ class TestInvariantDefaults:
         assert widget is not None, f"Widget {widget_name} not found"
         assert widget.toolTip() == expected_tooltip
 
-
     VALIDATOR_CASES: list[str] = [
-        "txtBackgd", "txtScale", "txtPorodCst", "txtPorodCstErr", "txtContrast", "txtContrastErr",
-        "txtVolFrac1", "txtVolFrac1Err", "txtGuinierEnd_ex", "txtPorodStart_ex", "txtPorodEnd_ex",
-        "txtHighQPower_ex", "txtLowQPower_ex"
+        "txtBackgd",
+        "txtScale",
+        "txtPorodCst",
+        "txtPorodCstErr",
+        "txtContrast",
+        "txtContrastErr",
+        "txtVolFrac1",
+        "txtVolFrac1Err",
+        "txtGuinierEnd_ex",
+        "txtPorodStart_ex",
+        "txtPorodEnd_ex",
+        "txtHighQPower_ex",
+        "txtLowQPower_ex",
     ]
 
     @pytest.mark.parametrize("field_name", VALIDATOR_CASES, ids=lambda name: name)
@@ -92,42 +116,70 @@ class TestInvariantDefaults:
         assert validator is not None, f"Expected {field_name} to have a validator"
         assert isinstance(validator, GuiUtils.DoubleValidator), f"Expected {field_name} to have DoubleValidator"
 
-    @pytest.mark.parametrize("widget_name", [
-        "txtName", "txtTotalQMin", "txtTotalQMax", "txtContrastOut", "txtContrastOutErr", "txtSpecSurf",
-        "txtSpecSurfErr", "txtInvariantTot", "txtInvariantTotErr", "txtFileName"
-    ], ids=lambda name: name)
+    @pytest.mark.parametrize(
+        "widget_name",
+        [
+            "txtName",
+            "txtTotalQMin",
+            "txtTotalQMax",
+            "txtContrastOut",
+            "txtContrastOutErr",
+            "txtSpecSurf",
+            "txtSpecSurfErr",
+            "txtInvariantTot",
+            "txtInvariantTotErr",
+            "txtFileName",
+        ],
+        ids=lambda name: name,
+    )
     def test_readonly_widgets(self, widget_name):
         """Test that widgets are read-only by default."""
         widget = self.window.findChild(QtWidgets.QLineEdit, widget_name)
         assert widget is not None, f"UI widget not found: {widget_name}"
         assert widget.isReadOnly()
 
-    @pytest.mark.parametrize("widget_name", [
-        "txtBackgd", "txtScale", "txtPorodCst", "txtPorodCstErr", "txtContrast", "txtContrastErr",
-        "txtVolFrac1", "txtVolFrac1Err", "txtGuinierEnd_ex", "txtPorodStart_ex", "txtPorodEnd_ex",
-        "txtHighQPower_ex", "txtLowQPower_ex"
-    ], ids=lambda name: name)
+    @pytest.mark.parametrize(
+        "widget_name",
+        [
+            "txtBackgd",
+            "txtScale",
+            "txtPorodCst",
+            "txtPorodCstErr",
+            "txtContrast",
+            "txtContrastErr",
+            "txtVolFrac1",
+            "txtVolFrac1Err",
+            "txtGuinierEnd_ex",
+            "txtPorodStart_ex",
+            "txtPorodEnd_ex",
+            "txtHighQPower_ex",
+            "txtLowQPower_ex",
+        ],
+        ids=lambda name: name,
+    )
     def test_editable_widgets(self, widget_name):
         """Test that widgets are editable by default."""
         widget = self.window.findChild(QtWidgets.QLineEdit, widget_name)
         assert widget is not None, f"UI widget not found: {widget_name}"
         assert widget.isReadOnly() is False
 
-    @pytest.mark.parametrize("widget_name", [
-        "cmdStatus", "cmdCalculate"
-    ], ids=lambda name: name)
+    @pytest.mark.parametrize("widget_name", ["cmdStatus", "cmdCalculate"], ids=lambda name: name)
     def test_disabled_widgets(self, widget_name):
         """Test that widgets are disabled by default."""
         widget = self.window.findChild(QtWidgets.QPushButton, widget_name)
         assert widget is not None, f"UI widget not found: {widget_name}"
         assert widget.isEnabled() is False
 
-    @pytest.mark.parametrize("rb_group, rb_list", [
-        ("VolFracContrastGroup", ["rbVolFrac", "rbContrast"]),
-        ("LowQGroup", ["rbLowQGuinier_ex", "rbLowQPower_ex"]),
-        ("LowQPowerGroup", ["rbLowQFix_ex", "rbLowQFit_ex"]),
-        ("HighQGroup", ["rbHighQFix_ex", "rbHighQFit_ex"]),
-    ], ids=lambda name: name[0])
+    @pytest.mark.parametrize(
+        "rb_group, rb_list",
+        [
+            ("VolFracContrastGroup", ["rbVolFrac", "rbContrast"]),
+            ("LowQGroup", ["rbLowQGuinier_ex", "rbLowQPower_ex"]),
+            ("LowQPowerGroup", ["rbLowQFix_ex", "rbLowQFit_ex"]),
+            ("HighQGroup", ["rbHighQFix_ex", "rbHighQFit_ex"]),
+        ],
+        ids=lambda name: name[0],
+    )
     def test_rb_groups(self, rb_group, rb_list):
         """Test that radio buttons are grouped correctly."""
         group = getattr(self.window, rb_group)
@@ -138,9 +190,9 @@ class TestInvariantDefaults:
             assert isinstance(button, QtWidgets.QRadioButton), f"Expected {rb} to be a QRadioButton"
             assert button.group() == group, f"Expected {rb} to be in group {rb_group}"
 
-    @pytest.mark.parametrize("progress_bar", [
-        "progressBarLowQ", "progressBarData", "progressBarHighQ"
-    ], ids=lambda name: name)
+    @pytest.mark.parametrize(
+        "progress_bar", ["progressBarLowQ", "progressBarData", "progressBarHighQ"], ids=lambda name: name
+    )
     def test_progress_bar_initial(self, progress_bar):
         """Test that the progress bar is at 0% initially."""
         bar = getattr(self.window, progress_bar)
@@ -167,7 +219,8 @@ class TestInvariantDefaults:
         (WIDGETS.W_HIGHQ_POWER_VALUE_EX, "_high_power_value"),
         (WIDGETS.W_LOWQ_POWER_VALUE_EX, "_low_power_value"),
     ]
-    @pytest.mark.parametrize("model_item, variable_name", MODEL_LINE_EDITS, ids = [p[1] for p in MODEL_LINE_EDITS])
+
+    @pytest.mark.parametrize("model_item, variable_name", MODEL_LINE_EDITS, ids=[p[1] for p in MODEL_LINE_EDITS])
     def test_update_from_model_line_edits(self, model_item: int, variable_name: str):
         """Update the globals based on the data in the model line edits."""
         value = "2.0"
@@ -180,12 +233,13 @@ class TestInvariantDefaults:
         (WIDGETS.W_ENABLE_HIGHQ_EX, "_high_extrapolate"),
         (WIDGETS.W_LOWQ_POWER_EX, "_low_power"),
     ]
-    @pytest.mark.parametrize("model_item, variable_name", MODEL_RB_AND_CHKS, ids = [p[1] for p in MODEL_RB_AND_CHKS])
+
+    @pytest.mark.parametrize("model_item, variable_name", MODEL_RB_AND_CHKS, ids=[p[1] for p in MODEL_RB_AND_CHKS])
     def test_update_from_model_rb_and_chks(self, model_item: int, variable_name: str):
         """Update the globals based on the data in the model radio buttons and checkboxes."""
         self.window.model.item(model_item).setText("true")
         self.window.update_from_model()
-        assert getattr(self.window, variable_name) == True
+        assert getattr(self.window, variable_name)
 
     GUI_LINE_EDITS = [
         ("txtBackgd", WIDGETS.W_BACKGROUND),
@@ -199,16 +253,144 @@ class TestInvariantDefaults:
         ("txtLowQPower_ex", WIDGETS.W_LOWQ_POWER_VALUE_EX),
         ("txtHighQPower_ex", WIDGETS.W_HIGHQ_POWER_VALUE_EX),
     ]
-    @pytest.mark.parametrize("gui_widget, model_item", GUI_LINE_EDITS, ids = [p[0] for p in GUI_LINE_EDITS])
+
+    @pytest.mark.parametrize("gui_widget, model_item", GUI_LINE_EDITS, ids=[p[0] for p in GUI_LINE_EDITS])
     def test_updateFromGui(self, gui_widget: str, model_item: int):
         """Update the globals based on the data in the GUI line edits."""
         line_edit = self.window.findChild(QtWidgets.QLineEdit, gui_widget)
         assert line_edit is not None, f"Line edit not found: {gui_widget}"
 
+        line_edit.setText("5.0")
         line_edit.textEdited.emit("5.0")
         QtWidgets.QApplication.processEvents()
 
         assert self.window.model.item(model_item).text() == "5.0"
+
+    def test_extrapolation_parameters(self):
+        """Test that the extrapolation parameters return None for no data"""
+        assert self.window.extrapolation_parameters is None
+
+    def test_enableStatus(self, mocker):
+        """Test that the enable status is set correctly."""
+        mock_cmdStatus = mocker.patch.object(self.window, "cmdStatus")
+        self.window.enableStatus()
+        mock_cmdStatus.setEnabled.assert_called_once_with(True)
+
+    @pytest.mark.parametrize("closable", [True, False], ids=["True", "False"])
+    def test_setClosable(self, closable):
+        """Test that the closable status is set correctly."""
+        self.window.setClosable(closable)
+        assert self.window._allow_close == closable
+
+    def test_closeEvent(self, mocker):
+        """Test that the close event is handled correctly."""
+        self.window.setClosable(True)
+        self.window.closeEvent(mocker.Mock())
+        assert not self.window._allow_close
+
+    def test_closeEvent_allows_close_with_parent(self, mocker):
+        mock_parent = mocker.MagicMock()
+        mock_set_closable = mocker.patch.object(self.window, "setClosable")
+        mock_set_window_state = mocker.patch.object(self.window, "setWindowState")
+        mocker.patch.object(self.window, "parentWidget", return_value=mock_parent)
+
+        mock_event = mocker.MagicMock()
+
+        self.window._allow_close = True
+        self.window.closeEvent(mock_event)
+
+        mock_set_closable.assert_called_once_with(value=False)
+        mock_parent.close.assert_called_once()
+        mock_event.accept.assert_called_once()
+        mock_event.ignore.assert_not_called()
+        mock_set_window_state.assert_not_called()
+
+    def test_isSerializable(self):
+        """Test that isSerializable returns the expected boolean."""
+        assert self.window.isSerializable() is True
+
+    def test_serialize_state_returns_expected_dict(self, mocker):
+        """Test that the serializeState method returns the expected dictionary."""
+
+        # Set fields to known values (strings for QLineEdit)
+        self.window.txtVolFract.setText("0.123")
+        self.window.txtVolFractErr.setText("0.001")
+        self.window.txtContrastOut.setText("42.0")
+        self.window.txtContrastOutErr.setText("0.5")
+        self.window.txtSpecSurf.setText("3.14")
+        self.window.txtSpecSurfErr.setText("0.01")
+        self.window.txtInvariantTot.setText("10.0")
+        self.window.txtInvariantTotErr.setText("0.2")
+        self.window.txtBackgd.setText("0.0")
+        self.window.txtContrast.setText("1.0")
+        self.window.txtContrastErr.setText("0.05")
+        self.window.txtScale.setText("2.0")
+        self.window.txtPorodCst.setText("1.23")
+        self.window.txtVolFrac1.setText("0.5")
+        self.window.txtVolFrac1Err.setText("0.05")
+        self.window.txtTotalQMin.setText("0.01")
+        self.window.txtTotalQMax.setText("0.25")
+        self.window.txtGuinierEnd_ex.setText("0.02")
+        self.window.txtPorodStart_ex.setText("0.2")
+        self.window.txtPorodEnd_ex.setText("1.0")
+        self.window.txtLowQPower_ex.setText("4.0")
+        self.window.txtHighQPower_ex.setText("3.0")
+
+        # Set checkbox / radio states
+        self.window.rbContrast.setChecked(True)
+        self.window.rbVolFrac.setChecked(False)
+        self.window.chkLowQ_ex.setChecked(True)
+        self.window.chkHighQ_ex.setChecked(False)
+        self.window.rbLowQGuinier_ex.setChecked(True)
+        self.window.rbLowQPower_ex.setChecked(False)
+        self.window.rbLowQFit_ex.setChecked(False)
+        self.window.rbLowQFix_ex.setChecked(True)
+        self.window.rbHighQFit_ex.setChecked(False)
+        self.window.rbHighQFix_ex.setChecked(True)
+
+        mock_update_from_model = mocker.patch.object(self.window, "update_from_model", autospec=True)
+
+        state = self.window.serializeState()
+
+        assert mock_update_from_model.called
+        mock_update_from_model.assert_called_once()
+
+        expected = {
+            "vol_fraction": "0.123",
+            "vol_fraction_err": "0.001",
+            "contrast_out": "42.0",
+            "contrast_out_err": "0.5",
+            "specific_surface": "3.14",
+            "specific_surface_err": "0.01",
+            "invariant_total": "10.0",
+            "invariant_total_err": "0.2",
+            "background": "0.0",
+            "contrast": "1.0",
+            "contrast_err": "0.05",
+            "scale": "2.0",
+            "porod": "1.23",
+            "volfrac1": "0.5",
+            "volfrac1_err": "0.05",
+            "enable_contrast": True,
+            "enable_volfrac": False,
+            "total_q_min": "0.01",
+            "total_q_max": "0.25",
+            "guinier_end_low_q_ex": "0.02",
+            "porod_start_high_q_ex": "0.2",
+            "porod_end_high_q_ex": "1.0",
+            "power_low_q_ex": "4.0",
+            "power_high_q_ex": "3.0",
+            "enable_low_q_ex": True,
+            "enable_high_q_ex": False,
+            "low_q_guinier_ex": True,
+            "low_q_power_ex": False,
+            "low_q_fit_ex": False,
+            "low_q_fix_ex": True,
+            "high_q_fit_ex": False,
+            "high_q_fix_ex": True,
+        }
+
+        assert state == expected
 
 
 @pytest.mark.usefixtures("window_class")
