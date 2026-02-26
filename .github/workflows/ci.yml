@@ -557,7 +557,7 @@ jobs:
       - name: Retrieve installer (old image)
         if: ${{ env.INSTALLER_USE_OLD_IMAGE == 'true' }}
         id: download-old-installer
-        uses: dawidd6/action-download-artifact@v15
+        uses: dawidd6/action-download-artifact@v16
         with:
           # Select a specific installer image based on the GitHub Actions run id
           run_id: ${{ env.INSTALLER_OLD_RUNID }}
@@ -671,7 +671,7 @@ jobs:
       - name: Retrieve installer debug tarball
         if: ${{ env.INSTALLER_USE_DEBUG == 'true' }}
         id: download-old-debug
-        uses: dawidd6/action-download-artifact@v15
+        uses: dawidd6/action-download-artifact@v16
         with:
           # Select a specific installer image based on the GitHub Actions run id
           run_id: ${{ env.INSTALLER_OLD_RUNID }}
