@@ -5,6 +5,7 @@ from PySide6.QtGui import QStandardItem
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Utilities.GuiUtils import dataFromItem
+from sas.sascalc.pr.invertor import Invertor
 
 PR_FIT_LABEL = r"$P_{fit}(r)$"
 PR_LOADED_LABEL = r"$P_{loaded}(r)$"
@@ -49,7 +50,9 @@ class InversionLogic:
         """Return whether data has been loaded into this logic instance."""
         return self.data_is_loaded
 
-    def new1DPlot(self, tab_id: int = 1, out=None, pr=None, q=None) -> Data1D:
+    def new1DPlot(
+        self, tab_id: int = 1, out: np.ndarray | None = None, pr: Invertor | None = None, q: np.ndarray | None = None
+    ) -> Data1D:
         """Create a new 1D data instance based on fitting results."""
         qtemp = pr.x
         if q is not None:
@@ -115,7 +118,7 @@ class InversionLogic:
 
         return new_plot
 
-    def newPRPlot(self, out: np.ndarray, pr: "Invertor", cov: np.ndarray | None = None) -> Data1D:
+    def newPRPlot(self, out: np.ndarray, pr: Invertor, cov: np.ndarray | None = None) -> Data1D:
         """Create a new P(r) plot from the inversion results."""
         x = np.arange(0.0, pr.dmax, pr.dmax / PR_PLOT_PTS)
 
