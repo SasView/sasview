@@ -26,19 +26,24 @@ from .UI.DMaxExplorer import Ui_DmaxExplorer
 logger = logging.getLogger(__name__)
 
 
-W = enum( 'NPTS',      #0
-          'DMIN',      #1
-          'DMAX',      #2
-          'VARIABLE',  #3
+W = enum(
+    "NPTS",
+    "DMIN",
+    "DMAX",
+    "VARIABLE",
 )
 
+
 class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
-    # The controller which is responsible for managing signal slots connections
-    # for the gui and providing an interface to the data model.
+    """
+    The controller which is responsible for managing signal slot connections
+    for the GUI and providing an interface to the data model.
+    """
+
     name = "Dmax Explorer"  # For displaying in the combo box
 
-    def __init__(self, pr_state, nfunc, parent=None):
-        super(DmaxWindow, self).__init__()
+    def __init__(self, pr_state: "Invertor", nfunc: int, parent=None):
+        super().__init__()
         self.setupUi(self)
         self.parent = parent
 
@@ -49,11 +54,11 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
         self.setWindowIcon(icon)
 
         self.pr_state = pr_state
-        self.nfunc = nfunc
+        self.nfunc: int = nfunc
         self.communicator = GuiUtils.Communicate()
 
         self.plot = PlotterWidget(self, self)
-        self.hasPlot = False
+        self.hasPlot: bool = False
         self.plot.showLegend = False
         self.verticalLayout.insertWidget(0, self.plot)
 
@@ -71,35 +76,38 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
         # Set up the model.
         self.setupModel()
 
-        # # Set up the mapper
+        # Set up the mapper
         self.setupMapper()
 
-    def setupValidators(self):
-        """Add validators on relevant line edits"""
+    def setupValidators(self) -> None:
+        """Add validators on relevant line edits."""
         self.Npts.setValidator(QtGui.QIntValidator())
         self.minDist.setValidator(GuiUtils.DoubleValidator())
         self.maxDist.setValidator(GuiUtils.DoubleValidator())
 
-    def setupSlots(self):
+    def setupSlots(self) -> None:
+        """Connect UI signals to their corresponding slots."""
         self.closeButton.clicked.connect(self.close)
         self.model.itemChanged.connect(self.modelChanged)
-        self.dependentVariable.currentIndexChanged.connect(lambda:self.modelChanged(None))
+        self.dependentVariable.currentIndexChanged.connect(lambda: self.modelChanged(None))
 
-    def setupModel(self):
+    def setupModel(self) -> None:
+        """Populate the model with initial values derived from the current P(r) state."""
         self.model.blockSignals(True)
         self.model.setItem(W.NPTS, QtGui.QStandardItem(str(self.nfunc)))
         self.model.blockSignals(False)
         self.model.blockSignals(True)
-        self.model.setItem(W.DMIN, QtGui.QStandardItem(f"{0.9*self.pr_state.dmax:.1f}"))
+        self.model.setItem(W.DMIN, QtGui.QStandardItem(f"{0.9 * self.pr_state.dmax:.1f}"))
         self.model.blockSignals(False)
         self.model.blockSignals(True)
-        self.model.setItem(W.DMAX, QtGui.QStandardItem(f"{1.1*self.pr_state.dmax:.1f}"))
+        self.model.setItem(W.DMAX, QtGui.QStandardItem(f"{1.1 * self.pr_state.dmax:.1f}"))
         self.model.blockSignals(False)
         self.model.blockSignals(True)
-        self.model.setItem(W.VARIABLE, QtGui.QStandardItem( "χ²/dof"))
+        self.model.setItem(W.VARIABLE, QtGui.QStandardItem("χ²/dof"))
         self.model.blockSignals(False)
 
-    def setupMapper(self):
+    def setupMapper(self) -> None:
+        """Configure the data widget mapper to bind model items to UI widgets."""
         self.mapper.setOrientation(QtCore.Qt.Vertical)
         self.mapper.setModel(self.model)
 
@@ -110,26 +118,28 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
 
         self.mapper.toFirst()
 
-    def modelChanged(self, item):
+    def modelChanged(self, item: QtGui.QStandardItem | None) -> None:
+        """Recompute and replot the D_max exploration results when the model changes."""
         if not self.mapper:
             return
 
-        iq0 = []
-        rg = []
-        pos = []
-        pos_err = []
-        osc = []
-        bck = []
-        chi2 = []
-        plotable_xs = [] #Introducing this to make sure size of x and y for plotting is the same.8
+        iq0: list[float] = []
+        rg: list[float] = []
+        pos: list[float] = []
+        pos_err: list[float] = []
+        osc: list[float] = []
+        bck: list[float] = []
+        chi2: list[float] = []
+        # Introducing this to make sure size of x and y for plotting is the same.
+        plotable_xs: list[float] = []
+
         try:
             dmin = float(self.model.item(W.DMIN).text())
             dmax = float(self.model.item(W.DMAX).text())
             npts = int(self.model.item(W.NPTS).text())
             xs = np.linspace(dmin, dmax, npts)
         except ValueError as e:
-            msg = (f"An input value is not correctly formatted. Please check {e.message}"
-                   )
+            msg = f"An input value is not correctly formatted. Please check {e}"
             logger.error(msg)
 
         original = self.pr_state.dmax
@@ -149,14 +159,14 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
                 plotable_xs.append(x)
             except Exception as ex:
                 # This inversion failed, skip this D_max value
-
-                msg = (f"ExploreDialog: inversion failed for D_max={x}\n"
-                       f"{ex}\n"
-                       f"Please adapt Inversion parameters")
-
+                msg = (
+                    f"ExploreDialog: inversion failed for D_max={x}\n"
+                    f"{ex}\n"
+                    f"Please adapt Inversion parameters"
+                )
                 logger.error(msg)
 
-        #Return the invertor to its original state
+        # Return the invertor to its original state
         self.pr_state.d_max = original
         try:
             self.pr_state.invert(self.nfunc)
@@ -202,13 +212,13 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
             self.plot.removePlot(data.name)
         self.hasPlot = True
         data.title = plotter
-        data._xaxis= x_label
+        data._xaxis = x_label
         data._xunit = x_unit
         data._yaxis = y_label
         data._yunit = y_unit
         self.plot.plot(data=data, marker="-")
 
-    def closeEvent(self, event):
-        """Override close event"""
+    def closeEvent(self, event: QtCore.QEvent) -> None:
+        """Override close event to clear the parent's reference to this window."""
         self.parent.dmaxWindow = None
         event.accept()
