@@ -11,7 +11,7 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Perspectives.Inversion.InversionPerspective import InversionWindow
 from sas.qtgui.Perspectives.Inversion.InversionUtils import WIDGETS
 from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Utilities.GuiUtils import Communicate
+from sas.qtgui.Utilities.GuiUtils import communicator
 
 logger = logging.getLogger(__name__)
 
@@ -25,9 +25,7 @@ class InversionTest:
 
         class dummy_manager:
             HELP_DIRECTORY_LOCATION = "html"
-            communicate = Communicate()
-            def communicator(self):
-                return self.communicate
+            communicator = communicator
 
         w = InversionWindow(parent=dummy_manager())
         w._parent = QtWidgets.QMainWindow()

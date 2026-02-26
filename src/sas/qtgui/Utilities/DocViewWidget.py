@@ -40,8 +40,8 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         # Necessary globals
         self.source: Path = Path(source)
 
-        from sas.qtgui.Utilities.GuiUtils import communicate
-        self.communicate = communicate
+        from sas.qtgui.Utilities.GuiUtils import communicator
+        self.communicator = communicator
         self.initializeSignals()  # Connect signals
 
         self.initialLoadHtml()
@@ -49,7 +49,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
     def initializeSignals(self):
         """Initialize all external signals that will trigger events for the window."""
         self.closeButton.clicked.connect(self.onCloseButtonClicked)
-        self.communicate.closeSignal.connect(self.onCloseButtonClicked)
+        self.communicator.closeSignal.connect(self.onCloseButtonClicked)
         self.webEngineViewer.urlChanged.connect(self.updateTitle)
         self.webEngineViewer.page().profile().downloadRequested.connect(self.onDownload)
 

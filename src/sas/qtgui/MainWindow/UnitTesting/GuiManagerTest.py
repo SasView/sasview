@@ -160,7 +160,7 @@ class GuiManagerTest:
         """
         # 1. version = 0.0.0
         version_info = {"version": "0.0.0"}
-        spy_status_update = QtSignalSpy(manager, manager.communicate.statusBarUpdateSignal)
+        spy_status_update = QtSignalSpy(manager, manager.communicator.statusBarUpdateSignal)
 
         manager.processVersion(version_info)
 
@@ -170,7 +170,7 @@ class GuiManagerTest:
 
         # 2. version < config.__version__
         version_info = {"version": "0.0.1"}
-        spy_status_update = QtSignalSpy(manager, manager.communicate.statusBarUpdateSignal)
+        spy_status_update = QtSignalSpy(manager, manager.communicator.statusBarUpdateSignal)
 
         manager.processVersion(version_info)
 
@@ -180,7 +180,7 @@ class GuiManagerTest:
 
         # 3. version > LocalConfig.__version__
         version_info = {"version": "999.0.0"}
-        spy_status_update = QtSignalSpy(manager, manager.communicate.statusBarUpdateSignal)
+        spy_status_update = QtSignalSpy(manager, manager.communicator.statusBarUpdateSignal)
         mocker.patch.object(webbrowser, "open")
 
         manager.processVersion(version_info)
@@ -194,7 +194,7 @@ class GuiManagerTest:
         # 4. couldn't load version
         version_info = {}
         mocker.patch.object(logger, "error")
-        spy_status_update = QtSignalSpy(manager, manager.communicate.statusBarUpdateSignal)
+        spy_status_update = QtSignalSpy(manager, manager.communicator.statusBarUpdateSignal)
 
         manager.processVersion(version_info)
 

@@ -17,6 +17,7 @@ from sas.qtgui.Utilities.GuiUtils import (
     Communicate,
     DoubleValidator,
     HashableStandardItem,
+    communicator,
     dataFromItem,
     updateModelItemWithPlot,
 )
@@ -93,7 +94,7 @@ class InversionWidget(QWidget, Ui_PrInversion):
         self.tab_name = tab_name
         self.tab_id = tab_id
 
-        self.communicator: Communicate  = self.parent.communicator()
+        self.communicator: Communicate  = communicator
 
         # We're going to use this structure even if we're just dealing with one specific datum. Just that this list
         # would then have one item in it.

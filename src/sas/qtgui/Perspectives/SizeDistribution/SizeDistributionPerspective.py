@@ -68,8 +68,8 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self._parent = parent
         self._model_item = QtGui.QStandardItem()
 
-        self.communicate = parent.communicator()
-        self.communicate.dataDeletedSignal.connect(self.removeData)
+        self.communicator = GuiUtils.communicator
+        self.communicator.dataDeletedSignal.connect(self.removeData)
 
         self.logic = SizeDistributionLogic()
 
@@ -103,9 +103,6 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
 
     ######################################################################
     # Base Perspective Class Definitions
-
-    def communicator(self):
-        return self.communicate
 
     def allowBatch(self):
         return False
@@ -519,7 +516,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             GuiUtils.updateModelItemWithPlot(self._model_item, self.fit_plot, title)
             plots.append(self.fit_plot)
 
-        self.communicate.plotRequestedSignal.emit(plots)
+        self.communicator.plotRequestedSignal.emit(plots)
 
     def getState(self):
         """
@@ -672,7 +669,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self.enableButtons()
         if result is None:
             msg = "Fitting failed."
-            self.communicate.statusBarUpdateSignal.emit(msg)
+            self.communicator.statusBarUpdateSignal.emit(msg)
             return
 
         # update the output box
@@ -695,7 +692,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             title = self.trust_plot.name
             GuiUtils.updateModelItemWithPlot(self._model_item, self.trust_plot, title)
             plots.append(self.trust_plot)
-        self.communicate.plotRequestedSignal.emit(plots)
+        self.communicator.plotRequestedSignal.emit(plots)
 
         # add fit to data plot
         if isinstance(result.data_max_ent, LoadData1D):

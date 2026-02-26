@@ -50,7 +50,7 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
 
         self.pr_state = pr_state
         self.nfunc = nfunc
-        self.communicator = GuiUtils.Communicate()
+        self.communicator = GuiUtils.communicator
 
         self.plot = PlotterWidget(self, self)
         self.hasPlot = False

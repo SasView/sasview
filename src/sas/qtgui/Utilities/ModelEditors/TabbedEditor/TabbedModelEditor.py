@@ -410,11 +410,11 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.setTabEdited(False)
 
         # Notify listeners
-        self.parent.communicate.customModelDirectoryChanged.emit()
+        GuiUtils.communicator.customModelDirectoryChanged.emit()
 
         # Notify the user
         msg = "Custom model " + filename + " successfully created."
-        self.parent.communicate.statusBarUpdateSignal.emit(msg)
+        GuiUtils.communicator.statusBarUpdateSignal.emit(msg)
         logger.info(msg)
 
     def createOrUpdateTab(self, filename: str | Path, widget: QtWidgets.QWidget):
@@ -471,8 +471,8 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             logger.error(traceback_to_show)
 
             # Set the status bar message
-            # GuiUtils.Communicate.statusBarUpdateSignal.emit("Model check failed")
-            self.parent.communicate.statusBarUpdateSignal.emit("Model check failed")
+            # GuiUtils.communicator.statusBarUpdateSignal.emit("Model check failed")
+            GuiUtils.communicator.statusBarUpdateSignal.emit("Model check failed")
 
             # Find all QTextBrowser and QCodeEditor children
             text_browsers = self.tabWidget.currentWidget().findChildren(QtWidgets.QTextBrowser)
@@ -547,7 +547,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.setTabEdited(False)
 
         # Notify listeners, since the plugin name might have changed
-        self.parent.communicate.customModelDirectoryChanged.emit()
+        GuiUtils.communicator.customModelDirectoryChanged.emit()
 
         if self.isWidgetInTab(self.tabWidget, self.plugin_widget):
             # Attempt to update the plugin widget with updated model information
@@ -555,7 +555,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
 
         # notify the user
         msg = f"{str(filename)} successfully saved."
-        self.parent.communicate.statusBarUpdateSignal.emit(msg)
+        GuiUtils.communicator.statusBarUpdateSignal.emit(msg)
         logger.info(msg)
 
     def noModelCheckWarning(self):

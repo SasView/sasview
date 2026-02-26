@@ -57,14 +57,14 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         self.lastTabClosed = None
         self.installEventFilter(self)
 
-        self.communicate = self.parent.communicator()
+        self.communicator = GuiUtils.communicator
 
         # Initialize the first tab
         self.addFit(None)
 
         # Deal with signals
         self.tabCloseRequested.connect(self.tabCloses)
-        self.communicate.dataDeletedSignal.connect(self.dataDeleted)
+        self.communicator.dataDeletedSignal.connect(self.dataDeleted)
         self.fittingStartedSignal.connect(self.onFittingStarted)
         self.fittingStoppedSignal.connect(self.onFittingStopped)
 
