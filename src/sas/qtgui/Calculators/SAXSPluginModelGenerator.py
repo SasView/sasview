@@ -57,6 +57,7 @@ parameters = [
 
 ###
 import pyausaxs as ausaxs
+ausaxs.settings.set(\"allow_unknown_atoms\", \"false\")
 ausaxs.settings.set(\"allow_unknown_residues\", \"false\")
 
 structure_path = "{str(Path(structure_path).as_posix())}"
