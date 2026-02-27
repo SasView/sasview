@@ -67,6 +67,11 @@ class ResultPanel(QtWidgets.QTabWidget):
             self.addTab(self.traceView, "Parameter Trace")
         else:
             for view in (self.correlationView, self.uncertaintyView, self.traceView):
+                # When switching from DREAM to another optimizer, the views are hidden, but data remains. Setting the
+                # state and clearing the figure are important for outside accessors, so they don't grab stale plots
+                # from a previous fit
+                view.state = None
+                view.figure.clear()
                 view.close()
         # no tabs in the widget - possibly LM optimizer. Mark "closed"
         if self.count()==0:
