@@ -46,6 +46,8 @@ env:
   INSTALLER_OLD_RUNID: 3204825457
   # The test-installer job can run with the pyinstaller debug bundle
   INSTALLER_USE_DEBUG: false
+  # https://pytest-qt.readthedocs.io/en/latest/troubleshooting.html - Required for PySide pytest runner
+  DISPLAY: ':99.0'
 
 jobs:
 
@@ -318,16 +320,22 @@ jobs:
           cd $RUNNER_TEMP
           python -m pytest -v -s test
 
-      # - name: Test GUI (Linux)
-      #   if: ${{ matrix.os == 'ubuntu-latest' }}
-      #   env:
-      #     PYOPENCL_COMPILER_OUTPUT: 1
-      #   run: |
-      #     # Suppress SIGSEGV from the tests until they can be fixed
-      #     retval=0
-      #     xvfb-run -a --server-args="-screen 0 1600x900x24" python -m pytest -rsx -v src/sas/qtgui/ || retval=$?
-      #     if [ $retval -eq 139 ]; then echo "WARNING: Python interpreter exited with Segmentation Fault. This normally indicates that Qt objects were not correctly deleted. This error is currently suppressed in SasView's test suite."; retval=0; fi
-      #     exit $retval
+      - name: Test GUI (Linux)
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        env:
+          PYOPENCL_COMPILER_OUTPUT: 1
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          # Ensure all test running dependencies are installed (https://pytest-qt.readthedocs.io/en/latest/troubleshooting.html)
+          sudo apt install -y libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils
+          /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1920x1200x24 -ac +extension GLX
+          # Run the UI generation routine (with force recreate enabled)
+          python src/sas/qtgui/convertUI.py -f
+          # Suppress SIGSEGV from the tests until they can be fixed
+          retval=0
+          xvfb-run -a --server-args="-screen 0 1600x900x24" python -m pytest -rsx -v src/sas/qtgui/ || retval=$?
+          if [ $retval -eq 139 ]; then echo "WARNING: Python interpreter exited with Segmentation Fault. This normally indicates that Qt objects were not correctly deleted. This error is currently suppressed in SasView's test suite."; retval=0; fi
+          exit $retval
 
   installer-matrix:
     needs: [matrix, build-sasview]

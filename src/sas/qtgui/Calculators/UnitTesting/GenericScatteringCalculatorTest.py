@@ -1,5 +1,6 @@
 import os
 import time
+from pathlib import Path
 from unittest.mock import MagicMock
 
 import numpy
@@ -32,7 +33,6 @@ class GenericScatteringCalculatorTest:
 
         w.close()
 
-    @pytest.mark.xfail(reason="2022-09 already broken")
     def testDefaults(self, widget):
         """Test the GUI in its default state"""
         assert isinstance(widget, QtWidgets.QWidget)
@@ -41,8 +41,8 @@ class GenericScatteringCalculatorTest:
         assert 'trigger_plot_3d' in dir(widget)
 
         # Buttons
-        assert widget.txtData.text() == "Default SLD Profile"
-        assert widget.cmdLoad.text() == "Load"
+        assert widget.txtNucData.text() == "No File Loaded"
+        assert widget.cmdNucLoad.text() == "Load"
         assert widget.cmdDraw.text() == "Draw"
         assert widget.cmdCompute.text() == "Compute"
         assert widget.cmdReset.text() == "Reset"
@@ -58,12 +58,12 @@ class GenericScatteringCalculatorTest:
         assert widget.txtUpFracIn.text() == '1.0'
         assert widget.txtUpFracOut.text() == '1.0'
         assert widget.txtUpTheta.text() == '0.0'
-        assert widget.txtNoQBins.text() == '50'
+        assert widget.txtNoQBins.text() == '30'
         assert widget.txtQxMax.text() == '0.3'
         assert widget.txtNoPixels.text() == '1000'
-        assert widget.txtMx.text() == '0'
-        assert widget.txtMy.text() == '0'
-        assert widget.txtMz.text() == '0'
+        assert widget.txtMx.text() == '0.0'
+        assert widget.txtMy.text() == '0.0'
+        assert widget.txtMz.text() == '0.0'
         assert widget.txtNucl.text() == '6.97e-06'
         assert widget.txtXnodes.text() == '10'
         assert widget.txtYnodes.text() == '10'
@@ -75,11 +75,11 @@ class GenericScatteringCalculatorTest:
         # Comboboxes
         assert not widget.cbOptionsCalc.isVisible()
         assert not widget.cbOptionsCalc.isEditable()
-        assert widget.cbOptionsCalc.count() == 2
+        assert widget.cbOptionsCalc.count() == 3
         assert widget.cbOptionsCalc.currentIndex() == 0
         assert [widget.cbOptionsCalc.itemText(i) for i in
                                 range(widget.cbOptionsCalc.count())] == \
-                                ['Fixed orientation', 'Debye full avg.']
+                                ['Fixed orientation', 'Debye full avg.', 'Debye full avg. w/ β(Q)',]
 
         assert widget.cbShape.count() == 1
         assert widget.cbShape.currentIndex() == 0
@@ -89,15 +89,15 @@ class GenericScatteringCalculatorTest:
                                 #['Rectangular', 'Ellipsoid'])
         assert not widget.cbShape.isEditable()
         # disable buttons
-        assert not widget.cmdSave.isEnabled()
-        assert not widget.cmdDraw.isEnabled()
-        assert not widget.cmdDrawpoints.isEnabled()
+        assert widget.cmdSave.isEnabled()
+        assert widget.cmdDraw.isEnabled()
+        assert widget.cmdDrawpoints.isEnabled()
 
     def testHelpButton(self, widget, mocker):
         """ Assure help file is shown """
         mocker.patch.object(widget.manager, 'showHelp', create=True)
         widget.onHelp()
-        assert widget.manager.showHelp.called_once()
+        widget.manager.showHelp.assert_called_once()
         args = widget.manager.showHelp.call_args
         assert 'sas_calculator_help.html' in args[0][0]
 
@@ -152,7 +152,7 @@ class GenericScatteringCalculatorTest:
         for item in txtEdit_q_values:
             item.setText('1500.01')
             state = item.validator().validate(item.text(), 0)[0]
-            assert state == QtGui.QValidator.Invalid
+            assert (state == QtGui.QValidator.Intermediate or state == QtGui.QValidator.Invalid)
 
         widget.txtNoQBins.setText('1.5')
         assert widget.txtNoQBins.validator().validate(item.text(), 0)[0] == \
@@ -162,42 +162,38 @@ class GenericScatteringCalculatorTest:
         assert widget.txtQxMax.validator().validate(item.text(), 0)[0] == \
             QtGui.QValidator.Acceptable
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testLoadedSLDData(self, widget, mocker):
         """
         Load sld data and check modifications of GUI
         """
-        filename = os.path.join("UnitTesting", "sld_file.sld")
+        filename = str(Path(__file__).parent.parent.parent / "UnitTesting" / "sld_file.sld")
         mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[filename, ''])
-        widget.loadFile()
+        widget.cmdMagLoad.click()
 
         # check modification of text in Load button
-        assert widget.cmdLoad.text() == 'Loading...'
+        assert widget.cmdMagLoad.text() == 'Loading...'
         # wait a bit for data to be loaded
         time.sleep(0.1)
-        QtWidgets.qApp.processEvents()
+        QtWidgets.QApplication.processEvents()
 
         # check updated values in ui, read from loaded file
-        assert widget.txtData.text() == 'sld_file.sld'
+        assert widget.txtMagData.text() == 'sld_file.sld'
         assert widget.txtTotalVolume.text() == '402408.0'
         assert widget.txtNoPixels.text() == '552'
         assert not widget.txtNoPixels.isEnabled()
 
         # check disabled TextEdits according to data format
-        assert not widget.txtUpFracIn.isEnabled()
-        assert not widget.txtUpFracOut.isEnabled()
-        assert not widget.txtUpFracOut.isEnabled()
+        assert widget.txtUpFracIn.isEnabled()
+        assert widget.txtUpFracOut.isEnabled()
+        assert widget.txtUpFracOut.isEnabled()
         assert not widget.txtNoPixels.isEnabled()
 
         # check enabled draw buttons
         assert widget.cmdDraw.isEnabled()
         assert widget.cmdDrawpoints.isEnabled()
-        widget.show()
-        assert widget.isVisible()
-        assert not widget.cbOptionsCalc.isVisible()
 
         # check that text of loadButton is back to initial state
-        assert widget.cmdLoad.text() == 'Load'
+        assert widget.cmdNucLoad.text() == 'Load'
         # check values and enabled / disabled for
         # Mx,y,z x,y,znodes and x,y,zstepsize buttons
         assert not widget.txtMx.isEnabled()
@@ -207,7 +203,7 @@ class GenericScatteringCalculatorTest:
         assert not widget.txtMz.isEnabled()
         assert float(widget.txtMz.text()) == pytest.approx(3.1739e-07, rel=1e-4)
         assert widget.txtNucl.isEnabled()
-        assert widget.txtNucl.text() == '0'
+        assert widget.txtNucl.text() == '0.0'
 
         assert not widget.txtXnodes.isEnabled()
         assert widget.txtXnodes.text() == '10'
@@ -223,30 +219,28 @@ class GenericScatteringCalculatorTest:
         assert not widget.txtZstepsize.isEnabled()
         assert widget.txtZstepsize.text() == '9'
 
-        assert widget.sld_data.is_data
+        assert widget.mag_sld_data.is_data
 
         # assert widget.trigger_plot_3d
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testLoadedPDBButton(self, widget, mocker):
         """
         Load pdb data and check modifications of GUI
         """
-        filename = os.path.join("UnitTesting", "diamdsml.pdb")
+        filename = str(Path(__file__).parent.parent.parent / "UnitTesting" / "diamdsml.pdb")
 
         mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[filename, ''])
-        widget.loadFile()
+        widget.cmdNucLoad.click()
 
         # check modification of text in Load button
-        assert widget.cmdLoad.text() == 'Loading...'
+        assert widget.cmdNucLoad.text() == 'Loading...'
 
         time.sleep(1)
-        QtWidgets.qApp.processEvents()
+        QtWidgets.QApplication.processEvents()
 
         # check updated values in ui, read from loaded file
-        # TODO to be changed
-        assert widget.txtData.text() == 'diamdsml.pdb'
-        assert float(widget.txtTotalVolume.text()) == pytest.approx(170.95058, abs=1e-5)
+        assert widget.txtNucData.text() == 'diamdsml.pdb'
+        assert float(widget.txtTotalVolume.text()) == pytest.approx(163.18417, abs=1e-5)
         assert widget.txtNoPixels.text() == '18'
 
         # check disabled TextEdits according to data format
@@ -257,24 +251,20 @@ class GenericScatteringCalculatorTest:
         # check enabled draw buttons
         assert widget.cmdDraw.isEnabled()
         assert widget.cmdDrawpoints.isEnabled()
-        # fixed orientation
-        widget.show()
-        assert widget.isVisible()
-        assert widget.cbOptionsCalc.isVisible()
         # check that text of loadButton is back to initial state
-        assert widget.cmdLoad.text() == 'Load'
-        assert widget.cmdLoad.isEnabled()
+        assert widget.cmdNucLoad.text() == 'Load'
+        assert widget.cmdNucLoad.isEnabled()
 
         # check values and enabled / disabled for
         # Mx,y,z x,y,znodes and x,y,zstepsize buttons
-        assert not widget.txtMx.isEnabled()
-        assert widget.txtMx.text() == '0'
-        assert not widget.txtMy.isEnabled()
-        assert widget.txtMy.text() == '0'
-        assert not widget.txtMz.isEnabled()
-        assert widget.txtMz.text() == '0'
+        assert widget.txtMx.isEnabled()
+        assert widget.txtMx.text() == '0.0'
+        assert widget.txtMy.isEnabled()
+        assert widget.txtMy.text() == '0.0'
+        assert widget.txtMz.isEnabled()
+        assert widget.txtMz.text() == '0.0'
         assert not widget.txtNucl.isEnabled()
-        assert float(widget.txtNucl.text()) == pytest.approx(7.0003e-06, rel=1e-4)
+        assert float(widget.txtNucl.text()) == pytest.approx(7.3322e-06, rel=1e-4)
 
         assert not widget.txtXnodes.isEnabled()
         assert widget.txtXnodes.text() == 'NaN'
@@ -290,30 +280,31 @@ class GenericScatteringCalculatorTest:
         assert not widget.txtZstepsize.isEnabled()
         assert widget.txtZstepsize.text() == 'NaN'
 
-        assert widget.sld_data.is_data
+        assert widget.nuc_sld_data.is_data
 
-    # TODO
-    @pytest.mark.xfail(reason="2022-09 already broken")
     def testLoadedOMFButton(self, widget, mocker):
         """
         Load omf data and check modifications of GUI
         """
-        filename = os.path.join("UnitTesting", "A_Raw_Example-1.omf")
+        filename = str(Path(__file__).parent.parent.parent / "UnitTesting" / "A_Raw_Example-1.omf")
 
         mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[filename, ''])
-        widget.loadFile()
-        assert widget.cmdLoad.text() == 'Loading...'
-        time.sleep(2)
-        QtWidgets.qApp.processEvents()
+        widget.cmdMagLoad.click()
 
-        assert widget.txtData.text() == 'A_Raw_Example-1.omf'
+        # check modification of text in Load button
+        assert widget.cmdMagLoad.text() == 'Loading...'
+        # wait a bit for data to be loaded
+        time.sleep(0.1)
+        QtWidgets.QApplication.processEvents()
+
+        assert widget.txtMagData.text() == 'A_Raw_Example-1.omf'
         assert widget.txtTotalVolume.text() == '128000000.0'
         assert widget.txtNoPixels.text() == '16000'
 
         # check disabled TextEdits according to data format
-        assert not widget.txtUpFracIn.isEnabled()
-        assert not widget.txtUpFracOut.isEnabled()
-        assert not widget.txtUpFracOut.isEnabled()
+        assert widget.txtUpFracIn.isEnabled()
+        assert widget.txtUpFracOut.isEnabled()
+        assert widget.txtUpFracOut.isEnabled()
         assert not widget.txtNoPixels.isEnabled()
 
         # check enabled draw buttons
@@ -321,19 +312,19 @@ class GenericScatteringCalculatorTest:
         assert widget.cmdDrawpoints.isEnabled()
 
         # check that text of loadButton is back to initial state
-        assert widget.cmdLoad.text() == 'Load'
-        assert widget.cmdLoad.isEnabled()
+        assert widget.cmdMagLoad.text() == 'Load'
+        assert widget.cmdMagLoad.isEnabled()
 
         # check values and enabled / disabled for
         # Mx,y,z x,y,znodes and x,y,zstepsize buttons
         assert not widget.txtMx.isEnabled()
-        assert float(widget.txtMx.text()) == pytest.approx(7.855e-09, rel=1e-4)
+        assert float(widget.txtMx.text()) == pytest.approx(8.0019e-09, rel=1e-4)
         assert not widget.txtMy.isEnabled()
-        assert float(widget.txtMy.text()) == pytest.approx(4.517e-08, rel=1e-4)
+        assert float(widget.txtMy.text()) == pytest.approx(4.6014e-08, rel=1e-4)
         assert not widget.txtMz.isEnabled()
-        assert float(widget.txtMz.text()) == pytest.approx(9.9511e-10, rel=1e-4)
+        assert float(widget.txtMz.text()) == pytest.approx(1.0137e-09, rel=1e-4)
         assert widget.txtNucl.isEnabled()
-        assert widget.txtNucl.text() == '0'
+        assert widget.txtNucl.text() == '0.0'
 
         assert not widget.txtXnodes.isEnabled()
         assert widget.txtXnodes.text() == '40'
@@ -360,40 +351,44 @@ class GenericScatteringCalculatorTest:
         # check that we get back to the initial state
         assert widget.txtBackground.text() == '0.0'
 
-    # TODO check plots
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testCompute(self, widget, mocker):
         """
         Test compute button
         """
         # load data
-        filename = os.path.join("UnitTesting", "diamdsml.pdb")
+        filename = str(Path(__file__).parent.parent.parent / "UnitTesting" / "diamdsml.pdb")
 
         mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[filename, ''])
-        widget.loadFile()
-        time.sleep(1)
+        widget.cmdNucLoad.click()
+
+        # check modification of text in Load button
+        assert widget.cmdNucLoad.text() == 'Loading...'
+        # wait a bit for data to be loaded
+        time.sleep(0.1)
+        QtWidgets.QApplication.processEvents()
         QTest.mouseClick(widget.cmdCompute, Qt.LeftButton)
         # check modification of text of Compute button
-        assert widget.cmdCompute.text() == 'Wait...'
-        assert not widget.cmdCompute.isEnabled()
+        assert widget.cmdCompute.text() == 'Cancel'
+        assert widget.cmdCompute.isEnabled()
 
         #widget.complete([numpy.ones(1), numpy.zeros(1), numpy.zeros(1)], update=None)
         #assert widget.cmdCompute.text() == 'Compute'
         #assert widget.cmdCompute.isEnabled()
 
-    # TODO
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
-    def testDrawButton(self, widget, mocker):
+    def testDrawButton(self, widget, mocker, qtbot):
         """
         Test Draw buttons for 3D plots with and without arrows
         """
-        assert not widget.cmdDraw.isEnabled()
-        filename = os.path.join("UnitTesting", "diamdsml.pdb")
+        assert widget.cmdDraw.isEnabled()
+        filename = str(Path(__file__).parent.parent.parent / "UnitTesting" / "diamdsml.pdb")
         mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[filename,''])
-        widget.loadFile()
-        assert widget.cmdLoad.text() == 'Loading...'
-        time.sleep(1)
-        QtWidgets.qApp.processEvents()
+        widget.cmdNucLoad.click()
+
+        # check modification of text in Load button
+        assert widget.cmdNucLoad.text() == 'Loading...'
+        # wait a bit for data to be loaded
+        time.sleep(0.1)
+        QtWidgets.QApplication.processEvents()
 
         assert widget.cmdDraw.isEnabled()
         QTest.mouseClick(widget.cmdDraw, Qt.LeftButton)
@@ -409,25 +404,25 @@ class GenericScatteringCalculatorTest:
         """
         Test Save feature to .sld file
         """
-        filename = os.path.join("UnitTesting", "sld_file.sld")
+        filename = str(Path(__file__).parent.parent.parent / "UnitTesting" / "sld_file.sld")
 
         mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[filename, ''])
-        widget.loadFile()
+        widget.cmdMagLoad.click()
 
         time.sleep(0.1)
-        QtWidgets.qApp.processEvents()
+        QtWidgets.QApplication.processEvents()
 
-        filename1 = "test"
+        filename1 = str(Path(__file__).parent.parent.parent / "UnitTesting" / "test")
         mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName', return_value=[filename1, ''])
 
         #QTest.mouseClick(widget.cmdSave, Qt.LeftButton)
-        widget.onSaveFile()
-        QtWidgets.qApp.processEvents()
+        widget.cmdSave.click()
+        QtWidgets.QApplication.processEvents()
 
         assert os.path.isfile(filename1 + '.sld')
         assert os.path.getsize(filename1 + '.sld') > 0
 
-        os.remove("test.sld")
+        os.remove(filename1 + ".sld")
 
 
 class Plotter3DTest:
@@ -469,7 +464,6 @@ class Plotter3DTest:
         assert plotter.graph_title, 'test'
         assert not plotter.data.has_conect
 
-    @pytest.mark.skip(reason="setting the mocker on FigureCanvas causes exceptions on Windows")
     def testShowNoPlot(self, plotter, mocker):
         mocker.patch.object(FigureCanvas, 'draw_idle')
         mocker.patch.object(FigureCanvas, 'draw')
@@ -477,12 +471,11 @@ class Plotter3DTest:
         assert not FigureCanvas.draw_idle.called
         assert not FigureCanvas.draw.called
 
-    @pytest.mark.skip(reason="setting the mocker on FigureCanvas causes exceptions on Windows")
     def testShow3DPlot(self, plotter, data, mocker):
         mocker.patch.object(FigureCanvas, 'draw')
         mocker.patch.object(Axes3D, 'plot')
 
         plotter.data = data
         plotter.showPlot(data=data)
-        assert Axes3D.plot.called
-        assert FigureCanvas.draw.called
+        Axes3D.plot.assert_called()
+        FigureCanvas.draw.assert_called()

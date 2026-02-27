@@ -44,6 +44,13 @@ class Plotter2DTest:
                       zmin=1.0, zmax=20.0,
                       )
 
+        data.xmin = 1.0
+        data.xmax = 5.0
+        data.ymin = 1.0
+        data.ymax = 15.0
+        data.zmin = 1.0
+        data.zmax = 20.0
+
         data.title = "Test data"
         data.id = 1
         data.ndim = 2
@@ -65,27 +72,23 @@ class Plotter2DTest:
         """ Look at the plotting """
         mocker.patch.object(plotter, 'plot')
         plotter.plot()
-        assert plotter.plot.called_once()
+        plotter.plot.assert_called_once()
 
-    @pytest.mark.skip(reason="2022-09 already broken")
     def testCalculateDepth(self, plotter):
         ''' Test the depth calculator '''
-        plotter.data = self.data
 
         # Default, log scale
         depth = plotter.calculateDepth()
-        assert depth == (0.1, 1.e20)
+        assert depth == (10.0, 1.e20)
 
         # Change the scale to linear
         plotter.scale = 'linear'
         depth = plotter.calculateDepth()
-        assert depth[0] == -32.
+        assert depth[0] == 0.0
         assert depth[1] == pytest.approx(1.30103, abs=1e-5)
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testOnColorMap(self, plotter, mocker):
         ''' Respond to the color map event '''
-        plotter.data = self.data
         plotter.plot()
         plotter.show()
 
@@ -95,22 +98,20 @@ class Plotter2DTest:
         plotter.onColorMap()
 
         # Check that exec_ got called
-        assert QtWidgets.QDialog.exec_.called
+        QtWidgets.QDialog.exec_.assert_called()
 
         assert plotter.cmap == "jet"
-        assert plotter.vmin == pytest.approx(0.1, abs=1e-6)
+        assert plotter.vmin == pytest.approx(10.0, abs=1e-6)
         assert plotter.vmax == pytest.approx(1e+20, abs=1e-6)
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testOnToggleScale(self, plotter, mocker):
         """ Respond to the event by replotting """
-        plotter.data = self.data
         plotter.show()
         mocker.patch.object(FigureCanvas, 'draw_idle')
 
         plotter.onToggleScale(None)
 
-        assert FigureCanvas.draw_idle.called
+        FigureCanvas.draw_idle.assert_called()
 
     def testOnToggleMaskedPoints(self, plotter, mocker):
         """ Respond to the masked data event by replotting """
@@ -131,16 +132,16 @@ class Plotter2DTest:
         mocker.patch.object(plotter, 'plot')
         plotter.onToggleMaskedData(None)
         assert plotter._show_masked_data
-        assert plotter.plot.called_once()
+        plotter.plot.assert_called_once()
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testOnBoxSum(self, plotter, mocker):
         """ Test the box sum display and functionality """
 
         # hacky way to make things work in manipulations._sum
-        self.data.detector = [1]
-        self.data.err_data = numpy.array([0.0, 0.0, 0.1, 0.0])
-        plotter.data = self.data
+        data = plotter.data0
+        data.detector = [1]
+        data.err_data = numpy.array([[1.0, 2.0, 3.0, 4.0]]*4)
+        plotter.data = data
         plotter.show()
 
         # Mock the main window
@@ -154,13 +155,11 @@ class Plotter2DTest:
         assert plotter.boxwidget.isVisible()
         assert isinstance(plotter.boxwidget.model, QtGui.QStandardItemModel)
 
-    @pytest.mark.skip(reason="2022-09 already broken")
     def testContextMenuQuickPlot(self, plotter, mocker):
         """ Test the right click menu """
-        plotter.data = self.data
         plotter.createContextMenuQuick()
         actions = plotter.contextMenu.actions()
-        assert len(actions) == 7
+        assert len(actions) == 9
 
         # Trigger Print Image and make sure the method is called
         assert actions[1].text() == "Print Image"
@@ -189,13 +188,12 @@ class Plotter2DTest:
         self.clipboard_called = False
         def done():
             self.clipboard_called = True
-        QtCore.QObject.connect(QtWidgets.qApp.clipboard(), QtCore.SIGNAL("dataChanged()"), done)
+        QtCore.QObject.connect(QtWidgets.QApplication.clipboard(), QtCore.SIGNAL("dataChanged()"), done)
         actions[2].trigger()
-        QtWidgets.qApp.processEvents()
+        QtWidgets.QApplication.processEvents()
         # Make sure clipboard got updated.
         assert self.clipboard_called
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testShowNoPlot(self, plotter, mocker):
         """ Test the plot rendering and generation """
 
@@ -204,18 +202,17 @@ class Plotter2DTest:
 
         # Test early return on no data
         plotter.showPlot(data=None,
-                              qx_data=self.data.qx_data,
-                              qy_data=self.data.qy_data,
-                              xmin=self.data.xmin,
-                              xmax=self.data.xmax,
-                              ymin=self.data.ymin, ymax=self.data.ymax,
-                              cmap=None, zmin=None,
+                              qx_data=plotter.data0.qx_data,
+                              qy_data=plotter.data0.qy_data,
+                              xmin=plotter.data0.xmin,
+                              xmax=plotter.data0.xmax,
+                              ymin=plotter.data0.ymin, ymax=plotter.data0.ymax,
+                              cmap=None, zmin=0.0,
                               zmax=None)
 
-        assert not FigureCanvas.draw_idle.called
-        assert not FigureCanvas.draw.called
+        FigureCanvas.draw_idle.assert_not_called()
+        FigureCanvas.draw.assert_not_called()
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testShow3DPlot(self, plotter, mocker):
         """ Test the 3Dplot rendering and generation """
         # Test 3D printout
@@ -223,20 +220,19 @@ class Plotter2DTest:
         mocker.patch.object(Axes3D, 'plot_surface')
         mocker.patch.object(plotter.figure, 'colorbar')
 
+        data = plotter.data0
         plotter.dimension = 3
-        plotter.data = self.data
-        plotter.showPlot(data=plotter.data0.data,
-                              qx_data=self.data.qx_data,
-                              qy_data=self.data.qy_data,
-                              xmin=self.data.xmin,
-                              xmax=self.data.xmax,
-                              ymin=self.data.ymin, ymax=self.data.ymax,
-                              cmap=None, zmin=None,
+        plotter.showPlot(data=data.data,
+                              qx_data=data.qx_data,
+                              qy_data=data.qy_data,
+                              xmin=data.xmin,
+                              xmax=data.xmax,
+                              ymin=data.ymin, ymax=data.ymax,
+                              cmap=None, zmin=0.0,
                               zmax=None)
-        assert Axes3D.plot_surface.called
-        assert FigureCanvas.draw.called
+        Axes3D.plot_surface.assert_called()
+        FigureCanvas.draw.assert_called()
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testShow2DPlot(self, plotter, mocker):
         """ Test the 2Dplot rendering and generation """
         # Test 2D printout
@@ -244,13 +240,12 @@ class Plotter2DTest:
         mocker.patch.object(plotter.figure, 'colorbar')
 
         plotter.dimension = 2
-        plotter.data = self.data
-        plotter.showPlot(data=self.data.data,
-                              qx_data=self.data.qx_data,
-                              qy_data=self.data.qy_data,
-                              xmin=self.data.xmin,
-                              xmax=self.data.xmax,
-                              ymin=self.data.ymin, ymax=self.data.ymax,
-                              cmap=None, zmin=None,
+        plotter.showPlot(data=plotter.data0.data,
+                              qx_data=plotter.data0.qx_data,
+                              qy_data=plotter.data0.qy_data,
+                              xmin=plotter.data0.xmin,
+                              xmax=plotter.data0.xmax,
+                              ymin=plotter.data0.ymin, ymax=plotter.data0.ymax,
+                              cmap=None, zmin=0.0,
                               zmax=None)
-        assert FigureCanvas.draw_idle.called
+        FigureCanvas.draw_idle.assert_called()

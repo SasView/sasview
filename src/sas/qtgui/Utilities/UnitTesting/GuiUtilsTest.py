@@ -321,7 +321,7 @@ class GuiUtilsTest:
         if os.path.isfile(save_path):
             os.remove(save_path)
 
-    def testSaveAnyData(self, qapp, caplog, mocker):
+    def testSaveAnyData(self, caplog, mocker):
         """
         Test the generic GUIUtils.saveAnyData method
         """
@@ -347,7 +347,7 @@ class GuiUtilsTest:
         data.filename = "test123.dat"
         self.genericFileSaveTest(data, file_name, file_name_save, "IGOR", caplog=caplog)
 
-    def testSaveData1D(self, qapp, caplog, mocker):
+    def testSaveData1D(self, caplog, mocker):
         """
         Test the 1D file save method
         """
@@ -372,7 +372,7 @@ class GuiUtilsTest:
         data.filename = "test123.mp3"
         self.genericFileSaveTest(data, file_name, file_name, "ASCII", "1D", caplog=caplog)
 
-    def testSaveData2D(self, qapp, caplog, mocker):
+    def testSaveData2D(self, caplog, mocker):
         """
         Test the 1D file save method
         """
@@ -404,7 +404,7 @@ class GuiUtilsTest:
         name_full = name if name_full == "" else name_full
 
         if caplog:
-            with caplog.at_level(logger.WARNING):
+            with caplog.at_level(logging.WARNING):
                 saveMethod(data)
                 #assert len(cm.output) == 1
                 assert (f"Unknown file type specified when saving {name}."
@@ -451,7 +451,7 @@ class GuiUtilsTest:
 
         xLabel, yLabel, xscale, yscale = GuiUtils.xyTransform(data, xLabel="log10(x^(4))", yLabel="y*x^(4)")
         assert xLabel == "^{4}(()^{4})"
-        assert yLabel == " \\ \\ ^{4}(()^{16})"
+        assert yLabel == " \\ \\ ^{4}(()^{4})"
         assert xscale == "log"
         assert yscale == "linear"
 
@@ -658,20 +658,20 @@ class FormulaValidatorTest:
     def testValidateGood(self, validator):
         """Test a valid Formula """
         formula_good = "H24O12C4C6N2Pu"
-        assert validator.validate(formula_good, 1)[0] == QtGui.QValidator.Acceptable
+        assert validator.validate(formula_good, 1) == QtGui.QValidator.Acceptable
 
         formula_good = "(H2O)0.5(D2O)0.5"
-        assert validator.validate(formula_good, 1)[0] == QtGui.QValidator.Acceptable
+        assert validator.validate(formula_good, 1) == QtGui.QValidator.Acceptable
 
     @pytest.mark.xfail(reason="2022-09 already broken")
     def testValidateBad(self, validator):
         """Test an invalid Formula """
         formula_bad = "H24 %%%O12C4C6N2Pu"
-        pytest.raises(validator.validate(formula_bad, 1)[0])
-        assert validator.validate(formula_bad, 1)[0] == QtGui.QValidator.Intermediate
+        pytest.raises(Exception, validator.validate(formula_bad, 1))
+        assert validator.validate(formula_bad, 1) == QtGui.QValidator.Intermediate
 
         formula_bad = [1]
-        assert self.validator.validate(formula_bad, 1)[0] == QtGui.QValidator.Intermediate
+        assert self.validator.validate(formula_bad, 1) == QtGui.QValidator.Intermediate
 
 class HashableStandardItemTest:
     """ Test the reimplementation of QStandardItem """

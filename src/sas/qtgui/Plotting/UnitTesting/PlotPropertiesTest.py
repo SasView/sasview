@@ -73,7 +73,6 @@ class PlotPropertiesTest:
         assert widget.cbColor.currentIndex() == 1
         assert widget.cbColor.currentText() == "Green"
 
-
     def testOnColorIndexChange(self, widget):
         '''Test the response to color index change event'''
         # Intitial population of the color combo box

@@ -18,17 +18,17 @@ class PluginDefinitionTest:
 
     def testDefaults(self, widget):
         """Test the GUI in its default state"""
-        assert isinstance(widget.highlight, PythonHighlighter)
+        assert isinstance(widget.highlightFunction, PythonHighlighter)
         assert isinstance(widget.parameter_dict, dict)
         assert isinstance(widget.pd_parameter_dict, dict)
 
-        assert len(widget.model) == 6
+        assert len(widget.model) == 9
         assert "filename" in widget.model.keys()
         assert "overwrite" in widget.model.keys()
         assert "description" in widget.model.keys()
         assert "parameters" in widget.model.keys()
         assert "pd_parameters" in widget.model.keys()
-        assert "text" in widget.model.keys()
+        assert "func_text" in widget.model.keys()
 
     def testOnOverwrite(self, widget):
         """See what happens when the overwrite checkbox is selected"""
@@ -53,7 +53,6 @@ class PluginDefinitionTest:
         # Change the name
         new_text = "Duck season"
         widget.txtName.setText(new_text)
-        widget.txtName.editingFinished.emit()
 
         # Check the signal
         assert spy_signal.count() == 1
@@ -126,7 +125,7 @@ class PluginDefinitionTest:
         widget.tblParamsPD.setItem(0,0,QTableWidgetItem(new_param))
 
         # Check the signal
-        assert spy_signal.count() == 1
+        assert spy_signal.count() == 2
 
         # model dict updated
         assert widget.model['pd_parameters'] == {0: (new_param, None)}
@@ -136,7 +135,7 @@ class PluginDefinitionTest:
         widget.tblParamsPD.setItem(0,1,QTableWidgetItem(new_value))
 
         # Check the signal
-        assert spy_signal.count() == 2
+        assert spy_signal.count() == 3
 
         # model dict updated
         assert widget.model['pd_parameters'] == {0: (new_param, new_value)}
@@ -156,4 +155,4 @@ class PluginDefinitionTest:
         assert spy_signal.count() == 1
 
         # model dict updated
-        assert widget.model['text'] == new_model.rstrip()
+        assert widget.model['func_text'] == new_model.rstrip()

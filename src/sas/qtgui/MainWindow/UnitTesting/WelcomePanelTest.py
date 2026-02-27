@@ -26,8 +26,9 @@ class WelcomePanelTest:
     def testVersion(self, widget):
         '''Test the version string'''
         version = widget.lblVersion
+        ack = widget.lblAcknowledgements
         assert isinstance(version, QtWidgets.QLabel)
 
         assert "SasView" in version.text()
         for inst in "UTK, UMD, ESS, NIST, ORNL, ISIS, ILL, DLS, TUD, BAM, ANSTO".split(", "):
-            assert inst in version.text()
+            assert inst in ack.text()

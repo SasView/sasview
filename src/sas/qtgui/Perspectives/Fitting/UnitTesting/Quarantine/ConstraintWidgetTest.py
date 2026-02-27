@@ -15,6 +15,7 @@ from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
 from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
 
 
+# TODO: Turn this back on once we figure out the cause of the fatal exceptions
 class ConstraintWidgetTest:
     '''Test the ConstraintWidget dialog'''
 

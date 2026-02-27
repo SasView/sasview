@@ -1,5 +1,5 @@
 import pytest
-from pyside6 import QtGui, QtWidgets
+from PySide6 import QtGui, QtWidgets
 from PySide6.QtCore import Qt
 from PySide6.QtTest import QTest
 
@@ -20,7 +20,7 @@ class InvariantDetailsTest:
         w._model = QtGui.QStandardItemModel()
         w._model.setItem(WIDGETS.W_INVARIANT, QtGui.QStandardItem(str(10.)))
         w._model.setItem(WIDGETS.W_INVARIANT_ERR, QtGui.QStandardItem(str(0.1)))
-        w._model.setItem(WIDGETS.W_ENABLE_LOWQ, QtGui.QStandardItem('true'))
+        w._model.setItem(WIDGETS.W_ENABLE_LOWQ_EX, QtGui.QStandardItem('true'))
         w._model.setItem(WIDGETS.D_LOW_QSTAR, QtGui.QStandardItem(str(9.)))
         w._model.setItem(WIDGETS.D_LOW_QSTAR_ERR, QtGui.QStandardItem(str(0.03)))
         w._model.setItem(WIDGETS.D_DATA_QSTAR, QtGui.QStandardItem(str(10.)))
@@ -29,12 +29,9 @@ class InvariantDetailsTest:
         w._model.setItem(WIDGETS.D_HIGH_QSTAR_ERR, QtGui.QStandardItem(str(0.01)))
 
         # High-Q
-        w._model.setItem(WIDGETS.W_ENABLE_HIGHQ, QtGui.QStandardItem('false'))
+        w._model.setItem(WIDGETS.W_ENABLE_HIGHQ_EX, QtGui.QStandardItem('false'))
 
         yield w
-
-        """Destroy the Invariant Details window """
-        w.close()
 
     def testDefaults(self, widget):
         """Test the GUI in its default state"""

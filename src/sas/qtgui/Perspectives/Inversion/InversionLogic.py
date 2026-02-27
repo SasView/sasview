@@ -152,7 +152,7 @@ class InversionLogic:
         """
         Adds errors to data set is they are not available.
         """
-        if self.data.dy.size == 0.0:
+        if self.data.dy is None or self.data.dy.size == 0.0:
             self.data.dy = np.sqrt(np.fabs(self.data.y))*sigma
 
         if self.data.dy is not None:

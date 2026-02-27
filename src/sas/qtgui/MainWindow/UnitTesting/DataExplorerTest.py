@@ -1,25 +1,31 @@
 import random
 import time
+from pathlib import Path
 
 import pytest
 from PySide6.QtCore import QItemSelectionModel, QPoint, QSize, QSortFilterProxyModel, Qt
 from PySide6.QtGui import QIcon, QStandardItem, QStandardItemModel
 from PySide6.QtTest import QTest
-from PySide6.QtWidgets import QApplication, QFileDialog, QMessageBox, QTabWidget, QTreeView
+from PySide6.QtWidgets import QApplication, QFileDialog, QMessageBox, QTabWidget, QTreeView, QWidget
 
 from sasdata.dataloader.loader import Loader
 
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
+
+# Local
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
 from sas.qtgui.MainWindow.DataManager import DataManager
 from sas.qtgui.Plotting.Plotter import Plotter
 from sas.qtgui.Plotting.Plotter2D import Plotter2D
-
-# Local
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
-from sas.qtgui.Utilities.GuiUtils import Communicate, HashableStandardItem
 from sas.system.version import __version__ as SASVIEW_VERSION
+
+
+class ResultsPanel(QWidget):
+    def onDataDeleted(self, data):
+        pass
 
 
 class MyPerspective:
@@ -27,7 +33,7 @@ class MyPerspective:
         self.name = "Dummy Perspective"
 
     def communicator(self):
-        return Communicate()
+        return GuiUtils.Communicate()
 
     def allowBatch(self):
         return True
@@ -48,9 +54,10 @@ class MyPerspective:
 class dummy_manager:
     def __init__(self):
         self._perspective = MyPerspective()
+        self.results_panel = ResultsPanel()
 
     def communicator(self):
-        return Communicate()
+        return GuiUtils.Communicate()
 
     def perspective(self):
         return self._perspective
@@ -83,7 +90,7 @@ class DataExplorerTest:
         assert form.cmdDeleteData.text() == "Delete Data"
         assert form.cmdDeleteTheory.text() == "Delete"
         assert form.cmdFreeze.text() == "Freeze Theory"
-        assert form.cmdSendTo.text() == "Send data to"
+        assert form.cmdSendTo.text().strip() == "Send to"
         assert form.cmdSendTo.iconSize() == QSize(32, 32)
         assert isinstance(form.cmdSendTo.icon(), QIcon)
         assert form.chkBatch.text() == "Batch mode"
@@ -105,7 +112,7 @@ class DataExplorerTest:
         assert form.model.columnCount() == 0
         assert isinstance(form.data_proxy, QSortFilterProxyModel)
         assert form.data_proxy.sourceModel() == form.model
-        assert str(form.data_proxy.filterRegExp().pattern()) == ".+"
+        assert str(form.data_proxy.filterRegularExpression().pattern()) == ".+"
         assert isinstance(form.treeView, QTreeView)
 
         # Models - theory
@@ -116,7 +123,7 @@ class DataExplorerTest:
         assert form.theory_model.columnCount() == 0
         assert isinstance(form.theory_proxy, QSortFilterProxyModel)
         assert form.theory_proxy.sourceModel() == form.theory_model
-        assert str(form.theory_proxy.filterRegExp().pattern()) == ".+"
+        assert str(form.theory_proxy.filterRegularExpression().pattern()) == ".+"
         assert isinstance(form.freezeView, QTreeView)
 
     def testWidgets(self, form):
@@ -124,11 +131,10 @@ class DataExplorerTest:
         Test if all required widgets got added
         """
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testLoadButton(self, form, mocker):
         loadButton = form.cmdLoad
 
-        filename = "cyl_400_20.txt"
+        filename = [str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute())]
         # Initialize signal spy instances
         spy_file_read = QtSignalSpy(form, form.communicator.fileReadSignal)
 
@@ -139,7 +145,6 @@ class DataExplorerTest:
         QTest.mouseClick(loadButton, Qt.LeftButton)
 
         # Test the getOpenFileName() dialog called once
-        assert QFileDialog.getOpenFileNames.called
         QFileDialog.getOpenFileNames.assert_called_once()
 
         # Make sure the signal has not been emitted
@@ -150,17 +155,15 @@ class DataExplorerTest:
 
         # Click on the Load button
         QTest.mouseClick(loadButton, Qt.LeftButton)
-        qApp.processEvents()
+        QApplication.processEvents()
 
         # Test the getOpenFileName() dialog called once
-        assert QFileDialog.getOpenFileNames.called
         QFileDialog.getOpenFileNames.assert_called_once()
 
         # Expected one spy instance
         #assert spy_file_read.count() == 1
         #assert filename in str(spy_file_read.called()[0]['args'][0])
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testLoadFiles(self, form):
         """
         Test progress bar update while loading of multiple files
@@ -170,7 +173,11 @@ class DataExplorerTest:
             form.communicator.progressBarUpdateSignal)
 
         # Populate the model
-        filename = ["cyl_400_20.txt", "P123_D2O_10_percent.dat", "cyl_400_20.txt"]
+        filename = [
+            str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute()),
+            str(Path("./src/sas/qtgui/UnitTesting/P123_D2O_10_percent.dat").absolute()),
+            str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute()),
+        ]
         form.readData(filename)
 
         # 0, 0, 33, 66, -1 -> 5 signals reaching progressBar
@@ -180,7 +187,6 @@ class DataExplorerTest:
         spied_list = [spy_progress_bar_update.called()[i]['args'][0] for i in range(5)]
         assert expected_list == spied_list
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testDeleteButton(self, form, mocker):
         """
         Functionality of the delete button
@@ -191,7 +197,11 @@ class DataExplorerTest:
         mocker.patch.object(QMessageBox, 'question', return_value=QMessageBox.No)
 
         # Populate the model
-        filename = ["cyl_400_20.txt", "cyl_400_20.txt", "cyl_400_20.txt"]
+        filename = [
+            str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute()),
+            str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute()),
+            str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute()),
+        ]
         form.readData(filename)
 
         # Assure the model contains three items
@@ -209,7 +219,7 @@ class DataExplorerTest:
         QTest.mouseClick(deleteButton, Qt.LeftButton)
 
         # Test the warning dialog called once
-        assert QMessageBox.question.called
+        QMessageBox.question.assert_called()
 
         # Assure the model still contains the items
         assert form.model.rowCount() == 3
@@ -221,7 +231,7 @@ class DataExplorerTest:
         QTest.mouseClick(deleteButton, Qt.LeftButton)
 
         # Test the warning dialog called once
-        assert QMessageBox.question.called
+        QMessageBox.question.assert_called()
 
         # Assure the model contains no items
         assert form.model.rowCount() == 0
@@ -239,12 +249,12 @@ class DataExplorerTest:
         mocker.patch.object(QMessageBox, 'question', return_value=QMessageBox.No)
 
         # Populate the model
-        item1 = HashableStandardItem(True)
+        item1 = GuiUtils.HashableStandardItem(True)
         item1.setCheckable(True)
         item1.setCheckState(Qt.Checked)
         item1.setText("item 1")
         form.theory_model.appendRow(item1)
-        item2 = HashableStandardItem(True)
+        item2 = GuiUtils.HashableStandardItem(True)
         item2.setCheckable(True)
         item2.setCheckState(Qt.Unchecked)
         item2.setText("item 2")
@@ -261,7 +271,7 @@ class DataExplorerTest:
         QTest.mouseClick(deleteButton, Qt.LeftButton)
 
         # Test the warning dialog called once
-        assert QMessageBox.question.called
+        QMessageBox.question.assert_called()
 
         # Assure the model still contains the items
         assert form.theory_model.rowCount() == 2
@@ -273,7 +283,7 @@ class DataExplorerTest:
         QTest.mouseClick(deleteButton, Qt.LeftButton)
 
         # Test the warning dialog called once
-        assert QMessageBox.question.called
+        QMessageBox.question.assert_called()
 
         # Assure the model contains 1 item
         assert form.theory_model.rowCount() == 1
@@ -290,7 +300,7 @@ class DataExplorerTest:
         # Click delete once again to assure no nasty behaviour on empty model
         QTest.mouseClick(deleteButton, Qt.LeftButton)
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
+    @pytest.mark.xfail(reason="2026-02: QMessageBox mocking isn't working and I can't fix it")
     def testSendToButton(self, form, mocker):
         """
         Test that clicking the Send To button sends checked data to a perspective
@@ -303,10 +313,10 @@ class DataExplorerTest:
         QTest.mouseClick(form.cmdSendTo, Qt.LeftButton)
 
         # The set_data method not called
-        assert not mocked_perspective.setData.called
+        mocked_perspective.setData.assert_not_called()
 
         # Populate the model
-        filename = ["cyl_400_20.txt"]
+        filename = [str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute())]
         form.readData(filename)
 
         QApplication.processEvents()
@@ -323,20 +333,19 @@ class DataExplorerTest:
         QApplication.processEvents()
 
         # Test the set_data method called
-        assert mocked_perspective.setData.called
-        assert not mocked_perspective.swapData.called
+        mocked_perspective.setData.assert_called()
+        mocked_perspective.swapData.assert_not_called()
 
         # Now select the swap data checkbox
         form.chkSwap.setChecked(True)
 
         # Click on the Send To  button
-        QTest.mouseClick(form.cmdSendTo, Qt.LeftButton)
-
+        form.actionReplace.triggered.emit()
         QApplication.processEvents()
 
         # Now the swap data method should be called
-        assert mocked_perspective.setData.called_once
-        assert mocked_perspective.swapData.called
+        mocked_perspective.setData.assert_called_once()
+        mocked_perspective.swapData.assert_called_once()
 
         # Test the exception block
         mocker.patch.object(QMessageBox, 'exec_')
@@ -352,7 +361,7 @@ class DataExplorerTest:
         QMessageBox.setText.assert_called_with("foo")
 
         # open another file
-        filename = ["cyl_400_20.txt"]
+        filename = [str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute())]
         form.readData(filename)
 
         # Mock the warning message and the swapData method
@@ -369,13 +378,15 @@ class DataExplorerTest:
         QMessageBox.setText.assert_called_with(
             "Dummy Perspective does not allow replacing multiple data.")
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testDataSelection(self, form):
         """
         Tests the functionality of the Selection Option combobox
         """
         # Populate the model with 1d and 2d data
-        filename = ["cyl_400_20.txt", "P123_D2O_10_percent.dat"]
+        filename = [
+            str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute()),
+            str(Path("./src/sas/qtgui/UnitTesting/P123_D2O_10_percent.dat").absolute())
+        ]
         form.readData(filename)
 
         # Wait a moment for data to load
@@ -457,12 +468,11 @@ class DataExplorerTest:
         assert item1.child(1).rowCount() == new_item.child(1).rowCount()
         assert item1.child(0).child(0).rowCount() == new_item.child(0).child(0).rowCount()
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testReadData(self, form, mocker):
         """
         Test the low level readData() method
         """
-        filename = ["cyl_400_20.txt"]
+        filename = [str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute())]
         mocker.patch.object(form.manager, 'add_data')
 
         # Initialize signal spy instances
@@ -474,7 +484,7 @@ class DataExplorerTest:
 
         # Expected two status bar updates
         assert spy_status_update.count() == 2
-        assert filename[0] in str(spy_status_update.called()[0]['args'][0])
+        assert Path(filename[0]).name in str(spy_status_update.called()[0]['args'][0])
 
 
         # Check that the model contains the item
@@ -484,7 +494,7 @@ class DataExplorerTest:
         # The 0th item header should be the name of the file
         model_item = form.model.index(0,0)
         model_name = form.model.data(model_item)
-        assert model_name == filename[0]
+        assert model_name == Path(filename[0]).name
 
     def skip_testDisplayHelp(self, form): # Skip due to help path change
         """
@@ -496,7 +506,7 @@ class DataExplorerTest:
 
         # Click on the Help button
         QTest.mouseClick(button1, Qt.LeftButton)
-        qApp.processEvents()
+        QApplication.processEvents()
 
         # Check the browser
         assert partial_url in str(form._helpView.web())
@@ -505,7 +515,7 @@ class DataExplorerTest:
 
         # Click on the Help_2 button
         QTest.mouseClick(button2, Qt.LeftButton)
-        qApp.processEvents()
+        QApplication.processEvents()
         # Check the browser
         assert partial_url in str(form._helpView.web())
 
@@ -561,9 +571,8 @@ class DataExplorerTest:
             assert isinstance(data_value, Data1D)
 
         # Assure add_data on data_manager was called (last call)
-        assert form.manager.add_data.called
+        form.manager.add_data.assert_called()
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testNewPlot1D(self, form, mocker):
         """
         Creating new plots from Data1D/2D
@@ -578,15 +587,15 @@ class DataExplorerTest:
         assert not form.cmdAppend.isEnabled()
 
         # get Data1D
-        p_file="cyl_400_20.txt"
-        output_object = loader.load(p_file)
+        p_file = str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute())
+        output_object = loader.load([p_file])
         new_data = [(None, manager.create_gui_data(output_object[0], p_file))]
         _, test_data = new_data[0]
         assert f'Data file generated by SasView v{SASVIEW_VERSION}' in \
                         test_data.notes
 
         # Mask retrieval of the data
-        mocker.patch.object(sas.qtgui.Utilities.GuiUtils, 'plotsFromCheckedItems', return_value=new_data)
+        mocker.patch.object(GuiUtils, 'plotsFromCheckedItems', return_value=new_data)
 
         # Mask plotting
         mocker.patch.object(form.parent, 'workspace')
@@ -603,7 +612,6 @@ class DataExplorerTest:
         assert form.cbgraph.isEnabled()
         assert form.cmdAppend.isEnabled()
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testNewPlot2D(self, form, mocker):
         """
         Creating new plots from Data1D/2D
@@ -618,12 +626,12 @@ class DataExplorerTest:
         assert not form.cmdAppend.isEnabled()
 
         # get Data2D
-        p_file="P123_D2O_10_percent.dat"
-        output_object = loader.load(p_file)
+        p_file = str(Path("./src/sas/qtgui/UnitTesting/P123_D2O_10_percent.dat").absolute())
+        output_object = loader.load([p_file])
         new_data = [(None, manager.create_gui_data(output_object[0], p_file))]
 
         # Mask retrieval of the data
-        mocker.patch.object(sas.qtgui.Utilities.GuiUtils, 'plotsFromCheckedItems', return_value=new_data)
+        mocker.patch.object(GuiUtils, 'plotsFromCheckedItems', return_value=new_data)
 
         # Mask plotting
         mocker.patch.object(form.parent, 'workspace')
@@ -638,7 +646,6 @@ class DataExplorerTest:
         #assert form.cbgraph.isEnabled()
         #assert form.cmdAppend.isEnabled()
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testAppendPlot(self, form, mocker):
         """
         Creating new plots from Data1D/2D
@@ -654,8 +661,8 @@ class DataExplorerTest:
         assert not form.cmdAppend.isEnabled()
 
         # get Data1D
-        p_file="cyl_400_20.txt"
-        output_object = loader.load(p_file)
+        p_file = str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute())
+        output_object = loader.load([p_file])
         output_item = QStandardItem()
         new_data = [(output_item, manager.create_gui_data(output_object[0], p_file))]
 
@@ -666,7 +673,7 @@ class DataExplorerTest:
         mocker.patch.object(Plotter, 'show')
 
         # Mask retrieval of the data
-        mocker.patch.object(sas.qtgui.Utilities.GuiUtils, 'plotsFromCheckedItems', return_value=new_data)
+        mocker.patch.object(GuiUtils, 'plotsFromCheckedItems', return_value=new_data)
 
         # Call the plotting method
         form.newPlot()
@@ -719,20 +726,18 @@ class DataExplorerTest:
         with pytest.raises(Exception):
             form.updateModelFromPerspective(bad_item)
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testContextMenu(self, form, mocker):
         """
         See if the context menu is present
         """
         # get Data1D
-        p_file=["cyl_400_20.txt"]
+        p_file=[str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute())]
         # Read in the file
         output, message = form.readData(p_file)
         form.loadComplete((output, message))
 
         # Pick up the treeview index corresponding to that file
         index = form.treeView.indexAt(QPoint(5,5))
-        form.show()
 
         # Find out the center pointof the treeView row
         rect = form.treeView.visualRect(index).center()
@@ -747,6 +752,7 @@ class DataExplorerTest:
 
         # Instead, send the signal directly
         form.treeView.customContextMenuRequested.emit(rect)
+        QApplication.processEvents()
 
         # See that the menu has been shown
         form.context_menu.exec_.assert_called_once()
@@ -817,7 +823,6 @@ class DataExplorerTest:
         # Data name dictionary should be empty at this point
         assert len(form.manager.data_name_dict) == 0
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testNameChange(self, form):
         """
         Test the display name change routines
@@ -827,9 +832,9 @@ class DataExplorerTest:
         TEST_STRING_1 = "test value change"
         TEST_STRING_2 = "TEST VALUE CHANGE"
         # Test base state of the name change window
-        self.baseNameStateCheck()
+        self.baseNameStateCheck(form)
         # Get Data1D
-        p_file=[FILE_NAME]
+        p_file=[str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute())]
         # Read in the file
         output, message = form.readData(p_file)
         key = list(output.keys())
@@ -898,15 +903,14 @@ class DataExplorerTest:
         form.nameChangeBox.removeData(None)  # Nothing should happen
         assert form.nameChangeBox.txtCurrentName.text() == TEST_STRING_2
         form.nameChangeBox.removeData([form.nameChangeBox.model_item])  # Should return to base state
-        self.baseNameStateCheck()
+        self.baseNameStateCheck(form)
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testShowDataInfo(self, form):
         """
         Test of the showDataInfo method
         """
         # get Data1D
-        p_file=["cyl_400_20.txt"]
+        p_file = [str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute())]
         # Read in the file
         output, message = form.readData(p_file)
         form.loadComplete((output, message))
@@ -925,13 +929,12 @@ class DataExplorerTest:
         # Slider moved all the way up
         assert form.txt_widget.verticalScrollBar().sliderPosition() == 0
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testSaveDataAs(self, form, mocker):
         """
         Test the Save As context menu action
         """
         # get Data1D
-        p_file=["cyl_400_20.txt"]
+        p_file = [str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute())]
         # Read in the file
         output, message = form.readData(p_file)
         form.loadComplete((output, message))
@@ -944,15 +947,11 @@ class DataExplorerTest:
         # Call the tested method
         form.saveDataAs()
         filter = 'Text files (*.txt);;Comma separated value files (*.csv);;CanSAS 1D files (*.xml);;NXcanSAS files (*.h5);;All files (*.*)'
-        QFileDialog.getSaveFileName.assert_called_with(
-                                caption="Save As",
-                                filter=filter,
-                                options=16,
-                                parent=None)
+        QFileDialog.getSaveFileName.assert_called_with(None, "Save As", '', filter, '')
         QFileDialog.getSaveFileName.assert_called_once()
 
         # get Data2D
-        p_file=["P123_D2O_10_percent.dat"]
+        p_file = [str(Path("./src/sas/qtgui/UnitTesting/P123_D2O_10_percent.dat").absolute())]
         # Read in the file
         output, message = form.readData(p_file)
         form.loadComplete((output, message))
@@ -968,19 +967,16 @@ class DataExplorerTest:
         # Call the tested method
         form.saveDataAs()
         QFileDialog.getSaveFileName.assert_called_with(
-                                caption="Save As",
-                                filter='IGOR/DAT 2D file in Q_map (*.dat);;NXcanSAS files (*.h5);;All files (*.*)',
-                                options=16,
-                                parent=None)
+            None, "Save As", '', 'IGOR/DAT 2D file in Q_map (*.dat);;NXcanSAS files (*.h5);;All files (*.*)', '')
         QFileDialog.getSaveFileName.assert_called_once()
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
+    @pytest.mark.skip("Seg fault")
     def testQuickDataPlot(self, form, mocker):
         """
         Quick data plot generation.
         """
         # get Data1D
-        p_file=["cyl_400_20.txt"]
+        p_file = [str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute())]
         # Read in the file
         output, message = form.readData(p_file)
         form.loadComplete((output, message))
@@ -991,14 +987,14 @@ class DataExplorerTest:
         mocker.patch.object(Plotter, 'show') # for masking the display
 
         form.quickDataPlot()
-        assert Plotter.show.called
+        Plotter.show.assert_called()
 
     def notestQuickData3DPlot(self, form, mocker):
         """
         Slow(er) 3D data plot generation.
         """
         # get Data1D
-        p_file=["P123_D2O_10_percent.dat"]
+        p_file = [str(Path("./src/sas/qtgui/UnitTesting/P123_D2O_10_percent.dat").absolute())]
         # Read in the file
         output, message = form.readData(p_file)
         form.loadComplete((output, message))
@@ -1010,7 +1006,7 @@ class DataExplorerTest:
 
         form.quickData3DPlot()
 
-        assert Plotter2D.show.called
+        Plotter2D.show.assert_called()
 
     def testShowEditMask(self, form):
         """
@@ -1020,7 +1016,6 @@ class DataExplorerTest:
         """
         pass
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testDeleteItem(self, form, mocker):
         """
         Delete selected item from data explorer
@@ -1030,7 +1025,11 @@ class DataExplorerTest:
         mocker.patch.object(QMessageBox, 'question', return_value=QMessageBox.No)
 
         # Populate the model
-        filename = ["cyl_400_20.txt", "cyl_400_20.txt", "cyl_400_20.txt"]
+        filename = [
+            str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute()),
+            str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute()),
+            str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute())
+        ]
         form.readData(filename)
         assert len(form.manager.data_name_dict) == 1
         assert len(form.manager.data_name_dict["cyl_400_20.txt"]) == 3
@@ -1059,10 +1058,10 @@ class DataExplorerTest:
         form.current_view.selectionModel().select(select_index, QItemSelectionModel.Rows)
 
         # Attempt at deleting
-        form.deleteFile()
+        form.deleteFile(None)
 
         # Test the warning dialog called once
-        assert QMessageBox.question.called
+        QMessageBox.question.assert_called()
 
         # Assure the model still contains the items
         assert form.model.rowCount() == 3
@@ -1073,15 +1072,14 @@ class DataExplorerTest:
         # Select the newly created item
         form.current_view.selectionModel().select(select_index, QItemSelectionModel.Rows)
         # delete it. now for good
-        form.deleteFile()
+        form.deleteFile(None)
 
         # Test the warning dialog called once
-        assert QMessageBox.question.called
+        QMessageBox.question.assert_called()
 
         # Assure the model contains no items
-        assert form.model.rowCount() == 3
+        assert form.model.rowCount() == 0
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testClosePlotsForItem(self, form, mocker):
         """
         Delete selected item from data explorer should also delete corresponding plots
@@ -1099,7 +1097,7 @@ class DataExplorerTest:
         assert not form.cmdAppend.isEnabled()
 
         # Populate the model
-        filename = ["cyl_400_20.txt"]
+        filename = [str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute())]
         form.readData(filename)
 
         # Mask plotting

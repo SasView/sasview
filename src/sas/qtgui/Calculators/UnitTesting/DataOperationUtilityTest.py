@@ -42,7 +42,7 @@ class DataOperationUtilityTest:
                                                         "| (append)]"
         # size
         assert widget.size().height() == 425
-        assert widget.size().width() == 951
+        assert widget.size().width() == 1168
 
         # content of line edits
         assert widget.txtNumber.text() == '1.0'
@@ -67,12 +67,9 @@ class DataOperationUtilityTest:
                                 ['+', '-', '*', '/', '|']
 
         # Tooltips
-        assert str(widget.cmdCompute.toolTip()) == "Generate the Data " \
-                                                            "and send to Data " \
-                                                            "Explorer."
+        assert str(widget.cmdCompute.toolTip()) == "Generate the Data and show the preview."
         assert str(widget.cmdClose.toolTip()) == "Close this panel."
-        assert str(widget.cmdHelp.toolTip()) == \
-                            "Get help on Data Operations."
+        assert str(widget.cmdHelp.toolTip()) == "Get help on Data Operations."
         assert widget.txtNumber.toolTip() == "If no Data2 loaded, " \
                                                 "enter a number to be " \
                                                 "applied to Data1 using " \
@@ -101,15 +98,13 @@ class DataOperationUtilityTest:
         assert not widget.data1OK
 
         mocker.patch.object(widget, 'newPlot')
-        assert widget.newPlot.called_once()
-        assert widget.newPlot.called_once()
-        assert widget.newPlot.called_once()
+        widget.newPlot.assert_not_called()
 
     def testHelp(self, widget, mocker):
         """ Assure help file is shown """
         mocker.patch.object(widget.manager, 'showHelp', create=True)
         widget.onHelp()
-        assert widget.manager.showHelp.called_once()
+        widget.manager.showHelp.assert_called_once()
         args = widget.manager.showHelp.call_args
         assert 'data_operator_help.html' in args[0][0]
 
@@ -125,7 +120,6 @@ class DataOperationUtilityTest:
         closeButton = widget.cmdClose
         QTest.mouseClick(closeButton, Qt.LeftButton)
 
-    @pytest.mark.xfail(reason="2022-09 already broken")
     def testOnCompute(self, widget, mocker):
         """ Test onCompute function """
 
@@ -136,6 +130,7 @@ class DataOperationUtilityTest:
 
         # mock update of plot
         mocker.patch.object(widget, 'updatePlot')
+        mocker.patch.object(widget, 'onPrepareOutputData')
 
         # enable onCompute to run (check on data type)
         mocker.patch.object(widget, 'onCheckChosenData', return_value=True)
@@ -148,11 +143,9 @@ class DataOperationUtilityTest:
         assert widget.output.x.tolist() == \
                                 widget.data1.x.tolist()
         assert widget.output.y.tolist() == [12.0, 13.0, 14.0]
-        assert widget.updatePlot.called_once()
 
-        mocker.patch.object(widget, 'onPrepareOutputData')
-
-        assert widget.onPrepareOutputData.called_once()
+        widget.updatePlot.assert_called_once()
+        widget.onPrepareOutputData.assert_not_called()
 
     def testOnSelectData1(self, widget, mocker):
         """ Test ComboBox for Data1 """
@@ -168,7 +161,7 @@ class DataOperationUtilityTest:
 
         widget.cbData1.addItems(['Select Data', 'datafile1'])
         widget.cbData1.setCurrentIndex(widget.cbData1.count()-1)
-        assert widget.updatePlot.called_once()
+        widget.updatePlot.assert_called_once()
         # Compute button disabled if data2OK == False
         assert widget.cmdCompute.isEnabled() == widget.data2OK
 
@@ -199,20 +192,20 @@ class DataOperationUtilityTest:
         assert widget.cmdCompute.isEnabled() == widget.data1OK
         assert isinstance(widget.data2, float)
         # call updatePlot
-        assert widget.updatePlot.called_once()
+        widget.updatePlot.assert_called()
 
         # Case 4: when Data2 is a file
         mocker.patch.object(widget, 'filenames', return_value={'datafile2': 'details'})
         widget.cbData2.addItems(['Select Data', 'Number', 'datafile2'])
         widget.cbData2.setCurrentIndex(widget.cbData2.count() - 1)
-        assert widget.updatePlot.called_once()
+        widget.updatePlot.assert_called()
         # editing of txtNumber is disabled when Data2 is a file
         assert not widget.txtNumber.isEnabled()
         # Compute button enabled only if data1OK True
         assert widget.cmdCompute.isEnabled() == \
                             widget.data1OK
         # call updatePlot
-        assert widget.updatePlot.called_once()
+        widget.updatePlot.assert_called()
 
     def testUpdateCombobox(self, widget):
         """ Test change of contents of comboboxes for Data1 and Data2 """
@@ -364,7 +357,6 @@ class DataOperationUtilityTest:
         id_out = widget._findId('datafile2')
         assert id_out == 'datafile2'
 
-    @pytest.mark.xfail(reason="2022-09 already broken")
     def testExtractData(self, widget):
         """
         Test function to extract data to be computed from input filenames
@@ -385,10 +377,10 @@ class DataOperationUtilityTest:
         widget.filenames = {'datafile2': DataState(data2),
                                     'datafile1': DataState(data1)}
         output1D = widget._extractData('datafile1')
-        assert isinstance(output1D, Data1D)
+        assert isinstance(output1D.data, Data1D)
 
         output2D = widget._extractData('datafile2')
-        assert isinstance(output2D, Data2D)
+        assert isinstance(output2D.data, Data2D)
 
     # TODO
     def testOnPrepareOutputData(self, widget):

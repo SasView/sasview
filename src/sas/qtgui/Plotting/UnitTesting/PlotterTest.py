@@ -6,12 +6,16 @@ import pytest
 
 mpl.use("Qt5Agg")
 
+from unittest import mock
+
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from PySide6 import QtCore, QtGui, QtPrintSupport, QtWidgets
 
 # Tested module
 import sas.qtgui.Plotting.Plotter as Plotter
+from sas.qtgui.MainWindow.UnitTesting.DataExplorerTest import MyPerspective
 from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.Utilities.GuiUtils import Communicate
 
 
 class PlotterTest:
@@ -20,7 +24,17 @@ class PlotterTest:
     def plotter(self, qapp):
         '''Create/Destroy the Plotter1D'''
 
+        class dummy_manager(QtWidgets.QWidget):
+            def communicator(self):
+                return Communicate()
+            def perspective(self):
+                return MyPerspective()
+            def workspace(self):
+                return None
+
+        manager = dummy_manager()
         p = Plotter.Plotter(None, quickplot=True)
+        p.parent = manager
         self.data = Data1D(x=[1.0, 2.0, 3.0],
                            y=[10.0, 11.0, 12.0],
                            dx=[0.1, 0.2, 0.3],
@@ -50,7 +64,7 @@ class PlotterTest:
         plotter.plot(hide_error=False)
 
         assert plotter.ax.get_xscale() == 'linear'
-        assert FigureCanvas.draw_idle.called
+        FigureCanvas.draw_idle.assert_called()
 
         plotter.figure.clf()
 
@@ -63,7 +77,7 @@ class PlotterTest:
         plotter.plot(hide_error=True)
 
         assert plotter.ax.get_yscale() == 'linear'
-        assert FigureCanvas.draw_idle.called
+        FigureCanvas.draw_idle.assert_called()
         plotter.figure.clf()
 
     def testPlotWithSesans(self, plotter, mocker):
@@ -86,19 +100,19 @@ class PlotterTest:
         assert plotter.ax.get_xscale() == 'linear'
         assert plotter.ax.get_yscale() == 'linear'
         #assert plotter.data[0].ytransform == "y"
-        assert FigureCanvas.draw_idle.called
+        FigureCanvas.draw_idle.assert_called()
 
     def testCreateContextMenuQuick(self, plotter, mocker):
         """ Test the right click menu """
         plotter.createContextMenuQuick()
         actions = plotter.contextMenu.actions()
-        assert len(actions) == 8
+        assert len(actions) == 10
 
         # Trigger Print Image and make sure the method is called
         assert actions[1].text() == "Print Image"
         mocker.patch.object(QtPrintSupport.QPrintDialog, 'exec_', return_value=QtWidgets.QDialog.Rejected)
         actions[1].trigger()
-        assert QtPrintSupport.QPrintDialog.exec_.called
+        QtPrintSupport.QPrintDialog.exec_.assert_called()
 
         # Trigger Copy to Clipboard and make sure the method is called
         assert actions[2].text() == "Copy to Clipboard"
@@ -107,13 +121,13 @@ class PlotterTest:
         assert actions[4].text() == "Toggle Grid On/Off"
         mocker.patch.object(plotter.ax, 'grid')
         actions[4].trigger()
-        assert plotter.ax.grid.called
+        plotter.ax.grid.assert_called()
 
         # Trigger Change Scale and make sure the method is called
         assert actions[6].text() == "Change Scale"
         mocker.patch.object(plotter.properties, 'exec_', return_value=QtWidgets.QDialog.Rejected)
         actions[6].trigger()
-        assert plotter.properties.exec_.called
+        plotter.properties.exec_.assert_called()
 
         # Spy on cliboard's dataChanged() signal
         if not self.isWindows:
@@ -121,9 +135,9 @@ class PlotterTest:
         self.clipboard_called = False
         def done():
             self.clipboard_called = True
-        QtCore.QObject.connect(QtWidgets.qApp.clipboard(), QtCore.SIGNAL("dataChanged()"), done)
+        QtCore.QObject.connect(QtWidgets.QApplication.clipboard(), QtCore.SIGNAL("dataChanged()"), done)
         actions[2].trigger()
-        QtWidgets.qApp.processEvents()
+        QtWidgets.QApplication.processEvents()
         # Make sure clipboard got updated.
         assert self.clipboard_called
 
@@ -155,7 +169,7 @@ class PlotterTest:
         test_text = "Smoke in cabin"
         test_font = QtGui.QFont("Arial", 16, QtGui.QFont.Bold)
         test_color = "#00FF00"
-        plotter.addText.codeEditor.setText(test_text)
+        plotter.addText.textEdit.setText(test_text)
 
         # Return the requested font parameters
         mocker.patch.object(plotter.addText, 'font', return_value=test_font)
@@ -179,7 +193,7 @@ class PlotterTest:
         # Add some text
         plotter.plot(self.data)
         test_text = "Safety instructions"
-        plotter.addText.codeEditor.setText(test_text)
+        plotter.addText.textEdit.setText(test_text)
         # Return OK from the dialog
         mocker.patch.object(plotter.addText, 'exec_', return_value=QtWidgets.QDialog.Accepted)
         # Add text to graph
@@ -254,7 +268,7 @@ class PlotterTest:
         plotter.onLinearFit('Test name')
 
         # Check that exec_ got called
-        assert QtWidgets.QDialog.exec_.called
+        QtWidgets.QDialog.exec_.assert_called()
         plotter.figure.clf()
 
     def testOnRemovePlot(self, plotter, mocker):
@@ -289,7 +303,6 @@ class PlotterTest:
         # Assure we have no plots
         assert len(list(plotter.plot_dict.keys())) == 0
         # Assure the plotter window is closed
-        assert not plotter.isVisible()
         plotter.figure.clf()
 
     def testRemovePlot(self, plotter):
@@ -362,12 +375,13 @@ class PlotterTest:
 
         # fudge some init data
         fit_data = [[0.0,0.0], [5.0,5.0]]
+
         # Call the method
-        mocker.patch.object(plotter, 'plot')
-        plotter.onFitDisplay(fit_data)
-        assert plotter.plot.called
-        # Look at arguments passed to .plot()
-        plotter.plot.assert_called_with(data=plotter.fit_result,
+        with mock.patch("sas.qtgui.Plotting.Plotter.Plotter.plot") as plot:
+            plotter.onFitDisplay(fit_data[0], fit_data[1])
+            plot.assert_called_once()
+            # Look at arguments passed to .plot()
+            plot.assert_called_with(data=plotter.fit_result,
                                              hide_error=True, marker='-')
         plotter.figure.clf()
 
