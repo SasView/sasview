@@ -127,10 +127,10 @@ class SlicerParametersTest:
 
     @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testOnHelp(self, widget, mocker):
-        ''' Assure clicking on help returns QtWeb view on requested page'''
+        ''' Assure clicking on help opens the documentation in browser'''
         widget.show()
 
-        #Mock the webbrowser.open method
+        # Mock webbrowser.open which is called by GuiUtils.showHelp
         mocker.patch.object(webbrowser, 'open')
 
         # Invoke the action
