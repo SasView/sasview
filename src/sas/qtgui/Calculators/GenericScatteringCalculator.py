@@ -1479,6 +1479,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                     per.show()
 
             except Exception:
+                logger.warning("Failed to bring the newly generated plugin model into focus. Please report this issue.")
                 pass
 
             return
