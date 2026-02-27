@@ -43,7 +43,7 @@ def generate_unique_plot_id(base_id: str, item) -> str:
     parent_item = item if item.parent() is None else item.parent()
     existing = _count_matching_ids(parent_item, base_id)
 
-    return base_id if existing == 0 else f"{base_id}_{existing + 1}"
+    return f"{base_id}_{existing}"
 
 
 class StackableMixin:
