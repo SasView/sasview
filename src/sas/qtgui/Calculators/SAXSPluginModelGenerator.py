@@ -34,7 +34,6 @@ def get_model_text(structure_path: str) -> str:
     """
 
     return (
-
 f'''\
 r"""
 This file is auto-generated, and any changes will be overwritten. 
@@ -58,6 +57,7 @@ parameters = [
 
 ###
 import pyausaxs as ausaxs
+ausaxs.settings.set(\"allow_unknown_residues\", \"false\")
 
 structure_path = "{str(Path(structure_path).as_posix())}"
 
