@@ -27,6 +27,7 @@ from sas.qtgui.Utilities.GenericReader import GenReader
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor
 from sas.sascalc.calculator import sas_gen
 from sas.sascalc.calculator.geni import create_beta_plot, f_of_q, radius_of_gyration
+from sas.sascalc.calculator.sas_gen import ComputationType
 from sas.system.user import find_plugins_dir
 
 # Local UI
@@ -89,7 +90,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.setup_display()
 
         # combox box
-        self.cbOptionsCalc.currentIndexChanged.connect(self.change_is_avg)
+        self.cbOptionsCalc.currentIndexChanged.connect(self.change_computation_type)
         # prevent layout shifting when widget hidden
         # TODO: Is there a way to lcoate this policy in the ui file?
         sizePolicy = self.cbOptionsCalc.sizePolicy()
@@ -621,7 +622,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.cbOptionsCalc.setVisible(allow)
         if (allow):
             # A helper function to set up the averaging system
-            self.change_is_avg()
+            self.change_computation_type()
         else:
             # If magnetic data present then no averaging is allowed
             self.is_avg = False
@@ -633,7 +634,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.checkboxLogSpace.setEnabled(not self.is_mag)
 
 
-    def change_is_avg(self):
+    def change_computation_type(self):
         """Adjusts the GUI for whether 1D averaging is enabled
 
         If the user has chosen to carry out Debye full averaging then the magnetic sld
@@ -658,6 +659,22 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.checkboxLogSpace.setEnabled(self.is_avg)
         self.checkboxPluginModel.setEnabled(self.is_avg)
 
+        # set the type of calculation
+        self.model.set_computation_type(ComputationType(self.cbOptionsCalc.currentIndex()))
+        match self.cbOptionsCalc.currentIndex():
+            case 0 | 1 | 2:
+                pass
+            case 3:
+                self.checkboxPluginModel.setEnabled(False)
+                self.checkboxPluginModel.setChecked(True)
+                self.txtFileName.setText("saxs_fitting")
+                self.txtFileName.setEnabled(False)
+                self.cmdCompute.setText("Generate plugin model")
+                return
+            case _:
+                raise RuntimeError(f"Unknown computation type selected: {self.cbOptionsCalc.currentIndex()}")
+
+        self.cmdCompute.setText("Compute")
         if self.is_avg:
             self.txtMx.setText("0.0")
             self.txtMy.setText("0.0")
@@ -704,13 +721,20 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             load_nuc = self.sender() == self.cmdNucLoad
             # request a file from the user
             if load_nuc:
-                f_type = """
-                    All supported files (*.SLD *.sld *.pdb *.PDB, *.vtk, *.VTK);;
-                        SLD files (*.SLD *.sld);;
-                        PDB files (*.pdb *.PDB);;
-                        VTK files (*.vtk *.VTK);;
-                        All files (*.*)
-                """
+                if self.model.type is ComputationType.SAXS:
+                    f_type = """
+                        All supported files (*.CIF *.cif *.pdb *.PDB);;
+                            CIF files (*.CIF *.cif);;
+                            PDB files (*.pdb *.PDB);;
+                    """
+                else:
+                    f_type = """
+                        All supported files (*.SLD *.sld *.pdb *.PDB, *.vtk, *.VTK);;
+                            SLD files (*.SLD *.sld);;
+                            PDB files (*.pdb *.PDB);;
+                            VTK files (*.vtk *.VTK);;
+                            All files (*.*)
+                    """
             else:
                 f_type = """
                     All supported files (*.OMF *.omf *.SLD *.sld, *.vtk, *.VTK);;
@@ -720,6 +744,11 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                         All files (*.*)
                 """
             self.datafile = QtWidgets.QFileDialog.getOpenFileName(self, "Choose a file", "", f_type)[0]
+
+            if self.model.type is ComputationType.SAXS:
+                self.txtNucData.setText(os.path.basename(str(self.datafile)))
+                return
+
             # If a file has been sucessfully chosen
             if self.datafile:
                 # set basic data about the file
@@ -1412,6 +1441,49 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
         Copied from previous version
         """
+
+        if self.model.type is ComputationType.SAXS:
+            if self.datafile is None:
+                raise RuntimeError("No structure file is loaded! SAXS calculations require a structure file.")
+            from sas.qtgui.Calculators.SAXSPluginModelGenerator import get_base_plugin_name, write_plugin_model
+            write_plugin_model(self.datafile)
+            self.manager.communicator().customModelDirectoryChanged.emit() # notify that a new plugin model is available
+
+            # try to bring the fit panel into focus and select the newly generated plugin
+            try:
+                self.manager.actionFitting() # switch to fitting window
+                per = self.manager.perspective() # internal access into the fitting window's state
+                # currentFittingWidget is provided by the Fitting perspective
+                fw = getattr(per, 'currentFittingWidget', None)
+                if fw is not None:
+                    # select the plugin models category & our newly generated model
+                    idx = fw.cbCategory.findText("Plugin Models")
+                    if idx == -1: return
+
+                    # force population of model combobox
+                    fw.cbCategory.setCurrentIndex(idx)
+                    fw.onSelectCategory()
+
+                    # plugin name base is 'SAXS fit'
+                    # the actual model name includes a structure tag, e.g. 'SAXS fit (2epe)'
+                    model_name = get_base_plugin_name()
+                    midx = fw.cbModel.findText(model_name, QtCore.Qt.MatchStartsWith)
+                    if midx == -1: return
+
+                    # load the model into the parameter table
+                    fw.cbModel.setCurrentIndex(midx)
+                    fw.onSelectModel()
+
+                    # make sure the perspective window is visible and focused
+                    self.close() # close the calculator window to highlight the changes to the fitting window
+                    per.show()
+
+            except Exception:
+                logger.warning("Failed to bring the newly generated plugin model into focus. Please report this issue.")
+                pass
+
+            return
+
         try:
             # create the combined sld data and update from gui
             sld_data = self.create_full_sld_data()
