@@ -1,12 +1,16 @@
+import logging
 
-interface_color = 'black'
-disable_color = 'gray'
-active_color = 'red'
-rho_color = 'black'
-mu_color = 'green'
-P_color = 'blue'
-theta_color = 'orange'
+interface_color = "black"
+disable_color = "gray"
+active_color = "red"
+rho_color = "black"
+mu_color = "green"
+P_color = "blue"
+theta_color = "orange"
 profile_colors = [rho_color, mu_color, P_color, theta_color]
+
+logger = logging.getLogger(__name__)
+
 
 class BaseInteractor:
     """
@@ -40,9 +44,9 @@ class BaseInteractor:
         markers - list of handles for the interactor
 
     """
-    def __init__(self, base, axes, color='black'):
-        """
-        """
+
+    def __init__(self, base, axes, color="black"):
+        """ """
         self.base = base
         self.axes = axes
         self.color = color
@@ -60,44 +64,43 @@ class BaseInteractor:
         Clear old markers and interfaces.
         """
         for h in self.markers:
-            h.remove()
+            try:
+                h.remove()
+            except (ValueError, AttributeError):
+                logger.warning("Failed to remove marker: %s", h)
         if self.markers:
             self.base.connect.clear(*self.markers)
         self.markers = []
 
     def save(self, ev):
-        """
-        """
+        """ """
         pass
 
     def restore(self, ev):
-        """
-        """
+        """ """
         pass
 
     def move(self, x, y, ev):
-        """
-        """
+        """ """
         pass
 
     def moveend(self, ev):
-        """
-        """
+        """ """
         pass
 
     def connect_markers(self, markers):
         """
         Connect markers to callbacks
         """
-
         for h in markers:
             connect = self.base.connect
-            connect('enter', h, self.onHilite)
-            connect('leave', h, self.onLeave)
-            connect('click', h, self.onClick)
-            connect('release', h, self.onRelease)
-            connect('drag', h, self.onDrag)
-            connect('key', h, self.onKey)
+            connect("enter", h, self.onHilite)
+            connect("leave", h, self.onLeave)
+            connect("click", h, self.onClick)
+            connect("release", h, self.onRelease)
+            connect("drag", h, self.onDrag)
+            connect("key", h, self.onKey)
+        self.markers.extend(markers)
 
     def onHilite(self, ev):
         """
@@ -119,16 +122,29 @@ class BaseInteractor:
     def onClick(self, ev):
         """
         Prepare to move the artist.  Calls save() to preserve the state for
-        later restore().
+        later restore(). Also notify plotter of slicer interaction.
         """
         self.clickx, self.clicky = ev.xdata, ev.ydata
         self.save(ev)
+        try:
+            # Case 1: this interactor is the slicer (base is the plotter)
+            if hasattr(self.base, 'notifySlicerModified'):
+                self.base.notifySlicerModified(self)
+            # Case 2: this interactor is a child of the slicer (base is the slicer)
+            elif hasattr(self.base, 'base') and hasattr(self.base.base, 'notifySlicerModified'):
+                self.base.base.notifySlicerModified(self.base)
+        except (ValueError, AttributeError):
+            pass
         return True
 
     def onRelease(self, ev):
-        """
-        """
+        """Notify plotter on end of interaction."""
         self.moveend(ev)
+        try:
+            if hasattr(self.base, 'notifySlicerModified'):
+                self.base.notifySlicerModified(self)
+        except (ValueError, AttributeError):
+            logger.warning("Failed to notify slicer modified: %s", self.base)
         return True
 
     def onDrag(self, ev):
@@ -149,15 +165,15 @@ class BaseInteractor:
 
         Calls move() to update the state.  Calls restore() on escape.
         """
-        if ev.key == 'escape':
+        if ev.key == "escape":
             self.restore(ev)
-        elif ev.key in ['up', 'down', 'right', 'left']:
+        elif ev.key in ["up", "down", "right", "left"]:
             dx, dy = self.dpixel(self.clickx, self.clicky, nudge=ev.control)
-            if ev.key == 'up':
+            if ev.key == "up":
                 self.clicky += dy
-            elif ev.key == 'down':
+            elif ev.key == "down":
                 self.clicky -= dy
-            elif ev.key == 'right':
+            elif ev.key == "right":
                 self.clickx += dx
             else:
                 self.clickx -= dx
@@ -182,4 +198,3 @@ class BaseInteractor:
             nx, ny = ax.transData.xy_tup((px + 1.0, py + 1.0))
         dx, dy = nx - x, ny - y
         return dx, dy
-

@@ -60,11 +60,11 @@ class PlotterWidget(PlotterBase):
 
         # Connections used to prevent conflict between built in mpl toolbar actions and SasView context menu actions.
         # Toolbar actions only needed in 1D plots. 2D plots have no such conflicts.
-        self.toolbar._actions['home'].triggered.connect(self._home)
-        self.toolbar._actions['back'].triggered.connect(self._back)
-        self.toolbar._actions['forward'].triggered.connect(self._forward)
-        self.toolbar._actions['pan'].triggered.connect(self._pan)
-        self.toolbar._actions['zoom'].triggered.connect(self._zoom)
+        self.toolbar._actions["home"].triggered.connect(self._home)
+        self.toolbar._actions["back"].triggered.connect(self._back)
+        self.toolbar._actions["forward"].triggered.connect(self._forward)
+        self.toolbar._actions["pan"].triggered.connect(self._pan)
+        self.toolbar._actions["zoom"].triggered.connect(self._zoom)
 
         self.legendVisible = True
 
@@ -476,6 +476,8 @@ class PlotterWidget(PlotterBase):
             self.actionToggleLegend.triggered.connect(self.onToggleLegend)
         self.actionCustomizeLabel.triggered.connect(self.onCusotmizeLabel)
 
+        self.addHelpToContextMenu()
+
     def addPlotsToContextMenu(self):
         """
         Adds operations on all plotted sets of data to the context menu
@@ -550,6 +552,8 @@ class PlotterWidget(PlotterBase):
         if self.show_legend:
             self.actionToggleLegend = self.contextMenu.addAction("Toggle Legend")
             self.actionToggleLegend.triggered.connect(self.onToggleLegend)
+
+        self.addHelpToContextMenu()
 
     def onScaleChange(self):
         """

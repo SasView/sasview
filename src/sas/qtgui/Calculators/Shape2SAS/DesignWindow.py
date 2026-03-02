@@ -17,7 +17,6 @@ from PySide6.QtWidgets import (
 
 from sas.qtgui.Calculators.Shape2SAS.ButtonOptions import ButtonOptions
 from sas.qtgui.Calculators.Shape2SAS.Constraints import Constraints, logger
-from sas.qtgui.Calculators.Shape2SAS.genPlugin import generatePlugin
 from sas.qtgui.Calculators.Shape2SAS.PlotAspects.plotAspects import Canvas, ViewerPlotDesign
 from sas.qtgui.Calculators.Shape2SAS.Tables.subunitTable import OptionLayout, SubunitTable
 from sas.qtgui.Calculators.Shape2SAS.UI.DesignWindowUI import Ui_Shape2SAS
@@ -28,6 +27,7 @@ from sas.qtgui.Utilities.GuiUtils import createModelItemWithPlot
 
 # Local SasView
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor
+from sas.sascalc.shape2sas.PluginGenerator import generate_plugin
 from sas.sascalc.shape2sas.Shape2SAS import (
     ModelProfile,
     ModelSystem,
@@ -91,9 +91,8 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         self.plugin.setEnabled(False)
         self.modelTabButtonOptions.horizontalLayout_5.insertWidget(1, self.plugin)
 
-        # TODO: Remove these lines to enable the plugin model generation window - hidden for v6.1.0
-        self.line2.setHidden(True)
         self.plugin.setHidden(True)
+        self.line2.setHidden(True)
 
         #connect buttons
         self.modelTabButtonOptions.reset.clicked.connect(self.onSubunitTableReset)
@@ -103,7 +102,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
 
         #create layout for build model tab
         self.viewerModel = ViewerModel()
-        self.subunitTable = SubunitTable()
+        self.subunitTable = SubunitTable(self.onClickingPlot)
 
         modelVbox = QVBoxLayout()
         modelHbox = QHBoxLayout()
@@ -164,7 +163,8 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         #TODO: implement in a future project
 
         ###Building Constraint window
-        self.constraint = Constraints()
+        self.constraint = Constraints(parent=self)
+        self.constraint.setWindowFlags(Qt.Window | Qt.Tool)
         self.subunitTable.add.clicked.connect(self.addToVariableTable)
         self.subunitTable.deleteButton.clicked.connect(self.deleteFromVariableTable)
         self.subunitTable.table.clicked.connect(self.updateDeleteButton)
@@ -181,6 +181,8 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
     def showConstraintWindow(self):
         """Get the Constraint window"""
 
+        self.constraint.setScreen(self.screen())
+        self.constraint.move(self.pos().x()+50, self.pos().y()+50)
         self.constraint.show()
 
     def checkedVariables(self):
@@ -255,21 +257,21 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
 
         #Has anything been written to the text editor
         if constraintsStr:
-            #TODO: print to GUI output texteditor
-            return self.constraint.getConstraints(constraintsStr, fitPar, modelPars, modelVals, checkedPars)
+            self.constraint.log_embedded("Parsing constraints...")
+            return self.constraint.parseConstraintsText(constraintsStr, fitPar, modelPars, modelVals, checkedPars)
 
         #Did the user only check parameters and click generate plugin
         elif fitPar:
             #Get default constraints
             fitParLists = self.getConstraintsToTextEditor()
             defaultConstraintsStr = self.constraint.getConstraintText(fitParLists)
-            #TODO: print to GUI output texteditor
+            self.constraint.log_embedded("No constraints text found. Creating unconstrained model")
             return self.constraint.getConstraints(defaultConstraintsStr, fitPar, modelPars, modelVals, checkedPars)
 
         #If not, return empty
         else:
             #all parameters are constant
-            #TODO: print to GUI output texteditor
+            self.constraint.log_embedded("Creating unconstrained model.")
             return "", "", "", checkedPars
 
     def enableButtons(self, toggle: bool):
@@ -487,6 +489,8 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         self.plugin.setEnabled(columns > 0)
 
         if not self.subunitTable.model.item(1, columns - 1):
+            self.viewerModel.setClearScatteringPlot()
+            self.viewerModel.setClearModelPlot()
             return
 
         modelProfile = self.getModelProfile(self.ifEmptyValue)
@@ -637,20 +641,30 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         #get chosen fit parameters
         fitPar = self.getFitParameters()
 
-        logger.info("Retrieving and verifying constraints. . .")
+        logger.info("Retrieving and verifying constraints.")
         #get parameters constraints
-        importStatement, parameters, translation, checkedPars = self.checkStateOfConstraints(fitPar, parNames, parVals, checkedPars)
+        usertext, checkedPars = self.checkStateOfConstraints(fitPar, parNames, parVals, checkedPars)
 
-        logger.info("Retrieving Model. . .")
+        logger.info("Retrieving Model.")
         #conditional subunit table parameters
         modelProfile = self.getModelProfile(self.ifFitPar, conditionBool=checkedPars, conditionFitPar=parNames)
 
-        model_str, full_path = generatePlugin(modelProfile, [importStatement, parameters, translation], fitPar, Npoints, prPoints, modelName)
+        model_str, full_path = generate_plugin(
+            modelProfile,
+            [parNames, parVals],
+            usertext,
+            fitPar,
+            Npoints,
+            prPoints,
+            modelName
+        )
 
         #Write file to plugin model folder
         TabbedModelEditor.writeFile(full_path, model_str)
         self.communicator.customModelDirectoryChanged.emit()
         logger.info(f"Successfully generated model {modelName}!")
+        self.constraint.log_embedded(f"Plugin model {modelName} has been generated and is now available in the Fit panel.")
+        self.constraint.createPlugin.setEnabled(False)
 
     def onCheckingInput(self, input: str, default: str) -> str:
         """Check if the input not None. Otherwise, return default value"""
@@ -699,13 +713,20 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
 
         Distr = getPointDistribution(Profile, N)
 
-        Theo_calc = TheoreticalScatteringCalculation(System=ModelSystem(PointDistribution=Distr,
-                                                                        Stype=Stype, par=par,
-                                                                        polydispersity=polydispersity,
-                                                                        conc=conc,
-                                                                        sigma_r=sigma_r),
-                                                                        Calculation=Sim_par)
-        Theo_I = getTheoreticalScattering(Theo_calc)
+        model = ModelSystem(
+            PointDistribution=Distr,
+            Stype=Stype, par=par,
+            polydispersity=polydispersity,
+            conc=conc,
+            sigma_r=sigma_r
+        )
+
+        Theo_I = getTheoreticalScattering(
+            TheoreticalScatteringCalculation(
+                System=model,
+                Calculation=Sim_par
+            )
+        )
         Sim_calc = SimulateScattering(q=Theo_I.q, I0=Theo_I.I0, I=Theo_I.I, exposure=exposure)
         Sim_SAXS = getSimulatedScattering(Sim_calc)
 

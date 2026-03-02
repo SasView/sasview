@@ -15,18 +15,17 @@ from scipy.signal import argrelextrema
 from sasdata.dataloader.data_info import Data1D
 
 from sas.sascalc.corfunc.calculation_data import (
-    ExtrapolationParameters,
     Fittable,
     GuinierData,
     LamellarParameters,
     LongPeriodMethod,
     PorodData,
-    SettableExtrapolationParameters,
     SupplementaryParameters,
     TangentMethod,
     TransformedData,
 )
 from sas.sascalc.corfunc.smoothing import SmoothJoin
+from sas.sascalc.util import ExtrapolationParameters, SettableExtrapolationParameters
 
 
 class CalculationError(Exception):

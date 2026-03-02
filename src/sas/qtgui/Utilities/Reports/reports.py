@@ -1,6 +1,5 @@
 import base64
 import datetime
-import importlib.resources as pkg_resources
 import logging
 import os
 import sys
@@ -20,6 +19,7 @@ import sas.system.version
 from sas.qtgui.Plotting.PlotterBase import Data1D
 from sas.qtgui.Utilities import GuiUtils
 from sas.qtgui.Utilities.Reports.reportdata import ReportData
+from sas.system import SAS_RESOURCES
 
 logger = logging.getLogger(__name__)
 
@@ -100,8 +100,8 @@ class ReportBase:
                 tags.link(rel="stylesheet", href=style_link)
 
             else:
-                style_data = pkg_resources.read_text("sas.qtgui.Utilities.Reports", "report_style.css")
-                tags.style(style_data)
+                with SAS_RESOURCES.resource("qtgui/Utilities/Reports/report_style.css") as res_path:
+                    tags.style(res_path.read_text())
 
         with self._html_doc.body:
             with tags.div(id="main"):

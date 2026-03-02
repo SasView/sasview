@@ -3,13 +3,14 @@ import datetime
 import json
 import logging
 import os
+import subprocess
 import sys
 from csv import DictReader
 from pathlib import Path
 
 import requests
 
-from sas.system.legal import legal
+from sas.system import legal
 
 USAGE = '''This script should be run from one directory above the base sasview directory. This script also requires both
  sasmodels and sasdata repositories to be in the same directory as the sasview repository.
@@ -37,71 +38,12 @@ zenodo_url = "https://zenodo.org"
 # Should import release notes from git repo, for now will need to cut and paste
 sasview_data = {
 'metadata': {
-    'title': 'SasView version 6.1.1',
-    'description': '6.1.1 release',
+    'title': 'SasView version 6.1.2',
+    'description': '6.1.2 release',
     'related_identifiers': [{'identifier': 'https://github.com/SasView/sasview/releases/tag/v6.1.1',
                         'relation': 'isAlternateIdentifier', 'scheme': 'url'}],
-    'contributors': [
-        {'name': 'Anuchitanukul, Atijit', 'affiliation': 'STFC - Rutherford Appleton Laboratory', 'type':'Researcher'},
-        {'name': 'Corona, Patrick', 'affiliation': 'University of California Santa Barbara', 'type':'Researcher'},
-        {'name': 'Fragneto, Giovanna', 'affiliation': 'Institut Laue-Langevin', 'type':'Supervisor'},
-        {'name': 'Fultz, Brent', 'affiliation': 'California Institute of Technology', 'type':'WorkPackageLeader'},
-        {'name': 'Juhas, Pavol', 'affiliation': 'Brookhaven National Laboratory', 'type':'Researcher'},
-        {'name': 'Knudsen, Mikkel', 'affiliation': 'University of Copenhagen', 'type':'Researcher'},
-        {'name': 'Gilbert, Peter', 'affiliation': 'National Institute of Standards and Technology', 'type': 'Researcher'},
-        {'name': 'Krueger, Susan', 'affiliation': 'National Institute of Standards and Technology', 'type': 'Researcher'},
-        {'name': 'Markvardsen, Anders', 'affiliation': 'STFC - Rutherford Appleton Laboratory', 'type':'Supervisor'},
-        {'name': 'McKerns, Mike', 'affiliation': 'California Institute of Technology', 'type':'Researcher'},
-        {'name': 'Mothander, Karolina', 'affiliation': 'Lund University', 'type':'Researcher'},
-        {'name': 'Narayanan, Theyencheri', 'affiliation': 'European Synchrotron Radiation Facility', 'type':'Researcher'},
-        {'name': 'Parsons, Drew', 'affiliation': 'University of Cagliari and the Debian Project', 'type':'DataManager'},
-        {'name': 'Porcar, Lionel', 'affiliation': 'Institut Laue-Langevin', 'type':'Researcher'},
-        {'name': 'Pozzo, Lilo', 'affiliation': 'University of Washington', 'type':'Researcher'},
-        {'name': 'Rakitin, Maksim', 'affiliation': 'Brookhaven National Laboratory','type':'DataManager'},
-        {'name': 'Rennie, Adrian', 'affiliation': 'Uppsala University', 'type':'Researcher'},
-        {'name': 'Rod, Thomas Holm', 'affiliation': 'European Spallation Source ERIC', 'type':'WorkPackageLeader'},
-        {'name': 'Taylor, Jonathan', 'affiliation': 'European Spallation Source ERIC', 'type':'Other'},
-        {'name': 'Teixeira, Susana', 'affiliation': 'National Institute of Standards and Technology', 'type': 'Researcher'},
-        {'name': 'Udby, Linda', 'affiliation': 'Niels Bohr Institute', 'type':'Other'},
-        {'name': 'Weigandt, Katie', 'affiliation':'National Institute of Standards and Technology','type':'Researcher'},
-    ],
-
-    'creators': [
-        {'affiliation': 'Oak Ridge National Laboratory', 'name': 'Doucet, Mathieu', 'orcid': '0000-0002-5560-6478'},
-        {'name': 'Cho, Jae Hie','affiliation': 'University of Tennessee Knoxville'},
-        {'name': 'Alina, Gervaise','affiliation': 'University of Tennessee Knoxville'},
-        {'name': 'Attala, Ziggy', 'affiliation': 'STFC - Rutherford Appleton Laboratory'},
-        {'name': 'Bakker, Jurrian','affiliation': 'Technical Unviersity Delft'},
-        {'name': 'Beaucage, Peter','affiliation': 'National Institute of Standards and Technology', 'orcid': '0000-0002-2147-0728'},
-        {'name': 'Bouwman, Wim','affiliation': 'Technical Univeristy Deflt' },
-        {'name': 'Bourne, Robert', 'affiliation': 'STFC - Rutherford Appleton Laboratory'},
-        {'name': 'Butler, Paul','affiliation': 'National Institute of Standards and Technology', 'orcid': '0000-0002-5978-4714'},
-        {'name': 'Cadwallader-Jones, Iestyn','affiliation': 'Institut Laue-Langevin'},
-        {'name': 'Campbell, Kieran','affiliation': 'University of Oxford'},
-        {'name': 'Cooper-Benun, Torin', 'affiliation': 'STFC - Rutherford Appleton Laboratory'},
-        {'name': 'Durniak, Celine','affiliation': 'European Spallation Source ERIC' },
-        {'name': 'Forster, Laura','affiliation': 'Diamond Light Source'},
-        {'name': 'Gilbert, Peter','affiliation': 'National Institute of Standards and Technology', 'orcid': '0000-0003-1707-7517'},
-        {'name': 'Gonzalez, Miguel','affiliation': 'Institut Laue-Langevin', 'orcid': '0000-0002-3478-0215'},
-        {'name': 'Heenan, Richard','affiliation': 'STFC - Rutherford Appleton Laboratory','orcid': '0000-0002-7729-1454'},
-        {'name': 'Jackson, Andrew','affiliation': 'European Spallation Source ERIC', 'orcid': '0000-0002-6296-0336'},
-        {'name': 'King, Stephen','affiliation': 'STFC - Rutherford Appleton Laboratory', 'orcid': '0000-0003-3386-9151'},
-        {'name': 'Kienzle, Paul','affiliation': 'National Institute of Standards and Technology', 'orcid': '0000-0002-7893-0318'},
-        {'name': 'Krzywon, Jeff','affiliation': 'National Institute of Standards and Technology', 'orcid': '0000-0002-2380-4090'},
-        {'name': 'Maranville, Brian', 'affiliation': 'National Institute of Standards and Technology', 'orcid': '0000-0002-6105-8789'},
-        {'name': 'Martinez, Nicolas','affiliation': 'Institut Laue-Langevin'},
-        {'name': 'Murphy, Ryan', 'affiliation': 'National Institute of Standards and Technology', 'orcid': '0000-0002-4080-7525'},
-        {'name': 'Nielsen, Torben','affiliation': 'European Spallation Source ERIC'},
-        {'name': "O'Driscoll, Lewis",'affiliation': 'STFC - Rutherford Appleton Laboratory'},
-        {'name': 'Potrzebowski, Wojciech','affiliation': 'European Spallation Source ERIC', 'orcid': '0000-0002-7789-6779'},
-        {'name': "Prescott, Stuart",'affiliation': 'University of New South Wales and the Debian Project', 'orcid': '0000-0001-5639-9688'},
-        {'name': 'Ferraz Leal, Ricardo','affiliation': 'Oak Ridge National Laboratory'},
-        {'name': 'Rozyczko, Piotr','affiliation': 'European Spallation Source ERIC', 'orcid' : '0000-0002-2359-1013' },
-        {'name': 'Snow, Tim','affiliation': 'Diamond Light Source','orcid': '0000-0001-7146-6885'},
-        {'name': 'Washington, Adam','affiliation': 'STFC - Rutherford Appleton Laboratory'},
-        {'name': 'Wilkins, Lucas','affiliation': 'STFC - Rutherford Appleton Laboratory'},
-        {'name': 'Wolf, Caitlyn','affiliation': 'National Institute of Standards and Technology', 'orcid': '0000-0002-2956-7049'}
-        ],
+    'contributors': [],
+    'creators': [],
     'grants': [{'id': '10.13039/501100000780::654000'}],
     'license': 'BSD-3-Clause',
     'upload_type': 'software',
@@ -293,6 +235,17 @@ def update_file(license_file: Path, license_line: str, line_to_update: int):
         f.writelines(output_lines)
 
 
+def update_credits(credits_file: Path):
+    """Update the credits.html file with relevant license info"""
+    subprocess.check_call(
+        [
+            sys.executable,
+            "--minimal",
+            "build_tools/release_automation.py",
+            credits_file,
+        ])
+
+
 def update_acknowledgement_widget():
     """
 
@@ -308,7 +261,7 @@ def prepare_release_notes(issues_list, repository, username, password):
     """
     issue_titles = []
     for issue in issues_list:
-        # WARNING: One can try running with auth but there is limitted number of requests
+        # WARNING: One can try running with auth but there is limited number of requests
         response = requests.get('https://api.github.com/repos/SasView/' + repository + '/issues/' + issue,
                                 auth=(username, password))
         if response.status_code != 200:
@@ -365,6 +318,7 @@ def main(args=None):
     update_file(SASMODELS_PATH / 'LICENSE.txt', license_line, 0)
     update_file(SASDATA_PATH / 'LICENSE.TXT', license_line, 0)
     update_file(SASVIEW_PATH / 'installers' / 'license.txt', license_line, -1)
+    update_credits(SASVIEW_PATH / "src" / "sas" / "system" / "credits.html")
 
     sasview_issues_list = args.sasview_list
     sasmodels_issues_list = args.sasmodels_list

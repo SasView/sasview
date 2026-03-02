@@ -79,6 +79,9 @@ class Communicate(QtCore.QObject):
     """
     Utility class for tracking of the Qt signals
     """
+    # File was passed as an argument on the command line, dropped on the executable, or double clicked
+    fileTriggerSignal = QtCore.Signal(str)
+
     # File got successfully read
     fileReadSignal = QtCore.Signal(list)
 
@@ -177,6 +180,8 @@ class Communicate(QtCore.QObject):
     # Global close to help kill active threads
     closeSignal = QtCore.Signal()
 
+    # Notify about a data name to be frozen and send to fitting perspective
+    freezeDataNameSignal = QtCore.Signal(str)
 
 communicate = Communicate()
 

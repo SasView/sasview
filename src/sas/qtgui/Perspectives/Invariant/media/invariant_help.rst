@@ -124,10 +124,10 @@ Data Extrapolation
 The difficulty with using $Q^*$  arises from the fact that experimental data is
 never measured over the range $0 \le q \le \infty$ and it is thus usually
 necessary to extrapolate the experimental data to both low and high $q$.
-Currently, SasView allows extrapolation to any user-defined low and high $q$.
-The default range is $10^{-5} \le q \le 10$ |Ang^-1|. Note that the integrals
-above are weighted by $q^2$ or $q$. Thus the high-$q$ extrapolation is weighted
-far more heavily than the low-$q$ extrapolation so that having data measured to
+Currently, SasView allows extrapolation on a low and high $q$ range of 
+$10^{-5} \le q \le 10$ |Ang^-1|. Note that the integrals above are weighted by
+$q^2$ or $q$. Thus the high-$q$ extrapolation is weighted far more heavily 
+than the low-$q$ extrapolation so that having data measured to
 as large a value of $q_{max}$ as possible can be surprisingly important.
 
 Low-\ $q$ region (<= $q_{min}$ in data):
@@ -135,7 +135,7 @@ Low-\ $q$ region (<= $q_{min}$ in data):
 *  The Guinier function $I_0.exp(-q^2 R_g^2/3)$ can be used, where $I_0$
    and $R_g$ are obtained by fitting the data within the range $q_{min}$ to
    $q_{min+j}$ where $j$ is the user-chosen number of points from which to
-   extrapolate. The default is the first 10 points. Alternatively a power
+   extrapolate. The default is the lower 15\% of the data range. Alternatively a power
    law, similar to the high $q$ extrapolation, can be used but this is not
    recommended!
    
@@ -150,7 +150,7 @@ High-\ $q$ region (>= $q_{max}$ in data):
    such an extrapolation. The fitted constant(s) $A$ ($m$) is/are obtained by
    fitting the data within the range $q_{max-j}$ to $q_{max}$ where, again,
    $j$ is the user chosen number of points from which to extrapolate, the
-   default again being the last 10 points.
+   default again being the upper 15\% of the data range.
 
 .. note:: While the high $q$ exponent should generally be close to 4 for a
     system with sharp interfaces, in the special case of *infinite* slit
@@ -170,8 +170,7 @@ where $\Delta\rho = (\rho_1 - \rho_2)$ is the SLD contrast and $\phi_1$ and
 $\phi_2$ are the volume fractions of the two phases ($\phi_1 + \phi_2 = 1$).
 Thus from the invariant one can either calculate the volume fractions of the
 two phases given the contrast or, calculate the contrast given the volume
-fraction. However, the current implementation in SasView only allows for the
-former: extracting the volume fraction given a known contrast factor.
+fraction.
 
 Volume Fraction
 ^^^^^^^^^^^^^^^
@@ -196,7 +195,7 @@ and thus, if $\phi_1 < \phi_2$
     &\phi_1 = \frac{1 - \sqrt{1 - 4A}}{2} \\
     &\phi_2 = \frac{1 + \sqrt{1-4A}}{2}
 
-where $\phi_1$ (the volume fraction of the *minority phase*) is reported as the
+where $\phi_1$ (by convention, the volume fraction of the *minority phase*) is reported as the
 the volume fraction in the Invariant analysis window.
 
 .. note::
@@ -206,6 +205,18 @@ the volume fraction in the Invariant analysis window.
     as ERROR. Possible reasons for this are that the contrast has been
     incorrectly entered, or that the dataset is simply not suitable for
     invariant analysis.
+
+SLD Contrast
+^^^^^^^^^^^^
+In cases where the volume fraction of the particles is known, the invariant 
+can provide an estimate of the contrast term. Rearranging the expression for $Q^*$ yields
+
+.. math::
+
+    (\Delta\rho)^2 = \frac{Q^*}{2 \pi^2 \phi_1 \phi_2}
+
+where $\phi_1$ is the known volume fraction of the minority phase, and $\phi_2 =
+1 - \phi_1$.
 
 Specific Surface Area
 ^^^^^^^^^^^^^^^^^^^^^
@@ -309,44 +320,45 @@ Select a dataset and use the *Send To* button on the *Data Explorer* to load
 the dataset into the *Invariant* panel. Or select *Invariant* from the
 *Analysis* category in the menu bar.
 
-.. image:: image_invariant_load_data.png
+.. image:: image_contrast_calculation.png
 
-A first estimate of $Q^*$ should be computed automatically but should be
-ignored as it will be incorect until the proper contrast term is specified.
-
-Use the box on the *Options* tab to specify the contrast term(i.e. difference
-in SLDs). Note this must be specified for the eventual value of $Q^*$ to be on
-an absolute scale and to therefore have any meaning).
-
-.. warning:: **The user must provide the correct SLD contrast** for the data
-    they are analysing in the *Options* tab of the Invariant window **and then**
-    click on *Compute* before examining/using any displayed value of the
-    invariant or volume fraction. **The default contrast has been deliberately
-    set to the unlikley-to-be-realistic value of 8e-06** |Ang^-2|\ . 
+The Invariant panel will open showing the data plot. The user can select either
+'contrast' or 'volume fraction' calculation mode using the radio buttons, and
+enter the known value in the relevant box. Errors can be specified if known,
+otherwise the calculation will proceed assuming no error in the known value.
+After a valid value is entered, the 'Calculate' button will become active. Press
+this button to perform the Invariant calculation. The calculated value of the
+Invariant and the derived value (volume fraction or contrast) will be displayed
+in the relevant boxes at the bottom of the panel. 
 
 Optional: Also in this tab a background term to subtract from the data can be
 specified (if the data is not already properly background subtracted), the data
 can be rescaled if necessary (e.g. to be on an absolute scale) and a value for 
 $C_p$ can be specified (required if the specific surface area $S_v$ is desired).
 
-.. image:: image_invariant_option_tab.png
+.. image:: image_invariant_extrapolation_tab.png
 
-Adjust the extrapolation types as necessary by checking the relevant *Enable
-Extrapolate* check boxes. If power law extrapolations are chosen, the exponent
-can be either held fixed or fitted. The number of points, $Npts$, to be used
-for the basis of the extrapolation can also be specified.
+ Switch to the *Extrapolation* tab.
 
-In most cases the default values will suffice. Click the *Compute* button.
+Adjust the extrapolation types as necessary by checking the relevant check boxes. 
+If power law extrapolations are chosen, the exponent can be either fitted or held fixed. 
+The range over which the extrapolations are fitted can also be adjusted by changing the
+slider positions, or entering a specific value in the relevant box. The default values
+are to use the lower and upper 15% of the data points for the low and high $q$ 
+extrapolations respectively. In most cases the default values will suffice. Click 
+the *Calculate* button to run the extrapolation.
 
-.. note:: As mentioned above in the `Data Extrapolation`_ section, the 
-    extrapolation ranges are currently fixed and not adjustable. They are
-    designed to keep the computation time reasonable while including as
-    much of the total $q$ range as should be necessary for any SAS data.
+.. image:: image_extrapolated_data.png
 
-The details of the calculation are available by clicking the *Status*
-button at the bottom right of the panel.
+.. note:: As mentioned in the `Data Extrapolation` section, the 
+    maximum extrapolation range is currently fixed from $10e^{-5}$ to $10$.
+    These limits are designed to keep the computation time reasonable while
+    including as much of the total $q$ range as should be necessary for any SAS data. 
 
-.. image:: image_invariant_details.png
+The details of the calculation are available in brief at the bottom of the panel,
+or in more detail by clicking the *Status* button at the bottom right of the panel.
+
+.. image:: image_status.png
 
 If more than 10% of the computed $Q^*$ value comes from the areas under
 the extrapolated curves, proceed with caution.
@@ -374,5 +386,4 @@ References
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed (completely re-written) by Paul
-    Butler and Steve King, March-July 2020
+.. note::  This help document was last changed by Sujaya Shrestha, 7 January 2026.

@@ -627,6 +627,15 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
                 return tab
         return None
 
+    def reset(self):
+        """
+        Reset the fitting perspective to an empty state
+        """
+        while self.count() > 0:
+            self.closeTabByIndex(0)
+        # Add an empty fit tab
+        self.addFit(None)
+
     @property
     def supports_reports(self) -> bool:
         return True

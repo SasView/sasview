@@ -32,5 +32,5 @@ class Acknowledgements(QtWidgets.QDialog, Ui_Acknowledgements):
                                  " from the EU Horizon 2020 programme under the SINE2020 project Grant No 654000."
 
         self.textBrowser.setText(acknowledgement_text_1)
-        acknowledgement_text_2 = 'M. Doucet et al. SasView Version ' + str(version) + ', ' + str(doi)
+        acknowledgement_text_2 = 'J. Krzywon, et al. SasView Version ' + str(version) + ', ' + str(doi)
         self.textBrowser_2.setText(acknowledgement_text_2)
