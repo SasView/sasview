@@ -1,4 +1,4 @@
-"""Tests for the Invariant perspective with loaded data."""\
+"""Tests for the Invariant perspective with loaded data."""
 
 # from src.sas.qtgui.Utilities.BackgroundColor import BG_DEFAULT, BG_ERROR
 
@@ -11,7 +11,7 @@ from sas.qtgui.Plotting.PlotterData import Data1D
 # Default background color (transparent)
 BG_DEFAULT = ""
 # Error background color
-BG_ERROR   = "background-color: rgb(244, 170, 164);"
+BG_ERROR = "background-color: rgb(244, 170, 164);"
 
 
 @pytest.mark.parametrize("window_class", ["small_data"], indirect=True)
@@ -151,8 +151,7 @@ class TestInvariantCalculationPrerequisites:
         self.window.txtContrast.setText("e")
         self.window.txtContrast.textEdited.emit("e")
         assert self.window.txtContrast.styleSheet() == BG_ERROR
-        assert not self.window.cmdCalculate.isEnabled()\
-
+        assert not self.window.cmdCalculate.isEnabled()
         self.window.txtContrast.setText("1e-")
         self.window.txtContrast.textEdited.emit("1e-")
         assert self.window.txtContrast.styleSheet() == BG_ERROR

@@ -126,6 +126,7 @@ def real_data() -> Data1D:
     data.filename = "real_data.txt"
     return data
 
+
 @pytest.fixture
 def dummy_manager() -> DummyManager:
     return DummyManager()

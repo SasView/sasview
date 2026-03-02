@@ -6,7 +6,7 @@ from PySide6.QtTest import QTest
 from sas.qtgui.Perspectives.Invariant.InvariantDetails import DetailsDialog
 from sas.qtgui.Perspectives.Invariant.InvariantUtils import WIDGETS
 
-BG_COLOR_ERR = 'background-color: rgb(244, 170, 164);'
+BG_COLOR_ERR = "background-color: rgb(244, 170, 164);"
 
 
 class InvariantDetailsTest:
@@ -14,18 +14,18 @@ class InvariantDetailsTest:
 
     @pytest.fixture(autouse=True)
     def widget(self, qapp):
-        '''Create/Destroy the Invariant Details window'''
+        """Create/Destroy the Invariant Details window"""
 
         w = DetailsDialog(None)
         w._model = QtGui.QStandardItemModel()
-        w._model.setItem(WIDGETS.W_INVARIANT, QtGui.QStandardItem(str(10.)))
+        w._model.setItem(WIDGETS.W_INVARIANT, QtGui.QStandardItem(str(10.0)))
         w._model.setItem(WIDGETS.W_INVARIANT_ERR, QtGui.QStandardItem(str(0.1)))
         w._model.setItem(WIDGETS.W_ENABLE_LOWQ_EX, QtGui.QStandardItem('true'))
         w._model.setItem(WIDGETS.D_LOW_QSTAR, QtGui.QStandardItem(str(9.)))
         w._model.setItem(WIDGETS.D_LOW_QSTAR_ERR, QtGui.QStandardItem(str(0.03)))
-        w._model.setItem(WIDGETS.D_DATA_QSTAR, QtGui.QStandardItem(str(10.)))
+        w._model.setItem(WIDGETS.D_DATA_QSTAR, QtGui.QStandardItem(str(10.0)))
         w._model.setItem(WIDGETS.D_DATA_QSTAR_ERR, QtGui.QStandardItem(str(0.1)))
-        w._model.setItem(WIDGETS.D_HIGH_QSTAR, QtGui.QStandardItem(str(1.)))
+        w._model.setItem(WIDGETS.D_HIGH_QSTAR, QtGui.QStandardItem(str(1.0)))
         w._model.setItem(WIDGETS.D_HIGH_QSTAR_ERR, QtGui.QStandardItem(str(0.01)))
 
         # High-Q
@@ -55,7 +55,6 @@ class InvariantDetailsTest:
         assert widget.progressBarHighQ.minimum() == 0
         assert widget.progressBarHighQ.maximum() == 100
 
-
         # Tooltips
         assert widget.txtQData.toolTip() == "Invariant in the data set's Q range."
         assert widget.txtQDataErr.toolTip() == "Uncertainty on the invariant from data's range."
@@ -65,7 +64,7 @@ class InvariantDetailsTest:
         assert widget.txtQHighQErr.toolTip() == "Uncertainty on the invariant from high-Q range."
 
     def testOnOK(self, widget):
-        """ Test closing dialog"""
+        """Test closing dialog"""
         okButton = widget.cmdOK
         QTest.mouseClick(okButton, Qt.LeftButton)
 
@@ -74,15 +73,15 @@ class InvariantDetailsTest:
         widget.showDialog()
         # Low Q true
         assert widget.qlow == 9.0
-        assert widget.txtQLowQ.text() == '9.0'
+        assert widget.txtQLowQ.text() == "9.0"
         assert widget.progress_low_qstar == 90.0
         assert widget.qstar_total == 10.0
-        assert widget.txtQData.text() == '10.0'
-        assert widget.txtQDataErr.text() == '0.1'
+        assert widget.txtQData.text() == "10.0"
+        assert widget.txtQDataErr.text() == "0.1"
 
         # High Q false
-        assert widget.txtQHighQ.text() == ''
-        assert widget.txtQHighQErr.text() == ''
+        assert widget.txtQHighQ.text() == ""
+        assert widget.txtQHighQErr.text() == ""
         assert widget.progress_high_qstar == 0.0
 
         # Progressbars
@@ -106,8 +105,8 @@ class InvariantDetailsTest:
         widget.progress_qstar = 0
         widget.progress_low_qstar = 10
         return_string = widget.checkValues()
-        assert 'Extrapolated contribution at Low Q is higher than 5% of the invariant.' in return_string
-        assert 'The sum of all extrapolated contributions is higher than 5% of the invariant.' in return_string
+        assert "Extrapolated contribution at Low Q is higher than 5% of the invariant." in return_string
+        assert "The sum of all extrapolated contributions is higher than 5% of the invariant." in return_string
 
         widget.progress_low_qstar = -1
         assert widget.checkValues() == "Extrapolated contribution at Low Q < 0.\n"
