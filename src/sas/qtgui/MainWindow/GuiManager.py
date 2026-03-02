@@ -1629,5 +1629,3 @@ class GuiManager:
             loaded = load_data(dialog.params)
             for datum in loaded:
                 logger.info(datum.summary())
-        else:
-            logger.error('ASCII Reader Closed')
