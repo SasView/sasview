@@ -407,6 +407,47 @@ class TestInvariantDefaults:
 
         mock_removeData.assert_called_once()
 
+    @pytest.mark.parametrize("visible", [True, False], ids=["Visible", "Not Visible"])
+    def test_update_details_widget(self, mocker, visible):
+        """Test that updateDetailsWidget calls the expected methods."""
+        mock_details_dialog = mocker.MagicMock()
+        mock_details_dialog.isVisible.return_value = visible
+
+        mock_on_status = mocker.patch.object(self.window, "onStatus")
+        self.window.detailsDialog = mock_details_dialog
+
+        self.window.update_details_widget()
+
+        if visible:
+            mock_on_status.assert_called_once()
+        else:
+            mock_on_status.assert_not_called()
+
+    def test_onStatus(self, mocker):
+        """Test that onStatus calls the expected methods."""
+        mock_details_dialog = mocker.MagicMock()
+        mock_model = mocker.MagicMock()
+
+        self.window.detailsDialog = mock_details_dialog
+        self.window.model = mock_model
+
+        mock_cmdStatus = mocker.patch.object(self.window, "cmdStatus")
+
+        self.window.onStatus()
+
+        mock_details_dialog.setModel.assert_called_once_with(mock_model)
+        mock_details_dialog.showDialog.assert_called_once()
+        mock_cmdStatus.setEnabled.assert_called_once_with(False)
+
+    def test_onHelp(self, mocker):
+        """Test that onHelp calls showHelp on the parent with the correct path."""
+        mock_show_help = mocker.patch.object(self.window.parent, "showHelp")
+        tree_location = "/user/qtgui/Perspectives/Invariant/invariant_help.html"
+
+        self.window.onHelp()
+
+        mock_show_help.assert_called_once_with(tree_location)
+
 
 @pytest.mark.usefixtures("window_class")
 class TestInvariantUIBehaviour:
