@@ -1,4 +1,3 @@
-from contextlib import suppress
 from os import path
 
 from PySide6.QtCore import QModelIndex, QPoint, Slot
@@ -84,9 +83,7 @@ class AsciiDialog(QDialog):
         self.dataset_label = QLabel("Dataset Type")
         self.dataset_combobox = QComboBox()
         # TODO: Temporarily exclude SESANS until that's been fixed.
-        with suppress(ValueError):
-            dataset_types.remove('SESANS')
-        self.dataset_combobox.addItems(dataset_types)
+        self.dataset_combobox.addItems([option for option in dataset_types if option != 'SESANS'])
         self.dataset_layout.addWidget(self.dataset_label)
         self.dataset_layout.addWidget(self.dataset_combobox)
 
@@ -189,7 +186,7 @@ class AsciiDialog(QDialog):
     @property
     def rowsIsIncluded(self) -> list[bool] | None:
         if self.current_filename is None:
-            return None
+            return []
         return self.files_is_included[self.current_filename]
 
     @property
