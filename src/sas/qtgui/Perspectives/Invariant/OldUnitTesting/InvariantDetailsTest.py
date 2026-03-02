@@ -1,7 +1,8 @@
 import pytest
-from PySide6 import QtGui, QtWidgets
+from PySide6 import QtGui
 from PySide6.QtCore import Qt
 from PySide6.QtTest import QTest
+from PySide6.QtWidgets import QDialog
 
 from sas.qtgui.Perspectives.Invariant.InvariantDetails import DetailsDialog
 from sas.qtgui.Perspectives.Invariant.InvariantUtils import WIDGETS
@@ -20,8 +21,8 @@ class InvariantDetailsTest:
         w._model = QtGui.QStandardItemModel()
         w._model.setItem(WIDGETS.W_INVARIANT, QtGui.QStandardItem(str(10.0)))
         w._model.setItem(WIDGETS.W_INVARIANT_ERR, QtGui.QStandardItem(str(0.1)))
-        w._model.setItem(WIDGETS.W_ENABLE_LOWQ_EX, QtGui.QStandardItem('true'))
-        w._model.setItem(WIDGETS.D_LOW_QSTAR, QtGui.QStandardItem(str(9.)))
+        w._model.setItem(WIDGETS.W_ENABLE_LOWQ_EX, QtGui.QStandardItem("true"))
+        w._model.setItem(WIDGETS.D_LOW_QSTAR, QtGui.QStandardItem(str(9.0)))
         w._model.setItem(WIDGETS.D_LOW_QSTAR_ERR, QtGui.QStandardItem(str(0.03)))
         w._model.setItem(WIDGETS.D_DATA_QSTAR, QtGui.QStandardItem(str(10.0)))
         w._model.setItem(WIDGETS.D_DATA_QSTAR_ERR, QtGui.QStandardItem(str(0.1)))
@@ -29,7 +30,7 @@ class InvariantDetailsTest:
         w._model.setItem(WIDGETS.D_HIGH_QSTAR_ERR, QtGui.QStandardItem(str(0.01)))
 
         # High-Q
-        w._model.setItem(WIDGETS.W_ENABLE_HIGHQ_EX, QtGui.QStandardItem('false'))
+        w._model.setItem(WIDGETS.W_ENABLE_HIGHQ_EX, QtGui.QStandardItem("false"))
 
         yield w
 
@@ -46,7 +47,7 @@ class InvariantDetailsTest:
 
         widget.warning_msg = "No Details on calculations available...\n"
 
-        assert isinstance(widget, QtWidgets.QDialog)
+        assert isinstance(widget, QDialog)
 
         assert widget.progressBarLowQ.minimum() == 0
         assert widget.progressBarLowQ.maximum() == 100
