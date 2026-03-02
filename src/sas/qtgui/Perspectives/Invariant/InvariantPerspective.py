@@ -121,12 +121,10 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self._low_extrapolate: bool = False
         self._low_guinier: bool = True
         self._low_fit: bool = False
-        self._low_power_value: float = DEFAULT_POWER_VALUE
-        # self._low_points: int = 0
+        self._low_power_value: float | None = DEFAULT_POWER_VALUE
         self._high_extrapolate: bool = False
         self._high_fit: bool = False
         self._high_power_value: float | None = DEFAULT_POWER_VALUE
-        # self._high_points: int = 0
 
         # Define plots
         self.high_extrapolation_plot: PlotterData | None = None
@@ -1145,8 +1143,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                 "txtPorodCstErr": "_porod_err",
                 "txtVolFrac1": "_volfrac1",
                 "txtVolFrac1Err": "_volfrac1_err",
-                "txtLowQPower_ex": "_low_q_power_ex",
-                "txtHighQPower_ex": "_high_q_power_ex",
+                "txtLowQPower_ex": "_low_power_value",
+                "txtHighQPower_ex": "_high_power_value",
             }
             if sender_name in sender_to_attr:
                 setattr(self, sender_to_attr[sender_name], None)
