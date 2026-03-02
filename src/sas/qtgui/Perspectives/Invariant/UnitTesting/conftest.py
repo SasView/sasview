@@ -51,6 +51,9 @@ class DummyManager:
         item.setData(data, Qt.UserRole)  # store the Data1D on the item
         return item
 
+    def showHelp(self, location: str) -> None:
+        """Stub for the help dialog."""
+
 
 @pytest.fixture
 def small_data() -> Data1D:
