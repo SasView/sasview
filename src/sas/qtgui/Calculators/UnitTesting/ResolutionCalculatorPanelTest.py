@@ -12,7 +12,7 @@ mpl.use("Qt5Agg")
 from twisted.internet import threads
 
 from sas.qtgui.Calculators.ResolutionCalculatorPanel import ResolutionCalculatorPanel
-from sas.qtgui.Utilities.GuiUtils import Communicate
+from sas.qtgui.Utilities.GuiUtils import communicator
 
 BG_COLOR_ERR = 'background-color: rgb(244, 170, 164);'
 
@@ -26,7 +26,7 @@ class ResolutionCalculatorPanelTest:
         """Create/Destroy the ResolutionCalculatorPanel"""
         class dummy_manager:
             def communicator(widget):
-                return Communicate()
+                return communicator
 
         w = ResolutionCalculatorPanel(dummy_manager())
 

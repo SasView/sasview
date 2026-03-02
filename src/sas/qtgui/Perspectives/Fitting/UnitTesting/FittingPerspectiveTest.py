@@ -16,9 +16,7 @@ class FittingPerspectiveTest:
     def widget(self, qapp):
         '''Create/Destroy the perspective'''
         class dummy_manager:
-            def communicator(self):
-                return GuiUtils.Communicate()
-            communicate = GuiUtils.Communicate()
+            communicator = GuiUtils.communicator
 
         '''Create the perspective'''
         # need to ensure that categories exist first

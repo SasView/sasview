@@ -10,7 +10,7 @@ from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionPerspective import 
     SizeDistributionWindow,
 )
 from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Utilities.GuiUtils import Communicate
+from sas.qtgui.Utilities.GuiUtils import communicator
 
 
 class SizeDistributionTest:
@@ -22,10 +22,7 @@ class SizeDistributionTest:
 
         class dummy_manager:
             HELP_DIRECTORY_LOCATION = "html"
-            communicate = Communicate()
-
-            def communicator(self):
-                return self.communicate
+            communicator = communicator
 
         w = SizeDistributionWindow(parent=dummy_manager())
         w._parent = QtWidgets.QMainWindow()

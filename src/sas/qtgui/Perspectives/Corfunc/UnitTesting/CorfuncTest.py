@@ -26,10 +26,7 @@ class CorfuncTest:
                 self.filesWidget = MainWindow()
 
             def communicator(self, widget):
-                return GuiUtils.Communicate()
-
-            def communicate(self, widget):
-                return GuiUtils.Communicate()
+                return GuiUtils.communicator
 
         w = CorfuncWindow(dummy_manager())
         reference_data1 = Data1D(x=[0.1, 0.2, 0.3, 0.4, 0.5], y=[1000, 1000, 100, 10, 1], dy=[0.0, 0.0, 0.0, 0.0, 0.0])

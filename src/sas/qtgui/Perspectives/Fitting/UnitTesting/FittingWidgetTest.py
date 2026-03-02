@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 class dummy_manager:
     HELP_DIRECTORY_LOCATION = "html"
-    communicate = GuiUtils.Communicate()
+    communicator = GuiUtils.communicator
 
     def __init__(self):
         self._perspective = dummy_perspective()
@@ -401,7 +401,7 @@ class FittingWidgetTest:
         Test the data->QIndex conversion
         """
         # set up the model update spy
-        spy = QtSignalSpy(widget._model_model, widget.communicate.updateTheoryFromPerspectiveSignal)
+        spy = QtSignalSpy(widget._model_model, widget.communicator.updateTheoryFromPerspectiveSignal)
 
         widget.show()
         # Change the category index so we have some models
@@ -770,7 +770,7 @@ class FittingWidgetTest:
         assert widget.cmdPlot.text() == 'Calculate'
 
         # Spying on plot update signal
-        spy = QtSignalSpy(widget, widget.communicate.plotRequestedSignal)
+        spy = QtSignalSpy(widget, widget.communicator.plotRequestedSignal)
 
         # Press Calculate
         QtTest.QTest.mouseClick(widget.cmdPlot, QtCore.Qt.LeftButton)
@@ -811,7 +811,7 @@ class FittingWidgetTest:
         assert widget.cmdPlot.text() == 'Show Plot'
 
         # Spying on plot update signal
-        spy = QtSignalSpy(widget, widget.communicate.plotRequestedSignal)
+        spy = QtSignalSpy(widget, widget.communicator.plotRequestedSignal)
 
         # Press Calculate
         QtTest.QTest.mouseClick(widget.cmdPlot, QtCore.Qt.LeftButton)
@@ -894,7 +894,7 @@ class FittingWidgetTest:
         widget.main_params_to_fit = ['scale']
 
         # Spying on status update signal
-        update_spy = QtSignalSpy(widget, widget.communicate.statusBarUpdateSignal)
+        update_spy = QtSignalSpy(widget, widget.communicator.statusBarUpdateSignal)
 
         mocker.patch.object(threads, 'deferToThread')
         widget.onFit()
@@ -939,7 +939,7 @@ class FittingWidgetTest:
         widget.main_params_to_fit = ['scale']
 
         # Spying on status update signal
-        update_spy = QtSignalSpy(widget, widget.communicate.statusBarUpdateSignal)
+        update_spy = QtSignalSpy(widget, widget.communicator.statusBarUpdateSignal)
 
         with threads.deferToThread as MagicMock:
             widget.onFit()

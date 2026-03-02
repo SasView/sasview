@@ -17,7 +17,7 @@ class TabbedModelEditorTest:
         '''Create/Destroy the editor'''
         class dummy_manager:
             _parent = QWidget()
-            communicate = GuiUtils.Communicate()
+            communicator = GuiUtils.communicator
 
         w = TabbedModelEditor(parent=dummy_manager)
 
@@ -31,7 +31,7 @@ class TabbedModelEditorTest:
         '''Create/Destroy the editor'''
         class dummy_manager:
             _parent = QWidget()
-            communicate = GuiUtils.Communicate()
+            communicator = GuiUtils.communicator
 
         w = TabbedModelEditor(parent=dummy_manager, edit_only=True)
 
