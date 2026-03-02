@@ -70,6 +70,114 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="tabInstrument">
+      <attribute name="title">
+       <string>Instrument</string>
+      </attribute>
+      <layout class="QFormLayout" name="formLayoutInstrument">
+       <item row="0" column="0">
+        <widget class="QLabel" name="lblSourceType">
+         <property name="text">
+          <string>Source Type:*</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QComboBox" name="cmbSourceType">
+         <item>
+          <property name="text">
+           <string>X-ray synchrotron</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>X-ray in house</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Neutron source</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Other</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="lblBeamlineName">
+         <property name="text">
+          <string>Beamline/Instrument:*</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="txtBeamlineName"/>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="lblSynchrotronName">
+         <property name="text">
+          <string>Synchrotron/Facility:*</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLineEdit" name="txtSynchrotronName"/>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="lblDetectorManufacturer">
+         <property name="text">
+          <string>Detector Manufacturer/Model:*</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QLineEdit" name="txtDetectorManufacturer"/>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="lblDetectorType">
+         <property name="text">
+          <string>Detector Type:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QLineEdit" name="txtDetectorType"/>
+       </item>
+       <item row="5" column="0">
+        <widget class="QLabel" name="lblDetectorResolution">
+         <property name="text">
+          <string>Detector Resolution (pixel size):*</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <widget class="QLineEdit" name="txtDetectorResolution"/>
+       </item>
+       <item row="6" column="0">
+        <widget class="QLabel" name="lblCity">
+         <property name="text">
+          <string>City:*</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="1">
+        <widget class="QLineEdit" name="txtCity"/>
+       </item>
+       <item row="7" column="0">
+        <widget class="QLabel" name="lblCountry">
+         <property name="text">
+          <string>Country:*</string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="1">
+        <widget class="QLineEdit" name="txtCountry"/>
+       </item>
+      </layout>
+     </widget>
      <widget class="QWidget" name="tabSample">
       <attribute name="title">
        <string>Sample/Data</string>
@@ -422,7 +530,25 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayoutGuinier">
        <item>
-        <layout class="QFormLayout" name="formLayoutGuinier">
+        <layout class="QHBoxLayout" name="horizontalLayoutGuinier">
+         <item>
+          <spacer name="horizontalSpacerGuinierLeft">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Expanding</enum>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <layout class="QFormLayout" name="formLayoutGuinier">
          <item row="0" column="0">
           <widget class="QLabel" name="lblGuinierRg">
          <property name="text">
@@ -487,6 +613,24 @@
         </widget>
        </item>
         </layout>
+         </item>
+         <item>
+          <spacer name="horizontalSpacerGuinierRight">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Expanding</enum>
+           </property>
+          </spacer>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>
@@ -494,7 +638,27 @@
       <attribute name="title">
        <string>Fit</string>
       </attribute>
-      <layout class="QFormLayout" name="formLayoutFit">
+      <layout class="QVBoxLayout" name="verticalLayoutFit">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayoutFit">
+         <item>
+          <spacer name="horizontalSpacerFitLeft">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Expanding</enum>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <layout class="QFormLayout" name="formLayoutFit">
        <item row="0" column="0">
         <widget class="QLabel" name="lblFitSoftware">
          <property name="text">
@@ -612,112 +776,24 @@
         </widget>
        </item>
       </layout>
-     </widget>
-     <widget class="QWidget" name="tabInstrument">
-      <attribute name="title">
-       <string>Instrument</string>
-      </attribute>
-      <layout class="QFormLayout" name="formLayoutInstrument">
-       <item row="0" column="0">
-        <widget class="QLabel" name="lblSourceType">
-         <property name="text">
-          <string>Source Type:*</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1">
-        <widget class="QComboBox" name="cmbSourceType">
-         <item>
-          <property name="text">
-           <string>X-ray synchrotron</string>
-          </property>
          </item>
          <item>
-          <property name="text">
-           <string>X-ray in house</string>
-          </property>
+          <spacer name="horizontalSpacerFitRight">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Expanding</enum>
+           </property>
+          </spacer>
          </item>
-         <item>
-          <property name="text">
-           <string>Neutron source</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Other</string>
-          </property>
-         </item>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="lblBeamlineName">
-         <property name="text">
-          <string>Beamline/Instrument:*</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QLineEdit" name="txtBeamlineName"/>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="lblSynchrotronName">
-         <property name="text">
-          <string>Synchrotron/Facility:*</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QLineEdit" name="txtSynchrotronName"/>
-       </item>
-       <item row="3" column="0">
-        <widget class="QLabel" name="lblDetectorManufacturer">
-         <property name="text">
-          <string>Detector Manufacturer/Model:*</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="1">
-        <widget class="QLineEdit" name="txtDetectorManufacturer"/>
-       </item>
-       <item row="4" column="0">
-        <widget class="QLabel" name="lblDetectorType">
-         <property name="text">
-          <string>Detector Type:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="1">
-        <widget class="QLineEdit" name="txtDetectorType"/>
-       </item>
-       <item row="5" column="0">
-        <widget class="QLabel" name="lblDetectorResolution">
-         <property name="text">
-          <string>Detector Resolution (pixel size):*</string>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="1">
-        <widget class="QLineEdit" name="txtDetectorResolution"/>
-       </item>
-       <item row="6" column="0">
-        <widget class="QLabel" name="lblCity">
-         <property name="text">
-          <string>City:*</string>
-         </property>
-        </widget>
-       </item>
-       <item row="6" column="1">
-        <widget class="QLineEdit" name="txtCity"/>
-       </item>
-       <item row="7" column="0">
-        <widget class="QLabel" name="lblCountry">
-         <property name="text">
-          <string>Country:*</string>
-         </property>
-        </widget>
-       </item>
-       <item row="7" column="1">
-        <widget class="QLineEdit" name="txtCountry"/>
+        </layout>
        </item>
       </layout>
      </widget>
