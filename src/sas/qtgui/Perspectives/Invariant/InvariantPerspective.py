@@ -125,9 +125,11 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self._low_guinier: bool = True
         self._low_fit: bool = False
         self._low_power_value: float = DEFAULT_POWER_VALUE
+        # self._low_points: int = 0
         self._high_extrapolate: bool = False
         self._high_fit: bool = False
         self._high_power_value: float | None = DEFAULT_POWER_VALUE
+        # self._high_points: int = 0
 
         # Define plots
         self.high_extrapolation_plot: PlotterData | None = None
@@ -500,7 +502,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
         return qstar, qstar_err, success
 
-    def calculate_thread(self, extrapolation: str) -> None:
+    def calculate_thread(self, extrapolation: str | None) -> None:
         """Perform Invariant calculations.
 
         This function runs in a worker thread (deferToThread). It must not
@@ -636,6 +638,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             # add extrapolation plots (schedule GUI changes where needed)
             if low_success:
                 qmin_ext = float(self.extrapolation_parameters.ex_q_min)
+                if self._low_points is None:
+                    self.set_low_q_extrapolation_upper_limit(float(self.txtGuinierEnd_ex.text()))
                 extrapolated_data = self._calculator.get_extra_data_low(self._low_points, q_start=qmin_ext)
                 power_low = self._calculator.get_extrapolation_power(range="low")
                 title = f"Low-Q extrapolation [{self._data.name}]"
