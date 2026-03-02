@@ -9,7 +9,7 @@ from twisted.python.failure import Failure
 
 from sas.qtgui.Perspectives import Invariant
 from sas.qtgui.Perspectives.Invariant.InvariantUtils import WIDGETS
-from sas.qtgui.Perspectives.Invariant.Tests.RealDataTest import UIHelpersMixin
+from sas.qtgui.Perspectives.Invariant.UnitTesting.RealDataTest import UIHelpersMixin
 from sas.qtgui.Plotting.PlotterData import Data1D
 
 
