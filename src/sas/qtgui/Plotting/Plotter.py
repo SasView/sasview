@@ -746,6 +746,8 @@ class PlotterWidget(PlotterBase):
         new_plot.custom_color = selected_plot.custom_color
         new_plot.markersize = selected_plot.markersize
         new_plot.symbol = selected_plot.symbol
+        new_plot.xtransform = selected_plot.xtransform
+        new_plot.ytransform = selected_plot.ytransform
         self.removePlot(id)
         self.plot(data=new_plot)
         # Apply user-defined plot range
