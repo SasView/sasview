@@ -727,6 +727,14 @@ class SectorInteractorMulti(MultiSlicerBase):
                 if nbins < 1:
                     return
 
+                for i, slicer in enumerate(self.slicers):
+                    slicer.nbins = nbins
+
+            elif param_name == "fold":
+                fold_value = self.slicers[0].fold
+                for slicer in self.slicers[1:]:
+                    slicer.fold = fold_value
+
         except Exception as e:
             logger.error(f"Error in _on_model_changed: {e}")
 
