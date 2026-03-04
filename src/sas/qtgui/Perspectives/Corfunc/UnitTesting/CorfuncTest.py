@@ -1,5 +1,4 @@
 import os
-from pathlib import Path
 
 import pytest
 from PySide6 import QtCore, QtGui, QtWidgets
@@ -10,6 +9,7 @@ from sasdata.dataloader.loader import Loader
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Perspectives.Corfunc.CorfuncPerspective import CorfuncWindow
 from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.UnitTesting import base_path
 
 
 class CorfuncTest:
@@ -76,7 +76,7 @@ class CorfuncTest:
     def testProcess(self, widget, mocker):
         """Test the full analysis path"""
 
-        filename = str(Path(__file__).parent.parent.parent.parent / "UnitTesting" / "ISIS_98929.TXT")
+        filename = str(base_path / "ISIS_98929.TXT")
         try:
             os.stat(filename)
         except OSError:

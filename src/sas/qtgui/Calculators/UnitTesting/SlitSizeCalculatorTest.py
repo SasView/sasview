@@ -1,5 +1,4 @@
 import logging
-from pathlib import Path
 
 import pytest
 from PySide6 import QtWidgets
@@ -9,6 +8,7 @@ from PySide6.QtTest import QTest
 from sasdata.dataloader.loader import Loader
 
 from sas.qtgui.Calculators.SlitSizeCalculator import SlitSizeCalculator
+from sas.qtgui.UnitTesting import base_path
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +45,7 @@ class SlitSizeCalculatorTest:
     def testBrowseButton(self, widget, mocker):
         browseButton = widget.browseButton
 
-        filename = str(Path("./src/sas/qtgui/UnitTesting/beam_profile.DAT").absolute())
+        filename = str(base_path / "beam_profile.DAT")
 
         # Return no files.
         mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=('',''))
@@ -71,7 +71,7 @@ class SlitSizeCalculatorTest:
     def testCalculateSlitSize(self, widget):
         """ Test slit size calculated value """
 
-        filename = str(Path("./src/sas/qtgui/UnitTesting/beam_profile.DAT").absolute())
+        filename = str(base_path / "beam_profile.DAT")
         loader = Loader()
         data = loader.load(filename)[0]
 
@@ -83,7 +83,7 @@ class SlitSizeCalculatorTest:
     def testWrongInput(self, widget, mocker):
         """ Test on wrong input data """
 
-        filename = str(Path("./src/sas/qtgui/UnitTesting/Dec07031.ASC").absolute())
+        filename = str(base_path / "Dec07031.ASC")
         loader = Loader()
         data = loader.load(filename)[0]
 

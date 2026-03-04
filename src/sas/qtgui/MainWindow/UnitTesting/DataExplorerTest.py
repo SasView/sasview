@@ -19,6 +19,7 @@ from sas.qtgui.MainWindow.DataManager import DataManager
 from sas.qtgui.Plotting.Plotter import Plotter
 from sas.qtgui.Plotting.Plotter2D import Plotter2D
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
+from sas.qtgui.UnitTesting import base_path
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 from sas.system.version import __version__ as SASVIEW_VERSION
 
@@ -134,7 +135,7 @@ class DataExplorerTest:
     def testLoadButton(self, form, mocker):
         loadButton = form.cmdLoad
 
-        filename = [str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute())]
+        filename = [str(base_path / "cyl_400_20.txt")]
         # Initialize signal spy instances
         spy_file_read = QtSignalSpy(form, form.communicator.fileReadSignal)
 
@@ -174,9 +175,9 @@ class DataExplorerTest:
 
         # Populate the model
         filename = [
-            str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute()),
-            str(Path("./src/sas/qtgui/UnitTesting/P123_D2O_10_percent.dat").absolute()),
-            str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute()),
+            str(base_path / "cyl_400_20.txt"),
+            str(base_path / "P123_D2O_10_percent.dat"),
+            str(base_path / "cyl_400_20.txt"),
         ]
         form.readData(filename)
 
@@ -198,9 +199,9 @@ class DataExplorerTest:
 
         # Populate the model
         filename = [
-            str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute()),
-            str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute()),
-            str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute()),
+            str(base_path / "cyl_400_20.txt"),
+            str(base_path / "cyl_400_20.txt"),
+            str(base_path / "cyl_400_20.txt"),
         ]
         form.readData(filename)
 
@@ -316,7 +317,7 @@ class DataExplorerTest:
         mocked_perspective.setData.assert_not_called()
 
         # Populate the model
-        filename = [str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute())]
+        filename = [str(base_path / "cyl_400_20.txt")]
         form.readData(filename)
 
         QApplication.processEvents()
@@ -361,7 +362,7 @@ class DataExplorerTest:
         QMessageBox.setText.assert_called_with("foo")
 
         # open another file
-        filename = [str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute())]
+        filename = [str(base_path / "cyl_400_20.txt")]
         form.readData(filename)
 
         # Mock the warning message and the swapData method
@@ -384,8 +385,8 @@ class DataExplorerTest:
         """
         # Populate the model with 1d and 2d data
         filename = [
-            str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute()),
-            str(Path("./src/sas/qtgui/UnitTesting/P123_D2O_10_percent.dat").absolute())
+            str(base_path / "cyl_400_20.txt"),
+            str(base_path / "P123_D2O_10_percent.dat")
         ]
         form.readData(filename)
 
@@ -472,7 +473,7 @@ class DataExplorerTest:
         """
         Test the low level readData() method
         """
-        filename = [str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute())]
+        filename = [str(base_path / "cyl_400_20.txt")]
         mocker.patch.object(form.manager, 'add_data')
 
         # Initialize signal spy instances
@@ -587,7 +588,7 @@ class DataExplorerTest:
         assert not form.cmdAppend.isEnabled()
 
         # get Data1D
-        p_file = str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute())
+        p_file = str(base_path / "cyl_400_20.txt")
         output_object = loader.load([p_file])
         new_data = [(None, manager.create_gui_data(output_object[0], p_file))]
         _, test_data = new_data[0]
@@ -626,7 +627,7 @@ class DataExplorerTest:
         assert not form.cmdAppend.isEnabled()
 
         # get Data2D
-        p_file = str(Path("./src/sas/qtgui/UnitTesting/P123_D2O_10_percent.dat").absolute())
+        p_file = str(base_path / "P123_D2O_10_percent.dat")
         output_object = loader.load([p_file])
         new_data = [(None, manager.create_gui_data(output_object[0], p_file))]
 
@@ -661,7 +662,7 @@ class DataExplorerTest:
         assert not form.cmdAppend.isEnabled()
 
         # get Data1D
-        p_file = str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute())
+        p_file = str(base_path / "cyl_400_20.txt")
         output_object = loader.load([p_file])
         output_item = QStandardItem()
         new_data = [(output_item, manager.create_gui_data(output_object[0], p_file))]
@@ -731,7 +732,7 @@ class DataExplorerTest:
         See if the context menu is present
         """
         # get Data1D
-        p_file=[str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute())]
+        p_file=[str(base_path / "cyl_400_20.txt")]
         # Read in the file
         output, message = form.readData(p_file)
         form.loadComplete((output, message))
@@ -834,7 +835,7 @@ class DataExplorerTest:
         # Test base state of the name change window
         self.baseNameStateCheck(form)
         # Get Data1D
-        p_file=[str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute())]
+        p_file=[str(base_path / "cyl_400_20.txt")]
         # Read in the file
         output, message = form.readData(p_file)
         key = list(output.keys())
@@ -910,7 +911,7 @@ class DataExplorerTest:
         Test of the showDataInfo method
         """
         # get Data1D
-        p_file = [str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute())]
+        p_file = [str(base_path / "cyl_400_20.txt")]
         # Read in the file
         output, message = form.readData(p_file)
         form.loadComplete((output, message))
@@ -934,7 +935,7 @@ class DataExplorerTest:
         Test the Save As context menu action
         """
         # get Data1D
-        p_file = [str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute())]
+        p_file = [str(base_path / "cyl_400_20.txt")]
         # Read in the file
         output, message = form.readData(p_file)
         form.loadComplete((output, message))
@@ -951,7 +952,7 @@ class DataExplorerTest:
         QFileDialog.getSaveFileName.assert_called_once()
 
         # get Data2D
-        p_file = [str(Path("./src/sas/qtgui/UnitTesting/P123_D2O_10_percent.dat").absolute())]
+        p_file = [str(base_path / "P123_D2O_10_percent.dat")]
         # Read in the file
         output, message = form.readData(p_file)
         form.loadComplete((output, message))
@@ -976,7 +977,7 @@ class DataExplorerTest:
         Quick data plot generation.
         """
         # get Data1D
-        p_file = [str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute())]
+        p_file = [str(base_path / "cyl_400_20.txt")]
         # Read in the file
         output, message = form.readData(p_file)
         form.loadComplete((output, message))
@@ -994,7 +995,7 @@ class DataExplorerTest:
         Slow(er) 3D data plot generation.
         """
         # get Data1D
-        p_file = [str(Path("./src/sas/qtgui/UnitTesting/P123_D2O_10_percent.dat").absolute())]
+        p_file = [str(base_path / "P123_D2O_10_percent.dat")]
         # Read in the file
         output, message = form.readData(p_file)
         form.loadComplete((output, message))
@@ -1026,9 +1027,9 @@ class DataExplorerTest:
 
         # Populate the model
         filename = [
-            str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute()),
-            str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute()),
-            str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute())
+            str(base_path / "cyl_400_20.txt"),
+            str(base_path / "cyl_400_20.txt"),
+            str(base_path / "cyl_400_20.txt")
         ]
         form.readData(filename)
         assert len(form.manager.data_name_dict) == 1
@@ -1097,7 +1098,7 @@ class DataExplorerTest:
         assert not form.cmdAppend.isEnabled()
 
         # Populate the model
-        filename = [str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute())]
+        filename = [str(base_path / "cyl_400_20.txt")]
         form.readData(filename)
 
         # Mask plotting

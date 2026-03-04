@@ -1,5 +1,4 @@
 import sys
-from pathlib import Path
 
 import pytest
 from PySide6 import QtCore, QtWidgets
@@ -8,6 +7,7 @@ from PySide6.QtTest import QTest
 # Local
 from sas.qtgui.MainWindow.MainWindow import MainSasViewWindow, SplashScreen
 from sas.qtgui.Perspectives.Fitting import FittingPerspective
+from sas.qtgui.UnitTesting import base_path
 from sas.qtgui.Utilities.HidableDialog import HidableDialog
 from sas.system import config
 
@@ -74,7 +74,7 @@ class MainWindowTest:
         assert hasattr(gui, 'loadedPerspectives')
         assert len(gui.loadedPerspectives) == 5
         # Load data
-        file = [str(Path("./src/sas/qtgui/UnitTesting/cyl_400_20.txt").absolute())]
+        file = [str(base_path / "cyl_400_20.txt")]
         filesWidget.readData(file)
         data, _ = filesWidget.getAllData()
         dataIDList = list(data.keys())

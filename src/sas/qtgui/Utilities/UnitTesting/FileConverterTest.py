@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import numpy as np
 import pytest
 from lxml import etree
@@ -7,6 +5,7 @@ from PySide6 import QtWidgets
 
 import sasdata.file_converter.FileConverterUtilities as Utilities
 
+from sas.qtgui.UnitTesting import base_path
 from sas.qtgui.Utilities.FileConverter import FileConverterWidget
 from sas.qtgui.Utilities.GuiUtils import Communicate
 
@@ -61,7 +60,7 @@ class FileConverterTest:
         Testing intensity file read in.
         :return:
         """
-        filename = str(Path("./src/sas/qtgui/UnitTesting/FIT2D_I.TXT").absolute())
+        filename = str(base_path / "FIT2D_I.TXT")
         mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[filename, ''])
         widget.onIFileOpen()
 
@@ -78,7 +77,7 @@ class FileConverterTest:
         Testing intensity file read in.
         :return:
         """
-        filename = str(Path("./src/sas/qtgui/UnitTesting/FIT2D_Q.TXT").absolute())
+        filename = str(base_path / "FIT2D_Q.TXT")
         mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[filename, ''])
         widget.onQFileOpen()
 
@@ -95,17 +94,17 @@ class FileConverterTest:
 
         :return:
         """
-        ifilename = str(Path("./src/sas/qtgui/UnitTesting/FIT2D_I.TXT").absolute())
+        ifilename = str(base_path / "FIT2D_I.TXT")
         mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[ifilename, ''])
         widget.onIFileOpen()
-        qfilename = str(Path("./src/sas/qtgui/UnitTesting/FIT2D_Q.TXT").absolute())
+        qfilename = str(base_path / "FIT2D_Q.TXT")
         mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[qfilename, ''])
         widget.onQFileOpen()
 
         assert not widget.isBSL
         assert widget.is1D
 
-        ofilemame = str(Path("./src/sas/qtgui/UnitTesting/FIT2D_IQ.xml").absolute())
+        ofilemame = str(base_path / "FIT2D_IQ.xml")
         widget.ofile = ofilemame
 
         widget.chkLoadFile.setChecked(False)
