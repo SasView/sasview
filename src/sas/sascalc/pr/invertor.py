@@ -12,82 +12,32 @@ from numpy.linalg import lstsq
 if TYPE_CHECKING:
     from sas.qtgui.Perspectives.Inversion.InversionLogic import InversionLogic
 
-# TODO: Add docstrings later
-
 # Default Values for inputs
 NUMBER_OF_TERMS = 10
 REGULARIZATION = 0.0
-BACKGROUND_INPUT = 0.0
-Q_MIN_INPUT = 0.0
-Q_MAX_INPUT = 0.0
-MAX_DIST = 140.0
 
 logger = logging.getLogger(__name__)
 
 
-def help():
-    """
-    Provide general online help text
-    Future work: extend this function to allow topic selection
-    """
-    info_txt = "The inversion approach is based on Moore, J. Appl. Cryst. "
-    info_txt += "(1980) 13, 168-175.\n\n"
-    info_txt += "P(r) is set to be equal to an expansion of base functions "
-    info_txt += "of the type "
-    info_txt += "phi_n(r) = 2*r*sin(pi*n*r/D_max). The coefficient of each "
-    info_txt += "base functions "
-    info_txt += "in the expansion is found by performing a least square fit "
-    info_txt += "with the "
-    info_txt += "following fit function:\n\n"
-    info_txt += "chi**2 = sum_i[ I_meas(q_i) - I_th(q_i) ]**2/error**2 +"
-    info_txt += "Reg_term\n\n"
-    info_txt += "where I_meas(q) is the measured scattering intensity and "
-    info_txt += "I_th(q) is "
-    info_txt += "the prediction from the Fourier transform of the P(r) "
-    info_txt += "expansion. "
-    info_txt += "The Reg_term term is a regularization term set to the second"
-    info_txt += " derivative "
-    info_txt += "d**2P(r)/dr**2 integrated over r. It is used to produce "
-    info_txt += "a smooth P(r) output.\n\n"
-    info_txt += "The following are user inputs:\n\n"
-    info_txt += "   - Number of terms: the number of base functions in the P(r)"
-    info_txt += " expansion.\n\n"
-    info_txt += "   - Regularization constant: a multiplicative constant "
-    info_txt += "to set the size of "
-    info_txt += "the regularization term.\n\n"
-    info_txt += "   - Maximum distance: the maximum distance between any "
-    info_txt += "two points in the system.\n"
-
-    return info_txt
-
-
 class Invertor:
     def __init__(self, logic: "InversionLogic"):
-        self.init_default_values()
-        self.logic = logic
 
-    # TODO: Add types.
-    def init_default_values(self):
-        """Initialize default values for the invertor."""
-        ## Chisqr of the last computation
+        # Chisqr of the last computation
         self.chi2: float = 0
-        ## Time elapsed for last computation
+        # Time elapsed for last computation
         self.elapsed: float = 0
-        ## Alpha to get the reg term the same size as the signal
+        # Alpha to get the reg term the same size as the signal
         self.suggested_alpha: float = 0.0
-        ## Last number of base functions used
+        # Last number of base functions used
         self.nfunc: int = 10
-        ## Last output values
+        # Last output values
         self.out: npt.NDArray[np.float64] | None = None
-        ## Last errors on output values
+        # Last errors on output values
         self.cov: npt.NDArray[np.float64] | None = None
-        ## Background value
+        # Background value
         self.background: float = 0
-        ## TODO: My suspicion is that this'll go.
-        ## Information dictionary for application use
+        # Information dictionary for application use
         self.info: dict = {}
-
-        # Stuff that was on p_invertor
 
         # Maximum distance between any two points in the system
         self.dmax: float = 180.0
@@ -95,8 +45,7 @@ class Invertor:
         self.q_min: float = 0.0
         # Maximum q to include in inversion
         self.q_max: float = np.inf
-        # Flag for whether or not to evaluate a constant background
-        # while inverting
+        # Flag for whether or not to evaluate a constant background while inverting
         self.est_bck: bool = True
         # TODO: Is there a reason this is called alpha, and not just regularization.
         self.alpha: float = REGULARIZATION
@@ -105,8 +54,10 @@ class Invertor:
         # Slit width in units of q [A-1]
         self.slit_width: float = 0.0
 
-        # Stuff I've added that wasn't previously in the calculator.
+        # Number of terms to use in the expansion
         self.noOfTerms: int = NUMBER_OF_TERMS
+
+        self.logic = logic
 
     @property
     def x(self) -> npt.NDArray[np.float64]:
@@ -182,13 +133,9 @@ class Invertor:
         :return: c_out, c_cov - the coefficients with covariance matrix
         """
 
-        # Note: To make sure an array is contiguous:
-        # blah = np.ascontiguousarray(blah_original)
-        # ... before passing it to C
         if not self.is_valid():
-            # msg = "Invertor: invalid data; incompatible data lengths."
-            # raise RuntimeError(msg)
             logger.error("Invertor: invalid data; incompatible data lengths.")
+            return np.zeros(nfunc), np.zeros((nfunc, nfunc))
 
         self.nfunc = nfunc
         # a -- An M x N matrix.
@@ -203,17 +150,13 @@ class Invertor:
         if self.est_bck:
             nfunc += 1
 
-        a = np.zeros((npts + nq, nfunc))
-        b = np.zeros((npts + nq,))
-        err = np.zeros((nfunc, nfunc))
-
         # Construct the a matrix and b vector that represent the problem
         t_0 = time.time()
         try:
             a, b = self._get_matrix(nfunc, nq)
         except Exception as exc:
-            # raise RuntimeError("Invertor: could not invert I(Q)\n  %s" % str(exc))
             logger.error("Invertor: could not invert I(Q)\n  %s" % str(exc))
+            return np.zeros(nfunc), np.zeros((nfunc, nfunc))
 
         # Perform the inversion (least square fit)
         c, residuals, _, _ = lstsq(a, b, rcond=None)
@@ -238,6 +181,7 @@ class Invertor:
             # We were not able to estimate the errors
             # Return an empty error matrix
             logger.error(exc)
+            err = np.zeros((nfunc, nfunc))
 
         # Keep a copy of the last output
         if not self.est_bck:
@@ -401,7 +345,7 @@ class Invertor:
         oscill = calc.reg_term(pars, self.dmax, nslice)
         norm = calc.int_pr_square(pars, self.dmax, nslice)
 
-        if norm == 8:
+        if norm == 0:
             return 0
         return np.sqrt(oscill / norm) / np.pi * self.dmax
 
@@ -619,11 +563,11 @@ class Invertor:
 
         sqrt_alpha = np.sqrt(math.fabs(self.alpha))
         pi = np.pi
-        offset: int = (1, 0)[self.est_bck == 1]
+        offset: int = 0 if self.est_bck else 1
 
         if self.check_for_zero(self.err):
-            # raise RuntimeError("Pinvertor.get_matrix: Some I(Q) points have no error.")
             logger.error("Pinvertor.get_matrix: Some I(Q) points have no error.")
+            return np.zeros((nfunc, nfunc)), np.zeros(nfunc)
 
         # Compute A
         # Whether or not to use ortho_transformed_smeared.
@@ -643,7 +587,7 @@ class Invertor:
         a_use = a_obj[0 : self.npoints, :]
 
         for j in range(nfunc):
-            if self.est_bck == 1 and j == 0:
+            if self.est_bck and j == 0:
                 a_use[q_accept_x, j] = 1.0 / self.err[q_accept_x]
             elif smeared:
                 a_use[q_accept_x, j] = (
@@ -692,8 +636,8 @@ class Invertor:
         n_a = a_obj.size
 
         if not n_a >= (nfunc * (nr + self.npoints)):
-            # raise RuntimeError("Pinvertor._get_invcov_matrix: a array too small.")
             logger.error("Pinvertor._get_invcov_matrix: a array too small.")
+            return np.zeros((nfunc, nfunc))
 
         cov_obj[:, :] = np.dot(a_obj.T, a_obj)
         return cov_obj
@@ -712,8 +656,8 @@ class Invertor:
         nr = int(nr)
 
         if not a_obj.size >= nfunc * (nr + self.npoints):
-            # raise RuntimeError("Pinvertor._get_reg_size: input array too short for data.")
             logger.error("Pinvertor._get_reg_size: input array too short for data.")
+            return 0.0, 0.0
 
         a_pass = self.accept_q(self.x)
         a_use = a_obj[0 : self.npoints, :]
