@@ -1062,7 +1062,7 @@ class DataExplorerTest:
         form.deleteFile(None)
 
         # Test the warning dialog called once
-        QMessageBox.question.assert_called()
+        QMessageBox.question.assert_called_once()
 
         # Assure the model still contains the items
         assert form.model.rowCount() == 3

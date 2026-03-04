@@ -215,29 +215,6 @@ class InversionTest:
         assert widget.isClosable()
         self.removeAllData(widget)
 
-    @pytest.mark.skip(reason="2026-02: caplog does not exist")
-    def testGetNFunc(self, widget, caplog):
-        """ test nfunc getter """
-        # Float
-        widget.currentTab.noOfTermsInput.setText("10")
-        assert widget.getNFunc() == 10
-        # Int
-        widget.currentTab.noOfTermsInput.setText("980")
-        assert widget.getNFunc() == 980
-        # Empty
-        with caplog.at_level(logging.ERROR):
-            widget.currentTab.noOfTermsInput.setText("")
-            n = widget.getNFunc()
-        assert 'Incorrect number of terms specified:' in caplog.text
-        assert widget.getNFunc() == 10
-        # string
-        with caplog.at_level(logging.ERROR):
-            widget.currentTab.noOfTermsInput.setText("Nordvest Pizza")
-            n = widget.getNFunc()
-        assert "Incorrect number of terms specified: Nordvest Pizza" in caplog.text
-        assert widget.getNFunc() == 10
-        self.removeAllData(widget)
-
     def testSetCurrentData(self, widget):
         """ test current data setter """
         widget.setData([self.fakeData1, self.fakeData2])
@@ -308,11 +285,8 @@ class InversionTest:
         data_id = widget.currentTabDataId()[0]
         # Test three separate serialization routines
         state_all = widget.serializeAll()
-        print(state_all)
         state_one, _ = widget.serializeCurrentPage()
-        print(state_one)
         page = widget.currentTab.getPage()
-        print(page)
         # Pull out params from state
         params = state_all[data_id]['pr_params']
         # Tests

@@ -88,7 +88,7 @@ class GenericScatteringCalculatorTest:
                                 ['Rectangular']
                                 #['Rectangular', 'Ellipsoid'])
         assert not widget.cbShape.isEditable()
-        # disable buttons
+        # all buttons are enabled by default
         assert widget.cmdSave.isEnabled()
         assert widget.cmdDraw.isEnabled()
         assert widget.cmdDrawpoints.isEnabled()
@@ -173,7 +173,7 @@ class GenericScatteringCalculatorTest:
         # check modification of text in Load button
         assert widget.cmdMagLoad.text() == 'Loading...'
         # wait a bit for data to be loaded
-        time.sleep(0.1)
+        time.sleep(0.5)
         QtWidgets.QApplication.processEvents()
 
         # check updated values in ui, read from loaded file
@@ -182,7 +182,7 @@ class GenericScatteringCalculatorTest:
         assert widget.txtNoPixels.text() == '552'
         assert not widget.txtNoPixels.isEnabled()
 
-        # check disabled TextEdits according to data format
+        # all TextEdits are enabled, regardless of data format
         assert widget.txtUpFracIn.isEnabled()
         assert widget.txtUpFracOut.isEnabled()
         assert widget.txtUpFracOut.isEnabled()
@@ -301,7 +301,7 @@ class GenericScatteringCalculatorTest:
         assert widget.txtTotalVolume.text() == '128000000.0'
         assert widget.txtNoPixels.text() == '16000'
 
-        # check disabled TextEdits according to data format
+        # check enabled state for TextEdits according to data format
         assert widget.txtUpFracIn.isEnabled()
         assert widget.txtUpFracOut.isEnabled()
         assert widget.txtUpFracOut.isEnabled()

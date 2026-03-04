@@ -15,8 +15,6 @@ from sas.qtgui.Utilities.GuiUtils import Communicate
 
 
 class dummy_manager(QtWidgets.QWidget):
-    # def communicator(self):
-    #     return Communicate()
     communicator = Communicate()
     communicate = Communicate()
     active_plots = {}

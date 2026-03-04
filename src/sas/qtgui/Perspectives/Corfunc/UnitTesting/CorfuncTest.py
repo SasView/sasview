@@ -84,8 +84,6 @@ class CorfuncTest:
         f = Loader().load(filename)
         mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=(filename, ''))
 
-        #assert widget.txtFilename.text() == filename
-
         assert widget.txtBackground.text() == ''
 
         widget.txtLowerQMax.setText("0.20")

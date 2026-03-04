@@ -6,8 +6,6 @@ import pytest
 
 mpl.use("Qt5Agg")
 
-from unittest import mock
-
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from PySide6 import QtCore, QtGui, QtPrintSupport, QtWidgets
 
@@ -377,11 +375,11 @@ class PlotterTest:
         fit_data = [[0.0,0.0], [5.0,5.0]]
 
         # Call the method
-        with mock.patch("sas.qtgui.Plotting.Plotter.Plotter.plot") as plot:
-            plotter.onFitDisplay(fit_data[0], fit_data[1])
-            plot.assert_called_once()
-            # Look at arguments passed to .plot()
-            plot.assert_called_with(data=plotter.fit_result,
+        mocker.patch.object(plotter, 'plot', return_value=('', ''))
+        plotter.onFitDisplay(fit_data[0], fit_data[1])
+        plotter.plot.assert_called_once()
+        # Look at arguments passed to .plot()
+        plotter.plot.assert_called_with(data=plotter.fit_result,
                                              hide_error=True, marker='-')
         plotter.figure.clf()
 

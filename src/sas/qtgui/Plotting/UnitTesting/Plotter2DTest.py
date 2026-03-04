@@ -206,7 +206,8 @@ class Plotter2DTest:
                               qy_data=plotter.data0.qy_data,
                               xmin=plotter.data0.xmin,
                               xmax=plotter.data0.xmax,
-                              ymin=plotter.data0.ymin, ymax=plotter.data0.ymax,
+                              ymin=plotter.data0.ymin,
+                              ymax=plotter.data0.ymax,
                               cmap=None, zmin=0.0,
                               zmax=None)
 
@@ -227,7 +228,8 @@ class Plotter2DTest:
                               qy_data=data.qy_data,
                               xmin=data.xmin,
                               xmax=data.xmax,
-                              ymin=data.ymin, ymax=data.ymax,
+                              ymin=data.ymin,
+                              ymax=data.ymax,
                               cmap=None, zmin=0.0,
                               zmax=None)
         Axes3D.plot_surface.assert_called()
@@ -245,7 +247,8 @@ class Plotter2DTest:
                               qy_data=plotter.data0.qy_data,
                               xmin=plotter.data0.xmin,
                               xmax=plotter.data0.xmax,
-                              ymin=plotter.data0.ymin, ymax=plotter.data0.ymax,
+                              ymin=plotter.data0.ymin,
+                              ymax=plotter.data0.ymax,
                               cmap=None, zmin=0.0,
                               zmax=None)
         FigureCanvas.draw_idle.assert_called()

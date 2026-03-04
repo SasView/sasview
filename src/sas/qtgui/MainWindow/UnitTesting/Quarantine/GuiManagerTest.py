@@ -143,6 +143,7 @@ class GuiManagerTest:
         Tests the SasView website version polling
         """
         mocker.patch.object(manager, "processVersion")
+        # TODO: Find a better way to test this that doesn't require the test to be updated for every release.
         version = ("6.1.2", "https://github.com/SasView/sasview/releases/tag/v6.1.2", parse("6.1.2"))
         manager.checkUpdate()
 
