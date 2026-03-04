@@ -56,10 +56,16 @@ Metadata Population
 When a dataset is loaded from SASBDB, the following metadata is automatically extracted and populated:
 
 **Sample Information:**
-- Sample name (from molecule name, type, and oligomeric state)
-- Temperature
-- Concentration
-- Buffer description and pH
+- Sample ID (from molecule short name, if available)
+- Sample details section populated with:
+  - Sequence (when available)
+  - Molecule/sample description
+  - UniProt code (when available)
+  - Oligomerization and number of molecules (when available)
+  - Source organism (when available)
+  - Temperature
+  - Concentration
+  - Buffer description and pH
 
 **Instrument Information:**
 - Instrument/beamline name
@@ -95,7 +101,7 @@ After loading a SASBDB dataset, you can view the populated metadata by:
 
 The metadata is displayed in a compact format with key information organized by category:
 - Entry code and instrument information
-- Sample details (name, temperature, concentration, buffer)
+- Sample ID and sample details (sequence, UniProt, oligomerization, concentration, buffer, etc.)
 - Source wavelength
 - Structural parameters (Rg, I(0), Dmax, MW, etc.)
 - Publication information

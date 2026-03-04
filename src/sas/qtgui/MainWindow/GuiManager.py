@@ -889,22 +889,55 @@ class GuiManager:
                 if not hasattr(data.sample, 'details') or data.sample.details is None:
                     data.sample.details = []
                 
-                # Use molecule name as sample name (molecule IS the sample in SASBDB context)
-                # Always set sample name if we have molecule_name or sample_name
-                if dataset_info.molecule_name:
-                    sample_name = dataset_info.molecule_name
-                    # Add molecule type if available
-                    if dataset_info.molecule_type:
-                        sample_name += f" ({dataset_info.molecule_type})"
-                    # Add oligomeric state if available
-                    if dataset_info.oligomeric_state:
-                        sample_name += f" - {dataset_info.oligomeric_state}"
-                    data.sample.name = sample_name
-                    logger.debug(f"Set sample.name to: {sample_name}")
+                # Map molecule short name into Sample ID when available.
+                sample_id = ""
+                if dataset_info.molecule_short_name:
+                    sample_id = dataset_info.molecule_short_name
                 elif dataset_info.sample_name:
-                    # Fallback to sample_name if molecule_name not available
-                    data.sample.name = dataset_info.sample_name
-                    logger.debug(f"Set sample.name to: {dataset_info.sample_name}")
+                    # Fallback for entries without molecule short name.
+                    sample_id = dataset_info.sample_name
+                elif dataset_info.code:
+                    sample_id = dataset_info.code
+                if sample_id:
+                    data.sample.ID = sample_id
+                    logger.debug(f"Set sample.ID to: {sample_id}")
+
+                # Build human-readable sample details from remaining metadata.
+                sample_details = []
+                if dataset_info.molecule_name:
+                    molecule_str = f"Molecule: {dataset_info.molecule_name}"
+                    if dataset_info.molecule_type:
+                        molecule_str += f" ({dataset_info.molecule_type})"
+                    sample_details.append(molecule_str)
+                elif dataset_info.sample_name:
+                    sample_details.append(f"Sample: {dataset_info.sample_name}")
+
+                if dataset_info.sample_description:
+                    sample_details.append(
+                        f"Description: {dataset_info.sample_description}"
+                    )
+
+                if dataset_info.sequence:
+                    sample_details.append(f"Sequence: {dataset_info.sequence}")
+
+                if dataset_info.uniprot_code:
+                    sample_details.append(f"UniProt: {dataset_info.uniprot_code}")
+
+                oligomerization = (
+                    dataset_info.oligomerization or dataset_info.oligomeric_state
+                )
+                if oligomerization:
+                    sample_details.append(f"Oligomerization: {oligomerization}")
+
+                if dataset_info.number_of_molecules:
+                    sample_details.append(
+                        f"Number of molecules: {dataset_info.number_of_molecules}"
+                    )
+
+                if dataset_info.source_organism:
+                    sample_details.append(
+                        f"Source organism: {dataset_info.source_organism}"
+                    )
                 
                 # Set temperature
                 if dataset_info.temperature is not None:
@@ -912,22 +945,30 @@ class GuiManager:
                     if dataset_info.temperature_unit:
                         data.sample.temperature_unit = dataset_info.temperature_unit
                     logger.debug(f"Set sample.temperature to: {dataset_info.temperature} {dataset_info.temperature_unit}")
+                    temp_unit = dataset_info.temperature_unit or ""
+                    temp_str = f"Temperature: {dataset_info.temperature}"
+                    if temp_unit:
+                        temp_str += f" {temp_unit}"
+                    sample_details.append(temp_str)
                 
                 # Store concentration in sample details
                 if dataset_info.concentration is not None:
                     conc_str = f"Concentration: {dataset_info.concentration}"
                     if dataset_info.concentration_unit:
                         conc_str += f" {dataset_info.concentration_unit}"
-                    data.sample.details.append(conc_str)
-                    logger.debug(f"Added to sample.details: {conc_str}")
+                    sample_details.append(conc_str)
                 
                 # Add buffer info to sample details
                 if dataset_info.buffer_description:
                     buffer_str = f"Buffer: {dataset_info.buffer_description}"
                     if dataset_info.ph is not None:
                         buffer_str += f" (pH {dataset_info.ph})"
-                    data.sample.details.append(buffer_str)
-                    logger.debug(f"Added to sample.details: {buffer_str}")
+                    sample_details.append(buffer_str)
+
+                for detail in sample_details:
+                    if detail and detail not in data.sample.details:
+                        data.sample.details.append(detail)
+                        logger.debug(f"Added to sample.details: {detail}")
                 
                 # Log sample info for debugging
                 logger.debug(f"Sample populated for {data_id}: name={getattr(data.sample, 'name', None)}, "

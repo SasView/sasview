@@ -39,7 +39,13 @@ class SASBDBDatasetInfo:
     
     # Molecule information
     molecule_name: str = ""
+    molecule_short_name: str = ""
     molecule_type: str = ""
+    sequence: str = ""
+    uniprot_code: str = ""
+    source_organism: str = ""
+    number_of_molecules: str = ""
+    oligomerization: str = ""
     molecular_weight: Optional[float] = None  # Experimental MW in kDa
     molecular_weight_method: str = ""
     oligomeric_state: str = ""
@@ -112,14 +118,61 @@ def parseMetadata(metadata: dict) -> SASBDBDatasetInfo:
     info.concentration_unit = _get_str(metadata, 'concentration_unit', 'conc_unit', 'concentration_units') or "mg/mL"
     
     # Molecule information - try more variations
-    info.molecule_name = _get_str(metadata, 'molecule_name', 'macromolecule_name', 'protein_name', 
-                                  'molecule', 'macromolecule', 'protein', 'name')
-    info.molecule_type = _get_str(metadata, 'molecule_type', 'macromolecule_type', 'sample_type',
-                                  'type', 'molecule_type_full')
+    info.molecule_name = _get_str(
+        metadata,
+        'molecule_name',
+        'macromolecule_name',
+        'protein_name',
+        'molecule',
+        'macromolecule',
+        'protein',
+        'name',
+    ) or _get_deep_str(
+        metadata, 'long_name', 'molecule_name', 'macromolecule_name', 'protein_name'
+    )
+    info.molecule_short_name = _get_str(
+        metadata, 'short_name', 'molecule_short_name', 'shortName', 'short'
+    ) or _get_deep_str(metadata, 'short_name', 'molecule_short_name', 'shortName')
+    info.molecule_type = _get_str(
+        metadata, 'molecule_type', 'macromolecule_type', 'sample_type',
+        'type', 'molecule_type_full'
+    ) or _get_deep_str(
+        metadata, 'molecule_type', 'macromolecule_type', 'molecular_type'
+    )
+    info.sequence = _get_sequence(metadata)
+    info.uniprot_code = _get_str(
+        metadata,
+        'uniprot_code',
+        'uniprot',
+        'uniprot_id',
+        'uniprot_accession',
+        'uniprot_ac',
+    ) or _get_deep_str(
+        metadata, 'uniprot_code', 'uniprot', 'uniprot_id', 'uniprot_accession'
+    )
+    info.source_organism = _get_str(
+        metadata, 'source_organism', 'organism', 'organism_name'
+    ) or _get_deep_str(
+        metadata, 'source_organism', 'organism', 'organism_name'
+    )
+    info.number_of_molecules = _get_str(
+        metadata, 'number_of_molecules', 'num_molecules', 'copy_number'
+    ) or _get_deep_str(
+        metadata, 'number_of_molecules', 'number_molecules', 'num_molecules',
+        'copy_number'
+    )
+    info.oligomerization = _get_str(
+        metadata, 'oligomerization', 'oligomeric_state', 'oligomer_state'
+    ) or _get_deep_str(
+        metadata, 'oligomerization', 'oligomeric_state', 'oligomer_state',
+        'complex_state'
+    )
     info.molecular_weight = _get_float(metadata, 'molecular_weight', 'mw', 'exp_mw', 
                                         'experimental_mw', 'mw_kda')
     info.molecular_weight_method = _get_str(metadata, 'mw_method', 'molecular_weight_method')
-    info.oligomeric_state = _get_str(metadata, 'oligomeric_state', 'oligomer_state', 'oligomerization')
+    info.oligomeric_state = info.oligomerization or _get_str(
+        metadata, 'oligomeric_state', 'oligomer_state', 'oligomerization'
+    )
     
     # Buffer information
     info.buffer_description = _get_str(metadata, 'buffer', 'buffer_description', 'buffer_composition')
@@ -187,6 +240,109 @@ def _get_str(data: dict, *keys: str) -> str:
                     return str(data[path][key])
     
     return ""
+
+
+def _get_sequence(data: dict) -> str:
+    """
+    Extract a protein/nucleotide sequence from nested SASBDB metadata.
+
+    This helper searches recursively through dictionaries and lists since
+    sequence information may appear under molecule lists or nested blocks.
+
+    :param data: Dictionary to search
+    :return: Sequence string or empty string if not found
+    """
+    sequence_keys = {
+        'sequence',
+        'fasta_sequence',
+        'fasta',
+        'primary_sequence',
+        'sequence_string',
+    }
+
+    def _from_value(value) -> str:
+        """Normalize potential sequence values to a plain string."""
+        if value is None:
+            return ""
+        if isinstance(value, str):
+            return value.strip()
+        if isinstance(value, list):
+            parts = []
+            for item in value:
+                item_str = _from_value(item)
+                if item_str:
+                    parts.append(item_str)
+            if parts:
+                return " ".join(parts)
+            return ""
+        if isinstance(value, dict):
+            # Common wrappers for sequence strings.
+            for nested_key in ("value", "text", "seq"):
+                nested = value.get(nested_key)
+                nested_str = _from_value(nested)
+                if nested_str:
+                    return nested_str
+        return ""
+
+    def _search(obj) -> str:
+        if isinstance(obj, dict):
+            for key in sequence_keys:
+                if key in obj:
+                    sequence = _from_value(obj[key])
+                    if sequence:
+                        return sequence
+            for value in obj.values():
+                sequence = _search(value)
+                if sequence:
+                    return sequence
+        elif isinstance(obj, list):
+            for item in obj:
+                sequence = _search(item)
+                if sequence:
+                    return sequence
+        return ""
+
+    return _search(data)
+
+
+def _get_deep_str(data: dict, *keys: str) -> str:
+    """
+    Recursively search nested dict/list structures for the first key match.
+
+    :param data: Dictionary to search
+    :param keys: Candidate field names to locate
+    :return: String value or empty string if not found
+    """
+    key_set = set(keys)
+
+    def _normalize(value) -> str:
+        if value is None:
+            return ""
+        if isinstance(value, str):
+            return value.strip()
+        if isinstance(value, (int, float, bool)):
+            return str(value)
+        return ""
+
+    def _search(obj) -> str:
+        if isinstance(obj, dict):
+            for key, value in obj.items():
+                if key in key_set:
+                    normalized = _normalize(value)
+                    if normalized:
+                        return normalized
+            for value in obj.values():
+                found = _search(value)
+                if found:
+                    return found
+        elif isinstance(obj, list):
+            for item in obj:
+                found = _search(item)
+                if found:
+                    return found
+        return ""
+
+    return _search(data)
 
 
 def _get_float(data: dict, *keys: str) -> Optional[float]:
