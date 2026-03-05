@@ -55,7 +55,7 @@ class SizeDistributionTest:
         # mapper
         assert isinstance(widget.mapper, QtWidgets.QDataWidgetMapper)
         # buttons
-        assert widget.calculateThisButton.isEnabled()
+        assert not widget.quickFitButton.isEnabled()
         assert widget.helpButton.isEnabled()
 
     def testDefaults(self, widget):
@@ -65,7 +65,7 @@ class SizeDistributionTest:
     def testRemoveData(self, widget):
         """Test data removal from widget"""
         widget.setData([self.fakeData1])
-        assert widget._data is not None
+        assert widget.logic.data is not None
         widget.removeData([self.fakeData1])
         assert widget._data is None
 

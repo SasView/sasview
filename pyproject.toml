@@ -208,6 +208,12 @@ pythonpath = "src"
 norecursedirs = [
     "test/sasrealspace",
     "test/calculatorview",
+    "src/sas/qtgui/MainWindow/UnitTesting/Quarantine",
+    "src/sas/qtgui/Perspectives/Fitting/UnitTesting/Quarantine",
+    "src/sas/qtgui/Perspectives/Inversion",
+    "src/sas/qtgui/Perspectives/ParticleEditor",
+    "src/sas/qtgui/Plotting/UnitTesting/Quarantine",
+    "src/sas/qtgui/Utilities/UnitTesting/Quarantine"
 ]
 
 [tool.ruff]

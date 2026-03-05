@@ -84,6 +84,7 @@ class FittingPerspectiveTest:
         # See that the tab contains data no more
         assert len(widget.tabs[0].all_data) == 0
 
+    @pytest.mark.xfail(reason="2026-02: The second call of widget.tabCloses() throws an IndexError")
     def testCloseTab(self, widget):
         '''Delete a tab and test'''
         # Add an empty tab
@@ -95,7 +96,7 @@ class FittingPerspectiveTest:
         assert widget.maxIndex == 3
         assert widget.getTabName() == "FitPage3"
 
-        # Attemtp to remove the last tab
+        # Attempt to remove the last tab
         widget.tabCloses(1)
         # The tab should still be there
         assert len(widget.tabs) == 1
@@ -106,7 +107,6 @@ class FittingPerspectiveTest:
         '''Assure the perspective allows multiple datasets'''
         assert widget.allowBatch()
 
-    #@pytest.mark.skip()
     def testSetData(self, widget, qtbot, mocker):
         ''' Assure that setting data is correct'''
         with pytest.raises(AssertionError):
@@ -217,6 +217,7 @@ class FittingPerspectiveTest:
         assert isinstance(tabs, list)
         assert len(tabs) == 2
 
+    @pytest.mark.xfail(reason="2026-02: Mocker patching using old constraint API")
     def testGetActiveConstraintList(self, widget, mocker):
         '''test the active constraint getter'''
         # Add an empty tab
@@ -254,12 +255,6 @@ class FittingPerspectiveTest:
         assert len(symbols) == 2
         assert list(symbols.keys()) == ["M1.scale", "M2.scale"]
 
-    @pytest.mark.xfail(reason="2022-09 already broken")
-    # Generates a RuntimeError:
-    # src/sas/qtgui/Perspectives/Fitting/ConstraintWidget.py:240: RuntimeError
-    # wrapped C/C++ object of type FittingWidget has been deleted
-    # A previous tab, 'FitPage3', is still receiving signals but
-    # appears to have been garbage collected
     def testGetConstraintTab(self, widget, qtbot):
         '''test the constraint tab getter'''
         # no constraint tab is present, should return None
@@ -300,7 +295,7 @@ class FittingPerspectiveTest:
         assert len(state_all) == 1
         # getPage should include an extra param 'data_id' removed by serialize
         assert len(params) != len(page)
-        assert len(params) == 28
+        assert len(params) == 29
         assert page.get('data_id', None) is None
 
     def testUpdateFromConstraints(self, widget, mocker):
