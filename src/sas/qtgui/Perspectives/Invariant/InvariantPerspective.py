@@ -389,8 +389,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             self.high_extrapolation_plot.slider_update_on_move = False
             self.high_extrapolation_plot.slider_perspective_name = self.name
             self.high_extrapolation_plot.slider_low_q_input = self.txtPorodStart_ex.text()
-            self.high_extrapolation_plot.slider_low_q_setter = ["set_high_q_extrapolation_lower_limit"]
-            self.high_extrapolation_plot.slider_low_q_getter = ["get_high_q_extrapolation_lower_limit"]
             self.high_extrapolation_plot.slider_high_q_input = self.txtPorodEnd_ex.text()
             GuiUtils.updateModelItemWithPlot(
                 self._model_item, self.high_extrapolation_plot, self.high_extrapolation_plot.title
@@ -402,12 +400,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             self.low_extrapolation_plot.custom_color = "#ff7f0e"
             self.low_extrapolation_plot.show_errors = False
             self.low_extrapolation_plot.show_q_range_sliders = True
-            self.low_extrapolation_plot.slider_update_on_move = False
             self.low_extrapolation_plot.slider_perspective_name = self.name
             self.low_extrapolation_plot.slider_low_q_input = self.extrapolation_parameters.ex_q_min
             self.low_extrapolation_plot.slider_high_q_input = self.txtGuinierEnd_ex.text()
-            self.low_extrapolation_plot.slider_high_q_setter = ["set_low_q_extrapolation_upper_limit"]
-            self.low_extrapolation_plot.slider_high_q_getter = ["get_low_q_extrapolation_upper_limit"]
             GuiUtils.updateModelItemWithPlot(
                 self._model_item, self.low_extrapolation_plot, self.low_extrapolation_plot.title
             )
