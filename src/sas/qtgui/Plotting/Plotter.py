@@ -208,7 +208,18 @@ class PlotterWidget(PlotterBase):
                 dy = data.view.dy
                 # Convert tuple (lo,hi) to array [(x-lo),(hi-x)]
                 if dy is not None and isinstance(dy, tuple):
-                    dy = np.vstack((y - dy[0], dy[1] - y)).transpose()
+                    # Ensure dy tuple elements are arrays with correct shape
+                    dy_lo = np.atleast_1d(dy[0]).flatten()
+                    dy_hi = np.atleast_1d(dy[1]).flatten()
+                    y_flat = np.atleast_1d(y).flatten()
+                    
+                    # Check shapes match before broadcasting
+                    if len(dy_lo) == len(y_flat) and len(dy_hi) == len(y_flat):
+                        dy = np.vstack((y_flat - dy_lo, dy_hi - y_flat)).transpose()
+                    else:
+                        # If shapes don't match, skip error bars
+                        dy = None
+                        logger.warning(f"Error bar shape mismatch for {data.name}. Skipping error bars.")
 
                 line = ax.errorbar(x, y,
                             yerr=dy,
