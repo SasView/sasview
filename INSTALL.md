@@ -3,7 +3,7 @@
 Whether you're installing SasView to use as a tool for your research or
 because you're wanting to work on the code, it is recommended that you
 work inside a Python virtual environment of some sort.
-A `venv` or a `conda` are both popular choices.
+A `venv` or a `Pixi` are both popular choices.
 
 ## Installing SasView as a User
 
@@ -17,6 +17,8 @@ environment
 - or `uv pip install sasview` (or `pip install sasview`) to install it into your current Python environment.
 
 ## Making a SasView Development Environment
+
+### Develop using `venv`
 
 If you're familiar with working with developing in Python, then the very quick version is:
 
@@ -87,7 +89,59 @@ debugging software, e.g.:
 - [VS Code](https://code.visualstudio.com/docs/python/environments)
 - [PyCharm](https://www.jetbrains.com/help/pycharm/creating-virtual-environment.html)
 
-### Pre-Commit Hooks for Linting
+### Develop using Pixi
+
+An alternative to `venv` is the package management tool Pixi. If Pixi is not
+installed, follow the instructions [here](https://pixi.prefix.dev/latest/#installation).
+
+The very quick version for developing using Pixi is:
+
+```shell
+# Clone the repository
+git clone https://github.com/sasview/sasdata/
+git clone https://github.com/sasview/sasmodels/
+git clone https://github.com/sasview/sasview/
+
+# Enter the developer environment
+# (This will create (or reuse) a local Pixi environment with all required dependencies.)
+cd sasview
+pixi shell
+
+# Start the GUI
+python -m sas
+
+# Run tests
+pixi run test
+
+# Exit the developer environment
+exit
+```
+
+In more detail, the steps are:
+
+1. Obtain the SasView source using `git`. You will likely need to coordinate
+   updates to `sasdata` and `sasmodels`. The
+   [`bumps`](https://github.com/bumps/bumps) and
+   [`periodictable`](https://github.com/python-periodictable/periodictable)
+   packages are far more loosely coupled, but depending on what you are
+   doing you may also want them as development packages, in which case they
+   need to be added as editable in the section `[tool.pixi.pypi-dependencies]`
+   in `pyproject.toml`.
+1. Create (or reuse) a local Pixi environment in `.pixi` and enter the shell
+   into the developer environment. The first time it will take a while to
+   download and unpack all dependencies.
+   Note that `sasdata`, `sasmodels` and `sasview` are installed in editable mode,
+   meaning that any code changes will be available the next time you run the
+   program.
+1. Run SasView! As an alternative to typing `python -m sas`, you can simply
+   type `sasview`.
+
+Almost all the modules that SasView needs are available as precompiled modules
+on PyPI, including numpy, scipy, h5py, pyside6. A handful of Python-only
+modules will be built into wheels on your local machine. Installing the
+dependencies should be a one-off task.
+
+## Pre-Commit Hooks for Linting
 
 The SasView, SasData and SasModels repositories include [pre-commit hooks](https://pre-commit.com/), which can be set up to enable linting to be run on the code. A linter is a tool that can detect programming errors, bugs, stylistic errors, etc. SasView uses the [Ruff](https://docs.astral.sh/ruff/) package for linting. Ruff is able to warn about a wide range of possible errors, and in some cases apply automatic fixes for them.
 
