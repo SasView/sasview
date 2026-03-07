@@ -46,8 +46,6 @@ env:
   INSTALLER_OLD_RUNID: 3204825457
   # The test-installer job can run with the pyinstaller debug bundle
   INSTALLER_USE_DEBUG: false
-  # https://pytest-qt.readthedocs.io/en/latest/troubleshooting.html - Required for PySide pytest runner
-  DISPLAY: ':99.0'
 
 jobs:
 
