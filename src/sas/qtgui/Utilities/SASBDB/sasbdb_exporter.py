@@ -123,6 +123,8 @@ class SASBDBExporter:
                     'i0': sample.guinier.i0,
                     'range_start': sample.guinier.range_start,
                     'range_end': sample.guinier.range_end,
+                    'start_point': sample.guinier.start_point,
+                    'end_point': sample.guinier.end_point,
                 }
 
             # PDDF

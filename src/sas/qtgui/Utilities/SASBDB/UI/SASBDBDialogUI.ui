@@ -550,56 +550,104 @@
          <item>
           <layout class="QFormLayout" name="formLayoutGuinier">
          <item row="0" column="0">
-          <widget class="QLabel" name="lblGuinierRg">
+          <widget class="QLabel" name="lblGuinierRangeStart">
+         <property name="text">
+          <string>Q Start:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="txtGuinierRangeStart">
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="lblGuinierRangeEnd">
+         <property name="text">
+          <string>Q End:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="txtGuinierRangeEnd">
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="lblGuinierStartPoint">
+         <property name="text">
+          <string>Start point:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLineEdit" name="txtGuinierStartPoint">
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="lblGuinierEndPoint">
+         <property name="text">
+          <string>End point:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QLineEdit" name="txtGuinierEndPoint">
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="lblGuinierRg">
          <property name="text">
           <string>Rg (nm):</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="1">
-        <widget class="QLineEdit" name="txtGuinierRg"/>
+       <item row="4" column="1">
+        <widget class="QLineEdit" name="txtGuinierRg">
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
        </item>
-       <item row="1" column="0">
+       <item row="5" column="0">
         <widget class="QLabel" name="lblGuinierRgError">
          <property name="text">
           <string>Rg Error:</string>
          </property>
         </widget>
        </item>
-       <item row="1" column="1">
-        <widget class="QLineEdit" name="txtGuinierRgError"/>
+       <item row="5" column="1">
+        <widget class="QLineEdit" name="txtGuinierRgError">
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
        </item>
-       <item row="2" column="0">
+       <item row="6" column="0">
         <widget class="QLabel" name="lblGuinierI0">
          <property name="text">
           <string>I(0):</string>
          </property>
         </widget>
        </item>
-       <item row="2" column="1">
-        <widget class="QLineEdit" name="txtGuinierI0"/>
-       </item>
-       <item row="3" column="0">
-        <widget class="QLabel" name="lblGuinierRangeStart">
-         <property name="text">
-          <string>Range Start:</string>
+       <item row="6" column="1">
+        <widget class="QLineEdit" name="txtGuinierI0">
+         <property name="readOnly">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
-       <item row="3" column="1">
-        <widget class="QLineEdit" name="txtGuinierRangeStart"/>
-       </item>
-       <item row="4" column="0">
-        <widget class="QLabel" name="lblGuinierRangeEnd">
-         <property name="text">
-          <string>Range End:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="1">
-        <widget class="QLineEdit" name="txtGuinierRangeEnd"/>
-       </item>
-       <item row="5" column="0" colspan="2">
+       <item row="7" column="0" colspan="2">
         <widget class="QLabel" name="lblGuinierNote">
          <property name="text">
           <string>Note: Guinier region values are auto-estimated using the freesas package and may be incorrect. Please verify these values.</string>

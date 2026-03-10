@@ -62,6 +62,8 @@ class SASBDBGuinier:
     i0: float | None = None
     range_start: float | None = None
     range_end: float | None = None
+    start_point: int | None = None  # Data point index at range start
+    end_point: int | None = None   # Data point index at range end
 
 
 @dataclass

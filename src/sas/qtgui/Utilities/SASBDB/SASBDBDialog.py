@@ -216,6 +216,10 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
                     self.txtGuinierRangeStart.setText(str(guinier.range_start))
                 if guinier.range_end:
                     self.txtGuinierRangeEnd.setText(str(guinier.range_end))
+                if guinier.start_point is not None:
+                    self.txtGuinierStartPoint.setText(str(guinier.start_point))
+                if guinier.end_point is not None:
+                    self.txtGuinierEndPoint.setText(str(guinier.end_point))
 
             # Fit tab (use first fit if available)
             if sample.fits:
@@ -401,7 +405,22 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
         except ValueError:
             pass
 
-        if any([guinier.rg, guinier.i0, guinier.range_start, guinier.range_end]):
+        try:
+            start_point_text = self.txtGuinierStartPoint.text().strip()
+            if start_point_text:
+                guinier.start_point = int(start_point_text)
+        except ValueError:
+            pass
+
+        try:
+            end_point_text = self.txtGuinierEndPoint.text().strip()
+            if end_point_text:
+                guinier.end_point = int(end_point_text)
+        except ValueError:
+            pass
+
+        if any([guinier.rg, guinier.i0, guinier.range_start, guinier.range_end,
+                guinier.start_point is not None, guinier.end_point is not None]):
             sample.guinier = guinier
 
         # Fit
@@ -1828,14 +1847,21 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
             if sample.guinier:
                 guinier = sample.guinier
                 guinier_data = {}
+                # Q range start and end at top
+                if guinier.range_start is not None:
+                    guinier_data["Q Start"] = str(guinier.range_start)
+                if guinier.range_end is not None:
+                    guinier_data["Q End"] = str(guinier.range_end)
+                if guinier.start_point is not None:
+                    guinier_data["Start point"] = str(guinier.start_point)
+                if guinier.end_point is not None:
+                    guinier_data["End point"] = str(guinier.end_point)
                 if guinier.rg is not None:
                     guinier_data["Rg"] = f"{guinier.rg} nm"
                 if guinier.rg_error is not None:
                     guinier_data["Rg Error"] = f"{guinier.rg_error} nm"
                 if guinier.i0 is not None:
                     guinier_data["I(0)"] = str(guinier.i0)
-                if guinier.range_start is not None and guinier.range_end is not None:
-                    guinier_data["Q Range"] = f"{guinier.range_start} - {guinier.range_end}"
 
                 if guinier_data:
                     self._addSectionHeader(report, "Guinier Analysis")

@@ -463,12 +463,14 @@ class SASBDBDataCollector:
             # Range start and end (indices converted back to q values in original units)
             if hasattr(result, 'start_point') and result.start_point is not None:
                 start_idx = int(result.start_point)
+                guinier.start_point = start_idx
                 if 0 <= start_idx < len(q_valid):
                     # Return q in original units
                     guinier.range_start = float(q_valid[start_idx])
 
             if hasattr(result, 'end_point') and result.end_point is not None:
                 end_idx = int(result.end_point)
+                guinier.end_point = end_idx
                 if 0 <= end_idx < len(q_valid):
                     # Return q in original units
                     guinier.range_end = float(q_valid[end_idx])
