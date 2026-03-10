@@ -380,13 +380,7 @@ that in the meantime, these tabs will be excluded from the saved project.""")
         """
         Returns the data ID of the current tab
         """
-        tab_id = []
-        if not self.currentTab.data:
-            return tab_id
-        for item in self.currentTab.all_data:
-            data = GuiUtils.dataFromItem(item)
-            tab_id.append(data.id)
-
+        tab_id = [item.logic.data.id for item in self.currentTab.results]
         return tab_id
 
     def removeData(self, data_list: list[QtGui.QStandardItem]):

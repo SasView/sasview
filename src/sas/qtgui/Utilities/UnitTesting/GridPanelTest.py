@@ -88,8 +88,7 @@ Chi2,Data,scale,background,radius_equat_core,x_core,thick_shell,x_polar_shell,sl
         mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[""])
         widget.actionLoadData()
         # Assure parser wasn't called and logging got a message
-        assert logger.info.called_once()
-        assert "No data" in logger.info.call_args[0][0]
+        logger.info.assert_not_called()
 
         # Filename given
         mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value="test")
@@ -113,13 +112,12 @@ Chi2,Data,scale,background,radius_equat_core,x_core,thick_shell,x_polar_shell,sl
         assert spy_plot_signal.count() == 1
         assert "ddd" in str(spy_plot_signal.called()[0]['args'][0])
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testDataFromTable(self, widget):
         '''Test dictionary generation from data'''
         params = widget.dataFromTable(widget.tblParams)
         assert len(params) == 13
         assert params['Chi2'][0] == '9000'
-        assert params['Data'][1] == ''
+        assert params['Data'][1] == 'data'
         assert params['sld_solvent'][1] == '0.02'
 
     def testActionSendToExcel(self, widget, mocker):

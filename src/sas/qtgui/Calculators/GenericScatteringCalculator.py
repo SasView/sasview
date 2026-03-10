@@ -23,6 +23,7 @@ import sas.sascalc.calculator.gsc_model as gsc_model
 from sas.qtgui.Plotting.Arrow3D import Arrow3D
 from sas.qtgui.Plotting.PlotterBase import PlotterBase
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
+from sas.qtgui.Utilities.BackgroundColor import BG_DEFAULT, BG_ERROR, BG_WARNING
 from sas.qtgui.Utilities.GenericReader import GenReader
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor
 from sas.sascalc.calculator import sas_gen
@@ -40,11 +41,6 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
     trigger_plot_3d = QtCore.Signal()
     calculationFinishedSignal = QtCore.Signal()
     loadingFinishedSignal = QtCore.Signal(list, bool)
-
-    # class constants for textbox background colours
-    TEXTBOX_DEFAULT_STYLESTRING = 'background-color: rgb(255, 255, 255);'
-    TEXTBOX_WARNING_STYLESTRING = 'background-color: rgb(255, 226, 110);'
-    TEXTBOX_ERROR_STYLESTRING = 'background-color: rgb(255, 182, 193);'
 
     def __init__(self, parent=None):
         super(GenericScatteringCalculator, self).__init__()
@@ -472,12 +468,12 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         elif sender.hasAcceptableInput() and senderInvalid:
             self.invalidLineEdits.remove(sender)
             self.toggle_error_functionality()
-            sender.setStyleSheet(self.TEXTBOX_DEFAULT_STYLESTRING)
+            sender.setStyleSheet(BG_DEFAULT)
         # If the LineEdit has had an invalid value stored then remove functionality
         elif (not sender.hasAcceptableInput()) and (not senderInvalid):
             self.invalidLineEdits.append(sender)
             self.toggle_error_functionality()
-            sender.setStyleSheet(self.TEXTBOX_ERROR_STYLESTRING)
+            sender.setStyleSheet(BG_ERROR)
         # If the LineEdit is an acceptable value according to the regex apply warnings
         # This functionality was previously found in check_value()
         if sender not in self.invalidLineEdits:
@@ -489,9 +485,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 max_step =  3*max(xnodes, ynodes, znodes)
                     # limits qmin > maxq / nodes
                 if value < 2 or value > max_step:
-                    self.txtNoQBins.setStyleSheet(self.TEXTBOX_WARNING_STYLESTRING)
+                    self.txtNoQBins.setStyleSheet(BG_WARNING)
                 else:
-                    self.txtNoQBins.setStyleSheet(self.TEXTBOX_DEFAULT_STYLESTRING)
+                    self.txtNoQBins.setStyleSheet(BG_DEFAULT)
             elif sender == self.txtQxMax:
                 xstepsize = float(self.txtXstepsize.text())
                 ystepsize = float(self.txtYstepsize.text())
@@ -499,9 +495,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 value = float(str(self.txtQxMax.text()))
                 max_q = numpy.pi / (max(xstepsize, ystepsize, zstepsize))
                 if value <= 0 or value > max_q or value < float(self.txtQxMin.text()):
-                    self.txtQxMax.setStyleSheet(self.TEXTBOX_WARNING_STYLESTRING)
+                    self.txtQxMax.setStyleSheet(BG_WARNING)
                 else:
-                    self.txtQxMax.setStyleSheet(self.TEXTBOX_DEFAULT_STYLESTRING)
+                    self.txtQxMax.setStyleSheet(BG_DEFAULT)
                 #if 2D scattering, program sets qmin to -qmax
                 if not self.is_avg:
                     self.txtQxMin.setText(str(-value))
@@ -512,9 +508,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 value = float(str(self.txtQxMin.text()))
                 min_q = numpy.pi / (min(xstepsize, ystepsize, zstepsize))
                 if value <= 0 or value > min_q or value > float(self.txtQxMax.text()):
-                    self.txtQxMin.setStyleSheet(self.TEXTBOX_WARNING_STYLESTRING)
+                    self.txtQxMin.setStyleSheet(BG_WARNING)
                 else:
-                    self.txtQxMin.setStyleSheet(self.TEXTBOX_DEFAULT_STYLESTRING)
+                    self.txtQxMin.setStyleSheet(BG_DEFAULT)
 
 
 
