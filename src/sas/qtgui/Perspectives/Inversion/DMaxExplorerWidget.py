@@ -14,6 +14,7 @@ from PySide6.QtCore import QSize
 from PySide6.QtGui import QIcon
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Plotting import PlotUtilities
 from sas.qtgui.Plotting.Plotter import PlotterWidget
 
 # sas-global
@@ -198,6 +199,8 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
             y_unit = "a.u."
 
         data = Data1D(plotable_xs, ys)
+        # Store the line symbol so re-renders (e.g. 'Reset original view') keep the line style
+        data.symbol = list(PlotUtilities.SHAPES.keys()).index('Line')
         if self.hasPlot:
             self.plot.removePlot(data.name)
         self.hasPlot = True
