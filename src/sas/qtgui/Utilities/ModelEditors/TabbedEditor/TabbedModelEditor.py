@@ -11,6 +11,7 @@ from pathlib import Path
 from PySide6 import QtCore, QtGui, QtWidgets
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Utilities.BackgroundColor import BG_DEFAULT, BG_ERROR
 from sas.qtgui.Utilities.CustomGUI.CodeEditor import QCodeEditor
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.ModelEditor import ModelEditor
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.PluginDefinition import PluginDefinition
@@ -222,7 +223,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.tabWidget.setTabText(0, display_name)
 
         # In case previous model was incorrect, change the frame colours back
-        self.editor_widget.txtEditor.setStyleSheet("")
+        self.editor_widget.txtEditor.setStyleSheet(BG_DEFAULT)
         self.editor_widget.txtEditor.setToolTip("")
 
         # Check the validity of loaded model if the model is python
@@ -287,7 +288,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         Disable the plugin editor and show that the model is changed.
         """
         self.setTabEdited(True)
-        self.plugin_widget.txtFunction.setStyleSheet("")
+        self.plugin_widget.txtFunction.setStyleSheet(BG_DEFAULT)
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).setEnabled(True)
         self.is_modified = True
 
@@ -480,7 +481,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
 
             # Combine the lists and apply the stylesheet
             for child in text_browsers + code_editors:
-                child.setStyleSheet("border: 5px solid red")
+                child.setStyleSheet(BG_ERROR)
                 traceback_to_show = "\n".join(last_lines)
                 child.setToolTip(traceback_to_show)
 
@@ -536,11 +537,11 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         if clear_error_formatting:
             # change the frame colours back, if errors were fixed
             try:
-                self.c_editor_widget.txtEditor.setStyleSheet("")
+                self.c_editor_widget.txtEditor.setStyleSheet(BG_DEFAULT)
                 self.c_editor_widget.txtEditor.setToolTip("")
             except AttributeError:
                 pass
-            self.editor_widget.txtEditor.setStyleSheet("")
+            self.editor_widget.txtEditor.setStyleSheet(BG_DEFAULT)
             self.editor_widget.txtEditor.setToolTip("")
 
         # Update the tab title

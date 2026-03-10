@@ -412,7 +412,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         Update the polydispersity model with new parameters, create the errors column
         """
         assert isinstance(param_dict, dict)
-        if not dict:
+        if not param_dict:
             return
 
         def updateFittedValues(row_i: int) -> None:
@@ -477,7 +477,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         Update the polydispersity model with new parameters, create the errors column
         """
         assert isinstance(param_dict, dict)
-        if not dict:
+        if not param_dict:
             return
 
         def updateFittedValues(row: int) -> None:

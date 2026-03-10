@@ -1,5 +1,3 @@
-import os
-
 import numpy as np
 import pytest
 from lxml import etree
@@ -7,6 +5,7 @@ from PySide6 import QtWidgets
 
 import sasdata.file_converter.FileConverterUtilities as Utilities
 
+from sas.qtgui.UnitTesting import base_path
 from sas.qtgui.Utilities.FileConverter import FileConverterWidget
 from sas.qtgui.Utilities.GuiUtils import communicator
 
@@ -18,7 +17,7 @@ class FileConverterTest:
     def widget(self, qapp):
         '''Create/Destroy the FileConverter'''
         class dummy_manager:
-            communicator = communicator()
+            communicator = communicator
             _parent = QtWidgets.QDialog()
 
         w = FileConverterWidget(dummy_manager())
@@ -37,7 +36,9 @@ class FileConverterTest:
         assert not widget.isModal()
 
         # Size policy
-        assert widget.sizePolicy().Policy() == QtWidgets.QSizePolicy.Fixed
+        sp = widget.sizePolicy()
+        assert sp.horizontalPolicy() == QtWidgets.QSizePolicy.Policy.Preferred
+        assert sp.verticalPolicy() == QtWidgets.QSizePolicy.Policy.Preferred
 
         assert widget.is1D
         assert not widget.isBSL
@@ -52,15 +53,14 @@ class FileConverterTest:
 
         mocker.patch.object(widget.parent, 'showHelp', create=True)
         widget.onHelp()
-        assert widget.parent.showHelp.called_once()
+        widget.parent.showHelp.assert_called_once()
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testOnIFileOpen(self, widget, mocker):
         """
         Testing intensity file read in.
         :return:
         """
-        filename = os.path.join("UnitTesting", "FIT2D_I.TXT")
+        filename = str(base_path / "FIT2D_I.TXT")
         mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[filename, ''])
         widget.onIFileOpen()
 
@@ -72,13 +72,12 @@ class FileConverterTest:
         iqdata = np.array([Utilities.extract_ascii_data(widget.ifile)])
         assert iqdata[0][0] == pytest.approx(224.08691, rel=1e-5)
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testOnQFileOpen(self, widget, mocker):
         """
         Testing intensity file read in.
         :return:
         """
-        filename = os.path.join("UnitTesting", "FIT2D_Q.TXT")
+        filename = str(base_path / "FIT2D_Q.TXT")
         mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[filename, ''])
         widget.onQFileOpen()
 
@@ -90,23 +89,22 @@ class FileConverterTest:
         qdata = Utilities.extract_ascii_data(widget.qfile)
         assert qdata[0] == pytest.approx(0.13073, abs=1e-5)
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testOnConvert(self, widget, mocker):
         """
 
         :return:
         """
-        ifilename = os.path.join("UnitTesting", "FIT2D_I.TXT")
+        ifilename = str(base_path / "FIT2D_I.TXT")
         mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[ifilename, ''])
         widget.onIFileOpen()
-        qfilename = os.path.join("UnitTesting", "FIT2D_Q.TXT")
+        qfilename = str(base_path / "FIT2D_Q.TXT")
         mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[qfilename, ''])
         widget.onQFileOpen()
 
         assert not widget.isBSL
         assert widget.is1D
 
-        ofilemame = os.path.join('UnitTesting', 'FIT2D_IQ.xml')
+        ofilemame = str(base_path / "FIT2D_IQ.xml")
         widget.ofile = ofilemame
 
         widget.chkLoadFile.setChecked(False)

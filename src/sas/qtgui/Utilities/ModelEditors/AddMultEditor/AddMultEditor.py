@@ -14,6 +14,7 @@ from sasmodels.sasview_model import load_standard_models
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Perspectives.Fitting.FittingWidget import SUPPRESSED_MODELS
+from sas.qtgui.Utilities.BackgroundColor import BG_DEFAULT, BG_ERROR
 
 # Local UI
 from sas.qtgui.Utilities.ModelEditors.AddMultEditor.UI.AddMultEditorUI import Ui_AddMultEditorUI
@@ -29,10 +30,6 @@ model_info.name = '{name}'
 model_info.description = '{desc_line}'
 Model = make_model_from_info(model_info)
 """
-
-# Color of backgrounds to underline valid or invalid input
-BG_WHITE = "background-color: rgb(255, 255, 255);"
-BG_RED = "background-color: rgb(244, 170, 164);"
 
 # Default model names for combo boxes
 CB1_DEFAULT = 'sphere'
@@ -157,7 +154,7 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
             # allow overwriting -> only valid name needs to be checked
             # (done with validator in __init__ above)
             self.good_name = True
-            self.txtName.setStyleSheet(BG_WHITE)
+            self.txtName.setStyleSheet(BG_DEFAULT)
             self.plugin_filename = os.path.join(self.plugin_dir, filename)
         else:
             # No overwriting -> check existence of filename
@@ -166,7 +163,7 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
             models_list = [item + '.py' for item in self.list_models]
             if filename in models_list:
                 self.good_name = False
-                self.txtName.setStyleSheet(BG_RED)
+                self.txtName.setStyleSheet(BG_ERROR)
                 msg = "Plugin with specified name already exists.\n"
                 msg += "Please specify different filename or allow file overwrite."
                 logger.warning(msg)
@@ -177,7 +174,7 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
                     s_title = title[0:19] + '...'
                 logger.info(f"Model function ({str(s_title)}) has been set!\n")
                 self.good_name = True
-                self.txtName.setStyleSheet(BG_WHITE)
+                self.txtName.setStyleSheet(BG_DEFAULT)
                 self.plugin_filename = os.path.join(self.plugin_dir, filename)
 
         # Enable Apply push button only if valid name

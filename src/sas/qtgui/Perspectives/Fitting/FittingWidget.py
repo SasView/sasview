@@ -39,6 +39,7 @@ from sas.qtgui.Perspectives.Fitting.UI.FittingWidgetUI import Ui_FittingWidgetUI
 from sas.qtgui.Perspectives.Fitting.ViewDelegate import ModelViewDelegate
 from sas.qtgui.Plotting.Plotter import PlotterWidget
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
+from sas.qtgui.Utilities.BackgroundColor import BG_DEFAULT, BG_ERROR
 from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
 from sas.sascalc.fit import models
 from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
@@ -2971,7 +2972,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Enable the param table(s)
         """
         # Notify the user that fitting is available
-        self.cmdFit.setStyleSheet('QPushButton {color: black;}')
+        self.cmdFit.setStyleSheet(BG_DEFAULT)
         self.cmdFit.setText("Fit")
         self.fit_started = False
         self.setInteractiveElements(True)
@@ -2983,7 +2984,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         # Notify the user that fitting is being run
         # Allow for stopping the job
-        self.cmdFit.setStyleSheet('QPushButton {color: red;}')
+        self.cmdFit.setStyleSheet(BG_ERROR)
         self.cmdFit.setText('Stop fit')
         self.setInteractiveElements(False)
 
@@ -2994,7 +2995,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         # Notify the user that fitting is being run
         # Allow for stopping the job
-        self.cmdFit.setStyleSheet('QPushButton {color: red;}')
+        self.cmdFit.setStyleSheet(BG_ERROR)
         self.cmdFit.setText('Running...')
         self.setInteractiveElements(False)
 

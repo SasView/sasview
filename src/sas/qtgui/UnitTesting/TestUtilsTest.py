@@ -3,7 +3,7 @@ from PySide6.QtWidgets import QWidget
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 
 # Local
-from sas.qtgui.Utilities.GuiUtils import communicator
+from sas.qtgui.Utilities.GuiUtils import Communicate
 
 
 class TestUtilsTest:
@@ -17,7 +17,8 @@ class TestUtilsTest:
             # Test the signal callback
             assert signal == test_string
 
-        communicator = communicator
+        # Keep this as a separate Communicate object due to the different signals being generated to minimize conflicts
+        communicator = Communicate()
         communicator.statusBarUpdateSignal.connect(signalReceived)
 
         # Define the signal spy for testing

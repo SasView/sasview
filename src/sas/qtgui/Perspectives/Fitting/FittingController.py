@@ -84,6 +84,11 @@ class FittingController:
         qmin = self.widget.q_range_min
         qmax = self.widget.q_range_max
 
+        # Update the model with extra parameters (polydispersity, magnetism)
+        # This ensures that values from the PolydispersityWidget and MagnetismWidget
+        # are applied to the kernel_module before fitting
+        self.widget.updateKernelModelWithExtraParams(model)
+
         # Gather all parameters to fit
         params_to_fit = copy.deepcopy(self.widget.main_params_to_fit)
 
