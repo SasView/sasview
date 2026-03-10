@@ -690,6 +690,7 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
         # Get default parameters if none provided
         if params is None:
             params = {}
+        params = self._normalize_viz_params(params)
 
         # Define shape drawing functions for common models
         try:
@@ -770,11 +771,39 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
             logger.warning(traceback.format_exc())
             return None
 
+    def _normalize_viz_params(self, params: dict) -> dict:
+        """Normalize visualization params: ensure floats, add canonical keys from model-prefixed keys."""
+        if not params:
+            return params
+        normalized = {}
+        for key, val in params.items():
+            try:
+                fval = float(val)
+            except (ValueError, TypeError):
+                continue
+            normalized[key] = fval
+            # Also store under base name for lookup (e.g. M1.radius, radius (Å) -> radius)
+            base = key.split('.')[-1].split(':')[-1].strip().split()[0] if key else key
+            if base and base not in normalized:
+                normalized[base] = fval
+        return normalized
+
+    def _get_param(self, params: dict, *keys, default=None):
+        """Get param value trying keys in order. Keys are tried as-is and as base (last part after . or :)"""
+        for key in keys:
+            if key in params:
+                return params[key]
+            for pkey, pval in params.items():
+                base = pkey.split('.')[-1].split(':')[-1].split()[0]
+                if base == key:
+                    return pval
+        return default
+
     def _draw_sphere(self, ax1, ax2, ax3, params):
         """Draw a sphere in three views"""
         import numpy as np
 
-        radius = params.get('radius', 50.0)
+        radius = self._get_param(params, 'radius', default=50.0)
 
         # Create circle for all views (sphere looks like circle from all angles)
         theta = np.linspace(0, 2*np.pi, 100)
@@ -798,27 +827,23 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
         ax3.set_ylabel('Z (Å)')
 
     def _draw_core_shell_sphere(self, ax1, ax2, ax3, params):
-        """Draw a core-shell sphere in three views"""
+        """Draw a core-shell sphere in three views (sasmodels: radius=core, thickness=shell)"""
         import numpy as np
 
-        # Try multiple parameter name variations for core radius
-        core_radius = params.get('radius', params.get('radius_core', params.get('core_radius', 40.0)))
-        # Try multiple parameter name variations for thickness
-        thickness = params.get('thickness', params.get('shell_thickness', params.get('thick_shell', 10.0)))
-        outer_radius = core_radius + thickness
-
-        logger.info(f"Drawing core_shell_sphere with core_radius={core_radius}, thickness={thickness}")
+        core_radius = self._get_param(params, 'radius', 'radius_core', 'core_radius', default=40.0)
+        thickness = self._get_param(params, 'thickness', 'shell_thickness', 'thick_shell', default=10.0)
+        outer_radius = float(core_radius) + float(thickness)
 
         theta = np.linspace(0, 2*np.pi, 100)
 
         for ax in [ax1, ax2, ax3]:
-            # Draw outer shell
+            # Draw shell as ring first (outer circle)
             x_outer = outer_radius * np.cos(theta)
             y_outer = outer_radius * np.sin(theta)
             ax.fill(x_outer, y_outer, alpha=0.5, color='lightcoral',
                    edgecolor='darkred', linewidth=2, label='Shell')
 
-            # Draw core
+            # Draw core on top
             x_core = core_radius * np.cos(theta)
             y_core = core_radius * np.sin(theta)
             ax.fill(x_core, y_core, alpha=0.7, color='steelblue',
@@ -1068,14 +1093,12 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
         self._set_3d_axes(ax, radius * 1.3)
 
     def _draw_3d_core_shell_sphere(self, ax, params):
-        """Draw a 3D core-shell sphere with cutaway"""
+        """Draw a 3D core-shell sphere (sasmodels: radius=core, thickness=shell)"""
         import numpy as np
 
-        # Try multiple parameter name variations for core radius
-        core_radius = params.get('radius', params.get('radius_core', params.get('core_radius', 40.0)))
-        # Try multiple parameter name variations for thickness
-        thickness = params.get('thickness', params.get('shell_thickness', params.get('thick_shell', 10.0)))
-        outer_radius = core_radius + thickness
+        core_radius = self._get_param(params, 'radius', 'radius_core', 'core_radius', default=40.0)
+        thickness = self._get_param(params, 'thickness', 'shell_thickness', 'thick_shell', default=10.0)
+        outer_radius = float(core_radius) + float(thickness)
 
         # Create meshes
         u = np.linspace(0, 2 * np.pi, 30)
@@ -1233,10 +1256,15 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
         self._set_3d_axes(ax, radius * 1.3)
 
     def _set_3d_axes(self, ax, max_dim):
-        """Set up 3D axes with equal aspect ratio"""
+        """Set up 3D axes with equal aspect ratio so spheres render correctly"""
         ax.set_xlim(-max_dim, max_dim)
         ax.set_ylim(-max_dim, max_dim)
         ax.set_zlim(-max_dim, max_dim)
+        # Equal box aspect prevents sphere distortion/off-center appearance
+        try:
+            ax.set_box_aspect([1.0, 1.0, 1.0])
+        except AttributeError:
+            pass  # Older matplotlib
         ax.set_xlabel('X (Å)', fontsize=8)
         ax.set_ylabel('Y (Å)', fontsize=8)
         ax.set_zlabel('Z (Å)', fontsize=8)
@@ -1288,6 +1316,7 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
         # Get default parameters if none provided
         if params is None:
             params = {}
+        params = self._normalize_viz_params(params)
 
         # Define shape drawing functions for common models
         try:

@@ -3274,14 +3274,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 logger.debug(traceback.format_exc())
 
         # Collect visualization parameters (parameter name -> value dict for shape visualizer)
+        # param format from getStandardParam: [checkbox, param_name, value, "", ...]
         visualization_params = {}
         if model_parameters:
             for param in model_parameters:
-                # param format: [name, value, error, ...]
-                if len(param) >= 2:
-                    param_name = param[0]
-                    param_value = param[1]
-                    # Convert to float if possible
+                if len(param) >= 3:
+                    param_name = param[1]
+                    param_value = param[2]
                     try:
                         visualization_params[param_name] = float(param_value)
                     except (ValueError, TypeError):
