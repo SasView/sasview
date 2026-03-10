@@ -526,23 +526,13 @@ class InvariantCalculator:
         else:
             gx = data.dxl * data.x
 
-        n = len(data.x) - 1
-        # compute the first delta q
-        dx0 = (data.x[1] - data.x[0]) / 2
-        # compute the last delta q
-        dxn = (data.x[n] - data.x[n - 1]) / 2
-        total = 0
-        total += gx[0] * data.y[0] * dx0
-        total += gx[n] * data.y[n] * dxn
+        # Midpoint-width trapezoidal bin widths for each point
+        dx = np.empty_like(data.x)
+        dx[0] = (data.x[1] - data.x[0]) / 2
+        dx[1:-1] = (data.x[2:] - data.x[:-2]) / 2
+        dx[-1] = (data.x[-1] - data.x[-2]) / 2
 
-        if len(data.x) == 2:
-            return total
-        else:
-            # iterate between for element different from the first and the last
-            for i in range(1, n - 1):
-                dxi = (data.x[i + 1] - data.x[i - 1]) / 2
-                total += gx[i] * data.y[i] * dxi
-            return total
+        return np.dot(gx * data.y, dx)
 
     def _get_qstar_uncertainty(self, data):
         """
@@ -582,22 +572,13 @@ class InvariantCalculator:
         else:
             gx = data.dxl * data.x
 
-        n = len(data.x) - 1
-        # compute the first delta
-        dx0 = (data.x[1] - data.x[0]) / 2
-        # compute the last delta
-        dxn = (data.x[n] - data.x[n - 1]) / 2
-        total = 0
-        total += (gx[0] * dy[0] * dx0) ** 2
-        total += (gx[n] * dy[n] * dxn) ** 2
-        if len(data.x) == 2:
-            return math.sqrt(total)
-        else:
-            # iterate between for element different from the first and the last
-            for i in range(1, n - 1):
-                dxi = (data.x[i + 1] - data.x[i - 1]) / 2
-                total += (gx[i] * dy[i] * dxi) ** 2
-            return math.sqrt(total)
+        # Midpoint-width trapezoidal bin widths for each point
+        dx = np.empty_like(data.x)
+        dx[0] = (data.x[1] - data.x[0]) / 2
+        dx[1:-1] = (data.x[2:] - data.x[:-2]) / 2
+        dx[-1] = (data.x[-1] - data.x[-2]) / 2
+
+        return math.sqrt(np.sum((gx * dy * dx) ** 2))
 
     def _get_extrapolated_data(self, model, npts=INTEGRATION_NSTEPS, q_start=Q_MINIMUM, q_end=Q_MAXIMUM):
         """
