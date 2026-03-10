@@ -42,6 +42,9 @@ Bug fixes
 * Revert the polydisp table to the original state on model change by @rozyczko in https://github.com/SasView/sasview/pull/3768
 * Fixes for quick plotting - both 1D and 3D by @rozyczko in https://github.com/SasView/sasview/pull/3749
 * Warn user before starting scattering calcs on large structures by @klytje in https://github.com/SasView/sasview/pull/3737
+* Ensure polydispersity and magnetic parameters are available in batch fitting by @rozyczko in https://github.com/SasView/sasview/pull/3843
+* Ensure orientation parameters are available in polydispersity panel by @DrPaulSharp in https://github.com/SasView/sasview/pull/3855
+* Fix issue related to model order in constrained fit window by @rozyczko in https://github.com/SasView/sasview/pull/3857
 
 Documentation fixes
 ^^^^^^^^^^^^^^^^^^^
