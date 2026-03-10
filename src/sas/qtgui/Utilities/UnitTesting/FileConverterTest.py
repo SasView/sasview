@@ -7,7 +7,7 @@ import sasdata.file_converter.FileConverterUtilities as Utilities
 
 from sas.qtgui.UnitTesting import base_path
 from sas.qtgui.Utilities.FileConverter import FileConverterWidget
-from sas.qtgui.Utilities.GuiUtils import Communicate
+from sas.qtgui.Utilities.GuiUtils import communicator
 
 
 class FileConverterTest:
@@ -17,7 +17,7 @@ class FileConverterTest:
     def widget(self, qapp):
         '''Create/Destroy the FileConverter'''
         class dummy_manager:
-            communicate = Communicate()
+            communicator = communicator
             _parent = QtWidgets.QDialog()
 
         w = FileConverterWidget(dummy_manager())

@@ -11,14 +11,12 @@ from sas.qtgui.Plotting.PlotterData import Data2D
 # Local
 from sas.qtgui.Plotting.SlicerParameters import SlicerParameters
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
-from sas.qtgui.Utilities.GuiUtils import Communicate
+from sas.qtgui.Utilities.GuiUtils import communicator
 
 
 class dummy_manager(QtWidgets.QWidget):
-    communicator = Communicate()
-    communicate = Communicate()
+    communicator = communicator
     active_plots = {}
-
     def getActivePlots(self):
         return self.active_plots
 
@@ -59,7 +57,7 @@ class SlicerParametersTest:
         manager.active_plots = active_plots
         w = SlicerParameters(model=model, parent=plotter,
                                        active_plots=active_plots,
-                                       communicator=dummy_manager().communicate)
+                                       communicator=dummy_manager().communicator)
         yield w
         w.close()
 
@@ -100,7 +98,7 @@ class SlicerParametersTest:
         active_plots = {"test_plot": plotter}
         widget = SlicerParameters(model=model, parent=plotter,
                                   active_plots=active_plots,
-                                  communicator=dummy_manager().communicate)
+                                  communicator=dummy_manager().communicator)
         assert widget.proxy.columnCount() == 2
         assert widget.proxy.rowCount() == 2
         assert widget.model.item(0, 0).text() == 't1'

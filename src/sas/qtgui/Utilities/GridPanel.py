@@ -29,7 +29,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         self.setupUi(self)
 
         self.parent = parent
-        self.communicate = GuiUtils.communicate
+        self.communicator = GuiUtils.communicator
 
         self.addToolbarActions()
 
@@ -194,7 +194,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         rows = [s.row() for s in self.currentTable().selectionModel().selectedRows()]
         if not rows:
             msg = "Nothing to plot!"
-            self.communicate.statusBarUpdateSignal.emit(msg)
+            self.communicator.statusBarUpdateSignal.emit(msg)
             return
         data = self.dataFromTable(self.currentTable())
         # data['Data'] -> ['filename1', 'filename2', ...]
@@ -203,7 +203,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
             try:
                 name = data['Data'][row]
                 # emit a signal so the plots are being shown
-                self.communicate.plotFromNameSignal.emit(name)
+                self.communicator.plotFromNameSignal.emit(name)
                 # This is an important processEvent.
                 # This allows charts to be properly updated in order
                 # of plots being applied.
@@ -248,10 +248,10 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
             url = QUrl.fromLocalFile(self.grid_filename)
 
             if QDesktopServices.openUrl(url):
-                self.parent.communicate.statusBarUpdateSignal.emit("Success: "
+                self.communicator.statusBarUpdateSignal.emit("Success: "
                 "The batch results CSV file successfully opened in your system CSV viewer.")
             else:
-                self.parent.communicate.statusBarUpdateSignal.emit("Failure: A CSV viewer "
+                self.communicator.statusBarUpdateSignal.emit("Failure: A CSV viewer "
                     "is required to view the batch results. Please set one in your default "
                     "app settings to change this behavior.")
 
@@ -581,7 +581,7 @@ class BatchInversionOutputPanel(BatchOutputPanel):
         rows = [s.row() for s in self.currentTable().selectionModel().selectedRows()]
         if not rows:
             msg = "Nothing to plot!"
-            self.communicate.statusBarUpdateSignal.emit(msg)
+            self.communicator.statusBarUpdateSignal.emit(msg)
             return
         data = self.dataFromTable(self.currentTable())
         # data['Data'] -> ['filename1', 'filename2', ...]

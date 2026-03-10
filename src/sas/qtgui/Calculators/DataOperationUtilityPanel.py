@@ -21,7 +21,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         super(DataOperationUtilityPanel, self).__init__()
         self.setupUi(self)
         self.manager = parent
-        self.communicator = self.manager.communicator()
+        self.communicator = GuiUtils.communicator
 
         # To store input datafiles
         self.filenames = None
