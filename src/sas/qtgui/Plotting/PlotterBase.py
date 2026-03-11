@@ -17,6 +17,27 @@ from sas.qtgui.Plotting.WindowTitle import WindowTitle
 
 DEFAULT_CMAP = mpl.cm.jet
 
+class CustomToolbar(NavigationToolbar):
+    def __init__(self, canvas, parent=None):
+        super().__init__(canvas, parent)
+        self.parent = parent
+        self.add_custom_button()
+
+    def add_custom_button(self):
+        # I have been told that a Button is better
+        # But all NavigationToolbar interactions are Actions
+        # This way all can be called with:
+        #   self._actions['xxx']
+        custom_icon = QtGui.QIcon()  # You can load an icon here if you want e.g., QtGui.QIcon("path/to/icon.png")
+        custom_action = QtGui.QAction(custom_icon, "Send to Data Explorer", self)
+        custom_action.setToolTip("Send all data to the Data Explorer")
+        custom_action.triggered.connect(self.sendToDataExplorer)
+        self.insertAction(self.actions()[-1], custom_action)
+
+    def sendToDataExplorer(self):
+        for item in self.parent.data:
+            GuiUtils.communicator.freezeDataNameSignal.emit(item.name)
+
 class PlotterBase(QtWidgets.QWidget):
     #TODO: Describe what this class is
 
@@ -45,7 +66,7 @@ class PlotterBase(QtWidgets.QWidget):
         # Set the layout and place the canvas widget in it.
         layout = QtWidgets.QVBoxLayout()
         # FIXME setMargin -> setContentsMargins in qt5 with 4 args
-        #layout.setContentsMargins(0)
+        layout.setSpacing(0)
         layout.addWidget(self.canvas)
 
         # 1D plotter defaults
@@ -109,7 +130,8 @@ class PlotterBase(QtWidgets.QWidget):
         self.canvas.mpl_connect('scroll_event', self.onMplWheel)
 
         self.contextMenu = QtWidgets.QMenu(self)
-        self.toolbar = NavigationToolbar(self.canvas, self)
+        self.toolbar = CustomToolbar(self.canvas, self)
+
         self.canvas.mpl_connect('resize_event', self.onResize)
         self.canvas.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.canvas.customContextMenuRequested.connect(self.showContextMenu)
@@ -226,7 +248,7 @@ class PlotterBase(QtWidgets.QWidget):
         # Notify the helper
         PlotHelper.addPlot(self)
         # Notify the listeners about a new graph
-        self.manager.communicator.activeGraphsSignal.emit([self, False])
+        GuiUtils.communicator.activeGraphsSignal.emit([self, False])
 
     def defaultContextMenu(self):
         """
@@ -244,6 +266,14 @@ class PlotterBase(QtWidgets.QWidget):
         self.actionSaveImage.triggered.connect(self.onImageSave)
         self.actionPrintImage.triggered.connect(self.onImagePrint)
         self.actionCopyToClipboard.triggered.connect(self.onClipboardCopy)
+
+    def addHelpToContextMenu(self):
+        """
+        Add Help option at the end of the context menu
+        """
+        self.contextMenu.addSeparator()
+        self.actionHelp = self.contextMenu.addAction("Help")
+        self.actionHelp.triggered.connect(self.onHelp)
 
     def createContextMenu(self):
         """
@@ -324,7 +354,7 @@ class PlotterBase(QtWidgets.QWidget):
         PlotHelper.deletePlot(PlotHelper.idOfPlot(self))
 
         # Notify the listeners
-        self.manager.communicator.activeGraphsSignal.emit([self, True])
+        GuiUtils.communicator.activeGraphsSignal.emit([self, True])
 
         event.accept()
 
@@ -378,6 +408,13 @@ class PlotterBase(QtWidgets.QWidget):
         self.canvas.render(pixmap)
         bmp.setPixmap(pixmap)
 
+    def onHelp(self):
+        """
+        Display plotting help documentation
+        """
+        location = "/user/qtgui/MainWindow/graph_help.html"
+        self._help_window = GuiUtils.showHelp(location)
+
     def onGridToggle(self):
         """
         Add/remove grid lines from MPL plot
@@ -399,7 +436,7 @@ class PlotterBase(QtWidgets.QWidget):
         title = titleWidget.title()
         self.setWindowTitle(title)
         # Notify the listeners about a new graph title
-        self.manager.communicator.activeGraphName.emit((current_title, title))
+        GuiUtils.communicator.activeGraphName.emit((current_title, title))
 
     def onToggleMenu(self):
         """

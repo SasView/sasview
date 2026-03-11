@@ -1,15 +1,15 @@
 import numpy as np
 
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
 from sas.qtgui.Plotting.SlicerModel import SlicerModel
 from sas.qtgui.Plotting.Slicers.ArcInteractor import ArcInteractor
 from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
 from sas.qtgui.Plotting.Slicers.RadiusInteractor import RadiusInteractor
 from sas.qtgui.Plotting.Slicers.SectorSlicer import LineInteractor
+from sas.qtgui.Plotting.Slicers.SlicerUtils import StackableMixin, generate_unique_plot_id
 
 
-class WedgeInteractor(BaseInteractor, SlicerModel):
+class WedgeInteractor(BaseInteractor, SlicerModel, StackableMixin):
     """
     This WedgeInteractor is a cross between the SectorInteractor and the
     AnnulusInteractor. It plots a data1D average of a wedge area defined in a
@@ -33,6 +33,7 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
     def __init__(self, base, axes, item=None, color="black", zorder=3):
         BaseInteractor.__init__(self, base, axes, color=color)
         SlicerModel.__init__(self)
+        StackableMixin.__init__(self)
 
         self.markers = []
         self.axes = axes
@@ -51,23 +52,30 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         self.theta = np.pi / 3
         # Angle between the central line and the radial lines either side of it
         self.phi = np.pi / 8
+        # If True, I(|Q|) will be return, otherwise,
+        # negative q-values are allowed
+        # Default to true on initialize
+        # Same as BoxInteractor
+        self.fold = True
         # reference of the current data averager
         self.averager = None
+        # Store plot id so it doesn't get recreated each time a parameter changes
+        self._plot_id = None
 
         self.inner_arc = ArcInteractor(
-            self, self.axes, color="black", zorder=zorder, r=self.r1, theta=self.theta, phi=self.phi
+            self, self.axes, color=color, zorder=zorder, r=self.r1, theta=self.theta, phi=self.phi
         )
         self.inner_arc.qmax = self.qmax
         self.outer_arc = ArcInteractor(
-            self, self.axes, color="black", zorder=zorder + 1, r=self.r2, theta=self.theta, phi=self.phi
+            self, self.axes, color=color, zorder=zorder + 1, r=self.r2, theta=self.theta, phi=self.phi
         )
         self.outer_arc.qmax = self.qmax * 1.2
         self.radial_lines = RadiusInteractor(
-            self, self.axes, color="black", zorder=zorder + 1, r1=self.r1, r2=self.r2, theta=self.theta, phi=self.phi
+            self, self.axes, color=color, zorder=zorder + 1, r1=self.r1, r2=self.r2, theta=self.theta, phi=self.phi
         )
         self.radial_lines.qmax = self.qmax * 1.2
         self.central_line = LineInteractor(
-            self, self.axes, color="black", zorder=zorder, r=self.qmax * 1.414, theta=self.theta, half_length=True
+            self, self.axes, color=color, zorder=zorder, r=self.qmax * 1.414, theta=self.theta, half_length=True
         )
         self.central_line.qmax = self.qmax * 1.414
         self.update()
@@ -88,12 +96,10 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         Clear the slicer and all connected events related to this slicer
         """
         self.averager = None
-        self.clear_markers()
         self.outer_arc.clear()
         self.inner_arc.clear()
         self.radial_lines.clear()
         self.central_line.clear()
-        self.base.connect.clearall()
 
     def update(self):
         """
@@ -130,9 +136,13 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         self.radial_lines.save(ev)
         self.central_line.save(ev)
 
+    def _get_slicer_type_id(self):
+        """Return the slicer type identifier"""
+        return f"Wedge{self.averager.__name__}" + self.data.name if self.averager is not None else "Wedge" + self.data.name
+
     def _post_data(self, new_sector=None, nbins=None):
         """
-        post 1D data averagin in Q or Phi given new_sector type
+        post 1D data averaging in Q or Phi given new_sector type
 
         :param new_sector: slicer used for directional averaging in Q or Phi
         :param nbins: the number of point plotted when averaging
@@ -171,7 +181,7 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         # Add pi to the angles before invoking sector averaging to transform angular
         # range from python default of -pi,pi to 0,2pi suitable for manipulations
         sect = self.averager(r_min=rmin, r_max=rmax, phi_min=phimin + np.pi, phi_max=phimax + np.pi, nbins=self.nbins)
-        sect.fold = False
+        sect.fold = self.fold
         sector = sect(self.data)
 
         if hasattr(sector, "dxl"):
@@ -204,18 +214,22 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
             new_plot.xaxis(r"\rm{Q}", "A^{-1}")
         new_plot.yaxis(r"\rm{Intensity} ", "cm^{-1}")
 
-        new_plot.id = "Wedge" + self.averager.__name__ + self.data.name
-        new_plot.type_id = (
-            "Slicer" + self.data.name
-        )  # Used to remove plots after changing slicer so they don't keep showing up after closed
+        # Assign unique id per slicer instance and use it as the display name
+        if self._plot_id is None:
+            base_id = "Wedge" + self.averager.__name__ + self.data.name
+            self._plot_id = generate_unique_plot_id(base_id, self._item)
+
+        new_plot.id = self._plot_id
+        new_plot.name = new_plot.id
+        new_plot.title = new_plot.id
         new_plot.is_data = True
+
         item = self._item
         if self._item.parent() is not None:
             item = self._item.parent()
-        GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
 
-        self.base.manager.communicator.plotUpdateSignal.emit([new_plot])
-        self.base.manager.communicator.forcePlotDisplaySignal.emit([item, new_plot])
+        # Use the mixin to handle stacking/updating
+        self._create_or_update_plot(new_plot, item)
 
         if self.update_model:
             self.setModelFromParams()

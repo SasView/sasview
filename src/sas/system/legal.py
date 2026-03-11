@@ -1,4 +1,7 @@
 import datetime
+from pathlib import Path
+
+from ._resources import SAS_RESOURCES
 
 
 class Legal:
@@ -21,6 +24,10 @@ class Legal:
                     </body>
                 </html>"""
 
+
+    @property
+    def credits_html(self) -> Path:
+        return SAS_RESOURCES.resource("system/credits.html")
 
 
 legal = Legal()

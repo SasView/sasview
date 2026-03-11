@@ -39,6 +39,7 @@ from sas.qtgui.Plotting import DataTransform
 from sas.qtgui.Plotting.ConvertUnits import convertUnit
 from sas.qtgui.Plotting.Plottables import Chisq, Plottable, PlottableFit1D, PlottableTheory1D, Text, View
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
+from sas.qtgui.Utilities.BackgroundColor import BG_DEFAULT, BG_WARNING
 from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
 from sas.sascalc.fit.AbstractFitEngine import FitData1D, FitData2D, FResult
 from sas.system import HELP_SYSTEM
@@ -79,6 +80,9 @@ class Communicate(QtCore.QObject):
     """
     Utility class for tracking of the Qt signals
     """
+    # File was passed as an argument on the command line, dropped on the executable, or double clicked
+    fileTriggerSignal = QtCore.Signal(str)
+
     # File got successfully read
     fileReadSignal = QtCore.Signal(list)
 
@@ -103,7 +107,7 @@ class Communicate(QtCore.QObject):
 
     # New plot requested from the GUI manager
     # Old "NewPlotEvent"
-    plotRequestedSignal = QtCore.Signal(list, int)
+    plotRequestedSignal = QtCore.Signal(list)
 
     # Plot from file names
     plotFromNameSignal = QtCore.Signal(str)
@@ -177,8 +181,10 @@ class Communicate(QtCore.QObject):
     # Global close to help kill active threads
     closeSignal = QtCore.Signal()
 
+    # Notify about a data name to be frozen and send to fitting perspective
+    freezeDataNameSignal = QtCore.Signal(str)
 
-communicate = Communicate()
+communicator = Communicate()
 
 
 def updateModelItemWithPlot(item, update_data, name="", checkbox_state=None):
@@ -738,15 +744,15 @@ class FormulaValidator(QtGui.QValidator):
 
     def validate(self, input, pos):
 
-        self._setStyleSheet("")
+        self._setStyleSheet(BG_DEFAULT)
 
         try:
             Formula(str(input))
-            self._setStyleSheet("")
+            self._setStyleSheet(BG_DEFAULT)
             return QtGui.QValidator.Acceptable
 
         except Exception:
-            self._setStyleSheet("background-color:pink;")
+            self._setStyleSheet(BG_WARNING)
             return QtGui.QValidator.Intermediate
 
     def _setStyleSheet(self, value):

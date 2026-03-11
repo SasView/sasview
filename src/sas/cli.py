@@ -9,13 +9,18 @@ work in the Windows console.
 
 **Usage:**
 
-sasview [flags]
-    *Run SasView. If no flag is given, or -q or -V are given, this will start
-    the GUI.*
+sasview [flags] [file1 file2 ...]
+    *Run SasView. If no flags, a list of loadable files, or -q is given,
+    this will start the GUI. The list of files can include individual data files,
+    data directories, analysis files, and project files. Any number of files may
+    be listed and an attempt will be made to load them all, but please note that
+    loading multiple projects may create load conflicts.*
 
 sasview [flags] script [args...]
-    *Run a python script using the installed SasView libraries [passing
-    optional arguments]*
+    *Run a python script (with the extension .py or .py.txt) using the installed
+    SasView libraries [passing optional arguments]. Please note, this is the same
+    API as launching the GUI with data files. Whether a script is run or the GUI
+    is launched, is determined by the first non-flag argument.*
 
 sasview [flags] -m module [args...]
     *Run a SasView/Sasmodels/Bumps module as main [passing optional arguments]*
@@ -25,6 +30,7 @@ sasview [flags] -c "python statements" [args...]
 
 sasview -V
     *Print sasview version and exit.*
+
 
 **Flags:**
 
@@ -103,6 +109,12 @@ def parse_cli(argv: list[str]) -> argparse.Namespace:
         opts.args = rest
     return opts
 
+def is_script(filename: str | Path) -> bool:
+    # allow .py.txt as the script file name for those with mail systems that filter .py files, but py.txt should
+    #   be considered a txt file
+    filename = str(filename)
+    return any(filename.endswith(target) for target in (".py", ".py.txt"))
+
 def main(dev_mode: bool|None=None) -> int:
     """
     Run the main program.
@@ -166,7 +178,7 @@ def main(dev_mode: bool|None=None) -> int:
     elif opts.command: # -c "command"
         sys.argv = ["-c", *opts.args]
         exec(opts.command, context)
-    elif opts.args: # script [arg...]
+    elif opts.args and is_script(opts.args[0]): # script [arg...]
         import runpy
         sys.argv = opts.args
         context = runpy.run_path(opts.args[0], run_name="__main__")
@@ -179,7 +191,8 @@ def main(dev_mode: bool|None=None) -> int:
         from sas.qtgui.MainWindow.MainWindow import run_sasview
         # sys.argv is unchanged
         # Maybe hand cli.quiet to run_sasview?
-        run_sasview()
+        file_list = [str(Path(filepath).absolute()) for filepath in opts.args] if opts.args else None
+        run_sasview(file_list)
         return 0 # don't drop into the interactive interpreter
 
     # TODO: Start interactive with ipython rather than normal python

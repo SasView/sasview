@@ -10,20 +10,16 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtGui import QDoubleValidator, QStandardItem
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-
-# sas-global
-# pylint: disable=import-error, no-name-in-module
-from sas.qtgui.Perspectives.Corfunc.CorfuncSlider import CorfuncSlider
 from sas.qtgui.Perspectives.Corfunc.ExtractionCanvas import ExtractionCanvas
 from sas.qtgui.Perspectives.Corfunc.IDFCanvas import IDFCanvas
 from sas.qtgui.Perspectives.Corfunc.QSpaceCanvas import QSpaceCanvas
 from sas.qtgui.Perspectives.Corfunc.RealSpaceCanvas import RealSpaceCanvas
 from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.Utilities.BackgroundColor import BG_DEFAULT, BG_ERROR
+from sas.qtgui.Utilities.ExtrapolationSlider import ExtrapolationSlider, SliderPerspective
 from sas.qtgui.Utilities.Reports import ReportBase
 from sas.qtgui.Utilities.Reports.reportdata import ReportData
 from sas.sascalc.corfunc.calculation_data import (
-    ExtrapolationInteractionState,
-    ExtrapolationParameters,
     GuinierData,
     LongPeriodMethod,
     PorodData,
@@ -31,6 +27,7 @@ from sas.sascalc.corfunc.calculation_data import (
     TransformedData,
 )
 from sas.sascalc.corfunc.corfunc_calculator import CalculationError, CorfuncCalculator
+from sas.sascalc.util import ExtrapolationInteractionState, ExtrapolationParameters
 
 from ..perspective import Perspective
 from .SaveExtrapolatedPopup import SaveExtrapolatedPopup
@@ -38,6 +35,9 @@ from .UI.CorfuncPanel import Ui_CorfuncDialog
 from .util import WIDGETS, safe_float
 
 logger = logging.getLogger(__name__)
+
+# Small epsilon to adjust extrapolation values
+ADJUST_EPS = 1e-7
 
 
 class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
@@ -64,8 +64,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.mapper = None
         self._path = ""
         self.model = QtGui.QStandardItemModel(self)
-        self.communicate = self.parent.communicator()
-        self.communicate.dataDeletedSignal.connect(self.removeData)
+        self.communicator = GuiUtils.communicator
+        self.communicator.dataDeletedSignal.connect(self.removeData)
 
         self._allow_close = False
         self._model_item: QStandardItem | None = None
@@ -81,7 +81,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self._running = False
 
         # Add slider widget
-        self.slider = CorfuncSlider()
+        self.slider = ExtrapolationSlider(perspective=SliderPerspective.CORFUNC)
         self.sliderLayout.insertWidget(1, self.slider)
 
         # Plots
@@ -117,6 +117,11 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         # Set up the mapper
         self.setup_mapper()
 
+        self.update_readonly()
+
+        # Allow Go button only when data is loaded
+        self.allow_go()
+
     def set_background_warning(self):
         if (self._calculator is None or
             self._calculator.background is None or
@@ -131,9 +136,15 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             show_warning = False
 
         if show_warning:
-            self.txtBackground.setStyleSheet("QLineEdit { background-color: rgb(255,255,0) }")
+            self.txtBackground.setStyleSheet(BG_ERROR)
+            msgbox = QtWidgets.QMessageBox()
+            msgbox.setIcon(QtWidgets.QMessageBox.Warning)
+            msgbox.setWindowTitle('Warning')
+            msgbox.setText('Background is higher than the minimum extrapolated value. Subtracting background value will result in negative intensities')
+            msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
+            _ = msgbox.exec_()
         else:
-            self.txtBackground.setStyleSheet("")
+            self.txtBackground.setStyleSheet(BG_DEFAULT)
 
     def isSerializable(self):
         """
@@ -145,7 +156,6 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         """Connect the buttons to their appropriate slots."""
 
         self.cmdExtract.clicked.connect(self._run)
-        self.cmdExtract.setEnabled(False)
 
         self.cmdSave.clicked.connect(self.on_save_transformed)
         self.cmdSave.setEnabled(False)
@@ -157,9 +167,12 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
         self.model.itemChanged.connect(self.model_changed)
 
-        self.txtLowerQMax.textEdited.connect(self.on_extrapolation_text_changed_1)
-        self.txtUpperQMin.textEdited.connect(self.on_extrapolation_text_changed_2)
-        self.txtUpperQMax.textEdited.connect(self.on_extrapolation_text_changed_3)
+        self.txtLowerQMax.textEdited.connect(self.on_extrapolation_text_editing)
+        self.txtUpperQMin.textEdited.connect(self.on_extrapolation_text_editing)
+        self.txtUpperQMax.textEdited.connect(self.on_extrapolation_text_editing)
+        self.txtLowerQMax.editingFinished.connect(self.on_extrapolation_text_edited)
+        self.txtUpperQMin.editingFinished.connect(self.on_extrapolation_text_edited)
+        self.txtUpperQMax.editingFinished.connect(self.on_extrapolation_text_edited)
         self.txtLowerQMax.setValidator(QDoubleValidator(bottom=0))
         self.txtUpperQMin.setValidator(QDoubleValidator(bottom=0))
         self.txtUpperQMax.setValidator(QDoubleValidator(bottom=0))
@@ -184,6 +197,18 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.txtGuinierB.setValidator(QDoubleValidator())
         self.txtPorodK.setValidator(QDoubleValidator())
         self.txtPorodSigma.setValidator(QDoubleValidator())
+
+        # Connect checkboxes to update_readonly
+        self.fitBackground.stateChanged.connect(self.update_readonly)
+        self.fitGuinier.stateChanged.connect(self.update_readonly)
+        self.fitPorod.stateChanged.connect(self.update_readonly)
+
+        # Connect text fields to update_readonly
+        self.txtBackground.textEdited.connect(self.update_readonly)
+        self.txtGuinierA.textEdited.connect(self.update_readonly)
+        self.txtGuinierB.textEdited.connect(self.update_readonly)
+        self.txtPorodK.textEdited.connect(self.update_readonly)
+        self.txtPorodSigma.textEdited.connect(self.update_readonly)
 
     def set_text_enable(self, state: bool):
         self.txtLowerQMax.setEnabled(state)
@@ -217,17 +242,17 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.model.setItem(WIDGETS.W_QCUTOFF,
                            QtGui.QStandardItem("0.22"))
         self.model.setItem(WIDGETS.W_BACKGROUND,
-                           QtGui.QStandardItem("0"))
+                           QtGui.QStandardItem(""))
         #self.model.setItem(W.W_TRANSFORM,
         #                   QtGui.QStandardItem("Fourier"))
         self.model.setItem(WIDGETS.W_GUINIERA,
-                           QtGui.QStandardItem("0.0"))
+                           QtGui.QStandardItem(""))
         self.model.setItem(WIDGETS.W_GUINIERB,
-                           QtGui.QStandardItem("0.0"))
+                           QtGui.QStandardItem(""))
         self.model.setItem(WIDGETS.W_PORODK,
-                           QtGui.QStandardItem("0.0"))
+                           QtGui.QStandardItem(""))
         self.model.setItem(WIDGETS.W_PORODSIGMA,
-                           QtGui.QStandardItem("0.0"))
+                           QtGui.QStandardItem(""))
         self.model.setItem(WIDGETS.W_CORETHICK, QtGui.QStandardItem(str(0)))
         self.model.setItem(WIDGETS.W_INTTHICK, QtGui.QStandardItem(str(0)))
         self.model.setItem(WIDGETS.W_HARDBLOCK, QtGui.QStandardItem(str(0)))
@@ -273,10 +298,12 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
         self.mapper.toFirst()
 
-        self.slider.extrapolation_parameters = self.extrapolation_paramameters
+        self.slider.extrapolation_parameters = self.extrapolation_parameters
         self._q_space_plot.draw_data()
 
     def _run(self):
+
+        self.update_readonly()
 
         if self._running:
             return
@@ -289,7 +316,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
         calculator = CorfuncCalculator(
             data=self.data,
-            extrapolation_parameters=self.extrapolation_paramameters,
+            extrapolation_parameters=self.extrapolation_parameters,
             tangent_method=self._tangent_method,
             long_period_method=self._long_period_method)
 
@@ -297,6 +324,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         calculator.fit_guinier = self.fitGuinier.isChecked()
         calculator.fit_porod = self.fitPorod.isChecked()
 
+        self.update_readonly()
 
         if not calculator.fit_background:
             calculator.background = safe_float(self.txtBackground.text())
@@ -381,6 +409,75 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
         self._running = False
 
+        self.update_readonly()
+
+    def allow_go(self, reason: str | None = None):
+        """ 
+        Disable Go button if reason is provided or if no data is loaded
+        :param reason: Reason why Go button should be disabled
+        """
+        if self.data is None:
+            self.cmdExtract.setEnabled(False)
+            self.cmdExtract.setText("Go (No data loaded)")
+            return
+
+        if reason is not None:
+            self.cmdExtract.setEnabled(False)
+            self.cmdExtract.setText(f"Go ({reason})")
+            return
+
+        self.cmdExtract.setEnabled(True)
+        self.cmdExtract.setText("Go")
+
+    def check_extrapolation_entry(self, fits_enabled: list[str]):
+        """ Disable Go button if extrapolation ranges empty or invalid """
+
+        if "background" not in fits_enabled:
+            if self.txtBackground.text() == "":
+                self.allow_go("Extrapolation values not set")
+                return
+
+        if "guinier" not in fits_enabled:
+            if (self.txtGuinierA.text() == "" or self.txtGuinierB.text() == ""):
+                self.allow_go("Extrapolation values not set")
+                return
+
+        if "porod" not in fits_enabled:
+            if (self.txtPorodK.text() == "" or self.txtPorodSigma.text() == ""):
+                self.allow_go("Extrapolation values not set")
+                return
+
+        self.allow_go()
+
+    def update_readonly(self):
+        """
+        Disable text fields if the corresponding fit is enabled.
+        Disable Go button if any of the text fields are empty.
+        """
+        fits_enabled = []
+        if self.fitBackground.isChecked():
+            fits_enabled.append("background")
+            self.txtBackground.setEnabled(False)
+        else:
+            self.txtBackground.setEnabled(True)
+
+        if self.fitGuinier.isChecked():
+            fits_enabled.append("guinier")
+            self.txtGuinierA.setEnabled(False)
+            self.txtGuinierB.setEnabled(False)
+        else:
+            self.txtGuinierA.setEnabled(True)
+            self.txtGuinierB.setEnabled(True)
+
+        if self.fitPorod.isChecked():
+            fits_enabled.append("porod")
+            self.txtPorodK.setEnabled(False)
+            self.txtPorodSigma.setEnabled(False)
+        else:
+            self.txtPorodK.setEnabled(True)
+            self.txtPorodSigma.setEnabled(True)
+
+        self.check_extrapolation_entry(fits_enabled)
 
     def setup_mapper(self):
         """Creating mapping between model and gui elements."""
@@ -435,14 +532,16 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         return False
 
     @property
-    def extrapolation_paramameters(self) -> ExtrapolationParameters | None:
+    def extrapolation_parameters(self) -> ExtrapolationParameters | None:
         if self.data is not None:
             return ExtrapolationParameters(
-                min(self.data.x),
-                safe_float(self.model.item(WIDGETS.W_QMIN).text()),
-                safe_float(self.model.item(WIDGETS.W_QMAX).text()),
-                safe_float(self.model.item(WIDGETS.W_QCUTOFF).text()),
-                max(self.data.x))
+                ex_q_min=None,
+                data_q_min=min(self.data.x),
+                point_1=safe_float(self.model.item(WIDGETS.W_QMIN).text()),
+                point_2=safe_float(self.model.item(WIDGETS.W_QMAX).text()),
+                point_3=safe_float(self.model.item(WIDGETS.W_QCUTOFF).text()),
+                data_q_max=max(self.data.x),
+                ex_q_max=None)
         else:
             return None
 
@@ -456,10 +555,19 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             msg = "Data is already loaded into the Corfunc perspective. Sending a new data set "
             msg += f"will remove the Corfunc analysis for {self._path}. Continue?"
             dialog = QtWidgets.QMessageBox(self, text=msg)
+            dialog.setWindowTitle("Data already loaded")
+
+            # checkbox to reset Q range to defaults
+            checkbox = QtWidgets.QCheckBox("Reset extrapolation ranges to dataset defaults")
+            dialog.setCheckBox(checkbox)
+            checkbox.setChecked(False)
+
             dialog.setStandardButtons(QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel)
             retval = dialog.exec_()
             if retval == QtWidgets.QMessageBox.Cancel:
                 return
+
+            reset_q_range = checkbox.isChecked()
 
         model_item = data_item[0]
         data = GuiUtils.dataFromItem(model_item)
@@ -484,6 +592,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.model.setItem(WIDGETS.W_POLY_RYAN, QtGui.QStandardItem(""))
         self.model.setItem(WIDGETS.W_POLY_STRIBECK, QtGui.QStandardItem(""))
         self.model.setItem(WIDGETS.W_PERIOD, QtGui.QStandardItem(""))
+        self.model.setItem(WIDGETS.W_BACKGROUND, QtGui.QStandardItem(""))
 
         self._q_space_plot.data = data
         self._q_space_plot.extrap = None
@@ -492,23 +601,33 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         log_data_min = math.log(min(self.data.x))
         log_data_max = math.log(max(self.data.x))
 
-        self.cmdExtract.setEnabled(True)
-
         def fractional_position(f):
             return math.exp(f*log_data_max + (1-f)*log_data_min)
 
-        self.model.setItem(WIDGETS.W_QMIN,
-                           QtGui.QStandardItem("%.7g"%fractional_position(0.2)))
-        self.model.setItem(WIDGETS.W_QMAX,
-                           QtGui.QStandardItem("%.7g"%fractional_position(0.7)))
-        self.model.setItem(WIDGETS.W_QCUTOFF,
-                           QtGui.QStandardItem("%.7g"%fractional_position(0.8)))
+        # If we have data, check if any of the Q range values are missing or non-finite, or out of range
+        if self.has_data:
+            prev_q1 = safe_float(self.model.item(WIDGETS.W_QMIN).text())     if self.model.item(WIDGETS.W_QMIN)     else None
+            prev_q2 = safe_float(self.model.item(WIDGETS.W_QMAX).text())     if self.model.item(WIDGETS.W_QMAX)     else None
+            prev_q3 = safe_float(self.model.item(WIDGETS.W_QCUTOFF).text())  if self.model.item(WIDGETS.W_QCUTOFF)  else None
+
+            # If any are missing or non-finite, or out of range fall back to defaults
+            q_range = [WIDGETS.W_QMIN, WIDGETS.W_QMAX, WIDGETS.W_QCUTOFF]
+            q_frac = [0.2, 0.7, 0.8]
+            for i, x in enumerate([prev_q1, prev_q2, prev_q3]):
+                if any([x <= min(self.data.x), x >= max(self.data.x), not math.isfinite(x), x is None]):
+                    self.model.setItem(q_range[i], QtGui.QStandardItem("%.7g"%fractional_position(q_frac[i])))
+
+        # If no data or clear data, set to defaults
+        if not self.has_data or reset_q_range:
+            self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem("%.7g"%fractional_position(0.2)))
+            self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem("%.7g"%fractional_position(0.7)))
+            self.model.setItem(WIDGETS.W_QCUTOFF, QtGui.QStandardItem("%.7g"%fractional_position(0.8)))
 
 
         # Reconnect model
         self.model.itemChanged.connect(self.model_changed)
 
-        self.slider.extrapolation_parameters = self.extrapolation_paramameters
+        self.slider.extrapolation_parameters = self.extrapolation_parameters
         self.slider.setEnabled(True)
 
         self.model_changed(None)
@@ -520,6 +639,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
         self.set_text_enable(True)
         self.has_data = True
+        self.allow_go()
 
         self.tabWidget.setCurrentIndex(0)
         self.set_background_warning()
@@ -549,81 +669,170 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             # Maybe we should just minimize
             self.setWindowState(QtCore.Qt.WindowMinimized)
 
-    def on_extrapolation_text_changed_1(self, text):
-        """ Text in LowerQMax changed"""
+    def on_extrapolation_text_editing(self):
+        """Handle when user edits any of the extrapolation text boxes"""
+        if self.extrapolation_parameters is None or self.data is None:
+            return
+        self.check_extrapolation_values()
 
-        #
-        # Note: We need to update based on params below, not a call to self.extrapolation_parameters,
-        #       because that value wont be updated until after the QLineEdit.textEdited signals are
-        #       processed
-        #
+    def on_extrapolation_text_edited(self):
+        """Handle when user finishes editing any of the extrapolation text boxes"""
+        # First update the model with new values
+        self.apply_parameters_from_ui()
+        # Then correct any invalid values
+        self.correct_extrapolation_values()
 
-        params = self.extrapolation_paramameters._replace(point_1=safe_float(text))
-        self.slider.extrapolation_parameters = params
-        self._q_space_plot.update_lines(ExtrapolationInteractionState(params))
-        self.notify_extrapolation_text_box_validity(params)
+    def format_sig_fig(self, value:float) -> str:
+        """ Format a float to 7 significant figures as string """
+        return f"{value:.7g}"
 
-    def on_extrapolation_text_changed_2(self, text):
-        """ Text in UpperQMin changed"""
+    def _get_live_extrapolation_values(self) -> tuple[float, float, float]:
+        """Read current text box values without correcting them."""
+        return (
+            safe_float(self.txtLowerQMax.text()),
+            safe_float(self.txtUpperQMin.text()),
+            safe_float(self.txtUpperQMax.text()),
+        )
 
-        #
-        # Note: We need to update based on params below, not a call to self.extrapolation_parameters,
-        #       because that value wont be updated until after the QLineEdit.textEdited signals are
-        #       processed
-        #
+    def check_extrapolation_values(self):
+        """
+        Check validity of extrapolation values such that: data_q_min < point_1 < point_2 < point_3 < data_q_max
+        If invalid, set text box background to red and disable Go button
+        """
+        # source of values: live text boxes or model
+        p1, p2, p3 = self._get_live_extrapolation_values()
 
-        params = self.extrapolation_paramameters._replace(point_2=safe_float(text))
-        self.slider.extrapolation_parameters = params
-        self._q_space_plot.update_lines(ExtrapolationInteractionState(params))
-        self.notify_extrapolation_text_box_validity(params)
+        data_q_min = float(self.data.x.min())  # Actual data min
+        data_q_max = float(self.data.x.max())  # Actual data max
 
-    def on_extrapolation_text_changed_3(self, text):
-        """ Text in UpperQMax changed"""
+        # Helper to test numeric presence
+        has_p1 = not math.isnan(p1)
+        has_p2 = not math.isnan(p2)
+        has_p3 = not math.isnan(p3)
 
-        #
-        # Note: We need to update based on params below, not a call to self.extrapolation_parameters,
-        #       because that value wont be updated until after the QLineEdit.textEdited signals are
-        #       processed
-        #
+        invalid_p1_low = has_p1 and p1 <= data_q_min
+        invalid_p1_high = has_p1 and has_p2 and p1 >= p2
+        invalid_p2_low = has_p2 and p2 <= data_q_min
+        invalid_p2_high = has_p2 and p2 >= data_q_max
+        invalid_p3_low = has_p3 and has_p2 and p3 <= p2
+        invalid_p3_high = has_p3 and p3 >= data_q_max
 
-        params = self.extrapolation_paramameters._replace(point_3=safe_float(text))
-        self.slider.extrapolation_parameters = params
-        self._q_space_plot.update_lines(ExtrapolationInteractionState(params))
-        self.notify_extrapolation_text_box_validity(params)
+        # UI feedback:
+        # - If a field has no numeric value (user still typing "1e-" or empty) keep default background.
+        # - If the numeric check says invalid -> red
+        self.txtLowerQMax.setStyleSheet(BG_ERROR if invalid_p1_low or invalid_p1_high else BG_DEFAULT)
+        self.txtUpperQMin.setStyleSheet(BG_ERROR if invalid_p2_low or invalid_p2_high else BG_DEFAULT)
+        self.txtUpperQMax.setStyleSheet(BG_ERROR if invalid_p3_low or invalid_p3_high else BG_DEFAULT)
 
-    def notify_extrapolation_text_box_validity(self, params):
-        """ Set the colour of the text boxes to red if they have bad parameter definitions"""
-        box_1_style = ""
-        box_2_style = ""
-        box_3_style = ""
-        red = "QLineEdit { background-color: rgb(255,0,0); color: rgb(255,255,255) }"
+        self.validity_flags = [
+            invalid_p1_low,
+            invalid_p1_high,
+            invalid_p2_low,
+            invalid_p2_high,
+            invalid_p3_low,
+            invalid_p3_high
+        ]
 
-        if params.point_1 <= params.data_q_min:
-            box_1_style = red
+        # Disable Go button if any invalid
+        if any(self.validity_flags):
+            self.allow_go("Extrapolation values out of range")
+        else:
+            self.allow_go()
 
-        if params.point_2 <= params.point_1:
-            box_1_style = red
-            box_2_style = red
+    def correct_extrapolation_values(self):
+        """
+        Correct any invalid extrapolation values to be within valid ranges.
+        Show dialog informing user of corrections made.
+        """
+        # update validity flags first
+        self.check_extrapolation_values()
 
-        if params.point_3 <= params.point_2:
-            box_2_style = red
-            box_3_style = red
+        # if all values are valid, nothing to do
+        if not any(self.validity_flags):
+            return
 
-        if params.data_q_max <= params.point_3:
-            box_3_style = red
+        data_q_min = float(self.format_sig_fig(self.data.x.min()))
+        data_q_max = float(self.format_sig_fig(self.data.x.max()))
 
-        # if v3 < v1 and v2, all three will go red (because of transitivity of <=), but this is good
-        if params.point_3 <= params.point_1:
-            box_1_style = red
-            box_3_style = red
+        messages = []
 
-        self.txtLowerQMax.setStyleSheet(box_1_style)
-        self.txtUpperQMin.setStyleSheet(box_2_style)
-        self.txtUpperQMax.setStyleSheet(box_3_style)
+        # block signals to avoid recursive calls
+        with QtCore.QSignalBlocker(self.txtLowerQMax), QtCore.QSignalBlocker(self.txtUpperQMin), QtCore.QSignalBlocker(self.txtUpperQMax):
+
+            # start by updating p2 as it is used in multiple checks
+            if self.validity_flags[2]:  # p2 <= data_q_min
+                messages.append(f"Porod start was below data minimum: {data_q_min}")
+                new_p2: float = (data_q_min + data_q_max) / 2  # set to midpoint
+                self.txtUpperQMin.setText(self.format_sig_fig(new_p2))
+                self.check_extrapolation_values()  # re-check validity flags
+
+            p1, p2, p3 = self._get_live_extrapolation_values()
+
+            if self.validity_flags[0]:  # p1 <= qmin
+                messages.append(f"Guinier end was below data minimum: {data_q_min}")
+                new_p1 = data_q_min + ADJUST_EPS
+                self.txtLowerQMax.setText(self.format_sig_fig(new_p1))
+
+            if self.validity_flags[1]:  # p1 >= p2
+                messages.append("Guinier end must be before Porod start.")
+                new_p1 = p2 - ADJUST_EPS
+                self.txtLowerQMax.setText(self.format_sig_fig(new_p1))
+
+            if self.validity_flags[3]:  # p2 >= qmax
+                messages.append(f"Porod start was above data maximum: {data_q_max}")
+                new_p2: float = p3 - ADJUST_EPS
+                self.txtUpperQMin.setText(self.format_sig_fig(new_p2))
+                p2 = new_p2  # update p2 for next check
+
+            if self.validity_flags[4]:  # p3 <= p2
+                messages.append("Porod end was before Porod start.")
+                new_p3 = p2 + ADJUST_EPS
+                self.txtUpperQMax.setText(self.format_sig_fig(new_p3))
+
+            if self.validity_flags[5]:  # p3 >= qmax
+                new_p3 = data_q_max - ADJUST_EPS
+                messages.append("Porod end was above data maximum.")
+                self.txtUpperQMax.setText(self.format_sig_fig(new_p3))
+
+            # update slider and model
+            self.apply_parameters_from_ui()
+
+            # Update text boxes and model if corrections were made
+            if messages:
+                messages.append("Values have been adjusted to the nearest valid value.")
+                dialog = QtWidgets.QMessageBox(self)
+                dialog.setWindowTitle("Invalid Extrapolation Values")
+                dialog.setIcon(QtWidgets.QMessageBox.Warning)
+                dialog.setText("\n".join(messages))
+                dialog.setStandardButtons(QtWidgets.QMessageBox.Ok)
+                dialog.exec_()
+
+    def apply_parameters_from_ui(self):
+        """Sets extrapolation parameters from the text boxes into the model and slider"""
+        p1: str = self.txtLowerQMax.text()
+        p2: str = self.txtUpperQMin.text()
+        p3: str = self.txtUpperQMax.text()
+
+        if self.extrapolation_parameters is None:
+            return
+        # update the slider (this may emit a signal that will call on_extrapolation_slider_changed)
+        self.slider.extrapolation_parameters = self.extrapolation_parameters._replace(
+            point_1=safe_float(p1),
+            point_2=safe_float(p2),
+            point_3=safe_float(p3))
+
+        # update model item text too
+        self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem(p1))
+        self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem(p2))
+        self.model.setItem(WIDGETS.W_QCUTOFF, QtGui.QStandardItem(p3))
+
+        # re-validate to update any UI flags
+        self.check_extrapolation_values()
+
 
     def on_extrapolation_slider_changed(self, state: ExtrapolationParameters):
         """ Slider state changed"""
-        format_string = "%.8g"
+        format_string = "%.7g"
         self.model.setItem(WIDGETS.W_QMIN,
                            QtGui.QStandardItem(format_string%state.point_1))
         self.model.setItem(WIDGETS.W_QMAX,
@@ -851,3 +1060,10 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         report.add_plot(self.idf_figure)
 
         return report.report_data
+
+    def reset(self):
+        """
+        Reset the corfunc perspective to an empty state
+        """
+        self.removeData([self._model_item] if self._model_item else None)
+

@@ -8,7 +8,7 @@ from pathlib import Path
 from packaging.version import Version
 from PySide6.QtCore import QLocale, Qt
 from PySide6.QtGui import QStandardItem
-from PySide6.QtWidgets import QDockWidget, QLabel, QProgressBar, QTextBrowser
+from PySide6.QtWidgets import QDockWidget, QLabel, QMessageBox, QProgressBar, QTextBrowser
 from twisted.internet import reactor
 
 import sas
@@ -40,6 +40,7 @@ from sas.qtgui.Perspectives.Inversion.InversionPerspective import InversionWindo
 from sas.qtgui.Perspectives.perspective import Perspective
 from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionPerspective import SizeDistributionWindow
 from sas.qtgui.Utilities.About.About import About
+from sas.qtgui.Utilities.About.Credits import Credits
 
 # from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
 from sas.qtgui.Utilities.FileConverter import FileConverterWidget
@@ -59,7 +60,7 @@ from sas.qtgui.Utilities.ResultPanel import ResultPanel
 
 # General SAS imports
 from sas.qtgui.Utilities.SasviewLogger import setup_qt_logging
-from sas.qtgui.Utilities.WhatsNew.WhatsNew import WhatsNew
+from sas.qtgui.Utilities.WhatsNew.WhatsNew import WhatsNewWidget
 from sas.system import HELP_SYSTEM, web
 from sas.system.user import create_user_files_if_needed
 from sas.system.version import __release_date__ as SASVIEW_RELEASE_DATE
@@ -193,7 +194,7 @@ class GuiManager:
         self.GENSASCalculator = None
         self.DataOperation = DataOperationUtilityPanel(self)
         self.FileConverter = FileConverterWidget(self)
-        self.WhatsNew = WhatsNew(self._parent)
+        self.WhatsNew = WhatsNewWidget(self._parent)
 
     def loadAllPerspectives(self):
         """ Load all the perspectives"""
@@ -266,6 +267,7 @@ class GuiManager:
         """
         if not plot:
             return
+
         name = plot[1].name
         for action in self._workspace.menuWindow.actions():
             if action.text() == name:
@@ -501,10 +503,6 @@ class GuiManager:
             msg = "No perspective is currently active."
             logger.info(msg)
 
-    def communicator(self):
-        """ Accessor for the communicator """
-        return self.communicate
-
     def perspective(self):
         """ Accessor for the perspective """
         return self._current_perspective
@@ -585,7 +583,7 @@ class GuiManager:
 
             # save the paths etc.
             self.saveCustomConfig()
-            self.communicate.closeSignal.emit()
+            self.communicator.closeSignal.emit()
             reactor.callFromThread(reactor.stop)
             return True
 
@@ -633,17 +631,17 @@ class GuiManager:
                     webbrowser.open(version_info["download_url"])
                 else:
                     webbrowser.open(web.download_url)
-                self.communicate.statusBarUpdateSignal.emit(msg)
+                self.communicator.statusBarUpdateSignal.emit(msg)
             else:
                 msg = "You have the latest version"
-                self.communicate.statusBarUpdateSignal.emit(msg)
+                self.communicator.statusBarUpdateSignal.emit(msg)
         except:
             msg = "guiframe: could not get latest application"
             msg += " version number\n  %s" % sys.exc_info()[1]
             logger.error(msg)
             msg = "Could not connect to the application server."
             msg += " Please try again later."
-            self.communicate.statusBarUpdateSignal.emit(msg)
+            self.communicator.statusBarUpdateSignal.emit(msg)
 
     def actionWelcome(self):
         """ Show the Welcome panel """
@@ -652,7 +650,7 @@ class GuiManager:
         self.welcomePanel.show()
 
     def actionWhatsNew(self):
-        self.WhatsNew = WhatsNew(self._parent, only_recent=False)
+        self.WhatsNew = WhatsNewWidget(self._parent, only_recent=False)
         self.WhatsNew.show()
 
     def showWelcomeMessage(self):
@@ -667,18 +665,18 @@ class GuiManager:
         """
         Method defining all signal connections for the gui manager
         """
-        self.communicate = GuiUtils.communicate
-        self.communicate.fileDataReceivedSignal.connect(self.fileWasRead)
-        self.communicate.statusBarUpdateSignal.connect(self.updateStatusBar)
-        self.communicate.updatePerspectiveWithDataSignal.connect(self.updatePerspective)
-        self.communicate.progressBarUpdateSignal.connect(self.updateProgressBar)
-        self.communicate.perspectiveChangedSignal.connect(self.perspectiveChanged)
-        self.communicate.updateTheoryFromPerspectiveSignal.connect(self.updateTheoryFromPerspective)
-        self.communicate.deleteIntermediateTheoryPlotsSignal.connect(self.deleteIntermediateTheoryPlotsByTabId)
-        self.communicate.plotRequestedSignal.connect(self.showPlot)
-        self.communicate.plotFromNameSignal.connect(self.showPlotFromName)
-        self.communicate.updateModelFromDataOperationPanelSignal.connect(self.updateModelFromDataOperationPanel)
-        self.communicate.activeGraphsSignal.connect(self.updatePlotItems)
+        self.communicator = GuiUtils.communicator
+        self.communicator.fileDataReceivedSignal.connect(self.fileWasRead)
+        self.communicator.statusBarUpdateSignal.connect(self.updateStatusBar)
+        self.communicator.updatePerspectiveWithDataSignal.connect(self.updatePerspective)
+        self.communicator.progressBarUpdateSignal.connect(self.updateProgressBar)
+        self.communicator.perspectiveChangedSignal.connect(self.perspectiveChanged)
+        self.communicator.updateTheoryFromPerspectiveSignal.connect(self.updateTheoryFromPerspective)
+        self.communicator.deleteIntermediateTheoryPlotsSignal.connect(self.deleteIntermediateTheoryPlotsByTabId)
+        self.communicator.plotRequestedSignal.connect(self.showPlot)
+        self.communicator.plotFromNameSignal.connect(self.showPlotFromName)
+        self.communicator.updateModelFromDataOperationPanelSignal.connect(self.updateModelFromDataOperationPanel)
+        self.communicator.activeGraphsSignal.connect(self.updatePlotItems)
 
 
     def addTriggers(self):
@@ -706,6 +704,7 @@ class GuiManager:
         self._workspace.actionOpen_Analysis.triggered.connect(self.actionOpen_Analysis)
         self._workspace.actionSave.triggered.connect(self.actionSave_Project)
         self._workspace.actionSave_Analysis.triggered.connect(self.actionSave_Analysis)
+        self._workspace.actionClose_Project.triggered.connect(self.actionClose_Project)
         self._workspace.actionPreferences.triggered.connect(self.actionOpen_Preferences)
         self._workspace.actionQuit.triggered.connect(self.actionQuit)
         # Edit
@@ -776,12 +775,13 @@ class GuiManager:
         self._workspace.actionModel_Marketplace.triggered.connect(self.actionMarketplace)
         self._workspace.actionAcknowledge.triggered.connect(self.actionAcknowledge)
         self._workspace.actionAbout.triggered.connect(self.actionAbout)
+        self._workspace.actionCredits.triggered.connect(self.actionCredits)
         self._workspace.actionWelcomeWidget.triggered.connect(self.actionWelcome)
         self._workspace.actionCheck_for_update.triggered.connect(self.actionCheck_for_update)
         self._workspace.actionWhat_s_New.triggered.connect(self.actionWhatsNew)
 
-        self.communicate.sendDataToGridSignal.connect(self.showBatchOutput)
-        self.communicate.resultPlotUpdateSignal.connect(self.showFitResults)
+        self.communicator.sendDataToGridSignal.connect(self.showBatchOutput)
+        self.communicator.resultPlotUpdateSignal.connect(self.showFitResults)
 
 
     #============ FILE =================
@@ -809,13 +809,14 @@ class GuiManager:
         self.filesWidget.loadAnalysis()
 
 
-    def actionSave_Project(self):
+    def actionSave_Project(self) -> bool:
         """
         Menu Save Project
+        return: True if save was successful, False otherwise
         """
         filename = self.filesWidget.saveProject()
         if not filename:
-            return
+            return False
 
         # datasets
         all_data = self.filesWidget.getSerializedData()
@@ -840,6 +841,7 @@ class GuiManager:
 
         with open(filename, 'w') as outfile:
             GuiUtils.saveData(outfile, final_data)
+        return True
 
     def actionSave_Analysis(self):
         """
@@ -1002,7 +1004,7 @@ class GuiManager:
         """
         """
         data, theory = self.filesWidget.getAllFlatData()
-        self.communicate.sendDataToPanelSignal.emit(dict(data, **theory))
+        self.communicator.sendDataToPanelSignal.emit(dict(data, **theory))
 
         self.DataOperation.show()
 
@@ -1197,7 +1199,7 @@ class GuiManager:
 
     def actionEditMask(self):
 
-        self.communicate.extMaskEditorSignal.emit()
+        self.communicator.extMaskEditorSignal.emit()
 
     #============ ANALYSIS =================
     def actionFitting(self):
@@ -1319,6 +1321,32 @@ class GuiManager:
         about = About()
         about.exec()
 
+    def actionCredits(self):
+        """
+        Open the Credits/Licenses box
+        """
+        # TODO: proper sizing
+        credits = Credits()
+        credits.exec()
+
+    def actionClose_Project(self):
+        """
+        Menu File/Close Project
+        """
+        # Make sure this is what the user really wants
+        reply = QMessageBox.question(self._parent, 'Close Project',
+                                    "Do you want to save the project before closing?\n"
+                                    "All unsaved changes will be lost if you don't save.",
+                                    QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel,
+                                    QMessageBox.Cancel)
+        if reply == QMessageBox.Save:
+            saved = self.actionSave_Project()
+            if saved:
+                self.resetProject()
+        elif reply == QMessageBox.Discard:
+            self.resetProject()
+        # else Cancel, do nothing
+
     def actionCheck_for_update(self):
         """
         Menu Help/Check for Update
@@ -1365,12 +1393,12 @@ class GuiManager:
         if hasattr(self, "filesWidget"):
             self.filesWidget.displayDataByName(name=name, is_data=True)
 
-    def showPlot(self, plot, id):
+    def showPlot(self, plot):
         """
         Pass the show plot request to the data explorer
         """
         if hasattr(self, "filesWidget"):
-            self.filesWidget.displayData(plot, id)
+            self.filesWidget.displayData(plot)
             # update windows menu
             self.addPlotItemsInWindowsMenu(plot)
 
@@ -1396,3 +1424,15 @@ class GuiManager:
         Save the config file based on current session values
         """
         config.save()
+
+    def resetProject(self):
+        """
+        Reset the project to an empty state
+        """
+        # perspectives
+        for per in self.loadedPerspectives.values():
+            if hasattr(per, 'reset'):
+                per.reset()
+        # file manager
+        self.filesWidget.reset()
+

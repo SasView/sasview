@@ -9,11 +9,9 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.Plotter import PlotterWidget
 from sas.qtgui.Plotting.Plotter2D import Plotter2DWidget
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
+from sas.qtgui.Utilities.BackgroundColor import BG_DEFAULT, BG_ERROR
 
 from .UI.DataOperationUtilityUI import Ui_DataOperationUtility
-
-BG_WHITE = "background-color: rgb(255, 255, 255); color: rgb(0, 0, 0);"
-BG_RED = "background-color: rgb(244, 170, 164);"
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +21,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         super(DataOperationUtilityPanel, self).__init__()
         self.setupUi(self)
         self.manager = parent
-        self.communicator = self.manager.communicator()
+        self.communicator = GuiUtils.communicator
 
         # To store input datafiles
         self.filenames = None
@@ -50,8 +48,10 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         self.cmdHelp.clicked.connect(self.onHelp)
         self.cmdCompute.clicked.connect(self.onCompute)
         self.cmdReset.clicked.connect(self.onReset)
+        self.cmdSaveData.clicked.connect(self.onSaveData)
 
         self.cmdCompute.setEnabled(False)
+        self.cmdSaveData.setEnabled(False)
 
         # validator for coefficient
         self.txtNumber.setValidator(GuiUtils.DoubleValidator())
@@ -123,7 +123,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
 
 
     def onCompute(self):
-        """ perform calculation """
+        """ Perform calculation """
         # set operator to be applied
         operator = self.cbOperator.currentText()
         # calculate and send data to DataExplorer
@@ -141,19 +141,26 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         # if outputname was unused, write output result to it
         # and display plot
         if self.onCheckOutputName():
+            # plot result
+            self.updatePlot(self.graphOutput, self.layoutOutput, self.output)
+
+    def onSaveData(self):
+        """ Save current output in data file and add it to the DataExplorer """
+        # If output is empty, then compute it first
+        if self.output is None:
+            self.onCompute()
+        # if outputname was unused, proceed to save files
+        if self.onCheckOutputName():
             # add outputname to self.filenames
             self.list_data_items.append(str(self.txtOutputData.text()))
             # send result to DataExplorer
             self.onPrepareOutputData()
-            # plot result
-            self.updatePlot(self.graphOutput, self.layoutOutput, self.output)
-
-        # Add the new plot to the comboboxes
-        self.cbData1.addItem(self.output.name)
-        self.cbData2.addItem(self.output.name)
-        if self.filenames is None:
-            self.filenames = {}
-        self.filenames[self.output.name] = self.output
+            # Add the new plot to the comboboxes
+            self.cbData1.addItem(self.output.name)
+            self.cbData2.addItem(self.output.name)
+            if self.filenames is None:
+                self.filenames = {}
+            self.filenames[self.output.name] = self.output
 
     def onPrepareOutputData(self):
         """ Prepare datasets to be added to DataExplorer and DataManager """
@@ -174,6 +181,9 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         self.lblOperatorApplied.setText(self.cbOperator.currentText())
         self.newPlot(self.graphOutput, self.layoutOutput)
 
+        # Initialize output
+        self.output = None
+
     def onReset(self):
         """
         Reset Panel to its initial state (default values) keeping
@@ -184,6 +194,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
 
         self.txtNumber.setEnabled(False)
         self.cmdCompute.setEnabled(False)
+        self.cmdSaveData.setEnabled(False)
 
         self.cbData1.setCurrentIndex(0)
         self.cbData2.setCurrentIndex(0)
@@ -191,6 +202,9 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
 
         self.data1OK = False
         self.data2OK = False
+
+        # Initialize output
+        self.output = None
 
         # Empty graphs
         self.newPlot(self.graphOutput, self.layoutOutput)
@@ -200,8 +214,9 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
     def onSelectData1(self):
         """ Plot for selection of Data1 """
         choice_data1 = str(self.cbData1.currentText())
-
         wrong_choices = ['No Data Available', 'Select Data', '']
+        # Initialize output
+        self.output = None
 
         if choice_data1 in wrong_choices:
             # check validity of choice: input = filename
@@ -209,6 +224,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             self.data1 = None
             self.data1OK = False
             self.cmdCompute.setEnabled(False) # self.onCheckChosenData())
+            self.cmdSaveData.setEnabled(False)
             return
 
         else:
@@ -220,13 +236,16 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             self.updatePlot(self.graphData1, self.layoutData1, self.data1)
             # plot default for output graph
             self.newPlot(self.graphOutput, self.layoutOutput)
-            # Enable Compute button only if Data2 is defined and data compatible
+            # Enable Compute and SaveData buttons only if Data2 is defined and data compatible
             self.cmdCompute.setEnabled(self.onCheckChosenData())
+            self.cmdSaveData.setEnabled(self.onCheckChosenData())
 
     def onSelectData2(self):
         """ Plot for selection of Data2 """
         choice_data2 = str(self.cbData2.currentText())
         wrong_choices = ['No Data Available', 'Select Data', '']
+        # Initialize output
+        self.output = None
 
         if choice_data2 in wrong_choices:
             self.newPlot(self.graphData2, self.layoutData2)
@@ -234,6 +253,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             self.data2OK = False
             self.onCheckChosenData()
             self.cmdCompute.setEnabled(False)
+            self.cmdSaveData.setEnabled(False)
             return
 
         elif choice_data2 == 'Number':
@@ -241,8 +261,9 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             self.txtNumber.setEnabled(True)
             self.data2 = float(self.txtNumber.text())
 
-            # Enable Compute button only if Data1 defined and compatible data
+            # Enable Compute and SaveData buttons only if Data1 defined and compatible data
             self.cmdCompute.setEnabled(self.onCheckChosenData())
+            self.cmdSaveData.setEnabled(self.onCheckChosenData())
             # Display value of coefficient in graphData2
             self.updatePlot(self.graphData2, self.layoutData2, self.data2)
             # plot default for output graph
@@ -255,6 +276,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             key_id2 = self._findId(choice_data2)
             self.data2 = self._extractData(key_id2)
             self.cmdCompute.setEnabled(self.onCheckChosenData())
+            self.cmdSaveData.setEnabled(self.onCheckChosenData())
 
             # plot Data2
             self.updatePlot(self.graphData2, self.layoutData2, self.data2)
@@ -270,16 +292,16 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             if input_to_check is None or input_to_check == '':
                 msg = 'DataOperation: Number requires a float number'
                 logger.warning(msg)
-                self.txtNumber.setStyleSheet(BG_RED)
+                self.txtNumber.setStyleSheet(BG_ERROR)
 
             elif float(self.txtNumber.text()) == 0.:
                 # should be check that 0 is not chosen
                 msg = 'DataOperation: Number requires a non zero number'
                 logger.warning(msg)
-                self.txtNumber.setStyleSheet(BG_RED)
+                self.txtNumber.setStyleSheet(BG_ERROR)
 
             else:
-                self.txtNumber.setStyleSheet(BG_WHITE)
+                self.txtNumber.setStyleSheet(BG_DEFAULT)
                 self.data2 = float(self.txtNumber.text())
                 self.updatePlot(self.graphData2, self.layoutData2, self.data2)
 
@@ -290,13 +312,13 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             return False
         else:
             if self.cbData2.currentText() == 'Number':
-                self.cbData1.setStyleSheet(BG_WHITE)
-                self.cbData2.setStyleSheet(BG_WHITE)
+                self.cbData1.setStyleSheet(BG_DEFAULT)
+                self.cbData2.setStyleSheet(BG_DEFAULT)
                 return True
 
             elif self.data1.__class__.__name__ != self.data2.__class__.__name__:
-                self.cbData1.setStyleSheet(BG_RED)
-                self.cbData2.setStyleSheet(BG_RED)
+                self.cbData1.setStyleSheet(BG_ERROR)
+                self.cbData2.setStyleSheet(BG_ERROR)
                 print(self.data1.__class__.__name__ != self.data2.__class__.__name__)
                 logger.error('Cannot compute data of different dimensions')
                 return False
@@ -305,8 +327,8 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
                     and (len(self.data2.x) != len(self.data1.x) or
                              not all(i == j for i, j in zip(self.data1.x, self.data2.x))):
                 logger.error('Cannot compute 1D data of different lengths')
-                self.cbData1.setStyleSheet(BG_RED)
-                self.cbData2.setStyleSheet(BG_RED)
+                self.cbData1.setStyleSheet(BG_ERROR)
+                self.cbData2.setStyleSheet(BG_ERROR)
                 return False
 
             elif self.data1.__class__.__name__ == 'Data2D' \
@@ -317,33 +339,33 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
                     or not all(i == j for i, j in
                                 zip(self.data1.qy_data, self.data2.qy_data))
                          ):
-                self.cbData1.setStyleSheet(BG_RED)
-                self.cbData2.setStyleSheet(BG_RED)
+                self.cbData1.setStyleSheet(BG_ERROR)
+                self.cbData2.setStyleSheet(BG_ERROR)
                 logger.error('Cannot compute 2D data of different lengths')
                 return False
 
             else:
-                self.cbData1.setStyleSheet(BG_WHITE)
-                self.cbData2.setStyleSheet(BG_WHITE)
+                self.cbData1.setStyleSheet(BG_DEFAULT)
+                self.cbData2.setStyleSheet(BG_DEFAULT)
                 return True
 
     def onCheckOutputName(self):
         """ Check that name of output does not already exist """
         name_to_check = str(self.txtOutputData.text())
-        self.txtOutputData.setStyleSheet(BG_WHITE)
+        self.txtOutputData.setStyleSheet(BG_DEFAULT)
 
         if name_to_check is None or name_to_check == '':
-            self.txtOutputData.setStyleSheet(BG_RED)
+            self.txtOutputData.setStyleSheet(BG_ERROR)
             logger.warning('No output name')
             return False
 
         elif name_to_check in self.list_data_items:
-            self.txtOutputData.setStyleSheet(BG_RED)
+            self.txtOutputData.setStyleSheet(BG_ERROR)
             logger.warning('The Output data name already exists')
             return False
 
         else:
-            self.txtOutputData.setStyleSheet(BG_WHITE)
+            self.txtOutputData.setStyleSheet(BG_DEFAULT)
             return True
 
     # ########
@@ -377,7 +399,9 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         # clear layout
         if layout.count() > 0:
             item = layout.takeAt(0)
-            layout.removeItem(item)
+            widget = item.widget()
+            if widget is not None:
+                widget.deleteLater()
 
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self.prepareSubgraphWithData("?"))
@@ -393,7 +417,10 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         # clear layout
         if layout.count() > 0:
             item = layout.takeAt(0)
-            layout.removeItem(item)
+            #layout.removeItem(item)
+            widget = item.widget()
+            if widget is not None:
+                widget.deleteLater()
 
         layout.setContentsMargins(0, 0, 0, 0)
 
@@ -415,7 +442,6 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             plotter2D.x_label = ''
             plotter2D.plot(data=data, show_colorbar=False)
             plotter2D.show()
-
         elif isinstance(data, Data1D):
             # plot 1D data
             plotter = PlotterWidget(self, quickplot=True)

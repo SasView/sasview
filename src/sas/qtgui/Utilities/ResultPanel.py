@@ -4,6 +4,8 @@ FitPanel class contains fields allowing to fit  models and  data
 """
 from PySide6 import QtCore, QtWidgets
 
+from sas.qtgui.Utilities.GuiUtils import communicator
+
 
 class ResultPanel(QtWidgets.QTabWidget):
     """
@@ -22,14 +24,15 @@ class ResultPanel(QtWidgets.QTabWidget):
         """
         super(ResultPanel, self).__init__(parent)
         self.manager = manager
-        self.communicator = self.manager.communicator()
+        self.communicator = communicator
         self.setMinimumSize(400, 400)
         self.data_id = None
 
-        from .PlotView import ConvergenceView, CorrelationView, TraceView, UncertaintyView
+        from .PlotView import ConvergenceView, CorrelationTable, CorrelationView, TraceView, UncertaintyView
         self.convergenceView = ConvergenceView()
         self.correlationView = CorrelationView()
         self.uncertaintyView = UncertaintyView()
+        self.correlationTable = CorrelationTable()
         self.traceView = TraceView()
         self.show()
 
@@ -56,6 +59,10 @@ class ResultPanel(QtWidgets.QTabWidget):
             self.uncertaintyView.update(result)
             self.uncertaintyView.show()
             self.addTab(self.uncertaintyView, "Uncertainty")
+
+            self.correlationTable.update(result)
+            self.correlationTable.show()
+            self.addTab(self.correlationTable, "Statistics")
 
             self.traceView.update(result)
             self.traceView.show()

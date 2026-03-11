@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 from sas.qtgui.Perspectives.Corfunc.CorfuncCanvas import CorfuncCanvas
 from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.sascalc.corfunc.calculation_data import ExtrapolationInteractionState
+from sas.sascalc.util import ExtrapolationInteractionState
 
 
 class QSpaceCanvas(CorfuncCanvas):
@@ -81,7 +81,7 @@ class QSpaceCanvas(CorfuncCanvas):
 
         if self.data is not None:
 
-            extrapolation_params = self.corfunc_windows.extrapolation_paramameters
+            extrapolation_params = self.corfunc_windows.extrapolation_parameters
 
             self.axes.errorbar(self.data[0].x,
                                self.data[0].y,

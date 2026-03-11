@@ -43,9 +43,8 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         self.maxIndex = 1
         # Needed for Batch inversion
         self.parent = parent
-        self.communicate = self.parent.communicate
-        #self.communicate = self.parent.communicator()
-        self.communicate.dataDeletedSignal.connect(self.removeData)
+        self.communicator = GuiUtils.communicator
+        self.communicator.dataDeletedSignal.connect(self.removeData)
         self.tabCloseRequested.connect(self.tabCloses)
 
         # List of active Pr Tabs
@@ -126,7 +125,6 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
             # The tab might have already been deleted previously
             pass
 
-
     def closeTabByName(self, tab_name):
         """
         Given name of the tab - close it
@@ -191,10 +189,6 @@ that in the meantime, these tabs will be excluded from the saved project.""")
     @property
     def supports_fitting(self):
         return False
-
-    def communicator(self):
-        return self.filesWidget.communicate
-
 
     def allowBatch(self):
         """
@@ -381,13 +375,7 @@ that in the meantime, these tabs will be excluded from the saved project.""")
         """
         Returns the data ID of the current tab
         """
-        tab_id = []
-        if not self.currentTab.data:
-            return tab_id
-        for item in self.currentTab.all_data:
-            data = GuiUtils.dataFromItem(item)
-            tab_id.append(data.id)
-
+        tab_id = [item.logic.data.id for item in self.currentTab.results]
         return tab_id
 
     def removeData(self, data_list: list[QtGui.QStandardItem]):
@@ -435,3 +423,12 @@ that in the meantime, these tabs will be excluded from the saved project.""")
         inversion_widget = self.currentWidget()
         if isinstance(inversion_widget, InversionWidget):
             inversion_widget.updateFromParameters(params)
+
+    def reset(self):
+        """
+        Reset the Inversion perspective to an empty state
+        """
+        self.tabs.clear()
+        self.clear()
+        self.maxIndex = 1
+        self.addData(None)

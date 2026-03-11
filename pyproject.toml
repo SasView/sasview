@@ -5,9 +5,21 @@ requires = [
     "hatch-requirements-txt",
     "hatch-sphinx",
     "hatch-vcs",
+    # For documentation
+    "bumps",
+    "dominate",
+    "html2text",
+    "numpy",
+    "periodictable",
+    "pyopengl",
     "pyside6",
+    "qtconsole",
+    "scipy",
+    "superqt",
     "sasdata",
     "sasmodels",
+    "twisted",
+    "uncertainties",
 ]
 build-backend = "hatchling.build"
 
@@ -21,7 +33,7 @@ dynamic = [
 ]
 description = "SasView application"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 license = { text = "BSD-3-Clause" }
 authors = [
     {name = "SasView Team", email = "developers@sasview.org"},
@@ -196,6 +208,12 @@ pythonpath = "src"
 norecursedirs = [
     "test/sasrealspace",
     "test/calculatorview",
+    "src/sas/qtgui/MainWindow/UnitTesting/Quarantine",
+    "src/sas/qtgui/Perspectives/Fitting/UnitTesting/Quarantine",
+    "src/sas/qtgui/Perspectives/Inversion",
+    "src/sas/qtgui/Perspectives/ParticleEditor",
+    "src/sas/qtgui/Plotting/UnitTesting/Quarantine",
+    "src/sas/qtgui/Utilities/UnitTesting/Quarantine"
 ]
 
 [tool.ruff]

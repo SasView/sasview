@@ -213,6 +213,10 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         # Last version that the update prompt was dismissed for
         self.LAST_UPDATE_DISMISSED_VERSION = "5.0.0"
 
+        # Stack plots when using slicers
+        # If true, plots generated when using slicers will be on the same canvas
+        self.STACK_PLOTS = True
+
         #
         # Lock the class down, this is necessary both for
         # securing the class, and for setting up reading/writing files

@@ -338,16 +338,16 @@ class TestInvariantCalculator(unittest.TestCase):
         # of this test class.
 
         # volumer fraction
-        v, dv = inv.get_volume_fraction_with_error(2.2e-6, None)
+        v, dv = inv.get_volume_fraction_with_error(2.2e-6, extrapolation=None)
         _check_values(v, 0.01)
 
-        v_l, dv_l = inv.get_volume_fraction_with_error(2.2e-6, 'low')
+        v_l, dv_l = inv.get_volume_fraction_with_error(2.2e-6, extrapolation='low')
         _check_values(v_l, 0.01)
 
-        v_h, dv_h = inv.get_volume_fraction_with_error(2.2e-6, 'high')
+        v_h, dv_h = inv.get_volume_fraction_with_error(2.2e-6, extrapolation='high')
         _check_values(v_h, 0.01)
 
-        v_b, dv_b = inv.get_volume_fraction_with_error(2.2e-6, 'both')
+        v_b, dv_b = inv.get_volume_fraction_with_error(2.2e-6, extrapolation='both')
         _check_values(v_b, 0.01)
 
         # Specific Surface - though these are really redundant since
@@ -356,16 +356,16 @@ class TestInvariantCalculator(unittest.TestCase):
         # however since some day we could add a feature where vol frac can be
         # an input parameter in which case Sv WOULD in fact depend on the
         # invariant:
-        s, ds = inv.get_surface_with_error(2.2e-6, 1.825e-7, None)
+        s, ds = inv.get_surface_with_error(2.2e-6, 1.825e-7, extrapolation=None)
         _check_values(s, 6.00e-5)
 
-        s_l, ds_l = inv.get_surface_with_error(2.2e-6, 1.825e-7, 'low')
+        s_l, ds_l = inv.get_surface_with_error(2.2e-6, 1.825e-7, extrapolation='low')
         _check_values(s_l, 6.00e-5)
 
-        s_h, ds_h = inv.get_surface_with_error(2.2e-6, 1.825e-7, 'high')
+        s_h, ds_h = inv.get_surface_with_error(2.2e-6, 1.825e-7, extrapolation='high')
         _check_values(s_h, 6.00e-5)
 
-        s_b, ds_b = inv.get_surface_with_error(2.2e-6, 1.825e-7, 'both')
+        s_b, ds_b = inv.get_surface_with_error(2.2e-6, 1.825e-7, extrapolation='both')
         _check_values(s_b, 6.00e-5)
 
 
@@ -382,6 +382,52 @@ class TestInvariantCalculator(unittest.TestCase):
                           npts=4, function='guinier')
         self.assertRaises(ValueError, inv.set_extrapolation, 'high', npts=4,
                           function='guinier')
+
+    def test_volume_fraction_uncertainty_increases_with_contrast_err(self):
+        """
+        Checks if the uncertainty calculated for volume fraction scales with the uncertainty entered for contrast
+        """
+        inv = invariant.InvariantCalculator(self.data)
+        contrast = 2.2e-6
+        _, dv_small = inv.get_volume_fraction_with_error(contrast, contrast_err=0.1 * contrast)
+        _, dv_large = inv.get_volume_fraction_with_error(contrast, contrast_err=0.5 * contrast)
+        self.assertGreater(dv_large, dv_small)
+
+    def test_contrast_uncertainty_increases_with_volume_err(self):
+        """
+        Checks if the uncertainty calculated for contrast scales with the uncertainty entered for volume fraction
+        """
+        inv = invariant.InvariantCalculator(self.data)
+        volume = 0.01
+        _, dc_small = inv.get_contrast_with_error(volume, volume_err=0.001)
+        _, dc_large = inv.get_contrast_with_error(volume, volume_err=0.01)
+        self.assertGreater(dc_large, dc_small)
+
+    def test_surface_uncertainty_increases_with_input_err(self):
+        """
+        Checks if the uncertainty calculated for specific surface scales with the uncertainty entered for:
+            - SLD contrast
+            - Porod constant
+        """
+        inv = invariant.InvariantCalculator(self.data)
+        contrast = 2.2e-6
+        porod = 1.825e-7
+
+        _, ds_small_contrast = inv.get_surface_with_error(
+            contrast, porod, contrast_err=0.1 * contrast
+        )
+        _, ds_large_contrast = inv.get_surface_with_error(
+            contrast, porod, contrast_err=0.5 * contrast
+        )
+        self.assertGreater(ds_large_contrast, ds_small_contrast)
+
+        _, ds_small_porod = inv.get_surface_with_error(
+            contrast, porod, porod_const_err=0.1 * porod
+        )
+        _, ds_large_porod = inv.get_surface_with_error(
+            contrast, porod, porod_const_err=0.5 * porod
+        )
+        self.assertGreater(ds_large_porod, ds_small_porod)
 
 
 class TestGuinierExtrapolation(unittest.TestCase):
@@ -430,8 +476,8 @@ class TestGuinierExtrapolation(unittest.TestCase):
                           power=inv._low_extrapolation_power)
         self.assertAlmostEqual(self.scale,
                                inv._low_extrapolation_function.scale, 6)
-        self.assertAlmostEqual(self.rg,
-                               inv._low_extrapolation_function.radius, 6)
+        self.assertAlmostEqual(self.rg**2,
+                               inv._low_extrapolation_function.Rg_squared, 6)
 
 
 class TestPowerLawExtrapolation(unittest.TestCase):
@@ -573,8 +619,8 @@ class TestDataExtraLow(unittest.TestCase):
                           power=inv._low_extrapolation_power)
         self.assertAlmostEqual(self.scale,
                                inv._low_extrapolation_function.scale, 6)
-        self.assertAlmostEqual(self.rg,
-                               inv._low_extrapolation_function.radius, 6)
+        self.assertAlmostEqual(self.rg**2,
+                               inv._low_extrapolation_function.Rg_squared, 6)
 
         qstar = inv.get_qstar(extrapolation='low')
         test_y = inv._low_extrapolation_function.evaluate_model(x=self.data.x)

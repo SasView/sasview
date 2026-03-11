@@ -1,5 +1,6 @@
 from sas.system import config
 
+from ..BackgroundColor import BG_DEFAULT
 from .PreferencesWidget import PreferencesWidget
 
 
@@ -11,7 +12,8 @@ class PlottingPreferencesWidget(PreferencesWidget):
                               'FITTING_PLOT_LEGEND_MAX_LINE_LENGTH',
                               'DISABLE_RESIDUAL_PLOT',
                               'DISABLE_POLYDISPERSITY_PLOT',
-                              'USE_MATPLOTLIB_TOOLBAR']
+                              'USE_MATPLOTLIB_TOOLBAR',
+                              'STACK_PLOTS']
 
     def _addAllWidgets(self):
         self.legendFullWidth = self.addCheckBox(
@@ -44,6 +46,11 @@ class PlottingPreferencesWidget(PreferencesWidget):
             checked=config.USE_MATPLOTLIB_TOOLBAR)
         self.useMatplotlibToolbar.clicked.connect(
             lambda: self._stageChange('USE_MATPLOTLIB_TOOLBAR', self.useMatplotlibToolbar.isChecked()))
+        self.stackplots = self.addCheckBox(
+            title="Stack plots when using slicers",
+            checked=config.STACK_PLOTS)
+        self.stackplots.clicked.connect(
+            lambda: self._stageChange('STACK_PLOTS', self.stackplots.isChecked()))
 
     def _toggleBlockAllSignaling(self, toggle):
         self.legendFullWidth.blockSignals(toggle)
@@ -52,12 +59,14 @@ class PlottingPreferencesWidget(PreferencesWidget):
         self.disableResidualPlot.blockSignals(toggle)
         self.disablePolydispersityPlot.blockSignals(toggle)
         self.useMatplotlibToolbar.blockSignals(toggle)
+        self.stackplots.blockSignals(toggle)
 
     def _restoreFromConfig(self):
         self.legendFullWidth.setChecked(bool(config.FITTING_PLOT_FULL_WIDTH_LEGENDS))
         self.legendTruncate.setChecked(bool(config.FITTING_PLOT_LEGEND_TRUNCATE))
         self.legendLineLength.setText(str(config.FITTING_PLOT_LEGEND_MAX_LINE_LENGTH))
-        self.legendLineLength.setStyleSheet("background-color: white")
+        self.legendLineLength.setStyleSheet(BG_DEFAULT)
         self.disableResidualPlot.setChecked(config.DISABLE_RESIDUAL_PLOT)
         self.disablePolydispersityPlot.setChecked(config.DISABLE_POLYDISPERSITY_PLOT)
         self.useMatplotlibToolbar.setChecked(config.USE_MATPLOTLIB_TOOLBAR)
+        self.stackplots.setChecked(config.STACK_PLOTS)

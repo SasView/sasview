@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>246</width>
-    <height>214</height>
+    <width>312</width>
+    <height>235</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>0</width>
+    <height>0</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
@@ -16,9 +22,9 @@
   <widget class="QDoubleSpinBox" name="spnLow">
    <property name="geometry">
     <rect>
-     <x>90</x>
+     <x>130</x>
      <y>20</y>
-     <width>91</width>
+     <width>121</width>
      <height>22</height>
     </rect>
    </property>
@@ -35,9 +41,9 @@
   <widget class="QDoubleSpinBox" name="spnHigh">
    <property name="geometry">
     <rect>
-     <x>90</x>
+     <x>130</x>
      <y>60</y>
-     <width>91</width>
+     <width>121</width>
      <height>22</height>
     </rect>
    </property>
@@ -57,9 +63,9 @@
   <widget class="QDoubleSpinBox" name="spnDelta">
    <property name="geometry">
     <rect>
-     <x>90</x>
+     <x>130</x>
      <y>100</y>
-     <width>91</width>
+     <width>121</width>
      <height>22</height>
     </rect>
    </property>
@@ -76,9 +82,9 @@
   <widget class="QLabel" name="lblLow">
    <property name="geometry">
     <rect>
-     <x>-6</x>
+     <x>60</x>
      <y>20</y>
-     <width>71</width>
+     <width>61</width>
      <height>20</height>
     </rect>
    </property>
@@ -92,7 +98,7 @@
   <widget class="QLabel" name="lblHigh">
    <property name="geometry">
     <rect>
-     <x>-6</x>
+     <x>50</x>
      <y>60</y>
      <width>71</width>
      <height>20</height>
@@ -108,9 +114,9 @@
   <widget class="QLabel" name="lblDelta">
    <property name="geometry">
     <rect>
-     <x>-10</x>
+     <x>60</x>
      <y>100</y>
-     <width>71</width>
+     <width>51</width>
      <height>20</height>
     </rect>
    </property>
@@ -124,47 +130,47 @@
   <widget class="QLabel" name="units1">
    <property name="geometry">
     <rect>
-     <x>190</x>
+     <x>250</x>
      <y>20</y>
      <width>15</width>
      <height>22</height>
     </rect>
    </property>
    <property name="text">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Å&lt;/span&gt;&lt;span style=&quot; font-size:8pt; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </widget>
   <widget class="QLabel" name="units2">
    <property name="geometry">
     <rect>
-     <x>190</x>
+     <x>250</x>
      <y>60</y>
      <width>15</width>
      <height>22</height>
     </rect>
    </property>
    <property name="text">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Å&lt;/span&gt;&lt;span style=&quot; font-size:8pt; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </widget>
   <widget class="QLabel" name="units3">
    <property name="geometry">
     <rect>
-     <x>190</x>
+     <x>250</x>
      <y>100</y>
      <width>15</width>
      <height>22</height>
     </rect>
    </property>
    <property name="text">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Å&lt;/span&gt;&lt;span style=&quot; font-size:8pt; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </widget>
   <widget class="QPushButton" name="cmdOK">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>160</y>
+     <x>60</x>
+     <y>140</y>
      <width>93</width>
      <height>28</height>
     </rect>
@@ -176,8 +182,8 @@
   <widget class="QPushButton" name="cmdCancel">
    <property name="geometry">
     <rect>
-     <x>130</x>
-     <y>160</y>
+     <x>180</x>
+     <y>140</y>
      <width>93</width>
      <height>28</height>
     </rect>
