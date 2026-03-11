@@ -9,32 +9,22 @@ copyright 2010, University of Tennessee
 """
 
 import math
-import os.path
 import random
 
 import numpy as np
 import pytest
 
 from sasdata.dataloader.data_info import Data1D
-from sasdata.dataloader.loader import Loader
 
 from sas.sascalc.invariant import invariant
-
-
-def find(filename):
-    return os.path.join(os.path.dirname(__file__), "data", filename)
 
 
 class TestLinearFit:
     """Test Line fitting of the invariant calculator."""
 
-    def setup_method(self):
-        """Generate a linear distribution with uncertainties for testing the fit."""
-        x = np.asarray([1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0])
-        y = np.asarray([1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0])
-        dy = y / 10.0
-
-        self.data = Data1D(x=x, y=y, dy=dy)
+    @pytest.fixture(autouse=True)
+    def setup(self, linear_data):
+        self.data = linear_data
 
     def test_fit_linear_data(self):
         """Simple linear fit."""
@@ -96,10 +86,9 @@ class TestInvariantCalculator:
     Test main functionality of the Invariant calculator
     """
 
-    def setup_method(self):
-        data = Loader().load(find("100nmSpheresNodQ.txt"))
-        self.data = data[0]
-        self.data.dxl = None
+    @pytest.fixture(autouse=True)
+    def setup(self, real_data):
+        self.data = real_data
 
     def test_initial_data_processing(self):
         """
@@ -437,17 +426,11 @@ class TestGuinierExtrapolation:
     DELETE this test?
     """
 
-    def setup_method(self):
-        """
-        Generate a Guinier distribution. After extrapolating, we will
-        verify that we obtain the scale and rg parameters
-        """
+    @pytest.fixture(autouse=True)
+    def setup(self, guinier_data):
         self.scale = 1.5
         self.rg = 30.0
-        x = np.arange(0.0001, 0.1, 0.0001)
-        y = np.asarray([self.scale * math.exp(-((q * self.rg) ** 2) / 3.0) for q in x])
-        dy = y * 0.1
-        self.data = Data1D(x=x, y=y, dy=dy)
+        self.data = guinier_data
 
     def test_low_q(self):
         """
@@ -479,17 +462,11 @@ class TestPowerLawExtrapolation:
            when we stop allowing low q power law extrapolation.
     """
 
-    def setup_method(self):
-        """
-        Generate a power law distribution. After extrapolating, we will
-        verify that we obtain the scale and m parameters
-        """
+    @pytest.fixture(autouse=True)
+    def setup(self, power_law_data):
         self.scale = 1.5
         self.m = 3.0
-        x = np.arange(0.0001, 0.1, 0.0001)
-        y = np.asarray([self.scale * math.pow(q, -1.0 * self.m) for q in x])
-        dy = y * 0.1
-        self.data = Data1D(x=x, y=y, dy=dy)
+        self.data = power_law_data
 
     def test_low_q(self):
         """
@@ -569,17 +546,11 @@ class TestDataExtraLow:
     KEEP THIS ONE?
     """
 
-    def setup_method(self):
-        """
-        Generate a Guinier distribution. After extrapolating, we will
-        verify that we obtain the scale and rg parameters
-        """
+    @pytest.fixture(autouse=True)
+    def setup(self, guinier_data):
         self.scale = 1.5
         self.rg = 30.0
-        x = np.arange(0.0001, 0.1, 0.0001)
-        y = np.asarray([self.scale * math.exp(-((q * self.rg) ** 2) / 3.0) for q in x])
-        dy = y * 0.1
-        self.data = Data1D(x=x, y=y, dy=dy)
+        self.data = guinier_data
 
     def test_low_q(self):
         """
@@ -621,14 +592,12 @@ class TestDataExtraLowSlitGuinier:
 
     """
 
-    def setup_method(self):
+    @pytest.fixture(autouse=True)
+    def setup(self, guinier_data):
         self.scale = 1.5
         self.rg = 30.0
-        x = np.arange(0.0001, 0.1, 0.0001)
-        y = np.asarray([self.scale * math.exp(-((q * self.rg) ** 2) / 3.0) for q in x])
-        dy = y * 0.1
-        self.data = Data1D(x=x, y=y, dy=dy)
-        self.npts = len(x) - 10
+        self.data = guinier_data
+        self.npts = len(guinier_data.x) - 10
 
     def test_low_q(self):
         """
@@ -706,17 +675,9 @@ class TestDataExtraHighSlitPowerLaw:
            test? Need to double check then rewrite doc strings accordingly.
     """
 
-    def setup_method(self):
-        """
-        Generate a power law distribution. After extrapolating, we will
-        verify that we obtain the scale and m parameters
-        """
-        self.scale = 1.5
-        self.m = 3.0
-        x = np.arange(0.0001, 0.1, 0.0001)
-        y = np.asarray([self.scale * math.pow(q, -1.0 * self.m) for q in x])
-        dy = y * 0.1
-        self.data = Data1D(x=x, y=y, dy=dy)
+    @pytest.fixture(autouse=True)
+    def setup(self, power_law_data):
+        self.data = power_law_data
         self.npts = 20
 
     def test_high_q(self):
