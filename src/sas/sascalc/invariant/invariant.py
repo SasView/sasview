@@ -455,7 +455,8 @@ class InvariantCalculator:
         :return: new data = self._scale x data - self._background
         """
         if not issubclass(data.__class__, LoaderData1D):
-            logger.warning("Data should be of type DataLoader.Data1D, but got %s. Attempting to convert.", type(data))
+            msg = "Data should be of type DataLoader.Data1D, but got %s." % type(data)
+            raise ValueError(msg)
 
         new_data = (self._scale * data) - self._background
 

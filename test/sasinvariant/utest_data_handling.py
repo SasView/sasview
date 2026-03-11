@@ -10,9 +10,10 @@ copyright 2010, University of Tennessee
 
 import math
 import os.path
-import unittest
+import random
 
 import numpy as np
+import pytest
 
 from sasdata.dataloader.data_info import Data1D
 from sasdata.dataloader.loader import Loader
@@ -24,12 +25,11 @@ def find(filename):
     return os.path.join(os.path.dirname(__file__), "data", filename)
 
 
-class TestLinearFit(unittest.TestCase):
-    """
-    Test Line fit
-    """
+class TestLinearFit:
+    """Test Line fitting of the invariant calculator."""
 
-    def setUp(self):
+    def setup_method(self):
+        """Generate a linear distribution with uncertainties for testing the fit."""
         x = np.asarray([1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0])
         y = np.asarray([1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0])
         dy = y / 10.0
@@ -37,9 +37,7 @@ class TestLinearFit(unittest.TestCase):
         self.data = Data1D(x=x, y=y, dy=dy)
 
     def test_fit_linear_data(self):
-        """
-        Simple linear fit
-        """
+        """Simple linear fit."""
 
         # Create invariant object. Background and scale left as defaults.
         fit = invariant.Extrapolator(data=self.data)
@@ -47,16 +45,13 @@ class TestLinearFit(unittest.TestCase):
         p, dp = fit.fit()
 
         # Test results
-        self.assertAlmostEqual(p[0], 1.0, 5)
-        self.assertAlmostEqual(p[1], 0.0, 5)
+        assert p[0] == pytest.approx(1.0, abs=1e-5)
+        assert p[1] == pytest.approx(0.0, abs=1e-5)
 
     def test_fit_linear_data_with_noise(self):
         """
         Simple linear fit with noise
         """
-        import math
-        import random
-
         for i in range(len(self.data.y)):
             self.data.y[i] = self.data.y[i] + 0.1 * (random.random() - 0.5)
 
@@ -65,8 +60,8 @@ class TestLinearFit(unittest.TestCase):
         p, dp = fit.fit()
 
         # Test results
-        self.assertTrue(math.fabs(p[0] - 1.0) < 0.05)
-        self.assertTrue(math.fabs(p[1]) < 0.1)
+        assert math.fabs(p[0] - 1.0) < 0.05
+        assert math.fabs(p[1]) < 0.1
 
     def test_fit_with_fixed_parameter(self):
         """
@@ -77,16 +72,13 @@ class TestLinearFit(unittest.TestCase):
         p, dp = fit.fit(power=-1.0)
 
         # Test results
-        self.assertAlmostEqual(p[0], 1.0, 5)
-        self.assertAlmostEqual(p[1], 0.0, 5)
+        assert p[0] == pytest.approx(1.0, abs=1e-5)
+        assert p[1] == pytest.approx(0.0, abs=1e-5)
 
     def test_fit_linear_data_with_noise_and_fixed_par(self):
         """
         Simple linear fit with noise
         """
-        import math
-        import random
-
         for i in range(len(self.data.y)):
             self.data.y[i] = self.data.y[i] + 0.1 * (random.random() - 0.5)
 
@@ -95,16 +87,16 @@ class TestLinearFit(unittest.TestCase):
         p, dp = fit.fit(power=-1.0)
 
         # Test results
-        self.assertTrue(math.fabs(p[0] - 1.0) < 0.05)
-        self.assertTrue(math.fabs(p[1]) < 0.1)
+        assert math.fabs(p[0] - 1.0) < 0.05
+        assert math.fabs(p[1]) < 0.1
 
 
-class TestInvariantCalculator(unittest.TestCase):
+class TestInvariantCalculator:
     """
     Test main functionality of the Invariant calculator
     """
 
-    def setUp(self):
+    def setup_method(self):
         data = Loader().load(find("100nmSpheresNodQ.txt"))
         self.data = data[0]
         self.data.dxl = None
@@ -115,38 +107,38 @@ class TestInvariantCalculator(unittest.TestCase):
         when creating an InvariantCalculator object
         """
         length = len(self.data.x)
-        self.assertEqual(length, len(self.data.y))
+        assert length == len(self.data.y)
         inv = invariant.InvariantCalculator(self.data)
 
-        self.assertEqual(length, len(inv._data.x))
-        self.assertEqual(inv._data.x[0], self.data.x[0])
+        assert length == len(inv._data.x)
+        assert inv._data.x[0] == self.data.x[0]
 
         # Now the same thing with a background value
         bck = 0.1
         inv = invariant.InvariantCalculator(self.data, background=bck)
-        self.assertEqual(inv._background, bck)
+        assert inv._background == bck
 
-        self.assertEqual(length, len(inv._data.x))
-        self.assertEqual(inv._data.y[0] + bck, self.data.y[0])
+        assert length == len(inv._data.x)
+        assert inv._data.y[0] + bck == self.data.y[0]
 
         # Now the same thing with a scale value
         scale = 0.1
         inv = invariant.InvariantCalculator(self.data, scale=scale)
-        self.assertEqual(inv._scale, scale)
+        assert inv._scale == scale
 
-        self.assertEqual(length, len(inv._data.x))
-        self.assertAlmostEqual(inv._data.y[0] / scale, self.data.y[0], 7)
+        assert length == len(inv._data.x)
+        assert inv._data.y[0] / scale == pytest.approx(self.data.y[0], abs=1e-7)
 
     def test_incompatible_data_class(self):
         """
         Check that only classes that inherit from Data1D are allowed
         as data.
         """
-
         class Incompatible:
             pass
 
-        self.assertRaises(ValueError, invariant.InvariantCalculator, Incompatible())
+        with pytest.raises(ValueError):
+            invariant.InvariantCalculator(Incompatible())
 
     def test_error_treatment(self):
         x = np.asarray(np.asarray([0, 1, 2, 3]))
@@ -159,10 +151,10 @@ class TestInvariantCalculator(unittest.TestCase):
         for dy in dy_list:
             data = Data1D(x=x, y=y, dy=dy)
             inv = invariant.InvariantCalculator(data)
-            self.assertEqual(len(inv._data.x), len(inv._data.dy))
-            self.assertEqual(len(inv._data.dy), 4)
+            assert len(inv._data.x) == len(inv._data.dy)
+            assert len(inv._data.dy) == 4
             for i in range(4):
-                self.assertEqual(inv._data.dy[i], 1)
+                assert inv._data.dy[i] == 1
 
     def test_qstar_low_q_guinier(self):
         """
@@ -173,7 +165,7 @@ class TestInvariantCalculator(unittest.TestCase):
         # Basic sanity check
         _qstar = inv.get_qstar()
         qstar, dqstar = inv.get_qstar_with_error()
-        self.assertEqual(qstar, _qstar)
+        assert qstar == _qstar
 
         # Low-Q Extrapolation
         # Check that the returned invariant is what we expect given
@@ -182,8 +174,8 @@ class TestInvariantCalculator(unittest.TestCase):
         qs_extr, dqs_extr = inv.get_qstar_with_error("low")
         delta_qs_extr, delta_dqs_extr = inv.get_qstar_low()
 
-        self.assertEqual(qs_extr, _qstar + delta_qs_extr)
-        self.assertEqual(dqs_extr, math.sqrt(dqstar * dqstar + delta_dqs_extr * delta_dqs_extr))
+        assert qs_extr == _qstar + delta_qs_extr
+        assert dqs_extr == math.sqrt(dqstar * dqstar + delta_dqs_extr * delta_dqs_extr)
 
         # We don't expect the extrapolated invariant to be very far from the
         # result without extrapolation. Let's test for a result within 10%.
@@ -264,7 +256,7 @@ class TestInvariantCalculator(unittest.TestCase):
         # Basic sanity check
         _qstar = inv.get_qstar()
         qstar, dqstar = inv.get_qstar_with_error()
-        self.assertEqual(qstar, _qstar)
+        assert qstar == _qstar
 
         # High-Q Extrapolation
         # Check that the returned invariant is what we expect given
@@ -277,10 +269,10 @@ class TestInvariantCalculator(unittest.TestCase):
         # and finite number of points we need quite a lot of points to ensure
         # that the fit averages close to 4. SasView estimates 3.92 at the
         # moment
-        self.assertTrue(math.fabs(inv._high_extrapolation_function.power - 4) < 0.1)
+        assert math.fabs(inv._high_extrapolation_function.power - 4) < 0.1
 
-        self.assertEqual(qs_extr, _qstar + delta_qs_extr)
-        self.assertAlmostEqual(dqs_extr, math.sqrt(dqstar * dqstar + delta_dqs_extr * delta_dqs_extr), 10)
+        assert qs_extr == _qstar + delta_qs_extr
+        assert dqs_extr == pytest.approx(math.sqrt(dqstar * dqstar + delta_dqs_extr * delta_dqs_extr), abs=1e-10)
 
         # We don't expect the extrapolated invariant to be very far from the
         # result without extrapolation. Let's test for a result within 10%.
@@ -305,7 +297,7 @@ class TestInvariantCalculator(unittest.TestCase):
         # Basic sanity check
         _qstar = inv.get_qstar()
         qstar, dqstar = inv.get_qstar_with_error()
-        self.assertEqual(qstar, _qstar)
+        assert qstar == _qstar
 
         # High-Q Extrapolation
         # Check that the returned invariant is what we expect given
@@ -316,9 +308,9 @@ class TestInvariantCalculator(unittest.TestCase):
         delta_qs_low, delta_dqs_low = inv.get_qstar_low()
         delta_qs_hi, delta_dqs_hi = inv.get_qstar_high()
 
-        self.assertAlmostEqual(qs_extr, _qstar + delta_qs_low + delta_qs_hi, 8)
-        self.assertAlmostEqual(
-            dqs_extr, math.sqrt(dqstar * dqstar + delta_dqs_low * delta_dqs_low + delta_dqs_hi * delta_dqs_hi), 8
+        assert qs_extr == pytest.approx(_qstar + delta_qs_low + delta_qs_hi, abs=1e-8)
+        assert dqs_extr == pytest.approx(
+            math.sqrt(dqstar * dqstar + delta_dqs_low * delta_dqs_low + delta_dqs_hi * delta_dqs_hi), abs=1e-8
         )
 
         # We don't expect the extrapolated invariant to be very far from the
@@ -334,9 +326,7 @@ class TestInvariantCalculator(unittest.TestCase):
         #        self.assertTrue(math.fabs(qs_extr-qstar)<dqs_extr)
 
         def _check_values(to_check, reference, tolerance=0.05):
-            self.assertTrue(
-                math.fabs(to_check - reference) / reference < tolerance, msg="Tested value = " + str(to_check)
-            )
+            assert math.fabs(to_check - reference) / reference < tolerance, "Tested value = " + str(to_check)
 
         # The following values are taken from the data file loaded at the top
         # of this test class.
@@ -392,9 +382,12 @@ class TestInvariantCalculator(unittest.TestCase):
         (high/low) is recognized.
         """
         inv = invariant.InvariantCalculator(self.data)
-        self.assertRaises(ValueError, inv.set_extrapolation, "low", npts=4, function="not_a_name")
-        self.assertRaises(ValueError, inv.set_extrapolation, "not_a_range", npts=4, function="guinier")
-        self.assertRaises(ValueError, inv.set_extrapolation, "high", npts=4, function="guinier")
+        with pytest.raises(ValueError):
+            inv.set_extrapolation("low", npts=4, function="not_a_name")
+        with pytest.raises(ValueError):
+            inv.set_extrapolation("not_a_range", npts=4, function="guinier")
+        with pytest.raises(ValueError):
+            inv.set_extrapolation("high", npts=4, function="guinier")
 
     def test_volume_fraction_uncertainty_increases_with_contrast_err(self):
         """
@@ -404,7 +397,7 @@ class TestInvariantCalculator(unittest.TestCase):
         contrast = 2.2e-6
         _, dv_small = inv.get_volume_fraction_with_error(contrast, contrast_err=0.1 * contrast)
         _, dv_large = inv.get_volume_fraction_with_error(contrast, contrast_err=0.5 * contrast)
-        self.assertGreater(dv_large, dv_small)
+        assert dv_large > dv_small
 
     def test_contrast_uncertainty_increases_with_volume_err(self):
         """
@@ -414,7 +407,7 @@ class TestInvariantCalculator(unittest.TestCase):
         volume = 0.01
         _, dc_small = inv.get_contrast_with_error(volume, volume_err=0.001)
         _, dc_large = inv.get_contrast_with_error(volume, volume_err=0.01)
-        self.assertGreater(dc_large, dc_small)
+        assert dc_large > dc_small
 
     def test_surface_uncertainty_increases_with_input_err(self):
         """
@@ -428,14 +421,14 @@ class TestInvariantCalculator(unittest.TestCase):
 
         _, ds_small_contrast = inv.get_surface_with_error(contrast, porod, contrast_err=0.1 * contrast)
         _, ds_large_contrast = inv.get_surface_with_error(contrast, porod, contrast_err=0.5 * contrast)
-        self.assertGreater(ds_large_contrast, ds_small_contrast)
+        assert ds_large_contrast > ds_small_contrast
 
         _, ds_small_porod = inv.get_surface_with_error(contrast, porod, porod_const_err=0.1 * porod)
         _, ds_large_porod = inv.get_surface_with_error(contrast, porod, porod_const_err=0.5 * porod)
-        self.assertGreater(ds_large_porod, ds_small_porod)
+        assert ds_large_porod > ds_small_porod
 
 
-class TestGuinierExtrapolation(unittest.TestCase):
+class TestGuinierExtrapolation:
     """
     Generate a Guinier distribution and verifies that the extrapolation
     produces the correct ditribution.
@@ -444,7 +437,7 @@ class TestGuinierExtrapolation(unittest.TestCase):
     DELETE this test?
     """
 
-    def setUp(self):
+    def setup_method(self):
         """
         Generate a Guinier distribution. After extrapolating, we will
         verify that we obtain the scale and rg parameters
@@ -465,8 +458,8 @@ class TestGuinierExtrapolation(unittest.TestCase):
         # Set the extrapolation parameters for the low-Q range
         inv.set_extrapolation(range="low", npts=20, function="guinier")
 
-        self.assertEqual(inv._low_extrapolation_npts, 20)
-        self.assertEqual(inv._low_extrapolation_function.__class__, invariant.Guinier)
+        assert inv._low_extrapolation_npts == 20
+        assert inv._low_extrapolation_function.__class__ == invariant.Guinier
 
         # Data boundaries for fiiting
         qmin = inv._data.x[0]
@@ -474,11 +467,11 @@ class TestGuinierExtrapolation(unittest.TestCase):
 
         # Extrapolate the low-Q data
         inv._fit(model=inv._low_extrapolation_function, qmin=qmin, qmax=qmax, power=inv._low_extrapolation_power)
-        self.assertAlmostEqual(self.scale, inv._low_extrapolation_function.scale, 6)
-        self.assertAlmostEqual(self.rg**2, inv._low_extrapolation_function.Rg_squared, 6)
+        assert self.scale == pytest.approx(inv._low_extrapolation_function.scale, abs=1e-6)
+        assert self.rg**2 == pytest.approx(inv._low_extrapolation_function.Rg_squared, abs=1e-6)
 
 
-class TestPowerLawExtrapolation(unittest.TestCase):
+class TestPowerLawExtrapolation:
     """
     Generate a power law distribution and verify that the extrapolation
     produce the correct ditribution.
@@ -486,7 +479,7 @@ class TestPowerLawExtrapolation(unittest.TestCase):
            when we stop allowing low q power law extrapolation.
     """
 
-    def setUp(self):
+    def setup_method(self):
         """
         Generate a power law distribution. After extrapolating, we will
         verify that we obtain the scale and m parameters
@@ -510,8 +503,8 @@ class TestPowerLawExtrapolation(unittest.TestCase):
         # Set the extrapolation parameters for the low-Q range
         inv.set_extrapolation(range="low", npts=20, function="power_law")
 
-        self.assertEqual(inv._low_extrapolation_npts, 20)
-        self.assertEqual(inv._low_extrapolation_function.__class__, invariant.PowerLaw)
+        assert inv._low_extrapolation_npts == 20
+        assert inv._low_extrapolation_function.__class__ == invariant.PowerLaw
 
         # Data boundaries for fitting
         qmin = inv._data.x[0]
@@ -520,17 +513,19 @@ class TestPowerLawExtrapolation(unittest.TestCase):
         # Extrapolate the low-Q data
         inv._fit(model=inv._low_extrapolation_function, qmin=qmin, qmax=qmax, power=inv._low_extrapolation_power)
 
-        self.assertAlmostEqual(self.scale, inv._low_extrapolation_function.scale, 6)
-        self.assertAlmostEqual(self.m, inv._low_extrapolation_function.power, 6)
+        assert self.scale == pytest.approx(inv._low_extrapolation_function.scale, abs=1e-6)
+        assert self.m == pytest.approx(inv._low_extrapolation_function.power, abs=1e-6)
 
 
-class TestLinearization(unittest.TestCase):
+class TestLinearization:
     def test_guinier_incompatible_length(self):
         g = invariant.Guinier()
         data_in = Data1D(x=[1], y=[1, 2], dy=None)
-        self.assertRaises(AssertionError, g.linearize_data, data_in)
+        with pytest.raises(ValueError):
+            g.linearize_data(data_in)
         data_in = Data1D(x=[1, 1], y=[1, 2], dy=[1])
-        self.assertRaises(AssertionError, g.linearize_data, data_in)
+        with pytest.raises(ValueError):
+            g.linearize_data(data_in)
 
     def test_linearization(self):
         """
@@ -543,9 +538,9 @@ class TestLinearization(unittest.TestCase):
         data_in = Data1D(x=x, y=y)
         data_out = g.linearize_data(data_in)
         x_out, y_out, dy_out = data_out.x, data_out.y, data_out.dy
-        self.assertEqual(len(x_out), 3)
-        self.assertEqual(len(y_out), 3)
-        self.assertEqual(len(dy_out), 3)
+        assert len(x_out) == 3
+        assert len(y_out) == 3
+        assert len(dy_out) == 3
 
     def test_allowed_bins(self):
         x = np.asarray(np.asarray([0, 1, 2, 3]))
@@ -553,16 +548,16 @@ class TestLinearization(unittest.TestCase):
         dy = np.asarray(np.asarray([1, 1, 1, 1]))
         g = invariant.Guinier()
         data = Data1D(x=x, y=y, dy=dy)
-        self.assertEqual(g.get_allowed_bins(data), [False, True, True, True])
+        assert g.get_allowed_bins(data) == [False, True, True, True]
 
         data = Data1D(x=y, y=x, dy=dy)
-        self.assertEqual(g.get_allowed_bins(data), [False, True, True, True])
+        assert g.get_allowed_bins(data) == [False, True, True, True]
 
         data = Data1D(x=dy, y=y, dy=x)
-        self.assertEqual(g.get_allowed_bins(data), [False, True, True, True])
+        assert g.get_allowed_bins(data) == [False, True, True, True]
 
 
-class TestDataExtraLow(unittest.TestCase):
+class TestDataExtraLow:
     """
     Generate a Guinier distribution and verify that the extrapolation
     produce the correct ditribution. Test if the data generated by the
@@ -574,7 +569,7 @@ class TestDataExtraLow(unittest.TestCase):
     KEEP THIS ONE?
     """
 
-    def setUp(self):
+    def setup_method(self):
         """
         Generate a Guinier distribution. After extrapolating, we will
         verify that we obtain the scale and rg parameters
@@ -595,8 +590,8 @@ class TestDataExtraLow(unittest.TestCase):
         # Set the extrapolation parameters for the low-Q range
         inv.set_extrapolation(range="low", npts=10, function="guinier")
 
-        self.assertEqual(inv._low_extrapolation_npts, 10)
-        self.assertEqual(inv._low_extrapolation_function.__class__, invariant.Guinier)
+        assert inv._low_extrapolation_npts == 10
+        assert inv._low_extrapolation_function.__class__ == invariant.Guinier
 
         # Data boundaries for fiiting
         qmin = inv._data.x[0]
@@ -604,17 +599,17 @@ class TestDataExtraLow(unittest.TestCase):
 
         # Extrapolate the low-Q data
         inv._fit(model=inv._low_extrapolation_function, qmin=qmin, qmax=qmax, power=inv._low_extrapolation_power)
-        self.assertAlmostEqual(self.scale, inv._low_extrapolation_function.scale, 6)
-        self.assertAlmostEqual(self.rg**2, inv._low_extrapolation_function.Rg_squared, 6)
+        assert self.scale == pytest.approx(inv._low_extrapolation_function.scale, abs=1e-6)
+        assert self.rg**2 == pytest.approx(inv._low_extrapolation_function.Rg_squared, abs=1e-6)
 
         qstar = inv.get_qstar(extrapolation="low")
         test_y = inv._low_extrapolation_function.evaluate_model(x=self.data.x)
         for i in range(len(self.data.x)):
             value = math.fabs(test_y[i] - self.data.y[i]) / self.data.y[i]
-            self.assertTrue(value < 0.001)
+            assert value < 0.001
 
 
-class TestDataExtraLowSlitGuinier(unittest.TestCase):
+class TestDataExtraLowSlitGuinier:
     """
     for a smear data, test that the fitting goes through
     real data for at least the 2 first points
@@ -626,11 +621,7 @@ class TestDataExtraLowSlitGuinier(unittest.TestCase):
 
     """
 
-    def setUp(self):
-        """
-        Generate a Guinier distribution. After extrapolating, we will
-        verify that we obtain the scale and rg parameters
-        """
+    def setup_method(self):
         self.scale = 1.5
         self.rg = 30.0
         x = np.arange(0.0001, 0.1, 0.0001)
@@ -652,8 +643,8 @@ class TestDataExtraLowSlitGuinier(unittest.TestCase):
         # Set the extrapolation parameters for the low-Q range
         inv.set_extrapolation(range="low", npts=self.npts, function="guinier")
 
-        self.assertEqual(inv._low_extrapolation_npts, self.npts)
-        self.assertEqual(inv._low_extrapolation_function.__class__, invariant.Guinier)
+        assert inv._low_extrapolation_npts == self.npts
+        assert inv._low_extrapolation_function.__class__ == invariant.Guinier
 
         # Data boundaries for fiiting
         qmin = inv._data.x[0]
@@ -665,11 +656,11 @@ class TestDataExtraLowSlitGuinier(unittest.TestCase):
         qstar = inv.get_qstar(extrapolation="low")
 
         test_y = inv._low_extrapolation_function.evaluate_model(x=self.data.x[: inv._low_extrapolation_npts])
-        self.assertTrue(len(test_y) == len(self.data.y[: inv._low_extrapolation_npts]))
+        assert len(test_y) == len(self.data.y[: inv._low_extrapolation_npts])
 
         for i in range(inv._low_extrapolation_npts):
             value = math.fabs(test_y[i] - self.data.y[i]) / self.data.y[i]
-            self.assertTrue(value < 0.001)
+            assert value < 0.001
 
     def test_low_data(self):
         """
@@ -684,8 +675,8 @@ class TestDataExtraLowSlitGuinier(unittest.TestCase):
         # Set the extrapolation parameters for the low-Q range
         inv.set_extrapolation(range="low", npts=self.npts, function="guinier")
 
-        self.assertEqual(inv._low_extrapolation_npts, self.npts)
-        self.assertEqual(inv._low_extrapolation_function.__class__, invariant.Guinier)
+        assert inv._low_extrapolation_npts == self.npts
+        assert inv._low_extrapolation_function.__class__ == invariant.Guinier
 
         # Data boundaries for fiiting
         qmin = inv._data.x[0]
@@ -700,13 +691,13 @@ class TestDataExtraLowSlitGuinier(unittest.TestCase):
         # called and the guinier to have the radius and the scale fitted
         data_in_range = inv.get_extra_data_low(q_start=self.data.x[0], npts=inv._low_extrapolation_npts)
         test_y = data_in_range.y
-        self.assertTrue(len(test_y) == len(self.data.y[: inv._low_extrapolation_npts]))
+        assert len(test_y) == len(self.data.y[: inv._low_extrapolation_npts])
         for i in range(inv._low_extrapolation_npts):
             value = math.fabs(test_y[i] - self.data.y[i]) / self.data.y[i]
-            self.assertTrue(value < 0.001)
+            assert value < 0.001
 
 
-class TestDataExtraHighSlitPowerLaw(unittest.TestCase):
+class TestDataExtraHighSlitPowerLaw:
     """
     for a smear data, test that the fitting goes through
     real data for atleast the 2 first points
@@ -715,7 +706,7 @@ class TestDataExtraHighSlitPowerLaw(unittest.TestCase):
            test? Need to double check then rewrite doc strings accordingly.
     """
 
-    def setUp(self):
+    def setup_method(self):
         """
         Generate a power law distribution. After extrapolating, we will
         verify that we obtain the scale and m parameters
@@ -741,8 +732,8 @@ class TestDataExtraHighSlitPowerLaw(unittest.TestCase):
         # Set the extrapolation parameters for the low-Q range
         inv.set_extrapolation(range="high", npts=self.npts, function="power_law")
 
-        self.assertEqual(inv._high_extrapolation_npts, self.npts)
-        self.assertEqual(inv._high_extrapolation_function.__class__, invariant.PowerLaw)
+        assert inv._high_extrapolation_npts == self.npts
+        assert inv._high_extrapolation_function.__class__ == invariant.PowerLaw
 
         # Data boundaries for fiiting
         xlen = len(self.data.x)
@@ -756,11 +747,11 @@ class TestDataExtraHighSlitPowerLaw(unittest.TestCase):
         qstar = inv.get_qstar(extrapolation="high")
 
         test_y = inv._high_extrapolation_function.evaluate_model(x=self.data.x[start:])
-        self.assertTrue(len(test_y) == len(self.data.y[start:]))
+        assert len(test_y) == len(self.data.y[start:])
 
         for i in range(len(self.data.x[start:])):
             value = math.fabs(test_y[i] - self.data.y[start + i]) / self.data.y[start + i]
-            self.assertTrue(value < 0.001)
+            assert value < 0.001
 
     def test_high_data(self):
         """
@@ -775,8 +766,8 @@ class TestDataExtraHighSlitPowerLaw(unittest.TestCase):
         # Set the extrapolation parameters for the low-Q range
         inv.set_extrapolation(range="high", npts=self.npts, function="power_law")
 
-        self.assertEqual(inv._high_extrapolation_npts, self.npts)
-        self.assertEqual(inv._high_extrapolation_function.__class__, invariant.PowerLaw)
+        assert inv._high_extrapolation_npts == self.npts
+        assert inv._high_extrapolation_function.__class__ == invariant.PowerLaw
 
         # Data boundaries for fiiting
         xlen = len(self.data.x)
@@ -791,9 +782,9 @@ class TestDataExtraHighSlitPowerLaw(unittest.TestCase):
 
         data_in_range = inv.get_extra_data_high(q_end=max(self.data.x), npts=inv._high_extrapolation_npts)
         test_y = data_in_range.y
-        self.assertTrue(len(test_y) == len(self.data.y[start:]))
+        assert len(test_y) == len(self.data.y[start:])
         temp = self.data.y[start:]
 
         for i in range(len(self.data.x[start:])):
             value = math.fabs(test_y[i] - temp[i]) / temp[i]
-            self.assertTrue(value < 0.001)
+            assert value < 0.001
