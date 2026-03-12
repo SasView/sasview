@@ -1,5 +1,3 @@
-
-
 import os.path
 
 import numpy as np
@@ -48,4 +46,3 @@ def power_law_data():
     y = scale * np.power(x, -m)
     dy = y * 0.1
     return Data1D(x=x, y=y, dy=dy)
-
