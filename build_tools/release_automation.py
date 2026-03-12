@@ -12,6 +12,7 @@ import requests
 
 from sas.system import legal
 
+# This is a test comment for a test of GitHub rejection system. Feel free to remove me.
 USAGE = '''This script should be run from one directory above the base sasview directory. This script also requires both
  sasmodels and sasdata repositories to be in the same directory as the sasview repository.
 
