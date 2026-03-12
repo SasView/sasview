@@ -145,8 +145,8 @@ class GuiManager:
         self.logDockWidget.setWidget(self.listWidget)
         self._workspace.addDockWidget(Qt.BottomDockWidgetArea, self.logDockWidget)
 
-        # Preferences Panel must exist before perspectives are loaded
-        self.preferences = PreferencesPanel(self._parent)
+        # Preferences Panel initialized in loadAllPerspectives()
+        self.preferences = None
 
         # Load all perspectives - Preferences panel must exist
         self.loadAllPerspectives()
@@ -200,6 +200,7 @@ class GuiManager:
         """ Load all the perspectives"""
         # Close any existing perspectives to prevent multiple open instances
         self.closeAllPerspectives()
+        self.preferences = PreferencesPanel(self._parent)
         # Load all perspectives
         loaded_dict = {} # dictionary that will ultimately keep track of all perspective instances
         for name, perspective in Perspectives.PERSPECTIVES.items():
@@ -231,6 +232,7 @@ class GuiManager:
                     perspective.close()
                 except Exception as e:
                     logger.warning(f"Unable to close {name} perspective\n{e}")
+        self.preferences = None
         self.loadedPerspectives = {}
         self._current_perspective = None
 
