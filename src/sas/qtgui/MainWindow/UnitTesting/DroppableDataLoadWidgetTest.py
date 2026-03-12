@@ -5,7 +5,7 @@ from PySide6.QtWidgets import QApplication
 from sas.qtgui.MainWindow.DroppableDataLoadWidget import DroppableDataLoadWidget
 from sas.qtgui.MainWindow.UnitTesting.DataExplorerTest import MyPerspective
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
-from sas.qtgui.Utilities.GuiUtils import Communicate
+from sas.qtgui.Utilities.GuiUtils import communicator
 
 
 class DroppableDataLoadWidgetTest:
@@ -16,7 +16,7 @@ class DroppableDataLoadWidgetTest:
         '''Create/Destroy the DroppableDataLoadWidget'''
         class dummy_manager:
             def communicator(self):
-                return Communicate()
+                return communicator
             def perspective(self):
                 return MyPerspective()
 

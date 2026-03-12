@@ -145,12 +145,12 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
             return
         # everything converted, notify the user
         logger.info("File successfully converted.")
-        self.parent.communicate.statusBarUpdateSignal.emit("File converted successfully.")
+        GuiUtils.communicator.statusBarUpdateSignal.emit("File converted successfully.")
 
         # Optionally, load the freshly converted file into Data Explorer
         if self.chkLoadFile.isChecked():
             # awful climbing up the hierarchy... don't do that. please.
-            self.parent.filesWidget.loadFromURL([self.ofile])
+            GuiUtils.communicator.fileReadSignal.emit([self.ofile])
 
     def onHelp(self):
         """

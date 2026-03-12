@@ -503,10 +503,6 @@ class GuiManager:
             msg = "No perspective is currently active."
             logger.info(msg)
 
-    def communicator(self):
-        """ Accessor for the communicator """
-        return self.communicate
-
     def perspective(self):
         """ Accessor for the perspective """
         return self._current_perspective
@@ -587,7 +583,7 @@ class GuiManager:
 
             # save the paths etc.
             self.saveCustomConfig()
-            self.communicate.closeSignal.emit()
+            self.communicator.closeSignal.emit()
             reactor.callFromThread(reactor.stop)
             return True
 
@@ -635,17 +631,17 @@ class GuiManager:
                     webbrowser.open(version_info["download_url"])
                 else:
                     webbrowser.open(web.download_url)
-                self.communicate.statusBarUpdateSignal.emit(msg)
+                self.communicator.statusBarUpdateSignal.emit(msg)
             else:
                 msg = "You have the latest version"
-                self.communicate.statusBarUpdateSignal.emit(msg)
+                self.communicator.statusBarUpdateSignal.emit(msg)
         except:
             msg = "guiframe: could not get latest application"
             msg += " version number\n  %s" % sys.exc_info()[1]
             logger.error(msg)
             msg = "Could not connect to the application server."
             msg += " Please try again later."
-            self.communicate.statusBarUpdateSignal.emit(msg)
+            self.communicator.statusBarUpdateSignal.emit(msg)
 
     def actionWelcome(self):
         """ Show the Welcome panel """
@@ -669,18 +665,18 @@ class GuiManager:
         """
         Method defining all signal connections for the gui manager
         """
-        self.communicate = GuiUtils.communicate
-        self.communicate.fileDataReceivedSignal.connect(self.fileWasRead)
-        self.communicate.statusBarUpdateSignal.connect(self.updateStatusBar)
-        self.communicate.updatePerspectiveWithDataSignal.connect(self.updatePerspective)
-        self.communicate.progressBarUpdateSignal.connect(self.updateProgressBar)
-        self.communicate.perspectiveChangedSignal.connect(self.perspectiveChanged)
-        self.communicate.updateTheoryFromPerspectiveSignal.connect(self.updateTheoryFromPerspective)
-        self.communicate.deleteIntermediateTheoryPlotsSignal.connect(self.deleteIntermediateTheoryPlotsByTabId)
-        self.communicate.plotRequestedSignal.connect(self.showPlot)
-        self.communicate.plotFromNameSignal.connect(self.showPlotFromName)
-        self.communicate.updateModelFromDataOperationPanelSignal.connect(self.updateModelFromDataOperationPanel)
-        self.communicate.activeGraphsSignal.connect(self.updatePlotItems)
+        self.communicator = GuiUtils.communicator
+        self.communicator.fileDataReceivedSignal.connect(self.fileWasRead)
+        self.communicator.statusBarUpdateSignal.connect(self.updateStatusBar)
+        self.communicator.updatePerspectiveWithDataSignal.connect(self.updatePerspective)
+        self.communicator.progressBarUpdateSignal.connect(self.updateProgressBar)
+        self.communicator.perspectiveChangedSignal.connect(self.perspectiveChanged)
+        self.communicator.updateTheoryFromPerspectiveSignal.connect(self.updateTheoryFromPerspective)
+        self.communicator.deleteIntermediateTheoryPlotsSignal.connect(self.deleteIntermediateTheoryPlotsByTabId)
+        self.communicator.plotRequestedSignal.connect(self.showPlot)
+        self.communicator.plotFromNameSignal.connect(self.showPlotFromName)
+        self.communicator.updateModelFromDataOperationPanelSignal.connect(self.updateModelFromDataOperationPanel)
+        self.communicator.activeGraphsSignal.connect(self.updatePlotItems)
 
 
     def addTriggers(self):
@@ -784,8 +780,8 @@ class GuiManager:
         self._workspace.actionCheck_for_update.triggered.connect(self.actionCheck_for_update)
         self._workspace.actionWhat_s_New.triggered.connect(self.actionWhatsNew)
 
-        self.communicate.sendDataToGridSignal.connect(self.showBatchOutput)
-        self.communicate.resultPlotUpdateSignal.connect(self.showFitResults)
+        self.communicator.sendDataToGridSignal.connect(self.showBatchOutput)
+        self.communicator.resultPlotUpdateSignal.connect(self.showFitResults)
 
 
     #============ FILE =================
@@ -1008,7 +1004,7 @@ class GuiManager:
         """
         """
         data, theory = self.filesWidget.getAllFlatData()
-        self.communicate.sendDataToPanelSignal.emit(dict(data, **theory))
+        self.communicator.sendDataToPanelSignal.emit(dict(data, **theory))
 
         self.DataOperation.show()
 
@@ -1203,7 +1199,7 @@ class GuiManager:
 
     def actionEditMask(self):
 
-        self.communicate.extMaskEditorSignal.emit()
+        self.communicator.extMaskEditorSignal.emit()
 
     #============ ANALYSIS =================
     def actionFitting(self):

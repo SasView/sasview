@@ -15,6 +15,7 @@ from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
 from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
 
 
+# TODO: Turn this back on once we figure out the cause of the fatal exceptions
 class ConstraintWidgetTest:
     '''Test the ConstraintWidget dialog'''
 
@@ -24,9 +25,7 @@ class ConstraintWidgetTest:
 
         '''Create ConstraintWidget dialog'''
         class dummy_manager:
-            def communicator(self):
-                return GuiUtils.Communicate()
-            communicate = GuiUtils.Communicate()
+            communicator = GuiUtils.communicator
 
             def __init__(self):
                 self._perspective = dummy_perspective()
@@ -260,7 +259,7 @@ class ConstraintWidgetTest:
     def testFitComplete(self, widget, mocker):
         ''' test the handling of fit results'''
         mocker.patch.object(widget, 'getTabsForFit', return_value=[[None], [None]])
-        spy = QSignalSpy(widget.parent.communicate.statusBarUpdateSignal)
+        spy = QSignalSpy(widget.parent.communicator.statusBarUpdateSignal)
         # test handling of fit error
         # result is None
         result = None
@@ -293,9 +292,9 @@ class ConstraintWidgetTest:
     def testBatchFitComplete(self, widget, mocker):
         ''' test the handling of batch fit results'''
         mocker.patch.object(widget, 'getTabsForFit', return_value=[[None], [None]])
-        spy = QSignalSpy(widget.parent.communicate.statusBarUpdateSignal)
+        spy = QSignalSpy(widget.parent.communicator.statusBarUpdateSignal)
         spy_data = QSignalSpy(
-            widget.parent.communicate.sendDataToGridSignal)
+            widget.parent.communicator.sendDataToGridSignal)
         # test handling of fit error
         # result is None
         result = None

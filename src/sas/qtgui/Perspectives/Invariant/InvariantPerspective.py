@@ -11,6 +11,7 @@ from twisted.internet import reactor, threads
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting import PlotterData
 from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
+from sas.qtgui.Utilities.BackgroundColor import BG_DEFAULT, BG_ERROR
 from sas.qtgui.Utilities.ExtrapolationSlider import ExtrapolationSlider, SliderPerspective
 
 # sas-global
@@ -30,10 +31,6 @@ Q_MAXIMUM = 10
 DEFAULT_POWER_VALUE = 4
 # Small epsilon for floating point adjustments
 ADJUST_EPS = 1e-7
-
-# Background of line edits if settings OK or wrong
-BG_DEFAULT = ""
-BG_RED = "background-color: rgb(244, 170, 164);"
 
 logger = logging.getLogger(__name__)
 
@@ -63,8 +60,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self._allow_close: bool = False
 
         # Communication
-        self.communicate = self._manager.communicator()
-        self.communicate.dataDeletedSignal.connect(self.removeData)
+        self.communicator = GuiUtils.communicator
+        self.communicator.dataDeletedSignal.connect(self.removeData)
 
         self.detailsDialog = DetailsDialog(self)
         self.detailsDialog.cmdOK.clicked.connect(self.enableStatus)
@@ -410,7 +407,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             plots.append(self.low_extrapolation_plot)
 
         if len(plots) > 1:
-            self.communicate.plotRequestedSignal.emit(plots)
+            self.communicator.plotRequestedSignal.emit(plots)
 
         # Update the details dialog in case it is open
         self.update_details_widget()
@@ -960,9 +957,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         # UI feedback:
         # - If a field has no numeric value (user still typing "1e-" or empty) keep default background.
         # - If the numeric check says invalid -> red
-        self.txtGuinierEnd_ex.setStyleSheet(BG_RED if invalid_p1_data_min or invalid_p1_high else BG_DEFAULT)
-        self.txtPorodStart_ex.setStyleSheet(BG_RED if invalid_p2_data_min or invalid_p2_data_max else BG_DEFAULT)
-        self.txtPorodEnd_ex.setStyleSheet(BG_RED if invalid_p3_low or invalid_p3_ex_max else BG_DEFAULT)
+        self.txtGuinierEnd_ex.setStyleSheet(BG_ERROR if invalid_p1_data_min or invalid_p1_high else BG_DEFAULT)
+        self.txtPorodStart_ex.setStyleSheet(BG_ERROR if invalid_p2_data_min or invalid_p2_data_max else BG_DEFAULT)
+        self.txtPorodEnd_ex.setStyleSheet(BG_ERROR if invalid_p3_low or invalid_p3_ex_max else BG_DEFAULT)
 
         self.validity_flags = [
             invalid_p2_data_min,
@@ -1095,8 +1092,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             try:
                 vf1 = float(self.txtVolFrac1.text())
             except ValueError:
-                self.txtVolFrac1.setStyleSheet(BG_RED)
-                self.enable_calculation(False, "Calculate (Invalid volume fraction)")
+                self.txtVolFrac1.setStyleSheet(BG_ERROR)
+                self.cmdCalculate.setEnabled(False)
                 msg = "Volume fractions must be valid numbers."
                 dialog = QtWidgets.QMessageBox(self, text=msg)
                 dialog.setWindowTitle("Invalid Volume Fraction")
@@ -1108,8 +1105,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                 self.txtVolFrac1.setStyleSheet(BG_DEFAULT)
                 self.check_status()
             else:
-                self.txtVolFrac1.setStyleSheet(BG_RED)
-                self.enable_calculation(False, "Calculate (Invalid volume fraction)")
+                self.txtVolFrac1.setStyleSheet(BG_ERROR)
+                self.cmdCalculate.setEnabled(False)
                 msg = "Volume fraction must be between 0 and 1."
                 dialog = QtWidgets.QMessageBox(self, text=msg)
                 dialog.setWindowTitle("Invalid Volume Fraction")
@@ -1208,8 +1205,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             self.check_status()
         except (ValueError, TypeError):
             # empty field or invalid input, just skip
-            self.sender().setStyleSheet(BG_RED)
-            self.enable_calculation(False, "Calculate (Invalid input)")
+            self.sender().setStyleSheet(BG_ERROR)
+            self.cmdCalculate.setEnabled(False)
 
     def contrast_volfrac_toggle(self) -> None:
         """Enable editing of the correct fields based on whether Contrast or VolFrac is selected."""

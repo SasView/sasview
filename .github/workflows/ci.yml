@@ -194,7 +194,7 @@ jobs:
           cp dist/*whl ~/.cache/cache-wheel/
 
       - name: Store wheel of ${{ matrix.dependency.name }} for use
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: build-dependency-${{ matrix.dependency.name }}-wheel
           path: |
@@ -242,7 +242,7 @@ jobs:
           sudo eatmydata apt-get -y install libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils xvfb libegl-dev libcairo2-dev
 
       - name: Fetch wheels of sibling projects
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           path: dist/
           pattern: build-dependency-*-wheel
@@ -263,7 +263,7 @@ jobs:
           python -m build --no-isolation --sdist --wheel
 
       - name: Publish sdist
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: sasview-sdist
           path: |
@@ -271,7 +271,7 @@ jobs:
           if-no-files-found: error
 
       - name: Publish wheel package
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: sasview-wheel
           path: |
@@ -318,16 +318,22 @@ jobs:
           cd $RUNNER_TEMP
           python -m pytest -v -s test
 
-      # - name: Test GUI (Linux)
-      #   if: ${{ matrix.os == 'ubuntu-latest' }}
-      #   env:
-      #     PYOPENCL_COMPILER_OUTPUT: 1
-      #   run: |
-      #     # Suppress SIGSEGV from the tests until they can be fixed
-      #     retval=0
-      #     xvfb-run -a --server-args="-screen 0 1600x900x24" python -m pytest -rsx -v src/sas/qtgui/ || retval=$?
-      #     if [ $retval -eq 139 ]; then echo "WARNING: Python interpreter exited with Segmentation Fault. This normally indicates that Qt objects were not correctly deleted. This error is currently suppressed in SasView's test suite."; retval=0; fi
-      #     exit $retval
+      - name: Test GUI (Linux)
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        env:
+          PYOPENCL_COMPILER_OUTPUT: 1
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          # Ensure all test running dependencies are installed (https://pytest-qt.readthedocs.io/en/latest/troubleshooting.html)
+          sudo apt install -y libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils
+          /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1920x1200x24 -ac +extension GLX
+          # Run the UI generation routine (with force recreate enabled)
+          python src/sas/qtgui/convertUI.py -f
+          # Suppress SIGSEGV from the tests until they can be fixed
+          retval=0
+          xvfb-run -a --server-args="-screen 0 1600x900x24" python -m pytest -rsx -v src/sas/qtgui/ || retval=$?
+          if [ $retval -eq 139 ]; then echo "WARNING: Python interpreter exited with Segmentation Fault. This normally indicates that Qt objects were not correctly deleted. This error is currently suppressed in SasView's test suite."; retval=0; fi
+          exit $retval
 
   installer-matrix:
     needs: [matrix, build-sasview]
@@ -393,7 +399,7 @@ jobs:
 
       - name: Collect a debug tarball of the installer package
         if: ${{ matrix.installer }}
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: Debug-SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
           path: |
@@ -489,7 +495,7 @@ jobs:
         shell: cmd
 
       - name: Publish installer package
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
           path: |
@@ -538,7 +544,7 @@ jobs:
 
       - name: Retrieve installer (workflow image)
         if: ${{ env.INSTALLER_USE_OLD_IMAGE != 'true' }}
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         id: download
         with:
           name: SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
