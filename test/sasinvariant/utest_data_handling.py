@@ -9,7 +9,6 @@ copyright 2010, University of Tennessee
 """
 
 import math
-import random
 
 import numpy as np
 import pytest
@@ -27,64 +26,44 @@ class TestLinearFit:
         self.data = linear_data
 
     def test_fit_linear_data(self):
-        """Simple linear fit."""
-
-        # Create invariant object. Background and scale left as defaults.
+        """Test a simple linear fit."""
         fit = invariant.Extrapolator(data=self.data)
-        # a,b = fit.fit()
-        p, dp = fit.fit()
+        p, _ = fit.fit()
 
-        # Test results
         assert p[0] == pytest.approx(1.0, abs=1e-5)
         assert p[1] == pytest.approx(0.0, abs=1e-5)
 
     def test_fit_linear_data_with_noise(self):
-        """
-        Simple linear fit with noise
-        """
-        for i in range(len(self.data.y)):
-            self.data.y[i] = self.data.y[i] + 0.1 * (random.random() - 0.5)
+        """Test a simple linear fit with noise."""
+        self.data.y += 0.1 * (np.random.random(len(self.data.y)) - 0.5)
 
-        # Create invariant object. Background and scale left as defaults.
         fit = invariant.Extrapolator(data=self.data)
-        p, dp = fit.fit()
+        p, _ = fit.fit()
 
-        # Test results
         assert math.fabs(p[0] - 1.0) < 0.05
         assert math.fabs(p[1]) < 0.1
 
     def test_fit_with_fixed_parameter(self):
-        """
-        Linear fit for y=ax+b where a is fixed.
-        """
-        # Create invariant object. Background and scale left as defaults.
+        """Linear fit for y = ax + b, where a is fixed."""
         fit = invariant.Extrapolator(data=self.data)
-        p, dp = fit.fit(power=-1.0)
+        p, _ = fit.fit(power=-1.0)
 
-        # Test results
         assert p[0] == pytest.approx(1.0, abs=1e-5)
         assert p[1] == pytest.approx(0.0, abs=1e-5)
 
     def test_fit_linear_data_with_noise_and_fixed_par(self):
-        """
-        Simple linear fit with noise
-        """
-        for i in range(len(self.data.y)):
-            self.data.y[i] = self.data.y[i] + 0.1 * (random.random() - 0.5)
+        """Test a simple linear fit with noise and a fixed parameter."""
+        self.data.y += 0.1 * (np.random.random(len(self.data.y)) - 0.5)
 
-        # Create invariant object. Background and scale left as defaults.
         fit = invariant.Extrapolator(data=self.data)
-        p, dp = fit.fit(power=-1.0)
+        p, _ = fit.fit(power=-1.0)
 
-        # Test results
         assert math.fabs(p[0] - 1.0) < 0.05
         assert math.fabs(p[1]) < 0.1
 
 
 class TestInvariantCalculator:
-    """
-    Test main functionality of the Invariant calculator
-    """
+    """Test main functionality of the Invariant calculator."""
 
     @pytest.fixture(autouse=True)
     def setup(self, real_data):
@@ -93,295 +72,136 @@ class TestInvariantCalculator:
     def test_initial_data_processing(self):
         """
         Test whether the background and scale are handled properly
-        when creating an InvariantCalculator object
+        when creating an InvariantCalculator object.
         """
         length = len(self.data.x)
         assert length == len(self.data.y)
-        inv = invariant.InvariantCalculator(self.data)
 
-        assert length == len(inv._data.x)
-        assert inv._data.x[0] == self.data.x[0]
+        inv = invariant.InvariantCalculator(self.data)
+        assert len(inv._data.x) == length
+        assert inv._data.x == pytest.approx(self.data.x)
 
         # Now the same thing with a background value
         bck = 0.1
         inv = invariant.InvariantCalculator(self.data, background=bck)
         assert inv._background == bck
-
-        assert length == len(inv._data.x)
-        assert inv._data.y[0] + bck == self.data.y[0]
+        assert len(inv._data.x) == length
+        assert inv._data.y == pytest.approx(self.data.y - bck)
 
         # Now the same thing with a scale value
         scale = 0.1
         inv = invariant.InvariantCalculator(self.data, scale=scale)
         assert inv._scale == scale
-
-        assert length == len(inv._data.x)
-        assert inv._data.y[0] / scale == pytest.approx(self.data.y[0], abs=1e-7)
+        assert len(inv._data.x) == length
+        assert inv._data.y == pytest.approx(self.data.y * scale)
 
     def test_incompatible_data_class(self):
-        """
-        Check that only classes that inherit from Data1D are allowed
-        as data.
-        """
+        """Check that only classes that inherit from Data1D are allowed as data."""
         class Incompatible:
             pass
 
         with pytest.raises(ValueError):
             invariant.InvariantCalculator(Incompatible())
 
-    def test_error_treatment(self):
+    @pytest.mark.parametrize("dy", [[], None, [0, 0, 0, 0]])
+    def test_error_treatment(self, dy):
+        """Check that the error array is properly set to 1.0 when not provided or when all values are zero."""
         x = np.asarray(np.asarray([0, 1, 2, 3]))
         y = np.asarray(np.asarray([1, 1, 1, 1]))
+        data = Data1D(x=x, y=y, dy=dy)
 
-        # These are all the values of the dy array that would cause
-        # us to set all dy values to 1.0 at __init__ time.
-        dy_list = [[], None, [0, 0, 0, 0]]
+        inv = invariant.InvariantCalculator(data)
 
-        for dy in dy_list:
-            data = Data1D(x=x, y=y, dy=dy)
-            inv = invariant.InvariantCalculator(data)
-            assert len(inv._data.x) == len(inv._data.dy)
-            assert len(inv._data.dy) == 4
-            for i in range(4):
-                assert inv._data.dy[i] == 1
+        assert  len(inv._data.dy) == len(inv._data.x) == len(inv._data.y)
+        assert inv._data.dy == pytest.approx([1, 1, 1, 1], abs=1e-10)
 
-    def test_qstar_low_q_guinier(self):
-        """
-        Test low-q extrapolation with a Guinier
-        """
+    def test_qstar_no_extrapolation(self):
+        """Test the invariant calculation without extrapolation."""
         inv = invariant.InvariantCalculator(self.data)
 
-        # Basic sanity check
-        _qstar = inv.get_qstar()
-        qstar, dqstar = inv.get_qstar_with_error()
-        assert qstar == _qstar
+        qstar = inv.get_qstar()
+        qstar_with_error, dqstar = inv.get_qstar_with_error()
 
-        # Low-Q Extrapolation
-        # Check that the returned invariant is what we expect given
-        # the result we got without extrapolation
+        assert qstar == pytest.approx(qstar_with_error, abs=1e-10)
+        assert dqstar > 0.0
+
+    def test_qstar_low_q_guinier(self):
+        """Test low-q extrapolation with a Guinier function."""
+        inv = invariant.InvariantCalculator(self.data)
+        qstar, dqstar = inv.get_qstar_with_error()
+
         inv.set_extrapolation("low", npts=10, function="guinier")
         qs_extr, dqs_extr = inv.get_qstar_with_error("low")
         delta_qs_extr, delta_dqs_extr = inv.get_qstar_low()
 
-        assert qs_extr == _qstar + delta_qs_extr
+        assert qs_extr == qstar + delta_qs_extr
         assert dqs_extr == math.sqrt(dqstar * dqstar + delta_dqs_extr * delta_dqs_extr)
 
-        # We don't expect the extrapolated invariant to be very far from the
-        # result without extrapolation. Let's test for a result within 10%.
-        # TODO: verify whether this test really makes sense
-
-    #        self.assertTrue(math.fabs(qs_extr-qstar)/qstar<0.1)
-
-    # Check that the two results are consistent within errors
-    # Note that the error on the extrapolated value takes into account
-    # a systematic error for the fact that we may not know the shape of I(q)
-    # at low Q.
-    # THIS LINE MAKES NO SENSE!!! First the dif should be the amount of invarinat
-    # being contributed by the low q extrapolation so these should NOT be equal
-    # Further ths magical huge extra uncertainty added to dqs_extr makes no sense to
-    # me either.  Should remove this from invariant.py
-    #        self.assertTrue(math.fabs(qs_extr-qstar)<dqs_extr)
-
-    def test_qstar_low_q_power_law(self):
-        """
-        Test low-q extrapolation with a power law
-
-        This test is being removed on March 21, 2020 by PDB during code
-        camp sprint because
-        a) it makes zero sense with this data (i.e. only Guinier does)
-        b) It is not at all clear in what case a low Q power law makes
-        any sense whatsoever in the first place.
-        """
-        #     inv = invariant.InvariantCalculator(self.data, background=0)
-
-        # Basic sanity check
-        #        _qstar = inv.get_qstar()
-        #        qstar, dqstar = inv.get_qstar_with_error()
-        #        self.assertEqual(qstar, _qstar)
-
-        # Low-Q Extrapolation
-        # Check that the returned invariant is what we expect given
-        #       inv.set_extrapolation('low', npts=10, function='power_law')
-        #       qs_extr, dqs_extr = inv.get_qstar_with_error('low')
-        #       delta_qs_extr, delta_dqs_extr = inv.get_qstar_low()
-
-        # A fit using SasView gives 0.0655 for the value of the exponent
-        #      self.assertAlmostEqual(inv._low_extrapolation_function.power, 0.0, 3)
-
-        #        if False:
-        #          npts = len(inv._data.x)-1
-        #          import matplotlib.pyplot as plt
-        #          plt.loglog(inv._data.x[:npts], inv._data.y[:npts], 'o',
-        #                    label='Original data', markersize=10)
-        #          plt.loglog(inv._data.x[:npts],
-        #                     inv._low_extrapolation_function.evaluate_model(inv._data.x[:npts]),
-        #                     'r', label='Fitted line')
-        #          plt.legend()
-        #          plt.show()
-
-        #      self.assertEqual(qs_extr, _qstar+delta_qs_extr)
-        #        self.assertAlmostEqual(dqs_extr, math.sqrt(dqstar*dqstar
-        #                                                   + delta_dqs_extr
-        #                                                   *delta_dqs_extr), 15)
-
-        # We don't expect the extrapolated invariant to be very far from the
-        # result without extrapolation. Let's test for a result within 10%.
-        #        self.assertTrue(math.fabs(qs_extr-qstar)/qstar<0.1)
-
-        # This section is just wrong in any case. PDB
-        # Check that the two results are consistent within errors
-        # Note that the error on the extrapolated value takes into account
-        # a systematic error for the fact that we may not know the shape of
-        # I(q) at low Q.
-        #        self.assertTrue(math.fabs(qs_extr-qstar)<dqs_extr)
-        pass
-
     def test_qstar_high_q(self):
-        """
-        Test high-q extrapolation
-        """
+        """Test high-q extrapolation with a power law function."""
         inv = invariant.InvariantCalculator(self.data)
-
-        # Basic sanity check
-        _qstar = inv.get_qstar()
         qstar, dqstar = inv.get_qstar_with_error()
-        assert qstar == _qstar
 
-        # High-Q Extrapolation
-        # Check that the returned invariant is what we expect given
-        # the result we got without extrapolation
         inv.set_extrapolation("high", npts=95, function="power_law")
         qs_extr, dqs_extr = inv.get_qstar_with_error("high")
         delta_qs_extr, delta_dqs_extr = inv.get_qstar_high()
 
-        # In principle the slope should be -4. However due to the oscillations
-        # and finite number of points we need quite a lot of points to ensure
-        # that the fit averages close to 4. SasView estimates 3.92 at the
-        # moment
-        assert math.fabs(inv._high_extrapolation_function.power - 4) < 0.1
+        # In principle the slope should be -4, but SasView estimates it to be around 3.92.
+        assert inv._high_extrapolation_function.power == pytest.approx(4, abs=0.1)
+        assert qs_extr == qstar + delta_qs_extr
 
-        assert qs_extr == _qstar + delta_qs_extr
-        assert dqs_extr == pytest.approx(math.sqrt(dqstar * dqstar + delta_dqs_extr * delta_dqs_extr), abs=1e-10)
+        expected_dqs_extr = math.sqrt(dqstar * dqstar + delta_dqs_extr * delta_dqs_extr)
+        assert dqs_extr == pytest.approx(expected_dqs_extr, abs=1e-10)
 
-        # We don't expect the extrapolated invariant to be very far from the
-        # result without extrapolation. Let's test for a result within 10%.
-        # TODO: verify whether this test really makes sense
-        # self.assertTrue(math.fabs(qs_extr-qstar)/qstar<0.1)
-
-        # This section is just wrong in any case. PDB
-        # Check that the two results are consistent within errors
-        # Note that the error on the extrapolated value takes into account
-        # a systematic error for the fact that we may not know the shape of
-        # I(q) at low Q.
-        # Check that the two results are consistent within errors
-
-    #        self.assertTrue(math.fabs(qs_extr-qstar)<dqs_extr)
-
-    def test_qstar_full_q(self):
-        """
-        Test high-q extrapolation
-        """
+    @pytest.fixture
+    def configured_inv(self):
         inv = invariant.InvariantCalculator(self.data)
-
-        # Basic sanity check
-        _qstar = inv.get_qstar()
-        qstar, dqstar = inv.get_qstar_with_error()
-        assert qstar == _qstar
-
-        # High-Q Extrapolation
-        # Check that the returned invariant is what we expect given
-        # the result we got without extrapolation
         inv.set_extrapolation("low", npts=10, function="guinier")
         inv.set_extrapolation("high", npts=20, function="power_law")
-        qs_extr, dqs_extr = inv.get_qstar_with_error("both")
-        delta_qs_low, delta_dqs_low = inv.get_qstar_low()
-        delta_qs_hi, delta_dqs_hi = inv.get_qstar_high()
+        return inv
 
-        assert qs_extr == pytest.approx(_qstar + delta_qs_low + delta_qs_hi, abs=1e-8)
-        assert dqs_extr == pytest.approx(
-            math.sqrt(dqstar * dqstar + delta_dqs_low * delta_dqs_low + delta_dqs_hi * delta_dqs_hi), abs=1e-8
-        )
+    def test_qstar_both_extrapolation(self, configured_inv):
+        """Test that combined low-q and high-q extrapolation gives the correct qstar."""
+        qstar, dqstar = configured_inv.get_qstar_with_error()
+        qs_extr, dqs_extr = configured_inv.get_qstar_with_error("both")
+        delta_qs_low, delta_dqs_low = configured_inv.get_qstar_low()
+        delta_qs_hi, delta_dqs_hi = configured_inv.get_qstar_high()
 
-        # We don't expect the extrapolated invariant to be very far from the
-        # result without extrapolation. Let's test for a result within 10%.
-        # TODO: verify whether this test really makes sense
-        # self.assertTrue(math.fabs(qs_extr-qstar)/qstar<0.1)
+        assert qs_extr == pytest.approx(qstar + delta_qs_low + delta_qs_hi, abs=1e-8)
+        expected_dqs = math.sqrt(dqstar**2 + delta_dqs_low**2 + delta_dqs_hi**2)
+        assert dqs_extr == pytest.approx(expected_dqs, abs=1e-8)
 
-        # Check that the two results are consistent within errors
-        # THIS LINE MAKES NO SENSE!!! First the dif should be the amount of invarinat
-        # being contributed by the low q extrapolation so these should NOT be equal
-        # Further ths magical huge extra uncertainty added to dqs_extr makes no sense to
-        # me either.  Should remove this from invariant.py
-        #        self.assertTrue(math.fabs(qs_extr-qstar)<dqs_extr)
+    @pytest.mark.parametrize("extrapolation", [None, "low", "high", "both"])
+    def test_volume_fraction(self, configured_inv, extrapolation):
+        """Test that volume fraction is ~1% regardless of extrapolation mode."""
+        v, _ = configured_inv.get_volume_fraction_with_error(2.2e-6, extrapolation=extrapolation)
+        assert v == pytest.approx(0.01, rel=0.05)
 
-        def _check_values(to_check, reference, tolerance=0.05):
-            assert math.fabs(to_check - reference) / reference < tolerance, "Tested value = " + str(to_check)
+    @pytest.mark.parametrize("extrapolation", [None, "low", "high", "both"])
+    def test_contrast(self, configured_inv, extrapolation):
+        """Test that contrast is ~2.2e-6 regardless of extrapolation mode."""
+        c, _ = configured_inv.get_contrast_with_error(0.01, extrapolation=extrapolation)
+        assert c == pytest.approx(2.2e-6, rel=0.05)
 
-        # The following values are taken from the data file loaded at the top
-        # of this test class.
+    @pytest.mark.parametrize("extrapolation", [None, "low", "high", "both"])
+    def test_specific_surface(self, configured_inv, extrapolation):
+        """Test that specific surface area is ~6e-5 regardless of extrapolation mode."""
+        s, _ = configured_inv.get_surface_with_error(2.2e-6, 1.825e-7, extrapolation=extrapolation)
+        assert s == pytest.approx(6.00e-5, rel=0.05)
 
-        # volumer fraction
-        v, dv = inv.get_volume_fraction_with_error(2.2e-6, extrapolation=None)
-        _check_values(v, 0.01)
-
-        v_l, dv_l = inv.get_volume_fraction_with_error(2.2e-6, extrapolation="low")
-        _check_values(v_l, 0.01)
-
-        v_h, dv_h = inv.get_volume_fraction_with_error(2.2e-6, extrapolation="high")
-        _check_values(v_h, 0.01)
-
-        v_b, dv_b = inv.get_volume_fraction_with_error(2.2e-6, extrapolation="both")
-        _check_values(v_b, 0.01)
-
-        # contrast
-        c, dc = inv.get_contrast_with_error(0.01, extrapolation=None)
-        _check_values(c, 2.2e-6)
-
-        c_l, dc_l = inv.get_contrast_with_error(0.01, extrapolation="low")
-        _check_values(c_l, 2.2e-6)
-
-        c_h, dc_h = inv.get_contrast_with_error(0.01, extrapolation="high")
-        _check_values(c_h, 2.2e-6)
-
-        c_b, dc_b = inv.get_contrast_with_error(0.01, extrapolation="both")
-        _check_values(c_b, 2.2e-6)
-
-        # Specific Surface - though these are really redundant since
-        # specific surface area does NOT use the invariant calculation
-        # and thus independent of extrapolation.  Leaving the test alone
-        # however since some day we could add a feature where vol frac can be
-        # an input parameter in which case Sv WOULD in fact depend on the
-        # invariant:
-        s, ds = inv.get_surface_with_error(2.2e-6, 1.825e-7, extrapolation=None)
-        _check_values(s, 6.00e-5)
-
-        s_l, ds_l = inv.get_surface_with_error(2.2e-6, 1.825e-7, extrapolation="low")
-        _check_values(s_l, 6.00e-5)
-
-        s_h, ds_h = inv.get_surface_with_error(2.2e-6, 1.825e-7, extrapolation="high")
-        _check_values(s_h, 6.00e-5)
-
-        s_b, ds_b = inv.get_surface_with_error(2.2e-6, 1.825e-7, extrapolation="both")
-        _check_values(s_b, 6.00e-5)
-
-    def test_bad_parameter_name(self):
-        """
-        The set_extrapolation method checks that the name of the
-        extrapolation function and the name of the q-range to extrapolate
-        (high/low) is recognized.
-        """
+    @pytest.mark.parametrize("extrapolation, func",
+        [("low", "not_a_name"),
+         ("not_a_range", "guinier"),
+         ("high", "guinier")]
+    )
+    def test_bad_parameter_name(self, extrapolation, func):
+        """Test that invalid extrapolation range or function names raise ValueError."""
         inv = invariant.InvariantCalculator(self.data)
         with pytest.raises(ValueError):
-            inv.set_extrapolation("low", npts=4, function="not_a_name")
-        with pytest.raises(ValueError):
-            inv.set_extrapolation("not_a_range", npts=4, function="guinier")
-        with pytest.raises(ValueError):
-            inv.set_extrapolation("high", npts=4, function="guinier")
+            inv.set_extrapolation(extrapolation, npts=4, function=func)
 
     def test_volume_fraction_uncertainty_increases_with_contrast_err(self):
-        """
-        Checks if the uncertainty calculated for volume fraction scales with the uncertainty entered for contrast
-        """
+        """Checks if the uncertainty calculated for volume fraction scales with the uncertainty entered for contrast."""
         inv = invariant.InvariantCalculator(self.data)
         contrast = 2.2e-6
         _, dv_small = inv.get_volume_fraction_with_error(contrast, contrast_err=0.1 * contrast)
@@ -389,9 +209,7 @@ class TestInvariantCalculator:
         assert dv_large > dv_small
 
     def test_contrast_uncertainty_increases_with_volume_err(self):
-        """
-        Checks if the uncertainty calculated for contrast scales with the uncertainty entered for volume fraction
-        """
+        """Checks if the uncertainty calculated for contrast scales with the uncertainty entered for volume fraction."""
         inv = invariant.InvariantCalculator(self.data)
         volume = 0.01
         _, dc_small = inv.get_contrast_with_error(volume, volume_err=0.001)
