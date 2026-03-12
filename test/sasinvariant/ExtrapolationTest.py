@@ -1,4 +1,3 @@
-
 import pytest
 
 from sas.sascalc.invariant import invariant
@@ -78,8 +77,8 @@ class TestDataExtraLow:
         data_in_range = inv.get_extra_data_low(q_start=self.data.x[0], npts=inv._low_extrapolation_npts)
         test_y = data_in_range.y
 
-        assert len(test_y) == len(self.data.y[:inv._low_extrapolation_npts])
-        assert self.data.y[:inv._low_extrapolation_npts] == pytest.approx(test_y, rel=1e-3)
+        assert len(test_y) == len(self.data.y[: inv._low_extrapolation_npts])
+        assert self.data.y[: inv._low_extrapolation_npts] == pytest.approx(test_y, rel=1e-3)
 
 
 class TestDataExtraHighSlitPowerLaw:

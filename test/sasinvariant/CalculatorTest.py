@@ -43,6 +43,7 @@ class TestInvariantCalculator:
 
     def test_incompatible_data_class(self):
         """Check that only classes that inherit from Data1D are allowed as data."""
+
         class Incompatible:
             pass
 
@@ -58,7 +59,7 @@ class TestInvariantCalculator:
 
         inv = invariant.InvariantCalculator(data)
 
-        assert  len(inv._data.dy) == len(inv._data.x) == len(inv._data.y)
+        assert len(inv._data.dy) == len(inv._data.x) == len(inv._data.y)
         assert inv._data.dy == pytest.approx([1, 1, 1, 1], abs=1e-10)
 
     def test_qstar_no_extrapolation(self):
@@ -135,10 +136,8 @@ class TestInvariantCalculator:
         s, _ = configured_inv.get_surface_with_error(2.2e-6, 1.825e-7, extrapolation=extrapolation)
         assert s == pytest.approx(6.00e-5, rel=0.05)
 
-    @pytest.mark.parametrize("extrapolation, func",
-        [("low", "not_a_name"),
-         ("not_a_range", "guinier"),
-         ("high", "guinier")]
+    @pytest.mark.parametrize(
+        "extrapolation, func", [("low", "not_a_name"), ("not_a_range", "guinier"), ("high", "guinier")]
     )
     def test_bad_parameter_name(self, extrapolation, func):
         """Test that invalid extrapolation range or function names raise ValueError."""
