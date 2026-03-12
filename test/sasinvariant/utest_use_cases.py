@@ -7,7 +7,8 @@
 """
 
 import os.path
-import unittest
+
+import pytest
 
 from sasdata.dataloader.loader import Loader
 
@@ -22,53 +23,42 @@ class Data1D:
     pass
 
 
-class TestLineFit(unittest.TestCase):
+class TestLineFit:
     """
         Test Line fit
     """
-    def setUp(self):
+    def setup_method(self):
         self.data_list = Loader().load(find("linefittest.txt"))
         self.data = self.data_list[0]
 
     def test_fit_line_data(self):
         """
-            Fit_Test_1: test linear fit, ax +b. The power law is calculated
-            on the log data so that B * x^A becomes logB + A logX = ax+b.
-            For the extrapolation a can be fixed (usually to -4) or floating.
-            Here we test letting it float.
+        Bx^A becomes logB + A logX = ax+b in log-log space.
+        For the extrapolation a can be fixed (usually to -4) or floating.
+        Here we test letting it float.
         """
-
-        # Create invariant object. Background and scale left as defaults.
         fit = invariant.Extrapolator(data=self.data)
 
         # Let the power float (not fixed)
-        p, dp = fit.fit(power=None)
+        p, _ = fit.fit(power=None)
 
-        # Test results
-        self.assertAlmostEqual(p[0], 2.3983,3)
-        self.assertAlmostEqual(p[1], 0.87833,3)
+        assert p[0] == pytest.approx(2.3983, abs=5e-4)
+        assert p[1] == pytest.approx(0.87833, abs=5e-4)
 
     def test_fit_line_data_fixed(self):
-        """
-            Fit_Test_2: test linear fit, ax +b, with 'a' fixed
-        """
-
-        # Create invariant object. Background and scale left as defaults.
+        """Test fit for fixed power, in this case -4"""
         fit = invariant.Extrapolator(data=self.data)
 
         # Fixing  a = -power =4
         p, dp = fit.fit(power=-4)
 
-        # Test results
-        self.assertAlmostEqual(p[0], 4)
-        self.assertAlmostEqual(p[1], -4.0676,3)
+        assert p[0] == pytest.approx(4)
+        assert p[1] == pytest.approx(-4.0676, abs=5e-4)
 
 
-class TestLineFitNoweight(unittest.TestCase):
-    """
-        Test Line fit without weighting by the uncertainties in I
-    """
-    def setUp(self):
+class TestLineFitNoweight:
+    """Test Line fit without weighting by the uncertainties in I."""
+    def setup_method(self):
         self.data_list = Loader().load(find("linefittest_no_weight.txt"))
         self.data = self.data_list[0]
 
@@ -84,8 +74,8 @@ class TestLineFitNoweight(unittest.TestCase):
         p, dp = fit.fit(power=None)
 
         # Test results
-        self.assertAlmostEqual(p[0], 2.4727,3)
-        self.assertAlmostEqual(p[1], 0.6,3)
+        assert p[0] == pytest.approx(2.4727, abs=5e-4)
+        assert p[1] == pytest.approx(0.6, abs=5e-4)
 
     def test_fit_line_data_fixed_no_weight(self):
         """
@@ -99,11 +89,11 @@ class TestLineFitNoweight(unittest.TestCase):
         p, dp = fit.fit(power=-4)
 
         # Test results
-        self.assertAlmostEqual(p[0], 4)
-        self.assertAlmostEqual(p[1], -7.8,3)
+        assert p[0] == pytest.approx(4)
+        assert p[1] == pytest.approx(-7.8, abs=5e-4)
 
 
-class TestInvNoResolution(unittest.TestCase):
+class TestInvNoResolution:
     """
         Test unsmeared data ("perfect" pinhole) for invariant computation.
         The test data is simulated using the sphere form factor simulating
@@ -141,13 +131,14 @@ class TestInvNoResolution(unittest.TestCase):
            order <1% in this case)since many of the dips won't be completly
            captured.
     """
-    def setUp(self):
+    def setup_method(self):
         self.data_list = Loader().load(find("100nmSpheresNodQ.txt"))
         self.data = self.data_list[0]
 
 #    def test_wrong_data(self):
 #        """ test receiving Data1D not of type loader"""
-#        self.assertRaises(ValueError,invariant.InvariantCalculator, Data1D())
+#        with pytest.raises(ValueError):
+#            invariant.InvariantCalculator(Data1D())
 #
     def test_use_case_1(self):
         """
@@ -182,10 +173,10 @@ class TestInvNoResolution(unittest.TestCase):
                                            porod_const=1.825e-7)
 
         # Test results
-        self.assertEqual(qstar1, qstar)
-        self.assertAlmostEqual(qstar, 9.458239e-5,delta=1e-6)
-        self.assertAlmostEqual(v, 0.01000, delta=1e-4)
-        self.assertAlmostEqual(s , 6.000e-5, 7)
+        assert qstar1 == qstar
+        assert qstar == pytest.approx(9.458239e-5, abs=1e-6)
+        assert v == pytest.approx(0.01000, abs=1e-4)
+        assert s == pytest.approx(6.000e-5, abs=5e-8)
 
     def test_use_case_2(self):
         """
@@ -230,10 +221,10 @@ class TestInvNoResolution(unittest.TestCase):
                                            porod_const=1.825e-7)
 
         # Test results
-        self.assertEqual(qstar1, qstar)
-        self.assertAlmostEqual(qstar, 9.458239e-5,delta=1e-6)
-        self.assertAlmostEqual(v, 0.01000, delta=1e-4)
-        self.assertAlmostEqual(s , 6.000e-5, 7)
+        assert qstar1 == qstar
+        assert qstar == pytest.approx(9.458239e-5, abs=1e-6)
+        assert v == pytest.approx(0.01000, abs=1e-4)
+        assert s == pytest.approx(6.000e-5, abs=5e-8)
 
     def test_use_case_3(self):
         """
@@ -267,10 +258,10 @@ class TestInvNoResolution(unittest.TestCase):
                                            porod_const=1.825e-7)
 
         # Test results
-        self.assertEqual(qstar1, qstar)
-        self.assertAlmostEqual(qstar, 9.458239e-5,delta=1e-6)
-        self.assertAlmostEqual(v, 0.01000, delta=1e-4)
-        self.assertAlmostEqual(s , 6.000e-5, 7)
+        assert qstar1 == qstar
+        assert qstar == pytest.approx(9.458239e-5, abs=1e-6)
+        assert v == pytest.approx(0.01000, abs=1e-4)
+        assert s == pytest.approx(6.000e-5, abs=5e-8)
 
     def test_use_case_4(self):
         """
@@ -304,10 +295,10 @@ class TestInvNoResolution(unittest.TestCase):
                                            porod_const=1.825e-7)
 
         # Test results
-        self.assertEqual(qstar1, qstar)
-        self.assertAlmostEqual(qstar, 9.458239e-5,delta=1e-6)
-        self.assertAlmostEqual(v, 0.01000, delta=1e-4)
-        self.assertAlmostEqual(s , 6.000e-5, 7)
+        assert qstar1 == qstar
+        assert qstar == pytest.approx(9.458239e-5, abs=1e-6)
+        assert v == pytest.approx(0.01000, abs=1e-4)
+        assert s == pytest.approx(6.000e-5, abs=5e-8)
 
     # Note - on March 21, 2020 PDB removed the low Q power law extrapolotion
     # tests. In the first place they are totally bogus based on assuming the
@@ -317,7 +308,7 @@ class TestInvNoResolution(unittest.TestCase):
     # not even clear that this is a valid extrapolation.
 
 
-class TestInvPinholeSmeared(unittest.TestCase):
+class TestInvPinholeSmeared:
     """
         Test invariant with pinhole smeared data.
         ..NOTE:
@@ -359,13 +350,14 @@ class TestInvPinholeSmeared(unittest.TestCase):
 
 
     """
-    def setUp(self):
+    def setup_method(self):
         self.data_list = Loader().load(find("100nmPinholeSphere.txt"))
         self.data = self.data_list[0]
 
     def test_wrong_data(self):
         """ test receiving Data1D not of type loader"""
-        self.assertRaises(ValueError,invariant.InvariantCalculator, Data1D())
+        with pytest.raises(ValueError):
+            invariant.InvariantCalculator(Data1D())
 
     def test_use_case_1(self):
         """
@@ -400,10 +392,10 @@ class TestInvPinholeSmeared(unittest.TestCase):
                                            porod_const=1.825e-7)
 
         # Test results
-        self.assertEqual(qstar1, qstar)
-        self.assertAlmostEqual(qstar, 1.088e-4,delta=1e-6)
-        self.assertAlmostEqual(v, 0.01150, delta=1e-4)
-        self.assertAlmostEqual(s , 6.000e-5, 7)
+        assert qstar1 == qstar
+        assert qstar == pytest.approx(1.088e-4, abs=1e-6)
+        assert v == pytest.approx(0.01150, abs=1e-4)
+        assert s == pytest.approx(6.000e-5, abs=5e-8)
 
     def test_use_case_2(self):
         """
@@ -448,10 +440,10 @@ class TestInvPinholeSmeared(unittest.TestCase):
                                            porod_const=1.825e-7)
 
         # Test results
-        self.assertEqual(qstar1, qstar)
-        self.assertAlmostEqual(qstar, 1.088e-4,delta=1e-6)
-        self.assertAlmostEqual(v, 0.01150, delta=1e-4)
-        self.assertAlmostEqual(s , 6.000e-5, 7)
+        assert qstar1 == qstar
+        assert qstar == pytest.approx(1.088e-4, abs=1e-6)
+        assert v == pytest.approx(0.01150, abs=1e-4)
+        assert s == pytest.approx(6.000e-5, abs=5e-8)
 
     def test_use_case_3(self):
         """
@@ -485,10 +477,10 @@ class TestInvPinholeSmeared(unittest.TestCase):
                                            porod_const=1.825e-7)
 
         # Test results
-        self.assertEqual(qstar1, qstar)
-        self.assertAlmostEqual(qstar, 1.088e-4,delta=1e-6)
-        self.assertAlmostEqual(v, 0.01150, delta=1e-4)
-        self.assertAlmostEqual(s , 6.000e-5, 7)
+        assert qstar1 == qstar
+        assert qstar == pytest.approx(1.088e-4, abs=1e-6)
+        assert v == pytest.approx(0.01150, abs=1e-4)
+        assert s == pytest.approx(6.000e-5, abs=5e-8)
 
     def test_use_case_4(self):
         """
@@ -522,10 +514,10 @@ class TestInvPinholeSmeared(unittest.TestCase):
                                            porod_const=1.825e-7)
 
         # Test results
-        self.assertEqual(qstar1, qstar)
-        self.assertAlmostEqual(qstar, 1.088e-4,delta=1e-6)
-        self.assertAlmostEqual(v, 0.01150, delta=1e-4)
-        self.assertAlmostEqual(s , 6.000e-5, 7)
+        assert qstar1 == qstar
+        assert qstar == pytest.approx(1.088e-4, abs=1e-6)
+        assert v == pytest.approx(0.01150, abs=1e-4)
+        assert s == pytest.approx(6.000e-5, abs=5e-8)
 
     # Note - on March 21, 2020 PDB removed the low Q power law extrapolotion
     # tests. In the first place they are totally bogus based on assuming the
@@ -535,7 +527,7 @@ class TestInvPinholeSmeared(unittest.TestCase):
     # not even clear that this is a valid extrapolation.
 
 
-class TestInvSlitSmear(unittest.TestCase):
+class TestInvSlitSmear:
     """
         Test slit smeared data for invariant computation
         ..NOTE:
@@ -572,7 +564,7 @@ class TestInvSlitSmear(unittest.TestCase):
         = 9.458239e-13 A^-4 = 9.458239e-5
 
     """
-    def setUp(self):
+    def setup_method(self):
         # data with smear info
         list = Loader().load(find("1umSlitSmearSphere.ABS"))
         self.data_q_smear = list[0]
@@ -602,10 +594,10 @@ class TestInvSlitSmear(unittest.TestCase):
         s, ds = inv.get_surface_with_error(contrast=2.2e-6,
                                            porod_const=1.825e-8)
         # Test results
-        self.assertEqual(qstar1, qstar)
-        self.assertAlmostEqual(qstar, 8.8434e-5, delta=1.5e-6)
-        self.assertAlmostEqual(v, 0.00935, delta=1.5e-4)
-        self.assertAlmostEqual(s , 6.000e-6, 7 )
+        assert qstar1 == qstar
+        assert qstar == pytest.approx(8.8434e-5, abs=1.5e-6)
+        assert v == pytest.approx(0.00935, abs=1.5e-4)
+        assert s == pytest.approx(6.000e-6, abs=5e-8)
 
     def test_use_case_2(self):
         """
@@ -630,10 +622,10 @@ class TestInvSlitSmear(unittest.TestCase):
                                            porod_const=1.825e-8)
 
         # Test results
-        self.assertEqual(qstar1, qstar)
-        self.assertAlmostEqual(qstar, 9.458239e-5, delta=1.5e-6)
-        self.assertAlmostEqual(v, 0.01, delta=15e-4)
-        self.assertAlmostEqual(s , 6.000e-6, 7 )
+        assert qstar1 == qstar
+        assert qstar == pytest.approx(9.458239e-5, abs=1.5e-6)
+        assert v == pytest.approx(0.01, abs=15e-4)
+        assert s == pytest.approx(6.000e-6, abs=5e-8)
 
     def test_use_case_3(self):
         """
@@ -659,10 +651,10 @@ class TestInvSlitSmear(unittest.TestCase):
                                            porod_const=1.825e-8)
 
         # Test results
-        self.assertEqual(qstar1, qstar)
-        self.assertAlmostEqual(qstar, 8.9853e-5, delta=1.5e-6)
-        self.assertAlmostEqual(v, 0.0095, delta=1.5e-4)
-        self.assertAlmostEqual(s , 6.000e-6, 7 )
+        assert qstar1 == qstar
+        assert qstar == pytest.approx(8.9853e-5, abs=1.5e-6)
+        assert v == pytest.approx(0.0095, abs=1.5e-4)
+        assert s == pytest.approx(6.000e-6, abs=5e-8)
 
     def test_use_case_4(self):
         """
@@ -688,12 +680,10 @@ class TestInvSlitSmear(unittest.TestCase):
                                            porod_const=1.825e-8)
 
         # Test results
-        self.assertEqual(qstar1, qstar)
-        self.assertAlmostEqual(qstar, 9.458239e-5, delta=1.5e-6)
-        self.assertAlmostEqual(v, 0.01, delta=15e-4)
-        self.assertAlmostEqual(s , 6.000e-6, 7 )
+        assert qstar1 == qstar
+        assert qstar == pytest.approx(9.458239e-5, abs=1.5e-6)
+        assert v == pytest.approx(0.01, abs=15e-4)
+        assert s == pytest.approx(6.000e-6, abs=5e-8)
 
 
-if __name__ == '__main__':
-    unittest.main(testRunner=unittest.TextTestRunner(verbosity=2))
 
