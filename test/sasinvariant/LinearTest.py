@@ -50,13 +50,10 @@ class TestLinearFit:
         assert p[1] == pytest.approx(0.0, abs=0.1)
 
 
-
 class TestLinearization:
     """Test the linearization process of the Guinier extrapolation."""
 
-    @pytest.mark.parametrize("x, y, dy",
-        [([1], [1, 2], None), ([1, 1], [1, 2], [1])]
-    )
+    @pytest.mark.parametrize("x, y, dy", [([1], [1, 2], None), ([1, 1], [1, 2], [1])])
     def test_guinier_incompatible_length(self, x, y, dy):
         """Check that the linearization process raises an error when the input data arrays have incompatible lengths."""
         g = invariant.Guinier()
@@ -77,14 +74,17 @@ class TestLinearization:
         x_out, y_out, dy_out = data_out.x, data_out.y, data_out.dy
 
         assert len(x_out) == len(y_out) == len(dy_out) == 3
-        assert x_out == pytest.approx([1, 4 ,9], abs=1e-10)
+        assert x_out == pytest.approx([1, 4, 9], abs=1e-10)
         assert y_out == pytest.approx([0, 0, 0], abs=1e-10)
         assert dy_out == pytest.approx([1, 1, 1], abs=1e-10)
 
-    @pytest.mark.parametrize("px, py, pdy, expected_bins",
-        [(0, 1, 2, [False, True, True, True]),
-         (1, 0, 2, [False, True, True, True]),
-         (2, 1, 0, [False, True, True, True])]
+    @pytest.mark.parametrize(
+        "px, py, pdy, expected_bins",
+        [
+            (0, 1, 2, [False, True, True, True]),
+            (1, 0, 2, [False, True, True, True]),
+            (2, 1, 0, [False, True, True, True]),
+        ],
     )
     def test_allowed_bins(self, px, py, pdy, expected_bins):
         """Check that the allowed bins are correctly identified."""
