@@ -26,6 +26,7 @@ class DataViewer(QDialog):
             f"Type: {self.to_view.dataset_type.name}"
         )  # TODO: Probably a better way of printing this
         self.dataTable = QTableWidget()
+        self.dataTable.setMinimumHeight(345)
         self.buildTable()
         self.closeButton = QPushButton("Close")
         self.closeButton.clicked.connect(self.close)

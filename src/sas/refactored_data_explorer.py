@@ -48,7 +48,7 @@ class NewDataExplorer(QWidget):
 
         self.layout = QVBoxLayout(self)
 
-        self.add_data_row = QHBoxLayout(self)
+        self.add_data_row = QHBoxLayout()
 
         self.load_data_row = QPushButton("Load Data", self)
         _ = self.load_data_row.clicked.connect(self.onLoadFile)
@@ -67,7 +67,7 @@ class NewDataExplorer(QWidget):
 
         self.filter_label = QLabel("Filters")
 
-        self.filter_row = QHBoxLayout(self)
+        self.filter_row = QHBoxLayout()
         filter_names = ["Data", "Perspective", "Theory", "Plot"]
         self.filter_buttons: dict[str, QPushButton] = {
             name: QPushButton(name, self) for name in filter_names
@@ -82,7 +82,7 @@ class NewDataExplorer(QWidget):
         self.tree_view.current_datum_removed.connect(self.onRemove)
 
         # TODO: Is there a better name for this?
-        self.final_row = QHBoxLayout(self)
+        self.final_row = QHBoxLayout()
 
         self.remove_button = QPushButton("Remove", self)
         self.remove_button.setToolTip("Remove the selected data from SasView")
