@@ -1,10 +1,4 @@
-"""
-Implementation of the use-case from a usage perspective.
-
-TODO: The calculation of the uncertainties needs to be checked
-TODO: It woudl be good to add tests for the uncertainties
-
-"""
+"""Implementation of the use-case from a usage perspective."""
 
 import os.path
 
