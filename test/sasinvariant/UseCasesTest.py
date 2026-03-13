@@ -356,8 +356,8 @@ class TestInvSlitSmear:
 
     def setup_method(self):
         """Provide data with smear info."""
-        list = Loader().load(find("1umSlitSmearSphere.ABS"))
-        self.data_q_smear = list[0]
+        data_list = Loader().load(find("1umSlitSmearSphere.ABS"))
+        self.data_q_smear = data_list[0]
 
     def test_no_extrapolation(self):
         """
