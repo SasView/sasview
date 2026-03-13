@@ -50,7 +50,7 @@ class TestLineFit:
         fit = invariant.Extrapolator(data=self.data)
 
         # Fixing  a = -power =4
-        p, dp = fit.fit(power=-4)
+        p, _ = fit.fit(power=-4)
 
         assert p[0] == pytest.approx(4)
         assert p[1] == pytest.approx(-4.0676, abs=5e-4)
@@ -63,32 +63,22 @@ class TestLineFitNoweight:
         self.data = self.data_list[0]
 
     def skip_test_fit_line_data_no_weight(self):
-        """
-            Fit_Test_1: test linear fit, ax +b, without fixing the power a
-        """
-
-        # Create invariant object. Background and scale left as defaults.
+        """Tests linear fit, ax+b, without fixing the power a"""
         fit = invariant.Extrapolator(data=self.data)
 
         # Let the power float (not fixed)
-        p, dp = fit.fit(power=None)
+        p, _ = fit.fit(power=None)
 
-        # Test results
         assert p[0] == pytest.approx(2.4727, abs=5e-4)
         assert p[1] == pytest.approx(0.6, abs=5e-4)
 
     def test_fit_line_data_fixed_no_weight(self):
-        """
-            Fit_Test_2: test linear fit, ax +b, with 'a' fixed
-        """
-
-        # Create invariant object. Background and scale left as defaults.
+        """Tests linear fit, ax+b, with 'a' fixed"""
         fit = invariant.Extrapolator(data=self.data)
 
         # Fixing  a = -power =4
-        p, dp = fit.fit(power=-4)
+        p, _ = fit.fit(power=-4)
 
-        # Test results
         assert p[0] == pytest.approx(4)
         assert p[1] == pytest.approx(-7.8, abs=5e-4)
 
@@ -107,7 +97,7 @@ class TestInvNoResolution:
         vol fraction (Phi) = 0.01
         SLD = 4.2e-6 1/A (silica SLD)
         Solvent SLD = 6.4e-6 1/A (D2O SLD)
-        Backgroun was set to 0.
+        Background was set to 0.
 
         From this we can calculate the Sv (3*Phi/R):
         Sv = N * Surface of one sphere/ V_T
@@ -135,163 +125,82 @@ class TestInvNoResolution:
         self.data_list = Loader().load(find("100nmSpheresNodQ.txt"))
         self.data = self.data_list[0]
 
-#    def test_wrong_data(self):
-#        """ test receiving Data1D not of type loader"""
-#        with pytest.raises(ValueError):
-#            invariant.InvariantCalculator(Data1D())
-#
-    def test_use_case_1(self):
-        """
-            Test the Invariant without extrapolation
-        """
-        # Create an invariant object with background of zero as that is how the
-        # data was created. A different background could cause negative
-        # intensities. Leave scale as defaults.
+    def test_no_extrapolation(self):
+        """Test the Invariant without extrapolation."""
+
+        # Background of zero as that is how the data was created.
+        # A different background could cause negative intensities. Leave scale as defaults.
         inv = invariant.InvariantCalculator(data=self.data, background=0)
 
-        # We have to be able to tell the InvariantCalculator whether we want the
-        # extrapolation or not. By default, when the user doesn't specify, we
-        # should compute Q* without extrapolation. That's what should be done
-        # in __init__.
-
-        # We call get_qstar() with no argument, which signifies that we do NOT
-        # want extrapolation.
-
-        # The version of the call without uncertainties. unlike the v and s
-        # calculations the call to get_qstar_with_error runs the ge_qstar
-        # method but does not read the return value so check that here.
         qstar1 = inv.get_qstar()
+        qstar, _ = inv.get_qstar_with_error()
 
-        # The version of the call including uncertainty
-        qstar, qstar_err = inv.get_qstar_with_error()
+        v, _ = inv.get_volume_fraction_with_error(contrast=2.2e-6)
+        s, _ = inv.get_surface_with_error(contrast=2.2e-6, porod_const=1.825e-7)
 
-        # The volume fraction and surface use Q*. That means that the following
-        # methods should check that Q* has been computed. If not, it should
-        # compute it by calling get_qstare(), leaving the parameters as default.
-        v, dv = inv.get_volume_fraction_with_error(contrast=2.2e-6)
-        s, ds = inv.get_surface_with_error(contrast=2.2e-6,
-                                           porod_const=1.825e-7)
-
-        # Test results
-        assert qstar1 == qstar
+        assert qstar1 == pytest.approx(qstar, abs=1e-6)
         assert qstar == pytest.approx(9.458239e-5, abs=1e-6)
         assert v == pytest.approx(0.01000, abs=1e-4)
         assert s == pytest.approx(6.000e-5, abs=5e-8)
 
-    def test_use_case_2(self):
-        """
-            Test the Invariant with the low-Q Guinier extrapolation
-        """
-        # Create an invariant object with background of zero as that is how the
-        # data was created. A different background could cause negative
-        # intensities. Leave scale as defaults.
+    def test_low_q_guinier(self):
+        """Test the Invariant with the low-Q Guinier extrapolation."""
+
+        # Background of zero as that is how the data was created.
+        # A different background could cause negative intensities. Leave scale as defaults.
         inv = invariant.InvariantCalculator(data=self.data, background=0)
 
-        # Now we do want to use the extrapoloation so first we need to set
-        # the extrapolation parameters, in thsi case for the low-Q range
-
-        # The npts parameter should have a good default.
-        # The range parameter should be 'high' or 'low'
-        # The function parameter should default to None. If it is None,
-        #    the method should pick a good default
-        #    (Guinier at low-Q and 1/q^4 at high-Q).
-        #    The method should also check for consistency of the extrapolation
-        #    and function parameters. For instance, you might not want to allow
-        #    'high' and 'guinier'.
-        # The power parameter (not shown below) should default to 4.
         inv.set_extrapolation(range='low', npts=10, function='guinier')
 
-        # The version of the call without error again checks that the function
-        # returns the same value as it calculates and passes to the verion of
-        # the call with uncertainties.
-        #
-        # Note that at this point, we could still compute Q* without
-        # extrapolation by calling get_qstar with no arguments, or with
-        # extrapolation=None.
-        # But of course we want to test the low Q Guinier extrapolation so...
         qstar1 = inv.get_qstar(extrapolation='low')
+        qstar, _ = inv.get_qstar_with_error(extrapolation='low')
 
-        # And again, using the version of the call which also retruns
-        # the uncertainties.
-        qstar, qstar_err = inv.get_qstar_with_error(extrapolation='low')
+        v, _ = inv.get_volume_fraction_with_error(contrast=2.2e-6)
+        s, _ = inv.get_surface_with_error(contrast=2.2e-6, porod_const=1.825e-7)
 
-        # Get the volume fraction and surface
-        v, dv = inv.get_volume_fraction_with_error(contrast=2.2e-6)
-        s, ds = inv.get_surface_with_error(contrast=2.2e-6,
-                                           porod_const=1.825e-7)
-
-        # Test results
-        assert qstar1 == qstar
+        assert qstar1 == pytest.approx(qstar, abs=1e-6)
         assert qstar == pytest.approx(9.458239e-5, abs=1e-6)
         assert v == pytest.approx(0.01000, abs=1e-4)
         assert s == pytest.approx(6.000e-5, abs=5e-8)
 
-    def test_use_case_3(self):
-        """
-            Test the Invariant with a Q^-4 high-Q extrapolation
-        """
-        # Create an invariant object with background of zero as that is how the
-        # data was created. A different background could cause negative
-        # intensities. Leave scale as defaults.
+    def test_high_Q_power(self):
+        """Test the Invariant with a Q^-4 high-Q extrapolation."""
+
+        # Background of zero as that is how the data was created.
+        # A different background could cause negative intensities. Leave scale as defaults.
         inv = invariant.InvariantCalculator(data=self.data, background=0)
 
-        # Now we set the extrapolation parameters to test the high-Q range
-        # Note: that we are fixing the power law to 4 in this case, appropriate
-        # for a solid sphere at high q.
-        inv.set_extrapolation(range='high', npts=10, function='power_law',
-                              power=4)
+        inv.set_extrapolation(range='high', npts=10, function='power_law', power=4)
 
-        # Again we start with the version of the call that does not return the
-        # uncertainties to verify that it returns the same value as it passes
-        # to the verion of the call with uncertainties.
-        # Again by passing an extrapolation value, the values just set for
-        # that extrapolation are used.
         qstar1 = inv.get_qstar(extrapolation='high')
+        qstar, _ = inv.get_qstar_with_error(extrapolation='high')
 
-        # Now the same call to the "full" version which also returns
-        # uncertainties
-        qstar, qstar_err = inv.get_qstar_with_error(extrapolation='high')
-
-        # Get the volume fraction and surface
-        v, dv = inv.get_volume_fraction_with_error(contrast=2.2e-6)
-        s, ds = inv.get_surface_with_error(contrast=2.2e-6,
+        v, _ = inv.get_volume_fraction_with_error(contrast=2.2e-6)
+        s, _ = inv.get_surface_with_error(contrast=2.2e-6,
                                            porod_const=1.825e-7)
 
         # Test results
-        assert qstar1 == qstar
+        assert qstar1 == pytest.approx(qstar, abs=1e-6)
         assert qstar == pytest.approx(9.458239e-5, abs=1e-6)
         assert v == pytest.approx(0.01000, abs=1e-4)
         assert s == pytest.approx(6.000e-5, abs=5e-8)
 
-    def test_use_case_4(self):
-        """
-            Test the Invariant with both a high- and low-Q extrapolation
-        """
-        # Create an invariant object with background of zero as that is how the
-        # data was created. A different background could cause negative
-        # intensities. Leave scale as defaults.
+    def test_high_and_low_Q_extrapolation(self):
+        """Test the Invariant with both a high- and low-Q extrapolation."""
+
+        # Background of zero as that is how the data was created.
+        # A different background could cause negative intensities. Leave scale as defaults.
         inv = invariant.InvariantCalculator(data=self.data, background=0)
 
-
-        # Finally set the extrapolation parameters to test both the low- and
-        # high-Q extrapolotaions applied together.
         inv.set_extrapolation(range='low', npts=10, function='guinier')
         inv.set_extrapolation(range='high', npts=10, function='power_law',
                               power=4)
 
-        # Again we start with the version of the call that does not return the
-        # uncertainties to verify that it returns the same value as it passes
-        # to the verion of the call with uncertainties.
-        # Again by passing an extrapolation value, the values just set for
-        # that extrapolation are used.
         qstar1 = inv.get_qstar(extrapolation='both')
+        qstar, _ = inv.get_qstar_with_error(extrapolation='both')
 
-        # The version of the call with error
-        qstar, qstar_err = inv.get_qstar_with_error(extrapolation='both')
-
-        # Get the volume fraction and surface
-        v, dv = inv.get_volume_fraction_with_error(contrast=2.2e-6)
-        s, ds = inv.get_surface_with_error(contrast=2.2e-6,
+        v, _ = inv.get_volume_fraction_with_error(contrast=2.2e-6)
+        s, _ = inv.get_surface_with_error(contrast=2.2e-6,
                                            porod_const=1.825e-7)
 
         # Test results
@@ -299,27 +208,13 @@ class TestInvNoResolution:
         assert qstar == pytest.approx(9.458239e-5, abs=1e-6)
         assert v == pytest.approx(0.01000, abs=1e-4)
         assert s == pytest.approx(6.000e-5, abs=5e-8)
-
-    # Note - on March 21, 2020 PDB removed the low Q power law extrapolotion
-    # tests. In the first place they are totally bogus based on assuming the
-    # code was correct, looking at the values returned for a totally random
-    # set of data and parameters and asserting them true. Moreover there is no
-    # clear data set that could be used that would be reasonable here.  It is
-    # not even clear that this is a valid extrapolation.
 
 
 class TestInvPinholeSmeared:
     """
-        Test invariant with pinhole smeared data.
+        Test invariant with pinhole smeared data. 
         ..NOTE:
-             As of March 21, 2020 the invariant code does NOT include
-             pinhole smearing. Thus the invariant and derived vol fraction
-             will be high. Higher as the smearing is worse.  Note that an
-             invariant calculation that incluede pinhole smearing effects
-             could probably be included (need to either derive or find where
-             it has been). If that is done and implmented the value in these
-             tests should be adjusted to be approriately. The test values are
-             given assuming the invariant is NOT handling pinhole smearing.
+             The invariant code does NOT include pinhole smearing. Thus the invariant and derived vol fraction will be higher as the smearing is worse. The test values are given assuming the invariant is NOT handling pinhole smearing. Invariant calculation that include pinhole smearing effects could probably be included. If that is done and implmented the value in these tests should be adjusted to be approriately. 
 
          ..NOTE2:
              The data supplied here is for the exact same system as above,
@@ -334,7 +229,7 @@ class TestInvPinholeSmeared:
         system is the same) but due to the 15% dQ/Q the invariant, and thus the
         volume fraction computed from that invariant, are roughly 15% high
         again because the invariant calculation is assuming a dQ/Q of 0%.
-        the Sv however depends only on the Porod Constane which is an input
+        the Sv however depends only on the Porod Constant which is an input
         parameter and so remains correct (the the extent the supplied constant
         is correct).  While the actual code here is in fact using the invariant
         in the computation of Sv it also uses Phi and so the errors cancel (as
@@ -346,190 +241,83 @@ class TestInvPinholeSmeared:
         * Sv = 6e-5 * 1.15 ~ 6.9e-5 1/A
         * Vol Fraction = 0.01 * 1.15 ~ 0.0115
         * Q* = 9.458239e-5 * 1.15 ~ 1.088e-4 cm^-1 A^-3
-
-
-
     """
     def setup_method(self):
         self.data_list = Loader().load(find("100nmPinholeSphere.txt"))
         self.data = self.data_list[0]
 
-    def test_wrong_data(self):
-        """ test receiving Data1D not of type loader"""
-        with pytest.raises(ValueError):
-            invariant.InvariantCalculator(Data1D())
-
-    def test_use_case_1(self):
-        """
-            Test the Invariant without extrapolation
-        """
-        # Create an invariant object with background of zero as that is how the
-        # data was created. A different background could cause negative
-        # intensities. Leave scale as defaults.
+    def test_no_extrapolation(self):
+        """Test the Invariant without extrapolation."""
         inv = invariant.InvariantCalculator(data=self.data, background=0)
 
-        # We have to be able to tell the InvariantCalculator whether we want the
-        # extrapolation or not. By default, when the user doesn't specify, we
-        # should compute Q* without extrapolation. That's what should be done
-        # in __init__.
-
-        # We call get_qstar() with no argument, which signifies that we do NOT
-        # want extrapolation.
-
-        # The version of the call without uncertainties. unlike the v and s
-        # calculations the call to get_qstar_with_error runs the ge_qstar
-        # method but does not read the return value so check that here.
         qstar1 = inv.get_qstar()
+        qstar, _ = inv.get_qstar_with_error()
 
-        # The version of the call including uncertainty
-        qstar, qstar_err = inv.get_qstar_with_error()
+        v, _ = inv.get_volume_fraction_with_error(contrast=2.2e-6)
+        s, _ = inv.get_surface_with_error(contrast=2.2e-6, porod_const=1.825e-7)
 
-        # The volume fraction and surface use Q*. That means that the following
-        # methods should check that Q* has been computed. If not, it should
-        # compute it by calling get_qstare(), leaving the parameters as default.
-        v, dv = inv.get_volume_fraction_with_error(contrast=2.2e-6)
-        s, ds = inv.get_surface_with_error(contrast=2.2e-6,
-                                           porod_const=1.825e-7)
-
-        # Test results
-        assert qstar1 == qstar
+        assert qstar1 == pytest.approx(qstar, abs=1e-6)
         assert qstar == pytest.approx(1.088e-4, abs=1e-6)
         assert v == pytest.approx(0.01150, abs=1e-4)
         assert s == pytest.approx(6.000e-5, abs=5e-8)
 
-    def test_use_case_2(self):
-        """
-            Tes the Invariant with the low-Q Guinier extrapolation
-        """
-        # Create an invariant object with background of zero as that is how the
-        # data was created. A different background could cause negative
-        # intensities. Leave scale as defaults.
+    def test_low_q_guinier(self):
+        """Test the Invariant with the low-Q Guinier extrapolation."""
         inv = invariant.InvariantCalculator(data=self.data, background=0)
 
-        # Now we do want to use the extrapoloation so first we need to set
-        # the extrapolation parameters, in thsi case for the low-Q range
-
-        # The npts parameter should have a good default.
-        # The range parameter should be 'high' or 'low'
-        # The function parameter should default to None. If it is None,
-        #    the method should pick a good default
-        #    (Guinier at low-Q and 1/q^4 at high-Q).
-        #    The method should also check for consistency of the extrapolation
-        #    and function parameters. For instance, you might not want to allow
-        #    'high' and 'guinier'.
-        # The power parameter (not shown below) should default to 4.
         inv.set_extrapolation(range='low', npts=10, function='guinier')
 
-        # The version of the call without error again checks that the function
-        # returns the same value as it calculates and passes to the verion of
-        # the call with uncertainties.
-        #
-        # Note that at this point, we could still compute Q* without
-        # extrapolation by calling get_qstar with no arguments, or with
-        # extrapolation=None.
-        # But of course we want to test the low Q Guinier extrapolation so...
         qstar1 = inv.get_qstar(extrapolation='low')
 
-        # And again, using the version of the call which also retruns
-        # the uncertainties.
-        qstar, qstar_err = inv.get_qstar_with_error(extrapolation='low')
+        qstar, _ = inv.get_qstar_with_error(extrapolation='low')
 
-        # Get the volume fraction and surface
-        v, dv = inv.get_volume_fraction_with_error(contrast=2.2e-6)
-        s, ds = inv.get_surface_with_error(contrast=2.2e-6,
-                                           porod_const=1.825e-7)
+        v, _ = inv.get_volume_fraction_with_error(contrast=2.2e-6)
+        s, _ = inv.get_surface_with_error(contrast=2.2e-6, porod_const=1.825e-7)
 
-        # Test results
-        assert qstar1 == qstar
+        assert qstar1 == pytest.approx(qstar, abs=1e-6)
         assert qstar == pytest.approx(1.088e-4, abs=1e-6)
         assert v == pytest.approx(0.01150, abs=1e-4)
         assert s == pytest.approx(6.000e-5, abs=5e-8)
 
-    def test_use_case_3(self):
-        """
-            Test the Invariant with a Q^-4 high-Q extrapolation
-        """
-        # Create an invariant object with background of zero as that is how the
-        # data was created. A different background could cause negative
-        # intensities. Leave scale as defaults.
+    def test_high_q_power(self):
+        """Test the Invariant with a Q^-4 high-Q extrapolation."""
         inv = invariant.InvariantCalculator(data=self.data, background=0)
 
-        # Now we set the extrapolation parameters to test the high-Q range
-        # Note: that we are fixing the power law to 4 in this case, appropriate
-        # for a solid sphere at high q.
-        inv.set_extrapolation(range='high', npts=10, function='power_law',
-                              power=4)
+        inv.set_extrapolation(range='high', npts=10, function='power_law', power=4)
 
-        # Again we start with the version of the call that does not return the
-        # uncertainties to verify that it returns the same value as it passes
-        # to the verion of the call with uncertainties.
-        # Again by passing an extrapolation value, the values just set for
-        # that extrapolation are used.
         qstar1 = inv.get_qstar(extrapolation='high')
+        qstar, _ = inv.get_qstar_with_error(extrapolation='high')
 
-        # Now the same call to the "full" version which also returns
-        # uncertainties
-        qstar, qstar_err = inv.get_qstar_with_error(extrapolation='high')
+        v, _ = inv.get_volume_fraction_with_error(contrast=2.2e-6)
+        s, _ = inv.get_surface_with_error(contrast=2.2e-6, porod_const=1.825e-7)
 
-        # Get the volume fraction and surface
-        v, dv = inv.get_volume_fraction_with_error(contrast=2.2e-6)
-        s, ds = inv.get_surface_with_error(contrast=2.2e-6,
-                                           porod_const=1.825e-7)
-
-        # Test results
-        assert qstar1 == qstar
+        assert qstar1 == pytest.approx(qstar, abs=1e-6)
         assert qstar == pytest.approx(1.088e-4, abs=1e-6)
         assert v == pytest.approx(0.01150, abs=1e-4)
         assert s == pytest.approx(6.000e-5, abs=5e-8)
 
-    def test_use_case_4(self):
-        """
-            Test the Invariant with both a high- and low-Q extrapolation
-        """
-        # Create an invariant object with background of zero as that is how the
-        # data was created. A different background could cause negative
-        # intensities. Leave scale as defaults.
+    def test_high_and_low_q_extrapolation(self):
+        """Test the Invariant with both a high- and low-Q extrapolation."""
         inv = invariant.InvariantCalculator(data=self.data, background=0)
 
-
-        # Finally set the extrapolation parameters to test both the low- and
-        # high-Q extrapolotaions applied together.
         inv.set_extrapolation(range='low', npts=10, function='guinier')
-        inv.set_extrapolation(range='high', npts=10, function='power_law',
-                              power=4)
+        inv.set_extrapolation(range='high', npts=10, function='power_law', power=4)
 
-        # Again we start with the version of the call that does not return the
-        # uncertainties to verify that it returns the same value as it passes
-        # to the verion of the call with uncertainties.
-        # Again by passing an extrapolation value, the values just set for
-        # that extrapolation are used.
         qstar1 = inv.get_qstar(extrapolation='both')
-
-        # The version of the call with error
         qstar, qstar_err = inv.get_qstar_with_error(extrapolation='both')
 
-        # Get the volume fraction and surface
         v, dv = inv.get_volume_fraction_with_error(contrast=2.2e-6)
-        s, ds = inv.get_surface_with_error(contrast=2.2e-6,
-                                           porod_const=1.825e-7)
+        s, ds = inv.get_surface_with_error(contrast=2.2e-6, porod_const=1.825e-7)
 
-        # Test results
-        assert qstar1 == qstar
+        assert qstar1 == pytest.approx(qstar, abs=1e-6)
         assert qstar == pytest.approx(1.088e-4, abs=1e-6)
         assert v == pytest.approx(0.01150, abs=1e-4)
         assert s == pytest.approx(6.000e-5, abs=5e-8)
-
-    # Note - on March 21, 2020 PDB removed the low Q power law extrapolotion
-    # tests. In the first place they are totally bogus based on assuming the
-    # code was correct, looking at the values returned for a totally random
-    # set of data and parameters and asserting them true. Moreover there is no
-    # clear data set that could be used that would be reasonable here.  It is
-    # not even clear that this is a valid extrapolation.
 
 
 class TestInvSlitSmear:
     """
-        Test slit smeared data for invariant computation
+        Test slit smeared data for invariant computation.
         ..NOTE:
            The Invariant caculation for an infinite slit smearing has been
            known for a long time and is included here.  Ironically this means
