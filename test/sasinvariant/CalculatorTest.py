@@ -297,3 +297,184 @@ class TestInvariantCalculator:
         new_data = Data1D(x=np.asarray([0.1, 0.2]), y=np.asarray([1.0, 1.0]), dy=np.asarray([0.1, 0.1]))
         inv.set_data(new_data)
         assert inv._qstar is None
+
+    def test_get_data_returns_internal_data(self):
+        """get_data should return the currently stored data object."""
+        inv = invariant.InvariantCalculator(self.data)
+        assert inv.get_data() is inv._data
+
+    def test_get_extrapolation_power_low_and_high(self):
+        """get_extrapolation_power should return stored fitted values for both ranges."""
+        inv = invariant.InvariantCalculator(self.data)
+        inv.set_extrapolation("low", npts=10, function="guinier")
+        inv.set_extrapolation("high", npts=20, function="power_law")
+        _ = inv.get_qstar_with_error("both")
+
+        low_power = inv.get_extrapolation_power("low")
+        high_power = inv.get_extrapolation_power("high")
+        assert low_power is not None
+        assert high_power is not None
+
+    def test_qstar_low_with_valid_custom_limit_branch(self):
+        """A valid low_q_limit should use the explicit branch in get_qstar_low."""
+        inv = invariant.InvariantCalculator(self.data)
+        inv.set_extrapolation("low", npts=10, function="guinier")
+        qmin = inv._data.x[0]
+        qmax = inv._data.x[9]
+        low_q_limit = (qmin + qmax) / 2.0
+
+        qs, dqs = inv.get_qstar_low(low_q_limit=low_q_limit)
+        assert qs >= 0
+        assert dqs >= 0
+
+    def test_qstar_high_with_valid_custom_limit_branch(self):
+        """A valid high_q_limit should use the explicit branch in get_qstar_high."""
+        inv = invariant.InvariantCalculator(self.data)
+        inv.set_extrapolation("high", npts=20, function="power_law")
+        x_len = len(inv._data.x) - 1
+        qmin = inv._data.x[int(x_len - inv._high_extrapolation_npts)]
+        qmax = inv._data.x[x_len]
+        high_q_limit = qmax + (qmax - qmin)
+
+        qs, dqs = inv.get_qstar_high(high_q_limit=high_q_limit)
+        assert qs > 0
+        assert dqs >= 0
+
+    def test_get_extra_data_low_default_q_start_branch(self):
+        """get_extra_data_low should use default _low_q_limit when q_start is None."""
+        inv = invariant.InvariantCalculator(self.data)
+        inv.set_extrapolation("low", npts=10, function="guinier")
+        _ = inv.get_qstar_low()
+
+        data_out = inv.get_extra_data_low()
+        assert len(data_out.x) > 0
+        assert len(data_out.y) > 0
+
+    def test_qstar_uncertainty_invalid_lengths_raise(self):
+        """_get_qstar_uncertainty should reject data with only one point."""
+        inv = invariant.InvariantCalculator(self.data)
+        bad_data = Data1D(x=np.asarray([0.1]), y=np.asarray([1.0]), dy=np.asarray([0.1]))
+        with pytest.raises(ValueError):
+            inv._get_qstar_uncertainty(bad_data)
+
+    def test_qstar_uncertainty_none_dy_returns_none(self):
+        """_get_qstar_uncertainty should return None when dy is missing."""
+        inv = invariant.InvariantCalculator(self.data)
+        data = Data1D(x=np.asarray([0.1, 0.2]), y=np.asarray([1.0, 2.0]), dy=None)
+        assert inv._get_qstar_uncertainty(data) is None
+
+    def test_volume_fraction_runtime_for_nonpositive_qstar(self, monkeypatch):
+        """get_volume_fraction should raise RuntimeError when qstar is non-positive."""
+        inv = invariant.InvariantCalculator(self.data)
+
+        def _fake_get_qstar(_=None):
+            inv._qstar = 0.0
+            inv._qstar_err = 0.0
+            return inv._qstar
+
+        monkeypatch.setattr(inv, "get_qstar", _fake_get_qstar)
+        with pytest.raises(RuntimeError):
+            inv.get_volume_fraction(contrast=2.2e-6)
+
+    def test_volume_fraction_runtime_for_negative_discriminant(self, monkeypatch):
+        """get_volume_fraction should raise RuntimeError when discriminant is negative."""
+        inv = invariant.InvariantCalculator(self.data)
+
+        def _fake_get_qstar(_=None):
+            inv._qstar = 1.0e-3
+            inv._qstar_err = 0.0
+            return inv._qstar
+
+        monkeypatch.setattr(inv, "get_qstar", _fake_get_qstar)
+        with pytest.raises(RuntimeError):
+            inv.get_volume_fraction(contrast=1.0e-10)
+
+    def test_volume_fraction_discriminant_zero_returns_half(self, monkeypatch):
+        """get_volume_fraction should return 0.5 when discriminant is exactly zero."""
+        inv = invariant.InvariantCalculator(self.data)
+        contrast = 2.2e-6
+        target_qstar = 0.5 * (math.pi * abs(contrast)) ** 2 * 1.0e8
+
+        def _fake_get_qstar(_=None):
+            inv._qstar = target_qstar
+            inv._qstar_err = 0.0
+            return inv._qstar
+
+        monkeypatch.setattr(inv, "get_qstar", _fake_get_qstar)
+        assert inv.get_volume_fraction(contrast=contrast) == pytest.approx(0.5, abs=1e-12)
+
+    def test_volume_fraction_inconsistent_results_branch(self, monkeypatch):
+        """NaN from sqrt should trigger the inconsistent-results RuntimeError branch."""
+        inv = invariant.InvariantCalculator(self.data)
+
+        def _fake_get_qstar(_=None):
+            inv._qstar = 1.0e-5
+            inv._qstar_err = 0.0
+            return inv._qstar
+
+        monkeypatch.setattr(inv, "get_qstar", _fake_get_qstar)
+
+        real_sqrt = invariant.math.sqrt
+
+        def _nan_sqrt(value):
+            if value > 0:
+                return float("nan")
+            return real_sqrt(value)
+
+        monkeypatch.setattr(invariant.math, "sqrt", _nan_sqrt)
+        with pytest.raises(RuntimeError):
+            inv.get_volume_fraction(contrast=2.2e-6)
+
+    def test_contrast_runtime_for_nonpositive_qstar(self, monkeypatch):
+        """get_contrast should raise RuntimeError when qstar is non-positive."""
+        inv = invariant.InvariantCalculator(self.data)
+
+        def _fake_get_qstar(_=None):
+            inv._qstar = 0.0
+            inv._qstar_err = 0.0
+            return inv._qstar
+
+        monkeypatch.setattr(inv, "get_qstar", _fake_get_qstar)
+        with pytest.raises(RuntimeError):
+            inv.get_contrast(volume=0.5)
+
+    def test_contrast_runtime_from_sqrt_error_branch(self, monkeypatch):
+        """ValueError in sqrt should be mapped to RuntimeError in get_contrast."""
+        inv = invariant.InvariantCalculator(self.data)
+
+        def _fake_get_qstar(_=None):
+            inv._qstar = 1.0e-5
+            inv._qstar_err = 0.0
+            return inv._qstar
+
+        monkeypatch.setattr(inv, "get_qstar", _fake_get_qstar)
+
+        def _raise(_):
+            raise ValueError("forced")
+
+        monkeypatch.setattr(invariant.math, "sqrt", _raise)
+        with pytest.raises(RuntimeError):
+            inv.get_contrast(volume=0.5)
+
+    def test_contrast_with_error_returns_minus_one_when_internal_ratio_invalid(self, monkeypatch):
+        """Division-by-zero in uncertainty expression should return -1."""
+        inv = invariant.InvariantCalculator(self.data)
+        inv._qstar = 0.0
+        inv._qstar_err = 1.0
+
+        monkeypatch.setattr(inv, "get_contrast", lambda volume, extrapolation=None: 1.0)
+        _, uncertainty = inv.get_contrast_with_error(volume=0.5, volume_err=0.0)
+        assert uncertainty == -1
+
+    def test_surface_with_error_returns_none_pair_when_surface_is_none(self, monkeypatch):
+        """If get_surface returns None, get_surface_with_error should return (None, None)."""
+        inv = invariant.InvariantCalculator(self.data)
+        monkeypatch.setattr(inv, "get_surface", lambda **kwargs: None)
+        assert inv.get_surface_with_error(contrast=2.2e-6, porod_const=1.825e-7) == (None, None)
+
+    def test_surface_with_error_zero_division_returns_none_uncertainty(self):
+        """Zero porod constant with nonzero uncertainty should return undefined surface uncertainty."""
+        inv = invariant.InvariantCalculator(self.data)
+        s, ds = inv.get_surface_with_error(contrast=2.2e-6, porod_const=0.0, porod_const_err=1.0)
+        assert s == pytest.approx(0.0, abs=0.0)
+        assert ds is None
