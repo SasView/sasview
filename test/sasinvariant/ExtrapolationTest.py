@@ -4,7 +4,7 @@ from sas.sascalc.invariant import invariant
 
 
 class TestPowerLawExtrapolation:
-    """Generate a power law distribution and verify that the extrapolation produce the correct ditribution."""
+    """Generate a power law distribution and verify that the extrapolation produce the correct distribution."""
 
     @pytest.fixture(autouse=True)
     def setup(self, power_law_data):
