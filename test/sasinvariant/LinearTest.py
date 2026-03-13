@@ -23,7 +23,8 @@ class TestLinearFit:
 
     def test_fit_linear_data_with_noise(self):
         """Test a simple linear fit with noise."""
-        self.data.y += 0.1 * (np.random.random(len(self.data.y)) - 0.5)
+        rng = np.random.default_rng(0)
+        self.data.y += 0.1 * (rng.random(len(self.data.y)) - 0.5)
 
         fit = invariant.Extrapolator(data=self.data)
         p, _ = fit.fit()
@@ -41,7 +42,8 @@ class TestLinearFit:
 
     def test_fit_linear_data_with_noise_and_fixed_par(self):
         """Test a simple linear fit with noise and a fixed parameter."""
-        self.data.y += 0.1 * (np.random.random(len(self.data.y)) - 0.5)
+        rng = np.random.default_rng(0)
+        self.data.y += 0.1 * (rng.random(len(self.data.y)) - 0.5)
 
         fit = invariant.Extrapolator(data=self.data)
         p, _ = fit.fit(power=-1.0)
