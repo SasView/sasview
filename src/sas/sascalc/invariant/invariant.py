@@ -83,6 +83,8 @@ class Transform(ABC):
             for p in data_points
             if p[0] > 0 and p[1] > 0 and p[2] > 0
         ]
+        if output_points == []:
+            raise ValueError("No valid data points after linearization.")
 
         x_out, y_out, dy_out = zip(*output_points)
 
@@ -173,7 +175,7 @@ class Guinier(Transform):
         r"""
         Returns calculated I(q) for the model.
         Calculates the Guinier expression
-        $F(x)= s * \exp\left(-(r x)^{2/3}\right)$
+        $I(q)= s * \exp\left(-(R_g x)^{2}/3\right)$
 
         :param x: a vector of q values.
         :return: an array of I(q) values calculated by the model.
