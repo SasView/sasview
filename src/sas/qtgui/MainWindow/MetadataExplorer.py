@@ -44,6 +44,7 @@ class MetadataExplorer(QDialog):
 
         self.metadataTreeWidget = QTreeWidget()
         self.buildTree()
+        self.metadataTreeWidget.header().setDefaultSectionSize(350)
 
         self.closeButton = QPushButton("Close")
         self.closeButton.clicked.connect(self.closeEvent)
@@ -54,6 +55,7 @@ class MetadataExplorer(QDialog):
         self.layout.addWidget(self.closeButton)
 
         self.setWindowTitle("Metadata Explorer")
+        self.setMinimumSize(800, 430)
 
     def closeEvent(self, event):
         self.close()
