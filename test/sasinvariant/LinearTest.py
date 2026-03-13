@@ -130,3 +130,13 @@ class TestLinearization:
 
         data = Data1D(x=arr[px], y=arr[py], dy=arr[pdy])
         assert g.get_allowed_bins(data) == expected_bins
+
+
+class TestTransformAbstractFallback:
+    """Execute abstract base fallback returns for completeness."""
+
+    def test_abstract_method_fallback_returns_not_implemented(self):
+        assert invariant.Transform.linearize_q_value(object(), 1.0) is NotImplemented
+        assert invariant.Transform.extract_model_parameters(object(), 0.0, 0.0) is NotImplemented
+        assert invariant.Transform.evaluate_model(object(), np.asarray([1.0])) is NotImplemented
+        assert invariant.Transform.evaluate_model_errors(object(), np.asarray([1.0])) is NotImplemented
