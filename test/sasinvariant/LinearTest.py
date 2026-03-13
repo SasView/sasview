@@ -49,6 +49,18 @@ class TestLinearFit:
         assert p[0] == pytest.approx(1.0, abs=0.05)
         assert p[1] == pytest.approx(0.0, abs=0.1)
 
+    def test_fit_covariance_fallback_on_linalg_failure(self, monkeypatch):
+        """If covariance estimation fails, fit should return sentinel errors."""
+        fit = invariant.Extrapolator(data=self.data)
+
+        def _raise(_):
+            raise RuntimeError("forced pinv failure")
+
+        monkeypatch.setattr(invariant.np.linalg, "pinv", _raise)
+        _, err = fit.fit()
+
+        assert err == [-1.0, -1.0]
+
 
 class TestLinearization:
     """Test the linearization process of the Guinier extrapolation."""
@@ -77,6 +89,28 @@ class TestLinearization:
         assert x_out == pytest.approx([1, 4, 9], abs=1e-10)
         assert y_out == pytest.approx([0, 0, 0], abs=1e-10)
         assert dy_out == pytest.approx([1, 1, 1], abs=1e-10)
+
+    def test_linearization_with_none_dy_uses_unity_uncertainty(self):
+        """When dy is missing, linearization should default to ones."""
+        g = invariant.Guinier()
+        x = np.asarray([1.0, 2.0, 3.0])
+        y = np.asarray([2.0, 2.0, 2.0])
+        data_in = Data1D(x=x, y=y, dy=None)
+
+        data_out = g.linearize_data(data_in)
+        assert data_out.dy == pytest.approx([0.5, 0.5, 0.5], abs=1e-10)
+
+    def test_linearization_all_points_filtered_raises(self):
+        """If all points are invalid, linearization should fail clearly."""
+        g = invariant.Guinier()
+        data_in = Data1D(
+            x=np.asarray([0.0, -1.0]),
+            y=np.asarray([1.0, -1.0]),
+            dy=np.asarray([1.0, 1.0]),
+        )
+
+        with pytest.raises(ValueError):
+            g.linearize_data(data_in)
 
     @pytest.mark.parametrize(
         "px, py, pdy, expected_bins",
