@@ -178,3 +178,122 @@ class TestInvariantCalculator:
         _, ds_small_porod = inv.get_surface_with_error(contrast, porod, porod_const_err=0.1 * porod)
         _, ds_large_porod = inv.get_surface_with_error(contrast, porod, porod_const_err=0.5 * porod)
         assert ds_large_porod > ds_small_porod
+
+    @pytest.mark.parametrize("power", [0.0, -1.0])
+    def test_power_law_raises_for_non_positive_power(self, power):
+        """Power-law model should reject non-positive power values."""
+        model = invariant.PowerLaw(scale=1.0, power=power)
+        with pytest.raises(ValueError):
+            model.evaluate_model(np.asarray([0.1, 0.2]))
+
+    def test_power_law_raises_for_non_positive_scale(self):
+        """Power-law model should reject non-positive scale values."""
+        model = invariant.PowerLaw(scale=0.0, power=4.0)
+        with pytest.raises(ValueError):
+            model.evaluate_model(np.asarray([0.1, 0.2]))
+
+    def test_get_qstar_invalid_extrapolation_raises(self):
+        """Invalid extrapolation mode should raise ValueError."""
+        inv = invariant.InvariantCalculator(self.data)
+        with pytest.raises(ValueError):
+            inv.get_qstar(extrapolation="invalid")
+
+    def test_get_qstar_invalid_data_raises(self):
+        """Invalid data should raise ValueError when calculating q*."""
+        inv = invariant.InvariantCalculator(self.data)
+        inv._data.x = np.asarray([])
+        assert len(inv._data.x) == 0
+        with pytest.raises(ValueError):
+            inv.get_qstar()
+
+        inv = invariant.InvariantCalculator(self.data)
+        inv._data.y = np.asarray([1.0, 1.0])
+        assert len(inv._data.x) != 0
+        assert len(inv._data.x) != len(inv._data.y)
+        with pytest.raises(ValueError):
+            inv.get_qstar()
+
+        inv = invariant.InvariantCalculator(self.data)
+        inv._data.y = np.asarray([])
+        assert len(inv._data.x) != 0
+        assert len(inv._data.y) == 0
+        with pytest.raises(ValueError):
+            inv.get_qstar()
+
+    @pytest.mark.parametrize("contrast", [0.0, -1.0])
+    def test_get_volume_fraction_invalid_contrast_raises(self, contrast):
+        """Volume fraction requires positive contrast."""
+        inv = invariant.InvariantCalculator(self.data)
+        with pytest.raises(ValueError):
+            inv.get_volume_fraction(contrast)
+
+    @pytest.mark.parametrize("volume", [0.0, 1.0, -0.1, 1.1])
+    def test_get_contrast_invalid_volume_raises(self, volume):
+        """Contrast requires volume strictly between 0 and 1."""
+        inv = invariant.InvariantCalculator(self.data)
+        with pytest.raises(ValueError):
+            inv.get_contrast(volume)
+
+    def test_get_surface_zero_contrast_raises(self):
+        """Surface computation requires non-zero contrast."""
+        inv = invariant.InvariantCalculator(self.data)
+        with pytest.raises(ValueError):
+            inv.get_surface(contrast=0.0, porod_const=1.0e-7)
+
+    @pytest.mark.parametrize(
+        "contrast_err, porod_err",
+        [(-1.0, 0.0), (0.0, -1.0), (-1.0, -1.0)],
+    )
+    def test_surface_with_error_negative_uncertainties_raise(self, contrast_err, porod_err):
+        """Negative uncertainty inputs are invalid."""
+        inv = invariant.InvariantCalculator(self.data)
+        with pytest.raises(ValueError):
+            inv.get_surface_with_error(
+                contrast=2.2e-6,
+                porod_const=1.825e-7,
+                contrast_err=contrast_err,
+                porod_const_err=porod_err,
+            )
+
+    def test_get_extra_data_low_invalid_range_returns_empty(self):
+        """Low-Q extra data returns empty arrays when q_start is outside range."""
+        inv = invariant.InvariantCalculator(self.data)
+        inv.set_extrapolation("low", npts=10, function="guinier")
+        q_end = inv._data.x[9]
+        x_out, y_out = inv.get_extra_data_low(q_start=q_end, npts=20)
+
+        assert len(x_out) == 0
+        assert len(y_out) == 0
+
+    def test_get_extra_data_high_invalid_range_returns_empty(self):
+        """High-Q extra data returns empty arrays when q_end is before q_start."""
+        inv = invariant.InvariantCalculator(self.data)
+        inv.set_extrapolation("high", npts=20, function="power_law")
+        q_start = inv._data.x[len(inv._data.x) - 20]
+        x_out, y_out = inv.get_extra_data_high(npts_in=20, q_end=q_start, npts=20)
+
+        assert len(x_out) == 0
+        assert len(y_out) == 0
+
+    def test_background_and_scale_setters_invalidate_cached_qstar(self):
+        """Changing background/scale should invalidate cached qstar."""
+        inv = invariant.InvariantCalculator(self.data)
+        _ = inv.get_qstar()
+        assert inv._qstar is not None
+
+        inv.background = inv.background
+        assert inv._qstar is None
+
+        _ = inv.get_qstar()
+        inv.scale = inv.scale
+        assert inv._qstar is None
+
+    def test_set_data_invalidates_cached_qstar(self):
+        """Setting new data should invalidate cached qstar."""
+        inv = invariant.InvariantCalculator(self.data)
+        _ = inv.get_qstar()
+        assert inv._qstar is not None
+
+        new_data = Data1D(x=np.asarray([0.1, 0.2]), y=np.asarray([1.0, 1.0]), dy=np.asarray([0.1, 0.1]))
+        inv.set_data(new_data)
+        assert inv._qstar is None
