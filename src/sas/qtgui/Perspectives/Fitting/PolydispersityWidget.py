@@ -12,6 +12,10 @@ from sasmodels.weights import MODELS as POLYDISPERSITY_MODELS
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
+from sas.qtgui.Perspectives.Fitting.UndoRedo import (
+    ParameterMinMaxCommand,
+    ParameterValueCommand,
+)
 
 # Local UI
 from sas.qtgui.Perspectives.Fitting.UI.PolydispersityWidget import Ui_PolydispersityWidgetUI
@@ -34,6 +38,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         self.poly_model = FittingUtilities.ToolTippedItemModel()
         self.is2D = False
         self.isActive = False
+        self._fitting_widget = parent
         self.logic = parent.logic
         self.poly_params = {}
         self.has_poly_error_column = False
@@ -151,9 +156,15 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
             current_details = self.logic.kernel_module.details[parameter_name_w]
             if self.has_poly_error_column:
                 # err column changes the indexing
-                current_details[model_column-2] = value
+                pos = model_column - 2
             else:
-                current_details[model_column-1] = value
+                pos = model_column - 1
+            old_val = current_details[pos]
+            current_details[pos] = value
+            bound = "min" if pos == 1 else "max"
+            self._fitting_widget.undo_stack.push(
+                ParameterMinMaxCommand(parameter_name_w, bound, old_val, value)
+            )
 
         elif model_column == delegate.poly_function:
             # name of the function - just pass
@@ -172,8 +183,12 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
                 # Map the column to the poly param that was changed
                 associations = {1: "width", delegate.poly_npts: "npts", delegate.poly_nsigs: "nsigmas"}
                 p_name = f"{parameter_name}.{associations.get(model_column, 'width')}"
+                old_val = self.logic.kernel_module.getParam(p_name)
                 self.poly_params[p_name] = value
                 self.logic.kernel_module.setParam(p_name, value)
+                self._fitting_widget.undo_stack.push(
+                    ParameterValueCommand(p_name, old_val, value)
+                )
 
                 # Update plot
                 self.updateDataSignal.emit()

@@ -259,6 +259,24 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         log_points = self.chkLogData.isChecked()
         return (q_range_min, q_range_max, npts, log_points, self.weighting)
 
+    def setState(self, q_range_min, q_range_max, npts, log_points, weighting):
+        """
+        Set the state of controls from provided values.
+        Used by undo/redo to restore fit options.
+        """
+        self.model.blockSignals(True)
+        self.updateQRange(q_range_min, q_range_max, npts)
+        self.chkLogData.setChecked(log_points)
+        self.weighting = weighting
+        # Update the weighting radio buttons to match
+        buttons = self.weightingGroup.buttons()
+        for btn in buttons:
+            btn_id = abs(self.weightingGroup.id(btn) + 2)
+            if btn_id == weighting:
+                btn.setChecked(True)
+                break
+        self.model.blockSignals(False)
+
     def npts2fit(self, data=None, qmin=None, qmax=None, npts=None):
         """
         return numbers of data points within qrange
