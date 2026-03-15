@@ -1,6 +1,10 @@
 import os
 import platform
 
+# Must be set before any Qt or matplotlib import so that matplotlib's
+# qt_compat.py selects PySide6 instead of raising an ImportError.
+os.environ.setdefault("QT_API", "pyside6")
+
 import pytest
 
 # We are assuming that the tests are running in a virtual environment with
