@@ -41,9 +41,13 @@ from sas.qtgui.Perspectives.Fitting.UndoRedo import (
 # ---------------------------------------------------------------------------
 
 @pytest.fixture(autouse=True)
-def mock_message_box(mocker):
+def mock_message_box(monkeypatch):
     """Suppress all QMessageBox dialogs for the entire test module."""
-    return mocker.patch("PySide6.QtWidgets.QMessageBox")
+    mock = MagicMock()
+    monkeypatch.setattr(
+        "sas.qtgui.Perspectives.Fitting.UndoRedo.QtWidgets.QMessageBox", mock
+    )
+    return mock
 
 
 @pytest.fixture
@@ -475,6 +479,35 @@ class TestUndoStack:
         stack.clear()
         assert len(received) == 1
 
+    def test_stackChanged_emitted_on_set_enabled(self, stack):
+        """set_enabled must emit stackChanged so UI actions refresh."""
+        received = []
+        stack.stackChanged.connect(lambda: received.append(1))
+        stack.set_enabled(False)
+        assert len(received) == 1
+        stack.set_enabled(True)
+        assert len(received) == 2
+
+    def test_can_undo_false_when_disabled(self, stack):
+        """can_undo must return False when the stack is disabled."""
+        stack.push(_make_cmd())
+        assert stack.can_undo()
+        stack.set_enabled(False)
+        assert not stack.can_undo()
+        # Re-enable: can_undo should return True again
+        stack.set_enabled(True)
+        assert stack.can_undo()
+
+    def test_can_redo_false_when_disabled(self, stack, widget):
+        """can_redo must return False when the stack is disabled."""
+        stack.push(_make_cmd())
+        stack.undo()
+        assert stack.can_redo()
+        stack.set_enabled(False)
+        assert not stack.can_redo()
+        stack.set_enabled(True)
+        assert stack.can_redo()
+
     def test_max_depth_drops_oldest_entries(self, stack):
         stack._max_depth = 3
         cmds = [_make_cmd(f"c{i}") for i in range(5)]
@@ -523,7 +556,9 @@ class TestUndoStack:
         stack.push(_make_cmd())
         stack.set_enabled(False)
         stack.undo()
-        assert stack.can_undo()   # command must still be on the undo stack
+        # Command still on internal stack, but can_undo() reports False while disabled
+        assert len(stack._undo_stack) == 1
+        assert not stack.can_undo()
         assert not stack.can_redo()
 
     def test_disabled_prevents_redo(self, stack, widget):
@@ -532,8 +567,10 @@ class TestUndoStack:
         stack.undo()
         stack.set_enabled(False)
         stack.redo()
-        assert not stack.can_undo()  # nothing moved back
-        assert stack.can_redo()      # command must still be on the redo stack
+        # Command still on internal redo stack, but can_redo() reports False while disabled
+        assert not stack.can_undo()
+        assert not stack.can_redo()
+        assert len(stack._redo_stack) == 1
 
     def test_replaying_prevents_recursive_push(self, stack):
         """Commands pushed during undo replay must be silently dropped."""

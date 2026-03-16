@@ -123,16 +123,19 @@ class FittingWidgetMod(FittingWidget.FittingWidget):
 # ---------------------------------------------------------------------------
 
 @pytest.fixture(autouse=True)
-def _suppress_message_boxes(mocker):
+def _suppress_message_boxes(monkeypatch):
     """Suppress QMessageBox dialogs globally."""
-    mocker.patch("PySide6.QtWidgets.QMessageBox")
+    monkeypatch.setattr(
+        "sas.qtgui.Perspectives.Fitting.UndoRedo.QtWidgets.QMessageBox",
+        MagicMock(),
+    )
 
 
 @pytest.fixture
-def widget(qapp, mocker):
+def widget(qapp, monkeypatch):
     """Create a real FittingWidget for integration testing."""
     w = FittingWidgetMod(dummy_manager())
-    mocker.patch.object(FittingUtilities, 'checkConstraints', return_value=None)
+    monkeypatch.setattr(FittingUtilities, 'checkConstraints', lambda *a, **kw: None)
     yield w
     w.close()
     del w
@@ -504,21 +507,21 @@ class TestFitResultUndo:
         res.pname = param_names[:len(res.pvec)]
         return ([[res]], 0.5)
 
-    def test_fit_complete_pushes_fit_result_command(self, widget_with_model, mocker):
+    def test_fit_complete_pushes_fit_result_command(self, widget_with_model, monkeypatch):
         """fitComplete should push a FitResultCommand."""
         w = widget_with_model
         w.undo_stack.clear()
 
         # Mock methods that would crash without real fit data
-        mocker.patch.object(w.polydispersity_widget, 'updatePolyModelFromList')
-        mocker.patch.object(w.magnetism_widget, 'updateMagnetModelFromList')
-        mocker.patch.object(w, 'onPlot')
+        monkeypatch.setattr(w.polydispersity_widget, 'updatePolyModelFromList', lambda *a, **kw: None)
+        monkeypatch.setattr(w.magnetism_widget, 'updateMagnetModelFromList', lambda *a, **kw: None)
+        monkeypatch.setattr(w, 'onPlot', lambda *a, **kw: None)
 
         # Create a result that paramDictFromResults can handle
         old_params = w._get_parameter_dict()
         param_dict = {n: (v + 1.0, 0.01) for n, v in old_params.items()}
-        mocker.patch.object(
-            w.fitting_controller, 'paramDictFromResults', return_value=param_dict
+        monkeypatch.setattr(
+            w.fitting_controller, 'paramDictFromResults', lambda *a, **kw: param_dict
         )
 
         # Make updateModelFromList actually modify the kernel so new_params != old_params
@@ -526,8 +529,8 @@ class TestFitResultUndo:
             for name, (val, _err) in pd.items():
                 w.logic.kernel_module.setParam(name, val)
 
-        mocker.patch.object(
-            w.fitting_controller, 'updateModelFromList', side_effect=fake_update
+        monkeypatch.setattr(
+            w.fitting_controller, 'updateModelFromList', fake_update
         )
 
         result = self._make_fit_result(w)
@@ -537,17 +540,17 @@ class TestFitResultUndo:
         top_cmd = w.undo_stack._undo_stack[-1]
         assert isinstance(top_cmd, FitResultCommand)
 
-    def test_fit_complete_reenables_undo_stack(self, widget_with_model, mocker):
+    def test_fit_complete_reenables_undo_stack(self, widget_with_model, monkeypatch):
         """fitComplete must re-enable the undo stack (disabled during fit)."""
         w = widget_with_model
 
-        mocker.patch.object(w.fitting_controller, 'updateModelFromList')
-        mocker.patch.object(w.polydispersity_widget, 'updatePolyModelFromList')
-        mocker.patch.object(w.magnetism_widget, 'updateMagnetModelFromList')
-        mocker.patch.object(w, 'onPlot')
-        mocker.patch.object(
+        monkeypatch.setattr(w.fitting_controller, 'updateModelFromList', lambda *a, **kw: None)
+        monkeypatch.setattr(w.polydispersity_widget, 'updatePolyModelFromList', lambda *a, **kw: None)
+        monkeypatch.setattr(w.magnetism_widget, 'updateMagnetModelFromList', lambda *a, **kw: None)
+        monkeypatch.setattr(w, 'onPlot', lambda *a, **kw: None)
+        monkeypatch.setattr(
             w.fitting_controller, 'paramDictFromResults',
-            return_value={n: (v, 0.01) for n, v in w._get_parameter_dict().items()}
+            lambda *a, **kw: {n: (v, 0.01) for n, v in w._get_parameter_dict().items()}
         )
 
         w.undo_stack.set_enabled(False)
@@ -555,12 +558,12 @@ class TestFitResultUndo:
         w.fitComplete(result)
         assert w.undo_stack._enabled
 
-    def test_fit_complete_failed_no_command(self, widget_with_model, mocker):
+    def test_fit_complete_failed_no_command(self, widget_with_model, monkeypatch):
         """A failed fit should not push an undo command."""
         w = widget_with_model
         w.undo_stack.clear()
 
-        mocker.patch.object(w, 'enableInteractiveElements')
+        monkeypatch.setattr(w, 'enableInteractiveElements', lambda *a, **kw: None)
         w.kernel_module_copy = MagicMock()
 
         # Simulate failed fit
@@ -574,25 +577,25 @@ class TestFitResultUndo:
 
 class TestUndoStackDisabledDuringFit:
 
-    def test_onfit_disables_undo_stack(self, widget_with_model, mocker):
+    def test_onfit_disables_undo_stack(self, widget_with_model, monkeypatch):
         """onFit must disable the undo stack when fitting starts."""
         w = widget_with_model
 
-        mocker.patch.object(w.fitting_controller, 'prepareFitters', return_value=([MagicMock()], 0))
-        mocker.patch.object(w, 'disableInteractiveElements')
-        mocker.patch('twisted.internet.threads.deferToThread', return_value=MagicMock())
+        monkeypatch.setattr(w.fitting_controller, 'prepareFitters', lambda *a, **kw: ([MagicMock()], 0))
+        monkeypatch.setattr(w, 'disableInteractiveElements', lambda *a, **kw: None)
+        monkeypatch.setattr('twisted.internet.threads.deferToThread', lambda *a, **kw: MagicMock())
 
         w.onFit()
         assert not w.undo_stack._enabled
 
-    def test_stopfit_reenables_undo_stack(self, widget_with_model, mocker):
+    def test_stopfit_reenables_undo_stack(self, widget_with_model, monkeypatch):
         """stopFit must re-enable the undo stack."""
         w = widget_with_model
         w.calc_fit = MagicMock()
         w.calc_fit.isrunning.return_value = True
         w.undo_stack.set_enabled(False)
 
-        mocker.patch.object(w, 'enableInteractiveElements')
+        monkeypatch.setattr(w, 'enableInteractiveElements', lambda *a, **kw: None)
         w.stopFit()
         assert w.undo_stack._enabled
 

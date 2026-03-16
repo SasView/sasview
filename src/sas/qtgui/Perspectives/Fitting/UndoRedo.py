@@ -460,12 +460,12 @@ class UndoStack(QtCore.QObject):
             self.stackChanged.emit()
 
     def can_undo(self) -> bool:
-        """Return True if there is at least one command to undo."""
-        return bool(self._undo_stack)
+        """Return True if undo is possible (enabled and stack non-empty)."""
+        return self._enabled and bool(self._undo_stack)
 
     def can_redo(self) -> bool:
-        """Return True if there is at least one command to redo."""
-        return bool(self._redo_stack)
+        """Return True if redo is possible (enabled and stack non-empty)."""
+        return self._enabled and bool(self._redo_stack)
 
     def clear(self) -> None:
         """Clear both stacks and reset failure state."""
@@ -477,9 +477,14 @@ class UndoStack(QtCore.QObject):
         self.stackChanged.emit()
 
     def set_enabled(self, enabled: bool) -> None:
-        """Enable or disable command capture."""
+        """Enable or disable command capture and undo/redo execution.
+
+        Emits ``stackChanged`` so that action enabled state is refreshed
+        immediately (e.g. buttons grey out when a fit starts).
+        """
         self._enabled = enabled
         logger.debug("UndoStack: set_enabled=%s", enabled)
+        self.stackChanged.emit()
 
     @contextlib.contextmanager
     def suppressed(self):

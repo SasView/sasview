@@ -276,6 +276,8 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
                 btn.setChecked(True)
                 break
         self.model.blockSignals(False)
+        # Refresh the QDataWidgetMapper so text fields reflect the model
+        self.mapper.toFirst()
 
     def npts2fit(self, data=None, qmin=None, qmax=None, npts=None):
         """
