@@ -24,16 +24,6 @@ from sas.qtgui.Perspectives.Fitting.ConstraintManager import ConstraintManager
 from sas.qtgui.Perspectives.Fitting.FitPage import FitPage
 from sas.qtgui.Perspectives.Fitting.FitThread import FitThread
 from sas.qtgui.Perspectives.Fitting.FittingController import FittingController
-from sas.qtgui.Perspectives.Fitting.UndoRedo import (
-    CheckboxToggleCommand,
-    FitOptionsCommand,
-    FitResultCommand,
-    ModelSelectionCommand,
-    ParameterMinMaxCommand,
-    ParameterValueCommand,
-    SmearingOptionsCommand,
-    UndoStack,
-)
 from sas.qtgui.Perspectives.Fitting.FittingLogic import FittingLogic
 from sas.qtgui.Perspectives.Fitting.FittingState import FittingState
 from sas.qtgui.Perspectives.Fitting.MagnetismWidget import MagnetismWidget
@@ -46,6 +36,16 @@ from sas.qtgui.Perspectives.Fitting.PolydispersityWidget import PolydispersityWi
 from sas.qtgui.Perspectives.Fitting.ReportPageLogic import ReportPageLogic
 from sas.qtgui.Perspectives.Fitting.SmearingWidget import SmearingWidget
 from sas.qtgui.Perspectives.Fitting.UI.FittingWidgetUI import Ui_FittingWidgetUI
+from sas.qtgui.Perspectives.Fitting.UndoRedo import (
+    CheckboxToggleCommand,
+    FitOptionsCommand,
+    FitResultCommand,
+    ModelSelectionCommand,
+    ParameterMinMaxCommand,
+    ParameterValueCommand,
+    SmearingOptionsCommand,
+    UndoStack,
+)
 from sas.qtgui.Perspectives.Fitting.ViewDelegate import ModelViewDelegate
 from sas.qtgui.Plotting.Plotter import PlotterWidget
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole

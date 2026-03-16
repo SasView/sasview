@@ -12,13 +12,13 @@ from sasmodels.weights import MODELS as POLYDISPERSITY_MODELS
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
+
+# Local UI
+from sas.qtgui.Perspectives.Fitting.UI.PolydispersityWidget import Ui_PolydispersityWidgetUI
 from sas.qtgui.Perspectives.Fitting.UndoRedo import (
     ParameterMinMaxCommand,
     ParameterValueCommand,
 )
-
-# Local UI
-from sas.qtgui.Perspectives.Fitting.UI.PolydispersityWidget import Ui_PolydispersityWidgetUI
 from sas.qtgui.Perspectives.Fitting.ViewDelegate import PolyViewDelegate
 
 DEFAULT_POLYDISP_FUNCTION = 'gaussian'

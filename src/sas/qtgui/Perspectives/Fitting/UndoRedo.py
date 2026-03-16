@@ -22,7 +22,7 @@ import contextlib
 import logging
 import time
 import traceback
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from PySide6 import QtCore, QtWidgets
 
@@ -52,7 +52,7 @@ class UndoCommand:
         """Re-apply the forward change to *widget*."""
         raise NotImplementedError(f"{type(self).__name__}.redo() not implemented")
 
-    def can_merge(self, other: "UndoCommand") -> bool:
+    def can_merge(self, other: UndoCommand) -> bool:
         """Return True if *other* may be merged into this command.
 
         Merging collapses consecutive edits (e.g. two value changes to the
@@ -60,7 +60,7 @@ class UndoCommand:
         """
         return False
 
-    def merge(self, other: "UndoCommand") -> "UndoCommand":
+    def merge(self, other: UndoCommand) -> UndoCommand:
         """Return a single command combining *self* (earlier) with *other* (later).
 
         Only called when ``can_merge(other)`` returns True.
@@ -109,14 +109,14 @@ class ParameterValueCommand(UndoCommand):
     #: apart than this are treated as independent actions.
     _COALESCE_WINDOW_SECONDS: float = 5.0
 
-    def can_merge(self, other: "UndoCommand") -> bool:
+    def can_merge(self, other: UndoCommand) -> bool:
         return (
             isinstance(other, ParameterValueCommand)
             and other._param_name == self._param_name
             and (other.timestamp - self.timestamp) <= self._COALESCE_WINDOW_SECONDS
         )
 
-    def merge(self, other: "ParameterValueCommand") -> "ParameterValueCommand":
+    def merge(self, other: ParameterValueCommand) -> ParameterValueCommand:
         """Merge *self* (earlier) with *other* (later).
 
         The merged command undoes all the way to *self*'s old value and
@@ -137,7 +137,7 @@ class ParameterMinMaxCommand(UndoCommand):
     (added in Phase 2).
     """
 
-    _BOUND_INDEX: Dict[str, int] = {"min": 1, "max": 2}
+    _BOUND_INDEX: dict[str, int] = {"min": 1, "max": 2}
 
     def __init__(
         self, param_name: str, bound: str, old_val: float, new_val: float
@@ -183,10 +183,10 @@ class ModelSelectionCommand(UndoCommand):
 
     def __init__(
         self,
-        old_triple: Tuple[str, str, str],
-        new_triple: Tuple[str, str, str],
-        old_params: Dict[str, float],
-        new_params: Dict[str, float],
+        old_triple: tuple[str, str, str],
+        new_triple: tuple[str, str, str],
+        old_params: dict[str, float],
+        new_params: dict[str, float],
     ) -> None:
         super().__init__(f"Select model {new_triple[1]!r}")
         self._old_triple = old_triple
@@ -208,7 +208,7 @@ class FitOptionsCommand(UndoCommand):
     """
 
     def __init__(
-        self, old_options: Dict[str, Any], new_options: Dict[str, Any]
+        self, old_options: dict[str, Any], new_options: dict[str, Any]
     ) -> None:
         super().__init__("Change fit options")
         self._old_options = dict(old_options)
@@ -228,7 +228,7 @@ class SmearingOptionsCommand(UndoCommand):
     """
 
     def __init__(
-        self, old_state: Dict[str, Any], new_state: Dict[str, Any]
+        self, old_state: dict[str, Any], new_state: dict[str, Any]
     ) -> None:
         super().__init__("Change smearing options")
         self._old_state = dict(old_state)
@@ -279,7 +279,7 @@ class FitResultCommand(UndoCommand):
     """
 
     def __init__(
-        self, old_params: Dict[str, float], new_params: Dict[str, float]
+        self, old_params: dict[str, float], new_params: dict[str, float]
     ) -> None:
         super().__init__("Fit result")
         self._old_params = dict(old_params)
@@ -303,16 +303,16 @@ class CompoundCommand(UndoCommand):
     """
 
     def __init__(
-        self, commands: List[UndoCommand], description: str = ""
+        self, commands: list[UndoCommand], description: str = ""
     ) -> None:
         desc = description or (
             commands[0].description if commands else "Compound action"
         )
         super().__init__(desc)
-        self._commands: List[UndoCommand] = list(commands)
+        self._commands: list[UndoCommand] = list(commands)
 
     @property
-    def commands(self) -> List[UndoCommand]:
+    def commands(self) -> list[UndoCommand]:
         """A copy of the contained command list."""
         return list(self._commands)
 
@@ -364,17 +364,17 @@ class UndoStack(QtCore.QObject):
     stackChanged = QtCore.Signal()
 
     def __init__(
-        self, widget, parent: Optional[QtCore.QObject] = None
+        self, widget, parent: QtCore.QObject | None = None
     ) -> None:
         super().__init__(parent)
         self._widget = widget
         from sas import config as _sas_config
         self._max_depth: int = getattr(_sas_config, "UNDO_STACK_MAX_DEPTH", 200)
-        self._undo_stack: List[UndoCommand] = []
-        self._redo_stack: List[UndoCommand] = []
+        self._undo_stack: list[UndoCommand] = []
+        self._redo_stack: list[UndoCommand] = []
         self._enabled: bool = True
         self._replaying: bool = False
-        self._last_good_state: Optional[Dict[str, float]] = None
+        self._last_good_state: dict[str, float] | None = None
         self._consecutive_failures: int = 0
 
     # ------------------------------------------------------------------
@@ -519,7 +519,7 @@ class UndoStack(QtCore.QObject):
             return f"Redo {self._redo_stack[-1].description}"
         return "Redo"
 
-    def save_last_good_state(self, state: Dict[str, float]) -> None:
+    def save_last_good_state(self, state: dict[str, float]) -> None:
         """Store *state* as the recovery snapshot.
 
         Call from FittingWidget after each successful undo/redo::

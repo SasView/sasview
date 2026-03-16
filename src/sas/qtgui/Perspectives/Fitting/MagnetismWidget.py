@@ -9,13 +9,13 @@ from PySide6 import QtCore, QtGui, QtWidgets
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
+
+# Local UI
+from sas.qtgui.Perspectives.Fitting.UI.MagnetismWidget import Ui_MagnetismWidgetUI
 from sas.qtgui.Perspectives.Fitting.UndoRedo import (
     ParameterMinMaxCommand,
     ParameterValueCommand,
 )
-
-# Local UI
-from sas.qtgui.Perspectives.Fitting.UI.MagnetismWidget import Ui_MagnetismWidgetUI
 from sas.qtgui.Perspectives.Fitting.ViewDelegate import MagnetismViewDelegate
 
 logger = logging.getLogger(__name__)
