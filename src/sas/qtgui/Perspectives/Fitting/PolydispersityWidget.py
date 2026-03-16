@@ -144,7 +144,6 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
                 if parameter_name_w in self.poly_params_to_fit:
                     self.poly_params_to_fit.remove(parameter_name_w)
             self.cmdFitSignal.emit()
-            # self.updateUndo()
 
         elif model_column in [delegate.poly_min, delegate.poly_max]:
             try:

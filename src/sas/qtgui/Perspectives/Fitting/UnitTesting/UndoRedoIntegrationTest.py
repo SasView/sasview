@@ -21,10 +21,10 @@ Test organisation:
 """
 import glob
 import os
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
-from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtWidgets
 
 from sasmodels.sasview_model import load_custom_model
 
@@ -39,10 +39,8 @@ from sas.qtgui.Perspectives.Fitting.UndoRedo import (
     SmearingOptionsCommand,
     UndoStack,
 )
-from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Utilities import GuiUtils
 from sas.sascalc.fit.models import ModelManager, ModelManagerBase
-
 
 # ---------------------------------------------------------------------------
 # Helpers (same pattern as FittingWidgetTest.py)
@@ -299,11 +297,11 @@ class TestModelSelectionUndo:
         w.cbModel.setCurrentIndex(model_index)
         QtWidgets.QApplication.processEvents()
 
-        assert type(w.logic.kernel_module) != original_model_type
+        assert type(w.logic.kernel_module) is not original_model_type
         w.undo_stack.undo()
         QtWidgets.QApplication.processEvents()
         # Verify the kernel module type was restored
-        assert type(w.logic.kernel_module) == original_model_type
+        assert type(w.logic.kernel_module) is original_model_type
 
     def test_select_default_model_no_command(self, widget_with_model):
         """Selecting MODEL_DEFAULT should not push a command."""
@@ -329,7 +327,7 @@ class TestFitOptionsUndo:
 
         # Modify the Q range via the options widget's model
         from sas.qtgui.Perspectives.Fitting.OptionsWidget import OptionsWidget
-        old_state = w._get_fit_options_dict()
+        w._get_fit_options_dict()
         # Directly change the widget's model value to simulate user edit
         w.options_widget.model.item(
             OptionsWidget.MODEL.index('MIN_RANGE')
