@@ -421,6 +421,7 @@ class UndoStack(QtCore.QObject):
             self._redo_stack.append(cmd)
             self._consecutive_failures = 0
             self._auto_snapshot()
+            self._refresh_view()
             logger.debug(
                 "UndoStack: undo %r (undo=%d, redo=%d)",
                 cmd, len(self._undo_stack), len(self._redo_stack),
@@ -446,6 +447,7 @@ class UndoStack(QtCore.QObject):
             self._undo_stack.append(cmd)
             self._consecutive_failures = 0
             self._auto_snapshot()
+            self._refresh_view()
             logger.debug(
                 "UndoStack: redo %r (undo=%d, redo=%d)",
                 cmd, len(self._undo_stack), len(self._redo_stack),
@@ -616,3 +618,15 @@ class UndoStack(QtCore.QObject):
                 "UndoStack: auto-saved last_good_state (%d params)",
                 len(self._last_good_state),
             )
+
+    def _refresh_view(self) -> None:
+        """Force the parameter table viewport to repaint after undo/redo.
+
+        PySide6 QTreeView may defer repainting when model items are changed
+        programmatically (via QStandardItem.setText) rather than through
+        user interaction.  This forces an immediate visual update.
+        """
+        try:
+            self._widget.lstParams.viewport().update()
+        except AttributeError:
+            pass

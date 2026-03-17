@@ -496,36 +496,40 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Enable/disable various UI elements based on data loaded
         """
-        # Tag along functionality
-        self.label.setText("Data loaded from: ")
-        if self.logic.data.name:
-            self.lblFilename.setText(self.logic.data.name)
-        else:
-            self.lblFilename.setText(self.logic.data.filename)
-        self.updateQRange()
-        # Switch off Data2D control
-        self.chk2DView.setEnabled(False)
-        self.chk2DView.setVisible(False)
-        self.chkMagnetism.setEnabled(self.canHaveMagnetism())
-        self.tabFitting.setTabEnabled(TAB_MAGNETISM, self.chkMagnetism.isChecked())
-        # Combo box or label for file name"
-        if self.is_batch_fitting:
-            self.lblFilename.setVisible(False)
-            for dataitem in self.all_data:
-                name = GuiUtils.dataFromItem(dataitem).name
-                self.cbFileNames.addItem(name)
-            self.cbFileNames.setVisible(True)
-            self.chkChainFit.setEnabled(True)
-            self.chkChainFit.setVisible(True)
-            # This panel is not designed to view individual fits, so disable plotting
-            self.cmdPlot.setVisible(False)
-        # Similarly on other tabs
-        self.options_widget.setEnablementOnDataLoad()
-        self.onSelectModel()
-        # Smearing tab
-        self.smearing_widget.updateData(self.data)
-        # Check if a model was already loaded when data is sent to the tab
-        self.cmdFit.setEnabled(self.haveParamsToFit())
+        # Suppress undo capture: data loading is a programmatic operation,
+        # not a user-initiated parameter change.  Without this, updateQRange
+        # and onWeightingChoice push spurious FitOptionsCommand entries.
+        with self.undo_stack.suppressed():
+            # Tag along functionality
+            self.label.setText("Data loaded from: ")
+            if self.logic.data.name:
+                self.lblFilename.setText(self.logic.data.name)
+            else:
+                self.lblFilename.setText(self.logic.data.filename)
+            self.updateQRange()
+            # Switch off Data2D control
+            self.chk2DView.setEnabled(False)
+            self.chk2DView.setVisible(False)
+            self.chkMagnetism.setEnabled(self.canHaveMagnetism())
+            self.tabFitting.setTabEnabled(TAB_MAGNETISM, self.chkMagnetism.isChecked())
+            # Combo box or label for file name"
+            if self.is_batch_fitting:
+                self.lblFilename.setVisible(False)
+                for dataitem in self.all_data:
+                    name = GuiUtils.dataFromItem(dataitem).name
+                    self.cbFileNames.addItem(name)
+                self.cbFileNames.setVisible(True)
+                self.chkChainFit.setEnabled(True)
+                self.chkChainFit.setVisible(True)
+                # This panel is not designed to view individual fits, so disable plotting
+                self.cmdPlot.setVisible(False)
+            # Similarly on other tabs
+            self.options_widget.setEnablementOnDataLoad()
+            self.onSelectModel()
+            # Smearing tab
+            self.smearing_widget.updateData(self.data)
+            # Check if a model was already loaded when data is sent to the tab
+            self.cmdFit.setEnabled(self.haveParamsToFit())
 
     def acceptsData(self) -> bool:
         """ Tells the caller this widget can accept new dataset """

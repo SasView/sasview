@@ -239,14 +239,24 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         """
         Update the local model based on calculated values
         """
-        qmax = str(q_range_max)
-        qmin = str(q_range_min)
-        self.model.item(self.MODEL.index('MIN_RANGE')).setText(qmin)
-        self.model.item(self.MODEL.index('MAX_RANGE')).setText(qmax)
-        self.model.item(self.MODEL.index('NPTS')).setText(str(npts))
-        self.qmin, self.qmax, self.npts = q_range_min, q_range_max, npts
-        npts_fit = self.npts2fit(self.logic.data, self.qmin, self.qmax, self.npts)
-        self.model.item(self.MODEL.index('NPTS_FIT')).setText(str(npts_fit))
+        # Block signals to prevent intermediate dataChanged→onModelChange→
+        # plot_signal firing for each individual setText.  Without this,
+        # onOptionsUpdate receives partially-updated state and can push
+        # multiple spurious FitOptionsCommand entries onto the undo stack.
+        self.model.blockSignals(True)
+        try:
+            qmax = str(q_range_max)
+            qmin = str(q_range_min)
+            self.model.item(self.MODEL.index('MIN_RANGE')).setText(qmin)
+            self.model.item(self.MODEL.index('MAX_RANGE')).setText(qmax)
+            self.model.item(self.MODEL.index('NPTS')).setText(str(npts))
+            self.qmin, self.qmax, self.npts = q_range_min, q_range_max, npts
+            npts_fit = self.npts2fit(self.logic.data, self.qmin, self.qmax, self.npts)
+            self.model.item(self.MODEL.index('NPTS_FIT')).setText(str(npts_fit))
+        finally:
+            self.model.blockSignals(False)
+        # Single signal after all values are consistent
+        self.plot_signal.emit()
 
     def state(self):
         """
