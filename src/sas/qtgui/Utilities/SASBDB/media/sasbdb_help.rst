@@ -6,7 +6,7 @@ SASBDB Export
 Introduction
 ------------
 
-The SASBDB Export tool allows you to export your Small Angle Scattering (SAS) data and analysis results in a format suitable for submission to the Small Angle Scattering Biological Data Bank (SASBDB). SASBDB is a repository for experimental SAS data from biological macromolecules, providing a standardized format for data sharing and publication.
+The SASBDB Export tool prepares Small Angle Scattering (SAS) data and analysis results for submission to the Small Angle Scattering Biological Data Bank (SASBDB). SASBDB is a repository for experimental SAS data from biological macromolecules, providing a standardized format for data sharing and publication.
 
 This tool collects data from your current SasView session, including:
 
@@ -32,16 +32,17 @@ The dialog will automatically collect available data from your current session a
 Dialog Overview
 ---------------
 
-The SASBDB Export dialog consists of multiple tabs, each containing related fields:
+The SASBDB Export dialog consists of multiple tabs in this order (left to right in the dialog):
 
-- **Project Tab**: Project publication status and identification
-- **Instrument Tab**: Instrument and facility details
-- **Sample/Data Tab**: Sample information and experimental parameters
-- **Molecule Tab**: Biological molecule details
-- **Buffer Tab**: Buffer composition and conditions
-- **Guinier Tab**: Guinier analysis results (if available, read-only)
-- **Fit Tab**: Fit results and model information
-- **Shape Visualization**: 3D model visualization (if a model is fitted)
+1. **Project Tab**: Project publication status and identification
+2. **Instrument Tab**: Instrument and facility details
+3. **Sample/Data Tab**: Sample information and experimental parameters
+4. **Molecule Tab**: Biological molecule details
+5. **Buffer Tab**: Buffer composition and conditions
+6. **Guinier Tab**: Guinier analysis results (if available, read-only)
+7. **Fit Tab**: Fit results and model information
+
+Below the tabs, **Shape Visualization** shows a 3D model preview when a fitted model is available.
 
 Project Tab
 -----------
