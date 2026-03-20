@@ -2194,6 +2194,11 @@ NOTE: Currently not impacted by Solvent SLD </string>
        <string>Debye full avg. w/ β(Q)</string>
       </property>
      </item>
+     <item>
+      <property name="text">
+       <string>SAXS fitting</string>
+      </property>
+     </item>
     </widget>
    </item>
   </layout>
