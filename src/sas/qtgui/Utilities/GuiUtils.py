@@ -12,7 +12,6 @@ import urllib.parse
 import warnings
 import webbrowser
 from io import BytesIO
-from pathlib import Path
 
 import numpy
 import numpy as np
