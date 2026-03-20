@@ -3,7 +3,6 @@ import os
 import sys
 import traceback
 import webbrowser
-from pathlib import Path
 
 from packaging.version import Version
 from PySide6.QtCore import QLocale, Qt

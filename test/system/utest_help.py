@@ -3,9 +3,7 @@
 from pathlib import Path
 from unittest.mock import patch
 
-import pytest
-
-from sas.system._help import HELP_SYSTEM, _HelpSystem, _release_version
+from sas.system._help import _HelpSystem, _release_version
 
 
 class TestReleaseVersion:
