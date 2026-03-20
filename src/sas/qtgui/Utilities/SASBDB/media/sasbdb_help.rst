@@ -35,12 +35,12 @@ Dialog Overview
 The SASBDB Export dialog consists of multiple tabs, each containing related fields:
 
 - **Project Tab**: Project publication status and identification
-- **Sample Tab**: Sample information and experimental parameters
+- **Instrument Tab**: Instrument and facility details
+- **Sample/Data Tab**: Sample information and experimental parameters
 - **Molecule Tab**: Biological molecule details
 - **Buffer Tab**: Buffer composition and conditions
-- **Guinier Tab**: Guinier analysis results (if available)
+- **Guinier Tab**: Guinier analysis results (if available, read-only)
 - **Fit Tab**: Fit results and model information
-- **Instrument Tab**: Instrument and facility details
 - **Shape Visualization**: 3D model visualization (if a model is fitted)
 
 Project Tab
@@ -65,10 +65,33 @@ The Project tab contains information about your research project.
 - **DOI**: Digital Object Identifier (required if published)
 - **Project Title**: Title of the project (required if not published)
 
-Sample Tab
-----------
+Instrument Tab
+--------------
 
-The Sample tab contains information about your experimental sample and data.
+The Instrument tab contains information about the instrument and facility where the experiment was performed.
+
+**Required Fields**
+
+- **Source Type**: Type of radiation source (X-ray synchrotron, X-ray in house, Neutron source, or Other)
+- **Beamline Name**: Name of the beamline or instrument manufacturer/model
+- **Synchrotron Name**: Name of the synchrotron facility or institute/facility
+- **Detector Manufacturer**: Detector manufacturer and model
+- **Detector Resolution**: Detector pixel size
+- **City**: City where the facility is located
+- **Country**: Country where the facility is located
+
+**Data Collection**
+
+Instrument information is automatically extracted from:
+
+- Data metadata (beamline, facility, detector information)
+- Source and detector objects in the data structure
+- Metadata dictionary fields
+
+Sample/Data Tab
+---------------
+
+The Sample/Data tab contains information about your experimental sample and data.
 
 **Required Fields**
 
@@ -137,15 +160,17 @@ The Buffer tab contains information about the buffer solution used in the experi
 Guinier Tab
 -----------
 
-The Guinier tab displays results from Guinier analysis, if available.
+The Guinier tab displays results from Guinier analysis, if available. All fields are read-only and auto-populated.
 
 **Fields**
 
+- **Q Start**: Starting q-value of the Guinier range
+- **Q End**: Ending q-value of the Guinier range
+- **Start point**: Data point index at the start of the Guinier range
+- **End point**: Data point index at the end of the Guinier range
 - **Rg**: Radius of gyration in nm
 - **Rg Error**: Uncertainty in Rg
 - **I(0)**: Forward scattering intensity
-- **Range Start**: Starting q-value of the Guinier range
-- **Range End**: Ending q-value of the Guinier range
 
 **Availability**
 
@@ -182,29 +207,6 @@ Fit information is automatically collected from:
 - Model name and parameters from the fitted model
 
 If no fit has been performed, these fields will be empty.
-
-Instrument Tab
---------------
-
-The Instrument tab contains information about the instrument and facility where the experiment was performed.
-
-**Required Fields**
-
-- **Source Type**: Type of radiation source (X-ray synchrotron, X-ray in house, Neutron source, or Other)
-- **Beamline Name**: Name of the beamline or instrument manufacturer/model
-- **Synchrotron Name**: Name of the synchrotron facility or institute/facility
-- **Detector Manufacturer**: Detector manufacturer and model
-- **Detector Resolution**: Detector pixel size
-- **City**: City where the facility is located
-- **Country**: Country where the facility is located
-
-**Data Collection**
-
-Instrument information is automatically extracted from:
-
-- Data metadata (beamline, facility, detector information)
-- Source and detector objects in the data structure
-- Metadata dictionary fields
 
 Shape Visualization
 ------------------
