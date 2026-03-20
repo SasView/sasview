@@ -3,8 +3,6 @@
 Provides UndoCommand (abstract base), concrete subclasses for each kind of
 undoable action, and UndoStack which manages per-tab history.
 
-Phase 1 of UNDO_PLAN_CLAUDE.md — core infrastructure only.
-Integration with FittingWidget is done in Phase 2.
 
 Design notes:
 - Each command stores only old_value + new_value (delta, not snapshot).
@@ -14,7 +12,6 @@ Design notes:
   parameter are merged into one entry (Qt fires dataChanged on commit, not
   per keystroke, providing the natural coalescing boundary).
 - Parameter 'fit' checkbox toggles are intentionally NOT tracked
-  (see UNDO_PLAN_CLAUDE.md, Decisions).
 """
 from __future__ import annotations
 
@@ -248,7 +245,6 @@ class CheckboxToggleCommand(UndoCommand):
     (e.g. ``"chkPolydispersity"``).
 
     Note: parameter 'fit' checkbox toggles are intentionally NOT tracked.
-    See UNDO_PLAN_CLAUDE.md, Decisions for rationale.
     """
 
     def __init__(self, checkbox_id: str, old_bool: bool, new_bool: bool) -> None:
@@ -271,8 +267,7 @@ class FitResultCommand(UndoCommand):
     """Full parameter snapshot before and after a fit.
 
     ``old_params`` MUST be captured at the very start of ``fitComplete()``,
-    before ``updateModelFromList()`` is called (see UNDO_PLAN_CLAUDE.md,
-    Step 2.6 — Critical ordering).
+    before ``updateModelFromList()`` is called.
 
     Delegates to ``widget._restore_parameter_values(params)``
     (added in Phase 2).

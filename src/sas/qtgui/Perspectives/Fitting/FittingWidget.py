@@ -1576,7 +1576,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Disable some elements
         self.disableInteractiveElements()
-        self.undo_stack.set_enabled(False)
+        # self.undo_stack.set_enabled(False)
 
     def stopFit(self) -> None:
         """
@@ -1587,10 +1587,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.calc_fit.stop()
         #re-enable the Fit button
         self.enableInteractiveElements()
-        self.undo_stack.set_enabled(True)
+        # self.undo_stack.set_enabled(True)
 
         msg = "Fitting cancelled."
         self.communicate.statusBarUpdateSignal.emit(msg)
+        self.communicate.undoRedoUpdateSignal.emit()
 
     def updateFit(self) -> None:
         """
@@ -1682,7 +1683,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         #re-enable the Fit button
         self.enableInteractiveElements()
-        self.undo_stack.set_enabled(True)
+        # self.undo_stack.set_enabled(True)
 
         if not result or not result[0] or not result[0][0]:
             msg = "Fitting failed."
@@ -1691,8 +1692,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.kernel_module = copy.deepcopy(self.kernel_module_copy)
             return
 
-        # Capture parameter snapshot BEFORE fit results are applied
-        old_params = self._get_parameter_dict()
+        # # Capture parameter snapshot BEFORE fit results are applied
+        self.old_params = self._get_parameter_dict(self.kernel_module_copy)
 
         # Don't recalculate chi2 - it's in res.fitness already
         self.fitResults = True
@@ -1735,8 +1736,14 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Push a single FitResultCommand for the entire fit
         new_params = self._get_parameter_dict()
-        if old_params != new_params:
-            self.undo_stack.push(FitResultCommand(old_params, new_params))
+        #if old_params != new_params:
+        self.undo_stack.push(FitResultCommand(self.old_params, new_params))
+
+        # Ensure undo/redo action state is refreshed in the GUI manager.
+        # The push above emits stackChanged, but if the per-stack signal
+        # connection was disrupted (e.g. tab change during processEvents
+        # in onPlot), this communicator signal provides a reliable fallback.
+        self.communicate.undoRedoUpdateSignal.emit()
 
 
     def prepareFitters(self, fitter: Fit | None = None, fit_id: int = 0, weight_increase: int = 1) -> tuple[list[Fit], int]:
@@ -3175,6 +3182,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 value_item = self._model_model.item(row, col)
                 if value_item:
                     value_item.setText(GuiUtils.formatNumber(value, high=True))
+                    # print(f"Updated {param_name} to {value} in model model.")
                 return
 
     def _update_model_param_limit(self, param_name: str, bound: str, value: float) -> None:
@@ -3246,13 +3254,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 self._update_model_param_value(name, value)
             self.calculateQGridForModel()
 
-    def _get_parameter_dict(self) -> dict:
+    def _get_parameter_dict(self, kernel_module=None) -> dict:
         """Return ``{param_name: float_value}`` for all current kernel params."""
-        if self.logic.kernel_module is None:
+        if kernel_module is None:
+            kernel_module = self.logic.kernel_module
+        if kernel_module is None:
             return {}
         return {
-            p.name: self.logic.kernel_module.getParam(p.name)
-            for p in self.logic.kernel_module._model_info.parameters.kernel_parameters
+            p.name: kernel_module.getParam(p.name)
+            for p in kernel_module._model_info.parameters.kernel_parameters
         }
 
     def _get_fit_options_dict(self) -> dict:
