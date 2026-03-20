@@ -48,7 +48,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.setFixedSize(self.minimumSizeHint())
 
         self.manager = parent
-        self.communicator = self.manager.communicator()
+        self.communicator = GuiUtils.communicator
         self.model = sas_gen.GenSAS()
         self.omf_reader = sas_gen.OMFReader()
         self.sld_reader = sas_gen.SLDReader()
@@ -1537,7 +1537,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             model_str, model_path = gsc_model.generate_plugin(self.txtFileName.text(), self.data_to_plot, self.xValues,
                                                               self.fQ, self.rGMass)
             TabbedModelEditor.writeFile(model_path, model_str)
-            self.manager.communicate.customModelDirectoryChanged.emit()
+            self.communicator.customModelDirectoryChanged.emit()
 
             # Notify the user
             msg = "Custom model " + str(model_path.absolute()) + " successfully created."

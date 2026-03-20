@@ -303,10 +303,6 @@ class Plotter2DWidget(PlotterBase):
 
         self.canvas.draw()
 
-        if self.slicer_widget:
-            self.slicer_widget.close()
-            self.slicer_widget = None
-
         # Close the box sum widget if it exists
         if hasattr(self, 'boxwidget') and self.boxwidget is not None:
             self.boxwidget.close()
@@ -329,8 +325,10 @@ class Plotter2DWidget(PlotterBase):
 
         # Search through all active plots
         for plot_id, plot_window in self.manager.active_plots.items():
-            if not hasattr(plot_window, 'data') and plot_window.data is not None:
-                # No data loaded (catches the cases where data == None and data == [])
+            if (not hasattr(plot_window, 'data') or
+                plot_window.data is None or
+                plot_window.data == []):
+                # No data loaded (catches the cases where data == None or data == [])
                 continue
             # Get the data (could be a list or single item)
             data_list = plot_window.data if isinstance(plot_window.data, list) else [plot_window.data]
@@ -374,7 +372,7 @@ class Plotter2DWidget(PlotterBase):
         self.slicer_widget = SlicerParameters(self, model=self.param_model,
                                               active_plots=self.getActivePlots(),
                                               validate_method=validator,
-                                              communicator=self.manager.communicator)
+                                              communicator=GuiUtils.communicator)
         self.slicer_widget.closeWidgetSignal.connect(slicer_closed)
         # Add the plot to the workspace
         self.slicer_subwindow = self.manager.parent.workspace().addSubWindow(self.slicer_widget)
@@ -436,8 +434,8 @@ class Plotter2DWidget(PlotterBase):
 
         GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
 
-        self.manager.communicator.plotUpdateSignal.emit([new_plot])
-        self.manager.communicator.forcePlotDisplaySignal.emit([item, new_plot])
+        GuiUtils.communicator.plotUpdateSignal.emit([new_plot])
+        GuiUtils.communicator.forcePlotDisplaySignal.emit([item, new_plot])
 
     def updateCircularAverage(self):
         """
@@ -471,7 +469,7 @@ class Plotter2DWidget(PlotterBase):
         # Overwrite existing plot
         GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
         # Show the new plot, if already visible
-        self.manager.communicator.plotUpdateSignal.emit([new_plot])
+        GuiUtils.communicator.plotUpdateSignal.emit([new_plot])
 
     def updateSlicer(self):
         """
@@ -881,7 +879,7 @@ class Plotter2DWidget(PlotterBase):
         x_str = GuiUtils.formatNumber(x_click)
         y_str = GuiUtils.formatNumber(y_click)
         coord_str = f"x: {x_str}, y: {y_str}"
-        self.manager.communicate.statusBarUpdateSignal.emit(coord_str)
+        GuiUtils.communicator.statusBarUpdateSignal.emit(coord_str)
 
 class Plotter2D(QtWidgets.QDialog, Plotter2DWidget):
     """

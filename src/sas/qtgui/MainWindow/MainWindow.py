@@ -128,7 +128,7 @@ def run_sasview(file_list: list[str] | None = None):
     # Trigger an event to pass the filepath(s) to the GUI without requiring an API change
     if file_list:
         for file in file_list:
-            mainwindow.guiManager.communicate.fileTriggerSignal.emit(file)
+            mainwindow.guiManager.communicator.fileTriggerSignal.emit(file)
 
     timer = QTimer()
     timer.timeout.connect(lambda: None)

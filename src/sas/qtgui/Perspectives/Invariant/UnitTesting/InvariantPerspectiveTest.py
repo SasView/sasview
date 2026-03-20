@@ -35,10 +35,7 @@ class InvariantPerspectiveTest:
                 self.filesWidget = MainWindow()
 
             def communicator(self):
-                return GuiUtils.Communicate()
-
-            def communicate(self):
-                return GuiUtils.Communicate()
+                return GuiUtils.communicator
 
             def createGuiData(self, data_to_plot):
                 # Pass data back - testing module - production createGuiData returns a QStandardItem

@@ -389,7 +389,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # modify the Fit button
         self.cmdFit.setStyleSheet(BG_ERROR)
         self.cmdFit.setText('Stop fit')
-        self.parent.communicate.statusBarUpdateSignal.emit('Fitting started...')
+        self.parent.communicator.statusBarUpdateSignal.emit('Fitting started...')
         self.is_running = True
 
     def onHelp(self):
@@ -447,7 +447,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                     msg = "Please use a non-empty name."
                 else:
                     msg = "Please use a unique name."
-                self.parent.communicate.statusBarUpdateSignal.emit(msg)
+                self.parent.communicator.statusBarUpdateSignal.emit(msg)
                 item.setToolTip(msg)
                 return
 
@@ -457,7 +457,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             self.cmdFit.setEnabled(True)
             item.setToolTip("")
             msg = f"Fitpage name changed to {new_moniker}."
-            self.parent.communicate.statusBarUpdateSignal.emit(msg)
+            self.parent.communicator.statusBarUpdateSignal.emit(msg)
 
             if not self.current_cell:
                 return
@@ -489,7 +489,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                 self.tblTabList.blockSignals(False)
                 self.cmdFit.setEnabled(False)
                 msg = "Weighting must be a numerical value (integer or float)."
-                self.parent.communicate.statusBarUpdateSignal.emit(msg)
+                self.parent.communicator.statusBarUpdateSignal.emit(msg)
                 item.setToolTip(msg)
                 return
 
@@ -645,13 +645,13 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # Assure the fitting succeeded
         if not result or not result[0] or not result[0][0]:
             msg = "Fitting failed."
-            self.parent.communicate.statusBarUpdateSignal.emit(msg)
+            self.parent.communicator.statusBarUpdateSignal.emit(msg)
             return
 
         if isinstance(result[0], str):
             msg = ("Fitting failed with the following message: " +
                    result[0])
-            self.parent.communicate.statusBarUpdateSignal.emit(msg)
+            self.parent.communicator.statusBarUpdateSignal.emit(msg)
             return
 
         # Get the results list
@@ -664,7 +664,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             else:
                 msg = ("Fitting failed. Please ensure correctness of " +
                        "chosen constraints.")
-            self.parent.communicate.statusBarUpdateSignal.emit(msg)
+            self.parent.communicator.statusBarUpdateSignal.emit(msg)
             return
 
         # get the elapsed time
@@ -684,7 +684,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                 tab_object.fitComplete(([[results[i]]], elapsed))
 
         msg = "Fitting completed successfully in: %s s.\n" % GuiUtils.formatNumber(elapsed)
-        self.parent.communicate.statusBarUpdateSignal.emit(msg)
+        self.parent.communicator.statusBarUpdateSignal.emit(msg)
 
     def onBatchFitComplete(self, result):
         """
@@ -705,7 +705,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         self.parent.fittingStoppedSignal.emit(self.getTabsForFit())
         if result is None:
             msg = "Fitting failed."
-            self.parent.communicate.statusBarUpdateSignal.emit(msg)
+            self.parent.communicator.statusBarUpdateSignal.emit(msg)
             return
 
         # get the elapsed time
@@ -721,17 +721,17 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             else:
                 msg = ("Fitting failed. Please ensure correctness of " +
                        "chosen constraints.")
-            self.parent.communicate.statusBarUpdateSignal.emit(msg)
+            self.parent.communicator.statusBarUpdateSignal.emit(msg)
             return
 
         # Show the grid panel
         page_name = "ConstSimulPage"
         results = copy.deepcopy(result[0])
         results.append(page_name)
-        self.parent.communicate.sendDataToGridSignal.emit(results)
+        self.parent.communicator.sendDataToGridSignal.emit(results)
 
         msg = "Fitting completed successfully in: %s s.\n" % GuiUtils.formatNumber(elapsed)
-        self.parent.communicate.statusBarUpdateSignal.emit(msg)
+        self.parent.communicator.statusBarUpdateSignal.emit(msg)
 
     def onFitFailed(self, reason):
         """
@@ -752,7 +752,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         self.parent.fittingStoppedSignal.emit(self.getTabsForFit())
 
         msg = "Fitting failed: %s s.\n" % reason
-        self.parent.communicate.statusBarUpdateSignal.emit(msg)
+        self.parent.communicator.statusBarUpdateSignal.emit(msg)
 
     def isTabImportable(self, tab):
         """
