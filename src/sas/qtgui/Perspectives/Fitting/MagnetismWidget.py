@@ -12,6 +12,10 @@ from sas.qtgui.Perspectives.Fitting import FittingUtilities
 
 # Local UI
 from sas.qtgui.Perspectives.Fitting.UI.MagnetismWidget import Ui_MagnetismWidgetUI
+from sas.qtgui.Perspectives.Fitting.UndoRedo import (
+    ParameterMinMaxCommand,
+    ParameterValueCommand,
+)
 from sas.qtgui.Perspectives.Fitting.ViewDelegate import MagnetismViewDelegate
 
 logger = logging.getLogger(__name__)
@@ -31,6 +35,7 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
         self._magnet_model = FittingUtilities.ToolTippedItemModel()
         self.is2D = False
         self.isActive = False
+        self._fitting_widget = parent
         self.logic = parent.logic
         self.magnet_params = {}
         self.has_magnet_error_column = False
@@ -138,18 +143,30 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
         if model_column > 1:
             if model_column == delegate.mag_min:
                 pos = 1
+                bound = "min"
             elif model_column == delegate.mag_max:
                 pos = 2
+                bound = "max"
             elif model_column == delegate.mag_unit:
                 pos = 0
+                bound = None
             else:
                 # For all other values sent here (e.g. the error column, do nothing)
                 return
             # min/max to be changed in self.logic.kernel_module.details[parameter_name] = ['Ang', 0.0, inf]
+            old_val = self.logic.kernel_module.details[parameter_name][pos]
             self.logic.kernel_module.details[parameter_name][pos] = value
+            if bound is not None:
+                self._fitting_widget.undo_stack.push(
+                    ParameterMinMaxCommand(parameter_name, bound, old_val, value)
+                )
         else:
+            old_val = self.logic.kernel_module.getParam(parameter_name)
             self.magnet_params[parameter_name] = value
             self.logic.kernel_module.setParam(parameter_name, value)
+            self._fitting_widget.undo_stack.push(
+                ParameterValueCommand(parameter_name, old_val, value)
+            )
             # Update plot
             self.updateDataSignal.emit()
 

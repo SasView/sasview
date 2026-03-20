@@ -36,6 +36,16 @@ from sas.qtgui.Perspectives.Fitting.PolydispersityWidget import PolydispersityWi
 from sas.qtgui.Perspectives.Fitting.ReportPageLogic import ReportPageLogic
 from sas.qtgui.Perspectives.Fitting.SmearingWidget import SmearingWidget
 from sas.qtgui.Perspectives.Fitting.UI.FittingWidgetUI import Ui_FittingWidgetUI
+from sas.qtgui.Perspectives.Fitting.UndoRedo import (
+    CheckboxToggleCommand,
+    FitOptionsCommand,
+    FitResultCommand,
+    ModelSelectionCommand,
+    ParameterMinMaxCommand,
+    ParameterValueCommand,
+    SmearingOptionsCommand,
+    UndoStack,
+)
 from sas.qtgui.Perspectives.Fitting.ViewDelegate import ModelViewDelegate
 from sas.qtgui.Plotting.Plotter import PlotterWidget
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
@@ -296,10 +306,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.weighting = 0
         self.chi2 = None
 
-        # Does the control support UNDO/REDO
-        # temporarily off
-        self.undo_supported = False
-        self.page_stack = []
+        # Undo/redo stack (per-tab, incremental command pattern)
+        self.undo_stack = UndoStack(self)
+        self._last_smearing_state = None
+        self._last_model_triple = None  # (category, model, structure) for undo capture
         self.all_data = []
         # custom plugin models
         # {model.name:model}
@@ -485,36 +495,40 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Enable/disable various UI elements based on data loaded
         """
-        # Tag along functionality
-        self.label.setText("Data loaded from: ")
-        if self.logic.data.name:
-            self.lblFilename.setText(self.logic.data.name)
-        else:
-            self.lblFilename.setText(self.logic.data.filename)
-        self.updateQRange()
-        # Switch off Data2D control
-        self.chk2DView.setEnabled(False)
-        self.chk2DView.setVisible(False)
-        self.chkMagnetism.setEnabled(self.canHaveMagnetism())
-        self.tabFitting.setTabEnabled(TAB_MAGNETISM, self.chkMagnetism.isChecked())
-        # Combo box or label for file name"
-        if self.is_batch_fitting:
-            self.lblFilename.setVisible(False)
-            for dataitem in self.all_data:
-                name = GuiUtils.dataFromItem(dataitem).name
-                self.cbFileNames.addItem(name)
-            self.cbFileNames.setVisible(True)
-            self.chkChainFit.setEnabled(True)
-            self.chkChainFit.setVisible(True)
-            # This panel is not designed to view individual fits, so disable plotting
-            self.cmdPlot.setVisible(False)
-        # Similarly on other tabs
-        self.options_widget.setEnablementOnDataLoad()
-        self.onSelectModel()
-        # Smearing tab
-        self.smearing_widget.updateData(self.data)
-        # Check if a model was already loaded when data is sent to the tab
-        self.cmdFit.setEnabled(self.haveParamsToFit())
+        # Suppress undo capture: data loading is a programmatic operation,
+        # not a user-initiated parameter change.  Without this, updateQRange
+        # and onWeightingChoice push spurious FitOptionsCommand entries.
+        with self.undo_stack.suppressed():
+            # Tag along functionality
+            self.label.setText("Data loaded from: ")
+            if self.logic.data.name:
+                self.lblFilename.setText(self.logic.data.name)
+            else:
+                self.lblFilename.setText(self.logic.data.filename)
+            self.updateQRange()
+            # Switch off Data2D control
+            self.chk2DView.setEnabled(False)
+            self.chk2DView.setVisible(False)
+            self.chkMagnetism.setEnabled(self.canHaveMagnetism())
+            self.tabFitting.setTabEnabled(TAB_MAGNETISM, self.chkMagnetism.isChecked())
+            # Combo box or label for file name"
+            if self.is_batch_fitting:
+                self.lblFilename.setVisible(False)
+                for dataitem in self.all_data:
+                    name = GuiUtils.dataFromItem(dataitem).name
+                    self.cbFileNames.addItem(name)
+                self.cbFileNames.setVisible(True)
+                self.chkChainFit.setEnabled(True)
+                self.chkChainFit.setVisible(True)
+                # This panel is not designed to view individual fits, so disable plotting
+                self.cmdPlot.setVisible(False)
+            # Similarly on other tabs
+            self.options_widget.setEnablementOnDataLoad()
+            self.onSelectModel()
+            # Smearing tab
+            self.smearing_widget.updateData(self.data)
+            # Check if a model was already loaded when data is sent to the tab
+            self.cmdFit.setEnabled(self.haveParamsToFit())
 
     def acceptsData(self) -> bool:
         """ Tells the caller this widget can accept new dataset """
@@ -566,6 +580,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Check if any parameters are ready for fitting
         self.cmdFit.setEnabled(self.haveParamsToFit())
         self.polydispersity_widget.togglePoly(isChecked)
+        self.undo_stack.push(
+            CheckboxToggleCommand('chkPolydispersity', not isChecked, isChecked)
+        )
 
     def onPolyToggled(self, isChecked: bool) -> None:
         """
@@ -583,6 +600,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Check if any parameters are ready for fitting
         self.cmdFit.setEnabled(self.haveParamsToFit())
         self.magnetism_widget.isActive = isChecked
+        self.undo_stack.push(
+            CheckboxToggleCommand('chkMagnetism', not isChecked, isChecked)
+        )
 
     def onMagnetismToggled(self, isChecked: bool) -> None:
         """
@@ -607,9 +627,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """ Enable/disable the controls dependent on 1D/2D data instance """
         self.chkMagnetism.setEnabled(isChecked)
         self.is2D = isChecked
-        # Reload the current model
-        if self.logic.kernel_module:
-            self.onSelectModel()
+        # Reload the current model — suppress so the inner onSelectModel
+        # doesn't push its own command; toggle2D is one atomic undo step.
+        with self.undo_stack.suppressed():
+            if self.logic.kernel_module:
+                self.onSelectModel()
+
+        self.undo_stack.push(
+            CheckboxToggleCommand('chk2DView', not isChecked, isChecked)
+        )
 
     @classmethod
     def customModels(cls) -> dict[str, Any]:
@@ -1163,6 +1189,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 self.cbModel.setCurrentIndex(self._previous_model_index)
                 self.cbModel.blockSignals(False)
             return
+
+        # Capture old state for undo before anything changes
+        old_triple = self._last_model_triple
+        old_params = self._get_parameter_dict()
+
         if self.model_data is not None:
             # Store any old parameters before switching to a new model
             self.page_parameters = self.getParameterDict()
@@ -1174,30 +1205,46 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if not model:
             return
 
-        self.chkMagnetism.setEnabled(self.canHaveMagnetism())
-        self.tabFitting.setTabEnabled(TAB_MAGNETISM, self.chkMagnetism.isChecked() and self.canHaveMagnetism())
-        self._previous_model_index = self.cbModel.currentIndex()
+        # Suppress undo capture during the model rebuild
+        with self.undo_stack.suppressed():
+            self.chkMagnetism.setEnabled(self.canHaveMagnetism())
+            self.tabFitting.setTabEnabled(TAB_MAGNETISM, self.chkMagnetism.isChecked() and self.canHaveMagnetism())
+            self._previous_model_index = self.cbModel.currentIndex()
 
-        # Reset parameters to fit
-        self.resetParametersToFit()
-        self.has_error_column = False
-        self.polydispersity_widget.is2D = self.is2D
-        self.polydispersity_widget.has_poly_error_column = False
-        self.magnetism_widget.has_magnet_error_column = False
+            # Reset parameters to fit
+            self.resetParametersToFit()
+            self.has_error_column = False
+            self.polydispersity_widget.is2D = self.is2D
+            self.polydispersity_widget.has_poly_error_column = False
+            self.magnetism_widget.has_magnet_error_column = False
 
-        structure = None
-        if self.cbStructureFactor.isEnabled():
-            structure = str(self.cbStructureFactor.currentText())
-        self.respondToModelStructure(model=model, structure_factor=structure)
+            structure = None
+            if self.cbStructureFactor.isEnabled():
+                structure = str(self.cbStructureFactor.currentText())
+            self.respondToModelStructure(model=model, structure_factor=structure)
 
-        # paste parameters from previous state
-        if self.page_parameters:
-            self.updatePageWithParameters(self.page_parameters, warn_user=False)
+            # paste parameters from previous state
+            if self.page_parameters:
+                self.updatePageWithParameters(self.page_parameters, warn_user=False)
 
-        # disable polydispersity if the model does not support it
-        has_poly = self.polydispersity_widget.poly_model.rowCount() != 0
-        self.chkPolydispersity.setEnabled(has_poly)
-        # self.tabFitting.setTabEnabled(TAB_POLY, has_poly)
+            # disable polydispersity if the model does not support it
+            has_poly = self.polydispersity_widget.poly_model.rowCount() != 0
+            self.chkPolydispersity.setEnabled(has_poly)
+            # self.tabFitting.setTabEnabled(TAB_POLY, has_poly)
+
+        # Capture new state after model change
+        new_triple = (
+            str(self.cbCategory.currentText()),
+            str(self.cbModel.currentText()),
+            str(self.cbStructureFactor.currentText()) if self.cbStructureFactor.isEnabled() else '',
+        )
+        new_params = self._get_parameter_dict()
+        self._last_model_triple = new_triple
+
+        if old_triple is not None and (old_triple != new_triple or old_params != new_params):
+            self.undo_stack.push(
+                ModelSelectionCommand(old_triple, new_triple, old_params, new_params)
+            )
 
         # set focus so it doesn't move up
         self.cbModel.setFocus()
@@ -1380,9 +1427,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Update plot
         self.updateData()
 
-        # Update state stack
-        self.updateUndo()
-
         # Let others know
         self.newModelSignal.emit()
 
@@ -1532,6 +1576,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Disable some elements
         self.disableInteractiveElements()
+        self.undo_stack.set_enabled(False)
 
     def stopFit(self) -> None:
         """
@@ -1542,6 +1587,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.calc_fit.stop()
         #re-enable the Fit button
         self.enableInteractiveElements()
+        self.undo_stack.set_enabled(True)
 
         msg = "Fitting cancelled."
         self.communicate.statusBarUpdateSignal.emit(msg)
@@ -1636,6 +1682,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         #re-enable the Fit button
         self.enableInteractiveElements()
+        self.undo_stack.set_enabled(True)
 
         if not result or not result[0] or not result[0][0]:
             msg = "Fitting failed."
@@ -1643,6 +1690,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # reload the kernel_module in case it's corrupted
             self.kernel_module = copy.deepcopy(self.kernel_module_copy)
             return
+
+        # Capture parameter snapshot BEFORE fit results are applied
+        old_params = self._get_parameter_dict()
 
         # Don't recalculate chi2 - it's in res.fitness already
         self.fitResults = True
@@ -1671,11 +1721,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Dictionary of fitted parameter: value, error
         # e.g. param_dic = {"sld":(1.703, 0.0034), "length":(33.455, -0.0983)}
-        self.fitting_controller.updateModelFromList(param_dict)
-
-        self.polydispersity_widget.updatePolyModelFromList(param_dict)
-
-        self.magnetism_widget.updateMagnetModelFromList(param_dict)
+        with self.undo_stack.suppressed():
+            self.fitting_controller.updateModelFromList(param_dict)
+            self.polydispersity_widget.updatePolyModelFromList(param_dict)
+            self.magnetism_widget.updateMagnetModelFromList(param_dict)
 
         # update charts
         self.onPlot()
@@ -1683,6 +1732,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Read only value - we can get away by just printing it here
         chi2_repr = GuiUtils.formatNumber(self.chi2, high=True)
         self.lblChi2Value.setText(chi2_repr)
+
+        # Push a single FitResultCommand for the entire fit
+        new_params = self._get_parameter_dict()
+        if old_params != new_params:
+            self.undo_stack.push(FitResultCommand(old_params, new_params))
 
 
     def prepareFitters(self, fitter: Fit | None = None, fit_id: int = 0, weight_increase: int = 1) -> tuple[list[Fit], int]:
@@ -1752,10 +1806,17 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         React to changes in the smearing widget
         """
+        old_state = self._last_smearing_state
+
         # update display
         smearing, accuracy, smearing_min, smearing_max = self.smearing_widget.state()
         self.lblCurrentSmearing.setText(smearing)
         self.calculateQGridForModel()
+
+        new_state = self._get_smearing_state_dict()
+        if old_state is not None and old_state != new_state:
+            self.undo_stack.push(SmearingOptionsCommand(old_state, new_state))
+        self._last_smearing_state = new_state
 
     def onKey(self, event: QtGui.QKeyEvent) -> None:
         if event.key() in [QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return] and self.cmdPlot.isEnabled():
@@ -1813,12 +1874,18 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Update local option values and replot
         """
+        old_opts = self._get_fit_options_dict()
+
         self.q_range_min, self.q_range_max, self.npts, self.log_points, self.weighting = \
             self.options_widget.state()
         # set Q range labels on the main tab
         self.lblMinRangeDef.setText(GuiUtils.formatNumber(self.q_range_min, high=True))
         self.lblMaxRangeDef.setText(GuiUtils.formatNumber(self.q_range_max, high=True))
         self.recalculatePlotData()
+
+        new_opts = self._get_fit_options_dict()
+        if old_opts != new_opts:
+            self.undo_stack.push(FitOptionsCommand(old_opts, new_opts))
 
     def setDefaultStructureCombo(self) -> None:
         """
@@ -2061,11 +2128,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.logic.kernel_module.name = self.modelName()
 
         # Explicitly add scale and background with default values
-        temp_undo_state = self.undo_supported
-        self.undo_supported = False
-        self.addScaleToModel(self._model_model)
-        self.addBackgroundToModel(self._model_model)
-        self.undo_supported = temp_undo_state
+        with self.undo_stack.suppressed():
+            self.addScaleToModel(self._model_model)
+            self.addBackgroundToModel(self._model_model)
 
         self.logic.shell_names = self.shellNamesList()
 
@@ -2195,8 +2260,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if model_column == 0:
             self.checkboxSelected(item, model_key="standard")
             self.cmdFit.setEnabled(self.haveParamsToFit())
-            # Update state stack
-            self.updateUndo()
+            # Fit-checkbox toggles intentionally excluded from undo stack
             return
 
         model_row = item.row()
@@ -2221,16 +2285,18 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         min_column = self.lstParams.itemDelegate().param_min
         max_column = self.lstParams.itemDelegate().param_max
         if model_column == param_column:
-            # don't try to update multiplicity counters if they aren't there.
-            # Note that this will fail for proper bad update where the model
-            # doesn't contain multiplicity parameter
+            old_val = self.logic.kernel_module.getParam(parameter_name)
             self.logic.kernel_module.setParam(parameter_name, value)
+            self.undo_stack.push(ParameterValueCommand(parameter_name, old_val, value))
 
         elif model_column == min_column:
-            # min/max to be changed in self.logic.kernel_module.details[parameter_name] = ['Ang', 0.0, inf]
+            old_val = self.logic.kernel_module.details[parameter_name][1]
             self.logic.kernel_module.details[parameter_name][1] = value
+            self.undo_stack.push(ParameterMinMaxCommand(parameter_name, "min", old_val, value))
         elif model_column == max_column:
+            old_val = self.logic.kernel_module.details[parameter_name][2]
             self.logic.kernel_module.details[parameter_name][2] = value
+            self.undo_stack.push(ParameterMinMaxCommand(parameter_name, "max", old_val, value))
         else:
             # don't update the chart
             return
@@ -2239,8 +2305,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # necessary
         self.processEffectiveRadius()
 
-        # Update state stack
-        self.updateUndo()
+        # Keep page_parameters up-to-date so parameter retention across
+        # model switches works even when no plot has been computed yet.
         self.page_parameters = self.getParameterDict()
 
     def processEffectiveRadius(self) -> None:
@@ -3093,34 +3159,121 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # TODO: add polydispersity and magnetism
 
-    def updateUndo(self) -> None:
-        """
-        Create a new state page and add it to the stack
-        """
-        if self.undo_supported:
-            self.pushFitPage(self.currentState())
+    # ------------------------------------------------------------------
+    # Undo/redo helper methods (called by UndoCommand subclasses)
+    # ------------------------------------------------------------------
 
-    def currentState(self) -> FitPage:
-        """
-        Return fit page with current state
-        """
-        new_page = FitPage()
-        self.saveToFitPage(new_page)
+    def _update_model_param_value(self, param_name: str, value: float) -> None:
+        """Update the UI model item for a parameter value (called by undo/redo)."""
+        for row in range(self._model_model.rowCount()):
+            name_item = self._model_model.item(row, 0)
+            if name_item is None:
+                continue
+            row_name = str(name_item.data(QtCore.Qt.UserRole) or name_item.text())
+            if row_name == param_name:
+                col = self.lstParams.itemDelegate().param_value
+                value_item = self._model_model.item(row, col)
+                if value_item:
+                    value_item.setText(GuiUtils.formatNumber(value, high=True))
+                return
 
-        return new_page
+    def _update_model_param_limit(self, param_name: str, bound: str, value: float) -> None:
+        """Update min or max bound in the UI model (called by undo/redo)."""
+        col = self.lstParams.itemDelegate().param_min if bound == "min" else self.lstParams.itemDelegate().param_max
+        for row in range(self._model_model.rowCount()):
+            name_item = self._model_model.item(row, 0)
+            if name_item is None:
+                continue
+            row_name = str(name_item.data(QtCore.Qt.UserRole) or name_item.text())
+            if row_name == param_name:
+                item = self._model_model.item(row, col)
+                if item:
+                    item.setText(GuiUtils.formatNumber(value, high=True))
+                return
 
-    def pushFitPage(self, new_page: FitPage) -> None:
-        """
-        Add a new fit page object with current state
-        """
-        self.page_stack.append(new_page)
+    def _restore_model_selection(self, triple: tuple, params: dict) -> None:
+        """Restore model selection and parameter values (called by undo/redo).
 
-    def popFitPage(self) -> None:
+        ``triple`` is ``(category, model, structure_factor)``.
         """
-        Remove top fit page from stack
-        """
-        if self.page_stack:
-            self.page_stack.pop()
+        with self.undo_stack.suppressed():
+            category, model, structure = triple
+            # Block cbModel signals while changing category to prevent
+            # onSelectModel firing with the wrong model during repopulation.
+            self.cbModel.blockSignals(True)
+            self.cbCategory.setCurrentIndex(self.cbCategory.findText(category))
+            self.cbModel.blockSignals(False)
+            self.cbModel.setCurrentIndex(self.cbModel.findText(model))
+            if structure:
+                self.cbStructureFactor.setCurrentIndex(
+                    self.cbStructureFactor.findText(structure)
+                )
+            else:
+                self.cbStructureFactor.setCurrentIndex(0)
+            # Apply saved parameter values
+            self._restore_parameter_values(params)
+
+    def _apply_fit_options(self, options: dict) -> None:
+        """Apply fit options dict (called by undo/redo)."""
+        with self.undo_stack.suppressed():
+            self.q_range_min = options.get('q_range_min', self.q_range_min)
+            self.q_range_max = options.get('q_range_max', self.q_range_max)
+            self.npts = options.get('npts', self.npts)
+            self.log_points = options.get('log_points', self.log_points)
+            self.weighting = options.get('weighting', self.weighting)
+            self.options_widget.setState(
+                self.q_range_min, self.q_range_max,
+                self.npts, self.log_points, self.weighting,
+            )
+            self.lblMinRangeDef.setText(GuiUtils.formatNumber(self.q_range_min, high=True))
+            self.lblMaxRangeDef.setText(GuiUtils.formatNumber(self.q_range_max, high=True))
+            self.recalculatePlotData()
+
+    def _apply_smearing_state(self, state: dict) -> None:
+        """Apply smearing options from a dict (called by undo/redo)."""
+        with self.undo_stack.suppressed():
+            self.smearing_widget.setState(
+                state.get('smearing'), state.get('accuracy'),
+                state.get('d_down'), state.get('d_up'),
+            )
+            self.calculateQGridForModel()
+
+    def _restore_parameter_values(self, params: dict) -> None:
+        """Restore all kernel parameter values from a ``{name: value}`` dict."""
+        with self.undo_stack.suppressed():
+            for name, value in params.items():
+                self.logic.kernel_module.setParam(name, value)
+                self._update_model_param_value(name, value)
+            self.calculateQGridForModel()
+
+    def _get_parameter_dict(self) -> dict:
+        """Return ``{param_name: float_value}`` for all current kernel params."""
+        if self.logic.kernel_module is None:
+            return {}
+        return {
+            p.name: self.logic.kernel_module.getParam(p.name)
+            for p in self.logic.kernel_module._model_info.parameters.kernel_parameters
+        }
+
+    def _get_fit_options_dict(self) -> dict:
+        """Return current fit options as a dict (for undo command capture)."""
+        return {
+            'q_range_min': self.q_range_min,
+            'q_range_max': self.q_range_max,
+            'npts': self.npts,
+            'log_points': self.log_points,
+            'weighting': self.weighting,
+        }
+
+    def _get_smearing_state_dict(self) -> dict:
+        """Return current smearing state as a dict (for undo command capture)."""
+        smearing, accuracy, d_down, d_up = self.smearing_widget.state()
+        return {
+            'smearing': smearing,
+            'accuracy': accuracy,
+            'd_down': d_down,
+            'd_up': d_up,
+        }
 
     def getReport(self) -> list[str]:
         """
