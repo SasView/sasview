@@ -328,10 +328,11 @@ class FittingWidgetTest:
         # Observe calculateQGridForModel called
         assert widget.calculateQGridForModel.called
 
-    def testSelectFactor(self, widget):
+    def testSelectFactor(self, widget, mocker):
         """
         Assure proper behaviour on changing structure factor
         """
+        mocker.patch.object(widget, 'calculateQGridForModel')
         widget.show()
         # Change the category index so we have some models
         category_index = widget.cbCategory.findText("Cylinder")

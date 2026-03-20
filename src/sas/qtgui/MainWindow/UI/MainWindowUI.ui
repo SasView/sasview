@@ -260,6 +260,12 @@
    <property name="text">
     <string>Undo</string>
    </property>
+   <property name="toolTip">
+    <string>Undo</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Z</string>
+   </property>
   </action>
   <action name="actionRedo">
    <property name="icon">
@@ -272,6 +278,9 @@
    <property name="toolTip">
     <string>Redo</string>
    </property>
+  <property name="shortcut">
+   <string>Ctrl+Y</string>
+  </property>
   </action>
   <action name="actionCopy">
    <property name="icon">
