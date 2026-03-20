@@ -357,19 +357,7 @@ class GuiManager:
     @classmethod
     def showHelp(cls, url):
         """Open documentation in the default browser."""
-        if not HELP_SYSTEM.path:
-            logger.error("Help documentation was not found.")
-            return
-
-        if isinstance(url, str):
-            url = url.lstrip("//")
-        url = Path(url)
-        if str(HELP_SYSTEM.path.resolve()) not in str(url.absolute()):
-            url_abs = HELP_SYSTEM.path / url
-        else:
-            url_abs = Path(url)
-
-        GuiUtils.showHelp(url_abs)
+        HELP_SYSTEM.show_help(url)
 
     def workspace(self):
         """

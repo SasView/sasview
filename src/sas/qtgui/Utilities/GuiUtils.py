@@ -1456,32 +1456,6 @@ def enum(*sequential, **named):
     return type('Enum', (), enums)
 
 
-def _get_online_docs_url(relative_path: Path) -> str:
-    """Construct online documentation URL for the current SasView version."""
-    from sas.system.version import __version__
-    base_url = f"https://www.sasview.org/docs/v{__version__}"
-    # Ensure forward slashes for URL (Windows paths use backslashes)
-    path_str = str(relative_path).replace("\\", "/")
-    return f"{base_url}/{path_str}"
-
-
 def showHelp(url: PATH_LIKE):
-    """Open documentation in the system's default web browser.
-
-    Attempts to find local documentation first, falls back to online docs if unavailable.
-    """
-    if isinstance(url, str):
-        url = url.lstrip("//")
-    url = Path(url)
-    url_abs = HELP_SYSTEM.path / url if str(HELP_SYSTEM.path.resolve()) not in str(url.absolute()) else url
-
-    try:
-        if url_abs.exists():
-            # Open local documentation
-            webbrowser.open(url_abs.as_uri())
-        else:
-            # Fall back to online documentation
-            online_url = _get_online_docs_url(url)
-            webbrowser.open(online_url)
-    except Exception as ex:
-        logger.warning(f"Cannot display help: {ex}")
+    """Open documentation in the system's default web browser."""
+    HELP_SYSTEM.show_help(url)
