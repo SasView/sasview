@@ -10,9 +10,11 @@
 # - pyinstaller is slow, run it separately to running the unittests
 
 import json
+import os
 import sys
 
 pretty = "--pretty" in sys.argv
+is_push_event = os.environ.get("GITHUB_EVENT_NAME", "") == "push"
 
 
 test_jobs = []
@@ -49,6 +51,11 @@ python_test_list = python_release_list + [
     "3.12",
     "3.14",
 ]
+
+# On push events, only test the latest Python version to avoid duplicating
+# work when a pull_request event fires for the same commit.
+if is_push_event:
+    python_test_list = [max(python_test_list, key=lambda v: tuple(int(x) for x in v.split(".")))]
 
 
 def truthy(val):

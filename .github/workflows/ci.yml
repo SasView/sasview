@@ -127,6 +127,8 @@ jobs:
 
       - name: Generate job configuration matrix
         id: set-matrix
+        env:
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
         run: python .github/workflows/matrix.py >> $GITHUB_OUTPUT
 
 
