@@ -75,11 +75,11 @@ class GenericScatteringCalculatorTest:
         # Comboboxes
         assert not widget.cbOptionsCalc.isVisible()
         assert not widget.cbOptionsCalc.isEditable()
-        assert widget.cbOptionsCalc.count() == 3
+        assert widget.cbOptionsCalc.count() == 4
         assert widget.cbOptionsCalc.currentIndex() == 0
         assert [widget.cbOptionsCalc.itemText(i) for i in
                                 range(widget.cbOptionsCalc.count())] == \
-                                ['Fixed orientation', 'Debye full avg.', 'Debye full avg. w/ β(Q)',]
+                                ['Fixed orientation', 'Debye full avg.', 'Debye full avg. w/ β(Q)', 'SAXS fitting',]
 
         assert widget.cbShape.count() == 1
         assert widget.cbShape.currentIndex() == 0
