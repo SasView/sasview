@@ -139,15 +139,20 @@ class ReportPageLogic:
         """Format the smearing information and return """
         smearing, accuracy, smearing_min, smearing_max = self.parent.smearing_widget.state()
         smear_format = ""
-        if self.parent.smearing_widget.smear_type and smearing != "None":
-            smear_format = f"Type = {self.parent.smearing_widget.smear_type} {smearing}"
+        if smearing != "None":
+            type = self.parent.smearing_widget.smear_type if self.parent.smearing_widget.smear_type else smearing
+            smear_format = f"{type}"
             if accuracy:
-                smear_format += f"Accuracy = {accuracy}"
-            if self.parent.smearing_widget.smear_type == "Slit":
-                smear_format += f", dQl = {smearing_max}, dqw = {smearing_min}"
-            elif self.parent.smearing_widget.smear_type == "Pinhole":
+                smear_format += f", Accuracy = {accuracy}"
+            if "Slit" in type:
+                # All slit smearing should be handled here
+                smear_format += f", dQl = {smearing_max} Å, dQw = {smearing_min} Å"
+            elif "Custom" in type:
+                # Custom pinhole smearing should be handled here, because there is only one input
+                smear_format += f", dQ/Q = {smearing_max}%"
+            elif "Pinhole" in type:
                 # The boxes are labelled backwards in the smearing widget.
-                smear_format += f", dQ/Q_max = {smearing_min}, dQ/Q_min = {smearing_max}"
+                smear_format += f", dQ/Q range = {smearing_max}%  {smearing_min}%"
             smear_format = CENTRE.format(f"Smearing Information: {smear_format}")
         return smear_format
 
