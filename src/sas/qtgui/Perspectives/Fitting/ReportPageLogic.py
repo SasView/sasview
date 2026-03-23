@@ -183,7 +183,7 @@ class ReportPageLogic:
         return results_table
 
     def getBatchResults(self) -> str:
-        """Format the bumps results correlation table into html."""
+        """Format the batch results table into html."""
         batch_results_table = ''
         if hasattr(self.parent, 'is_batch_fitting') and self.parent.is_batch_fitting:
             batch_results_table += CENTRE.format("Batch Results") + "<table>"
