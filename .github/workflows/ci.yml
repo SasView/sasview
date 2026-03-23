@@ -49,19 +49,7 @@ env:
 
 jobs:
 
-  # This job filters out runs that are triggered on pull request from branches
-  # in the base repository, since the CI will also run on the push event.
-  # For pull requests from forks, the CI should run to ensure changes are tested.
-  filter_duplicated_jobs:
-    runs-on: ubuntu-latest
-    outputs:
-      should_run: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork) }}
-    steps:
-      - run: echo "Filter evaluated"
-
   ruff:
-    needs: [filter_duplicated_jobs]
-    if: needs.filter_duplicated_jobs.outputs.should_run == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -344,6 +332,7 @@ jobs:
 
   installer-matrix:
     needs: [matrix, build-sasview]
+    if: github.event_name != 'push'
 
     strategy:
       fail-fast: false
@@ -515,6 +504,7 @@ jobs:
 
   test-installer:
     needs: [ matrix, installer-matrix ]
+    if: github.event_name != 'push'
 
     strategy:
       fail-fast: false
