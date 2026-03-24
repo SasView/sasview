@@ -113,6 +113,11 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    # Stop existing workflows for matching branches and pull requests
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
+
     outputs:
       test-matrix-json: ${{ steps.set-matrix.outputs.test_matrix }}
       installer-matrix-json: ${{ steps.set-matrix.outputs.installer_matrix }}
