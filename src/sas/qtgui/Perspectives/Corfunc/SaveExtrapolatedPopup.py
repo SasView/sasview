@@ -1,4 +1,5 @@
 from collections.abc import Callable
+from pathlib import Path
 
 import numpy as np
 from PySide6.QtWidgets import QDialog, QFileDialog, QMessageBox
@@ -18,13 +19,19 @@ class SaveExtrapolatedPopup(QDialog, Ui_SaveExtrapolatedPanel):
     #trigger = QtCore.Signal(tuple)
 
     # pylint: disable=unused-argument
-    def __init__(self, input_qs: np.ndarray, interpolation_function: Callable[[np.ndarray], np.ndarray], parent=None):
+    def __init__(
+            self,
+            input_qs: np.ndarray,
+            interpolation_function: Callable[[np.ndarray], np.ndarray],
+            background: float | None = None,
+            parent=None):
         super().__init__()
 
         self.parent = parent
 
         self.input_qs = input_qs
         self.interpolation_function = interpolation_function
+        self.background = background
 
         self.setupUi(self)
 
@@ -90,7 +97,7 @@ class SaveExtrapolatedPopup(QDialog, Ui_SaveExtrapolatedPanel):
         """
         filename = QFileDialog.getSaveFileName(
             None,
-            "Save As",
+            "Save As (base name; writes _uncorrected and _corrected)",
             "",
             "Comma separated values (*.csv)",
             "")[0]
@@ -98,11 +105,21 @@ class SaveExtrapolatedPopup(QDialog, Ui_SaveExtrapolatedPanel):
         if not filename:
             return
 
-        if "." not in filename:
-            filename += ".csv"
+        selected_path = Path(filename)
+        base_path = selected_path.with_suffix("")
+        uncorrected_path = base_path.parent / f"{base_path.name}_uncorrected.csv"
+        corrected_path = base_path.parent / f"{base_path.name}_corrected.csv"
 
-        with open(filename, "w") as outfile:
-            outfile.write("Q, I(q)\n")
+        background = 0.0 if self.background is None else self.background
+        background_subtracted_intensity = intensity - background
+
+        with open(uncorrected_path, "w") as uncorrected_file:
+            uncorrected_file.write("Q, I(q)\n")
             for q_value, i_value in zip(q, intensity):
-                outfile.write("%.6g, %.6g\n"%(q_value, i_value))
+                uncorrected_file.write("%.6g, %.6g\n" % (q_value, i_value))
+
+        with open(corrected_path, "w") as corrected_file:
+            corrected_file.write("Q, I(q)-Background\n")
+            for q_value, i_subtracted in zip(q, background_subtracted_intensity):
+                corrected_file.write("%.6g, %.6g\n" % (q_value, i_subtracted))
 
