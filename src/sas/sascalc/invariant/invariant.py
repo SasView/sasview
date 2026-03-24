@@ -236,11 +236,13 @@ class PowerLaw(Transform):
         """
         Returns the error on I(q) for the given array of q-values
         :param x: array of q-values
+        :return: array of I(q) errors
         """
-        p1 = np.array([self.dscale * math.pow(q, -self.power) for q in x])
-        p2 = np.array([self.scale * self.power * math.pow(q, -self.power - 1) * self.dpower for q in x])
-        diq2 = p1 * p1 + p2 * p2
-        return np.array([math.sqrt(err) for err in diq2])
+        # term from scale: dI/ds * error in scale
+        p1 = self.dscale * x ** (-self.power)
+        # term from power: (dI/dp = I * (-log(x)) * error in power
+        p2 = - self.scale * x ** -self.power * np.log(x) * self.dpower
+        return np.sqrt(p1**2 + p2**2)
 
     def _power_law(self, x):
         """
