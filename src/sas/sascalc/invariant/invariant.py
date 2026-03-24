@@ -61,19 +61,15 @@ class Transform(ABC):
         :param data: LoadData1D instance containing the data to linearize.
         :return: a new LoadData1D instance with the linearized data.
         """
+        dy_provided = data.dy is not None
 
         # Check that the vector lengths are equal
-        if len(data.x) != len(data.y):
-            msg = "Length of data.x and data.y must be equal; got x=%s, y=%s" % (len(data.x), len(data.y))
+        if len(data.x) != len(data.y) or (dy_provided and len(data.x) != len(data.dy)):
+            msg = f"The length of all data arrays must be equal; got sizes of x={len(data.x)}, y={len(data.y)}"
+            msg += f", dy={len(data.dy) if data.dy is not None else 'None'}"
             raise ValueError(msg)
 
-        if data.dy is not None:
-            if len(data.x) != len(data.dy):
-                msg = "Length of data.x and data.dy must be equal; got x=%s, dy=%s" % (len(data.x), len(data.dy))
-                raise ValueError(msg)
-            dy = data.dy
-        else:
-            dy = np.ones(len(data.y))
+        dy = data.dy if dy_provided else np.ones(len(data.y))
 
         # Transform the data
         data_points = zip(data.x, data.y, dy)
