@@ -16,15 +16,22 @@ from sas.qtgui.Plotting.PlotterData import Data1D
 @pytest.mark.parametrize("window_class", ["real_data"], indirect=True)
 @pytest.mark.usefixtures("window_class")
 class TestInvariantCalculateThread(UIHelpersMixin):
-    def test_calculate_thread(self, mocker):
+    @pytest.fixture(autouse=True)
+    def sync_reactor(self, mocker):
+        """Patch reactor and make callFromThread scheduling synchronous."""
+        reactor = mocker.patch.object(Invariant.InvariantPerspective, "reactor")
+        reactor.callFromThread.side_effect = lambda fn, *a, **k: fn(*a, **k)
+        return reactor
+
+    @pytest.fixture
+    def mock_calculator(self, mocker):
+        """Attach a fresh calculator mock to the test window."""
+        calc = mocker.MagicMock()
+        self.window._calculator = calc
+        return calc
+
+    def test_calculate_thread(self, mocker, mock_calculator):
         """Test that calculate_thread calls the appropriate compute methods and updates the model."""
-
-        # Patch reactor and make scheduling synchronous for assertions
-        mock_reactor = mocker.patch.object(Invariant.InvariantPerspective, "reactor")
-        mock_reactor.callFromThread.side_effect = lambda fn, *a, **k: fn(*a, **k)
-
-        mock_calculator = mocker.MagicMock()
-        self.window._calculator = mock_calculator
 
         mock_update = mocker.patch.object(self.window, "update_model_from_thread")
 
@@ -57,19 +64,14 @@ class TestInvariantCalculateThread(UIHelpersMixin):
         ],
         ids=["contrast_mode", "volume_fraction_mode"],
     )
-    def test_calculate_thread_contrast_or_volfrac(self, mocker, setup_name, calc_method, other_method, expect_widget):
+    def test_calculate_thread_contrast_or_volfrac(
+        self, mocker, mock_calculator, setup_name, calc_method, other_method, expect_widget
+    ):
         """Test that calculate_thread updates the model with the correct volume fraction or contrast values."""
 
-        # Patch reactor and make scheduling synchronous for assertions
-        mock_reactor = mocker.patch.object(Invariant.InvariantPerspective, "reactor")
-        mock_reactor.callFromThread.side_effect = lambda fn, *a, **k: fn(*a, **k)
-
-        mock_calc = mocker.MagicMock()
-        self.window._calculator = mock_calc
-
         returned = (0.321, 0.012)
-        getattr(mock_calc, calc_method).return_value = returned
-        mocker.patch.object(mock_calc, "get_qstar_with_error", return_value=(0.1, 0.01))
+        getattr(mock_calculator, calc_method).return_value = returned
+        mocker.patch.object(mock_calculator, "get_qstar_with_error", return_value=(0.1, 0.01))
 
         mock_update = mocker.patch.object(self.window, "update_model_from_thread")
         mock_enable = mocker.patch.object(self.window, "enable_calculation")
@@ -78,8 +80,8 @@ class TestInvariantCalculateThread(UIHelpersMixin):
 
         self.window.calculate_thread(extrapolation=None)
 
-        getattr(mock_calc, calc_method).assert_called_once()
-        getattr(mock_calc, other_method).assert_not_called()
+        getattr(mock_calculator, calc_method).assert_called_once()
+        getattr(mock_calculator, other_method).assert_not_called()
 
         mock_update.assert_any_call(expect_widget, returned[0])
         err_widget = expect_widget + 1
@@ -94,27 +96,20 @@ class TestInvariantCalculateThread(UIHelpersMixin):
         ],
         ids=["volume_fraction_exception", "contrast_exception"],
     )
-    def test_calculate_thread_exceptions(self, mocker, setup_name, calc_method, other_method):
+    def test_calculate_thread_exceptions(self, mocker, mock_calculator, setup_name, calc_method, other_method):
         """Test that calculate_thread handles exceptions from the calculator and logs warnings."""
-
-        # Patch reactor and make scheduling synchronous for assertions
-        mock_reactor = mocker.patch.object(Invariant.InvariantPerspective, "reactor")
-        mock_reactor.callFromThread.side_effect = lambda fn, *a, **k: fn(*a, **k)
 
         mock_logger = mocker.patch.object(Invariant.InvariantPerspective, "logger")
 
-        mock_calc = mocker.MagicMock()
-        self.window._calculator = mock_calc
-
-        getattr(mock_calc, calc_method).side_effect = ValueError("calculation error")
-        mocker.patch.object(mock_calc, "get_qstar_with_error", return_value=(0.1, 0.01))
+        getattr(mock_calculator, calc_method).side_effect = ValueError("calculation error")
+        mocker.patch.object(mock_calculator, "get_qstar_with_error", return_value=(0.1, 0.01))
 
         getattr(self, setup_name)()
 
         self.window.calculate_thread(extrapolation=None)
 
-        getattr(mock_calc, calc_method).assert_called_once()
-        getattr(mock_calc, other_method).assert_not_called()
+        getattr(mock_calculator, calc_method).assert_called_once()
+        getattr(mock_calculator, other_method).assert_not_called()
 
         mock_logger.warning.assert_called_once()
         logged_message = mock_logger.warning.call_args[0][0]
@@ -128,24 +123,17 @@ class TestInvariantCalculateThread(UIHelpersMixin):
         ],
         ids=["contrast_mode", "volume_fraction_mode"],
     )
-    def test_calculate_thread_with_porod(self, setup_name, calc_method, mocker):
+    def test_calculate_thread_with_porod(self, setup_name, calc_method, mocker, mock_calculator):
         """
         Test that calculate_thread correctly updates the model with specific surface
         and q* when Porod constant is provided.
         """
 
-        # Patch reactor and make scheduling synchronous for assertions
-        mock_reactor = mocker.patch.object(Invariant.InvariantPerspective, "reactor")
-        mock_reactor.callFromThread.side_effect = lambda fn, *a, **k: fn(*a, **k)
-
-        mock_calc = mocker.MagicMock()
-        self.window._calculator = mock_calc
-
-        mocker.patch.object(mock_calc, calc_method, return_value=(0.321, 0.012))
+        mocker.patch.object(mock_calculator, calc_method, return_value=(0.321, 0.012))
 
         returned = (0.1, 0.01)
-        mocker.patch.object(mock_calc, "get_surface_with_error", return_value=returned)
-        mocker.patch.object(mock_calc, "get_qstar_with_error", return_value=(0.1, 0.01))
+        mocker.patch.object(mock_calculator, "get_surface_with_error", return_value=returned)
+        mocker.patch.object(mock_calculator, "get_qstar_with_error", return_value=(0.1, 0.01))
 
         mock_update = mocker.patch.object(self.window, "update_model_from_thread")
         mock_enable = mocker.patch.object(self.window, "enable_calculation")
@@ -167,22 +155,17 @@ class TestInvariantCalculateThread(UIHelpersMixin):
         ],
         ids=["contrast_mode", "volume_fraction_mode"],
     )
-    def test_calculate_thread_with_porod_exception(self, setup_name, calc_method, mocker):
+    def test_calculate_thread_with_porod_exception(self, setup_name, calc_method, mocker, mock_calculator):
         """Test that calculate_thread handles exceptions in Porod constant calculation and logs a warning."""
-
-        # Patch reactor and make scheduling synchronous for assertions
-        mock_reactor = mocker.patch.object(Invariant.InvariantPerspective, "reactor")
-        mock_reactor.callFromThread.side_effect = lambda fn, *a, **k: fn(*a, **k)
 
         mock_logger = mocker.patch.object(Invariant.InvariantPerspective, "logger")
 
-        mock_calc = mocker.MagicMock()
-        self.window._calculator = mock_calc
+        mocker.patch.object(mock_calculator, calc_method, return_value=(0.321, 0.012))
 
-        mocker.patch.object(mock_calc, calc_method, return_value=(0.321, 0.012))
-
-        mocker.patch.object(mock_calc, "get_surface_with_error", side_effect=ValueError("surface calculation error"))
-        mocker.patch.object(mock_calc, "get_qstar_with_error", return_value=(0.1, 0.01))
+        mocker.patch.object(
+            mock_calculator, "get_surface_with_error", side_effect=ValueError("surface calculation error")
+        )
+        mocker.patch.object(mock_calculator, "get_qstar_with_error", return_value=(0.1, 0.01))
 
         getattr(self, setup_name)()
         self.update_and_emit_line_edits(self.window.txtPorodCst, "1e-04")
@@ -215,33 +198,26 @@ class TestInvariantCalculateThread(UIHelpersMixin):
         ],
         ids=["low_extrapolation", "high_extrapolation", "both_extrapolations"],
     )
-    def test_calculate_thread_with_extrapolation_success(self, extrapolation, plots, mocker):
+    def test_calculate_thread_with_extrapolation_success(self, extrapolation, plots, mocker, mock_calculator):
         """Test that calculate_thread handles a successful low extrapolation and updates the model accordingly."""
-
-        # Patch reactor and make scheduling synchronous for assertions
-        mock_reactor = mocker.patch.object(Invariant.InvariantPerspective, "reactor")
-        mock_reactor.callFromThread.side_effect = lambda fn, *a, **k: fn(*a, **k)
 
         mock_compute_low = mocker.patch.object(self.window, "compute_low")
         mock_compute_high = mocker.patch.object(self.window, "compute_high")
         mocker.patch.object(self.window, "update_model_from_thread")
-
-        mock_calc = mocker.MagicMock()
-        self.window._calculator = mock_calc
 
         npts = 10
         if extrapolation == "low":
             mock_compute_low.return_value = (0.1, 0.01, True)
             mock_compute_high.return_value = (0.0, 0.0, False)
             self.window._low_points = npts
-            self.set_extra_low(mock_calc, mocker)
+            self.set_extra_low(mock_calculator, mocker)
             get_methods = ["get_extra_data_low"]
             expected_titles = [f"Low-Q extrapolation [{self.window._data.name}]"]
         elif extrapolation == "high":
             mock_compute_low.return_value = (0.0, 0.0, False)
             mock_compute_high.return_value = (0.2, 0.02, True)
             self.window._high_points = npts
-            self.set_extra_high(mock_calc, mocker)
+            self.set_extra_high(mock_calculator, mocker)
             get_methods = ["get_extra_data_high"]
             expected_titles = [f"High-Q extrapolation [{self.window._data.name}]"]
         else:
@@ -249,8 +225,8 @@ class TestInvariantCalculateThread(UIHelpersMixin):
             mock_compute_high.return_value = (0.2, 0.02, True)
             self.window._low_points = npts
             self.window._high_points = npts
-            self.set_extra_low(mock_calc, mocker)
-            self.set_extra_high(mock_calc, mocker)
+            self.set_extra_low(mock_calculator, mocker)
+            self.set_extra_high(mock_calculator, mocker)
             get_methods = ["get_extra_data_low", "get_extra_data_high"]
             expected_titles = [
                 f"Low-Q extrapolation [{self.window._data.name}]",
@@ -259,9 +235,9 @@ class TestInvariantCalculateThread(UIHelpersMixin):
 
         self.setup_contrast()
 
-        mocker.patch.object(mock_calc, "get_qstar_with_error", return_value=(0.5, 0.05))
-        mocker.patch.object(mock_calc, "get_volume_fraction_with_error", return_value=(0.321, 0.012))
-        mocker.patch.object(mock_calc, "get_extrapolation_power", return_value=4.0)
+        mocker.patch.object(mock_calculator, "get_qstar_with_error", return_value=(0.5, 0.05))
+        mocker.patch.object(mock_calculator, "get_volume_fraction_with_error", return_value=(0.321, 0.012))
+        mocker.patch.object(mock_calculator, "get_extrapolation_power", return_value=4.0)
 
         self.window.calculate_thread(extrapolation=extrapolation)
 
@@ -290,7 +266,7 @@ class TestInvariantCalculateThread(UIHelpersMixin):
             Invariant.InvariantPerspective.GuiUtils, "updateModelItemWithPlot"
         )
         emitted = []
-        self.window.communicate.plotRequestedSignal.connect(lambda plots: emitted.append(plots))
+        self.window.communicator.plotRequestedSignal.connect(lambda plots: emitted.append(plots))
         mock_details = mocker.patch.object(self.window, "update_details_widget")
         mock_progress = mocker.patch.object(self.window, "update_progress_bars")
 
@@ -334,6 +310,13 @@ class TestInvariantCalculateThread(UIHelpersMixin):
 @pytest.mark.parametrize("window_class", ["real_data"], indirect=True)
 @pytest.mark.usefixtures("window_class")
 class TestInvariantCalculateHelpers(UIHelpersMixin):
+    @pytest.fixture
+    def sync_reactor(self, mocker):
+        """Patch reactor and make callFromThread scheduling synchronous."""
+        reactor = mocker.patch.object(Invariant.InvariantPerspective, "reactor")
+        reactor.callFromThread.side_effect = lambda fn, *a, **k: fn(*a, **k)
+        return reactor
+
     def test_on_calculate_emits_slot(self, mocker):
         """Ensure clicking the button triggers the connected slot."""
         mock_calculate = mocker.patch.object(self.window, "calculate_invariant")
@@ -402,12 +385,8 @@ class TestInvariantCalculateHelpers(UIHelpersMixin):
         mock_check.assert_called_once_with()
 
     @pytest.mark.parametrize("extrapolation", ["low", "high"], ids=["low", "high"])
-    def test_deferredPlot(self, mocker, extrapolation):
+    def test_deferredPlot(self, mocker, extrapolation, sync_reactor):
         """Test that the deferredPlot method updates the plot and checks if the button can be reenabled."""
-
-        # Patch reactor and make scheduling synchronous for assertions
-        mock_reactor = mocker.patch.object(Invariant.InvariantPerspective, "reactor")
-        mock_reactor.callFromThread.side_effect = lambda fn, *a, **k: fn(*a, **k)
 
         mock_plot = mocker.patch.object(self.window, "plot_result")
 
@@ -418,15 +397,11 @@ class TestInvariantCalculateHelpers(UIHelpersMixin):
 
         self.window.deferredPlot(mock_model, extrapolation=extrapolation)
 
-        mock_reactor.callFromThread.assert_called_once()
+        sync_reactor.callFromThread.assert_called_once()
         mock_plot.assert_called_once_with(mock_model)
 
-    def test_deferredPlot_recreates_plot_when_no_extrapolation(self, mocker):
+    def test_deferredPlot_recreates_plot_when_no_extrapolation(self, mocker, sync_reactor):
         """Test that deferredPlot creates a new plot when extrapolation is None and extrapolation_made is True."""
-
-        # Patch reactor and make scheduling synchronous for assertions
-        mock_reactor = mocker.patch.object(Invariant.InvariantPerspective, "reactor")
-        mock_reactor.callFromThread.side_effect = lambda fn, *a, **k: fn(*a, **k)
 
         mock_plot = mocker.patch.object(self.window, "plot_result")
         mock_check = mocker.patch.object(self.window, "check_status")
@@ -438,7 +413,7 @@ class TestInvariantCalculateHelpers(UIHelpersMixin):
 
         self.window.deferredPlot(mock_model, extrapolation=None)
 
-        assert mock_reactor.callFromThread.call_count == 2
+        assert sync_reactor.callFromThread.call_count == 2
         mock_plot.assert_called_once_with(mock_model)
         mock_check.assert_called_once()
         mock_newplot.assert_called_once()
