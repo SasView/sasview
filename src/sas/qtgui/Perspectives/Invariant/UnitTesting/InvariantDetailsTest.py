@@ -7,8 +7,6 @@ from PySide6.QtWidgets import QDialog
 from sas.qtgui.Perspectives.Invariant.InvariantDetails import DetailsDialog
 from sas.qtgui.Perspectives.Invariant.InvariantUtils import WIDGETS
 
-BG_COLOR_ERR = "background-color: rgb(244, 170, 164);"
-
 
 class InvariantDetailsTest:
     """Test the Invariant Perspective Window"""
