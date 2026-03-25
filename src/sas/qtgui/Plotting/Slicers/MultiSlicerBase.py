@@ -8,7 +8,7 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 
-from sas.qtgui.Plotting.SlicerModel import SlicerModel
+from sas.qtgui.Plotting.SlicerModel import SlicerModel, temporary_flag
 from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
 from sas.qtgui.Plotting.Slicers.SectorSlicer import SectorInteractor
 from sas.qtgui.Plotting.Slicers.SlicerUtils import StackableMixin
@@ -336,15 +336,11 @@ class MultiSlicerBase(BaseInteractor, SlicerModel, StackableMixin, ABC):
         # Now post data for all secondary slicers (with update_model temporarily enabled)
         for i, slicer in enumerate(self.slicers[1:], start=1):
             try:
-                # Temporarily enable model updates for this slicer
-                old_update_model = slicer.update_model
-                slicer.update_model = True
-                with warnings.catch_warnings():
-                    warnings.simplefilter("ignore")
-                    slicer._post_data()
-
-                # Restore original state
-                slicer.update_model = old_update_model
+                # Temporarily enable model updates for this slicer.
+                with temporary_flag(slicer, "update_model", True):
+                    with warnings.catch_warnings():
+                        warnings.simplefilter("ignore")
+                        slicer._post_data()
             except (ValueError, RuntimeError) as e:
                 logger.warning(f"Failed to post data for slicer {i + 1}: {e}")
 
