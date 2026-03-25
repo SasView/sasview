@@ -209,6 +209,12 @@ class Invertor:
         """
         Perform inversion to P(r).
 
+        This is a thin wrapper around :meth:`lstsq` that handles temporary
+        background subtraction when ``est_bck`` is disabled.
+
+        See :meth:`lstsq` for details of the linear system construction
+        (including regularization) and the least-squares solve.
+
         :param nfunc: number of base functions to use.
         :param nr: number of r points to evaluate the 2nd derivative at for the reg. term.
 
