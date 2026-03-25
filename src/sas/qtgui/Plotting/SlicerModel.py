@@ -1,6 +1,19 @@
+from contextlib import contextmanager
+
 from PySide6 import QtCore, QtGui
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+
+
+@contextmanager
+def temporary_flag(obj, attribute_name, value):
+    """Temporarily set an attribute value and always restore the previous value."""
+    old_value = getattr(obj, attribute_name)
+    setattr(obj, attribute_name, value)
+    try:
+        yield
+    finally:
+        setattr(obj, attribute_name, old_value)
 
 
 class SlicerModel:
@@ -44,9 +57,8 @@ class SlicerModel:
             else:
                 params[param_name] = float(self._model.item(row_index, 1).text())
 
-        self.update_model = False
-        self.setParams(params)
-        self.update_model = True
+        with temporary_flag(self, "update_model", False):
+            self.setParams(params)
 
     def setParamsFromModelItem(self, item):
         """
@@ -61,9 +73,8 @@ class SlicerModel:
         else:
             params[param_name] = float(self._model.item(row_index, 1).text())
 
-        self.update_model = False
-        self.setParams(params)
-        self.update_model = True
+        with temporary_flag(self, "update_model", False):
+            self.setParams(params)
 
     def model(self):
         '''getter for the model'''
@@ -73,7 +84,7 @@ class SlicerModel:
         ''' pure virtual '''
         raise NotImplementedError("Parameter getter must be implemented in derived class.")
 
-    def setParams(self):
+    def setParams(self, params):
         ''' pure virtual '''
         raise NotImplementedError("Parameter setter must be implemented in derived class.")
 
