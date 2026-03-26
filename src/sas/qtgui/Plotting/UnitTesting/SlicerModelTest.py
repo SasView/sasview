@@ -28,7 +28,7 @@ class SlicerModelTest:
         '''Assure that SlicerModel contains pure virtuals'''
         model = SlicerModel()
         with pytest.raises(NotImplementedError):
-            model.setParams()
+            model.setParams({})
         with pytest.raises(NotImplementedError):
             model.setModelFromParams()
 
@@ -64,3 +64,48 @@ class SlicerModelTest:
         # Check the new model. The update should be automatic
         assert model.model().rowCount() == 3
         assert model.model().columnCount() == 2
+
+    def testSetParamsFromModel_restores_update_model_on_exception(self, qapp):
+        """update_model should be restored even if setParams raises."""
+        class FailingModel(SlicerModel):
+            params = {"a": 1}
+
+            def __init__(self):
+                SlicerModel.__init__(self)
+
+            def getParams(self):
+                return self.params
+
+            def setParams(self, par):
+                raise RuntimeError("boom")
+
+        model = FailingModel()
+        model.setModelFromParams()
+
+        with pytest.raises(RuntimeError):
+            model.setParamsFromModel()
+
+        assert model.update_model is True
+
+    def testSetParamsFromModelItem_restores_update_model_on_exception(self, qapp):
+        """update_model should be restored for single-item updates too."""
+        class FailingModel(SlicerModel):
+            params = {"a": 1}
+
+            def __init__(self):
+                SlicerModel.__init__(self)
+
+            def getParams(self):
+                return self.params
+
+            def setParams(self, par):
+                raise RuntimeError("boom")
+
+        model = FailingModel()
+        model.setModelFromParams()
+        item = model.model().item(0, 1)
+
+        with pytest.raises(RuntimeError):
+            model.setParamsFromModelItem(item)
+
+        assert model.update_model is True

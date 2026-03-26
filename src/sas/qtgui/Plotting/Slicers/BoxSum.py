@@ -5,6 +5,7 @@ from PySide6 import QtGui
 
 from sasdata.data_util.manipulations import Boxavg, Boxsum
 
+from sas.qtgui.Plotting.SlicerModel import temporary_flag
 from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
 from sas.qtgui.Utilities.GuiUtils import formatNumber, toDouble
 
@@ -150,10 +151,10 @@ class BoxSumCalculator(BaseInteractor):
         params["Width"] = toDouble(self.model().item(0, 1).text())
         params["center_x"] = toDouble(self.model().item(0, 2).text())
         params["center_y"] = toDouble(self.model().item(0, 3).text())
-        self.update_model = False
-        self.setParams(params)
-        self.setReadOnlyParametersFromModel()
-        self.update_model = True
+
+        with temporary_flag(self, "update_model", False):
+            self.setParams(params)
+            self.setReadOnlyParametersFromModel()
 
     def setPanelName(self, name):
         """
