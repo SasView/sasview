@@ -1,10 +1,5 @@
 """Pytest configuration for Invariant perspective tests."""
 
-import os
-
-# Ensure Qt runs headless in CI environments
-os.environ.setdefault("QT_QPA_PLATFORM", os.environ.get("QT_QPA_PLATFORM", "offscreen"))
-
 from collections.abc import Iterator
 
 import pytest
