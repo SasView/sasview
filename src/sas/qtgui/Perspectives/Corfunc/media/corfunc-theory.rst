@@ -1,6 +1,9 @@
 .. _corfunc-theory:
 
 
+.. note::
+    For an explanation of the parameters in the Corfunc window, see the :ref:`corfunc-technical` documentation.
+
 
 Correlation Function Theory
 ===========================
@@ -370,3 +373,8 @@ References
     Stribeck, N. *X-Ray Scattering of Soft Matter*, Springer. Berlin (2007), 138-161
 
 :ref:`FDR` (PDF format)
+
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+.. note:: This document was last modified by Sujaya Shrestha, 25/03/2026.
