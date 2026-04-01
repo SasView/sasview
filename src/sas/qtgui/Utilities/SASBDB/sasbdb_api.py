@@ -9,7 +9,6 @@ import logging
 import os
 import tempfile
 from dataclasses import dataclass, field
-from typing import Optional
 
 import requests
 
@@ -30,13 +29,13 @@ class SASBDBDatasetInfo:
     entry_id: str = ""
     code: str = ""
     title: str = ""
-    
+
     # Sample information
     sample_name: str = ""
     sample_description: str = ""
-    concentration: Optional[float] = None
+    concentration: float | None = None
     concentration_unit: str = "mg/mL"
-    
+
     # Molecule information
     molecule_name: str = ""
     molecule_short_name: str = ""
@@ -46,44 +45,44 @@ class SASBDBDatasetInfo:
     source_organism: str = ""
     number_of_molecules: str = ""
     oligomerization: str = ""
-    molecular_weight: Optional[float] = None  # Experimental MW in kDa
+    molecular_weight: float | None = None  # Experimental MW in kDa
     molecular_weight_method: str = ""
     oligomeric_state: str = ""
-    
+
     # Buffer information
     buffer_description: str = ""
-    ph: Optional[float] = None
-    
+    ph: float | None = None
+
     # Experimental parameters
     instrument: str = ""
     detector: str = ""
-    wavelength: Optional[float] = None  # in Angstrom
+    wavelength: float | None = None  # in Angstrom
     wavelength_unit: str = "Å"
-    temperature: Optional[float] = None  # in Kelvin or Celsius
+    temperature: float | None = None  # in Kelvin or Celsius
     temperature_unit: str = "K"
-    
+
     # Analysis results
-    rg: Optional[float] = None  # Radius of gyration in Angstrom
-    rg_error: Optional[float] = None
-    i0: Optional[float] = None  # I(0)
-    i0_error: Optional[float] = None
-    dmax: Optional[float] = None  # Maximum dimension in Angstrom
-    porod_volume: Optional[float] = None
-    
+    rg: float | None = None  # Radius of gyration in Angstrom
+    rg_error: float | None = None
+    i0: float | None = None  # I(0)
+    i0_error: float | None = None
+    dmax: float | None = None  # Maximum dimension in Angstrom
+    porod_volume: float | None = None
+
     # Q-range
-    q_min: Optional[float] = None
-    q_max: Optional[float] = None
-    
+    q_min: float | None = None
+    q_max: float | None = None
+
     # Publication
     publication_title: str = ""
     publication_doi: str = ""
     publication_pmid: str = ""
     authors: list = field(default_factory=list)
-    
+
     # Data files
     intensities_data_url: str = ""
     pddf_data_url: str = ""
-    
+
     # Raw metadata for additional fields
     raw_metadata: dict = field(default_factory=dict)
 
@@ -96,27 +95,27 @@ def parseMetadata(metadata: dict) -> SASBDBDatasetInfo:
     :return: Parsed SASBDBDatasetInfo object
     """
     info = SASBDBDatasetInfo()
-    
+
     if not isinstance(metadata, dict):
         return info
-    
+
     # Store raw metadata for reference
     info.raw_metadata = metadata
-    
+
     # Log top-level keys for debugging
     logger.debug(f"SASBDB API response keys: {list(metadata.keys())}")
-    
+
     # Identifiers
     info.entry_id = _get_str(metadata, 'id', 'entry_id', 'sasbdb_id')
     info.code = _get_str(metadata, 'code', 'accession_code', 'entry_code')
     info.title = _get_str(metadata, 'title', 'entry_title', 'sample_title')
-    
+
     # Sample information - try more variations
     info.sample_name = _get_str(metadata, 'sample_name', 'sample', 'name', 'sample_name_full')
     info.sample_description = _get_str(metadata, 'sample_description', 'description', 'sample_description_full')
     info.concentration = _get_float(metadata, 'concentration', 'sample_concentration', 'conc', 'sample_conc')
     info.concentration_unit = _get_str(metadata, 'concentration_unit', 'conc_unit', 'concentration_units') or "mg/mL"
-    
+
     # Molecule information - try more variations
     info.molecule_name = _get_str(
         metadata,
@@ -167,53 +166,53 @@ def parseMetadata(metadata: dict) -> SASBDBDatasetInfo:
         metadata, 'oligomerization', 'oligomeric_state', 'oligomer_state',
         'complex_state'
     )
-    info.molecular_weight = _get_float(metadata, 'molecular_weight', 'mw', 'exp_mw', 
+    info.molecular_weight = _get_float(metadata, 'molecular_weight', 'mw', 'exp_mw',
                                         'experimental_mw', 'mw_kda')
     info.molecular_weight_method = _get_str(metadata, 'mw_method', 'molecular_weight_method')
     info.oligomeric_state = info.oligomerization or _get_str(
         metadata, 'oligomeric_state', 'oligomer_state', 'oligomerization'
     )
-    
+
     # Buffer information
     info.buffer_description = _get_str(metadata, 'buffer', 'buffer_description', 'buffer_composition')
     info.ph = _get_float(metadata, 'ph', 'buffer_ph')
-    
+
     # Experimental parameters
     info.instrument = _get_str(metadata, 'instrument', 'beamline', 'instrument_name')
     info.detector = _get_str(metadata, 'detector', 'detector_name', 'detector_type')
     info.wavelength = _get_float(metadata, 'wavelength', 'xray_wavelength', 'neutron_wavelength')
     info.temperature = _get_float(metadata, 'temperature', 'sample_temperature', 'temp')
-    
+
     # Analysis results - Guinier
     info.rg = _get_float(metadata, 'rg', 'radius_of_gyration', 'guinier_rg')
     info.rg_error = _get_float(metadata, 'rg_error', 'rg_err', 'guinier_rg_error')
     info.i0 = _get_float(metadata, 'i0', 'i_zero', 'guinier_i0')
     info.i0_error = _get_float(metadata, 'i0_error', 'i0_err', 'guinier_i0_error')
-    
+
     # Analysis results - P(r)
     info.dmax = _get_float(metadata, 'dmax', 'd_max', 'maximum_dimension')
     info.porod_volume = _get_float(metadata, 'porod_volume', 'volume', 'porod_vol')
-    
+
     # Q-range
     info.q_min = _get_float(metadata, 'q_min', 'qmin', 's_min', 'smin')
     info.q_max = _get_float(metadata, 'q_max', 'qmax', 's_max', 'smax')
-    
+
     # Publication
     info.publication_title = _get_str(metadata, 'publication_title', 'pub_title', 'paper_title')
     info.publication_doi = _get_str(metadata, 'doi', 'publication_doi', 'pub_doi')
     info.publication_pmid = _get_str(metadata, 'pmid', 'publication_pmid', 'pubmed_id')
-    
+
     # Authors
     authors = metadata.get('authors') or metadata.get('author_list') or []
     if isinstance(authors, list):
         info.authors = [str(a) for a in authors]
     elif isinstance(authors, str):
         info.authors = [authors]
-    
+
     # Data file URLs
     info.intensities_data_url = _get_str(metadata, 'intensities_data', 'data_url', 'intensities_url')
     info.pddf_data_url = _get_str(metadata, 'pddf_data', 'pddf_url', 'pr_data')
-    
+
     return info
 
 
@@ -230,7 +229,7 @@ def _get_str(data: dict, *keys: str) -> str:
     for key in keys:
         if key in data and data[key] is not None:
             return str(data[key])
-    
+
     # Then search in common nested structures
     nested_paths = ['sample', 'molecule', 'experiment', 'experimental', 'metadata', 'info']
     for path in nested_paths:
@@ -238,7 +237,7 @@ def _get_str(data: dict, *keys: str) -> str:
             for key in keys:
                 if key in data[path] and data[path][key] is not None:
                     return str(data[path][key])
-    
+
     return ""
 
 
@@ -345,7 +344,7 @@ def _get_deep_str(data: dict, *keys: str) -> str:
     return _search(data)
 
 
-def _get_float(data: dict, *keys: str) -> Optional[float]:
+def _get_float(data: dict, *keys: str) -> float | None:
     """
     Get float value from dictionary, trying multiple possible keys.
     Also searches in nested dictionaries (sample, molecule, experiment, etc.).
@@ -361,7 +360,7 @@ def _get_float(data: dict, *keys: str) -> Optional[float]:
                 return float(data[key])
             except (ValueError, TypeError):
                 continue
-    
+
     # Then search in common nested structures
     nested_paths = ['sample', 'molecule', 'experiment', 'experimental', 'metadata', 'info']
     for path in nested_paths:
@@ -372,11 +371,11 @@ def _get_float(data: dict, *keys: str) -> Optional[float]:
                         return float(data[path][key])
                     except (ValueError, TypeError):
                         continue
-    
+
     return None
 
 
-def getDatasetMetadata(dataset_id: str) -> Optional[dict]:
+def getDatasetMetadata(dataset_id: str) -> dict | None:
     """
     Fetch dataset metadata from SASBDB API.
     
@@ -388,21 +387,21 @@ def getDatasetMetadata(dataset_id: str) -> Optional[dict]:
     if not normalized_id:
         logger.error(f"Invalid dataset ID format: {dataset_id}")
         return None
-    
+
     # Use the correct REST API endpoint: /rest-api/entry/summary/{id}/
     endpoint = f"{SASBDB_API_BASE}/entry/summary/{normalized_id}/"
-    
+
     try:
         logger.info(f"Fetching dataset metadata from: {endpoint}")
         headers = {"accept": "application/json"}
         response = requests.get(endpoint, headers=headers, timeout=30)
         response.raise_for_status()
-        
+
         # Parse JSON response
         metadata = response.json()
         logger.info(f"Successfully retrieved metadata for dataset {normalized_id}")
         return metadata
-                
+
     except requests.exceptions.HTTPError as e:
         if e.response.status_code == 404:
             logger.error(f"Dataset {normalized_id} not found (404)")
@@ -417,7 +416,7 @@ def getDatasetMetadata(dataset_id: str) -> Optional[dict]:
         return None
 
 
-def getDataFileUrl(metadata: dict) -> Optional[str]:
+def getDataFileUrl(metadata: dict) -> str | None:
     """
     Extract data file URL from dataset metadata.
     
@@ -429,7 +428,7 @@ def getDataFileUrl(metadata: dict) -> Optional[str]:
     """
     if not isinstance(metadata, dict):
         return None
-    
+
     # SASBDB-specific field names that might contain data file URLs
     # Priority: intensities_data is the primary field for SASBDB
     possible_fields = [
@@ -461,7 +460,7 @@ def getDataFileUrl(metadata: dict) -> Optional[str]:
         'scattering_data',
         'scatteringData',
     ]
-    
+
     # Check top-level fields
     for field in possible_fields:
         if field in metadata:
@@ -489,14 +488,14 @@ def getDataFileUrl(metadata: dict) -> Optional[str]:
                                     return f"https://www.sasbdb.org{url}"
                                 elif url.startswith('http'):
                                     return url
-    
+
     # Check nested structures (common in REST APIs)
     for nested_key in ['entry', 'data', 'files', 'experimental_data', 'scattering_data']:
         if nested_key in metadata and isinstance(metadata[nested_key], dict):
             result = getDataFileUrl(metadata[nested_key])
             if result:
                 return result
-    
+
     # If we have an entry ID, try constructing a download URL
     # Format might be: /rest-api/entry/{id}/download/ or similar
     entry_id = metadata.get('entry_id') or metadata.get('id') or metadata.get('sasbdb_id')
@@ -509,7 +508,7 @@ def getDataFileUrl(metadata: dict) -> Optional[str]:
         ]
         # Return first endpoint (we'll try them in downloadDataFile if needed)
         return download_endpoints[0]
-    
+
     logger.warning("Could not find data file URL in metadata")
     logger.debug(f"Metadata keys: {list(metadata.keys())}")
     return None
@@ -527,28 +526,28 @@ def downloadDataFile(url: str, filepath: str) -> bool:
         logger.info(f"Downloading data file from: {url}")
         response = requests.get(url, timeout=60, stream=True)
         response.raise_for_status()
-        
+
         # Create directory if it doesn't exist
         os.makedirs(os.path.dirname(filepath), exist_ok=True)
-        
+
         # Write file in chunks to handle large files
         with open(filepath, 'wb') as f:
             for chunk in response.iter_content(chunk_size=8192):
                 if chunk:
                     f.write(chunk)
-        
+
         logger.info(f"Successfully downloaded data file to: {filepath}")
         return True
-        
+
     except requests.exceptions.RequestException as e:
         logger.error(f"Error downloading data file from {url}: {e}")
         return False
-    except IOError as e:
+    except OSError as e:
         logger.error(f"Error writing data file to {filepath}: {e}")
         return False
 
 
-def _normalizeDatasetId(dataset_id: str) -> Optional[str]:
+def _normalizeDatasetId(dataset_id: str) -> str | None:
     """
     Normalize a SASBDB dataset identifier.
     
@@ -564,21 +563,21 @@ def _normalizeDatasetId(dataset_id: str) -> Optional[str]:
     """
     if not dataset_id:
         return None
-    
+
     # Remove whitespace and convert to uppercase
     normalized = dataset_id.strip().upper()
-    
+
     # SASBDB identifiers are typically 7 characters
     # Accept identifiers that are 4-10 characters to be flexible
     if len(normalized) < 4 or len(normalized) > 10:
         logger.warning(f"Dataset ID length unusual: {len(normalized)} characters for '{normalized}'")
         # Still try it, but warn
-    
+
     # Return the normalized identifier as-is (API expects full identifier)
     return normalized
 
 
-def downloadDataset(dataset_id: str, output_dir: Optional[str] = None) -> tuple[Optional[str], Optional[SASBDBDatasetInfo]]:
+def downloadDataset(dataset_id: str, output_dir: str | None = None) -> tuple[str | None, SASBDBDatasetInfo | None]:
     """
     Download a complete dataset from SASBDB.
     
@@ -596,35 +595,35 @@ def downloadDataset(dataset_id: str, output_dir: Optional[str] = None) -> tuple[
     metadata = getDatasetMetadata(dataset_id)
     if not metadata:
         return None, None
-    
+
     # Parse metadata into structured object
     dataset_info = parseMetadata(metadata)
-    
+
     # Get data file URL
     data_url = getDataFileUrl(metadata)
     if not data_url:
         logger.error(f"Could not find data file URL in metadata for dataset {dataset_id}")
         return None, dataset_info  # Return metadata even if download fails
-    
+
     # Store the data URL in the info object
     if not dataset_info.intensities_data_url:
         dataset_info.intensities_data_url = data_url
-    
+
     # Determine output directory
     if output_dir is None:
         output_dir = tempfile.gettempdir()
-    
+
     # Generate filename
     normalized_id = _normalizeDatasetId(dataset_id)
     # Try to determine file extension from URL or metadata
     file_extension = _guessFileExtension(data_url, metadata)
     filename = f"SASBDB_{normalized_id}{file_extension}"
     filepath = os.path.join(output_dir, filename)
-    
+
     # Download the file
     if downloadDataFile(data_url, filepath):
         return filepath, dataset_info
-    
+
     return None, dataset_info
 
 
@@ -643,7 +642,7 @@ def _guessFileExtension(url: str, metadata: dict) -> str:
             ext = '.' + parts[-1].split('?')[0]  # Remove query parameters
             if ext.lower() in ['.dat', '.txt', '.csv', '.out', '.asc']:
                 return ext
-    
+
     # Check metadata for file type hints
     if isinstance(metadata, dict):
         file_type_fields = ['file_type', 'fileType', 'format', 'data_format']
@@ -656,7 +655,7 @@ def _guessFileExtension(url: str, metadata: dict) -> str:
                     return '.txt'
                 elif 'dat' in file_type or 'data' in file_type:
                     return '.dat'
-    
+
     # Default to .dat for scattering data
     return '.dat'
 

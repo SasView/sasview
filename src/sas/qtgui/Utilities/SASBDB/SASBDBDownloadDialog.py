@@ -8,11 +8,10 @@ and loading them into SasView.
 import logging
 import os
 import tempfile
-from typing import Optional
 
 from PySide6 import QtWidgets
 
-from .sasbdb_api import downloadDataset, SASBDBDatasetInfo
+from .sasbdb_api import SASBDBDatasetInfo, downloadDataset
 from .UI.SASBDBDownloadDialogUI import Ui_SASBDBDownloadDialogUI
 
 logger = logging.getLogger(__name__)
@@ -25,7 +24,7 @@ class SASBDBDownloadDialog(QtWidgets.QDialog, Ui_SASBDBDownloadDialogUI):
     Allows users to enter a SASBDB dataset identifier, downloads
     the dataset, and loads it into SasView.
     """
-    
+
     def __init__(self, parent=None):
         """
         Initialize the download dialog.
@@ -34,20 +33,20 @@ class SASBDBDownloadDialog(QtWidgets.QDialog, Ui_SASBDBDownloadDialogUI):
         """
         super().__init__(parent)
         self.setupUi(self)
-        
+
         # Store downloaded file path and metadata
-        self.downloaded_filepath: Optional[str] = None
-        self.dataset_info: Optional[SASBDBDatasetInfo] = None
-        
+        self.downloaded_filepath: str | None = None
+        self.dataset_info: SASBDBDatasetInfo | None = None
+
         # Connect signals
         self.cmdDownload.clicked.connect(self.onDownload)
         self.cmdCancel.clicked.connect(self.reject)
         self.cmdHelp.clicked.connect(self.onHelp)
         self.txtDatasetId.returnPressed.connect(self.onDownload)
-        
+
         # Set focus on dataset ID input
         self.txtDatasetId.setFocus()
-    
+
     def onDownload(self):
         """
         Handle download button click.
@@ -56,11 +55,11 @@ class SASBDBDownloadDialog(QtWidgets.QDialog, Ui_SASBDBDownloadDialogUI):
         and loads it into SasView.
         """
         dataset_id = self.txtDatasetId.text().strip()
-        
+
         if not dataset_id:
             self._showError("Please enter a dataset identifier.")
             return
-        
+
         # Disable download button during download
         self.cmdDownload.setEnabled(False)
         self.cmdCancel.setEnabled(False)
@@ -68,32 +67,32 @@ class SASBDBDownloadDialog(QtWidgets.QDialog, Ui_SASBDBDownloadDialogUI):
         self.progressBar.setRange(0, 0)  # Indeterminate progress
         self.lblStatus.setText("Downloading dataset...")
         QtWidgets.QApplication.processEvents()
-        
+
         try:
             # Download the dataset
             output_dir = tempfile.gettempdir()
             filepath, dataset_info = downloadDataset(dataset_id, output_dir)
-            
+
             # Store the metadata
             self.dataset_info = dataset_info
-            
+
             if filepath and os.path.exists(filepath):
                 self.downloaded_filepath = filepath
-                
+
                 # Build success message with metadata summary
                 success_msg = f"Successfully downloaded dataset {dataset_id}"
                 if dataset_info:
                     details = self._formatMetadataSummary(dataset_info)
                     if details:
                         success_msg += f"\n{details}"
-                
+
                 self.lblStatus.setText(success_msg)
                 self.progressBar.setVisible(False)
-                
+
                 # Log detailed metadata
                 if dataset_info:
                     self._logMetadata(dataset_info)
-                
+
                 self.accept()  # Close dialog and return success
             else:
                 self._showError(f"Failed to download dataset {dataset_id}.\n"
@@ -101,14 +100,14 @@ class SASBDBDownloadDialog(QtWidgets.QDialog, Ui_SASBDBDownloadDialogUI):
                 self.progressBar.setVisible(False)
                 self.cmdDownload.setEnabled(True)
                 self.cmdCancel.setEnabled(True)
-                
+
         except Exception as e:
             logger.error(f"Error downloading dataset {dataset_id}: {e}", exc_info=True)
             self._showError(f"Error downloading dataset:\n{str(e)}")
             self.progressBar.setVisible(False)
             self.cmdDownload.setEnabled(True)
             self.cmdCancel.setEnabled(True)
-    
+
     def _formatMetadataSummary(self, info: SASBDBDatasetInfo) -> str:
         """
         Format a brief summary of the dataset metadata.
@@ -117,7 +116,7 @@ class SASBDBDownloadDialog(QtWidgets.QDialog, Ui_SASBDBDownloadDialogUI):
         :return: Formatted summary string
         """
         parts = []
-        
+
         if info.title:
             parts.append(f"Title: {info.title}")
         if info.sample_name:
@@ -130,9 +129,9 @@ class SASBDBDownloadDialog(QtWidgets.QDialog, Ui_SASBDBDownloadDialogUI):
             parts.append(rg_str)
         if info.molecular_weight is not None:
             parts.append(f"MW: {info.molecular_weight:.1f} kDa")
-        
+
         return "\n".join(parts)
-    
+
     def _logMetadata(self, info: SASBDBDatasetInfo):
         """
         Log detailed metadata information.
@@ -166,7 +165,7 @@ class SASBDBDownloadDialog(QtWidgets.QDialog, Ui_SASBDBDownloadDialogUI):
             logger.info(f"  MW: {info.molecular_weight} kDa")
         if info.publication_doi:
             logger.info(f"  DOI: {info.publication_doi}")
-    
+
     def _showError(self, message: str):
         """
         Display an error message to the user.
@@ -175,23 +174,23 @@ class SASBDBDownloadDialog(QtWidgets.QDialog, Ui_SASBDBDownloadDialogUI):
         """
         self.lblStatus.setText(f"<span style='color: red;'>{message}</span>")
         QtWidgets.QMessageBox.warning(self, "Download Error", message)
-    
-    def getDownloadedFilepath(self) -> Optional[str]:
+
+    def getDownloadedFilepath(self) -> str | None:
         """
         Get the path to the downloaded file.
         
         :return: Path to downloaded file, or None if download failed
         """
         return self.downloaded_filepath
-    
-    def getDatasetInfo(self) -> Optional[SASBDBDatasetInfo]:
+
+    def getDatasetInfo(self) -> SASBDBDatasetInfo | None:
         """
         Get the parsed dataset metadata.
         
         :return: SASBDBDatasetInfo object, or None if metadata not available
         """
         return self.dataset_info
-    
+
     def onHelp(self):
         """
         Show the SASBDB download help documentation.
@@ -210,7 +209,7 @@ class SASBDBDownloadDialog(QtWidgets.QDialog, Ui_SASBDBDownloadDialogUI):
                 elif hasattr(parent, 'showHelp'):
                     parent.showHelp(help_location)
                     return
-            
+
             # Fallback to GuiUtils
             GuiUtils.showHelp(help_location)
         except Exception as e:
