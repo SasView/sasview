@@ -5,6 +5,7 @@ This dialog allows users to review and edit SASBDB export data before exporting.
 """
 import logging
 import os
+import sys
 
 from dominate import tags
 from dominate.util import raw
@@ -53,17 +54,26 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
     :param export_data: Pre-collected SASBDB export data (optional). If not provided,
                         an empty SASBDBExportData object will be created.
     :param parent: Parent widget for the dialog
+    :param guinier_source_data: Optional 1D dataset for optional FreeSAS Guinier estimate
     """
 
-    def __init__(self, export_data: SASBDBExportData | None = None, parent: QtCore.QObject | None = None):
+    def __init__(
+        self,
+        export_data: SASBDBExportData | None = None,
+        parent: QtCore.QObject | None = None,
+        guinier_source_data=None,
+    ):
         """
         Initialize the SASBDB dialog
-        
+
         :param export_data: Pre-collected SASBDB export data (optional)
         :param parent: Parent widget
+        :param guinier_source_data: 1D data used when the user runs FreeSAS from the Guinier tab
         """
         super().__init__(parent)
         self.setupUi(self)
+
+        self._guinier_source_data = guinier_source_data
 
         # Cache for the original (unscaled) shape pixmap; used to rescale efficiently on resize
         self._shape_pixmap_original = None
@@ -86,6 +96,16 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
         self.cmdHelp.clicked.connect(self.onHelp)
         self.cmdClose.clicked.connect(self.close)
         self.chkPublished.toggled.connect(self.onPublishedToggled)
+        if hasattr(self, 'btnGuinierEstimateFreeSAS'):
+            self.btnGuinierEstimateFreeSAS.clicked.connect(
+                self._on_guinier_estimate_clicked)
+            # Not a dialog default: stay neutral until pressed; avoid default-button
+            # chrome (autoDefault) like the footer Export/Close actions.
+            est_btn = self.btnGuinierEstimateFreeSAS
+            est_btn.setAutoDefault(False)
+            est_btn.setDefault(False)
+            if sys.platform == "darwin":
+                est_btn.setAttribute(QtCore.Qt.WA_MacShowFocusRect, False)
 
         # Populate UI with data
         self.populateFromData()
@@ -109,6 +129,66 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
                     self.lblShapeImage.setPixmap(scaled)
                     self.lblShapeImage.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         return super().eventFilter(obj, event)
+
+    def _clear_guinier_fields(self) -> None:
+        """Clear all Guinier line edits."""
+        self.txtGuinierRg.clear()
+        self.txtGuinierRgError.clear()
+        self.txtGuinierI0.clear()
+        self.txtGuinierRangeStart.clear()
+        self.txtGuinierRangeEnd.clear()
+        self.txtGuinierStartPoint.clear()
+        self.txtGuinierEndPoint.clear()
+
+    def _apply_guinier_to_fields(self, guinier: SASBDBGuinier, clear_first: bool = False) -> None:
+        """Fill Guinier tab fields from a SASBDBGuinier object."""
+        if clear_first:
+            self._clear_guinier_fields()
+        if guinier.rg is not None:
+            self.txtGuinierRg.setText(f"{guinier.rg:.2g}")
+        if guinier.rg_error is not None:
+            self.txtGuinierRgError.setText(f"{guinier.rg_error:.2g}")
+        if guinier.i0 is not None:
+            self.txtGuinierI0.setText(f"{guinier.i0:.2g}")
+        if guinier.range_start is not None:
+            self.txtGuinierRangeStart.setText(str(guinier.range_start))
+        if guinier.range_end is not None:
+            self.txtGuinierRangeEnd.setText(str(guinier.range_end))
+        if guinier.start_point is not None:
+            self.txtGuinierStartPoint.setText(str(guinier.start_point))
+        if guinier.end_point is not None:
+            self.txtGuinierEndPoint.setText(str(guinier.end_point))
+
+    def _on_guinier_estimate_clicked(self) -> None:
+        """Run FreeSAS auto_guinier and fill Guinier fields."""
+        self._run_free_sas_guinier_estimate()
+
+    def _run_free_sas_guinier_estimate(self) -> None:
+        """Run freesas auto_guinier and fill the Guinier tab."""
+        from sas.qtgui.Utilities.SASBDB.sasbdb_data_collector import SASBDBDataCollector
+
+        if self._guinier_source_data is None:
+            QtWidgets.QMessageBox.information(
+                self,
+                "Guinier estimate",
+                "No 1D scattering data is available for FreeSAS.\n\n"
+                "Open SASBDB from the Fitting perspective with 1D data loaded, "
+                "or load 1D data in the Data Explorer first.",
+            )
+            return
+
+        collector = SASBDBDataCollector()
+        guinier = collector.collect_guinier_from_freesas(self._guinier_source_data)
+        if guinier is None:
+            QtWidgets.QMessageBox.warning(
+                self,
+                "Guinier estimate",
+                "FreeSAS auto_guinier did not return a result.\n\n"
+                "Ensure the freesas package is installed and the curve is suitable for Guinier analysis.",
+            )
+            return
+
+        self._apply_guinier_to_fields(guinier, clear_first=True)
 
     def populateFromData(self):
         """
@@ -200,26 +280,9 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
                 if buffer.comment:
                     self.txtBufferComment.setPlainText(buffer.comment)
 
-            # Guinier tab
+            # Guinier tab (manual entry by default; optional FreeSAS via Estimate button)
             if sample.guinier:
-                guinier = sample.guinier
-                if guinier.rg:
-                    # Format to 2 significant digits
-                    self.txtGuinierRg.setText(f"{guinier.rg:.2g}")
-                if guinier.rg_error:
-                    # Format to 2 significant digits
-                    self.txtGuinierRgError.setText(f"{guinier.rg_error:.2g}")
-                if guinier.i0:
-                    # Format to 2 significant digits
-                    self.txtGuinierI0.setText(f"{guinier.i0:.2g}")
-                if guinier.range_start:
-                    self.txtGuinierRangeStart.setText(str(guinier.range_start))
-                if guinier.range_end:
-                    self.txtGuinierRangeEnd.setText(str(guinier.range_end))
-                if guinier.start_point is not None:
-                    self.txtGuinierStartPoint.setText(str(guinier.start_point))
-                if guinier.end_point is not None:
-                    self.txtGuinierEndPoint.setText(str(guinier.end_point))
+                self._apply_guinier_to_fields(sample.guinier, clear_first=False)
 
             # Fit tab (use first fit if available)
             if sample.fits:

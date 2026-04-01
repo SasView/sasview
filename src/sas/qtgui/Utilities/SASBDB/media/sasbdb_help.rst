@@ -39,7 +39,7 @@ The SASBDB Export dialog consists of multiple tabs in this order (left to right 
 3. **Sample/Data Tab**: Sample information and experimental parameters
 4. **Molecule Tab**: Biological molecule details
 5. **Buffer Tab**: Buffer composition and conditions
-6. **Guinier Tab**: Guinier analysis results (if available, read-only)
+6. **Guinier Tab**: Optional Guinier values (manual entry or **Estimate** with FreeSAS)
 7. **Fit Tab**: Fit results and model information
 
 Below the tabs, **Shape Visualization** shows a 3D model preview when a fitted model is available.
@@ -161,7 +161,11 @@ The Buffer tab contains information about the buffer solution used in the experi
 Guinier Tab
 -----------
 
-The Guinier tab displays results from Guinier analysis, if available. All fields are read-only and auto-populated.
+The Guinier tab holds optional Guinier analysis values for export. By default the fields are **empty and editable** so you can type values yourself or leave them blank.
+
+**FreeSAS estimate (optional)**
+
+- Click **Estimate** (the button directly below the **I(0)** field) to run freesas ``auto_guinier`` on the current **1D** dataset (active Fitting tab or most recent 1D data in the Data Explorer). If no 1D data is available or the estimate fails, a message explains why.
 
 **Fields**
 
@@ -175,12 +179,7 @@ The Guinier tab displays results from Guinier analysis, if available. All fields
 
 **Availability**
 
-Guinier analysis results are automatically populated if:
-
-- You have performed a Guinier fit using the Linear Fit tool
-- FreeSAS auto_guinier analysis has been performed on your data
-
-If no Guinier analysis is available, these fields will be empty and can be left blank.
+Values may be filled from a saved export that already contained Guinier data. Otherwise use manual entry and/or **Estimate** as above.
 
 Fit Tab
 -------
@@ -192,7 +191,7 @@ The Fit tab contains information about your model fitting results.
 - **Software**: Fitting software used (typically "SasView")
 - **Software Version**: Version of the fitting software
 - **Chi-squared**: Chi-squared value from the fit
-- **CorMap P-value**: CorMap p-value (if calculated)
+- **CorMap P-value**: CorMap p-value (if calculated using CorMap routine of FreeSAS)
 
 **Model Information**
 
@@ -221,23 +220,24 @@ The Shape Visualization panel displays a 3D representation of your fitted model 
 
 **Supported Models**
 
-The visualization supports the following model types:
+The visualization chooses a drawing routine from the fitted **model name** (lowercased, with simple substring checks). Dedicated geometry is used for:
 
-- **Sphere**: Simple spherical particles
-- **Core-Shell Sphere**: Spherical particles with a core and shell
-- **Cylinder**: Cylindrical particles
-- **Core-Shell Cylinder**: Cylindrical particles with a core and shell
-- **Ellipsoid**: Ellipsoidal particles
-- **Parallelepiped**: Rectangular box-shaped particles
-- **Generic Models**: Other models display a generic representation
+- **Sphere**: Model name contains ``sphere`` but not ``core_shell`` (e.g. sasmodels ``sphere``)
+- **Core-Shell Sphere**: Name contains both ``core_shell`` and ``sphere`` (e.g. ``core_shell_sphere``)
+- **Cylinder**: Name contains ``cylinder`` but not ``core_shell`` (e.g. ``cylinder``)
+- **Core-Shell Cylinder**: Name contains both ``core_shell`` and ``cylinder`` (e.g. ``core_shell_cylinder``)
+- **Ellipsoid**: Name contains ``ellipsoid`` (e.g. ``ellipsoid``, ``triaxial_ellipsoid``)
+- **Parallelepiped**: Name contains ``parallelepiped`` or ``rectangular`` (e.g. ``parallelepiped``, ``rectangular_prism``)
+- **Other models**: A **generic** schematic (model label and a few parameters) is shown; these are not geometrically accurate shapes
+
+Other particle models whose names happen to include the same substrings may be drawn with the matching routine even if the physics model differs—use the generic preview only as a rough guide unless the name clearly matches one of the types above.
 
 **Availability**
 
 The shape visualization is available when:
 
 - A model has been fitted to your data
-- The model parameters are available from the fitting widget
-- The model type is recognized
+- The model name is present in the export data (parameters improve the plot when present; generic views still appear with minimal or missing parameters)
 
 The visualization uses the current fitted parameter values, so it reflects your actual fit results.
 
@@ -280,9 +280,9 @@ After export, you will see a message indicating:
 
 The dialog will automatically close on successful export of all files.
 
-**Export PDF**
+**Generate Report**
 
-You can also generate a PDF report without exporting by clicking the **Export PDF** button. This creates a PDF file containing:
+You can also generate a PDF report without exporting by clicking the **Generate Report** button. This creates a PDF file containing:
 
 - All project, sample, molecule, buffer, instrument, and fit information
 - Model visualization (if available)
@@ -310,7 +310,7 @@ The SASBDB Export tool automatically collects data from your SasView session:
 
 **From Analysis Results**
 
-- Guinier analysis results (if Linear Fit or FreeSAS was used)
+- Guinier values are not auto-filled from the fit page; use the Guinier tab (manual entry or **Estimate** button)
 - PDDF results (if Corfunc analysis was performed)
 
 **Manual Entry**

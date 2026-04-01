@@ -557,11 +557,7 @@
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="QLineEdit" name="txtGuinierRangeStart">
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
+        <widget class="QLineEdit" name="txtGuinierRangeStart"/>
        </item>
        <item row="1" column="0">
         <widget class="QLabel" name="lblGuinierRangeEnd">
@@ -571,11 +567,7 @@
         </widget>
        </item>
        <item row="1" column="1">
-        <widget class="QLineEdit" name="txtGuinierRangeEnd">
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
+        <widget class="QLineEdit" name="txtGuinierRangeEnd"/>
        </item>
        <item row="2" column="0">
         <widget class="QLabel" name="lblGuinierStartPoint">
@@ -585,11 +577,7 @@
         </widget>
        </item>
        <item row="2" column="1">
-        <widget class="QLineEdit" name="txtGuinierStartPoint">
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
+        <widget class="QLineEdit" name="txtGuinierStartPoint"/>
        </item>
        <item row="3" column="0">
         <widget class="QLabel" name="lblGuinierEndPoint">
@@ -599,11 +587,7 @@
         </widget>
        </item>
        <item row="3" column="1">
-        <widget class="QLineEdit" name="txtGuinierEndPoint">
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
+        <widget class="QLineEdit" name="txtGuinierEndPoint"/>
        </item>
        <item row="4" column="0">
         <widget class="QLabel" name="lblGuinierRg">
@@ -613,11 +597,7 @@
         </widget>
        </item>
        <item row="4" column="1">
-        <widget class="QLineEdit" name="txtGuinierRg">
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
+        <widget class="QLineEdit" name="txtGuinierRg"/>
        </item>
        <item row="5" column="0">
         <widget class="QLabel" name="lblGuinierRgError">
@@ -627,11 +607,7 @@
         </widget>
        </item>
        <item row="5" column="1">
-        <widget class="QLineEdit" name="txtGuinierRgError">
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
+        <widget class="QLineEdit" name="txtGuinierRgError"/>
        </item>
        <item row="6" column="0">
         <widget class="QLabel" name="lblGuinierI0">
@@ -641,16 +617,84 @@
         </widget>
        </item>
        <item row="6" column="1">
-        <widget class="QLineEdit" name="txtGuinierI0">
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
+        <widget class="QWidget" name="widgetGuinierI0Column">
+         <layout class="QVBoxLayout" name="verticalLayoutGuinierI0">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <property name="spacing">
+           <number>6</number>
+          </property>
+          <item>
+           <widget class="QLineEdit" name="txtGuinierI0"/>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayoutGuinierEstimate">
+            <property name="spacing">
+             <number>0</number>
+            </property>
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QPushButton" name="btnGuinierEstimateFreeSAS">
+              <property name="autoDefault">
+               <bool>false</bool>
+              </property>
+              <property name="default">
+               <bool>false</bool>
+              </property>
+              <property name="text">
+               <string>Estimate</string>
+              </property>
+              <property name="toolTip">
+               <string>Run freesas auto_guinier on the current 1D dataset and fill the Guinier fields.</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacerGuinierEstimate">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Expanding</enum>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+         </layout>
         </widget>
        </item>
        <item row="7" column="0" colspan="2">
         <widget class="QLabel" name="lblGuinierNote">
          <property name="text">
-          <string>Note: Guinier region values are auto-estimated using the freesas package and may be incorrect. Please verify these values.</string>
+          <string>Note: Leave fields blank or enter values manually. Use Estimate below I(0) to run FreeSAS auto_guinier; results may be incorrect—please verify.</string>
          </property>
          <property name="wordWrap">
           <bool>true</bool>
@@ -872,7 +916,7 @@
      <item>
       <widget class="QPushButton" name="cmdGeneratePDF">
        <property name="text">
-        <string>Generate PDF</string>
+        <string>Generate Report</string>
        </property>
       </widget>
      </item>

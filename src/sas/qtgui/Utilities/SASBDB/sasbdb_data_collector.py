@@ -7,7 +7,7 @@ structures. The SASBDBDataCollector class handles:
 
 - Extracting sample and instrument information from Data1D/Data2D objects
 - Collecting fit results and model parameters from fitting widgets
-- Gathering Guinier analysis results (from Linear Fit or FreeSAS)
+- Guinier analysis via ``collect_guinier_from_freesas`` (called from SASBDB dialog on request)
 - Collecting PDDF information from Corfunc analysis
 - Creating default structures for missing data
 

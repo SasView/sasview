@@ -916,6 +916,28 @@ class GuiManager:
                 self.report_dialog = ReportDialog(report_data=report_data, parent=self._parent)
                 self.report_dialog.show()
 
+    def _sasbdb_guinier_source_data_1d(self):
+        """
+        Return loaded 1D data for optional FreeSAS Guinier estimation in SASBDB.
+
+        Prefers the active Fitting tab dataset; otherwise the most recent 1D
+        item in the data manager.
+        """
+        if self._current_perspective is not None:
+            fw = getattr(self._current_perspective, 'currentFittingWidget', None)
+            if fw is not None and fw.data is not None and isinstance(fw.data, Data1D):
+                return fw.data
+        if hasattr(self, '_data_manager'):
+            try:
+                stored = self._data_manager.stored_data
+                if stored:
+                    data = list(stored.values())[-1]
+                    if isinstance(data, Data1D):
+                        return data
+            except Exception:
+                logger.debug("Could not resolve SASBDB Guinier source data", exc_info=True)
+        return None
+
     def actionSASBDB(self):
         """
         Show the SASBDB Export dialog.
@@ -964,8 +986,14 @@ class GuiManager:
         if export_data.project is None:
             export_data.project = collector.create_default_project()
 
+        guinier_source_data = self._sasbdb_guinier_source_data_1d()
+
         # Show dialog
-        self.sasbdb_dialog = SASBDBDialog(export_data=export_data, parent=self._parent)
+        self.sasbdb_dialog = SASBDBDialog(
+            export_data=export_data,
+            parent=self._parent,
+            guinier_source_data=guinier_source_data,
+        )
         self.sasbdb_dialog.show()
 
     def actionReset(self):
