@@ -23,18 +23,23 @@ class TestSASBDBDialog:
     """Test SASBDBDialog export functionality"""
 
     @pytest.fixture(autouse=True)
-    def dialog(self, qapp):
+    def dialog(self, qapp, qtbot):
         """Create/destroy the dialog with minimal export data"""
         export_data = SASBDBExportData()
         # Add minimal required data for validation
         project = SASBDBProject(project_title="Test Project")
         export_data.project = project
 
+        # All fields required by validateData() must be present or onExport()
+        # opens a modal QMessageBox and headless CI hangs (pytest-qt / xvfb).
         sample = SASBDBSample(
             sample_title="Test Sample",
             angular_units="1/A",
             intensity_units="1/cm",
-            curve_type="Single concentration"
+            curve_type="Single concentration",
+            experimental_molecular_weight=50.0,
+            experiment_date="2024-01-15",
+            beamline_instrument="BL12",
         )
         molecule = SASBDBMolecule(
             long_name="Test Molecule",
@@ -55,6 +60,7 @@ class TestSASBDBDialog:
         export_data.instruments.append(instrument)
 
         w = SASBDBDialog(export_data=export_data, parent=None)
+        qtbot.addWidget(w)
         yield w
         w.close()
 
