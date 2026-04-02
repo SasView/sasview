@@ -62,7 +62,11 @@ class TestSASBDBDialog:
         w = SASBDBDialog(export_data=export_data, parent=None)
         qtbot.addWidget(w)
         yield w
-        w.close()
+        try:
+            w.close()
+        except RuntimeError:
+            # Reparenting tests may leave the C++ object destroyed before teardown
+            pass
 
     def test_dialog_initialization(self, dialog):
         """Test dialog initializes correctly"""
@@ -239,78 +243,95 @@ class TestSASBDBDialog:
     def test_saveProjectFile_no_gui_manager(self, dialog):
         """Test _saveProjectFile when parent has no guiManager"""
         parent = QtWidgets.QWidget()
-        parent.guiManager = None
-        parent.gui_manager = None
-        dialog.setParent(parent)
+        try:
+            parent.guiManager = None
+            parent.gui_manager = None
+            dialog.setParent(parent)
 
-        result = dialog._saveProjectFile("/tmp/test_project.json")
-        assert result is False
+            result = dialog._saveProjectFile("/tmp/test_project.json")
+            assert result is False
+        finally:
+            # Orphan dialog before ``parent`` is GC'd (else Qt deletes the dialog
+            # and pytest-qt teardown raises "already deleted").
+            dialog.setParent(None)
 
     def test_saveProjectFile_no_files_widget(self, dialog):
         """Test _saveProjectFile when guiManager has no filesWidget"""
         parent = QtWidgets.QWidget()
-        gui_manager = MagicMock()
-        gui_manager.filesWidget = None
-        parent.guiManager = gui_manager
-        dialog.setParent(parent)
+        try:
+            gui_manager = MagicMock()
+            gui_manager.filesWidget = None
+            parent.guiManager = gui_manager
+            dialog.setParent(parent)
 
-        result = dialog._saveProjectFile("/tmp/test_project.json")
-        assert result is False
+            result = dialog._saveProjectFile("/tmp/test_project.json")
+            assert result is False
+        finally:
+            dialog.setParent(None)
 
     def test_saveProjectFile_success(self, dialog, mocker):
         """Test _saveProjectFile when all conditions are met"""
         parent = QtWidgets.QWidget()
-        gui_manager = MagicMock()
-
-        # Mock filesWidget
-        files_widget = MagicMock()
-        files_widget.getSerializedData.return_value = {'data1': 'test_data'}
-        gui_manager.filesWidget = files_widget
-
-        # Mock perspectives
-        perspective = MagicMock()
-        perspective.isSerializable.return_value = True
-        perspective.serializeAll.return_value = {'data1': {'fit': 'result'}}
-        gui_manager.loadedPerspectives = {'fitting': perspective}
-
-        # Mock grid_window
-        gui_manager.grid_window = MagicMock()
-        gui_manager.grid_window.data_dict = {}
-
-        # Mock current perspective
-        current_perspective = MagicMock()
-        current_perspective.name = "Fitting"
-        gui_manager._current_perspective = current_perspective
-
-        parent.guiManager = gui_manager
-        dialog.setParent(parent)
-
-        # Mock GuiUtils.saveData
-        save_mock = mocker.patch('sas.qtgui.Utilities.GuiUtils.GuiUtils.saveData')
-
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
-            filepath = f.name
-
         try:
-            result = dialog._saveProjectFile(filepath)
-            assert result is True
-            save_mock.assert_called_once()
+            gui_manager = MagicMock()
+
+            # Mock filesWidget
+            files_widget = MagicMock()
+            files_widget.getSerializedData.return_value = {'data1': 'test_data'}
+            gui_manager.filesWidget = files_widget
+
+            # Mock perspectives
+            perspective = MagicMock()
+            perspective.isSerializable.return_value = True
+            perspective.serializeAll.return_value = {'data1': {'fit': 'result'}}
+            gui_manager.loadedPerspectives = {'fitting': perspective}
+
+            # Mock grid_window
+            gui_manager.grid_window = MagicMock()
+            gui_manager.grid_window.data_dict = {}
+
+            # Mock current perspective
+            current_perspective = MagicMock()
+            current_perspective.name = "Fitting"
+            gui_manager._current_perspective = current_perspective
+
+            parent.guiManager = gui_manager
+            dialog.setParent(parent)
+
+            # _saveProjectFile does ``import ...GuiUtils as GuiUtils`` then
+            # ``GuiUtils.saveData`` — patch the module function.
+            save_mock = mocker.patch(
+                'sas.qtgui.Utilities.GuiUtils.saveData',
+            )
+
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+                filepath = f.name
+
+            try:
+                result = dialog._saveProjectFile(filepath)
+                assert result is True
+                save_mock.assert_called_once()
+            finally:
+                if os.path.exists(filepath):
+                    os.unlink(filepath)
         finally:
-            if os.path.exists(filepath):
-                os.unlink(filepath)
+            dialog.setParent(None)
 
     def test_saveProjectFile_exception_handling(self, dialog, mocker):
         """Test _saveProjectFile handles exceptions gracefully"""
         parent = QtWidgets.QWidget()
-        gui_manager = MagicMock()
-        files_widget = MagicMock()
-        files_widget.getSerializedData.side_effect = Exception("Test error")
-        gui_manager.filesWidget = files_widget
-        parent.guiManager = gui_manager
-        dialog.setParent(parent)
+        try:
+            gui_manager = MagicMock()
+            files_widget = MagicMock()
+            files_widget.getSerializedData.side_effect = Exception("Test error")
+            gui_manager.filesWidget = files_widget
+            parent.guiManager = gui_manager
+            dialog.setParent(parent)
 
-        result = dialog._saveProjectFile("/tmp/test_project.json")
-        assert result is False
+            result = dialog._saveProjectFile("/tmp/test_project.json")
+            assert result is False
+        finally:
+            dialog.setParent(None)
 
     def test_onExport_validation_failure(self, dialog, mocker):
         """Test onExport when validation fails"""
