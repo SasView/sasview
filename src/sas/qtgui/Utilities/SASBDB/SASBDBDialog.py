@@ -1651,7 +1651,7 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
                 return False
 
             # Get serialized data from filesWidget
-            if not hasattr(gui_manager, 'filesWidget'):
+            if not hasattr(gui_manager, 'filesWidget') or gui_manager.filesWidget is None:
                 logger.warning("Cannot save project file: filesWidget not available")
                 return False
 

@@ -1,9 +1,13 @@
 """
 Unit tests for SASBDB export functionality
 """
+import builtins
 import json
 import os
+import sys
 import tempfile
+import types
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 import numpy as np
@@ -306,7 +310,14 @@ class TestSASBDBDataCollector:
 
     def test_collect_instrument_from_data_no_data(self, collector):
         """Test collecting instrument information when no data available"""
-        data = Data1D(x=[0.01, 0.02], y=[100, 50])
+        # PlotterData Data1D inherits a default ``source`` from sasdata; that
+        # still counts as instrument-related metadata, so use a minimal stub.
+        data = SimpleNamespace(
+            instrument=None,
+            source=None,
+            detector=None,
+            meta_data=None,
+        )
 
         instrument = collector.collect_instrument_from_data(data)
 
@@ -561,33 +572,56 @@ class TestSASBDBDataCollector:
         assert guinier.range_start == 0.01
         assert guinier.range_end == 0.05
 
-    @patch('sas.qtgui.Utilities.SASBDB.sasbdb_data_collector.auto_guinier')
-    def test_collect_guinier_from_freesas(self, mock_auto_guinier, collector):
-        """Test collecting Guinier using FreeSAS"""
-        # Mock FreeSAS auto_guinier result
+    def test_collect_guinier_from_freesas(self, collector):
+        """Test collecting Guinier using FreeSAS (auto_guinier mocked via sys.modules)."""
         mock_result = MagicMock()
         mock_result.Rg = 2.5
         mock_result.sigma_Rg = 0.1
         mock_result.I0 = 100.0
         mock_result.start_point = 5
         mock_result.end_point = 15
-        mock_auto_guinier.return_value = mock_result
+        mock_auto_guinier = MagicMock(return_value=mock_result)
 
-        data = Data1D(x=np.linspace(0.01, 0.1, 20), y=np.ones(20) * 100)
-        data.dy = np.ones(20) * 5
-        data._xunit = "1/A"
+        autorg_mod = types.ModuleType('freesas.autorg')
+        autorg_mod.auto_guinier = mock_auto_guinier
+        freesas_mod = types.ModuleType('freesas')
+        freesas_mod.autorg = autorg_mod
 
-        guinier = collector.collect_guinier_from_freesas(data)
+        saved = {}
+        for key in ('freesas', 'freesas.autorg'):
+            saved[key] = sys.modules.pop(key, None)
+        sys.modules['freesas'] = freesas_mod
+        sys.modules['freesas.autorg'] = autorg_mod
+        try:
+            data = Data1D(x=np.linspace(0.01, 0.1, 20), y=np.ones(20) * 100)
+            data.dy = np.ones(20) * 5
+            data._xunit = "1/A"
 
-        assert guinier is not None
-        assert isinstance(guinier, SASBDBGuinier)
-        assert guinier.rg == 2.5
-        assert guinier.rg_error == 0.1
-        assert guinier.i0 == 100.0
+            guinier = collector.collect_guinier_from_freesas(data)
+
+            assert guinier is not None
+            assert isinstance(guinier, SASBDBGuinier)
+            assert guinier.rg == 2.5
+            assert guinier.rg_error == 0.1
+            assert guinier.i0 == 100.0
+            mock_auto_guinier.assert_called_once()
+        finally:
+            for key, val in saved.items():
+                if val is not None:
+                    sys.modules[key] = val
+                else:
+                    sys.modules.pop(key, None)
 
     def test_collect_guinier_from_freesas_no_freesas(self, collector):
         """Test collecting Guinier when FreeSAS is not available"""
-        with patch('sas.qtgui.Utilities.SASBDB.sasbdb_data_collector.auto_guinier', side_effect=ImportError()):
+        real_import = builtins.__import__
+
+        def _import_guard(name, globals=None, locals=None, fromlist=(), level=0):
+            if name == 'freesas' or name.startswith('freesas.'):
+                raise ImportError('No module named freesas')
+            return real_import(name, globals, locals, fromlist, level)
+
+        with patch('builtins.__import__', side_effect=_import_guard):
             data = Data1D(x=[0.01, 0.02], y=[100, 50])
             guinier = collector.collect_guinier_from_freesas(data)
             assert guinier is None

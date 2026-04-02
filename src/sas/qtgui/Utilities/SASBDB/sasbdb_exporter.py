@@ -258,6 +258,13 @@ class SASBDBExporter:
         try:
             from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
 
+            if not isinstance(data, (Data1D, Data2D)):
+                logger.error(
+                    "export_experimental_data requires Data1D or Data2D, got %s",
+                    type(data).__name__,
+                )
+                return False
+
             with open(filepath, 'w', encoding='utf-8') as f:
                 # Write header
                 f.write("# SASBDB Experimental Data Export\n")

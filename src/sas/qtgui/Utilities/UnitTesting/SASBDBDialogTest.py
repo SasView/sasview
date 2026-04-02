@@ -70,14 +70,19 @@ class TestSASBDBDialog:
         assert dialog.export_data is not None
         assert len(dialog.export_data.samples) == 1
 
-    def test_onExport_cancels_when_no_filename(self, dialog, mocker):
+    def test_onExport_cancels_when_no_filename(self, dialog, mocker, qtbot):
         """Test that onExport returns early when user cancels file dialog"""
         mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName',
                           return_value=("", ""))
+        close_mock = mocker.patch.object(dialog, 'close')
+
+        dialog.show()
+        qtbot.waitExposed(dialog)
 
         # Should return without error
         dialog.onExport()
-        # Dialog should still be open (not closed)
+        # Cancel path must not close the dialog
+        close_mock.assert_not_called()
         assert dialog.isVisible()
 
     def test_onExport_generates_correct_filenames(self, dialog, mocker):
@@ -233,7 +238,7 @@ class TestSASBDBDialog:
 
     def test_saveProjectFile_no_gui_manager(self, dialog):
         """Test _saveProjectFile when parent has no guiManager"""
-        parent = MagicMock()
+        parent = QtWidgets.QWidget()
         parent.guiManager = None
         parent.gui_manager = None
         dialog.setParent(parent)
@@ -243,7 +248,7 @@ class TestSASBDBDialog:
 
     def test_saveProjectFile_no_files_widget(self, dialog):
         """Test _saveProjectFile when guiManager has no filesWidget"""
-        parent = MagicMock()
+        parent = QtWidgets.QWidget()
         gui_manager = MagicMock()
         gui_manager.filesWidget = None
         parent.guiManager = gui_manager
@@ -254,7 +259,7 @@ class TestSASBDBDialog:
 
     def test_saveProjectFile_success(self, dialog, mocker):
         """Test _saveProjectFile when all conditions are met"""
-        parent = MagicMock()
+        parent = QtWidgets.QWidget()
         gui_manager = MagicMock()
 
         # Mock filesWidget
@@ -296,7 +301,7 @@ class TestSASBDBDialog:
 
     def test_saveProjectFile_exception_handling(self, dialog, mocker):
         """Test _saveProjectFile handles exceptions gracefully"""
-        parent = MagicMock()
+        parent = QtWidgets.QWidget()
         gui_manager = MagicMock()
         files_widget = MagicMock()
         files_widget.getSerializedData.side_effect = Exception("Test error")
