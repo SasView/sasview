@@ -17,6 +17,8 @@ from sas.qtgui.Plotting.WindowTitle import WindowTitle
 
 DEFAULT_CMAP = mpl.cm.jet
 
+mpl.use('all')
+
 class CustomToolbar(NavigationToolbar):
     def __init__(self, canvas, parent=None):
         super().__init__(canvas, parent)
