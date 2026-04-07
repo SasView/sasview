@@ -31,6 +31,8 @@ defaults:
 env:
   # Version of Python that will be used in the release builds
   RELEASE_PYVER: "3.13"
+  # Determine if this CI should build binaries. All non-push event types and all actions against main should trigger
+  BUILD_BINARIES: github.event_name != 'push' || github.ref == 'main'
   # Determine if this CI is being done during the release polishing steps
   RELEASE_BRANCH_BUILD: ${{
       (
@@ -339,7 +341,7 @@ jobs:
 
   installer-matrix:
     needs: [matrix, build-sasview]
-    if: github.event_name != 'push'
+    if: ${{ env.BUILD_BINARIES == 'true' }}
 
     strategy:
       fail-fast: false
@@ -511,7 +513,7 @@ jobs:
 
   test-installer:
     needs: [ matrix, installer-matrix ]
-    if: github.event_name != 'push'
+    if: ${{ env.BUILD_BINARIES == 'true' }}
 
     strategy:
       fail-fast: false
