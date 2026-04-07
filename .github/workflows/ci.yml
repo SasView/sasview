@@ -132,6 +132,8 @@ jobs:
 
       - name: Generate job configuration matrix
         id: set-matrix
+        env:
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
         run: python .github/workflows/matrix.py >> $GITHUB_OUTPUT
 
 
@@ -337,6 +339,7 @@ jobs:
 
   installer-matrix:
     needs: [matrix, build-sasview]
+    if: github.event_name != 'push'
 
     strategy:
       fail-fast: false
@@ -508,6 +511,7 @@ jobs:
 
   test-installer:
     needs: [ matrix, installer-matrix ]
+    if: github.event_name != 'push'
 
     strategy:
       fail-fast: false
