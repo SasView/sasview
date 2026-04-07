@@ -16,7 +16,9 @@ This module implements invariant and its related computations.
 
 """
 
+import logging
 import math
+from abc import ABC, abstractmethod
 
 import numpy as np
 
@@ -31,28 +33,43 @@ Q_MAXIMUM = 10
 # Number of steps in the extrapolation
 INTEGRATION_NSTEPS = 1000
 
+logger = logging.getLogger(__name__)
 
-class Transform:
+
+class Transform(ABC):
     """
-    Define interface that need to compute a function or an inverse
-    function given some x, y
+    Define interface that is needed to compute a function or an inverse function given some x, y.
+    This is an abstract class that should be inherited by any function that is used to
+    extrapolate the data for the invariant calculation. This implements:
+
+    1. linearize_data: linearize the data for a given function
+    2. get_allowed_bins: filter out the data that can't be transformed
+
+    The following are abstract methods that should be implemented by a child class:
+
+    1. linearize_q_value: transform the input q-value for linearization
+    2. extract_model_parameters: assign new value to the parameters of the model
+    3. evaluate_model: returns an array f(x) values where f is the Transform function.
+    4. evaluate_model_errors: returns an array of I(q) errors
     """
 
-    def linearize_data(self, data):
+    def linearize_data(self, data: LoaderData1D) -> LoaderData1D:
         """
         Linearize data so that a linear fit can be performed.
         Filter out the data that can't be transformed.
 
-        :param data: LoadData1D instance
-
+        :param data: LoadData1D instance containing the data to linearize.
+        :return: a new LoadData1D instance with the linearized data.
         """
+        dy_provided = data.dy is not None
+
         # Check that the vector lengths are equal
-        assert len(data.x) == len(data.y)
-        if data.dy is not None:
-            assert len(data.x) == len(data.dy)
-            dy = data.dy
-        else:
-            dy = np.ones(len(data.y))
+        if len(data.x) != len(data.y) or (dy_provided and len(data.x) != len(data.dy)):
+            msg = f"The length of all data arrays must be equal; got sizes of x={len(data.x)}, y={len(data.y)}"
+            msg += f", dy={len(data.dy) if data.dy is not None else 'None'}"
+            raise ValueError(msg)
+
+        dy = data.dy if dy_provided else np.ones(len(data.y))
 
         # Transform the data
         data_points = zip(data.x, data.y, dy)
@@ -62,6 +79,8 @@ class Transform:
             for p in data_points
             if p[0] > 0 and p[1] > 0 and p[2] > 0
         ]
+        if output_points == []:
+            raise ValueError("No valid data points after linearization.")
 
         x_out, y_out, dy_out = zip(*output_points)
 
@@ -73,106 +92,107 @@ class Transform:
 
         return linear_data
 
-    def get_allowed_bins(self, data):
+    def get_allowed_bins(self, data: LoaderData1D) -> list[bool]:
         """
         Goes through the data points and returns a list of boolean values
         to indicate whether each points is allowed by the model or not.
 
         :param data: Data1D object
+        :return: a mask indicating whether each point is allowed by the model or not.
         """
         return [p[0] > 0 and p[1] > 0 and p[2] > 0 for p in zip(data.x, data.y, data.dy)]
 
-    def linearize_q_value(self, value):
-        """
-        Transform the input q-value for linearization
-        """
+    @abstractmethod
+    def linearize_q_value(self, value: float) -> float:
+        """Transform the input q-value for linearization."""
         return NotImplemented
 
-    def extract_model_parameters(self, constant, slope, dconstant=0, dslope=0):
-        """
-        set private member
-        """
+    @abstractmethod
+    def extract_model_parameters(
+        self, constant: float, slope: float, dconstant: float = 0, dslope: float = 0
+    ) -> tuple[list[float], list[float]]:
+        """Assign new value to the parameters of the model."""
         return NotImplemented
 
-    def evaluate_model(self, x):
-        """
-        Returns an array f(x) values where f is the Transform function.
-        """
+    @abstractmethod
+    def evaluate_model(self, x: np.ndarray) -> np.ndarray:
+        """Returns an array f(x) values where f is the Transform function."""
         return NotImplemented
 
-    def evaluate_model_errors(self, x):
-        """
-        Returns an array of I(q) errors
-        """
+    @abstractmethod
+    def evaluate_model_errors(self, x: np.ndarray) -> np.ndarray:
+        """Returns an array of I(q) errors."""
         return NotImplemented
 
 
 class Guinier(Transform):
-    """
-    class of type Transform that performs operations related to guinier
-    function
-    """
+    """Child class of Transform that performs operations related to Guinier function."""
 
-    def __init__(self, scale=1, Rg_squared=3600):
-        Transform.__init__(self)
-        self.scale = scale
-        self.Rg_squared = Rg_squared
-        ## Uncertainty of scale parameter
-        self.dscale = 0
-        ## Uncertainty of Rg squared parameter
-        self.dRg_squared = 0
+    def __init__(self, scale: float = 1, Rg_squared: float = 3600):
+        super().__init__()
 
-    def linearize_q_value(self, value):
+        self.scale: float = scale
+        self.Rg_squared: float = Rg_squared
+        self.dscale: float = 0
+        self.dRg_squared: float = 0
+
+    def linearize_q_value(self, value: float) -> float:
         """
-        Transform the input q-value for linearization
+        Transform the input q-value for linearization.
+        Returns the square of the q-value, which is used for linearizing the Guinier function.
 
         :param value: q-value
-
-        :return: q*q
+        :return: $q^2$
         """
         return value * value
 
-    def extract_model_parameters(self, constant, slope, dconstant=0, dslope=0):
+    def extract_model_parameters(
+        self, constant: float, slope: float, dconstant: float = 0, dslope: float = 0
+    ) -> tuple[list[float], list[float]]:
         """
-        assign new value to the scale and the radius
+        Assign new value to the scale and the radius.
+
+        :param constant: the intercept from the linear fit.
+        :param slope: the slope from the linear fit.
+        :param dconstant: the uncertainty of the intercept from the linear fit.
+        :param dslope: the uncertainty of the slope from the linear fit.
+        :return: a tuple containing two lists:
+            - the parameters of the model [Rg_squared, scale],
+            - the uncertainties of the parameters [dRg_squared, dscale].
         """
         self.scale = math.exp(constant)
         self.Rg_squared = -3.0 * slope
-        # Errors
         self.dscale = math.exp(constant) * dconstant
         self.dRg_squared = 3.0 * dslope
 
         return [self.Rg_squared, self.scale], [self.dRg_squared, self.dscale]
 
-    def evaluate_model(self, x):
+    def evaluate_model(self, x: np.ndarray) -> np.ndarray:
         r"""
-        return calculated I(q) for the model
-
+        Returns calculated I(q) for the model.
         Calculates the Guinier expression
-        $F(x)= s * \exp\left(-(r x)^{2/3}\right)$
+        $I(q)= s * \exp\left(-(R_g x)^{2}/3\right)$
+
+        :param x: a vector of q values.
+        :return: an array of I(q) values calculated by the model.
         """
         return self._guinier(x)
 
-    def evaluate_model_errors(self, x):
+    def evaluate_model_errors(self, x: np.ndarray) -> np.ndarray:
         """
-        Returns the error on I(q) for the given array of q-values
+        Returns the error on I(q) for the given array of q-values.
 
-        :param x: array of q-values
+        :param x: array of q-values.
+        :return: an array of errors corresponding to the I(q) values calculated by the model.
         """
-        p1 = np.array([self.dscale * math.exp(-(self.Rg_squared * q**2 / 3.0)) for q in x])
-        p2 = np.array(
-            [
-                self.scale * math.exp(-(self.Rg_squared * q**2 / 3.0)) * (-(q**2 / 3.0)) * self.dRg_squared
-                for q in x
-            ]
-        )
-        diq2 = p1 * p1 + p2 * p2
-        return np.array([math.sqrt(err) for err in diq2])
+        exp_term = np.exp(-self.Rg_squared * x**2 / 3.0)
+        p1 = self.dscale * exp_term
+        p2 = self.scale * exp_term * (-(x**2) / 3.0) * self.dRg_squared
+        return np.sqrt(p1**2 + p2**2)
 
-    def _guinier(self, x):
+    def _guinier(self, x: np.ndarray) -> np.ndarray:
         r"""
-        Retrieve the guinier function after apply an inverse guinier function
-        to x
+        Retrieve the Guinier function after apply an inverse guinier function to x.
         Compute $F(x) = s * \exp\left(-(r x)^{2}/3\right)$.
 
         :param x: a vector of q values
@@ -181,60 +201,60 @@ class Guinier(Transform):
          - self.scale: $s$, the scale value
          - self.Rg_squared: $R_g^2$, the guinier radius value squared
 
-        :return: F(x)
+        :return: F(x), the form factor calculated by the Guinier function for the given q values.
         """
-        # transform the radius of coming from the inverse guinier function to a
-        # a radius of a guinier function
-        value = np.array([math.exp(-(self.Rg_squared * i**2 / 3.0)) for i in x])
+        value = np.exp(-self.Rg_squared * x**2 / 3.0)
         return self.scale * value
 
 
 class PowerLaw(Transform):
-    """
-    class of type transform that perform operation related to power_law
-    function
-    """
+    """Child class of Transform that performs operation related to the power law function."""
 
-    def __init__(self, scale=1, power=4):
-        Transform.__init__(self)
-        self.scale = scale
-        self.power = power
-        self.dscale = 0.0
-        self.dpower = 0.0
+    def __init__(self, scale: float = 1, power: float = 4):
+        super().__init__()
+        self.scale: float = scale
+        self.power: float = power
+        self.dscale: float = 0.0
+        self.dpower: float = 0.0
 
-    def linearize_q_value(self, value):
+    def linearize_q_value(self, value: float) -> float:
         r"""
-        Transform the input q-value for linearization
+        Transform the input q-value for linearization.
 
-        :param value: q-value
-
+        :param value: q-value.
         :return: $\log(q)$
         """
         return math.log(value)
 
-    def extract_model_parameters(self, constant, slope, dconstant=0, dslope=0):
+    def extract_model_parameters(
+        self, constant: float, slope: float, dconstant: float = 0, dslope: float = 0
+    ) -> tuple[list[float], list[float]]:
         """
-        Assign new value to the scale and the power
+        Assign new value to the scale and the power.
+
+        :param constant: the intercept from the linear fit.
+        :param slope: the slope from the linear fit.
+        :param dconstant: the uncertainty of the intercept from the linear fit.
+        :param dslope: the uncertainty of the slope from the linear fit.
+        :return: a tuple containing two lists:
+            - the parameters of the model [power, scale],
+            - the uncertainties of the parameters [dpower, dscale].
         """
         self.power = -slope
         self.scale = math.exp(constant)
-
-        # Errors
-        self.dscale = math.exp(constant) * dconstant
         self.dpower = -dslope
+        self.dscale = math.exp(constant) * dconstant
 
         return [self.power, self.scale], [self.dpower, self.dscale]
 
-    def evaluate_model(self, x):
-        """
-        given a scale and a radius transform x, y using a power_law
-        function
-        """
+    def evaluate_model(self, x: np.ndarray) -> np.ndarray:
+        """Given a scale and a radius, transform x, y using a power law function."""
         return self._power_law(x)
 
-    def evaluate_model_errors(self, x):
+    def evaluate_model_errors(self, x: np.ndarray) -> np.ndarray:
         """
-        Returns the error on I(q) for the given array of q-values
+        Returns the error on I(q) for the given array of q-values.
+
         :param x: array of q-values
         :return: array of I(q) errors
         """
@@ -244,65 +264,66 @@ class PowerLaw(Transform):
         p2 = - self.scale * x ** -self.power * np.log(x) * self.dpower
         return np.sqrt(p1**2 + p2**2)
 
-    def _power_law(self, x):
+    def _power_law(self, x: np.ndarray) -> np.ndarray:
         """
-        F(x) = scale* (x)^(-power)
-            when power= 4. the model is porod
-            else power_law
-        The model has three parameters: ::
+        $F(x) = s * x^{-p}$, where $s$ is the scale value and $p$ is the power value.
+        When power = 4, the model is porod, else it is a power law.
+
+        The model has three parameters:
             1. x: a vector of q values
             2. power: power of the function
             3. scale : scale factor value
 
-        :param x: array
-        :return: F(x)
+        :param x: array of q values.
+        :return: F(x), the form factor calculated by the power law function for the given q values.
         """
         if self.power <= 0:
             msg = "Power_law function expected positive power,"
             msg += " but got %s" % self.power
             raise ValueError(msg)
         if self.scale <= 0:
-            msg = "scale expected positive value, but got %s" % self.scale
+            msg = "Scale expected positive value, but got %s" % self.scale
             raise ValueError(msg)
 
-        value = np.array([math.pow(i, -self.power) for i in x])
+        value = (x ** (-self.power))
         return self.scale * value
 
 
 class Extrapolator:
-    """
-    Extrapolate I(q) distribution using a given model
-    """
+    """Extrapolate I(q) distribution using a given model."""
 
     def __init__(self, data, model=None):
         """
-        Determine a and b given a linear equation y = ax + b
+        Determine a and b given a linear equation y = ax + b.
 
-        If a model is given, it will be used to linearize the data before
-        the extrapolation is performed. If None,
-        a simple linear fit will be done.
+        If a model is given, it will be used to linearize the data before the extrapolation is performed.
+        If None, a simple linear fit will be done.
 
-        :param data: data containing x and y  such as  y = ax + b
+        :param data: data containing x and y, such as y = ax + b
         :param model: optional Transform object
         """
         self.data = data
         self.model = model
 
         # Set qmin as the lowest non-zero value
-        self.qmin = Q_MINIMUM
-        for q_value in self.data.x:
-            if q_value > 0:
-                self.qmin = q_value
-                break
-        self.qmax = max(self.data.x)
+        positive = self.data.x[self.data.x > 0]
+        self.qmin = positive.min() if len(positive) > 0 else Q_MINIMUM
 
-    def fit(self, power=None, qmin=None, qmax=None):
+        # Set qmax as the highest value
+        self.qmax = self.data.x.max()
+
+    def fit(
+        self, power: float | None = None, qmin: float | None = None, qmax: float | None = None
+    ) -> tuple[list[float], list[float]]:
         """
         Fit data for $y = ax + b$  return $a$ and $b$
 
         :param power: a fixed, otherwise None
         :param qmin: Minimum Q-value
         :param qmax: Maximum Q-value
+        :return: a tuple containing two arrays:
+            - the parameters of the model [a, b],
+            - the uncertainties of the parameters [da, db].
         """
         if qmin is None:
             qmin = self.qmin
@@ -312,39 +333,32 @@ class Extrapolator:
         # Identify the bin range for the fit
         idx = (self.data.x >= qmin) & (self.data.x <= qmax)
 
-        fx = np.zeros(len(self.data.x))
-
         # Uncertainty
         if isinstance(self.data.dy, np.ndarray) and len(self.data.dy) == len(self.data.x) and np.all(self.data.dy > 0):
             sigma = self.data.dy
         else:
-            sigma = np.ones(len(self.data.x))
-
-        # Compute theory data f(x)
-        fx[idx] = self.data.y[idx]
+            sigma = np.ones_like(self.data.x)
 
         # Linearize the data
         if self.model is not None:
-            linearized_data = self.model.linearize_data(LoaderData1D(self.data.x[idx], fx[idx], dy=sigma[idx]))
+            linearized_data = self.model.linearize_data(LoaderData1D(self.data.x[idx], self.data.y[idx], dy=sigma[idx]))
         else:
-            linearized_data = LoaderData1D(self.data.x[idx], fx[idx], dy=sigma[idx])
+            linearized_data = LoaderData1D(self.data.x[idx], self.data.y[idx], dy=sigma[idx])
 
-        ##power is given only for function = power_law
+        # Power is given only for function = power_law
         if power is not None:
-            sigma2 = linearized_data.dy * linearized_data.dy
+            sigma2 = linearized_data.dy**2
             a = -(power)
             b = (np.sum(linearized_data.y / sigma2) - a * np.sum(linearized_data.x / sigma2)) / np.sum(1.0 / sigma2)
 
-            deltas = linearized_data.x * a + np.ones(len(linearized_data.x)) * b - linearized_data.y
-            residuals = np.sum(deltas * deltas / sigma2)
+            deltas = linearized_data.x * a + b - linearized_data.y
+            residuals = np.sum(deltas**2 / sigma2)
 
             err = np.fabs(residuals) / np.sum(1.0 / sigma2)
             return [a, b], [0, np.sqrt(err)]
         else:
             A = np.vstack([linearized_data.x / linearized_data.dy, 1.0 / linearized_data.dy]).T
-            # CRUFT: numpy>=1.14.0 allows rcond=None for the following default
-            rcond = np.finfo(float).eps * max(A.shape)
-            p, residuals, _, _ = np.linalg.lstsq(A, linearized_data.y / linearized_data.dy, rcond=rcond)
+            p, residuals, _, _ = np.linalg.lstsq(A, linearized_data.y / linearized_data.dy, rcond=None)
 
             # Get the covariance matrix, defined as inv_cov = a_transposed * a
             err = np.zeros(2)
@@ -353,7 +367,8 @@ class Extrapolator:
                 cov = np.linalg.pinv(inv_cov)
                 err_matrix = np.fabs(residuals) * cov
                 err = [np.sqrt(err_matrix[0][0]), np.sqrt(err_matrix[1][1])]
-            except:
+            except Exception as e:
+                logger.warning("Error computing covariance matrix: %s", e)
                 err = [-1.0, -1.0]
 
             return p, err
@@ -362,8 +377,7 @@ class Extrapolator:
 class InvariantCalculator:
     """
     Compute invariant if data is given.
-    Can provide volume fraction and surface area if the user provides
-    Porod constant  and contrast values.
+    Can provide volume fraction and surface area if the user provides Porod constant and contrast values.
 
     :precondition:  the user must send a data of type DataLoader.Data1D
                     the user provide background and scale values.
@@ -371,111 +385,107 @@ class InvariantCalculator:
     :note: Some computations depends on each others.
     """
 
-    def __init__(self, data, background=0, scale=1):
+    def __init__(self, data: LoaderData1D, background: float = 0, scale: float = 1):
         """
         Initialize variables.
 
-        :param data: data must be of type DataLoader.Data1D
-        :param background: Background value. The data will be corrected
-            before processing
-        :param scale: Scaling factor for I(q). The data will be corrected
-            before processing
+        :param data: data must be of type DataLoader.Data1D.
+        :param background: Background value.
+        :param scale: Scaling factor for I(q).
+
+        The data will be corrected before processing.
         """
-        # Background and scale should be private data member if the only way to
-        # change them are by instantiating a new object.
-        self._background = background
-        self._scale = scale
+        self._background: float = background
+        self._scale: float = scale
+
+        self._data = self._get_data(data)
+
         # slit height for smeared data
         self._smeared = None
-        # The data should be private
-        self._data = self._get_data(data)
-        # get the dxl if the data is smeared: This is done only once on init.
+
+        # Get the dxl if the data is smeared: This is done only once on init.
         if self._data.dxl is not None and self._data.dxl.all() > 0:
             # assumes constant dxl
             self._smeared = self._data.dxl[0]
 
-        # Since there are multiple variants of Q*, you should force the
-        # user to use the get method and keep Q* a private data member
-        self._qstar = None
-
-        # You should keep the error on Q* so you can reuse it without
-        # recomputing the whole thing.
-        self._qstar_err = 0
+        self._qstar: float | None = None
+        self._qstar_err: float = 0
 
         # Extrapolation parameters
-        self._low_extrapolation_npts = 4
-        self._low_extrapolation_function = Guinier()
-        self._low_extrapolation_power = None
-        self._low_extrapolation_power_fitted = None
+        self._low_extrapolation_npts: int = 4
+        self._low_extrapolation_function: Transform = Guinier()
+        self._low_extrapolation_power: float | None = None
+        self._low_extrapolation_power_fitted: float | None = None
+        self._low_q_limit: float = Q_MINIMUM
 
-        self._high_extrapolation_npts = 4
-        self._high_extrapolation_function = PowerLaw()
-        self._high_extrapolation_power = None
-        self._high_extrapolation_power_fitted = None
-
-        # Extrapolation range
-        self._low_q_limit = Q_MINIMUM
+        self._high_extrapolation_npts: int = 4
+        self._high_extrapolation_function: Transform = PowerLaw()
+        self._high_extrapolation_power: float | None = None
+        self._high_extrapolation_power_fitted: float | None = None
 
     @property
-    def background(self):
+    def background(self) -> float:
         return self._background
 
     @background.setter
-    def background(self, value):
+    def background(self, value: float):
         self._background = value
+        self._qstar = None
 
     @property
-    def scale(self):
+    def scale(self) -> float:
         return self._scale
 
     @scale.setter
-    def scale(self, value):
+    def scale(self, value: float):
         self._scale = value
+        self._qstar = None
 
-    def set_data(self, data):
+    def set_data(self, data: LoaderData1D):
         self._data = self._get_data(data)
+        self._qstar = None
 
-    def _get_data(self, data):
+    def _get_data(self, data: LoaderData1D) -> LoaderData1D:
         """
-        :note: this function must be call before computing any type
-         of invariant
+        This function must be called before computing any type of invariant.
 
+        :param data: the data to use for the Invariant calculation. Must be of type DataLoader.Data1D.
         :return: new data = self._scale x data - self._background
         """
         if not issubclass(data.__class__, LoaderData1D):
-            # Process only data that inherited from DataLoader.Data_info.Data1D
-            raise ValueError("Data must be of type DataLoader.Data1D")
-        # from copy import deepcopy
+            msg = "Data should be of type DataLoader.Data1D, but got %s." % type(data)
+            raise ValueError(msg)
+
         new_data = (self._scale * data) - self._background
 
-        # Check that the vector lengths are equal
-        assert len(new_data.x) == len(new_data.y)
+        if len(new_data.x) != len(new_data.y):
+            msg = "Length of data.x and data.y must be equal; got x=%s, y=%s" % (len(new_data.x), len(new_data.y))
+            raise ValueError(msg)
 
-        # Verify that the errors are set correctly
-        if (
-            new_data.dy is None
-            or len(new_data.x) != len(new_data.dy)
-            or (min(new_data.dy) == 0 and max(new_data.dy) == 0)
-        ):
-            new_data.dy = np.ones(len(new_data.x))
+        if new_data.dy is None or len(new_data.x) != len(new_data.dy) or not np.any(new_data.dy):
+            new_data.dy = np.ones_like(new_data.x)
         return new_data
 
-    def _fit(self, model, qmin=Q_MINIMUM, qmax=Q_MAXIMUM, power=None):
+    def _fit(
+        self, model: Transform, qmin: float = Q_MINIMUM, qmax: float = Q_MAXIMUM, power: float | None = None
+    ) -> tuple[list[float], list[float]]:
         """
-        fit data with function using
-        data = self._get_data()
-        fx = Functor(data , function)
+        Fit data with function using data = self._get_data()
+        fx = Functor(data, function)
         y = data.y
         slope, constant = linalg.lstsq(y,fx)
 
-        :param qmin: data first q value to consider during the fit
-        :param qmax: data last q value to consider during the fit
-        :param power: power value to consider for power-law
-        :param function: the function to use during the fit
+        :param model: the function to use for the fit. Must be a child class of Transform.
+        :param qmin: data first q value to consider during the fit.
+        :param qmax: data last q value to consider during the fit.
+        :param power: power value to consider for power-law,
+        :param function: the function to use during the fit,
 
-        :return a: the scale of the function
-        :return b: the other parameter of the function for guinier will be radius
-                for power_law will be the power value
+        :return: a tuple containing two lists:
+            - the parameters of the model, which are scale and:
+                - for Guinier, the radius of gyration,
+                - for power law, the power value.
+            - the uncertainties on the parameters.
         """
         extrapolator = Extrapolator(data=self._data, model=model)
         p, dp = extrapolator.fit(power=power, qmin=qmin, qmax=qmax)
@@ -507,31 +517,21 @@ class InvariantCalculator:
             msg = "Length x and y must be equal"
             msg += " and greater than 1; got x=%s, y=%s" % (len(data.x), len(data.y))
             raise ValueError(msg)
+
+        # Take care of smeared data
+        if self._smeared is None:
+            gx = data.x * data.x
+        # assumes that len(x) == len(dxl).
         else:
-            # Take care of smeared data
-            if self._smeared is None:
-                gx = data.x * data.x
-            # assumes that len(x) == len(dxl).
-            else:
-                gx = data.dxl * data.x
+            gx = data.dxl * data.x
 
-            n = len(data.x) - 1
-            # compute the first delta q
-            dx0 = (data.x[1] - data.x[0]) / 2
-            # compute the last delta q
-            dxn = (data.x[n] - data.x[n - 1]) / 2
-            total = 0
-            total += gx[0] * data.y[0] * dx0
-            total += gx[n] * data.y[n] * dxn
+        # Midpoint-width trapezoidal bin widths for each point
+        dx = np.empty_like(data.x)
+        dx[0] = (data.x[1] - data.x[0]) / 2
+        dx[1:-1] = (data.x[2:] - data.x[:-2]) / 2
+        dx[-1] = (data.x[-1] - data.x[-2]) / 2
 
-            if len(data.x) == 2:
-                return total
-            else:
-                # iterate between for element different from the first and the last
-                for i in range(1, n - 1):
-                    dxi = (data.x[i + 1] - data.x[i - 1]) / 2
-                    total += gx[i] * data.y[i] * dxi
-                return total
+        return np.dot(gx * data.y, dx)
 
     def _get_qstar_uncertainty(self, data):
         """
@@ -559,37 +559,25 @@ class InvariantCalculator:
             msg = "Length of data.x and data.y must be equal"
             msg += " and greater than 1; got x=%s, y=%s" % (len(data.x), len(data.y))
             raise ValueError(msg)
-        else:
-            # For reduced data sqrt(I) is incorrect! if the data has no dy
-            # then we should not invent it and then propogate that completely
-            # bogus value.  So changed behaviour on Mar 23, 2020 to return
-            # None instead
-            if data.dy is None:
-                return None
-            dy = data.dy
-            # Take care of smeared data
-            if self._smeared is None:
-                gx = data.x * data.x
-            # assumes that len(x) == len(dxl).
-            else:
-                gx = data.dxl * data.x
 
-            n = len(data.x) - 1
-            # compute the first delta
-            dx0 = (data.x[1] - data.x[0]) / 2
-            # compute the last delta
-            dxn = (data.x[n] - data.x[n - 1]) / 2
-            total = 0
-            total += (gx[0] * dy[0] * dx0) ** 2
-            total += (gx[n] * dy[n] * dxn) ** 2
-            if len(data.x) == 2:
-                return math.sqrt(total)
-            else:
-                # iterate between for element different from the first and the last
-                for i in range(1, n - 1):
-                    dxi = (data.x[i + 1] - data.x[i - 1]) / 2
-                    total += (gx[i] * dy[i] * dxi) ** 2
-                return math.sqrt(total)
+        if data.dy is None:
+            return None
+
+        dy = data.dy
+        # Take care of smeared data
+        if self._smeared is None:
+            gx = data.x * data.x
+        # assumes that len(x) == len(dxl).
+        else:
+            gx = data.dxl * data.x
+
+        # Midpoint-width trapezoidal bin widths for each point
+        dx = np.empty_like(data.x)
+        dx[0] = (data.x[1] - data.x[0]) / 2
+        dx[1:-1] = (data.x[2:] - data.x[:-2]) / 2
+        dx[-1] = (data.x[-1] - data.x[-2]) / 2
+
+        return math.sqrt(np.sum((gx * dy * dx) ** 2))
 
     def _get_extrapolated_data(self, model, npts=INTEGRATION_NSTEPS, q_start=Q_MINIMUM, q_end=Q_MAXIMUM):
         """
@@ -694,7 +682,7 @@ class InvariantCalculator:
 
     def get_extra_data_low(self, npts_in=None, q_start=None, npts=20):
         """
-        Returns the extrapolated data used for the loew-Q invariant calculation.
+        Returns the extrapolated data used for the low-Q invariant calculation.
         By default, the distribution will cover the data points used for the
         extrapolation. The number of overlap points is a parameter (npts_in).
         By default, the maximum q-value of the distribution will be
@@ -812,14 +800,14 @@ class InvariantCalculator:
         if extrapolation == "low":
             qs_low, dqs_low = self.get_qstar_low()
             qs_hi, dqs_hi = 0, 0
-
         elif extrapolation == "high":
             qs_low, dqs_low = 0, 0
             qs_hi, dqs_hi = self.get_qstar_high()
-
         elif extrapolation == "both":
             qs_low, dqs_low = self.get_qstar_low()
             qs_hi, dqs_hi = self.get_qstar_high()
+        else:
+            raise ValueError("Extrapolation should be 'low', 'high' or 'both'")
 
         self._qstar += qs_low + qs_hi
         self._qstar_err = math.sqrt(self._qstar_err * self._qstar_err + dqs_low * dqs_low + dqs_hi * dqs_hi)
