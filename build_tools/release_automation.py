@@ -48,6 +48,27 @@ sasview_data = {
     }
 }
 
+version_template = \
+"""
+try:
+    from ._version import __version__
+except ImportError:
+    __version__ = "{}"
+
+__release_date__ = "{}"
+__build__ = "GIT_COMMIT"
+
+__all__ = ["__build__", "__release_date__", "__version__"]
+"""
+acknowledgement_template = \
+'''
+__DOI__ = "{}"
+__RELEASE_MANAGER__ = "{}"
+__ACKNOWLEDGEMENT__ = "This work benefited from the use of the SasView application, originally developed " \
+                      "under NSF Award DMR - 0520547. SasView also contains code developed with funding" \
+                      " from the EU Horizon 2020 programme under the SINE2020 project Grant No 654000."
+'''
+
 CURRENT_PATH = Path('.').resolve()
 SASVIEW_PATH = CURRENT_PATH / 'sasview'
 SASDATA_PATH = CURRENT_PATH / 'sasdata'
@@ -158,13 +179,6 @@ def generate_zenodo(sasview_data, zenodo_api_key):
     return newDOI
 
 
-version_template = \
-"""__version__ = "%s"
-__release_date__ = "%i"
-__build__ = "GIT_COMMIT"
-"""
-
-zenodo_template = '__DOI__ = "%s"'
 
 
 def update_sasview_metadata(version, doi):
