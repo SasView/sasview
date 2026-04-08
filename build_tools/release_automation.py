@@ -34,9 +34,9 @@ zenodo_url = "https://zenodo.org"
 # Should import release notes from git repo, for now will need to cut and paste
 sasview_data = {
 'metadata': {
-    'title': 'SasView version 6.1.2',
-    'description': '6.1.2 release',
-    'related_identifiers': [{'identifier': 'https://github.com/SasView/sasview/releases/tag/v6.1.1',
+    'title': 'SasView version ',
+    'description': ' release',
+    'related_identifiers': [{'identifier': 'https://github.com/SasView/sasview/releases/tag/v',
                         'relation': 'isAlternateIdentifier', 'scheme': 'url'}],
     'contributors': [],
     'creators': [],
@@ -50,9 +50,9 @@ sasview_data = {
 }
 sasmodels_data = {
 'metadata': {
-    'title': 'SasModels version 1.0.11',
-    'description': '1.0.11 release',
-    'related_identifiers': [{'identifier': 'https://github.com/SasView/sasmodels/releases/tag/v1.0.11',
+    'title': 'SasModels version ',
+    'description': ' release',
+    'related_identifiers': [{'identifier': 'https://github.com/SasView/sasmodels/releases/tag/v',
                         'relation': 'isAlternateIdentifier', 'scheme': 'url'}],
     'contributors': [],
     'creators': [],
@@ -65,9 +65,9 @@ sasmodels_data = {
 }
 sasdata_data = {
 'metadata': {
-    'title': 'SasData version {}',
-    'description': '{} release',
-    'related_identifiers': [{'identifier': 'https://github.com/SasView/sasdata/releases/tag/v{}',
+    'title': 'SasData version ',
+    'description': ' release',
+    'related_identifiers': [{'identifier': 'https://github.com/SasView/sasdata/releases/tag/v',
                         'relation': 'isAlternateIdentifier', 'scheme': 'url'}],
     'contributors': [],
     'creators': [],
@@ -149,10 +149,10 @@ def generate_zenodo_data(zenodo_data: dict, version: str, contributors_file: Pat
     :param version: The version of the repo.
     :param contributors_file: The path to the contributors file for the repo.
     """
-    zenodo_data['metadata']['title'] = zenodo_data['metadata']['title'] % version
-    zenodo_data['metadata']['description'] = zenodo_data['metadata']['description'] % version
+    zenodo_data['metadata']['title'] = zenodo_data['metadata']['title'] + version
+    zenodo_data['metadata']['description'] = version + zenodo_data['metadata']['description']
     zenodo_data['metadata']['related_identifiers'][0]['identifier'] = (
-        zenodo_data)['metadata']['related_identifiers'][0]['identifier'] % version
+        zenodo_data)['metadata']['related_identifiers'][0]['identifier'] + version
     contributors = []
     creators = []
     with open(contributors_file) as f:
