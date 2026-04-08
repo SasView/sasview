@@ -21,12 +21,7 @@ Options include:
     -v/--sasview_version: The sasview version for the upcoming release in x.y.z(a|b)(0-9) format. **required**
     -s/--sasmodels_version: The sasmodels version for the upcoming release in x.y.z(a|b)(0-9) format. **required**
     -d/--sasdata_version: The sasdata version for the upcoming release in x.y.z(a|b)(0-9) format. **required**
-    -z/--zenodo: The Zenodo api key for modifying/creating Zenodo entries.
-    -u/--username: Your Github username for fetching the repositories.
-    -p/--password: Your Github password for fetching the repositories.
-    -l/--sasview_list: A comma-delimited list of sasview issue numbers closed for this release.
-    -m/--sasmodels_list: A comma-delimited list of sasmodels issue numbers closed for this release.
-    -n/--sasdata_list: A comma-delimited list of sasdata issue numbers closed for this release.
+    -z/--zenodo: A Zenodo API Key for modifying/creating Zenodo entries.
 '''
 
 # Replace with live server and live server key
@@ -254,34 +249,12 @@ def update_acknowledgement_widget():
     pass
 
 
-def prepare_release_notes(issues_list, repository, username, password):
-    """
-    Retrieving information from github and creating issue list for release notes
-    :return:
-    """
-    issue_titles = []
-    for issue in issues_list:
-        # WARNING: One can try running with auth but there is limited number of requests
-        response = requests.get('https://api.github.com/repos/SasView/' + repository + '/issues/' + issue,
-                                auth=(username, password))
-        if response.status_code != 200:
-            return []
-        title = response.json()['title']
-        issue_titles.append(f"#{issue}, {title}")
-    return issue_titles
-
-
 def parse_args():
     parser = argparse.ArgumentParser('Script to automate release process')
     parser.add_argument('-v', '--sasview_version', required=True)
     parser.add_argument('-s', '--sasmodels_version', required=True)
     parser.add_argument('-d', '--sasdata_version', required=True)
     parser.add_argument('-z', '--zenodo', default=False)
-    parser.add_argument('-u', '--username', default=False)
-    parser.add_argument('-p', '--password', default=False)
-    parser.add_argument('-l', '--sasview_list', default=False, action=SplitArgs)
-    parser.add_argument('-m', '--sasmodels_list', default=False, action=SplitArgs)
-    parser.add_argument('-n', '--sasdata_list', default=False, action=SplitArgs)
     return parser.parse_args()
 
 
@@ -319,29 +292,6 @@ def main(args=None):
     update_file(SASDATA_PATH / 'LICENSE.TXT', license_line, 0)
     update_file(SASVIEW_PATH / 'installers' / 'license.txt', license_line, -1)
     update_credits(SASVIEW_PATH / "src" / "sas" / "system" / "credits.html")
-
-    sasview_issues_list = args.sasview_list
-    sasmodels_issues_list = args.sasmodels_list
-    sasdata_issues_list = args.sasdata_list
-
-    # Release notes template is generated if github credentials are provided
-    if args.username and args.password:
-        username = args.username
-        password = args.password
-
-        sasview_issues = prepare_release_notes(sasview_issues_list, 'sasview', username, password)
-        sasmodels_issues = prepare_release_notes(sasmodels_issues_list, 'sasmodels', username, password)
-        sasdata_issues = prepare_release_notes(sasdata_issues_list, 'sasmodels', username, password)
-
-        print('Copy text below to  /sasview/docs/sphinx-docs/source/user/RELEASE.rst and adapt accordingly')
-        for issue_title in sasview_issues:
-            print(f'Fixes sasview {issue_title}')
-
-        for issue_title in sasmodels_issues:
-            print(f'Fixes sasmodels {issue_title}')
-
-        for issue_title in sasdata_issues:
-            print(f'Fixes sasdata {issue_title}')
 
 
 if __name__ == "__main__":
