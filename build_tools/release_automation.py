@@ -80,23 +80,21 @@ sasdata_data = {
 }
 
 version_template = \
-"""
-try:
+"""try:
     from ._version import __version__
 except ImportError:
-    __version__ = "{}"
+    __version__ = "{0}"
 
-__release_date__ = "{}"
+__release_date__ = "{1}"
 __build__ = "GIT_COMMIT"
 
 __all__ = ["__build__", "__release_date__", "__version__"]
 """
 acknowledgement_template = \
-'''
-__DOI__ = "{}"
-__RELEASE_MANAGER__ = "{}"
-__ACKNOWLEDGEMENT__ = "This work benefited from the use of the SasView application, originally developed " \
-                      "under NSF Award DMR - 0520547. SasView also contains code developed with funding" \
+'''__DOI__ = "{0}"
+__RELEASE_MANAGER__ = "{1}"
+__ACKNOWLEDGEMENT__ = "This work benefited from the use of the SasView application, originally developed " \\
+                      "under NSF Award DMR - 0520547. SasView also contains code developed with funding" \\
                       " from the EU Horizon 2020 programme under the SINE2020 project Grant No 654000."
 '''
 
@@ -250,11 +248,11 @@ def update_sasview_metadata(version: str, doi: str, release_manager: str) -> Non
 
     # Update the version in version.py
     with open(version_filename, 'w') as file:
-        file.write(version_template % (version, year))
+        file.write(version_template.format(version, year))
 
     # Update the citation information
     with open(citation_filename, 'w') as file:
-        file.write(acknowledgement_template % (doi, release_manager))
+        file.write(acknowledgement_template.format(doi, release_manager))
 
     # Update the Pyinstall config
     ver = yrs = False
