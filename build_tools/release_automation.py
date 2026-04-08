@@ -109,7 +109,7 @@ for path in [SASMODELS_PATH, SASDATA_PATH, SASVIEW_PATH]:
         msg = f"""The {missing_repo} repository does not exist relative to the run path of release_automation.py.
         Please ensure you are running this script from the directory all sub packages are in.
         Usage:
-            `python ./sasview/release_automation.py [options]
+            `python ./sasview/build_tools/release_automation.py [options]
         """
         logging.error(msg)
 SASVIEW_CONTRIBUTORS_FILE = SASVIEW_PATH / 'build_tools' / 'contributors.tsv'
