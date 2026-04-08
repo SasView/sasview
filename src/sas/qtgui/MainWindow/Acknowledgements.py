@@ -3,8 +3,8 @@ from PySide6.QtCore import QSize
 from PySide6.QtGui import QIcon
 
 import sas.sasview
+import sas.system.citation
 import sas.system.version
-import sas.system.zenodo
 
 from .UI.AcknowledgementsUI import Ui_Acknowledgements
 
@@ -26,11 +26,9 @@ class Acknowledgements(QtWidgets.QDialog, Ui_Acknowledgements):
         Modify the labels so the text corresponds to the current version
         """
         version = sas.system.version.__version__
-        doi = sas.system.zenodo.__DOI__
-        acknowledgement_text_1 = "This work benefited from the use of the SasView application, originally developed " \
-                                 "under NSF Award DMR - 0520547. SasView also contains code developed with funding" \
-                                 " from the EU Horizon 2020 programme under the SINE2020 project Grant No 654000."
-
+        doi = sas.system.citation.__DOI__
+        release_manager = sas.system.citation.__RELEASE_MANAGER__
+        acknowledgement_text_1 = sas.system.citation.__ACKNOWLEDGEMENT__
         self.textBrowser.setText(acknowledgement_text_1)
-        acknowledgement_text_2 = 'J. Krzywon, et al. SasView Version ' + str(version) + ', ' + str(doi)
+        acknowledgement_text_2 = f'{release_manager}, et al. SasView Version {version} {doi}'
         self.textBrowser_2.setText(acknowledgement_text_2)
