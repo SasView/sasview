@@ -353,9 +353,12 @@ def main(args=None):
     sasdata_version = args.sasdata_version
 
     # Generate a list of contributors using a file, if that file exists, otherwise use the pre-defined list given here.
-    generate_zenodo_data(sasview_data, sasview_version, SASVIEW_CONTRIBUTORS_FILE)
-    generate_zenodo_data(sasdata_data, sasdata_version, SASDATA_CONTRIBUTORS_FILE)
-    generate_zenodo_data(sasmodels_data, sasmodels_version, SASMODELS_CONTRIBUTORS_FILE)
+    if SASVIEW_CONTRIBUTORS_FILE.exists():
+        generate_zenodo_data(sasview_data, sasview_version, SASVIEW_CONTRIBUTORS_FILE)
+    if SASDATA_CONTRIBUTORS_FILE.exists():
+        generate_zenodo_data(sasdata_data, sasdata_version, SASDATA_CONTRIBUTORS_FILE)
+    if SASMODELS_CONTRIBUTORS_FILE.exists():
+        generate_zenodo_data(sasmodels_data, sasmodels_version, SASMODELS_CONTRIBUTORS_FILE)
 
     release_manager = sasview_data['metadata']['contributors'][0] if len(sasview_data['metadata']['contributors']) > 0 else ''
 
