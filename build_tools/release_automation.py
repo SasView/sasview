@@ -360,7 +360,7 @@ def main(args=None):
     if SASMODELS_CONTRIBUTORS_FILE.exists():
         generate_zenodo_data(sasmodels_data, sasmodels_version, SASMODELS_CONTRIBUTORS_FILE)
 
-    release_manager = sasview_data['metadata']['contributors'][0] if len(sasview_data['metadata']['contributors']) > 0 else ''
+    release_manager = sasview_data['metadata']['creators'][0]['name'] if len(sasview_data['metadata']['contributors']) > 0 else ''
 
     # Generates zenodo doi if zenodo api key is provided
     new_sasview_doi = new_sasdata_doi = new_sasmodels_doi = ''
