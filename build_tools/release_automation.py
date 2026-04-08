@@ -254,22 +254,21 @@ def update_sasview_metadata(version: str, doi: str, release_manager: str) -> Non
     with open(citation_filename, 'w') as file:
         file.write(acknowledgement_template.format(doi, release_manager))
 
-    # Update the Pyinstall config
-    ver = yrs = False
+    # Update the Pyinstall config with the version and the year
     for line in fileinput.input(iss_file, inplace=True):
-        if line.startswith('# define MyAppVersion'):
-            print(f'# define MyAppVersion {version}')
-            ver = True
-        if line.startswith('#define MyAppPublisher'):
-            print(f'#define MyAppPublisher "(c) 2009 - {year}, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO, BAM, TU Delft, and DLS"')
-            yrs = True
-        if yrs and ver:
-            break
+        if line.startswith('#define MyAppVersion'):
+            print(f'#define MyAppVersion "{version}"', end='\r')
+        elif line.startswith('#define MyAppPublisher'):
+            print(f'#define MyAppPublisher "(c) 2009 - {year}, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO, BAM, TU Delft, and DLS"', end='\r')
+        else:
+            print(line, end='')
 
+    # Update the flatpak manifest with the version and date
     for line in fileinput.input(flatpak_manifest, inplace=True):
         if line.strip().startswith('<release '):
-            print(f'    <release version="{version}" date="{date}"></release>')
-            break
+            print(f'    <release version="{version}" date="{date}"></release>', end='\r')
+        else:
+            print(line, end='')
 
 
 def update_sasmodels_metadata(version, doi, release_manager):
