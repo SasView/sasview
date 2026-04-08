@@ -1,5 +1,6 @@
 import argparse
 import datetime
+import fileinput
 import json
 import logging
 import os
@@ -234,17 +235,43 @@ def update_sasview_metadata(version: str, doi: str, release_manager: str) -> Non
     :param release_manager: The name of the release manager to be displayed in the citation GUI.
     """
 
-    system_directory = "sasview/src/sas/system"
-    version_filename = os.path.join(system_directory, "version.py")
-    zenodo_filename = os.path.join(system_directory, "citation.py")
+    build_tools_directory = SASVIEW_PATH / 'build_tools'
+    installers_directory = SASVIEW_PATH / 'installers'
+    flatpak_directory = build_tools_directory / 'application_metadata'
+    system_directory = SASVIEW_PATH / "src" / "sas" / "system"
+    version_filename = system_directory /"version.py"
+    citation_filename = system_directory / "citation.py"
+    iss_file = installers_directory / 'installer.iss'
+    flatpak_manifest = flatpak_directory / 'org.sasview.sasview.metainfo.xml'
 
-    year = datetime.datetime.now().year
+    now = datetime.datetime.now()
+    date = now.strftime("%Y-%m-%d")
+    year = now.year
 
+    # Update the version in version.py
     with open(version_filename, 'w') as file:
         file.write(version_template % (version, year))
 
-    with open(zenodo_filename, 'w') as file:
+    # Update the citation information
+    with open(citation_filename, 'w') as file:
         file.write(acknowledgement_template % (doi, release_manager))
+
+    # Update the Pyinstall config
+    ver = yrs = False
+    for line in fileinput.input(iss_file, inplace=True):
+        if line.startswith('# define MyAppVersion'):
+            print(f'# define MyAppVersion {version}')
+            ver = True
+        if line.startswith('#define MyAppPublisher'):
+            print(f'#define MyAppPublisher "(c) 2009 - {year}, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO, BAM, TU Delft, and DLS"')
+            yrs = True
+        if yrs and ver:
+            break
+
+    for line in fileinput.input(flatpak_manifest, inplace=True):
+        if line.strip().startswith('<release '):
+            print(f'    <release version="{version}" date="{date}"></release>')
+            break
 
 
 def update_sasmodels_metadata(version, doi, release_manager):
