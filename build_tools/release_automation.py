@@ -375,7 +375,7 @@ def main(args=None):
     update_sasdata_metadata(sasdata_version, new_sasdata_doi, release_manager)
 
     # Pull the license from a know location
-    license_line = legal.copyright
+    license_line = legal.copyright + "\r"
     update_file(SASMODELS_PATH / 'LICENSE.txt', license_line, 0)
     update_file(SASDATA_PATH / 'LICENSE.TXT', license_line, 0)
     update_file(SASVIEW_PATH / 'installers' / 'license.txt', license_line, -1)
