@@ -111,7 +111,12 @@ class SaveExtrapolatedPopup(QDialog, Ui_SaveExtrapolatedPanel):
 
         selected_path = Path(filename)
         base_path = selected_path.with_suffix("")
-        uncorrected_path, corrected_path = self._next_available_output_paths(base_path)
+        uncorrected_path = base_path.parent / f"{base_path.name}_uncorrected.csv"
+        corrected_path = base_path.parent / f"{base_path.name}_corrected.csv"
+
+        existing_paths = [path for path in (uncorrected_path, corrected_path) if path.exists()]
+        if existing_paths and not self._confirm_overwrite(existing_paths):
+            uncorrected_path, corrected_path = self._next_available_output_paths(base_path)
 
         background = 0.0 if self.background is None else self.background
         background_subtracted_intensity = intensity - background
@@ -125,6 +130,18 @@ class SaveExtrapolatedPopup(QDialog, Ui_SaveExtrapolatedPanel):
             corrected_file.write("Q, I(q)-Background\n")
             for q_value, i_subtracted in zip(q, background_subtracted_intensity):
                 corrected_file.write("%.6g, %.6g\n" % (q_value, i_subtracted))
+
+    def _confirm_overwrite(self, existing_paths: list[Path]) -> bool:
+        """Ask user whether existing output files should be overwritten."""
+        existing_files = "\n".join(str(path) for path in existing_paths)
+        result = QMessageBox.question(
+            self,
+            "Overwrite Existing Files?",
+            f"The following output file(s) already exist:\n{existing_files}\n\nDo you want to overwrite them?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
+        )
+        return result == QMessageBox.Yes
 
     @staticmethod
     def _next_available_output_paths(base_path: Path) -> tuple[Path, Path]:
@@ -140,4 +157,3 @@ class SaveExtrapolatedPopup(QDialog, Ui_SaveExtrapolatedPanel):
                 return uncorrected_path, corrected_path
 
             suffix_index += 1
-
