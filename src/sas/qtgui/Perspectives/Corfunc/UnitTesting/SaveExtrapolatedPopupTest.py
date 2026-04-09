@@ -42,7 +42,11 @@ def test_save_extrapolated_creates_uncorrected_and_corrected_files(qapp, mocker,
     ids=["decline-overwrite", "confirm-overwrite"],
 )
 def test_save_extrapolated_does_not_overwrite(qapp, mocker, tmp_path, user_choice, expect_suffix_files):
-    """Test that the _do_save method does not overwrite existing files when the user declines to overwrite them, and instead creates new files with incremented suffixes."""
+    """
+    Test that the _do_save method follows the user's choice regarding overwriting existing files:
+        - if the user declines to overwrite, new files with incremented suffixes are created,
+        - if the user confirms overwriting, the original files are overwritten and no new suffixed files are created.
+    """
     q = np.array([0.2, 0.4, 0.6])
     intensity = np.array([20.0, 40.0, 60.0])
     background = 2
@@ -59,7 +63,6 @@ def test_save_extrapolated_does_not_overwrite(qapp, mocker, tmp_path, user_choic
         return_value=user_choice
     )
 
-    # Create existing files that would be overwritten
     original_uncorrected = tmp_path / "extrapolated_uncorrected.csv"
     original_corrected = tmp_path / "extrapolated_corrected.csv"
     original_uncorrected.write_text("existing uncorrected\n")
@@ -105,6 +108,10 @@ def test_save_extrapolated_does_not_overwrite(qapp, mocker, tmp_path, user_choic
         assert not suffixed_corrected.exists()
 
 def test_next_available_output_paths_raises_when_suffix_limit_reached(tmp_path, monkeypatch):
+    """
+    Test that _next_available_output_paths raises SaveOutputPathExhausted
+    when the maximum number of suffix attempts is exceeded.
+    """
     base_path = tmp_path / "extrapolated"
     (tmp_path / "extrapolated_uncorrected_1.csv").write_text("x\n")
     (tmp_path / "extrapolated_corrected_1.csv").write_text("x\n")
