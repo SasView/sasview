@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from PySide6.QtWidgets import QMessageBox
 
 from sas.qtgui.Perspectives.Corfunc.SaveExtrapolatedPopup import SaveExtrapolatedPopup
@@ -31,7 +32,15 @@ def test_save_extrapolated_creates_uncorrected_and_corrected_files(qapp, mocker,
     assert corrected_lines[2] == "0.2, 18.5"
     assert corrected_lines[3] == "0.3, 28.5"
 
-def test_save_extrapolated_does_not_overwrite_existing_files_when_user_declines(qapp, mocker, tmp_path):
+@pytest.mark.parametrize(
+    "user_choice, expect_suffix_files",
+    [
+        (QMessageBox.No, True),
+        (QMessageBox.Yes, False),
+    ],
+    ids=["decline-overwrite", "confirm-overwrite"],
+)
+def test_save_extrapolated_does_not_overwrite(qapp, mocker, tmp_path, user_choice, expect_suffix_files):
     """Test that the _do_save method does not overwrite existing files when the user declines to overwrite them, and instead creates new files with incremented suffixes."""
     q = np.array([0.2, 0.4, 0.6])
     intensity = np.array([20.0, 40.0, 60.0])
@@ -42,10 +51,12 @@ def test_save_extrapolated_does_not_overwrite_existing_files_when_user_declines(
     output_path = tmp_path / "extrapolated.csv"
     mocker.patch(
         "sas.qtgui.Perspectives.Corfunc.SaveExtrapolatedPopup.QFileDialog.getSaveFileName",
-        return_value=(str(output_path), ""))
+        return_value=(str(output_path), "")
+    )
     mocker.patch(
         "sas.qtgui.Perspectives.Corfunc.SaveExtrapolatedPopup.QMessageBox.question",
-        return_value=QMessageBox.No)
+        return_value=user_choice
+    )
 
     # Create existing files that would be overwritten
     original_uncorrected = tmp_path / "extrapolated_uncorrected.csv"
@@ -55,58 +66,39 @@ def test_save_extrapolated_does_not_overwrite_existing_files_when_user_declines(
 
     popup._do_save(q, intensity)
 
-    # Verify that original files were not overwritten
-    assert original_uncorrected.read_text() == "existing uncorrected\n"
-    assert original_corrected.read_text() == "existing corrected\n"
+    suffixed_uncorrected = tmp_path / "extrapolated_uncorrected_1.csv"
+    suffixed_corrected = tmp_path / "extrapolated_corrected_1.csv"
 
-    new_uncorrected_lines = (tmp_path / "extrapolated_uncorrected_1.csv").read_text().splitlines()
-    assert new_uncorrected_lines[0] == "Q, I(q)"
-    assert new_uncorrected_lines[1] == "0.2, 20"
-    assert new_uncorrected_lines[2] == "0.4, 40"
-    assert new_uncorrected_lines[3] == "0.6, 60"
+    if expect_suffix_files:
+        # Verify that original files were not overwritten
+        assert original_uncorrected.read_text() == "existing uncorrected\n"
+        assert original_corrected.read_text() == "existing corrected\n"
 
-    new_corrected_lines = (tmp_path / "extrapolated_corrected_1.csv").read_text().splitlines()
-    assert new_corrected_lines[0] == "Q, I(q)-Background"
-    assert new_corrected_lines[1] == "0.2, 18"
-    assert new_corrected_lines[2] == "0.4, 38"
-    assert new_corrected_lines[3] == "0.6, 58"
+        new_uncorrected_lines = suffixed_uncorrected.read_text().splitlines()
+        assert new_uncorrected_lines[0] == "Q, I(q)"
+        assert new_uncorrected_lines[1] == "0.2, 20"
+        assert new_uncorrected_lines[2] == "0.4, 40"
+        assert new_uncorrected_lines[3] == "0.6, 60"
 
+        new_corrected_lines = suffixed_corrected.read_text().splitlines()
+        assert new_corrected_lines[0] == "Q, I(q)-Background"
+        assert new_corrected_lines[1] == "0.2, 18"
+        assert new_corrected_lines[2] == "0.4, 38"
+        assert new_corrected_lines[3] == "0.6, 58"
+    else:
+        # Verify that original files were overwritten
+        new_uncorrected_lines = original_uncorrected.read_text().splitlines()
+        assert new_uncorrected_lines[0] == "Q, I(q)"
+        assert new_uncorrected_lines[1] == "0.2, 20"
+        assert new_uncorrected_lines[2] == "0.4, 40"
+        assert new_uncorrected_lines[3] == "0.6, 60"
 
-def test_save_extrapolated_overwrites_existing_files_when_user_confirms(qapp, mocker, tmp_path):
-    """Test that the _do_save method overwrites existing files when the user confirms the overwrite."""
-    q = np.array([0.2, 0.4, 0.6])
-    intensity = np.array([20.0, 40.0, 60.0])
-    background = 2
+        new_corrected_lines = original_corrected.read_text().splitlines()
+        assert new_corrected_lines[0] == "Q, I(q)-Background"
+        assert new_corrected_lines[1] == "0.2, 18"
+        assert new_corrected_lines[2] == "0.4, 38"
+        assert new_corrected_lines[3] == "0.6, 58"
 
-    popup = SaveExtrapolatedPopup(q, lambda qs: qs, background=background)
-
-    output_path = tmp_path / "extrapolated.csv"
-    mocker.patch(
-        "sas.qtgui.Perspectives.Corfunc.SaveExtrapolatedPopup.QFileDialog.getSaveFileName",
-        return_value=(str(output_path), ""))
-    mocker.patch(
-        "sas.qtgui.Perspectives.Corfunc.SaveExtrapolatedPopup.QMessageBox.question",
-        return_value=QMessageBox.Yes)
-
-    original_uncorrected = tmp_path / "extrapolated_uncorrected.csv"
-    original_corrected = tmp_path / "extrapolated_corrected.csv"
-    original_uncorrected.write_text("existing uncorrected\n")
-    original_corrected.write_text("existing corrected\n")
-
-    popup._do_save(q, intensity)
-
-    new_uncorrected_lines = original_uncorrected.read_text().splitlines()
-    assert new_uncorrected_lines[0] == "Q, I(q)"
-    assert new_uncorrected_lines[1] == "0.2, 20"
-    assert new_uncorrected_lines[2] == "0.4, 40"
-    assert new_uncorrected_lines[3] == "0.6, 60"
-
-    new_corrected_lines = original_corrected.read_text().splitlines()
-    assert new_corrected_lines[0] == "Q, I(q)-Background"
-    assert new_corrected_lines[1] == "0.2, 18"
-    assert new_corrected_lines[2] == "0.4, 38"
-    assert new_corrected_lines[3] == "0.6, 58"
-
-    # Verify that no new files with incremented suffixes were created
-    assert not (tmp_path / "extrapolated_uncorrected_1.csv").exists()
-    assert not (tmp_path / "extrapolated_corrected_1.csv").exists()
+        # Verify that no new files with incremented suffixes were created
+        assert not suffixed_uncorrected.exists()
+        assert not suffixed_corrected.exists()
