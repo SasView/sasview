@@ -112,8 +112,8 @@ for path in [SASMODELS_PATH, SASDATA_PATH, SASVIEW_PATH]:
         """
         logging.error(msg)
 SASVIEW_CONTRIBUTORS_FILE = SASVIEW_PATH / 'build_tools' / 'contributors.tsv'
-SASDATA_CONTRIBUTORS_FILE = SASDATA_PATH / 'build_tools' / 'contributors.tsv'  # TODO: Create this
-SASMODELS_CONTRIBUTORS_FILE = SASMODELS_PATH / 'build_tools' / 'contributors.tsv'  # TODO: Create this
+SASDATA_CONTRIBUTORS_FILE = SASDATA_PATH / 'contributors.tsv'
+SASMODELS_CONTRIBUTORS_FILE = SASMODELS_PATH / 'build_tools' / 'contributors.tsv'
 
 
 class SplitArgs(argparse.Action):
