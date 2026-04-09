@@ -2,7 +2,8 @@ import numpy as np
 import pytest
 from PySide6.QtWidgets import QMessageBox
 
-from sas.qtgui.Perspectives.Corfunc.SaveExtrapolatedPopup import SaveExtrapolatedPopup
+import sas.qtgui.Perspectives.Corfunc.SaveExtrapolatedPopup as save_extrapolated_popup_module
+from sas.qtgui.Perspectives.Corfunc.SaveExtrapolatedPopup import SaveExtrapolatedPopup, SaveOutputPathExhausted
 
 
 def test_save_extrapolated_creates_uncorrected_and_corrected_files(qapp, mocker, tmp_path):
@@ -102,3 +103,13 @@ def test_save_extrapolated_does_not_overwrite(qapp, mocker, tmp_path, user_choic
         # Verify that no new files with incremented suffixes were created
         assert not suffixed_uncorrected.exists()
         assert not suffixed_corrected.exists()
+
+def test_next_available_output_paths_raises_when_suffix_limit_reached(tmp_path, monkeypatch):
+    base_path = tmp_path / "extrapolated"
+    (tmp_path / "extrapolated_uncorrected_1.csv").write_text("x\n")
+    (tmp_path / "extrapolated_corrected_1.csv").write_text("x\n")
+
+    monkeypatch.setattr(save_extrapolated_popup_module, "MAX_SUFFIX_ATTEMPTS", 1)
+
+    with pytest.raises(SaveOutputPathExhausted):
+        SaveExtrapolatedPopup._next_available_output_paths(base_path)

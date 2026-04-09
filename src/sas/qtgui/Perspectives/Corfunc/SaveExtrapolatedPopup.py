@@ -6,8 +6,16 @@ from PySide6.QtWidgets import QDialog, QFileDialog, QMessageBox
 
 from .UI.SaveExtrapolated import Ui_SaveExtrapolatedPanel
 
+MAX_SUFFIX_ATTEMPTS = 10000
+
 
 class UserInputInvalid(Exception):
+    def __init__(self, message, *args):
+        super().__init__(message, *args)
+        self.message = message
+
+
+class SaveOutputPathExhausted(Exception):
     def __init__(self, message, *args):
         super().__init__(message, *args)
         self.message = message
@@ -63,7 +71,9 @@ class SaveExtrapolatedPopup(QDialog, Ui_SaveExtrapolatedPanel):
             self.close()
 
         except UserInputInvalid as e:
-            self._notify_user_error(e.message)
+            self._notify_error("Invalid input", e.message)
+        except SaveOutputPathExhausted as e:
+            self._notify_error("Unable to save files", e.message)
 
     def on_cancel(self):
         """ Cancel button pressed"""
@@ -81,13 +91,13 @@ class SaveExtrapolatedPopup(QDialog, Ui_SaveExtrapolatedPanel):
 
         return
 
-    def _notify_user_error(self, message: str):
+    def _notify_error(self, title: str, message: str):
         """ Message box for showing error """
 
         popup = QMessageBox()
         popup.setIcon(QMessageBox.Warning)
         popup.setText(message)
-        popup.setWindowTitle("Invalid input")
+        popup.setWindowTitle(title)
         popup.exec_()
 
 
@@ -146,10 +156,10 @@ class SaveExtrapolatedPopup(QDialog, Ui_SaveExtrapolatedPanel):
     @staticmethod
     def _next_available_output_paths(base_path: Path) -> tuple[Path, Path]:
         """Return output file paths that do not overwrite existing files."""
-        suffix_index = 0
+        suffix_index = 1
 
-        while True:
-            suffix = "" if suffix_index == 0 else f"_{suffix_index}"
+        while suffix_index <= MAX_SUFFIX_ATTEMPTS:
+            suffix = f"_{suffix_index}"
             uncorrected_path = base_path.parent / f"{base_path.name}_uncorrected{suffix}.csv"
             corrected_path = base_path.parent / f"{base_path.name}_corrected{suffix}.csv"
 
@@ -157,3 +167,8 @@ class SaveExtrapolatedPopup(QDialog, Ui_SaveExtrapolatedPanel):
                 return uncorrected_path, corrected_path
 
             suffix_index += 1
+
+        raise SaveOutputPathExhausted(
+            f"Could not find available output filenames after {MAX_SUFFIX_ATTEMPTS} attempts. "
+            "Please choose a different base name or remove old files."
+        )
