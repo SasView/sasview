@@ -362,14 +362,19 @@ def main(args=None):
 
     release_manager = sasview_data['metadata']['creators'][0]['name'] if len(sasview_data['metadata']['contributors']) > 0 else ''
 
-    # Generates zenodo doi if zenodo api key is provided
+    # Generates zenodo doi if zenodo api key is provided ...
     new_sasview_doi = new_sasdata_doi = new_sasmodels_doi = ''
     if args.zenodo:
         zenodo_api_key = args.zenodo
-        new_sasview_doi = generate_zenodo(sasview_data, zenodo_api_key)
-        new_sasmodels_doi = generate_zenodo(sasmodels_data, zenodo_api_key)
-        new_sasdata_doi = generate_zenodo(sasdata_data, zenodo_api_key)
+        # ... but only if a version is given for the specific package
+        if sasview_version:
+            new_sasview_doi = generate_zenodo(sasview_data, zenodo_api_key)
+        if sasmodels_version:
+            new_sasmodels_doi = generate_zenodo(sasmodels_data, zenodo_api_key)
+        if sasdata_version:
+            new_sasdata_doi = generate_zenodo(sasdata_data, zenodo_api_key)
 
+    # Regardless of previous checks and changes, apply changes to all packages (especially for the copyright year)
     update_sasview_metadata(sasview_version, new_sasview_doi, release_manager)
     update_sasmodels_metadata(sasmodels_version, new_sasmodels_doi, release_manager)
     update_sasdata_metadata(sasdata_version, new_sasdata_doi, release_manager)
