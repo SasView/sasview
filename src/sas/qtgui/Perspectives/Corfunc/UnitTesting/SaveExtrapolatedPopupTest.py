@@ -1,9 +1,11 @@
 import numpy as np
+from PySide6.QtWidgets import QMessageBox
 
 from sas.qtgui.Perspectives.Corfunc.SaveExtrapolatedPopup import SaveExtrapolatedPopup
 
 
 def test_save_extrapolated_creates_uncorrected_and_corrected_files(qapp, mocker, tmp_path):
+    """Test that the _do_save method creates both uncorrected and background-corrected CSV files with the expected content."""
     q = np.array([0.1, 0.2, 0.3])
     intensity = np.array([10.0, 20.0, 30.0])
     background = 1.5
@@ -28,3 +30,83 @@ def test_save_extrapolated_creates_uncorrected_and_corrected_files(qapp, mocker,
     assert corrected_lines[1] == "0.1, 8.5"
     assert corrected_lines[2] == "0.2, 18.5"
     assert corrected_lines[3] == "0.3, 28.5"
+
+def test_save_extrapolated_does_not_overwrite_existing_files_when_user_declines(qapp, mocker, tmp_path):
+    """Test that the _do_save method does not overwrite existing files when the user declines to overwrite them, and instead creates new files with incremented suffixes."""
+    q = np.array([0.2, 0.4, 0.6])
+    intensity = np.array([20.0, 40.0, 60.0])
+    background = 2
+
+    popup = SaveExtrapolatedPopup(q, lambda qs: qs, background=background)
+
+    output_path = tmp_path / "extrapolated.csv"
+    mocker.patch(
+        "sas.qtgui.Perspectives.Corfunc.SaveExtrapolatedPopup.QFileDialog.getSaveFileName",
+        return_value=(str(output_path), ""))
+    mocker.patch(
+        "sas.qtgui.Perspectives.Corfunc.SaveExtrapolatedPopup.QMessageBox.question",
+        return_value=QMessageBox.No)
+
+    # Create existing files that would be overwritten
+    original_uncorrected = tmp_path / "extrapolated_uncorrected.csv"
+    original_corrected = tmp_path / "extrapolated_corrected.csv"
+    original_uncorrected.write_text("existing uncorrected\n")
+    original_corrected.write_text("existing corrected\n")
+
+    popup._do_save(q, intensity)
+
+    # Verify that original files were not overwritten
+    assert original_uncorrected.read_text() == "existing uncorrected\n"
+    assert original_corrected.read_text() == "existing corrected\n"
+
+    new_uncorrected_lines = (tmp_path / "extrapolated_uncorrected_1.csv").read_text().splitlines()
+    assert new_uncorrected_lines[0] == "Q, I(q)"
+    assert new_uncorrected_lines[1] == "0.2, 20"
+    assert new_uncorrected_lines[2] == "0.4, 40"
+    assert new_uncorrected_lines[3] == "0.6, 60"
+
+    new_corrected_lines = (tmp_path / "extrapolated_corrected_1.csv").read_text().splitlines()
+    assert new_corrected_lines[0] == "Q, I(q)-Background"
+    assert new_corrected_lines[1] == "0.2, 18"
+    assert new_corrected_lines[2] == "0.4, 38"
+    assert new_corrected_lines[3] == "0.6, 58"
+
+
+def test_save_extrapolated_overwrites_existing_files_when_user_confirms(qapp, mocker, tmp_path):
+    """Test that the _do_save method overwrites existing files when the user confirms the overwrite."""
+    q = np.array([0.2, 0.4, 0.6])
+    intensity = np.array([20.0, 40.0, 60.0])
+    background = 2
+
+    popup = SaveExtrapolatedPopup(q, lambda qs: qs, background=background)
+
+    output_path = tmp_path / "extrapolated.csv"
+    mocker.patch(
+        "sas.qtgui.Perspectives.Corfunc.SaveExtrapolatedPopup.QFileDialog.getSaveFileName",
+        return_value=(str(output_path), ""))
+    mocker.patch(
+        "sas.qtgui.Perspectives.Corfunc.SaveExtrapolatedPopup.QMessageBox.question",
+        return_value=QMessageBox.Yes)
+
+    original_uncorrected = tmp_path / "extrapolated_uncorrected.csv"
+    original_corrected = tmp_path / "extrapolated_corrected.csv"
+    original_uncorrected.write_text("existing uncorrected\n")
+    original_corrected.write_text("existing corrected\n")
+
+    popup._do_save(q, intensity)
+
+    new_uncorrected_lines = original_uncorrected.read_text().splitlines()
+    assert new_uncorrected_lines[0] == "Q, I(q)"
+    assert new_uncorrected_lines[1] == "0.2, 20"
+    assert new_uncorrected_lines[2] == "0.4, 40"
+    assert new_uncorrected_lines[3] == "0.6, 60"
+
+    new_corrected_lines = original_corrected.read_text().splitlines()
+    assert new_corrected_lines[0] == "Q, I(q)-Background"
+    assert new_corrected_lines[1] == "0.2, 18"
+    assert new_corrected_lines[2] == "0.4, 38"
+    assert new_corrected_lines[3] == "0.6, 58"
+
+    # Verify that no new files with incremented suffixes were created
+    assert not (tmp_path / "extrapolated_uncorrected_1.csv").exists()
+    assert not (tmp_path / "extrapolated_corrected_1.csv").exists()
