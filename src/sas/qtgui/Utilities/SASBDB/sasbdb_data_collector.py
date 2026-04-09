@@ -39,6 +39,26 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
+def _x_axis_label_is_inverse_angstrom(text: str) -> bool:
+    """
+    True if axis label/units indicate q in inverse Angstrom (Å\\ :sup:`-1`).
+
+    Accepts common Sphinx/HTML and plain variants including Unicode Å.
+    """
+    if not text:
+        return False
+    markers = (
+        "A^{-1}",
+        "A^-1",
+        "\u00c5^{-1}",  # Å^{-1} (Latin-1 capital A with ring)
+        "\u00c5^-1",
+        "\u00c5-1",
+        "\u212b^{-1}",  # ANGSTROM SIGN U+212B
+        "1/\u00c5",
+    )
+    return any(m in text for m in markers)
+
+
 class SASBDBDataCollector:
     """
     Collects data from SasView for SASBDB export.
@@ -370,6 +390,140 @@ class SASBDBDataCollector:
         guinier.range_end = range_end
         return guinier
 
+    def _guinier_native_q_to_nm_scale(self, data) -> float:
+        """
+        Factor to convert q from data native units to nm\\ :sup:`-1`.
+
+        Returns 10.0 when the x axis is \\AA\\ :sup:`-1`, else 1.0 for nm\\ :sup:`-1`.
+        """
+        if data is None:
+            return 1.0
+        if hasattr(data, "get_xaxis"):
+            try:
+                xaxis_label, xaxis_units = data.get_xaxis()
+                xaxis_label = str(xaxis_label) if xaxis_label else ""
+                xaxis_units = str(xaxis_units) if xaxis_units else ""
+                combined = f"{xaxis_label} {xaxis_units}"
+                if _x_axis_label_is_inverse_angstrom(combined):
+                    return 10.0
+            except (AttributeError, TypeError, ValueError):
+                pass
+        if hasattr(data, "_xunit"):
+            xunit = str(data._xunit)
+            if _x_axis_label_is_inverse_angstrom(xunit):
+                return 10.0
+        return 1.0
+
+    def collect_guinier_from_q_range(
+        self, data, q_min: float, q_max: float
+    ) -> tuple[SASBDBGuinier | None, dict | None]:
+        """
+        Guinier analysis by weighted linear least squares of ln(I) vs q\\ :sup:`2`.
+
+        Uses points with q in [min(q_min, q_max), max(q_min, q_max)], I > 0.
+        Fits ln(I) = a + b q\\ :sup:`2`; then I(0) = exp(a) and
+        R\\ :sub:`g` = sqrt(-3 b) in native length units, stored in **nm**
+        (divide by 10 when q is in \\AA\\ :sup:`-1`).
+
+        :param data: Object with ``x`` (q), ``y`` (I), optional ``dy``
+        :param q_min: Range boundary in the same q units as ``data.x``
+        :param q_max: Other range boundary
+        :return: ``(guinier, fit_info)``. ``fit_info`` is ``None`` on failure,
+                 otherwise ``{"a": intercept, "b": slope, "q_start": q_lo,
+                 "q_end": q_hi}`` for plotting (native q units).
+        """
+        import numpy as np
+
+        if not hasattr(data, "x") or not hasattr(data, "y"):
+            return None, None
+
+        q = np.asarray(data.x, dtype=float)
+        I = np.asarray(data.y, dtype=float)
+        if len(q) == 0 or len(I) == 0:
+            return None, None
+
+        if hasattr(data, "dy") and data.dy is not None and len(data.dy) == len(q):
+            dy = np.asarray(data.dy, dtype=float)
+        else:
+            dy = np.ones_like(I)
+
+        q_lo = float(min(q_min, q_max))
+        q_hi = float(max(q_min, q_max))
+
+        mask = (
+            (q >= q_lo)
+            & (q <= q_hi)
+            & (q > 0)
+            & (I > 0)
+            & np.isfinite(q)
+            & np.isfinite(I)
+            & np.isfinite(dy)
+        )
+        idx = np.flatnonzero(mask)
+        if idx.size < 2:
+            return None, None
+
+        q_s = q[mask]
+        I_s = I[mask]
+        dy_s = dy[mask]
+        y = np.log(I_s)
+        x = q_s**2
+        sig_y = np.abs(dy_s / np.maximum(I_s, np.finfo(float).tiny))
+        sig_y = np.maximum(sig_y, 1e-12)
+        w = 1.0 / (sig_y**2)
+
+        x_design = np.column_stack((np.ones_like(x), x))
+        xtw = x_design.T * w
+        xtw_x = xtw @ x_design
+        xtw_y = xtw @ y
+        try:
+            params = np.linalg.solve(xtw_x, xtw_y)
+        except np.linalg.LinAlgError:
+            return None, None
+
+        a, b = float(params[0]), float(params[1])
+        try:
+            cov = np.linalg.inv(xtw_x)
+        except np.linalg.LinAlgError:
+            cov = np.zeros((2, 2))
+        sigma_b = float(np.sqrt(max(cov[1, 1], 0.0)))
+
+        if b >= 0:
+            return None, None
+
+        rg_native = float(np.sqrt(-3.0 * b))
+        q_to_nm = self._guinier_native_q_to_nm_scale(data)
+        if q_to_nm == 10.0:
+            rg_nm = rg_native / 10.0
+        else:
+            rg_nm = rg_native
+
+        if rg_nm > 0 and sigma_b > 0:
+            sigma_rg = float(3.0 * sigma_b / (2.0 * rg_native))
+            if q_to_nm == 10.0:
+                sigma_rg /= 10.0
+        else:
+            sigma_rg = 0.0
+
+        i0 = float(np.exp(a))
+
+        guinier = SASBDBGuinier()
+        guinier.rg = rg_nm
+        guinier.rg_error = sigma_rg
+        guinier.i0 = i0
+        guinier.range_start = q_lo
+        guinier.range_end = q_hi
+        guinier.start_point = int(idx[0])
+        guinier.end_point = int(idx[-1])
+
+        fit_info = {
+            "a": a,
+            "b": b,
+            "q_start": q_lo,
+            "q_end": q_hi,
+        }
+        return guinier, fit_info
+
     def collect_guinier_from_freesas(self, data) -> SASBDBGuinier | None:
         """
         Collect Guinier analysis results using FreeSAS auto_guinier
@@ -416,20 +570,20 @@ class SASBDBDataCollector:
         # Check if data is in 1/A (Angstrom^-1) and convert to nm^-1
         # 1 A^-1 = 10 nm^-1
         unit_conversion = 1.0
-        if hasattr(data, 'get_xaxis'):
+        if hasattr(data, "get_xaxis"):
             try:
                 xaxis_label, xaxis_units = data.get_xaxis()
-                xaxis_label = str(xaxis_label) if xaxis_label else ''
-                xaxis_units = str(xaxis_units) if xaxis_units else ''
-                if 'A^{-1}' in xaxis_label or 'A^-1' in xaxis_label or 'A^{-1}' in xaxis_units or 'A^-1' in xaxis_units:
-                    # Data is in 1/A, convert to 1/nm
+                xaxis_label = str(xaxis_label) if xaxis_label else ""
+                xaxis_units = str(xaxis_units) if xaxis_units else ""
+                combined = f"{xaxis_label} {xaxis_units}"
+                if _x_axis_label_is_inverse_angstrom(combined):
                     unit_conversion = 10.0
             except (AttributeError, TypeError, ValueError):
-                # Fallback: check _xunit attribute if available
-                if hasattr(data, '_xunit'):
-                    xunit = str(data._xunit)
-                    if 'A^{-1}' in xunit or 'A^-1' in xunit:
-                        unit_conversion = 10.0
+                pass
+        if unit_conversion == 1.0 and hasattr(data, "_xunit"):
+            xunit = str(data._xunit)
+            if _x_axis_label_is_inverse_angstrom(xunit):
+                unit_conversion = 10.0
 
         # Convert q to nm^-1 for FreeSAS
         q_for_freesas = q_valid * unit_conversion

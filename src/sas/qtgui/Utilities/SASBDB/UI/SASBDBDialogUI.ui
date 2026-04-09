@@ -529,70 +529,62 @@
        <string>Guinier</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayoutGuinier">
+       <property name="spacing">
+        <number>10</number>
+       </property>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayoutGuinier">
+        <layout class="QHBoxLayout" name="horizontalLayoutGuinierMain">
          <item>
-          <spacer name="horizontalSpacerGuinierLeft">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+          <layout class="QVBoxLayout" name="verticalLayoutGuinierLeft">
+           <property name="spacing">
+            <number>8</number>
            </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-           <property name="sizeType">
-            <enum>QSizePolicy::Expanding</enum>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <layout class="QFormLayout" name="formLayoutGuinier">
+           <item>
+            <layout class="QFormLayout" name="formLayoutGuinier">
          <item row="0" column="0">
-          <widget class="QLabel" name="lblGuinierRangeStart">
-         <property name="text">
-          <string>Q Start:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1">
-        <widget class="QLineEdit" name="txtGuinierRangeStart"/>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="lblGuinierRangeEnd">
-         <property name="text">
-          <string>Q End:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QLineEdit" name="txtGuinierRangeEnd"/>
-       </item>
-       <item row="2" column="0">
         <widget class="QLabel" name="lblGuinierStartPoint">
          <property name="text">
           <string>Start point:</string>
          </property>
         </widget>
        </item>
-       <item row="2" column="1">
+       <item row="0" column="1">
         <widget class="QLineEdit" name="txtGuinierStartPoint"/>
        </item>
-       <item row="3" column="0">
+       <item row="1" column="0">
         <widget class="QLabel" name="lblGuinierEndPoint">
          <property name="text">
           <string>End point:</string>
          </property>
         </widget>
        </item>
-       <item row="3" column="1">
+       <item row="1" column="1">
         <widget class="QLineEdit" name="txtGuinierEndPoint"/>
+       </item>
+       <item row="2" column="0">
+          <widget class="QLabel" name="lblGuinierRangeStart">
+         <property name="text">
+          <string>Q start:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLineEdit" name="txtGuinierRangeStart"/>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="lblGuinierRangeEnd">
+         <property name="text">
+          <string>Q end:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QLineEdit" name="txtGuinierRangeEnd"/>
        </item>
        <item row="4" column="0">
         <widget class="QLabel" name="lblGuinierRg">
          <property name="text">
-          <string>Rg (nm):</string>
+          <string>Rg:</string>
          </property>
         </widget>
        </item>
@@ -617,8 +609,21 @@
         </widget>
        </item>
        <item row="6" column="1">
-        <widget class="QWidget" name="widgetGuinierI0Column">
-         <layout class="QVBoxLayout" name="verticalLayoutGuinierI0">
+        <widget class="QLineEdit" name="txtGuinierI0"/>
+       </item>
+       <item row="7" column="0">
+        <widget class="QLabel" name="lblGuinierEstimateRow">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="1">
+        <widget class="QWidget" name="widgetGuinierButtons">
+         <layout class="QHBoxLayout" name="horizontalLayoutGuinierEstimate">
+          <property name="spacing">
+           <number>6</number>
+          </property>
           <property name="leftMargin">
            <number>0</number>
           </property>
@@ -631,98 +636,106 @@
           <property name="bottomMargin">
            <number>0</number>
           </property>
-          <property name="spacing">
-           <number>6</number>
-          </property>
           <item>
-           <widget class="QLineEdit" name="txtGuinierI0"/>
+           <widget class="QPushButton" name="btnGuinierEstimateFreeSAS">
+            <property name="autoDefault">
+             <bool>false</bool>
+            </property>
+            <property name="default">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Estimate</string>
+            </property>
+            <property name="toolTip">
+             <string>With start and end point empty: run FreeSAS auto_guinier. With both indices set (and 1D data): fit ln(I) vs q² over that index range. You can also set Q start and Q end instead to fit by q.</string>
+            </property>
+           </widget>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayoutGuinierEstimate">
-            <property name="spacing">
-             <number>0</number>
+           <widget class="QPushButton" name="btnGuinierReset">
+            <property name="autoDefault">
+             <bool>false</bool>
             </property>
-            <property name="leftMargin">
-             <number>0</number>
+            <property name="default">
+             <bool>false</bool>
             </property>
-            <property name="topMargin">
-             <number>0</number>
+            <property name="text">
+             <string>Reset</string>
             </property>
-            <property name="rightMargin">
-             <number>0</number>
+            <property name="toolTip">
+             <string>Clear all Guinier fields and the plot.</string>
             </property>
-            <property name="bottomMargin">
-             <number>0</number>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacerGuinierEstimate">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
             </property>
-            <item>
-             <widget class="QPushButton" name="btnGuinierEstimateFreeSAS">
-              <property name="autoDefault">
-               <bool>false</bool>
-              </property>
-              <property name="default">
-               <bool>false</bool>
-              </property>
-              <property name="text">
-               <string>Estimate</string>
-              </property>
-              <property name="toolTip">
-               <string>Run freesas auto_guinier on the current 1D dataset and fill the Guinier fields.</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="horizontalSpacerGuinierEstimate">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-              <property name="sizeType">
-               <enum>QSizePolicy::Expanding</enum>
-              </property>
-             </spacer>
-            </item>
-           </layout>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>0</width>
+              <height>20</height>
+             </size>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Minimum</enum>
+            </property>
+           </spacer>
           </item>
          </layout>
         </widget>
        </item>
-       <item row="7" column="0" colspan="2">
+            </layout>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QWidget" name="widgetGuinierPlot">
+           <property name="minimumSize">
+            <size>
+             <width>560</width>
+             <height>240</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>376</height>
+            </size>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>1</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
         <widget class="QLabel" name="lblGuinierNote">
          <property name="text">
-          <string>Note: Leave fields blank or enter values manually. Use Estimate below I(0) to run FreeSAS auto_guinier; results may be incorrect—please verify.</string>
+          <string>Note: If any Guinier field is filled, start and end point (data indices) are required. Leave both index fields empty and click Estimate for FreeSAS auto_guinier; with both indices set (and 1D data), Estimate fits over that range. You may also edit Q start / Q end to fit by q. Verify all results.</string>
          </property>
          <property name="wordWrap">
           <bool>true</bool>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignHCenter|Qt::AlignTop</set>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
          </property>
          <property name="styleSheet">
           <string>color: #d9534f; font-style: italic;</string>
          </property>
         </widget>
-       </item>
-        </layout>
-         </item>
-         <item>
-          <spacer name="horizontalSpacerGuinierRight">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-           <property name="sizeType">
-            <enum>QSizePolicy::Expanding</enum>
-           </property>
-          </spacer>
-         </item>
-        </layout>
        </item>
       </layout>
      </widget>

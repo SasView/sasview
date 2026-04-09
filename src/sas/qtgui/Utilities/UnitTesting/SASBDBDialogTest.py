@@ -74,6 +74,24 @@ class TestSASBDBDialog:
         assert dialog.export_data is not None
         assert len(dialog.export_data.samples) == 1
 
+    def test_validateData_guinier_requires_indices(self, dialog):
+        """Guinier fields require start and end point indices before export."""
+        ok, _msg = dialog.validateData()
+        assert ok
+
+        if not hasattr(dialog, "txtGuinierRg"):
+            return
+
+        dialog.txtGuinierRg.setText("2.0")
+        ok, msg = dialog.validateData()
+        assert not ok
+        assert "start and end point" in msg
+
+        dialog.txtGuinierStartPoint.setText("0")
+        dialog.txtGuinierEndPoint.setText("5")
+        ok, msg = dialog.validateData()
+        assert ok, msg
+
     def test_onExport_cancels_when_no_filename(self, dialog, mocker, qtbot):
         """Test that onExport returns early when user cancels file dialog"""
         mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName',

@@ -4,6 +4,7 @@ SASBDB Export Dialog
 This dialog allows users to review and edit SASBDB export data before exporting.
 """
 import logging
+import math
 import os
 import sys
 
@@ -28,6 +29,15 @@ from sas.qtgui.Utilities.SASBDB.sasbdb_exporter import SASBDBExporter
 from sas.qtgui.Utilities.SASBDB.UI.SASBDBDialogUI import Ui_SASBDBDialogUI
 
 logger = logging.getLogger(__name__)
+
+# Guinier Q / Rg / I(0) fields locked after a successful Estimate (indices stay editable).
+_GUINIER_DERIVED_FIELD_NAMES = (
+    "txtGuinierRangeStart",
+    "txtGuinierRangeEnd",
+    "txtGuinierRg",
+    "txtGuinierRgError",
+    "txtGuinierI0",
+)
 
 
 class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
@@ -74,6 +84,23 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
         self.setupUi(self)
 
         self._guinier_source_data = guinier_source_data
+        self._guinier_plot_a: float | None = None
+        self._guinier_plot_b: float | None = None
+        self._guinier_suppress_range_signals: bool = False
+        self._guinier_plot_panel = None
+        if hasattr(self, "widgetGuinierPlot"):
+            from sas.qtgui.Utilities.SASBDB.guinier_plot_panel import GuinierPlotPanel
+
+            if hasattr(self, "horizontalLayoutGuinierMain"):
+                self.horizontalLayoutGuinierMain.setAlignment(
+                    self.widgetGuinierPlot,
+                    QtCore.Qt.AlignmentFlag.AlignTop
+                    | QtCore.Qt.AlignmentFlag.AlignLeft,
+                )
+            plot_layout = QtWidgets.QVBoxLayout(self.widgetGuinierPlot)
+            plot_layout.setContentsMargins(0, 0, 0, 0)
+            self._guinier_plot_panel = GuinierPlotPanel(self.widgetGuinierPlot)
+            plot_layout.addWidget(self._guinier_plot_panel)
 
         # Cache for the original (unscaled) shape pixmap; used to rescale efficiently on resize
         self._shape_pixmap_original = None
@@ -107,14 +134,40 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
             if sys.platform == "darwin":
                 est_btn.setAttribute(QtCore.Qt.WA_MacShowFocusRect, False)
 
+        if hasattr(self, "btnGuinierReset"):
+            self.btnGuinierReset.clicked.connect(self._on_guinier_reset_clicked)
+            reset_btn = self.btnGuinierReset
+            reset_btn.setAutoDefault(False)
+            reset_btn.setDefault(False)
+            if sys.platform == "darwin":
+                reset_btn.setAttribute(QtCore.Qt.WA_MacShowFocusRect, False)
+
+        if hasattr(self, "txtGuinierStartPoint"):
+            self.txtGuinierStartPoint.editingFinished.connect(
+                self._on_guinier_indices_editing_finished
+            )
+            self.txtGuinierEndPoint.editingFinished.connect(
+                self._on_guinier_indices_editing_finished
+            )
+        if hasattr(self, "txtGuinierRangeStart"):
+            self.txtGuinierRangeStart.editingFinished.connect(
+                self._on_guinier_q_range_editing_finished
+            )
+            self.txtGuinierRangeEnd.editingFinished.connect(
+                self._on_guinier_q_range_editing_finished
+            )
+
         # Populate UI with data
         self.populateFromData()
+        self._set_guinier_derived_fields_read_only(False)
 
         # Set up initial state
         self.onPublishedToggled(self.chkPublished.isChecked())
 
         # Generate model visualization if available
         self.updateModelVisualization()
+
+        self._refresh_guinier_plot()
 
     def eventFilter(self, obj, event):
         """Keep the shape visualization filling the available label size on resize (no re-render)."""
@@ -130,6 +183,17 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
                     self.lblShapeImage.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         return super().eventFilter(obj, event)
 
+    def _set_guinier_derived_fields_read_only(self, readonly: bool) -> None:
+        """
+        Lock or unlock Q start/end, Rg, Rg error, and I(0).
+
+        Start and end point indices stay editable so the user can re-range and
+        use Estimate again; Reset clears everything and unlocks.
+        """
+        for name in _GUINIER_DERIVED_FIELD_NAMES:
+            if hasattr(self, name):
+                getattr(self, name).setReadOnly(readonly)
+
     def _clear_guinier_fields(self) -> None:
         """Clear all Guinier line edits."""
         self.txtGuinierRg.clear()
@@ -139,33 +203,338 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
         self.txtGuinierRangeEnd.clear()
         self.txtGuinierStartPoint.clear()
         self.txtGuinierEndPoint.clear()
+        self._guinier_plot_a = None
+        self._guinier_plot_b = None
 
-    def _apply_guinier_to_fields(self, guinier: SASBDBGuinier, clear_first: bool = False) -> None:
+    def _on_guinier_reset_clicked(self) -> None:
+        """Clear all Guinier line edits and reset the plot panel."""
+        self._clear_guinier_fields()
+        self._set_guinier_derived_fields_read_only(False)
+        self._refresh_guinier_plot()
+
+    def _sync_guinier_plot_ab_from_rg_i0(self, guinier: SASBDBGuinier) -> None:
+        """Set ln(I)=a+b q² line parameters from Rg (nm) and I(0) for plotting."""
+        from sas.qtgui.Utilities.SASBDB.sasbdb_data_collector import SASBDBDataCollector
+
+        if guinier.rg is None or guinier.i0 is None or guinier.i0 <= 0:
+            self._guinier_plot_a = None
+            self._guinier_plot_b = None
+            return
+        coll = SASBDBDataCollector()
+        scale = coll._guinier_native_q_to_nm_scale(self._guinier_source_data)
+        rg_native = float(guinier.rg) * scale
+        self._guinier_plot_b = -(rg_native**2) / 3.0
+        self._guinier_plot_a = math.log(float(guinier.i0))
+
+    def _apply_guinier_to_fields(
+        self,
+        guinier: SASBDBGuinier,
+        clear_first: bool = False,
+        fit_info: dict | None = None,
+    ) -> None:
         """Fill Guinier tab fields from a SASBDBGuinier object."""
-        if clear_first:
-            self._clear_guinier_fields()
-        if guinier.rg is not None:
-            self.txtGuinierRg.setText(f"{guinier.rg:.2g}")
-        if guinier.rg_error is not None:
-            self.txtGuinierRgError.setText(f"{guinier.rg_error:.2g}")
-        if guinier.i0 is not None:
-            self.txtGuinierI0.setText(f"{guinier.i0:.2g}")
-        if guinier.range_start is not None:
-            self.txtGuinierRangeStart.setText(str(guinier.range_start))
-        if guinier.range_end is not None:
-            self.txtGuinierRangeEnd.setText(str(guinier.range_end))
-        if guinier.start_point is not None:
-            self.txtGuinierStartPoint.setText(str(guinier.start_point))
-        if guinier.end_point is not None:
-            self.txtGuinierEndPoint.setText(str(guinier.end_point))
+        self._guinier_suppress_range_signals = True
+        try:
+            if clear_first:
+                self._clear_guinier_fields()
+            if guinier.rg is not None:
+                self.txtGuinierRg.setText(f"{guinier.rg:.2g}")
+            if guinier.rg_error is not None:
+                self.txtGuinierRgError.setText(f"{guinier.rg_error:.2g}")
+            if guinier.i0 is not None:
+                self.txtGuinierI0.setText(f"{guinier.i0:.2g}")
+            if guinier.range_start is not None:
+                self.txtGuinierRangeStart.setText(str(guinier.range_start))
+            if guinier.range_end is not None:
+                self.txtGuinierRangeEnd.setText(str(guinier.range_end))
+            if guinier.start_point is not None:
+                self.txtGuinierStartPoint.setText(str(guinier.start_point))
+            if guinier.end_point is not None:
+                self.txtGuinierEndPoint.setText(str(guinier.end_point))
+
+            if fit_info is not None:
+                self._guinier_plot_a = fit_info.get("a")
+                self._guinier_plot_b = fit_info.get("b")
+            elif guinier.rg is not None and guinier.i0 is not None and guinier.i0 > 0:
+                self._sync_guinier_plot_ab_from_rg_i0(guinier)
+            else:
+                self._guinier_plot_a = None
+                self._guinier_plot_b = None
+        finally:
+            self._guinier_suppress_range_signals = False
+        self._refresh_guinier_plot()
+
+    def _refresh_guinier_plot(self) -> None:
+        """Redraw the Guinier ln(I) vs q² panel."""
+        if self._guinier_plot_panel is None:
+            return
+        import numpy as np
+
+        data = self._guinier_source_data
+        q = (
+            np.asarray(data.x, dtype=float)
+            if data is not None and hasattr(data, "x")
+            else None
+        )
+        iy = (
+            np.asarray(data.y, dtype=float)
+            if data is not None and hasattr(data, "y")
+            else None
+        )
+        q_start = q_end = None
+        rs = self.txtGuinierRangeStart.text().strip()
+        re = self.txtGuinierRangeEnd.text().strip()
+        if rs and re:
+            try:
+                q_start = float(rs)
+                q_end = float(re)
+            except ValueError:
+                pass
+        self._guinier_plot_panel.update_plot(
+            q,
+            iy,
+            q_start,
+            q_end,
+            self._guinier_plot_a,
+            self._guinier_plot_b,
+        )
+
+    def _guinier_any_field_nonempty(self) -> bool:
+        """True if any Guinier line edit has text (export validation)."""
+        for name in (
+            "txtGuinierRg",
+            "txtGuinierRgError",
+            "txtGuinierI0",
+            "txtGuinierRangeStart",
+            "txtGuinierRangeEnd",
+            "txtGuinierStartPoint",
+            "txtGuinierEndPoint",
+        ):
+            if hasattr(self, name) and getattr(self, name).text().strip():
+                return True
+        return False
+
+    def _q_lo_q_hi_from_guinier_indices(
+        self, i_start: int, i_end: int
+    ) -> tuple[float, float] | None:
+        """
+        Map inclusive data indices to q-range endpoints (uses sorted index order).
+
+        :return: ``(q_lo, q_hi)`` at ``x[min(i)]`` and ``x[max(i)]``, or ``None``
+        """
+        data = self._guinier_source_data
+        if data is None or not hasattr(data, "x"):
+            return None
+        import numpy as np
+
+        x = np.asarray(data.x, dtype=float)
+        n = len(x)
+        if n == 0:
+            return None
+        ia = int(min(i_start, i_end))
+        ib = int(max(i_start, i_end))
+        if ia < 0 or ib >= n:
+            return None
+        return float(x[ia]), float(x[ib])
+
+    def _on_guinier_indices_editing_finished(self) -> None:
+        """Refit when both start and end point indices are set."""
+        if self._guinier_suppress_range_signals:
+            return
+        sp = self.txtGuinierStartPoint.text().strip()
+        ep = self.txtGuinierEndPoint.text().strip()
+        if not sp or not ep:
+            self._refresh_guinier_plot()
+            return
+        try:
+            i_s = int(sp)
+            i_e = int(ep)
+        except ValueError:
+            self._refresh_guinier_plot()
+            return
+        if self._guinier_source_data is None:
+            self._refresh_guinier_plot()
+            return
+        qr = self._q_lo_q_hi_from_guinier_indices(i_s, i_e)
+        if qr is None:
+            self._refresh_guinier_plot()
+            return
+        q_lo, q_hi = qr
+        if q_lo >= q_hi:
+            self._refresh_guinier_plot()
+            return
+
+        from sas.qtgui.Utilities.SASBDB.sasbdb_data_collector import SASBDBDataCollector
+
+        collector = SASBDBDataCollector()
+        guinier, fit_info = collector.collect_guinier_from_q_range(
+            self._guinier_source_data, q_lo, q_hi
+        )
+        if guinier is None:
+            self._refresh_guinier_plot()
+            return
+        self._apply_guinier_to_fields(guinier, clear_first=False, fit_info=fit_info)
+
+    def _on_guinier_q_range_editing_finished(self) -> None:
+        """Refit ln(I) vs q² when both Q start and Q end are set."""
+        if self._guinier_suppress_range_signals:
+            return
+        rs = self.txtGuinierRangeStart.text().strip()
+        re = self.txtGuinierRangeEnd.text().strip()
+        if not rs or not re:
+            self._refresh_guinier_plot()
+            return
+        try:
+            q_lo = float(rs)
+            q_hi = float(re)
+        except ValueError:
+            self._refresh_guinier_plot()
+            return
+        if q_lo >= q_hi:
+            self._refresh_guinier_plot()
+            return
+        if self._guinier_source_data is None:
+            self._refresh_guinier_plot()
+            return
+
+        from sas.qtgui.Utilities.SASBDB.sasbdb_data_collector import SASBDBDataCollector
+
+        collector = SASBDBDataCollector()
+        guinier, fit_info = collector.collect_guinier_from_q_range(
+            self._guinier_source_data, q_lo, q_hi
+        )
+        if guinier is None:
+            self._refresh_guinier_plot()
+            return
+        self._apply_guinier_to_fields(guinier, clear_first=False, fit_info=fit_info)
 
     def _on_guinier_estimate_clicked(self) -> None:
-        """Run FreeSAS auto_guinier and fill Guinier fields."""
+        """Estimate: FreeSAS when range empty; fit by indices or by Q when set."""
         self._run_free_sas_guinier_estimate()
 
     def _run_free_sas_guinier_estimate(self) -> None:
-        """Run freesas auto_guinier and fill the Guinier tab."""
+        """FreeSAS auto_guinier, or WLS fit by indices / by Q range."""
         from sas.qtgui.Utilities.SASBDB.sasbdb_data_collector import SASBDBDataCollector
+
+        sp = self.txtGuinierStartPoint.text().strip()
+        ep = self.txtGuinierEndPoint.text().strip()
+        rs = self.txtGuinierRangeStart.text().strip()
+        re = self.txtGuinierRangeEnd.text().strip()
+
+        if sp and ep:
+            if self._guinier_source_data is None:
+                QtWidgets.QMessageBox.information(
+                    self,
+                    "Guinier estimate",
+                    "No 1D scattering data is available for a fit by indices.\n\n"
+                    "Load 1D data or clear start/end point to use FreeSAS.",
+                )
+                return
+            try:
+                i_s = int(sp)
+                i_e = int(ep)
+            except ValueError:
+                QtWidgets.QMessageBox.warning(
+                    self,
+                    "Guinier estimate",
+                    "Start and end point must be integers.",
+                )
+                return
+            qr = self._q_lo_q_hi_from_guinier_indices(i_s, i_e)
+            if qr is None:
+                QtWidgets.QMessageBox.warning(
+                    self,
+                    "Guinier estimate",
+                    "Indices are out of range for the current 1D dataset.",
+                )
+                return
+            q_lo, q_hi = qr
+            if q_lo >= q_hi:
+                QtWidgets.QMessageBox.warning(
+                    self,
+                    "Guinier estimate",
+                    "Start and end point must span at least two distinct q values.",
+                )
+                return
+
+            collector = SASBDBDataCollector()
+            guinier, fit_info = collector.collect_guinier_from_q_range(
+                self._guinier_source_data, q_lo, q_hi
+            )
+            if guinier is None:
+                QtWidgets.QMessageBox.warning(
+                    self,
+                    "Guinier estimate",
+                    "Could not fit ln(I) vs q² for the selected indices.\n\n"
+                    "Need at least two points with I > 0 and a negative slope.",
+                )
+                return
+            self._apply_guinier_to_fields(guinier, clear_first=False, fit_info=fit_info)
+            self._set_guinier_derived_fields_read_only(True)
+            return
+
+        if sp or ep:
+            QtWidgets.QMessageBox.information(
+                self,
+                "Guinier estimate",
+                "Enter both start and end point for a fit by indices, or clear "
+                "both to use FreeSAS or Q start / Q end.",
+            )
+            return
+
+        if rs and re:
+            if self._guinier_source_data is None:
+                QtWidgets.QMessageBox.information(
+                    self,
+                    "Guinier estimate",
+                    "No 1D scattering data is available for a range fit.\n\n"
+                    "Load 1D data or clear Q start and Q end to use FreeSAS "
+                    "auto_guinier.",
+                )
+                return
+            try:
+                q_lo = float(rs)
+                q_hi = float(re)
+            except ValueError:
+                QtWidgets.QMessageBox.warning(
+                    self,
+                    "Guinier estimate",
+                    "Q start and Q end must be valid numbers.",
+                )
+                return
+            if q_lo >= q_hi:
+                QtWidgets.QMessageBox.warning(
+                    self,
+                    "Guinier estimate",
+                    "Q start must be less than Q end.",
+                )
+                return
+
+            collector = SASBDBDataCollector()
+            guinier, fit_info = collector.collect_guinier_from_q_range(
+                self._guinier_source_data, q_lo, q_hi
+            )
+            if guinier is None:
+                QtWidgets.QMessageBox.warning(
+                    self,
+                    "Guinier estimate",
+                    "Could not fit ln(I) vs q² in the selected range.\n\n"
+                    "Need at least two points with I > 0 and a negative slope "
+                    "(check q range and data).",
+                )
+                return
+            self._apply_guinier_to_fields(guinier, clear_first=False, fit_info=fit_info)
+            self._set_guinier_derived_fields_read_only(True)
+            return
+
+        if rs or re:
+            QtWidgets.QMessageBox.information(
+                self,
+                "Guinier estimate",
+                "Enter both Q start and Q end to fit by q, or clear both for "
+                "FreeSAS auto_guinier.",
+            )
+            return
 
         if self._guinier_source_data is None:
             QtWidgets.QMessageBox.information(
@@ -184,11 +553,13 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
                 self,
                 "Guinier estimate",
                 "FreeSAS auto_guinier did not return a result.\n\n"
-                "Ensure the freesas package is installed and the curve is suitable for Guinier analysis.",
+                "Ensure the freesas package is installed and the curve is suitable "
+                "for Guinier analysis.",
             )
             return
 
-        self._apply_guinier_to_fields(guinier, clear_first=True)
+        self._apply_guinier_to_fields(guinier, clear_first=True, fit_info=None)
+        self._set_guinier_derived_fields_read_only(True)
 
     def populateFromData(self):
         """
@@ -590,6 +961,39 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
 
         if not self.txtBufferPH.text().strip():
             return False, "Buffer pH is required"
+
+        if hasattr(self, "txtGuinierStartPoint") and self._guinier_any_field_nonempty():
+            sp = self.txtGuinierStartPoint.text().strip()
+            ep = self.txtGuinierEndPoint.text().strip()
+            if not sp or not ep:
+                return (
+                    False,
+                    "Guinier: start and end point are required when any Guinier "
+                    "field is filled.",
+                )
+            try:
+                i_s = int(sp)
+                i_e = int(ep)
+            except ValueError:
+                return False, "Guinier: start and end point must be integers."
+            if i_s < 0 or i_e < 0:
+                return False, "Guinier: indices must be non-negative."
+            if i_s >= i_e:
+                return (
+                    False,
+                    "Guinier: start point index must be less than end point index.",
+                )
+            data = self._guinier_source_data
+            if data is not None and hasattr(data, "x"):
+                import numpy as np
+
+                n = len(np.asarray(data.x))
+                if n and (i_s >= n or i_e >= n):
+                    return (
+                        False,
+                        "Guinier: start and end point must be within the 1D data "
+                        "length.",
+                    )
 
         return True, ""
 

@@ -163,19 +163,32 @@ Guinier Tab
 
 The Guinier tab holds optional Guinier analysis values for export. By default the fields are **empty and editable** so you can type values yourself or leave them blank.
 
-**FreeSAS estimate (optional)**
+A **Guinier plot** (ln(I) vs q²) appears on the right when 1D data is available: data points, vertical markers at the fit range, the linear fit, and an extrapolation to q² = 0.
 
-- Click **Estimate** (the button directly below the **I(0)** field) to run freesas ``auto_guinier`` on the current **1D** dataset (active Fitting tab or most recent 1D data in the Data Explorer). If no 1D data is available or the estimate fails, a message explains why.
+**Estimate**
+
+- Leave **start point** and **end point** empty and click **Estimate** to run freesas ``auto_guinier`` on the current **1D** dataset. All Guinier fields (including indices and **Q start** / **Q end**) are filled when the estimate succeeds.
+- Enter **both** **start point** and **end point** (0-based indices into the 1D data) and click **Estimate** to fit ln(I) vs q² over that index range. **Rg**, **I(0)**, errors, and **Q start** / **Q end** are updated from the fit.
+- Alternatively, with index fields empty, enter **both** **Q start** and **Q end** to fit by q (same units as the dataset).
+- If only one of **start** / **end point** (or one of **Q start** / **Q end**) is filled, **Estimate** asks you to complete or clear the pair.
+
+Changing **start point** or **end point** and leaving the field refits when both indices are valid and 1D data is loaded. Changing **Q start** or **Q end** does the same for a q-based fit when both q values are valid.
+
+**Reset** (next to **Estimate**) clears every Guinier field and resets the plot to the empty state.
+
+After a successful **Estimate**, **Q start**, **Q end**, **Rg**, **Rg Error**, and **I(0)** become read-only so the fit output is not edited by mistake; **start point** and **end point** stay editable for a new range. **Reset** makes all Guinier fields editable again.
 
 **Fields**
 
-- **Q Start**: Starting q-value of the Guinier range
-- **Q End**: Ending q-value of the Guinier range
-- **Start point**: Data point index at the start of the Guinier range
-- **End point**: Data point index at the end of the Guinier range
+- **Start point** / **End point** (required if any Guinier field is filled): 0-based indices into the 1D dataset; **start point** must be less than **end point**.
+- **Q start** / **Q end**: q-values at the ends of the Guinier window (same units as the data; filled automatically from estimates/fits; may be edited to fit by q when index fields are empty).
 - **Rg**: Radius of gyration in nm
 - **Rg Error**: Uncertainty in Rg
-- **I(0)**: Forward scattering intensity
+- **I(0)**: Forward scattering intensity (you can still type **Rg**, **I(0)**, and errors manually after an estimate).
+
+**Export validation**
+
+If any Guinier field contains text, **start point** and **end point** must both be filled with valid integers, **start point** must be less than **end point**, and (when 1D data is available for the dialog) both indices must lie within the data length.
 
 **Availability**
 
