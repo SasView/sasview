@@ -24,7 +24,7 @@ class SaveExtrapolatedPopup(QDialog, Ui_SaveExtrapolatedPanel):
             input_qs: np.ndarray,
             interpolation_function: Callable[[np.ndarray], np.ndarray],
             background: float | None = None,
-            parent=None):
+            parent = None):
         super().__init__()
 
         self.parent = parent
@@ -95,20 +95,23 @@ class SaveExtrapolatedPopup(QDialog, Ui_SaveExtrapolatedPanel):
         """
         Save data to a file
         """
+        options = QFileDialog.Options()
+        options |= QFileDialog.Option.DontConfirmOverwrite
+
         filename = QFileDialog.getSaveFileName(
-            None,
+            self,
             "Save As (base name; writes _uncorrected and _corrected)",
             "",
             "Comma separated values (*.csv)",
-            "")[0]
+            "",
+            options)[0]
 
         if not filename:
             return
 
         selected_path = Path(filename)
         base_path = selected_path.with_suffix("")
-        uncorrected_path = base_path.parent / f"{base_path.name}_uncorrected.csv"
-        corrected_path = base_path.parent / f"{base_path.name}_corrected.csv"
+        uncorrected_path, corrected_path = self._next_available_output_paths(base_path)
 
         background = 0.0 if self.background is None else self.background
         background_subtracted_intensity = intensity - background
@@ -122,4 +125,19 @@ class SaveExtrapolatedPopup(QDialog, Ui_SaveExtrapolatedPanel):
             corrected_file.write("Q, I(q)-Background\n")
             for q_value, i_subtracted in zip(q, background_subtracted_intensity):
                 corrected_file.write("%.6g, %.6g\n" % (q_value, i_subtracted))
+
+    @staticmethod
+    def _next_available_output_paths(base_path: Path) -> tuple[Path, Path]:
+        """Return output file paths that do not overwrite existing files."""
+        suffix_index = 0
+
+        while True:
+            suffix = "" if suffix_index == 0 else f"_{suffix_index}"
+            uncorrected_path = base_path.parent / f"{base_path.name}_uncorrected{suffix}.csv"
+            corrected_path = base_path.parent / f"{base_path.name}_corrected{suffix}.csv"
+
+            if not uncorrected_path.exists() and not corrected_path.exists():
+                return uncorrected_path, corrected_path
+
+            suffix_index += 1
 
