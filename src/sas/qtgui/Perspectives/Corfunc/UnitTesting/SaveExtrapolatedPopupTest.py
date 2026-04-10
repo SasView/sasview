@@ -63,6 +63,7 @@ def test_save_extrapolated_does_not_overwrite(qapp, mocker, tmp_path, user_choic
         return_value=user_choice
     )
 
+    # Create existing files that would trigger the overwrite confirmation
     original_uncorrected = tmp_path / "extrapolated_uncorrected.csv"
     original_corrected = tmp_path / "extrapolated_corrected.csv"
     original_uncorrected.write_text("existing uncorrected\n")
@@ -74,38 +75,34 @@ def test_save_extrapolated_does_not_overwrite(qapp, mocker, tmp_path, user_choic
     suffixed_corrected = tmp_path / "extrapolated_corrected_1.csv"
 
     if expect_suffix_files:
-        # Verify that original files were not overwritten
+        assert suffixed_uncorrected.exists()
+        assert suffixed_corrected.exists()
+
+        target_uncorrected = suffixed_uncorrected
+        target_corrected = suffixed_corrected
+
+        # Verify that the original files were not overwritten
         assert original_uncorrected.read_text() == "existing uncorrected\n"
         assert original_corrected.read_text() == "existing corrected\n"
-
-        new_uncorrected_lines = suffixed_uncorrected.read_text().splitlines()
-        assert new_uncorrected_lines[0] == "Q, I(q)"
-        assert new_uncorrected_lines[1] == "0.2, 20"
-        assert new_uncorrected_lines[2] == "0.4, 40"
-        assert new_uncorrected_lines[3] == "0.6, 60"
-
-        new_corrected_lines = suffixed_corrected.read_text().splitlines()
-        assert new_corrected_lines[0] == "Q, I(q)-Background"
-        assert new_corrected_lines[1] == "0.2, 18"
-        assert new_corrected_lines[2] == "0.4, 38"
-        assert new_corrected_lines[3] == "0.6, 58"
     else:
-        # Verify that original files were overwritten
-        new_uncorrected_lines = original_uncorrected.read_text().splitlines()
-        assert new_uncorrected_lines[0] == "Q, I(q)"
-        assert new_uncorrected_lines[1] == "0.2, 20"
-        assert new_uncorrected_lines[2] == "0.4, 40"
-        assert new_uncorrected_lines[3] == "0.6, 60"
-
-        new_corrected_lines = original_corrected.read_text().splitlines()
-        assert new_corrected_lines[0] == "Q, I(q)-Background"
-        assert new_corrected_lines[1] == "0.2, 18"
-        assert new_corrected_lines[2] == "0.4, 38"
-        assert new_corrected_lines[3] == "0.6, 58"
-
-        # Verify that no new files with incremented suffixes were created
         assert not suffixed_uncorrected.exists()
         assert not suffixed_corrected.exists()
+
+        target_uncorrected = original_uncorrected
+        target_corrected = original_corrected
+
+    # Verify the content of the files that were written (either original or suffixed)
+    new_uncorrected_lines = target_uncorrected.read_text().splitlines()
+    assert new_uncorrected_lines[0] == "Q, I(q)"
+    assert new_uncorrected_lines[1] == "0.2, 20"
+    assert new_uncorrected_lines[2] == "0.4, 40"
+    assert new_uncorrected_lines[3] == "0.6, 60"
+
+    new_corrected_lines = target_corrected.read_text().splitlines()
+    assert new_corrected_lines[0] == "Q, I(q)-Background"
+    assert new_corrected_lines[1] == "0.2, 18"
+    assert new_corrected_lines[2] == "0.4, 38"
+    assert new_corrected_lines[3] == "0.6, 58"
 
 def test_next_available_output_paths_raises_when_suffix_limit_reached(tmp_path, monkeypatch):
     """
