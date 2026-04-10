@@ -6,7 +6,7 @@ from PySide6.QtWidgets import QDialog, QFileDialog, QMessageBox
 
 from .UI.SaveExtrapolated import Ui_SaveExtrapolatedPanel
 
-MAX_SUFFIX_ATTEMPTS = 10000
+MAX_SUFFIX_ATTEMPTS = 1000
 
 
 class UserInputInvalid(Exception):
