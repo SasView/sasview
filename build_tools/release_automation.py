@@ -95,9 +95,9 @@ __all__ = ["__version_parsed__", "__release_date__", "__version__"]
 acknowledgement_template = \
 '''__DOI__ = "{0}"
 __RELEASE_MANAGER__ = "{1}"
-__ACKNOWLEDGEMENT__ = "This work benefited from the use of the SasView application, originally developed " \\
-                      "under NSF Award DMR - 0520547. SasView also contains code developed with funding" \\
-                      " from the EU Horizon 2020 programme under the SINE2020 project Grant No 654000."
+__ACKNOWLEDGEMENT__ = "This work benefited from the use of the SasView project, originally developed under NSF "\\
+                      "award DMR-0520547 and containing code developed with funding from the European Union's Horizon " \\
+                      "2020 research and innovation programme under the SINE2020 project, grant agreement No 654000. "
 '''
 
 CURRENT_PATH = Path('.').resolve()
