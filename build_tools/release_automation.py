@@ -257,16 +257,16 @@ def update_sasview_metadata(version: str, doi: str, release_manager: str) -> Non
     # Update the Pyinstall config with the version and the year
     for line in fileinput.input(iss_file, inplace=True):
         if line.startswith('#define MyAppVersion'):
-            print(f'#define MyAppVersion "{version}"', end='\r')
+            print(f'#define MyAppVersion "{version}"', end='\n')
         elif line.startswith('#define MyAppPublisher'):
-            print(f'#define MyAppPublisher "(c) 2009 - {year}, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO, BAM, TU Delft, and DLS"', end='\r')
+            print(f'#define MyAppPublisher "(c) 2009 - {year}, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO, BAM, TU Delft, and DLS"', end='\n')
         else:
             print(line, end='')
 
     # Update the flatpak manifest with the version and date
     for line in fileinput.input(flatpak_manifest, inplace=True):
         if line.strip().startswith('<release '):
-            print(f'    <release version="{version}" date="{date}"></release>', end='\r')
+            print(f'    <release version="{version}" date="{date}"></release>', end='\n')
         else:
             print(line, end='')
 
@@ -380,7 +380,7 @@ def main(args=None):
     update_sasdata_metadata(sasdata_version, new_sasdata_doi, release_manager)
 
     # Pull the license from a know location
-    license_line = legal.copyright + "\r"
+    license_line = legal.copyright + "\n"
     update_file(SASMODELS_PATH / 'LICENSE.txt', license_line, 0)
     update_file(SASDATA_PATH / 'LICENSE.TXT', license_line, 0)
     update_file(SASVIEW_PATH / 'installers' / 'license.txt', license_line, -1)
