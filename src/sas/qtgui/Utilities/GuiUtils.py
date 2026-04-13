@@ -534,6 +534,314 @@ def openLink(url):
         raise AttributeError(msg)
 
 
+def _formatDictValue(value, max_depth=2) -> str:
+    """
+    Format a dictionary value for display, extracting useful information.
+    
+    :param value: Dictionary or other value to format
+    :param max_depth: Maximum nesting depth to process
+    :return: Formatted string representation
+    """
+    if not isinstance(value, dict):
+        return str(value)
+
+    if max_depth <= 0:
+        return "{...}"
+
+    # Extract common useful fields from dictionaries
+    parts = []
+
+    # Instrument/source dictionaries
+    if 'name' in value:
+        parts.append(value['name'])
+    if 'beamline_name' in value:
+        parts.append(f"Beamline: {value['beamline_name']}")
+    if 'type' in value:
+        parts.append(f"Type: {value['type']}")
+    if 'city' in value and 'country' in value:
+        parts.append(f"{value['city']}, {value['country']}")
+    elif 'city' in value:
+        parts.append(value['city'])
+    elif 'country' in value:
+        parts.append(value['country'])
+
+    # Detector dictionaries
+    if 'detector' in str(value).lower() or 'type' in value:
+        if 'name' in value:
+            parts.append(f"Detector: {value['name']}")
+        if 'type' in value and 'name' not in value:
+            parts.append(f"Detector: {value['type']}")
+        if 'resolution' in value:
+            parts.append(f"Resolution: {value['resolution']}")
+
+    if parts:
+        return " | ".join(parts)
+
+    # Fallback: show key-value pairs for shallow dicts
+    if len(value) <= 3:
+        return ", ".join(f"{k}: {v}" for k, v in value.items() if not isinstance(v, dict))
+
+    return "{...}"
+
+
+def _formatDictLine(line: str) -> str:
+    """
+    Extract and format dictionary information from a line.
+    
+    :param line: Line that may contain a dictionary representation
+    :return: Formatted line with dictionary info extracted, or original line if no dict found
+    """
+    import ast
+    import re
+
+    stripped = line.strip()
+
+    # Check if line contains a dictionary
+    if not ("{" in stripped and "'" in stripped and ":" in stripped):
+        return line
+
+    # Try to extract the label (e.g., "Instrument:", "Detector:")
+    label_match = re.match(r'^(\w+)\s*:\s*(.+)', stripped)
+    if label_match:
+        label = label_match.group(1)
+        dict_str = label_match.group(2)
+    elif stripped.startswith("{'") or stripped.startswith("{"):
+        label = None
+        dict_str = stripped
+    else:
+        return line
+
+    # Try to parse the dictionary string
+    try:
+        # Use ast.literal_eval to safely parse the dictionary
+        parsed_dict = ast.literal_eval(dict_str)
+        if not isinstance(parsed_dict, dict):
+            return line
+
+        # Format the dictionary
+        parts = []
+
+        # Extract instrument/source info
+        if 'name' in parsed_dict and parsed_dict['name']:
+            parts.append(parsed_dict['name'])
+        if 'beamline_name' in parsed_dict and parsed_dict['beamline_name']:
+            parts.append(f"Beamline: {parsed_dict['beamline_name']}")
+        if 'type_of_source' in parsed_dict and parsed_dict['type_of_source']:
+            parts.append(f"Source: {parsed_dict['type_of_source']}")
+        if 'city' in parsed_dict and parsed_dict['city']:
+            city = parsed_dict['city']
+            if 'country' in parsed_dict and parsed_dict['country']:
+                parts.append(f"{city}, {parsed_dict['country']}")
+            else:
+                parts.append(city)
+        elif 'country' in parsed_dict and parsed_dict['country']:
+            parts.append(parsed_dict['country'])
+
+        # Extract detector info (nested or direct)
+        detector_info = None
+        if 'detector' in parsed_dict and isinstance(parsed_dict['detector'], dict):
+            det = parsed_dict['detector']
+            if 'name' in det and det['name']:
+                detector_info = det['name']
+            elif 'type' in det and det['type']:
+                detector_info = det['type']
+        elif 'detector' in parsed_dict:
+            detector_info = str(parsed_dict['detector'])
+
+        if detector_info:
+            parts.append(f"Detector: {detector_info}")
+
+        # If we extracted useful info, format it
+        if parts:
+            formatted = " | ".join(parts)
+            if label:
+                return f"{label}: {formatted}"
+            else:
+                return formatted
+
+        # Fallback: show key-value pairs for simple dicts
+        simple_parts = []
+        for k, v in parsed_dict.items():
+            if v is not None and not isinstance(v, dict):
+                simple_parts.append(f"{k}: {v}")
+        if simple_parts and len(simple_parts) <= 5:
+            formatted = " | ".join(simple_parts)
+            if label:
+                return f"{label}: {formatted}"
+            else:
+                return formatted
+
+    except (ValueError, SyntaxError):
+        # If parsing fails, return original line
+        pass
+
+    return line
+
+
+def _formatSASBDBMetadata(data) -> str:
+    """
+    Format SASBDB metadata from data object for display.
+    
+    Displays instrument, sample, source info and meta_data dictionary
+    for datasets loaded from SASBDB in a clean, concise format.
+    
+    :param data: Data1D or Data2D object
+    :return: Formatted string with SASBDB metadata, or empty string if none
+    """
+    text = ""
+
+    # Check if meta_data exists and contains SASBDB info
+    meta = getattr(data, 'meta_data', None) or {}
+
+    # Check if this is SASBDB data
+    if 'SASBDB_code' not in meta:
+        return text
+
+    text += "\n" + "=" * 50 + "\n"
+    text += "SASBDB Metadata\n"
+    text += "=" * 50 + "\n"
+
+    # Entry and instrument info (compact header)
+    header_parts = []
+    if meta.get('SASBDB_code'):
+        header_parts.append(f"Code: {meta['SASBDB_code']}")
+
+    # Extract instrument info from metadata (handle both string and dict formats)
+    instrument_str = None
+    location_str = None
+
+    if hasattr(data, 'instrument') and data.instrument:
+        if isinstance(data.instrument, str):
+            instrument_str = data.instrument
+        elif isinstance(data.instrument, dict):
+            # Extract from dict
+            instrument_str = data.instrument.get('name') or data.instrument.get('beamline_name')
+            if data.instrument.get('city') and data.instrument.get('country'):
+                location_str = f"{data.instrument['city']}, {data.instrument['country']}"
+            elif data.instrument.get('city'):
+                location_str = data.instrument['city']
+
+    # Also check meta_data for instrument info (search all keys for dict values)
+    if not instrument_str:
+        for key, val in meta.items():
+            if isinstance(val, dict):
+                # Check if this looks like an instrument dict
+                if 'beamline_name' in val or 'name' in val or 'type_of_source' in val:
+                    instrument_str = val.get('beamline_name') or val.get('name')
+                    if val.get('city') and val.get('country'):
+                        location_str = f"{val['city']}, {val['country']}"
+                    elif val.get('city'):
+                        location_str = val['city']
+                    break
+            elif key in ['instrument', 'source', 'beamline'] and isinstance(val, str):
+                instrument_str = val
+                break
+
+    if instrument_str:
+        header_parts.append(f"Instrument: {instrument_str}")
+    if location_str:
+        header_parts.append(location_str)
+
+    # Extract detector info if available (search all keys for detector dicts)
+    detector_info = None
+    for key, val in meta.items():
+        if isinstance(val, dict) and ('detector' in key.lower() or 'type' in val):
+            detector_name = val.get('name') or val.get('type')
+            if detector_name:
+                detector_info = detector_name
+                break
+        elif 'detector' in key.lower() and isinstance(val, str):
+            detector_info = val
+            break
+
+    if detector_info:
+        header_parts.append(f"Detector: {detector_info}")
+
+    if header_parts:
+        text += " | ".join(header_parts) + "\n"
+
+    # Sample info (consolidated)
+    if hasattr(data, 'sample') and data.sample:
+        sample = data.sample
+        sample_parts = []
+
+        if hasattr(sample, 'name') and sample.name:
+            sample_parts.append(sample.name)
+
+        # Add temperature if available
+        if hasattr(sample, 'temperature') and sample.temperature is not None:
+            temp_unit = getattr(sample, 'temperature_unit', 'K') or 'K'
+            sample_parts.append(f"T = {sample.temperature} {temp_unit}")
+
+        # Add concentration and buffer from details (if present)
+        if hasattr(sample, 'details') and sample.details:
+            for detail in sample.details:
+                if detail.startswith("Concentration:"):
+                    sample_parts.append(detail.replace("Concentration: ", ""))
+                elif detail.startswith("Buffer:"):
+                    sample_parts.append(detail.replace("Buffer: ", ""))
+
+        if sample_parts:
+            text += f"Sample: {' | '.join(sample_parts)}\n"
+
+    # Source wavelength (if available)
+    if hasattr(data, 'source') and data.source:
+        source = data.source
+        if hasattr(source, 'wavelength') and source.wavelength is not None:
+            wl_unit = getattr(source, 'wavelength_unit', 'Å') or 'Å'
+            text += f"Wavelength: {source.wavelength} {wl_unit}\n"
+
+    # Structural parameters (compact format)
+    structural_parts = []
+    if meta.get('SASBDB_Rg') is not None:
+        rg_str = f"Rg = {meta['SASBDB_Rg']:.2f}"
+        if meta.get('SASBDB_Rg_error') is not None:
+            rg_str += f" ± {meta['SASBDB_Rg_error']:.2f}"
+        rg_str += " Å"
+        structural_parts.append(rg_str)
+
+    if meta.get('SASBDB_I0') is not None:
+        i0_str = f"I(0) = {meta['SASBDB_I0']:.4e}"
+        if meta.get('SASBDB_I0_error') is not None:
+            i0_str += f" ± {meta['SASBDB_I0_error']:.4e}"
+        structural_parts.append(i0_str)
+
+    if meta.get('SASBDB_Dmax') is not None:
+        structural_parts.append(f"Dmax = {meta['SASBDB_Dmax']:.2f} Å")
+
+    if meta.get('SASBDB_MW') is not None:
+        mw_str = f"MW = {meta['SASBDB_MW']:.2f} kDa"
+        if meta.get('SASBDB_MW_method'):
+            mw_str += f" ({meta['SASBDB_MW_method']})"
+        structural_parts.append(mw_str)
+
+    if meta.get('SASBDB_Porod_volume') is not None:
+        structural_parts.append(f"Porod Volume = {meta['SASBDB_Porod_volume']:.0f} Å³")
+
+    if structural_parts:
+        text += "Structural: " + " | ".join(structural_parts) + "\n"
+
+    # Publication info (compact, only if available)
+    pub_parts = []
+    if meta.get('SASBDB_authors'):
+        # Truncate authors if too long
+        authors = meta['SASBDB_authors']
+        if len(authors) > 50:
+            authors = authors[:47] + "..."
+        pub_parts.append(f"Authors: {authors}")
+    if meta.get('SASBDB_DOI'):
+        pub_parts.append(f"DOI: {meta['SASBDB_DOI']}")
+    if meta.get('SASBDB_PMID'):
+        pub_parts.append(f"PMID: {meta['SASBDB_PMID']}")
+
+    if pub_parts:
+        text += "Publication: " + " | ".join(pub_parts) + "\n"
+
+    text += "=" * 50 + "\n\n"
+
+    return text
+
+
 def retrieveData1d(data):
     """
     Retrieve 1D data from file and construct its text
@@ -552,6 +860,35 @@ def retrieveData1d(data):
         raise ValueError(msg)
 
     text = data.__str__()
+
+    # Format dictionary representations instead of removing them
+    import re
+    lines = text.split('\n')
+    cleaned_lines = []
+    for line in lines:
+        stripped = line.strip()
+        # Check if line contains a dictionary representation
+        if ("{" in stripped and "'" in stripped and ":" in stripped and
+            (stripped.startswith("{'") or
+             re.search(r':\s*\{', stripped) or  # Matches "Instrument: {"
+             re.search(r"\{'[^']+':", stripped))):  # Matches "{'key':"
+            # Count opening and closing braces to detect dict structures
+            open_braces = stripped.count('{')
+            close_braces = stripped.count('}')
+            # If it looks like a dictionary, format it instead of skipping
+            if open_braces > 0 and close_braces > 0:
+                formatted_line = _formatDictLine(line)
+                if formatted_line != line:  # Only add if it was successfully formatted
+                    cleaned_lines.append(formatted_line)
+            else:
+                cleaned_lines.append(line)
+        else:
+            cleaned_lines.append(line)
+    text = '\n'.join(cleaned_lines)
+
+    # Add SASBDB metadata if present
+    text += _formatSASBDBMetadata(data)
+
     text += 'Data Min Max:\n'
     text += 'X_min = %s:  X_max = %s\n' % (xmin, max(data.x))
     text += 'Y_min = %s:  Y_max = %s\n' % (ymin, max(data.y))
@@ -596,6 +933,35 @@ def retrieveData2d(data):
         raise AttributeError(msg)
 
     text = data.__str__()
+
+    # Format dictionary representations instead of removing them
+    import re
+    lines = text.split('\n')
+    cleaned_lines = []
+    for line in lines:
+        stripped = line.strip()
+        # Check if line contains a dictionary representation
+        if ("{" in stripped and "'" in stripped and ":" in stripped and
+            (stripped.startswith("{'") or
+             re.search(r':\s*\{', stripped) or  # Matches "Instrument: {"
+             re.search(r"\{'[^']+':", stripped))):  # Matches "{'key':"
+            # Count opening and closing braces to detect dict structures
+            open_braces = stripped.count('{')
+            close_braces = stripped.count('}')
+            # If it looks like a dictionary, format it instead of skipping
+            if open_braces > 0 and close_braces > 0:
+                formatted_line = _formatDictLine(line)
+                if formatted_line != line:  # Only add if it was successfully formatted
+                    cleaned_lines.append(formatted_line)
+            else:
+                cleaned_lines.append(line)
+        else:
+            cleaned_lines.append(line)
+    text = '\n'.join(cleaned_lines)
+
+    # Add SASBDB metadata if present
+    text += _formatSASBDBMetadata(data)
+
     text += 'Data Min Max:\n'
     text += 'I_min = %s\n' % min(data.data)
     text += 'I_max = %s\n\n' % max(data.data)
