@@ -235,12 +235,12 @@ def update_sasview_metadata(version: str, doi: str, release_manager: str) -> Non
 
     build_tools_directory = SASVIEW_PATH / 'build_tools'
     installers_directory = SASVIEW_PATH / 'installers'
-    flatpak_directory = build_tools_directory / 'application_metadata'
+    metainfo_directory = build_tools_directory / 'application_metadata'
     system_directory = SASVIEW_PATH / "src" / "sas" / "system"
     version_filename = system_directory /"version.py"
     citation_filename = system_directory / "citation.py"
     iss_file = installers_directory / 'installer.iss'
-    flatpak_manifest = flatpak_directory / 'org.sasview.sasview.metainfo.xml'
+    metainfo = metainfo_directory / 'org.sasview.sasview.metainfo.xml'
 
     now = datetime.datetime.now()
     date = now.strftime("%Y-%m-%d")
@@ -264,7 +264,7 @@ def update_sasview_metadata(version: str, doi: str, release_manager: str) -> Non
             print(line, end='')
 
     # Update the flatpak manifest with the version and date
-    for line in fileinput.input(flatpak_manifest, inplace=True):
+    for line in fileinput.input(metainfo, inplace=True):
         if line.strip().startswith('<release '):
             print(f'    <release version="{version}" date="{date}"></release>', end='\n')
         else:
