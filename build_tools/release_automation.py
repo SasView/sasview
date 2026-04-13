@@ -254,7 +254,7 @@ def update_sasview_metadata(version: str, doi: str, release_manager: str) -> Non
     with open(citation_filename, 'w') as file:
         file.write(acknowledgement_template.format(doi, release_manager))
 
-    # Update the Pyinstall config with the version and the year
+    # Update the innosetup config with the version and the year
     for line in fileinput.input(iss_file, inplace=True):
         if line.startswith('#define MyAppVersion'):
             print(f'#define MyAppVersion "{version}"', end='\n')
