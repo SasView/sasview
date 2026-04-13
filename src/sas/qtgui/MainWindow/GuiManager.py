@@ -39,6 +39,7 @@ from sas.qtgui.Perspectives.Invariant.InvariantPerspective import InvariantWindo
 from sas.qtgui.Perspectives.Inversion.InversionPerspective import InversionWindow
 from sas.qtgui.Perspectives.perspective import Perspective
 from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionPerspective import SizeDistributionWindow
+from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
 from sas.qtgui.Utilities.About.About import About
 from sas.qtgui.Utilities.About.Credits import Credits
 
@@ -57,6 +58,8 @@ from sas.qtgui.Utilities.PluginManager import PluginManager
 from sas.qtgui.Utilities.Preferences.PreferencesPanel import PreferencesPanel
 from sas.qtgui.Utilities.Reports.ReportDialog import ReportDialog
 from sas.qtgui.Utilities.ResultPanel import ResultPanel
+from sas.qtgui.Utilities.SASBDB.sasbdb_data_collector import SASBDBDataCollector
+from sas.qtgui.Utilities.SASBDB.SASBDBDialog import SASBDBDialog
 
 # General SAS imports
 from sas.qtgui.Utilities.SasviewLogger import setup_qt_logging
@@ -715,6 +718,7 @@ class GuiManager:
         self._workspace.actionCopy.triggered.connect(self.actionCopy)
         self._workspace.actionPaste.triggered.connect(self.actionPaste)
         self._workspace.actionReport.triggered.connect(self.actionReport)
+        self._workspace.actionSASBDB.triggered.connect(self.actionSASBDB)
         self._workspace.actionReset.triggered.connect(self.actionReset)
         self._workspace.actionExcel.triggered.connect(self.actionExcel)
         self._workspace.actionLatex.triggered.connect(self.actionLatex)
@@ -914,7 +918,85 @@ class GuiManager:
                 self.report_dialog = ReportDialog(report_data=report_data, parent=self._parent)
                 self.report_dialog.show()
 
+    def _sasbdb_guinier_source_data_1d(self):
+        """
+        Return loaded 1D data for optional FreeSAS Guinier estimation in SASBDB.
 
+        Prefers the active Fitting tab dataset; otherwise the most recent 1D
+        item in the data manager.
+        """
+        if self._current_perspective is not None:
+            fw = getattr(self._current_perspective, 'currentFittingWidget', None)
+            if fw is not None and fw.data is not None and isinstance(fw.data, Data1D):
+                return fw.data
+        if hasattr(self, '_data_manager'):
+            try:
+                stored = self._data_manager.stored_data
+                if stored:
+                    data = list(stored.values())[-1]
+                    if isinstance(data, Data1D):
+                        return data
+            except Exception:
+                logger.debug("Could not resolve SASBDB Guinier source data", exc_info=True)
+        return None
+
+    def actionSASBDB(self):
+        """
+        Show the SASBDB Export dialog.
+        """
+        collector = SASBDBDataCollector()
+        export_data = collector.export_data
+
+        # Try to get data from current perspective (same way as Report Results)
+        if self._current_perspective is not None:
+            try:
+                perspective_data = self._current_perspective.getSASBDBData()
+                if perspective_data is not None:
+                    export_data = perspective_data
+            except Exception as e:
+                logger.warning(f"Could not collect data from perspective: {e}")
+
+        # If no samples collected, try to get from data manager
+        if not export_data.samples and hasattr(self, '_data_manager'):
+            try:
+                # Get the most recently added data
+                stored_data = self._data_manager.stored_data
+                if stored_data:
+                    # Get the last data item
+                    data_items = list(stored_data.values())
+                    if data_items:
+                        data = data_items[-1]
+                        if isinstance(data, (Data1D, Data2D)):
+                            sample, instrument = collector.collect_from_data(data)
+                            export_data.samples.append(sample)
+                            if instrument:
+                                export_data.instruments.append(instrument)
+            except Exception as e:
+                logger.warning(f"Could not collect data from data manager: {e}")
+
+        # If no samples collected, create defaults
+        if not export_data.samples:
+            # Create a default sample with defaults
+            sample, instrument = collector.collect_from_data(Data1D(x=[], y=[]))
+            sample.molecule = collector.create_default_molecule()
+            sample.buffer = collector.create_default_buffer()
+            export_data.samples.append(sample)
+            if instrument:
+                export_data.instruments.append(instrument)
+
+        # Create default project if not set
+        if export_data.project is None:
+            export_data.project = collector.create_default_project()
+
+        guinier_source_data = self._sasbdb_guinier_source_data_1d()
+
+        # Show dialog
+        self.sasbdb_dialog = SASBDBDialog(
+            export_data=export_data,
+            parent=self._parent,
+            guinier_source_data=guinier_source_data,
+        )
+        self.sasbdb_dialog.show()
 
     def actionReset(self):
         """

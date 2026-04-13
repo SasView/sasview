@@ -176,16 +176,31 @@ class ViewerModel(QWidget):
         colours = design.colour
 
         for series in self.dict_series.values():
-           data = []
-           series.dataProxy().resetArray(data)
+            data = []
+            series.dataProxy().resetArray(data)
 
         # Check if we have any data at all
         if not distr.x or len(distr.x) == 0:
             return
 
-        minx, maxx = min(distr.x[0]), max(distr.x[0])
-        miny, maxy = min(distr.y[0]), max(distr.y[0])
-        minz, maxz = min(distr.z[0]), max(distr.z[0])
+        # Find first non-empty subunit for initial bounds (first may be empty after overlap)
+        minx = maxx = miny = maxy = minz = maxz = None
+        for subunit in range(len(colours)):
+            try:
+                if (subunit >= len(distr.x)
+                        or not hasattr(distr.x[subunit], '__len__')
+                        or len(distr.x[subunit]) == 0):
+                    continue
+            except (ValueError, TypeError):
+                continue
+
+            minx, maxx = min(distr.x[subunit]), max(distr.x[subunit])
+            miny, maxy = min(distr.y[subunit]), max(distr.y[subunit])
+            minz, maxz = min(distr.z[subunit]), max(distr.z[subunit])
+            break
+
+        if minx is None:
+            return
 
         for subunit in range(len(colours)):
             # Skip empty subunits - handle numpy arrays properly
@@ -198,10 +213,17 @@ class ViewerModel(QWidget):
                 # Handle numpy array comparison issues
                 continue
 
-            series = self.dict_series[colours[subunit]]
+            series = self.dict_series.get(colours[subunit])
+            if series is None:
+                continue
+
             data = []
             for index in range(len(distr.x[subunit])):
-                data.append(QScatterDataItem(QVector3D(distr.x[subunit][index], distr.y[subunit][index], distr.z[subunit][index])))
+                data.append(QScatterDataItem(QVector3D(
+                    distr.x[subunit][index],
+                    distr.y[subunit][index],
+                    distr.z[subunit][index]
+                )))
 
             minx = min(minx, min(distr.x[subunit]))
             maxx = max(maxx, max(distr.x[subunit]))
