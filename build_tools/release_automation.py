@@ -80,15 +80,17 @@ sasdata_data = {
 }
 
 version_template = \
-"""try:
+"""from packaging.version import Version
+
+try:
     from ._version import __version__
 except ImportError:
     __version__ = "{0}"
 
 __release_date__ = "{1}"
-__build__ = "GIT_COMMIT"
+__version_parsed__ = Version(__version__)
 
-__all__ = ["__build__", "__release_date__", "__version__"]
+__all__ = ["__version_parsed__", "__release_date__", "__version__"]
 """
 acknowledgement_template = \
 '''__DOI__ = "{0}"
