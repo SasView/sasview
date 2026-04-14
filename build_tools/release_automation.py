@@ -118,11 +118,6 @@ SASDATA_CONTRIBUTORS_FILE = SASDATA_PATH / 'contributors.tsv'
 SASMODELS_CONTRIBUTORS_FILE = SASMODELS_PATH / 'build_tools' / 'contributors.tsv'
 
 
-class SplitArgs(argparse.Action):
-    def __call__(self, parser, namespace, values, option_string=None):
-        setattr(namespace, self.dest, values.split(','))
-
-
 def sort_records(records: list[dict]) -> None:
     """Sort a list of contributors in alphabetical order and move the release manager(s) to the start of the list.
     This sorting is performed directly on the list, so no return is necessary.
