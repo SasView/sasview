@@ -34,8 +34,6 @@ class _HelpSystem:
         if isinstance(url, Path):
             url = url.as_posix()
 
-        url = url.lstrip("/")
-
         # Separate any fragment (#anchor) from the path so Path operations
         # don't treat it as part of the filename.
         fragment = ""
@@ -43,6 +41,12 @@ class _HelpSystem:
             url, fragment = url.rsplit("#", 1)
 
         relative_path = Path(url)
+
+        # Preserve absolute paths long enough to detect and strip the local
+        # documentation root on POSIX platforms before normalizing relative
+        # help paths that may be passed with leading slashes.
+        if not relative_path.is_absolute():
+            relative_path = Path(url.lstrip("/"))
 
         # Strip the local doc root if a caller accidentally passed an
         # absolute path that already includes it.
