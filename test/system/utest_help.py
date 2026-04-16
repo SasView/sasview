@@ -1,9 +1,16 @@
 """Unit tests for sas.system._help"""
 
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from unittest.mock import patch
 
 from sas.system._help import _HelpSystem, _release_version
+
+
+class PosixTestPath(PurePosixPath):
+    """Pure POSIX path with the minimal filesystem API used by _HelpSystem."""
+
+    def exists(self):
+        return False
 
 
 class TestReleaseVersion:
@@ -141,6 +148,21 @@ class TestShowHelp:
         absolute_url = tmp_path / "user" / "fitting.html"
         with patch("sas.system.version.__version__", "6.1.2"):
             self.hs.show_help(str(absolute_url))
+
+        opened_url = mock_wb.open.call_args[0][0]
+        assert opened_url == (
+            "https://www.sasview.org/docs/v6.1.2/user/fitting.html"
+        )
+
+    @patch("sas.system._help.webbrowser")
+    def test_posix_absolute_path_stripped_for_online(self, mock_wb):
+        """POSIX absolute paths should also be reduced to doc-relative URLs."""
+        self.hs.path = PosixTestPath("/tmp/sasview-docs")
+        absolute_url = "/tmp/sasview-docs/user/fitting.html"
+
+        with patch("sas.system._help.Path", PosixTestPath):
+            with patch("sas.system.version.__version__", "6.1.2"):
+                self.hs.show_help(absolute_url)
 
         opened_url = mock_wb.open.call_args[0][0]
         assert opened_url == (
