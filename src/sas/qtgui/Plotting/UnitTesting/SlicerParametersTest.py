@@ -123,10 +123,9 @@ class SlicerParametersTest:
         assert spy_close.count() == 1
 
     def testOnHelp(self, widget, mocker):
-        ''' Assure clicking on help returns QtWeb view on requested page'''
+        ''' Assure clicking on help opens the documentation in browser'''
         widget.show()
 
-        #Mock the webbrowser.open method
         mocker.patch.object(widget.manager, 'parent')
         mocker.patch.object(widget.manager.parent, 'showHelp')
 
