@@ -1,5 +1,6 @@
 import argparse
 import datetime
+import fileinput
 import json
 import logging
 import os
@@ -21,12 +22,7 @@ Options include:
     -v/--sasview_version: The sasview version for the upcoming release in x.y.z(a|b)(0-9) format. **required**
     -s/--sasmodels_version: The sasmodels version for the upcoming release in x.y.z(a|b)(0-9) format. **required**
     -d/--sasdata_version: The sasdata version for the upcoming release in x.y.z(a|b)(0-9) format. **required**
-    -z/--zenodo: The Zenodo api key for modifying/creating Zenodo entries.
-    -u/--username: Your Github username for fetching the repositories.
-    -p/--password: Your Github password for fetching the repositories.
-    -l/--sasview_list: A comma-delimited list of sasview issue numbers closed for this release.
-    -m/--sasmodels_list: A comma-delimited list of sasmodels issue numbers closed for this release.
-    -n/--sasdata_list: A comma-delimited list of sasdata issue numbers closed for this release.
+    -z/--zenodo: A Zenodo API Key for modifying/creating Zenodo entries.
 '''
 
 # Replace with live server and live server key
@@ -38,9 +34,9 @@ zenodo_url = "https://zenodo.org"
 # Should import release notes from git repo, for now will need to cut and paste
 sasview_data = {
 'metadata': {
-    'title': 'SasView version 6.1.2',
-    'description': '6.1.2 release',
-    'related_identifiers': [{'identifier': 'https://github.com/SasView/sasview/releases/tag/v6.1.1',
+    'title': 'SasView version ',
+    'description': ' release',
+    'related_identifiers': [{'identifier': 'https://github.com/SasView/sasview/releases/tag/v',
                         'relation': 'isAlternateIdentifier', 'scheme': 'url'}],
     'contributors': [],
     'creators': [],
@@ -52,6 +48,57 @@ sasview_data = {
     'prereserve_doi': 'true'
     }
 }
+sasmodels_data = {
+'metadata': {
+    'title': 'SasModels version ',
+    'description': ' release',
+    'related_identifiers': [{'identifier': 'https://github.com/SasView/sasmodels/releases/tag/v',
+                        'relation': 'isAlternateIdentifier', 'scheme': 'url'}],
+    'contributors': [],
+    'creators': [],
+    'license': 'BSD-3-Clause',
+    'upload_type': 'software',
+    'access_right': 'open',
+    'communities': [{'identifier': 'ecfunded'}, {'identifier': 'zenodo'}],
+    'prereserve_doi': 'true'
+    }
+}
+sasdata_data = {
+'metadata': {
+    'title': 'SasData version ',
+    'description': ' release',
+    'related_identifiers': [{'identifier': 'https://github.com/SasView/sasdata/releases/tag/v',
+                        'relation': 'isAlternateIdentifier', 'scheme': 'url'}],
+    'contributors': [],
+    'creators': [],
+    'license': 'BSD-3-Clause',
+    'upload_type': 'software',
+    'access_right': 'open',
+    'communities': [{'identifier': 'ecfunded'}, {'identifier': 'zenodo'}],
+    'prereserve_doi': 'true'
+    }
+}
+
+version_template = \
+"""from packaging.version import Version
+
+try:
+    from ._version import __version__
+except ImportError:
+    __version__ = "{0}"
+
+__release_date__ = "{1}"
+__version_parsed__ = Version(__version__)
+
+__all__ = ["__version_parsed__", "__release_date__", "__version__"]
+"""
+acknowledgement_template = \
+'''__DOI__ = "{0}"
+__RELEASE_MANAGER__ = "{1}"
+__ACKNOWLEDGEMENT__ = "This work benefited from the use of the SasView project, originally developed under NSF "\\
+                      "award DMR-0520547 and containing code developed with funding from the European Union's Horizon " \\
+                      "2020 research and innovation programme under the SINE2020 project, grant agreement No 654000. "
+'''
 
 CURRENT_PATH = Path('.').resolve()
 SASVIEW_PATH = CURRENT_PATH / 'sasview'
@@ -63,18 +110,20 @@ for path in [SASMODELS_PATH, SASDATA_PATH, SASVIEW_PATH]:
         msg = f"""The {missing_repo} repository does not exist relative to the run path of release_automation.py.
         Please ensure you are running this script from the directory all sub packages are in.
         Usage:
-            `python ./sasview/release_automation.py [options]
+            `python ./sasview/build_tools/release_automation.py [options]
         """
         logging.error(msg)
-CONTRIBUTORS_FILE = SASVIEW_PATH / 'build_tools' / 'contributors.tsv'
+SASVIEW_CONTRIBUTORS_FILE = SASVIEW_PATH / 'build_tools' / 'contributors.tsv'
+SASDATA_CONTRIBUTORS_FILE = SASDATA_PATH / 'contributors.tsv'
+SASMODELS_CONTRIBUTORS_FILE = SASMODELS_PATH / 'build_tools' / 'contributors.tsv'
 
 
-class SplitArgs(argparse.Action):
-    def __call__(self, parser, namespace, values, option_string=None):
-        setattr(namespace, self.dest, values.split(','))
+def sort_records(records: list[dict]) -> None:
+    """Sort a list of contributors in alphabetical order and move the release manager(s) to the start of the list.
+    This sorting is performed directly on the list, so no return is necessary.
 
-
-def sort_records(records: list[dict]):
+    :param records: A list of contributor dictionaries with key word: value mappings.
+    """
     records.sort(key=lambda r: r['name'])
 
     # Move the release manager(s) so they are at the front of the list.
@@ -84,44 +133,55 @@ def sort_records(records: list[dict]):
         records.remove(record)
         records.insert(0, record)
 
-def generate_sasview_data() -> dict:
-    """Read in a known file and parse it for the information required to populate the list of participants used
-    in the zenodo record generation. The defined contributor types and difference between creators are defined in
+
+def generate_zenodo_data(zenodo_data: dict, version: str, contributors_file: Path) -> None:
+    """Update the zenodo data for a repo, using the latest version and contributors list.
+
+    The defined contributor types and difference between creators are defined in
     https://help.zenodo.org/docs/deposit/describe-records/contributors/.
 
-    :return: A dictionary with a lists of creators and contributors."""
-    if CONTRIBUTORS_FILE.exists():
-        contributors = []
-        creators = []
-        with open(CONTRIBUTORS_FILE) as f:
-            reader = DictReader(f, delimiter="\t")
-            for row in reader:
-                record = {"name": row["Name"], "affiliation": row["Affiliation"]}
-                if 'ORCID' in row:
-                    record['orcid'] = row['ORCID']
-                if 'ReleaseManager' in row:
-                    record['release_manager'] = row['ReleaseManager'] == 'x'
-                else:
-                    record['release_manager'] = False
-                if row['Creator']:
-                    creators.append(record)
-                elif row['Producer']:
-                    record['type'] = 'Producer'
-                    contributors.append(record)
-                else:
-                    record['type'] = 'Other'
-                    contributors.append(record)
-        sort_records(creators)
-        sort_records(contributors)
-        return {"creators": creators, "contributors": contributors}
-    else:
-        return {}
-
-
-def generate_zenodo(sasview_data, zenodo_api_key):
+    :param zenodo_data: A zenodo data dictionary for a single repo.
+    :param version: The version of the repo.
+    :param contributors_file: The path to the contributors file for the repo.
     """
-    Generating zenodo record
-    :return:
+    zenodo_data['metadata']['title'] = zenodo_data['metadata']['title'] + version
+    zenodo_data['metadata']['description'] = version + zenodo_data['metadata']['description']
+    zenodo_data['metadata']['related_identifiers'][0]['identifier'] = (
+        zenodo_data)['metadata']['related_identifiers'][0]['identifier'] + version
+    contributors = []
+    creators = []
+    with open(contributors_file) as f:
+        reader = DictReader(f, delimiter="\t")
+        for row in reader:
+            record = {"name": row["Name"], "affiliation": row["Affiliation"]}
+            if 'ORCID' in row:
+                record['orcid'] = row['ORCID']
+            if 'ReleaseManager' in row:
+                record['release_manager'] = row['ReleaseManager'] == 'x'
+            else:
+                record['release_manager'] = False
+            if row['Creator']:
+                creators.append(record)
+            elif row['Producer']:
+                record['type'] = 'Producer'
+                contributors.append(record)
+            else:
+                record['type'] = 'Other'
+                contributors.append(record)
+    sort_records(creators)
+    sort_records(contributors)
+    if contributors:
+        # Overwrite existing contributors and use the TSV file list (if available)
+        zenodo_data['metadata']['contributors'] = contributors
+        zenodo_data['metadata']['creators'] = creators
+
+
+def generate_zenodo(meta_data: dict, zenodo_api_key: str) -> str:
+    """Generate the zenodo record using the meta_data provided.
+
+    :param meta_data: A zenodo data dictionary for a repo.
+    :param zenodo_api_key: A Zenodo API key with write access to the SasView Zenodo community.
+    :return: A DOI for the generated zenodo record.
     """
     #get list of existing depositions
     r = requests.get(zenodo_url+"/api/deposit/depositions",
@@ -129,7 +189,6 @@ def generate_zenodo(sasview_data, zenodo_api_key):
     if r.status_code != 200:
         print("Failure of zenodo connection check. Terminating.")
         sys.exit(1)
-
 
     #create empty upload
     headers = {"Content-Type": "application/json"}
@@ -146,7 +205,7 @@ def generate_zenodo(sasview_data, zenodo_api_key):
     #populate record
     deposition_id = r.json()['id']
     r = requests.put(zenodo_url+'/api/deposit/depositions/%s' % deposition_id,
-                  params={'access_token': zenodo_api_key}, data=json.dumps(sasview_data),
+                  params={'access_token': zenodo_api_key}, data=json.dumps(meta_data),
                   headers=headers)
     if r.status_code != 200:
         print("Failure to set metadata on record. Terminating")
@@ -163,34 +222,53 @@ def generate_zenodo(sasview_data, zenodo_api_key):
     return newDOI
 
 
-version_template = \
-"""__version__ = "%s"
-__release_date__ = "%i"
-__build__ = "GIT_COMMIT"
-"""
+def update_sasview_metadata(version: str, doi: str, release_manager: str) -> None:
+    """Update metadata in the SasView repo related to an upcoming release.
 
-zenodo_template = '__DOI__ = "%s"'
-
-
-def update_sasview_metadata(version, doi):
-    """
-    Update version and zenodo DOI
+    :param version: The version of the release.
+    :param doi: The DOI of the release.
+    :param release_manager: The name of the release manager to be displayed in the citation GUI.
     """
 
-    system_directory = "sasview/src/sas/system"
-    version_filename = os.path.join(system_directory, "version.py")
-    zenodo_filename = os.path.join(system_directory, "zenodo.py")
+    build_tools_directory = SASVIEW_PATH / 'build_tools'
+    installers_directory = SASVIEW_PATH / 'installers'
+    metainfo_directory = build_tools_directory / 'application_metadata'
+    system_directory = SASVIEW_PATH / "src" / "sas" / "system"
+    version_filename = system_directory /"version.py"
+    citation_filename = system_directory / "citation.py"
+    iss_file = installers_directory / 'installer.iss'
+    metainfo = metainfo_directory / 'org.sasview.sasview.metainfo.xml'
 
-    year = datetime.datetime.now().year
+    now = datetime.datetime.now()
+    date = now.strftime("%Y-%m-%d")
+    year = now.year
 
+    # Update the version in version.py
     with open(version_filename, 'w') as file:
-        file.write(version_template % (version, year))
+        file.write(version_template.format(version, year))
 
-    with open(zenodo_filename, 'w') as file:
-        file.write(zenodo_template % doi)
+    # Update the citation information
+    with open(citation_filename, 'w') as file:
+        file.write(acknowledgement_template.format(doi, release_manager))
+
+    # Update the innosetup config with the version and the year
+    for line in fileinput.input(iss_file, inplace=True):
+        if line.startswith('#define MyAppVersion'):
+            print(f'#define MyAppVersion "{version}"', end='\n')
+        elif line.startswith('#define MyAppPublisher'):
+            print(f'#define MyAppPublisher "(c) 2009 - {year}, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO, BAM, TU Delft, and DLS"', end='\n')
+        else:
+            print(line, end='')
+
+    # Update the flatpak manifest with the version and date
+    for line in fileinput.input(metainfo, inplace=True):
+        if line.strip().startswith('<release '):
+            print(f'    <release version="{version}" date="{date}"></release>', end='\n')
+        else:
+            print(line, end='')
 
 
-def update_sasmodels_init(version):
+def update_sasmodels_metadata(version, doi, release_manager):
     """
 
     :param version:
@@ -208,7 +286,7 @@ def update_sasmodels_init(version):
         f.writelines(output_lines)
 
 
-def update_sasdata_init(version):
+def update_sasdata_metadata(version, doi, release_manager):
     """Modify the sasdata __init__.py file in order to update the version
 
     :param version:
@@ -254,34 +332,12 @@ def update_acknowledgement_widget():
     pass
 
 
-def prepare_release_notes(issues_list, repository, username, password):
-    """
-    Retrieving information from github and creating issue list for release notes
-    :return:
-    """
-    issue_titles = []
-    for issue in issues_list:
-        # WARNING: One can try running with auth but there is limited number of requests
-        response = requests.get('https://api.github.com/repos/SasView/' + repository + '/issues/' + issue,
-                                auth=(username, password))
-        if response.status_code != 200:
-            return []
-        title = response.json()['title']
-        issue_titles.append(f"#{issue}, {title}")
-    return issue_titles
-
-
 def parse_args():
     parser = argparse.ArgumentParser('Script to automate release process')
     parser.add_argument('-v', '--sasview_version', required=True)
     parser.add_argument('-s', '--sasmodels_version', required=True)
     parser.add_argument('-d', '--sasdata_version', required=True)
     parser.add_argument('-z', '--zenodo', default=False)
-    parser.add_argument('-u', '--username', default=False)
-    parser.add_argument('-p', '--password', default=False)
-    parser.add_argument('-l', '--sasview_list', default=False, action=SplitArgs)
-    parser.add_argument('-m', '--sasmodels_list', default=False, action=SplitArgs)
-    parser.add_argument('-n', '--sasdata_list', default=False, action=SplitArgs)
     return parser.parse_args()
 
 
@@ -292,56 +348,40 @@ def main(args=None):
     sasview_version = args.sasview_version
     sasmodels_version = args.sasmodels_version
     sasdata_version = args.sasdata_version
-    sasview_data['metadata']['title'] = 'SasView version ' + sasview_version
-    sasview_data['metadata']['description'] = sasview_version + ' release'
-    sasview_data['metadata']['related_identifiers'][0]['identifier'] = \
-        'https://github.com/SasView/sasview/releases/tag/v' + sasview_version
-    # Generate a list of contributors using a file, if that file exists, otherwise use the pre-defined list given here.
-    contributors = generate_sasview_data()
-    if contributors:
-        # Overwrite existing contributors and use the TSV file list (if available)
-        sasview_data['metadata']['contributors'] = contributors['contributors']
-        sasview_data['metadata']['creators'] = contributors['creators']
 
-    # Generates zenodo doi if zenodo api key is provided
-    new_doi = ''
+    # Generate a list of contributors using a file, if that file exists, otherwise use the pre-defined list given here.
+    if SASVIEW_CONTRIBUTORS_FILE.exists():
+        generate_zenodo_data(sasview_data, sasview_version, SASVIEW_CONTRIBUTORS_FILE)
+    if SASDATA_CONTRIBUTORS_FILE.exists():
+        generate_zenodo_data(sasdata_data, sasdata_version, SASDATA_CONTRIBUTORS_FILE)
+    if SASMODELS_CONTRIBUTORS_FILE.exists():
+        generate_zenodo_data(sasmodels_data, sasmodels_version, SASMODELS_CONTRIBUTORS_FILE)
+
+    release_manager = sasview_data['metadata']['creators'][0]['name'] if len(sasview_data['metadata']['contributors']) > 0 else ''
+
+    # Generates zenodo doi if zenodo api key is provided ...
+    new_sasview_doi = new_sasdata_doi = new_sasmodels_doi = ''
     if args.zenodo:
         zenodo_api_key = args.zenodo
-        new_doi = generate_zenodo(sasview_data, zenodo_api_key)
+        # ... but only if a version is given for the specific package
+        if sasview_version:
+            new_sasview_doi = generate_zenodo(sasview_data, zenodo_api_key)
+        if sasmodels_version:
+            new_sasmodels_doi = generate_zenodo(sasmodels_data, zenodo_api_key)
+        if sasdata_version:
+            new_sasdata_doi = generate_zenodo(sasdata_data, zenodo_api_key)
 
-    update_sasview_metadata(sasview_version, new_doi)
-    update_sasmodels_init(sasmodels_version)
-    update_sasdata_init(sasdata_version)
+    # Regardless of previous checks and changes, apply changes to all packages (especially for the copyright year)
+    update_sasview_metadata(sasview_version, new_sasview_doi, release_manager)
+    update_sasmodels_metadata(sasmodels_version, new_sasmodels_doi, release_manager)
+    update_sasdata_metadata(sasdata_version, new_sasdata_doi, release_manager)
 
     # Pull the license from a know location
-    license_line = legal.copyright
+    license_line = legal.copyright + "\n"
     update_file(SASMODELS_PATH / 'LICENSE.txt', license_line, 0)
     update_file(SASDATA_PATH / 'LICENSE.TXT', license_line, 0)
     update_file(SASVIEW_PATH / 'installers' / 'license.txt', license_line, -1)
     update_credits(SASVIEW_PATH / "src" / "sas" / "system" / "credits.html")
-
-    sasview_issues_list = args.sasview_list
-    sasmodels_issues_list = args.sasmodels_list
-    sasdata_issues_list = args.sasdata_list
-
-    # Release notes template is generated if github credentials are provided
-    if args.username and args.password:
-        username = args.username
-        password = args.password
-
-        sasview_issues = prepare_release_notes(sasview_issues_list, 'sasview', username, password)
-        sasmodels_issues = prepare_release_notes(sasmodels_issues_list, 'sasmodels', username, password)
-        sasdata_issues = prepare_release_notes(sasdata_issues_list, 'sasmodels', username, password)
-
-        print('Copy text below to  /sasview/docs/sphinx-docs/source/user/RELEASE.rst and adapt accordingly')
-        for issue_title in sasview_issues:
-            print(f'Fixes sasview {issue_title}')
-
-        for issue_title in sasmodels_issues:
-            print(f'Fixes sasmodels {issue_title}')
-
-        for issue_title in sasdata_issues:
-            print(f'Fixes sasdata {issue_title}')
 
 
 if __name__ == "__main__":
