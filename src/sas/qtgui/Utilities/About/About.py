@@ -168,24 +168,8 @@ class About(QDialog):
         </html>
         """
 
-        more_text = """
-        <html>
-            <head/>
-            <body>
-                <p>
-                    This work originally developed as part of the DANSE project funded by the NSF under
-                     grant DMR-0520547, and currently maintained by UTK, NIST, UMD, ORNL, ISIS, ESS, ILL,
-                     ANSTO, TU Delft, DLS, SciLifeLab, and the scattering community.
-                </p>
-                <p>
-                    SasView also contains code developed with funding from the EU Horizon 2020 programme under
-                     the SINE2020 project (Grant No 654000).
-                </p>
-            </body>
-        </html>"""
-
         self.mainLabel.setText(about_text)
-        self.subLabel.setText(more_text)
+        self.subLabel.setText(legal.about)
 
 
 
