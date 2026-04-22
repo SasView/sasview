@@ -64,3 +64,27 @@ class SlicerModelTest:
         # Check the new model. The update should be automatic
         assert model.model().rowCount() == 3
         assert model.model().columnCount() == 2
+
+
+    def testSetModelFromParams_blocks_itemChanged(self, model):
+        """Programmatic model writes should not emit itemChanged."""
+        emissions = []
+        model.model().itemChanged.connect(lambda *args: emissions.append(args))
+
+        model.setModelFromParams()
+
+        assert emissions == []
+
+    def testSetModelFromParams_restores_signal_state_on_exception(self, model, monkeypatch):
+        """Signal blocking should be restored even if model population fails."""
+        def boom(value):
+            if value == 2:
+                raise RuntimeError("boom")
+            return str(value)
+
+        monkeypatch.setattr("sas.qtgui.Plotting.SlicerModel.GuiUtils.formatNumber", boom)
+
+        with pytest.raises(RuntimeError):
+            model.setModelFromParams()
+
+        assert model.model().signalsBlocked() is False
