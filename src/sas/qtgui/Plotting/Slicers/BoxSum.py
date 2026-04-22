@@ -232,7 +232,8 @@ class BoxSumCalculator(BaseInteractor):
         # Dig out number of points summed, SMK & PDB, 04/03/2013
         boxtotal = Boxsum(x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
         self.total, self.totalerror, self.points = boxtotal(self.data)
-        self.setModelFromParams()
+        if self._model is not None:
+            self.setModelFromParams()
 
     def moveend(self, ev):
         """
