@@ -28,7 +28,7 @@ class SlicerModelTest:
         '''Assure that SlicerModel contains pure virtuals'''
         model = SlicerModel()
         with pytest.raises(NotImplementedError):
-            model.setParams()
+            model.setParams({})
         with pytest.raises(NotImplementedError):
             model.setModelFromParams()
 
