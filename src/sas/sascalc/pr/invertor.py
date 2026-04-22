@@ -212,7 +212,7 @@ class Invertor:
         This is a thin wrapper around :meth:`lstsq` that handles temporary
         background subtraction when ``est_bck`` is disabled.
 
-        See :meth:`lstsq` for details of the linear system construction
+        See :math:`lstsq` for details of the linear system construction
         (including regularization) and the least-squares solve.
 
         :param nfunc: number of base functions to use.
@@ -474,7 +474,7 @@ class Invertor:
         try:
             return estimator.num_terms(isquit_func)
         except Exception as exc:
-            # If we fail, estimate alpha and return the default  number of terms
+            # If we fail, estimate alpha and return the default number of terms
             best_alpha, _, _ = self.estimate_alpha(self.nfunc)
             logger.warning("Invertor.estimate_numterms: %s" % exc)
             return self.nfunc, best_alpha, "Could not estimate number of terms"

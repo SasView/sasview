@@ -188,12 +188,12 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         return True
 
     def setClosable(self, value: bool = True) -> None:
-        """Allow outsiders close this widget."""
+        """Set the closability flag."""
         assert isinstance(value, bool)
         self._allowClose = value
 
     def isClosable(self) -> bool:
-        """Allow outsiders close this widget."""
+        """Tell the caller if the widget can be closed."""
         return self._allowClose
 
     def isSerializable(self) -> bool:
@@ -242,7 +242,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         tree_location = "/user/qtgui/Perspectives/Inversion/pr_help.html"
 
         # Actual file anchor will depend on the combo box index
-        # Note that we can be clusmy here, since bad current_fitter_id
+        # Note that we can be clumsy here, since bad current_fitter_id
         # will just make the page displayed from the top
         self.parent.showHelp(tree_location)
 
