@@ -38,7 +38,6 @@ class BoxSumCalculator(BaseInteractor):
         self.markers = []
         self.axes = axes
         self._model = None
-        self.update_model = False
         # connect the artist for the motion
         self.connect = self.base.connect
         # Reference to the widget (if any)
@@ -97,14 +96,12 @@ class BoxSumCalculator(BaseInteractor):
         # Save the name of the slicer panel associate with this slicer
         self.panel_name = ""
         # Update and post slicer parameters
-        self.update_model = False
         self.update()
         self.postData()
 
         # set up the model
         self._model = QtGui.QStandardItemModel(1, 9)
         self.setModelFromParams()
-        self.update_model = True
         self._model.itemChanged.connect(self.setParamsFromModel)
 
     def validate(self, param_name, param_value):
@@ -150,10 +147,12 @@ class BoxSumCalculator(BaseInteractor):
         params["Width"] = toDouble(self.model().item(0, 1).text())
         params["center_x"] = toDouble(self.model().item(0, 2).text())
         params["center_y"] = toDouble(self.model().item(0, 3).text())
-        self.update_model = False
-        self.setParams(params)
-        self.setReadOnlyParametersFromModel()
-        self.update_model = True
+        blocked = self._model.blockSignals(True)
+        try:
+            self.setParams(params)
+            self.setReadOnlyParametersFromModel()
+        finally:
+            self._model.blockSignals(blocked)
 
     def setPanelName(self, name):
         """
@@ -233,7 +232,7 @@ class BoxSumCalculator(BaseInteractor):
         # Dig out number of points summed, SMK & PDB, 04/03/2013
         boxtotal = Boxsum(x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
         self.total, self.totalerror, self.points = boxtotal(self.data)
-        if self.update_model:
+        if self._model is not None:
             self.setModelFromParams()
 
     def moveend(self, ev):
