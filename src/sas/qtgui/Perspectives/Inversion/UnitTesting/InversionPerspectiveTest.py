@@ -1,4 +1,5 @@
 import logging
+from collections.abc import Generator
 
 import matplotlib as mpl
 import numpy as np
@@ -17,21 +18,21 @@ logger = logging.getLogger(__name__)
 
 
 class InversionTest:
-    """ Test the Inversion Perspective GUI """
+    """Test the Inversion Perspective GUI."""
 
     @pytest.fixture(autouse=True)
-    def widget(self, qapp, mocker):
-        '''Create/Destroy the InversionWindow'''
+    def widget(self, qapp, mocker) -> Generator[InversionWindow, None, None]:
+        """Create and destroy the InversionWindow for each test."""
 
-        class dummy_manager:
+        class DummyManager:
             HELP_DIRECTORY_LOCATION = "html"
             communicator = communicator
 
-        w = InversionWindow(parent=dummy_manager())
+        w = InversionWindow(parent=DummyManager())
         w._parent = QtWidgets.QMainWindow()
-        mocker.patch.object(w.currentTab, 'showBatchCalculationWindow')
-        mocker.patch.object(w.currentTab, 'startThread')
-        mocker.patch.object(w.currentTab, 'startThreadAll')
+        mocker.patch.object(w.currentTab, "showBatchCalculationWindow")
+        mocker.patch.object(w.currentTab, "startThread")
+        mocker.patch.object(w.currentTab, "startThreadAll")
         w.show()
 
         self.fakeData1 = GuiUtils.HashableStandardItem("A")
@@ -47,18 +48,17 @@ class InversionTest:
 
         yield w
 
-        """ Destroy the InversionWindow """
         w.setClosable(False)
         w.close()
 
-    def removeAllData(self, widget):
-        """ Cleanup method to restore widget to its base state """
+    def removeAllData(self, widget: InversionWindow) -> None:
+        """Cleanup method to restore widget to its base state."""
         while len(widget.currentTab.results) > 0:
             remove_me = list(widget._dataList.keys())
             widget.removeData(remove_me)
 
-    def baseGUIState(self, widget):
-        """ Testing base state of Inversion """
+    def baseGUIState(self, widget: InversionWindow) -> None:
+        """Assert the base GUI state of the Inversion perspective."""
         # base class information
         assert isinstance(widget, QtWidgets.QWidget)
         assert widget.windowTitle() == "P(r) Inversion Perspective"
@@ -92,16 +92,16 @@ class InversionTest:
         assert widget.currentTab.results[0].pr_plot is None
         assert widget.currentTab.results[0].data_plot is None
 
-    def baseBatchState(self, widget):
-        """ Testing the base batch fitting state """
+    def baseBatchState(self, widget: InversionWindow) -> None:
+        """Assert the base batch fitting state."""
         assert not widget.allowBatch()
         assert not widget.currentTab.is_batch
         assert not widget.currentTab.calculateAllButton.isEnabled()
         assert len(widget.batchResults) == 0
         widget.closeBatchResults()
 
-    def zeroDataSetState(self, widget):
-        """ Testing the base data state of the GUI """
+    def zeroDataSetState(self, widget: InversionWindow) -> None:
+        """Assert the base data state of the GUI with no data loaded."""
         # data variables
         assert widget._data is None
         # inputs
@@ -113,8 +113,8 @@ class InversionTest:
         assert widget.currentTab.noOfTermsInput.text() == "10"
         assert widget.currentTab.maxDistanceInput.text() == "180"
 
-    def oneDataSetState(self, widget):
-        """ Testing the base data state of the GUI """
+    def oneDataSetState(self, widget: InversionWindow) -> None:
+        """Assert the GUI state with exactly one data set loaded."""
         # Test the globals after first sent
         assert widget.currentTab.dataList.count() == 1
         # See that the buttons are now enabled properly
@@ -124,8 +124,8 @@ class InversionTest:
         assert widget.currentTab.removeButton.isEnabled()
         assert widget.currentTab.explorerButton.isEnabled()
 
-    def twoDataSetState(self, widget):
-        """ Testing the base data state of the GUI """
+    def twoDataSetState(self, widget: InversionWindow) -> None:
+        """Assert the GUI state with exactly two data sets loaded."""
         # Test the globals after first sent
         assert widget.currentTab.dataList.count() == 1
         # See that the buttons are now enabled properly
@@ -135,15 +135,15 @@ class InversionTest:
         assert widget.currentTab.removeButton.isEnabled()
         assert widget.currentTab.explorerButton.isEnabled()
 
-    def testDefaults(self, widget):
-        """ Test the GUI in its default state """
+    def testDefaults(self, widget: InversionWindow) -> None:
+        """Test the GUI in its default state."""
         self.baseGUIState(widget)
         self.zeroDataSetState(widget)
         self.baseBatchState(widget)
         self.removeAllData(widget)
 
-    def notestAllowBatch(self, widget):
-        """ Batch P(r) Tests """
+    def notestAllowBatch(self, widget: InversionWindow) -> None:
+        """Batch P(r) tests."""
         self.baseBatchState(widget)
         widget.setData([self.fakeData1])
         self.oneDataSetState(widget)
@@ -173,8 +173,8 @@ class InversionTest:
         self.removeAllData(widget)
         self.baseBatchState(widget)
 
-    def testSetData(self, widget):
-        """ Check if sending data works as expected """
+    def testSetData(self, widget: InversionWindow) -> None:
+        """Check if sending data works as expected."""
         self.zeroDataSetState(widget)
         widget.setData([self.fakeData1])
         self.oneDataSetState(widget)
@@ -187,8 +187,8 @@ class InversionTest:
         self.removeAllData(widget)
 
     @pytest.mark.skip(reason="2022-09 already broken - causes Qt event loop exception")
-    def testRemoveData(self, widget):
-        """ Test data removal from widget """
+    def testRemoveData(self, widget: InversionWindow) -> None:
+        """Test data removal from widget."""
         widget.setData([self.fakeData1, self.fakeData2])
         self.twoDataSetState(widget)
         # Remove data 0
@@ -197,8 +197,8 @@ class InversionTest:
         self.removeAllData(widget)
 
     @pytest.mark.skip(reason="2026-02: Freezing on launch")
-    def testClose(self, widget):
-        """ Test methods related to closing the window """
+    def testClose(self, widget: InversionWindow) -> None:
+        """Test methods related to closing the window."""
         assert not widget.isClosable()
         widget.close()
         assert widget.isMinimized()
@@ -213,8 +213,8 @@ class InversionTest:
         assert widget.isClosable()
         self.removeAllData(widget)
 
-    def testSetCurrentData(self, widget):
-        """ test current data setter """
+    def testSetCurrentData(self, widget: InversionWindow) -> None:
+        """Test current data setter."""
         widget.setData([self.fakeData1, self.fakeData2])
 
         # Set the ref to none
@@ -228,8 +228,8 @@ class InversionTest:
         assert widget._data == self.fakeData1
         self.removeAllData(widget)
 
-    def testModelChanged(self, widget):
-        """ Test setting the input and the model and vice-versa """
+    def testModelChanged(self, widget: InversionWindow) -> None:
+        """Test setting the input and the model and vice-versa."""
         # Initial values
         assert widget.currentTab.currentResult.calculator.dmax == 180.0
         assert widget.currentTab.currentResult.calculator.q_max == np.inf
@@ -265,8 +265,8 @@ class InversionTest:
         self.removeAllData(widget)
 
     @pytest.mark.xfail(reason="2026-02: Throwing error")
-    def testOpenExplorerWindow(self, widget):
-        """ open Dx window """
+    def testOpenExplorerWindow(self, widget: InversionWindow) -> None:
+        """Open Dmax window."""
         assert widget.currentTab.dmaxWindow is None
         assert not widget.currentTab.explorerButton.isEnabled()
         widget.currentTab.openExplorerWindow()
@@ -274,9 +274,9 @@ class InversionTest:
         assert widget.currentTab.dmaxWindow.isVisible()
         assert widget.currentTab.dmaxWindow.windowTitle() == "Dmax Explorer"
 
-    def testSerialization(self, widget):
-        """ Serialization routines """
-        assert hasattr(widget, 'isSerializable')
+    def testSerialization(self, widget: InversionWindow) -> None:
+        """Test serialization routines."""
+        assert hasattr(widget, "isSerializable")
         assert widget.isSerializable()
         widget.setData([self.fakeData1])
         self.oneDataSetState(widget)
@@ -286,15 +286,15 @@ class InversionTest:
         state_one, _ = widget.serializeCurrentPage()
         page = widget.currentTab.getPage()
         # Pull out params from state
-        params = state_all[data_id]['pr_params']
+        params = state_all[data_id]["pr_params"]
         # Tests
         assert len(state_all) == len(state_one)
         assert len(state_all) == 1
         # getPage should include an extra param 'data_id' removed by serialize
         assert len(params) != len(page)
         assert len(params) == 21
-        assert params.get('data_id', None) is None
-        assert page.get('data_id', None) is not None
-        assert params.get('alpha', None) is not None
-        assert params.get('alpha', None) == page.get('alpha', None)
-        assert np.isnan(params.get('rg'))
+        assert params.get("data_id", None) is None
+        assert page.get("data_id", None) is not None
+        assert params.get("alpha", None) is not None
+        assert params.get("alpha", None) == page.get("alpha", None)
+        assert np.isnan(params.get("rg"))
