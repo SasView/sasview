@@ -17,24 +17,30 @@ from sas.qtgui.Utilities.GuiUtils import communicator
 class dummy_manager(QtWidgets.QWidget):
     communicator = communicator
     active_plots = {}
+
     def getActivePlots(self):
         return self.active_plots
 
 
 class SlicerParametersTest:
-    '''Test the SlicerParameters dialog'''
+    """Test the SlicerParameters dialog"""
 
     @pytest.fixture(autouse=True)
     def data(self):
-        d = Data2D(image=[0.1] * 4,
-                    qx_data=[1.0, 2.0, 3.0, 4.0],
-                    qy_data=[10.0, 11.0, 12.0, 13.0],
-                    dqx_data=[0.1, 0.2, 0.3, 0.4],
-                    dqy_data=[0.1, 0.2, 0.3, 0.4],
-                    q_data=[1, 2, 3, 4],
-                    xmin=-1.0, xmax=5.0,
-                    ymin=-1.0, ymax=15.0,
-                    zmin=-1.0, zmax=20.0)
+        d = Data2D(
+            image=[0.1] * 4,
+            qx_data=[1.0, 2.0, 3.0, 4.0],
+            qy_data=[10.0, 11.0, 12.0, 13.0],
+            dqx_data=[0.1, 0.2, 0.3, 0.4],
+            dqy_data=[0.1, 0.2, 0.3, 0.4],
+            q_data=[1, 2, 3, 4],
+            xmin=-1.0,
+            xmax=5.0,
+            ymin=-1.0,
+            ymax=15.0,
+            zmin=-1.0,
+            zmax=20.0,
+        )
 
         d.title = "Test data"
         d.id = 1
@@ -43,7 +49,7 @@ class SlicerParametersTest:
 
     @pytest.fixture(autouse=True)
     def widget(self, qapp, data):
-        '''Create/Destroy the SlicerParameters'''
+        """Create/Destroy the SlicerParameters"""
 
         ## FIXME: any second creation of this fixture causes the Python
         ## interpreter to segfault at the end of the tests being run.
@@ -55,14 +61,14 @@ class SlicerParametersTest:
         plotter.data = data
         active_plots = {"test_plot": plotter}
         manager.active_plots = active_plots
-        w = SlicerParameters(model=model, parent=plotter,
-                                       active_plots=active_plots,
-                                       communicator=dummy_manager().communicator)
+        w = SlicerParameters(
+            model=model, parent=plotter, active_plots=active_plots, communicator=dummy_manager().communicator
+        )
         yield w
         w.close()
 
     def testDefaults(self, widget):
-        '''Test the GUI in its default state'''
+        """Test the GUI in its default state"""
         assert isinstance(widget.proxy, QtCore.QIdentityProxyModel)
         assert isinstance(widget.lstParams.itemDelegate(), QtWidgets.QStyledItemDelegate)
         assert widget.lstParams.model().columnReadOnly(0)
@@ -75,34 +81,34 @@ class SlicerParametersTest:
 
         # Slicer choice
         assert widget.cbSlicer.count(), 5
-        assert widget.cbSlicer.itemText(0), 'None'
+        assert widget.cbSlicer.itemText(0), "None"
 
         # Batch slicing options tab
         assert not widget.cbSave1DPlots.isChecked()
         assert not widget.txtLocation.isEnabled()
         assert widget.cbSlicer.count(), 3
-        assert widget.cbSlicer.itemText(0), 'No fitting'
+        assert widget.cbSlicer.itemText(0), "No fitting"
 
     def testLstParams(self, widget, data):
-        ''' test lstParams with content '''
-        item1 = QtGui.QStandardItem('t1')
-        item2 = QtGui.QStandardItem('t2')
+        """test lstParams with content"""
+        item1 = QtGui.QStandardItem("t1")
+        item2 = QtGui.QStandardItem("t2")
         model = QtGui.QStandardItemModel()
         model.appendRow([item1, item2])
-        item1 = QtGui.QStandardItem('t3')
-        item2 = QtGui.QStandardItem('t4')
+        item1 = QtGui.QStandardItem("t3")
+        item2 = QtGui.QStandardItem("t4")
         model.appendRow([item1, item2])
 
         plotter = Plotter2D(parent=dummy_manager(), quickplot=False)
         plotter.data = data
         active_plots = {"test_plot": plotter}
-        widget = SlicerParameters(model=model, parent=plotter,
-                                  active_plots=active_plots,
-                                  communicator=dummy_manager().communicator)
+        widget = SlicerParameters(
+            model=model, parent=plotter, active_plots=active_plots, communicator=dummy_manager().communicator
+        )
         assert widget.proxy.columnCount() == 2
         assert widget.proxy.rowCount() == 2
-        assert widget.model.item(0, 0).text() == 't1'
-        assert widget.model.item(0, 1).text() == 't2'
+        assert widget.model.item(0, 0).text() == "t1"
+        assert widget.model.item(0, 1).text() == "t2"
         # Check the flags in the proxy model
         flags = widget.proxy.flags(widget.proxy.index(0, 0))
         assert not flags & QtCore.Qt.ItemIsEditable
@@ -110,7 +116,7 @@ class SlicerParametersTest:
         assert flags & QtCore.Qt.ItemIsEnabled
 
     def testClose(self, widget, qtbot):
-        ''' Assure that clicking on Close triggers right behaviour'''
+        """Assure that clicking on Close triggers right behaviour"""
         widget.show()
         qtbot.addWidget(widget)
 
@@ -123,11 +129,11 @@ class SlicerParametersTest:
         assert spy_close.count() == 1
 
     def testOnHelp(self, widget, mocker):
-        ''' Assure clicking on help opens the documentation in browser'''
+        """Assure clicking on help opens the documentation in browser"""
         widget.show()
 
-        mocker.patch.object(widget.manager, 'parent')
-        mocker.patch.object(widget.manager.parent, 'showHelp')
+        mocker.patch.object(widget.manager, "parent")
+        mocker.patch.object(widget.manager.parent, "showHelp")
 
         # Invoke the action
         widget.onHelp()
@@ -139,7 +145,7 @@ class SlicerParametersTest:
         assert "graph_help.html" in widget.manager.parent.showHelp.call_args[0][0]
 
     def testSetModel(self, widget):
-        ''' Test if resetting the model works'''
+        """Test if resetting the model works"""
         item1 = QtGui.QStandardItem("s1")
         item2 = QtGui.QStandardItem("5.0")
         new_model = QtGui.QStandardItemModel()
@@ -153,11 +159,11 @@ class SlicerParametersTest:
         # Test if the widget got it
         assert widget.model.columnCount() == 2
         assert widget.model.rowCount() == 2
-        assert widget.model.item(0, 0).text() == 's1'
-        assert widget.model.item(1, 0).text() == 's2'
+        assert widget.model.item(0, 0).text() == "s1"
+        assert widget.model.item(1, 0).text() == "s2"
 
     def testPlotSave(self, widget):
-        ''' defaults for the Auto Save options '''
+        """defaults for the Auto Save options"""
         assert not widget.cbSave1DPlots.isChecked()
         assert not widget.txtLocation.isEnabled()
         assert not widget.txtExtension.isEnabled()
@@ -172,22 +178,22 @@ class SlicerParametersTest:
         assert widget.cbSaveExt.isEnabled()
 
     def testPlotList(self, widget):
-        ''' check if the plot list shows correct content '''
+        """check if the plot list shows correct content"""
         assert widget.lstPlots.count() == 1
         assert widget.lstPlots.item(0).text() == "test_plot"
         assert widget.lstPlots.item(0).checkState() == QtCore.Qt.CheckState.Unchecked
 
     def testOnSlicerChange(self, widget, mocker):
-        ''' change the slicer '''
-        mocker.patch.object(widget, 'onApply')
+        """change the slicer"""
+        mocker.patch.object(widget, "onApply")
         assert widget.lstParams.model().rowCount() == 0
         assert widget.lstParams.model().columnCount() == 0
         assert widget.lstParams.model().index(0, 0).data() is None
 
     def testOnApply(self, widget, mocker):
         widget.lstPlots.item(0).setCheckState(QtCore.Qt.CheckState.Checked)
-        mocker.patch.object(widget, 'applyPlotter')
-        mocker.patch.object(widget, 'save1DPlotsForPlot')
+        mocker.patch.object(widget, "applyPlotter")
+        mocker.patch.object(widget, "save1DPlotsForPlot")
         assert not widget.isSave
         # Apply without 1D data saved
         widget.onApply()
