@@ -207,3 +207,15 @@ class SlicerParametersTest:
         assert widget.model is not None
         widget.applyPlotter.assert_called()
         widget.save1DPlotsForPlot.assert_called_once()
+
+    def testCloseWhenParentPlotClosed(self, widget, qtbot):
+        """Assure the dialog closes when its owning plot is closed."""
+        widget.show()
+        qtbot.addWidget(widget)
+
+        spy_close = QtSignalSpy(widget, widget.closeWidgetSignal)
+
+        widget.communicator.activeGraphsSignal.emit([widget.parent, True])
+
+        qtbot.waitUntil(lambda: spy_close.count() == 1, timeout=1000)
+        assert not widget.isVisible()
