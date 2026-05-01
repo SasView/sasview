@@ -158,15 +158,17 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         header.setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
         header.setStretchLastSection(True)
 
-    def onActiveGraphsChanged(self, graph_data=None):
+    def onActiveGraphsChanged(self, graph_data: list | None = None):
         """
         Update plot lists and close this dialog if its parent plot was closed.
         """
         self.updatePlotList()
 
+        # Guard against unexpected signal emissions
         if not isinstance(graph_data, (list, tuple)) or len(graph_data) != 2:
             return
 
+        # If closed, it should be a list of [plot_object, was_removed_boolean].
         closed_plot, was_removed = graph_data
         if was_removed and closed_plot is self.parent:
             self.close()
