@@ -470,32 +470,28 @@ jobs:
         with:
           product-path: installers/dist/SasView6-${{ matrix.os }}.dmg
 
-      - name: Install DigiCert Client tools from Github Custom Actions marketplace
-        if: ${{ startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
-        uses: digicert/ssm-code-signing@v1.2.1
-
-      - name: Set up P12 certificate
-        if: ${{ startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
+      - name: Setup SM_CLIENT_CERT_FILE from base64 secret data
+        # if: ${{ startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
+        if: ${{ startsWith(matrix.os, 'windows') }}
         run: |
           echo "${{ secrets.WINDOZE_CERT_DATA }}" | base64 --decode > /d/Certificate_pkcs12.p12
         shell: bash
 
-      - name: Set keylocker variables
-        if: ${{ startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
-        id: variables
-        run: |
-          echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
-          echo "SM_HOST=${{ secrets.KEYLOCKER_HOST }}" >> "$GITHUB_ENV"
-          echo "SM_API_KEY=${{ secrets.KEYLOCKER_API_KEY }}" >> "$GITHUB_ENV"
-          echo "SM_CLIENT_CERT_FILE=D:\\Certificate_pkcs12.p12" >> "$GITHUB_ENV"
-          echo "SM_CLIENT_CERT_PASSWORD=${{ secrets.WINDOZE_CERT_PASSWORD }}" >> "$GITHUB_ENV"
-        shell: bash
 
-      - name: Sign the binary using keypair alias
-        if: ${{ startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
-        run: |
-           smctl sign --keypair-alias key_1369544803 --input installers/dist/setupSasView.exe
-        shell: cmd
+      - name: Setup Software Trust Manager
+        # if: ${{ startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
+        if: ${{ startsWith(matrix.os, 'windows') }}
+        uses: digicert/code-signing-software-trust-action@v1
+        with:
+              simple-signing-mode: true
+              # If the below 2 parameters are supplied, then smctl executable is invoked to attempt the signing.
+              input: installers/dist/setupSasView.exe
+              keypair-alias: ${{ secrets.KEYLOCKER_KEYPAIR_ALIAS }}
+        env:
+              SM_HOST: ${{ secrets.KEYLOCKER_HOST }}
+              SM_API_KEY: ${{ secrets.KEYLOCKER_API_KEY }}
+              SM_CLIENT_CERT_FILE: D:\\Certificate_pkcs12.p12
+              SM_CLIENT_CERT_PASSWORD: ${{ secrets.WINDOZE_CERT_PASSWORD }}
 
       - name: Publish installer package
         uses: actions/upload-artifact@v7
