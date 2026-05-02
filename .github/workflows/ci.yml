@@ -471,16 +471,14 @@ jobs:
           product-path: installers/dist/SasView6-${{ matrix.os }}.dmg
 
       - name: Setup SM_CLIENT_CERT_FILE from base64 secret data
-        # if: ${{ startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
-        if: ${{ startsWith(matrix.os, 'windows') }}
+        if: ${{ startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
         run: |
           echo "${{ secrets.WINDOZE_CERT_DATA }}" | base64 --decode > /d/Certificate_pkcs12.p12
         shell: bash
 
 
       - name: Setup Software Trust Manager
-        # if: ${{ startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
-        if: ${{ startsWith(matrix.os, 'windows') }}
+        if: ${{ startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
         uses: digicert/code-signing-software-trust-action@v1
         with:
               simple-signing-mode: true
