@@ -318,8 +318,8 @@ def update_credits(credits_file: Path):
     subprocess.check_call(
         [
             sys.executable,
+            SASVIEW_PATH / "build_tools" / "compile_licenses.py",
             "--minimal",
-            "build_tools/release_automation.py",
             credits_file,
         ])
 
