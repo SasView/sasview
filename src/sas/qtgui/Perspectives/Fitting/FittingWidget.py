@@ -3444,6 +3444,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if 'model_name' not in line_dict:
             return
         model = line_dict['model_name'][0]
+        structure_factor = line_dict['fitpage_structure'][0]
         context = {}
 
         if 'multiplicity' in line_dict:
@@ -3466,7 +3467,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Create the context dictionary for parameters
         # Exclude multiplicity and number of shells params from context
-        context = {k: v for (k, v) in line_dict.items() if len(v) > 3 and k != model}
+        context = {k: v for (k, v) in line_dict.items() if len(v) > 3 and k not in [model, structure_factor]}
         context['model_name'] = model
 
         if warn_user and str(self.cbModel.currentText()) != str(context['model_name']):
