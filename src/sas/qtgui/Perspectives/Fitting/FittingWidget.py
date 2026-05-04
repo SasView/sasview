@@ -3543,9 +3543,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             if param_name not in list(param_dict) or row == self._n_shells_row:
                 # Skip magnetic, polydisperse (.pd), and shell parameters - they are handled elsewhere
                 return
-            # checkbox state
-            param_checked = QtCore.Qt.Checked if param_dict[param_name][0] == "True" else QtCore.Qt.Unchecked
-            self._model_model.item(row, 0).setCheckState(param_checked)
+            # checkbox state - None means no checkbox present so don't modify
+            if param_dict[param_name][0] != "None":
+                param_checked = QtCore.Qt.Checked if param_dict[param_name][0] == "True" else QtCore.Qt.Unchecked
+                self._model_model.item(row, 0).setCheckState(param_checked)
 
             # parameter value can be either just a value or text on the combobox
             param_text = param_dict[param_name][1]
