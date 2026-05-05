@@ -2,6 +2,8 @@ import logging
 import webbrowser
 from pathlib import Path
 
+from packaging.version import parse
+
 logger = logging.getLogger(__name__)
 
 
@@ -10,10 +12,21 @@ def _release_version(version_string: str) -> str:
 
     Strips dev/pre-release suffixes so the version matches deployed documentation URLs.
     """
-    from packaging.version import parse
-
     version = parse(version_string)
     return f"{version.major}.{version.minor}.{version.micro}"
+
+
+def _online_doc_base(version_string: str) -> str:
+    """Return the best online documentation base URL for a version string.
+
+    Released documentation is archived under ``docs/old_docs/X.Y.Z``.
+    Development and pre-release builds should point at the current docs root.
+    """
+    version = parse(version_string)
+    if version.is_devrelease or version.is_prerelease:
+        return "https://www.sasview.org/docs"
+
+    return f"https://www.sasview.org/docs/old_docs/{_release_version(version_string)}"
 
 
 class _HelpSystem:
@@ -75,8 +88,7 @@ class _HelpSystem:
         """Construct the online documentation URL for the current version."""
         from sas.system.version import __version__
 
-        version = _release_version(__version__)
-        base = f"https://www.sasview.org/docs/v{version}"
+        base = _online_doc_base(__version__)
         url = f"{base}/{relative_path.as_posix()}"
         if fragment:
             url += "#" + fragment
