@@ -81,3 +81,5 @@ tests.log
 /installers/dist
 *.exe
 installers/credits.html
+# pixi environments
+.pixi/*
