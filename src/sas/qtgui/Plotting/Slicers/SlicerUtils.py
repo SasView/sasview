@@ -40,6 +40,10 @@ def generate_unique_plot_id(base_id: str, item) -> str:
     :param item: The current item in the data explorer tree
     :return: A unique ID string, either base_id or base_id_N where N is a number
     """
+    # Handle case where item is None or has no parent (multislicer)
+    if item is None or not hasattr(item, "parent"):
+        return base_id
+
     parent_item = item if item.parent() is None else item.parent()
     existing = _count_matching_ids(parent_item, base_id)
 
@@ -50,16 +54,6 @@ class StackableMixin:
     """
     Mixin class that provides stacking functionality for slicer plots.
     Any slicer that inherits from this mixin can stack multiple plots on the same window.
-
-    Required attributes in the slicer class:
-    - self.base: Reference to the 2D plot
-    - self.data: The 2D data being sliced
-    - self._item: The data explorer item
-    - self.color: Color for this slicer
-    - self._plot_id: The base plot ID (set before calling _create_or_update_plot)
-
-    Required methods in the slicer class:
-    - self._get_slicer_type_id(): Should return a string identifying the slicer type
     """
 
     def __init__(self):
@@ -71,7 +65,7 @@ class StackableMixin:
     def as_list(data: object) -> list:
         """
         Ensure data is returned as a list.
-        Returns an empty list if data is None, a single-item list if data is a single item/
+        Returns an empty list if data is None, a single-item list if data is a single item
         
         :param data: Data which may be None, a single item, or a list
         :return: List of data items
@@ -142,6 +136,32 @@ class StackableMixin:
                 return plot_window
         return None
 
+    def _emit_plot_update(self, plots):
+        """
+        Emit plot update signals, with batching support.
+        When self.base.manager._suspend_plot_signals is True, buffer updates to
+        self.base.manager._pending_plot_updates instead of emitting immediately.
+        """
+        manager = getattr(self.base, "manager", None)
+        if manager is None or not hasattr(manager, "communicator"):
+            return
+
+        if getattr(manager, "_suspend_plot_signals", False):
+            pending = getattr(manager, "_pending_plot_updates", None)
+            if pending is None:
+                manager._pending_plot_updates = []
+                pending = manager._pending_plot_updates
+            if isinstance(plots, list):
+                pending.extend(plots)
+            else:
+                pending.append(plots)
+        else:
+            # Emit immediately
+            if isinstance(plots, list):
+                manager.communicator.plotUpdateSignal.emit(plots)
+            else:
+                manager.communicator.plotUpdateSignal.emit([plots])
+
     def _append_to_plot_window(self, plot_window: object, new_plot: Data1D, item) -> str:
         """
         Append new data to an existing plot window.
@@ -159,12 +179,13 @@ class StackableMixin:
         # Add to existing window
         plot_window.plot(data=new_plot, color=self.color, hide_error=False)
 
-        # Notify manager
-        self.base.manager.communicator.plotUpdateSignal.emit([new_plot])
+        # Notify manager (batched when suspended)
+        self._emit_plot_update([new_plot])
 
-        # Update slicer plots list if the slicer widget exists
+        # Update slicer plots list if the slicer widget exists (do it only if not batching)
         if (slicer_widget := getattr(self.base, 'slicer_widget', None)):
-            slicer_widget.updateSlicerPlotList()
+            if not getattr(self.base.manager, "_suspend_plot_signals", False):
+                slicer_widget.updateSlicerPlotList()
 
         return new_plot.id
 
@@ -179,7 +200,7 @@ class StackableMixin:
         GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
 
         # Signal to create plot
-        self.base.manager.communicator.plotUpdateSignal.emit([new_plot])
+        self._emit_plot_update([new_plot])
         self.base.manager.communicator.forcePlotDisplaySignal.emit([item, new_plot])
 
         # Store references
@@ -194,9 +215,10 @@ class StackableMixin:
                     self._plot_window = plot_window
                     break
 
-        # Update slicer plots list if the slicer widget exists
+        # Update slicer plots list if the slicer widget exists (do it only if not batching)
         if (slicer_widget := getattr(self.base, 'slicer_widget', None)):
-            slicer_widget.updateSlicerPlotList()
+            if not getattr(self.base.manager, "_suspend_plot_signals", False):
+                slicer_widget.updateSlicerPlotList()
 
     def _update_existing_plot(self, new_plot, item):
         """
@@ -218,8 +240,8 @@ class StackableMixin:
         # Update model
         GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.name)
 
-        # Notify manager
-        self.base.manager.communicator.plotUpdateSignal.emit([new_plot])
+        # Notify manager (batched when suspended)
+        self._emit_plot_update([new_plot])
 
         # Update slicer plots list if the slicer widget exists
         if (slicer_widget := getattr(self.base, 'slicer_widget', None)):

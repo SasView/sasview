@@ -1,30 +1,34 @@
 import sys
 import time
+from collections.abc import Callable
 
 from sas.sascalc.data_util.calcthread import CalcThread
 from sas.sascalc.pr.invertor import Invertor
 
 
 class CalcPr(CalcThread):
-    """
-    Compute P(r)
-    """
+    """Compute P(r) inversion in a background thread."""
 
-    def __init__(self, pr, nfunc=5, tab_id=None, error_func=None, completefn=None,
-                 updatefn=None, yieldtime=0.01, worktime=0.01):
-        """
-        """
+    def __init__(
+        self,
+        pr: Invertor,
+        nfunc: int = 5,
+        tab_id: int | None = None,
+        error_func: Callable | None = None,
+        completefn: Callable | None = None,
+        updatefn: Callable | None = None,
+        yieldtime: float = 0.01,
+        worktime: float = 0.01,
+    ):
         CalcThread.__init__(self, completefn, updatefn, yieldtime, worktime)
-        self.pr = pr
-        self.tab_id = tab_id
-        self.nfunc = nfunc
-        self.error_func = error_func
-        self.starttime = 0
+        self.pr: Invertor = pr
+        self.tab_id: int | None = tab_id
+        self.nfunc: int = nfunc
+        self.error_func: Callable | None = error_func
+        self.starttime: float = 0
 
-    def compute(self):
-        """
-        Perform P(r) inversion
-        """
+    def compute(self) -> None:
+        """Perform P(r) inversion."""
         try:
             self.starttime = time.time()
             out, cov = self.pr.invert(self.nfunc)
@@ -37,19 +41,29 @@ class CalcPr(CalcThread):
             if self.error_func is not None:
                 self.error_func("CalcPr.compute: %s" % sys.exc_info()[1])
 
+
 class CalcBatchPr(CalcThread):
+    """Compute P(r) inversion for a batch of data sets in a background thread."""
 
-    # A lot of these aren't type hinted but that can be future work as I'm trying to closely follow the pre-existing
-    # structure, and I don't want to mess with anything.
-    def __init__(self, prs: list[Invertor], nfuncs=None, tab_id=None, error_func=None, completefn=None,
-                 updatefn=None, yieldtime=0.01, worktime=0.01):
+    def __init__(
+        self,
+        prs: list[Invertor],
+        nfuncs: list[int] | None = None,
+        tab_id: int | None = None,
+        error_func: Callable | None = None,
+        completefn: Callable | None = None,
+        updatefn: Callable | None = None,
+        yieldtime: float = 0.01,
+        worktime: float = 0.01,
+    ):
         CalcThread.__init__(self, completefn, updatefn, yieldtime, worktime)
-        self.prs = prs
-        self.nfuncs = nfuncs
-        self.error_func = error_func
-        self.starttime = 0
+        self.prs: list[Invertor] = prs
+        self.nfuncs: list[int] | None = nfuncs
+        self.error_func: Callable | None = error_func
+        self.starttime: float = 0
 
-    def compute(self):
+    def compute(self) -> None:
+        """Perform P(r) inversion for each invertor in the batch."""
         try:
             self.starttime = time.time()
             outputs = []
@@ -66,22 +80,26 @@ class CalcBatchPr(CalcThread):
 
 
 class EstimatePr(CalcThread):
-    """
-    Estimate P(r)
-    """
+    """Estimate the regularisation parameter alpha for P(r) in a background thread."""
 
-    def __init__(self, pr, nfunc=5, error_func=None, completefn=None,
-                 updatefn=None, yieldtime=0.01, worktime=0.01):
+    def __init__(
+        self,
+        pr: Invertor,
+        nfunc: int = 5,
+        error_func: Callable | None = None,
+        completefn: Callable | None = None,
+        updatefn: Callable | None = None,
+        yieldtime: float = 0.01,
+        worktime: float = 0.01,
+    ):
         CalcThread.__init__(self, completefn, updatefn, yieldtime, worktime)
-        self.pr = pr
-        self.nfunc = nfunc
-        self.error_func = error_func
-        self.starttime = 0
+        self.pr: Invertor = pr
+        self.nfunc: int = nfunc
+        self.error_func: Callable | None = error_func
+        self.starttime: float = 0
 
-    def compute(self):
-        """
-        Calculates the estimate
-        """
+    def compute(self) -> None:
+        """Calculate the alpha estimate."""
         try:
             alpha, message, elapsed = self.pr.estimate_alpha(self.nfunc)
             self.isquit()
@@ -95,30 +113,35 @@ class EstimatePr(CalcThread):
 
 
 class EstimateNT(CalcThread):
-    """
-    """
-    def __init__(self, pr, nfunc=5, error_func=None, completefn=None,
-                 updatefn=None, yieldtime=0.01, worktime=0.01):
-        CalcThread.__init__(self, completefn, updatefn, yieldtime, worktime)
-        self.pr = pr
-        self.nfunc = nfunc
-        self.error_func = error_func
-        self.starttime = 0
-        self._time_for_sleep = 0
-        self._sleep_delay = 1.0
+    """Estimate the number of terms for P(r) inversion in a background thread."""
 
-    def isquit(self):
-        """
-        """
+    def __init__(
+        self,
+        pr: Invertor,
+        nfunc: int = 5,
+        error_func: Callable | None = None,
+        completefn: Callable | None = None,
+        updatefn: Callable | None = None,
+        yieldtime: float = 0.01,
+        worktime: float = 0.01,
+    ):
+        CalcThread.__init__(self, completefn, updatefn, yieldtime, worktime)
+        self.pr: Invertor = pr
+        self.nfunc: int = nfunc
+        self.error_func: Callable | None = error_func
+        self.starttime: float = 0
+        self._time_for_sleep: float = 0
+        self._sleep_delay: float = 1.0
+
+    def isquit(self) -> None:
+        """Check for quit signal and throttle with a short sleep if needed."""
         CalcThread.isquit(self)
         if time.time() > self._time_for_sleep + self._sleep_delay:
-            time.sleep(.2)
+            time.sleep(0.2)
             self._time_for_sleep = time.time()
 
-    def compute(self):
-        """
-        Calculates the estimate
-        """
+    def compute(self) -> None:
+        """Calculate the estimated number of terms and optimal alpha."""
         try:
             t_0 = time.time()
             self._time_for_sleep = t_0

@@ -132,6 +132,8 @@ jobs:
 
       - name: Generate job configuration matrix
         id: set-matrix
+        env:
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
         run: python .github/workflows/matrix.py >> $GITHUB_OUTPUT
 
 
@@ -337,6 +339,7 @@ jobs:
 
   installer-matrix:
     needs: [matrix, build-sasview]
+    if: github.event_name != 'push' || github.ref_name == 'main'
 
     strategy:
       fail-fast: false
@@ -508,6 +511,7 @@ jobs:
 
   test-installer:
     needs: [ matrix, installer-matrix ]
+    if: github.event_name != 'push' || github.ref_name == 'main'
 
     strategy:
       fail-fast: false
@@ -563,7 +567,7 @@ jobs:
       - name: Retrieve installer (old image)
         if: ${{ env.INSTALLER_USE_OLD_IMAGE == 'true' }}
         id: download-old-installer
-        uses: dawidd6/action-download-artifact@v16
+        uses: dawidd6/action-download-artifact@v21
         with:
           # Select a specific installer image based on the GitHub Actions run id
           run_id: ${{ env.INSTALLER_OLD_RUNID }}
@@ -677,7 +681,7 @@ jobs:
       - name: Retrieve installer debug tarball
         if: ${{ env.INSTALLER_USE_DEBUG == 'true' }}
         id: download-old-debug
-        uses: dawidd6/action-download-artifact@v16
+        uses: dawidd6/action-download-artifact@v21
         with:
           # Select a specific installer image based on the GitHub Actions run id
           run_id: ${{ env.INSTALLER_OLD_RUNID }}

@@ -150,7 +150,11 @@ class SectorInteractor(BaseInteractor, SlicerModel, StackableMixin):
         sect = SectorQ(r_min=0.0, r_max=radius, phi_min=phimin + numpy.pi, phi_max=phimax + numpy.pi, nbins=nbins)
         sect.fold = self.fold
 
-        sector = sect(self.data)
+        sect.fold = self.fold
+        if self.fold:
+            sector = sect(self.data)
+        else:
+            sector = sect(self.data)
         # Create 1D data resulting from average
 
         if hasattr(sector, "dxl"):

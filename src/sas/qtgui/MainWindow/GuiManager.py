@@ -3,7 +3,6 @@ import os
 import sys
 import traceback
 import webbrowser
-from pathlib import Path
 
 from packaging.version import Version
 from PySide6.QtCore import QLocale, Qt
@@ -41,8 +40,6 @@ from sas.qtgui.Perspectives.perspective import Perspective
 from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionPerspective import SizeDistributionWindow
 from sas.qtgui.Utilities.About.About import About
 from sas.qtgui.Utilities.About.Credits import Credits
-
-# from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
 from sas.qtgui.Utilities.FileConverter import FileConverterWidget
 from sas.qtgui.Utilities.GridPanel import BatchOutputPanel
 from sas.qtgui.Utilities.HidableDialog import hidable_dialog
@@ -145,8 +142,8 @@ class GuiManager:
         self.logDockWidget.setWidget(self.listWidget)
         self._workspace.addDockWidget(Qt.BottomDockWidgetArea, self.logDockWidget)
 
-        # Preferences Panel must exist before perspectives are loaded
-        self.preferences = PreferencesPanel(self._parent)
+        # Preferences Panel initialized in loadAllPerspectives()
+        self.preferences = None
 
         # Load all perspectives - Preferences panel must exist
         self.loadAllPerspectives()
@@ -200,6 +197,7 @@ class GuiManager:
         """ Load all the perspectives"""
         # Close any existing perspectives to prevent multiple open instances
         self.closeAllPerspectives()
+        self.preferences = PreferencesPanel(self._parent)
         # Load all perspectives
         loaded_dict = {} # dictionary that will ultimately keep track of all perspective instances
         for name, perspective in Perspectives.PERSPECTIVES.items():
@@ -231,6 +229,7 @@ class GuiManager:
                     perspective.close()
                 except Exception as e:
                     logger.warning(f"Unable to close {name} perspective\n{e}")
+        self.preferences = None
         self.loadedPerspectives = {}
         self._current_perspective = None
 
@@ -356,39 +355,8 @@ class GuiManager:
 
     @classmethod
     def showHelp(cls, url):
-        """
-        Open a local url in the default browser
-        """
-        if not HELP_SYSTEM.path:
-            logger.error("Help documentation was not found.")
-            return
-
-        counter = 1
-        window_name = "help_window"
-        # Remove leading forward slashes from relative paths to allow easy Path building
-        if isinstance(url, str):
-            url = url.lstrip("//")
-        url = Path(url)
-        if str(HELP_SYSTEM.path.resolve()) not in str(url.absolute()):
-            url_abs = HELP_SYSTEM.path / url
-        else:
-            url_abs = Path(url)
-        try:
-            # In order to have multiple help windows open simultaneously, we need to create a new class variable
-            # If we just reassign the old one, the old window will be destroyed
-
-            # Have we found a name not assigned to a window?
-            potential_help_window = getattr(cls, window_name, None)
-            while potential_help_window and potential_help_window.isVisible():
-                window_name = f"help_window_{counter}"
-                potential_help_window = getattr(cls, window_name, None)
-                counter += 1
-
-            # Assign new variable to the GuiManager
-            setattr(cls, window_name, GuiUtils.showHelp(url_abs))
-
-        except Exception as ex:
-            logger.warning("Cannot display help. %s" % ex)
+        """Open documentation in the default browser."""
+        HELP_SYSTEM.show_help(url)
 
     def workspace(self):
         """

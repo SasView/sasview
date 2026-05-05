@@ -517,7 +517,7 @@ class sizeDistribution:
                                                              sigma,
                                                                self.model_matrix,
                                                                  BinsBack,
-                                                                   self.iterMax, report=True)
+                                                                   self.iterMax, report=False)
 
                 ChiSq.append(chisq)
                 BinMag.append(bin_magnitude)

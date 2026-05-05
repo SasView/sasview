@@ -20,6 +20,7 @@ from PySide6.QtWidgets import (
 import sas.system.version
 from sas.qtgui.Utilities import GuiUtils
 from sas.system import legal, web
+from sas.system.citation import __ACKNOWLEDGEMENT__
 
 
 class About(QDialog):
@@ -168,8 +169,18 @@ class About(QDialog):
         </html>
         """
 
+        more_text = f"""
+        <html>
+            <head/>
+            <body>
+                <p>
+                    {__ACKNOWLEDGEMENT__}
+                </p>
+            </body>
+        </html>"""
+
         self.mainLabel.setText(about_text)
-        self.subLabel.setText(legal.about)
+        self.subLabel.setText(more_text)
 
 
 
