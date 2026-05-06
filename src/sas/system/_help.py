@@ -4,6 +4,8 @@ from pathlib import Path
 
 from packaging.version import parse
 
+from sas.system.web import get_current_release_version
+
 logger = logging.getLogger(__name__)
 
 
@@ -22,8 +24,9 @@ def _online_doc_base(version_string: str) -> str:
     Released documentation is archived under ``docs/old_docs/X.Y.Z``.
     Development and pre-release builds should point at the current docs root.
     """
+    release_version = get_current_release_version()
     version = parse(version_string)
-    if version.is_devrelease or version.is_prerelease:
+    if version.is_devrelease or version.is_prerelease or release_version == version:
         return "https://www.sasview.org/docs"
 
     return f"https://www.sasview.org/docs/old_docs/{_release_version(version_string)}"
