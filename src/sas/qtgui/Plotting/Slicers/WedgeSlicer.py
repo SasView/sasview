@@ -9,6 +9,16 @@ from sas.qtgui.Plotting.Slicers.SectorSlicer import LineInteractor
 from sas.qtgui.Plotting.Slicers.SlicerUtils import StackableMixin, generate_unique_plot_id
 
 
+def _normalize_phi_for_wedge_display(phi_deg, delta_phi_deg):
+    """Normalize phi to match wedge display convention across +/-180 boundary."""
+    phi_normalized = np.mod(phi_deg - 180.0, 360.0) - 180.0
+    # Handle the case where phi is negative, but the wedge extends across the -180 boundary.
+    # Display phi as a positive angle above 180 to match the plot range.
+    if phi_normalized < 0 and (phi_normalized - delta_phi_deg) < -180.0:
+        phi_normalized += 360.0
+    return phi_normalized
+
+
 class WedgeInteractor(BaseInteractor, SlicerModel, StackableMixin):
     """
     This WedgeInteractor is a cross between the SectorInteractor and the
@@ -308,8 +318,10 @@ class WedgeInteractor(BaseInteractor, SlicerModel, StackableMixin):
         params = {}
         params["r_min"] = self.inner_arc.radius
         params["r_max"] = self.outer_arc.radius
-        params["phi [deg]"] = self.central_line.theta * 180 / np.pi
-        params["delta_phi [deg]"] = self.radial_lines.phi * 180 / np.pi
+        delta_phi_deg = self.radial_lines.phi * 180 / np.pi
+        phi_deg = self.central_line.theta * 180 / np.pi
+        params["phi [deg]"] = _normalize_phi_for_wedge_display(phi_deg, delta_phi_deg)
+        params["delta_phi [deg]"] = delta_phi_deg
         params["nbins"] = self.nbins
         return params
 
@@ -323,7 +335,10 @@ class WedgeInteractor(BaseInteractor, SlicerModel, StackableMixin):
         """
         self.r1 = params["r_min"]
         self.r2 = params["r_max"]
-        self.theta = params["phi [deg]"] * np.pi / 180
+
+        phi_normalized = _normalize_phi_for_wedge_display(params["phi [deg]"], params["delta_phi [deg]"])
+        self.theta = phi_normalized * np.pi / 180
+
         self.phi = params["delta_phi [deg]"] * np.pi / 180
         self.nbins = int(params["nbins"])
 
@@ -332,6 +347,11 @@ class WedgeInteractor(BaseInteractor, SlicerModel, StackableMixin):
         self.radial_lines.update(r1=self.r1, r2=self.r2, theta=self.theta, phi=self.phi)
         self.central_line.update(theta=self.theta)
         self._post_data()
+
+        # Refresh the model to show normalized phi value in the parameter field
+        if phi_normalized != params["phi [deg]"]:
+            self.setModelFromParams()
+
         self.draw()
 
     def draw(self):
