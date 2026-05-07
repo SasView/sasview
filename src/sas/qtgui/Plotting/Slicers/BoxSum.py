@@ -299,6 +299,7 @@ class BoxSumCalculator(BaseInteractor):
         self.vertical_lines.update(center=self.center, width=x_max, height=y_max)
         # compute the new error and sum given values of params
         self.postData()
+        self.draw()
 
     def draw(self):
         """Redraw canvas"""
