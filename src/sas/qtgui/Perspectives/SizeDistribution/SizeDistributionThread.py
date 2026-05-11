@@ -59,9 +59,7 @@ class SizeDistributionThread(CalcThread):
         sd.weightPercent = self.params.weight_percent
         sd.nbins = self.params.num_bins
 
-        trim_data, intensities, init_bins_back, sigma = sd.prep_maxEnt(
-            self.background, full_fit=self.params.full_fit
-        )
+        trim_data, intensities, init_bins_back, sigma = sd.prep_maxEnt(self.background, full_fit=self.params.full_fit)
         convergence_info = sd.run_maxEnt(trim_data, intensities, init_bins_back, sigma)
 
         convergences, num_iters = zip(*convergence_info)

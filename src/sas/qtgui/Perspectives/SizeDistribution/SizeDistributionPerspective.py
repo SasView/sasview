@@ -300,17 +300,11 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         """
         Enable buttons when data is present, else disable them
         """
-        self.quickFitButton.setEnabled(
-            self.logic.data_is_loaded and not self.is_calculating
-        )
-        self.fullFitButton.setEnabled(
-            self.logic.data_is_loaded and not self.is_calculating
-        )
+        self.quickFitButton.setEnabled(self.logic.data_is_loaded and not self.is_calculating)
+        self.fullFitButton.setEnabled(self.logic.data_is_loaded and not self.is_calculating)
         self.boxWeighting.setEnabled(self.logic.data_is_loaded)
         self.cmdFitFlatBackground.setEnabled(self.logic.data_is_loaded)
-        self.cmdFitPowerLaw.setEnabled(
-            self.logic.data_is_loaded and self.chkLowQ.isChecked()
-        )
+        self.cmdFitPowerLaw.setEnabled(self.logic.data_is_loaded and self.chkLowQ.isChecked())
 
     ######################################################################
     # GUI Interaction Events
@@ -319,9 +313,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         """
         Open the Size Distribution help
         """
-        tree_location = (
-            "/user/qtgui/Perspectives/SizeDistribution/sizedistribution_help.html"
-        )
+        tree_location = "/user/qtgui/Perspectives/SizeDistribution/sizedistribution_help.html"
         self._manager.showHelp(tree_location)
 
     def onQuickFit(self):
@@ -495,9 +487,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         Plot data, background and background subtracted data
         """
         plots = [self._model_item]
-        self.backgd_plot, self.backgd_subtr_plot, self.fit_plot = (
-            self.logic.newDataPlot()
-        )
+        self.backgd_plot, self.backgd_subtr_plot, self.fit_plot = self.logic.newDataPlot()
 
         if self.backgd_plot is not None:
             title = self.backgd_plot.name
@@ -506,9 +496,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
 
         if self.backgd_subtr_plot is not None:
             title = self.backgd_subtr_plot.name
-            GuiUtils.updateModelItemWithPlot(
-                self._model_item, self.backgd_subtr_plot, title
-            )
+            GuiUtils.updateModelItemWithPlot(self._model_item, self.backgd_subtr_plot, title)
             plots.append(self.backgd_subtr_plot)
 
         if self.fit_plot is not None:
@@ -619,17 +607,11 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self.txtAspectRatio.setText(str(params.get("aspect_ratio", str(ASPECT_RATIO))))
         self.txtMinDiameter.setText(str(params.get("d_min", str(DIAMETER_MIN))))
         self.txtMaxDiameter.setText(str(params.get("d_max", str(DIAMETER_MAX))))
-        self.txtBinsDiameter.setText(
-            str(params.get("num_d_bins", str(NUM_DIAMETER_BINS)))
-        )
+        self.txtBinsDiameter.setText(str(params.get("num_d_bins", str(NUM_DIAMETER_BINS))))
         self.chkLogBinning.setChecked(params.get("log_binning", True))
         self.txtContrast.setText(str(params.get("contrast", str(CONTRAST))))
-        self.txtSkyBackgd.setText(
-            str(params.get("sky_background", str(SKY_BACKGROUND)))
-        )
-        self.txtIterations.setText(
-            str(params.get("num_iterations", str(NUM_ITERATIONS)))
-        )
+        self.txtSkyBackgd.setText(str(params.get("sky_background", str(SKY_BACKGROUND))))
+        self.txtIterations.setText(str(params.get("num_iterations", str(NUM_ITERATIONS))))
         self.txtBackgd.setText(str(params.get("background", str(BACKGROUND))))
         self.chkLowQ.setChecked(params.get("subtract_low_q", False))
         self.txtPowerLowQ.setText(str(params.get("power_low_q", str(POWER_LOW_Q))))
@@ -679,14 +661,10 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         plots = [self._model_item]
         qmin_fit = float(self.txtMinRange.text())
         qmax_fit = float(self.txtMaxRange.text())
-        self.size_distr_plot, self.trust_plot = self.logic.newSizeDistrPlot(
-            result, qmin_fit, qmax_fit
-        )
+        self.size_distr_plot, self.trust_plot = self.logic.newSizeDistrPlot(result, qmin_fit, qmax_fit)
         if self.size_distr_plot is not None:
             title = self.size_distr_plot.name
-            GuiUtils.updateModelItemWithPlot(
-                self._model_item, self.size_distr_plot, title
-            )
+            GuiUtils.updateModelItemWithPlot(self._model_item, self.size_distr_plot, title)
             plots.append(self.size_distr_plot)
         if self.trust_plot is not None:
             title = self.trust_plot.name
@@ -783,9 +761,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         """
         if all(result.convergences):
             if len(result.convergences) == 1:
-                converge_msg = (
-                    f"Quick fit converged after {result.num_iters[0]} iterations"
-                )
+                converge_msg = f"Quick fit converged after {result.num_iters[0]} iterations"
             else:
                 converge_msg = f"Full fit converged after on average {np.mean(result.num_iters):.1f} iterations"
             self.lblConvergence.setStyleSheet("color: black;")

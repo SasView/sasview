@@ -71,9 +71,7 @@ class SizeDistributionLogic:
             qmin = min(self.data.x)
             qmax = max(self.data.x)
         except (ValueError, TypeError):
-            msg = (
-                "Unable to find min/max/length of \n data named %s" % self.data.filename
-            )
+            msg = "Unable to find min/max/length of \n data named %s" % self.data.filename
             raise ValueError(msg)
         return qmin, qmax
 
@@ -82,9 +80,7 @@ class SizeDistributionLogic:
         # calculate a*x^m + b
         y_back = scale * x**power + constant
         # TODO: the dy is the same as in TestSizeDistribution.py, but is it needed?
-        self.background = LoadData1D(
-            x, y_back, dy=0.0001 * y_back, lam=None, dlam=None, isSesans=False
-        )
+        self.background = LoadData1D(x, y_back, dy=0.0001 * y_back, lam=None, dlam=None, isSesans=False)
 
     def computeTrustRange(self, qmin: float, qmax: float):
         """
@@ -94,9 +90,7 @@ class SizeDistributionLogic:
         d_trust_max = 0.95 * np.pi / qmin
         return [d_trust_min, d_trust_max]
 
-    def fitBackground(
-        self, power: float | None, qmin: float, qmax: float
-    ) -> list[float]:
+    def fitBackground(self, power: float | None, qmin: float, qmax: float) -> list[float]:
         """
         Estimate the background power law, scale * q^(power)
         :param power: if a float is given, the power is fixed; if None, the power is fitted
