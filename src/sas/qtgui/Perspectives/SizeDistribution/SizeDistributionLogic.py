@@ -26,34 +26,34 @@ class SizeDistributionLogic:
     No QStandardModelIndex here.
     """
 
-    def __init__(self, data=None):
-        self._data = data
-        self.data_is_loaded = False
+    def __init__(self, data: LoadData1D | None = None) -> None:
+        self._data: LoadData1D | None = data
+        self.data_is_loaded: bool = False
         # di data presence in the dataset
-        self.di_flag = False
-        self.background = None
-        self.data_fit = None
+        self.di_flag: bool = False
+        self.background: LoadData1D | None = None
+        self.data_fit: LoadData1D | None = None
         if data is not None:
             self.data_is_loaded = True
             self.setDataProperties()
 
     @property
-    def data(self):
+    def data(self) -> LoadData1D | None:
         return self._data
 
     @data.setter
-    def data(self, value):
+    def data(self, value: LoadData1D | None) -> None:
         """data setter"""
         self._data = value
         self.data_is_loaded = self._data is not None
         if self._data is not None:
             self.setDataProperties()
 
-    def isLoadedData(self):
+    def isLoadedData(self) -> bool:
         """accessor"""
         return self.data_is_loaded
 
-    def setDataProperties(self):
+    def setDataProperties(self) -> None:
         """
         Analyze data and set up some properties important for
         the Presentation layer
@@ -63,7 +63,7 @@ class SizeDistributionLogic:
         else:
             self.di_flag = False
 
-    def computeDataRange(self):
+    def computeDataRange(self) -> tuple[float, float]:
         """
         Compute the minimum and the maximum range of the data
         """
@@ -75,14 +75,14 @@ class SizeDistributionLogic:
             raise ValueError(msg)
         return qmin, qmax
 
-    def computeBackground(self, constant: float, scale: float, power: float):
+    def computeBackground(self, constant: float, scale: float, power: float) -> None:
         x = self.data.x
         # calculate a*x^m + b
         y_back = scale * x**power + constant
         # TODO: the dy is the same as in TestSizeDistribution.py, but is it needed?
         self.background = LoadData1D(x, y_back, dy=0.0001 * y_back, lam=None, dlam=None, isSesans=False)
 
-    def computeTrustRange(self, qmin: float, qmax: float):
+    def computeTrustRange(self, qmin: float, qmax: float) -> list[float]:
         """
         Compute the trusted range (green area in Irena)
         """
@@ -90,7 +90,7 @@ class SizeDistributionLogic:
         d_trust_max = 0.95 * np.pi / qmin
         return [d_trust_min, d_trust_max]
 
-    def fitBackground(self, power: float | None, qmin: float, qmax: float) -> list[float]:
+    def fitBackground(self, power: float | None, qmin: float, qmax: float) -> list[float] | None:
         """
         Estimate the background power law, scale * q^(power)
         :param power: if a float is given, the power is fixed; if None, the power is fitted
@@ -103,7 +103,7 @@ class SizeDistributionLogic:
             return None
         return background
 
-    def newDataPlot(self):
+    def newDataPlot(self) -> tuple[Data1D, Data1D, Data1D | None]:
         """
         Create a new 1D data instance
         """
@@ -147,7 +147,7 @@ class SizeDistributionLogic:
         backgd_subtr_plot.slider_high_q_input = ["txtMaxRange"]
 
         # Fit plot
-        fit_plot = None
+        fit_plot: Data1D | None = None
         if self.data_fit is not None:
             fit_plot = Data1D(self.data_fit.x, self.data_fit.y, dy=self.data_fit.dy)
             fit_plot.is_data = False
@@ -166,7 +166,7 @@ class SizeDistributionLogic:
 
         return backgd_plot, backgd_subtr_plot, fit_plot
 
-    def newSizeDistrPlot(self, result: MaxEntResult, qmin: float, qmax: float):
+    def newSizeDistrPlot(self, result: MaxEntResult, qmin: float, qmax: float) -> tuple[Data1D, Data1D]:
         """
         Create a new 1D data instance based on fitting results
         """

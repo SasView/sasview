@@ -1,4 +1,5 @@
 import logging
+from collections.abc import Callable
 
 from sasdata.dataloader.data_info import Data1D
 
@@ -20,12 +21,12 @@ class SizeDistributionThread(CalcThread):
         data: Data1D,
         background: Data1D,
         params: MaxEntParameters,
-        completefn=None,
-        updatefn=None,
-        yieldtime=0.01,
-        worktime=0.01,
-        exception_handler=None,
-    ):
+        completefn: Callable[[MaxEntResult], None] | None = None,
+        updatefn: Callable | None = None,
+        yieldtime: float = 0.01,
+        worktime: float = 0.01,
+        exception_handler: Callable | None = None,
+    ) -> None:
         """
         Initialize parameters
         """
@@ -37,12 +38,12 @@ class SizeDistributionThread(CalcThread):
             worktime,
             exception_handler=exception_handler,
         )
-        self.data = data
-        self.background = background
-        self.params = params
-        self.starttime = 0
+        self.data: Data1D = data
+        self.background: Data1D = background
+        self.params: MaxEntParameters = params
+        self.starttime: float = 0
 
-    def compute(self, *args, **kwargs):
+    def compute(self, *args, **kwargs) -> None:
         sd = sizeDistribution(self.data)
         sd.qMin = self.params.qmin
         sd.qMax = self.params.qmax
