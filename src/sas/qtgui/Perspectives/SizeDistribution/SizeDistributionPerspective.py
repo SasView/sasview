@@ -44,16 +44,14 @@ logger = logging.getLogger(__name__)
 
 
 class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective):
-    """
-    The main window for the Size Distribution perspective.
-    """
+    """The main window for the Size Distribution perspective."""
 
     name: str = "SizeDistribution"
     ext: str = "ps"
 
     @property
     def title(self) -> str:
-        """Window title"""
+        """Return the window title."""
         return "Size Distribution Perspective"
 
     fittingFinishedSignal = QtCore.Signal(MaxEntResult)
@@ -106,37 +104,28 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
     # Base Perspective Class Definitions
 
     def allowBatch(self) -> bool:
+        """Tell the caller we don't accept batch data."""
         return False
 
     def allowSwap(self) -> bool:
-        """
-        Tell the caller we don't accept swapping data
-        """
+        """Tell the caller we don't accept swapping data."""
         return False
 
     def setClosable(self, value: bool = True) -> None:
-        """
-        Allow outsiders close this widget
-        """
+        """Allow outsiders close this widget."""
         assert isinstance(value, bool)
         self._allowClose = value
 
     def isClosable(self) -> bool:
-        """
-        Allow outsiders close this widget
-        """
+        """Return whether this widget is currently closable."""
         return self._allowClose
 
     def isSerializable(self) -> bool:
-        """
-        Tell the caller that this perspective writes its state
-        """
+        """Tell the caller that this perspective writes its state."""
         return True
 
     def closeEvent(self, event: QtGui.QCloseEvent) -> None:
-        """
-        Overwrite QDialog close method to allow for custom widget close
-        """
+        """Overwrite QDialog close method to allow for custom widget close."""
         # Close report widgets before closing/minimizing main widget
         if self._allowClose:
             # reset the closability flag
@@ -154,7 +143,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
     # Initialization routines
 
     def setupSlots(self) -> None:
-        """Connect the use controls to their appropriate methods"""
+        """Connect the use controls to their appropriate methods."""
         # Buttons
         self.helpButton.clicked.connect(self.help)
         self.quickFitButton.clicked.connect(self.onQuickFit)
@@ -179,7 +168,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             widget.installEventFilter(self)
 
     def setupMapper(self) -> None:
-        # Set up the mapper.
+        """Set up the mapper."""
         self.mapper.setOrientation(QtCore.Qt.Vertical)
         self.mapper.setModel(self.model)
 
@@ -217,9 +206,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self.mapper.toFirst()
 
     def setupModel(self) -> None:
-        """
-        Update boxes with initial values
-        """
+        """Update boxes with initial values."""
         # filename
         item = QtGui.QStandardItem(self._path)
         self.model.setItem(WIDGETS.W_NAME, item)
@@ -271,14 +258,14 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self.model.setItem(WIDGETS.W_WEIGHT_PERCENT, item)
 
     def setupWindow(self) -> None:
-        """Initialize base window state on init"""
+        """Initialize base window state on startup."""
         self.enableButtons()
         self.txtPowerLowQ.setEnabled(False)
         self.txtScaleLowQ.setEnabled(False)
         self.rbFixPower.setChecked(True)
 
     def setupValidators(self) -> None:
-        """Apply validators to editable line edits"""
+        """Apply validators to editable line edits."""
         self.txtAspectRatio.setValidator(GuiUtils.DoubleValidator())
         self.txtBackgd.setValidator(GuiUtils.DoubleValidator())
         self.txtMinDiameter.setValidator(GuiUtils.DoubleValidator())
@@ -298,31 +285,31 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
     # Methods for updating GUI
 
     def enableButtons(self) -> None:
-        """
-        Enable buttons when data is present, else disable them
-        """
-        self.quickFitButton.setEnabled(self.logic.data_is_loaded and not self.is_calculating)
-        self.fullFitButton.setEnabled(self.logic.data_is_loaded and not self.is_calculating)
-        self.boxWeighting.setEnabled(self.logic.data_is_loaded)
-        self.cmdFitFlatBackground.setEnabled(self.logic.data_is_loaded)
-        self.cmdFitPowerLaw.setEnabled(self.logic.data_is_loaded and self.chkLowQ.isChecked())
+        """Enable buttons when data is present, else disable them."""
+        data_loaded = self.logic.data_is_loaded
+        can_fit = data_loaded and not self.is_calculating
+
+        self.quickFitButton.setEnabled(can_fit)
+        self.fullFitButton.setEnabled(can_fit)
+
+        self.boxWeighting.setEnabled(data_loaded)
+        self.cmdFitFlatBackground.setEnabled(data_loaded)
+
+        self.cmdFitPowerLaw.setEnabled(data_loaded and self.chkLowQ.isChecked())
 
     ######################################################################
     # GUI Interaction Events
 
     def help(self) -> None:
-        """
-        Open the Size Distribution help
-        """
+        """Open the Size Distribution help."""
         tree_location: str = "/user/qtgui/Perspectives/SizeDistribution/sizedistribution_help.html"
         self._manager.showHelp(tree_location)
 
     def onQuickFit(self) -> None:
-        """
-        Perform a quick fit of the size distribution
-        """
+        """Perform a quick fit of the size distribution."""
         self.is_calculating = True
         self.enableButtons()
+
         params = self.getMaxEntParams()
         params.full_fit = False
         self.fit_thread = SizeDistributionThread(
@@ -335,11 +322,10 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self.fit_thread.queue()
 
     def onFullFit(self) -> None:
-        """
-        Perform a full fit of the size distribution
-        """
+        """Perform a full fit of the size distribution."""
         self.is_calculating = True
         self.enableButtons()
+
         params = self.getMaxEntParams()
         params.full_fit = True
         self.fit_thread = SizeDistributionThread(
@@ -352,9 +338,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self.fit_thread.queue()
 
     def onRangeReset(self) -> None:
-        """
-        Callback for resetting qmin/qmax
-        """
+        """Callback for resetting qmin/qmax."""
         qmin: float = 0.0
         qmax: float = 0.0
         if self.logic.data_is_loaded:
@@ -362,9 +346,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self.updateQRange(qmin, qmax)
 
     def onLowQStateChanged(self, state: int) -> None:
-        """
-        Slot for state change of the subtract power law checkbox
-        """
+        """Slot for state change of the subtract power law checkbox."""
         is_checked: bool = state == QtCore.Qt.CheckState.Checked.value
         self.txtPowerLowQ.setEnabled(is_checked)
         self.txtScaleLowQ.setEnabled(is_checked)
@@ -374,9 +356,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             self.plotData()
 
     def onFitFlatBackground(self) -> None:
-        """
-        Fit flat background and update plot
-        """
+        """Fit flat background and update plot."""
         qmin, qmax = self.getFlatBackgroundRange()
         fit_result = self.logic.fitBackground(power=0.0, qmin=qmin, qmax=qmax)
         if fit_result is None:
@@ -387,9 +367,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self.plotData()
 
     def onFitPowerLaw(self) -> None:
-        """
-        Fit background power law and update plot
-        """
+        """Fit background power law and update plot.="""
         qmin, qmax = self.getPowerLawBackgroundRange()
         if self.rbFitPower.isChecked():
             # if the power should be fit, pass None
@@ -413,9 +391,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self.plotData()
 
     def eventFilter(self, widget: QtCore.QObject, event: QtCore.QEvent) -> bool:
-        """
-        Catch enter key presses and update data plot
-        """
+        """Catch enter key presses and update data plot."""
         if not self.logic.data_is_loaded:
             return False
         if widget.text() == "":
@@ -433,8 +409,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
     # Response Actions
 
     def setData(self, data_item: list | None = None, is_batch: bool = False) -> None:
-        """
-        Obtain a QStandardItem object and parse it to get Data1D/2D
+        """Obtain a QStandardItem object and parse it to get Data1D/2D
         Pass it over to the calculator
         """
         if not isinstance(data_item, list):
@@ -484,9 +459,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self.plotData()
 
     def plotData(self) -> None:
-        """
-        Plot data, background and background subtracted data
-        """
+        """Plot data, background and background subtracted data."""
         plots: list = [self._model_item]
         self.backgd_plot, self.backgd_subtr_plot, self.fit_plot = self.logic.newDataPlot()
 
@@ -509,8 +482,9 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
 
     def getState(self) -> dict[str, str | bool]:
         """
-        Collects all active params into a dictionary of {name: value}
-        :return: {name: value}
+        Collects all active params into a dictionary.
+
+        :return: a dictionary of {name: value}
         """
         return {
             "range_q_min": self.txtMinRange.text(),
@@ -526,19 +500,17 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             "background": self.txtBackgd.text(),
             "subtract_low_q": self.chkLowQ.isChecked(),
             "power_low_q": self.txtPowerLowQ.text(),
-            "scale_low_q": self.txtScaleLowQ.txt(),
+            "scale_low_q": self.txtScaleLowQ.text(),
         }
 
     def removeData(self, data_list: list | None = None) -> None:
-        """Remove the existing data reference from the Size Distribution Perspective"""
+        """Remove the existing data reference from the Size Distribution Perspective."""
         if not data_list or self._model_item not in data_list:
             return
         self.resetWindow()
 
     def resetWindow(self) -> None:
-        """
-        Reset the state of input widgets and data structures
-        """
+        """Reset the state of input widgets and data structures to default values."""
         self._data = None
         self._path = ""
         self.txtName.setText("")
@@ -561,17 +533,19 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
 
     def serializeAll(self) -> dict:
         """
-        Serialize the size distribution state so data can be saved
-        Size distribution is not batch-ready so this will only effect a single page
-        :return: {data-id: {self.name: {inversion-state}}}
+        Serialize the size distribution state so data can be saved.
+        Size distribution is not batch-ready so this will only effect a single page.
+
+        :return: a dictionary of {data-id: {self.name: {inversion-state}}}
         """
         return self.serializeCurrentPage()
 
     def serializeCurrentPage(self) -> dict:
         """
-        Serialize and return a dictionary of {data_id: sizedistr-state}
-        Return empty dictionary if no data
-        :return: {data-id: {self.name: {invariant - state}}}
+        Serialize and return a dictionary representing the current state of the size distribution page.
+        Return empty dictionary if no data.
+
+        :return: a dictionary of {data-id: {self.name: {invariant - state}}}
         """
         state: dict = {}
         if self._data:
@@ -582,7 +556,9 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
 
     def getPage(self) -> dict[str, str | bool]:
         """
-        serializes full state of this fit page
+        Serializes full state of this fit page into a dictionary.
+
+        :return: a dictionary of {param_name: value}
         """
         # Get all parameters from page
         param_dict: dict[str, str | bool] = self.getState()
@@ -593,9 +569,10 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
 
     def updateFromParameters(self, params: dict) -> None:
         """
-        Called by Open Project, Open Analysis, and removeData
-        :param params: {param_name: value} -> Default values used if not valid
-        :return: None
+        Update the GUI state based on a dictionary of parameters.
+        Called by Open Project, Open Analysis, and removeData.
+
+        :param params: a dictionary of {param_name: value}; default values used if not valid
         """
         # Params should be a dictionary
         if not isinstance(params, dict):
@@ -619,24 +596,18 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self.txtScaleLowQ.setText(str(params.get("scale_low_q", str(SCALE_LOW_Q))))
 
     def updateQRange(self, q_range_min: float, q_range_max: float) -> None:
-        """
-        Update the local model based on calculated values
-        """
+        """Update the local model based on calculated values."""
         q_max: str = str(q_range_max)
         q_min: str = str(q_range_min)
         self.model.item(WIDGETS.W_QMIN).setText(q_min)
         self.model.item(WIDGETS.W_QMAX).setText(q_max)
 
     def fittingCompleted(self, result: MaxEntResult | None) -> None:
-        """
-        Send the finish message from calculate threads to main thread
-        """
+        """Send the finish message from calculate threads to main thread."""
         self.fittingFinishedSignal.emit(result)
 
     def fittingError(self, etype: type[BaseException], value: BaseException, traceback: TracebackType | None) -> None:
-        """
-        Handle error in the calculation thread
-        """
+        """Handle error in the calculation thread."""
         # re-enable the fit buttons
         self.is_calculating = False
         self.enableButtons()
@@ -644,8 +615,9 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
 
     def fitComplete(self, result: MaxEntResult) -> None:
         """
-        Receive and display fitting results
-        "result" is a tuple of actual result list and the fit time in seconds
+        Receive and display fitting results.
+
+        :param result: a tuple of actual result list and the fit time in seconds
         """
         # re-enable the fit buttons
         self.is_calculating = False
@@ -680,9 +652,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             self.plotData()
 
     def getWeightType(self) -> WeightType | None:
-        """
-        Return the weight type based on the checked radio button
-        """
+        """Return the weight type based on the checked radio button."""
         weight_type_map = {
             self.rbWeighting1: WeightType.NONE,
             self.rbWeighting2: WeightType.DI,
@@ -694,9 +664,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
                 return weight_type
 
     def getMaxEntParams(self) -> MaxEntParameters:
-        """
-        Collect Max Ent parameters from the GUI state
-        """
+        """Collect Max Ent parameters from the GUI state."""
         return MaxEntParameters(
             qmin=float(self.txtMinRange.text()),
             qmax=float(self.txtMaxRange.text()),
@@ -714,9 +682,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         )
 
     def getBackgroundParams(self) -> tuple[float, float, float]:
-        """
-        Collect background parameters from the GUI state
-        """
+        """Collect background parameters from the GUI state."""
         constant: float = float(self.txtBackgd.text())
         power_law: bool = self.chkLowQ.isChecked()
         power: float = -1.0 * float(self.txtPowerLowQ.text()) if power_law else 0.0
@@ -724,9 +690,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         return constant, scale, power
 
     def getFlatBackgroundRange(self) -> tuple[float, float]:
-        """
-        Collect background range from the GUI state
-        """
+        """Collect background range from the GUI state."""
         qmin, qmax = self.logic.computeDataRange()
         qmin_text = self.txtBackgdQMin.text()
         if qmin_text:
@@ -737,9 +701,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         return qmin, qmax
 
     def getPowerLawBackgroundRange(self) -> tuple[float, float]:
-        """
-        Collect power law range from the GUI state
-        """
+        """Collect power law range from the GUI state."""
         qmin, qmax = self.logic.computeDataRange()
         qmin_text = self.txtPowerLawQMin.text()
         if qmin_text:
@@ -750,16 +712,12 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         return qmin, qmax
 
     def updateBackground(self) -> None:
-        """
-        Update the background data
-        """
+        """Update the background data."""
         constant, scale, power = self.getBackgroundParams()
         self.logic.computeBackground(constant, scale, power)
 
     def updateStatistics(self, result: MaxEntResult) -> None:
-        """
-        Update the output box with statistics
-        """
+        """Update the output box with statistics."""
         if all(result.convergences):
             if len(result.convergences) == 1:
                 converge_msg = f"Quick fit converged after {result.num_iters[0]} iterations"
@@ -778,9 +736,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self.txtDiameterMode.setText(f"{stats['mode']:.5g}")
 
     def clearStatistics(self) -> None:
-        """
-        Clear the output box
-        """
+        """Clear the output box."""
         self.lblConvergence.setText("")
         self.txtChiSq.setText("")
         self.txtVolume.setText("")
@@ -789,8 +745,6 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self.txtDiameterMedian.setText("")
 
     def reset(self) -> None:
-        """
-        Reset the size distribution perspective to an empty state
-        """
+        """Reset the size distribution perspective to an empty state."""
         self.removeData([self._model_item] if self._model_item else None)
         self.resetWindow()

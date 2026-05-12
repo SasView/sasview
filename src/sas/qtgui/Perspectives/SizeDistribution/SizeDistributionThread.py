@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class SizeDistributionThread(CalcThread):
-    """Thread performing the fit"""
+    """Thread performing the fit."""
 
     def __init__(
         self,
@@ -27,9 +27,6 @@ class SizeDistributionThread(CalcThread):
         worktime: float = 0.01,
         exception_handler: Callable | None = None,
     ) -> None:
-        """
-        Initialize parameters
-        """
         CalcThread.__init__(
             self,
             completefn,
@@ -44,6 +41,7 @@ class SizeDistributionThread(CalcThread):
         self.starttime: float = 0
 
     def compute(self, *args, **kwargs) -> None:
+        """Perform the size distribution fit."""
         sd = sizeDistribution(self.data)
         sd.qMin = self.params.qmin
         sd.qMax = self.params.qmax
@@ -54,7 +52,6 @@ class SizeDistributionThread(CalcThread):
         sd.model = self.params.model
         sd.iterMax = self.params.max_iterations
         sd.skyBackground = self.params.sky_background
-        sd.useWeights = True
         sd.weightType = self.params.weight_type
         sd.weightFactor = self.params.weight_factor
         sd.weightPercent = self.params.weight_percent

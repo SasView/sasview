@@ -39,60 +39,55 @@ class SizeDistributionLogic:
 
     @property
     def data(self) -> LoadData1D | None:
+        """Return the data."""
         return self._data
 
     @data.setter
     def data(self, value: LoadData1D | None) -> None:
-        """data setter"""
+        """Set the data and update the properties accordingly."""
         self._data = value
         self.data_is_loaded = self._data is not None
         if self._data is not None:
             self.setDataProperties()
 
     def isLoadedData(self) -> bool:
-        """accessor"""
+        """Return whether data is loaded."""
         return self.data_is_loaded
 
     def setDataProperties(self) -> None:
-        """
-        Analyze data and set up some properties important for
-        the Presentation layer
-        """
+        """Analyze data and set up some properties important for the presentation layer."""
         if self._data.dy is not None and np.any(self._data.dy):
             self.di_flag = True
         else:
             self.di_flag = False
 
     def computeDataRange(self) -> tuple[float, float]:
-        """
-        Compute the minimum and the maximum range of the data
-        """
+        """Compute the minimum and the maximum range of the data."""
         try:
-            qmin = min(self.data.x)
-            qmax = max(self.data.x)
+            qmin: float = min(self.data.x)
+            qmax: float = max(self.data.x)
         except (ValueError, TypeError):
-            msg = "Unable to find min/max/length of \n data named %s" % self.data.filename
+            msg = f"Unable to find min/max/length of \n data named {self.data.filename}"
             raise ValueError(msg)
         return qmin, qmax
 
     def computeBackground(self, constant: float, scale: float, power: float) -> None:
-        x = self.data.x
+        x: np.ndarray = self.data.x
         # calculate a*x^m + b
-        y_back = scale * x**power + constant
+        y_back: np.ndarray = scale * x**power + constant
         # TODO: the dy is the same as in TestSizeDistribution.py, but is it needed?
         self.background = LoadData1D(x, y_back, dy=0.0001 * y_back, lam=None, dlam=None, isSesans=False)
 
     def computeTrustRange(self, qmin: float, qmax: float) -> list[float]:
-        """
-        Compute the trusted range (green area in Irena)
-        """
-        d_trust_min = 1.8 * np.pi / qmax
-        d_trust_max = 0.95 * np.pi / qmin
+        """Compute the trusted range (green area in Irena)."""
+        d_trust_min: float = 1.8 * np.pi / qmax
+        d_trust_max: float = 0.95 * np.pi / qmin
         return [d_trust_min, d_trust_max]
 
     def fitBackground(self, power: float | None, qmin: float, qmax: float) -> list[float] | None:
         """
-        Estimate the background power law, scale * q^(power)
+        Estimate the background power law, given by: scale * q^(power).
+
         :param power: if a float is given, the power is fixed; if None, the power is fitted
         :return: fit parameters; [scale] if power is fixed, or [scale, power] if power is fitted
         """
@@ -104,9 +99,7 @@ class SizeDistributionLogic:
         return background
 
     def newDataPlot(self) -> tuple[Data1D, Data1D, Data1D | None]:
-        """
-        Create a new 1D data instance
-        """
+        """Create a new 1D data instance."""
         # Background plot
         backgd_plot = Data1D(self.background.x, self.background.y)
         backgd_plot.is_data = False
@@ -167,11 +160,9 @@ class SizeDistributionLogic:
         return backgd_plot, backgd_subtr_plot, fit_plot
 
     def newSizeDistrPlot(self, result: MaxEntResult, qmin: float, qmax: float) -> tuple[Data1D, Data1D]:
-        """
-        Create a new 1D data instance based on fitting results
-        """
+        """Create a new 1D data instance based on fitting results."""
         # Create the new plot
-        # bins are radius but plot is in diameter
+        # Bins are radius but plot is in diameter
         x = 2 * result.bins
         y = result.bin_mag
         dy = result.bin_err
