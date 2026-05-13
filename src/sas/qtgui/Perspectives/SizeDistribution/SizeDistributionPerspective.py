@@ -367,7 +367,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self.plotData()
 
     def onFitPowerLaw(self) -> None:
-        """Fit background power law and update plot.="""
+        """Fit background power law and update plot."""
         qmin, qmax = self.getPowerLawBackgroundRange()
         if self.rbFitPower.isChecked():
             # if the power should be fit, pass None
@@ -617,7 +617,8 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         """
         Receive and display fitting results.
 
-        :param result: a tuple of actual result list and the fit time in seconds
+        :param result: MaxEnt fitting result object containing the calculated
+            statistics and fitted data used to update the plots and output.
         """
         # re-enable the fit buttons
         self.is_calculating = False
