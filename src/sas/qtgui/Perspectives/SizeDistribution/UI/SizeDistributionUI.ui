@@ -124,6 +124,9 @@
             <property name="enabled">
              <bool>true</bool>
             </property>
+            <property name="toolTip">
+             <string>Aspect ratio of the ellipsoid model (ratio of semi-axes)</string>
+            </property>
            </widget>
           </item>
          </layout>
@@ -147,6 +150,9 @@
             <property name="enabled">
              <bool>true</bool>
             </property>
+            <property name="toolTip">
+             <string>Minimum diameter of particles in the size distribution (in Angstroms)</string>
+            </property>
            </widget>
           </item>
           <item row="0" column="2">
@@ -169,6 +175,9 @@
             <property name="enabled">
              <bool>true</bool>
             </property>
+            <property name="toolTip">
+             <string>Maximum diameter of particles in the size distribution (in Angstroms)</string>
+            </property>
            </widget>
           </item>
           <item row="0" column="5">
@@ -190,6 +199,9 @@
            <widget class="QLineEdit" name="txtBinsDiameter">
             <property name="enabled">
              <bool>true</bool>
+            </property>
+            <property name="toolTip">
+             <string>Number of bins to use in the diameter distribution</string>
             </property>
            </widget>
           </item>
@@ -220,6 +232,9 @@
            <widget class="QLineEdit" name="txtContrast">
             <property name="enabled">
              <bool>true</bool>
+            </property>
+            <property name="toolTip">
+             <string>Scattering length density contrast between particles and solvent (10^-6 / Å^-2)</string>
             </property>
            </widget>
           </item>
@@ -264,6 +279,9 @@
             <property name="readOnly">
              <bool>true</bool>
             </property>
+            <property name="toolTip">
+             <string>Chi-squared value indicating quality of the fit (lower is better)</string>
+            </property>
            </widget>
           </item>
           <item row="2" column="0">
@@ -280,6 +298,9 @@
             </property>
             <property name="readOnly">
              <bool>true</bool>
+            </property>
+            <property name="toolTip">
+             <string>Total volume fraction of particles in the sample (%)</string>
             </property>
            </widget>
           </item>
@@ -305,6 +326,9 @@
             <property name="readOnly">
              <bool>true</bool>
             </property>
+            <property name="toolTip">
+             <string>Mean (average) diameter of the size distribution</string>
+            </property>
            </widget>
           </item>
           <item row="3" column="2">
@@ -329,6 +353,9 @@
             <property name="readOnly">
              <bool>true</bool>
             </property>
+            <property name="toolTip">
+             <string>Median diameter of the size distribution (50th percentile)</string>
+            </property>
            </widget>
           </item>
           <item row="4" column="2">
@@ -352,6 +379,9 @@
             </property>
             <property name="readOnly">
              <bool>true</bool>
+            </property>
+            <property name="toolTip">
+             <string>Mode diameter of the size distribution (most frequently occurring size)</string>
             </property>
            </widget>
           </item>
@@ -499,7 +529,11 @@
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QLineEdit" name="txtSkyBackgd"/>
+           <widget class="QLineEdit" name="txtSkyBackgd">
+            <property name="toolTip">
+             <string>Sky background parameter for the Maximum Entropy method (suggested: 1e-6)</string>
+            </property>
+           </widget>
           </item>
           <item row="0" column="2">
            <widget class="QLabel" name="label_9">
@@ -516,7 +550,11 @@
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QLineEdit" name="txtIterations"/>
+           <widget class="QLineEdit" name="txtIterations">
+            <property name="toolTip">
+             <string>Number of iterations for the Maximum Entropy method</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -537,12 +575,18 @@
               <property name="checked">
                <bool>true</bool>
               </property>
+              <property name="toolTip">
+               <string>No weighting applied to the data</string>
+              </property>
              </widget>
             </item>
             <item row="1" column="0">
              <widget class="QRadioButton" name="rbWeighting2">
               <property name="text">
                <string>Use dI Data</string>
+              </property>
+              <property name="toolTip">
+               <string>Weight data by its error values (dI)</string>
               </property>
              </widget>
             </item>
@@ -551,6 +595,9 @@
               <property name="text">
                <string>Use |sqrt(I Data)|</string>
               </property>
+              <property name="toolTip">
+               <string>Weight data by the square root of intensity values</string>
+              </property>
              </widget>
             </item>
             <item row="3" column="0">
@@ -558,10 +605,17 @@
               <property name="text">
                <string>Use % |I Data|</string>
               </property>
+              <property name="toolTip">
+               <string>Weight data as a percentage of intensity values</string>
+              </property>
              </widget>
             </item>
             <item row="3" column="1">
-             <widget class="QLineEdit" name="txtWgtPercent"/>
+             <widget class="QLineEdit" name="txtWgtPercent">
+              <property name="toolTip">
+               <string>Percentage value for percentage-based weighting</string>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
@@ -573,7 +627,11 @@
            </widget>
           </item>
           <item row="0" column="2">
-           <widget class="QLineEdit" name="txtWgtFactor"/>
+           <widget class="QLineEdit" name="txtWgtFactor">
+            <property name="toolTip">
+             <string>Overall weighting factor to apply to the data</string>
+            </property>
+           </widget>
           </item>
           <item row="0" column="3">
            <spacer name="horizontalSpacer_9">
@@ -605,7 +663,11 @@
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QLineEdit" name="txtBackgd"/>
+           <widget class="QLineEdit" name="txtBackgd">
+            <property name="toolTip">
+             <string>Flat background value (constant background in cm^-1)</string>
+            </property>
+           </widget>
           </item>
           <item row="0" column="2" colspan="2">
            <widget class="QLabel" name="label_8">
@@ -715,6 +777,9 @@
                  <property name="enabled">
                   <bool>true</bool>
                  </property>
+                 <property name="toolTip">
+                  <string>Minimum Q value for fitting flat background</string>
+                 </property>
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                    <horstretch>0</horstretch>
@@ -742,6 +807,9 @@
                  <property name="enabled">
                   <bool>true</bool>
                  </property>
+                 <property name="toolTip">
+                  <string>Maximum Q value for fitting flat background</string>
+                 </property>
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                    <horstretch>0</horstretch>
@@ -767,6 +835,9 @@
             <property name="text">
              <string>Fit flat background</string>
             </property>
+            <property name="toolTip">
+             <string>Fit the flat background component to the data in the specified Q range</string>
+            </property>
            </widget>
           </item>
           <item row="4" column="0" colspan="2">
@@ -788,6 +859,9 @@
                 <widget class="QLineEdit" name="txtPowerLawQMin">
                  <property name="enabled">
                   <bool>true</bool>
+                 </property>
+                 <property name="toolTip">
+                  <string>Minimum Q value for fitting power law background</string>
                  </property>
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -816,6 +890,9 @@
                  <property name="enabled">
                   <bool>true</bool>
                  </property>
+                 <property name="toolTip">
+                  <string>Maximum Q value for fitting power law background</string>
+                 </property>
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                    <horstretch>0</horstretch>
@@ -841,6 +918,9 @@
             <property name="text">
              <string>Fit power law</string>
             </property>
+            <property name="toolTip">
+             <string>Fit the power law component to the data in the specified Q range</string>
+            </property>
            </widget>
           </item>
          </layout>
@@ -860,12 +940,18 @@
        <property name="text">
         <string>Quick fit</string>
        </property>
+       <property name="toolTip">
+        <string>Perform a quick fit using fixed iteration parameters</string>
+       </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="fullFitButton">
        <property name="text">
         <string>Full fit</string>
+       </property>
+       <property name="toolTip">
+        <string>Perform a full fit with all parameters optimized</string>
        </property>
       </widget>
      </item>
@@ -895,6 +981,9 @@
        </property>
        <property name="text">
         <string>Help</string>
+       </property>
+       <property name="toolTip">
+        <string>Open help documentation for the Size Distribution perspective</string>
        </property>
       </widget>
      </item>
