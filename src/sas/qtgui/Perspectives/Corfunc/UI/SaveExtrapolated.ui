@@ -94,6 +94,9 @@
    <property name="alignment">
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
+   <property name="toolTip">
+    <string>Lower bound for extrapolation</string>
+   </property>
   </widget>
   <widget class="QLabel" name="lblHigh">
    <property name="geometry">
@@ -110,6 +113,9 @@
    <property name="alignment">
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
+   <property name="toolTip">
+    <string>Upper bound for extrapolation</string>
+   </property>
   </widget>
   <widget class="QLabel" name="lblDelta">
    <property name="geometry">
@@ -125,6 +131,9 @@
    </property>
    <property name="alignment">
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+   <property name="toolTip">
+    <string>Bin size for extrapolation</string>
    </property>
   </widget>
   <widget class="QLabel" name="units1">
@@ -178,6 +187,9 @@
    <property name="text">
     <string>OK</string>
    </property>
+   <property name="ToolTip">
+    <string>Save extrapolated data to file</string>
+   </property>
   </widget>
   <widget class="QPushButton" name="cmdCancel">
    <property name="geometry">
@@ -191,6 +203,9 @@
    <property name="text">
     <string>Cancel</string>
    </property>
+    <property name="ToolTip">
+     <string>Cancel and close dialog</string>
+    </property>
   </widget>
  </widget>
  <resources/>
