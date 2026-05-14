@@ -16,7 +16,7 @@ numpy
 packaging
 periodictable
 platformdirs
-pyausaxs < 1.1.4
+pyausaxs
 pybind11
 pylint
 pyopencl
