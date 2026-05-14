@@ -187,8 +187,8 @@
    <property name="text">
     <string>OK</string>
    </property>
-   <property name="ToolTip">
-    <string>Save extrapolated data to file</string>
+  <property name="toolTip">
+   <string>Save the extrapolated data to a file.</string>
    </property>
   </widget>
   <widget class="QPushButton" name="cmdCancel">
@@ -203,8 +203,8 @@
    <property name="text">
     <string>Cancel</string>
    </property>
-    <property name="ToolTip">
-     <string>Cancel and close dialog</string>
+    <property name="toolTip">
+     <string>Cancel and close the dialog.</string>
     </property>
   </widget>
  </widget>

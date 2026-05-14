@@ -302,7 +302,7 @@
                     <bool>true</bool>
                    </property>
                    <property name="toolTip">
-                    <string>Fit the Guinier region (low-Q) of the scattering data</string>
+                    <string>Fit the Guinier region (low-Q) of the scattering data.</string>
                    </property>
                   </widget>
                  </item>
@@ -315,7 +315,7 @@
                     <bool>true</bool>
                    </property>
                    <property name="toolTip">
-                    <string>Fit the Porod region (high-Q) of the scattering data</string>
+                    <string>Fit the Porod region (high-Q) of the scattering data.</string>
                    </property>
                   </widget>
                  </item>
@@ -345,7 +345,7 @@
                     </sizepolicy>
                    </property>
                    <property name="toolTip">
-                    <string>Minimum Q value for Porod region fitting (1/Angstrom)</string>
+                    <string>Minimum Q value for Porod region fitting (1/Angstrom).</string>
                    </property>
                   </widget>
                  </item>
@@ -381,7 +381,7 @@
                     </sizepolicy>
                    </property>
                    <property name="toolTip">
-                    <string>Maximum Q value for Porod region fitting (1/Angstrom)</string>
+                    <string>Maximum Q value for Porod region fitting (1/Angstrom).</string>
                    </property>
                   </widget>
                  </item>
@@ -407,7 +407,7 @@
                     </sizepolicy>
                    </property>
                    <property name="toolTip">
-                    <string>Maximum Q value for Guinier region fitting (1/Angstrom)</string>
+                    <string>Maximum Q value for Guinier region fitting (1/Angstrom).</string>
                    </property>
                   </widget>
                  </item>
@@ -1039,7 +1039,7 @@
               <item>
                <widget class="QPushButton" name="cmdSaveExtrapolation">
                 <property name="toolTip">
-                 <string>Save the extrapolated data (non-transformed)</string>
+                    <string>Save the extrapolated data (non-transformed).</string>
                 </property>
                 <property name="text">
                  <string>Export Extrapolated</string>
@@ -1055,7 +1055,7 @@
                  </sizepolicy>
                 </property>
                 <property name="toolTip">
-                 <string>Export the calculated real space correlation function to a file.</string>
+                 <string>Export the calculated real-space correlation function to a file.</string>
                 </property>
                 <property name="text">
                  <string>Export Transformed</string>
@@ -1068,7 +1068,7 @@
                  <string>Help</string>
                 </property>
                 <property name="toolTip">
-                 <string>Open help documentation for the Corfunc perspective</string>
+                 <string>Open the Corfunc perspective help documentation.</string>
                 </property>
                </widget>
               </item>
