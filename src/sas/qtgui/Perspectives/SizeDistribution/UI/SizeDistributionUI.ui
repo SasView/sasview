@@ -234,7 +234,7 @@
              <bool>true</bool>
             </property>
             <property name="toolTip">
-             <string>Scattering length density contrast between particles and solvent (10^-6 / Å^-2).</string>
+             <string>Scattering length density contrast between particles and solvent (10^-6 / Å^2).</string>
             </property>
            </widget>
           </item>
@@ -243,7 +243,7 @@
             <property name="text">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;10&lt;span
               style=&quot; vertical-align:super;&quot;&gt;-6&lt;/span&gt;/Å&lt;span
-              style=&quot; vertical-align:super;&quot;&gt;-2&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
+              style=&quot; vertical-align:super;&quot;&gt;2&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
              </string>
             </property>
            </widget>

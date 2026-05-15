@@ -587,7 +587,7 @@
                       <bool>false</bool>
                      </property>
                      <property name="toolTip">
-                      <string>Parameter describing the shapness of the SLD profile at the </string>
+                      <string>Parameter describing the sharpness of the SLD profile at the interface. </string>
                      </property>
                     </widget>
                    </item>
@@ -696,7 +696,7 @@
                     <bool>true</bool>
                    </property>
                    <property name="toolTip">
-                    <string>Polydispersity index according to Ryan's method (see Fibre Diffraction Review PDFs) </string>
+                    <string>Polydispersity index according to Eeckhaut's method (see help documentation).</string>
                    </property>
                   </widget>
                  </item>
@@ -731,7 +731,7 @@
                     </sizepolicy>
                    </property>
                    <property name="text">
-                    <string>Eekhaut:</string>
+                    <string>Eeckhaut:</string>
                    </property>
                    <property name="alignment">
                     <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
