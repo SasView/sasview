@@ -96,6 +96,7 @@
     <addaction name="actionMuMag_Fitter"/>
     <addaction name="actionGeneric_Scattering_Calculator"/>
     <addaction name="actionShape2SAS_Calculator"/>
+    <addaction name="actionRigidBodyRefinement"/>
     <addaction name="separator"/>
     <addaction name="actionImage_Viewer"/>
     <addaction name="actionOrientation_Viewer"/>
@@ -368,6 +369,11 @@
   <action name="actionShape2SAS_Calculator">
    <property name="text">
     <string>Shape2SAS Calculator (Experimental)</string>
+   </property>
+  </action>
+  <action name="actionRigidBodyRefinement">
+   <property name="text">
+    <string>Rigid-body refinement</string>
    </property>
   </action>
   <action name="actionGeneric_Scattering_Calculator">
