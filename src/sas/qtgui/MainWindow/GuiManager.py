@@ -24,7 +24,7 @@ from sas.qtgui.Calculators.DensityPanel import DensityPanel
 from sas.qtgui.Calculators.KiessigPanel import KiessigPanel
 from sas.qtgui.Calculators.ResolutionCalculatorPanel import ResolutionCalculatorPanel
 from sas.qtgui.Calculators.Shape2SAS.DesignWindow import DesignWindow as Shape2SAS
-from sas.qtgui.Calculators.SAXSPluginModelGeneratorWidget import RigidBodyRefinementWidget
+from sas.qtgui.Calculators.RigidbodyRefinement import RigidBodyRefinement
 from sas.qtgui.Calculators.SldPanel import SldPanel
 from sas.qtgui.Calculators.SlitSizeCalculator import SlitSizeCalculator
 from sas.qtgui.MainWindow.Acknowledgements import Acknowledgements
@@ -189,7 +189,7 @@ class GuiManager:
         self.SlitSizeCalculator = SlitSizeCalculator(self)
         self.ResolutionCalculator = ResolutionCalculatorPanel(self)
         self.Shape2SASCalculator =  Shape2SAS(self)
-        self.RigidBodyRefinementWidget = RigidBodyRefinementWidget(self._parent)
+        self.RigidBodyRefinement = RigidBodyRefinement(self._parent)
         self.GENSASCalculator = None
         self.DataOperation = DataOperationUtilityPanel(self)
         self.FileConverter = FileConverterWidget(self)
@@ -1037,7 +1037,7 @@ class GuiManager:
 
     def actionRigidBodyRefinement(self):
         try:
-            self.RigidBodyRefinementWidget.show()
+            self.RigidBodyRefinement.show()
         except Exception as ex:
             logger.error(str(ex))
             return
