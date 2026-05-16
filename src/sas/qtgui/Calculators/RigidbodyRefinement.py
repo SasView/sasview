@@ -1,4 +1,7 @@
+import contextlib
+import io
 import os
+import traceback
 
 import sas.qtgui.Calculators.RigidbodyRefinementUI as RigidBodyRefinementUI
 import pyausaxs as ausaxs
@@ -32,14 +35,33 @@ class RigidBodyRefinement:
         self.gui.set_load_pdb_hook(self.on_load_pdb)
         self.gui.set_load_data_hook(self.on_load_data)
         self.gui.finished.connect(self.on_finish)
+        self.gui.validate_requested.connect(self.on_validate)
+        self.gui.setValidElements(ausaxs.Rigidbody.get_valid_elements_and_arguments())
 
         self.block_load = self.BlockLoad()
         self.gui.setText(self.default_text())
 
     def on_finish(self, text: str):
         """Callback function to be called when the user finishes editing the script."""
+        self.on_validate(text)  # Validate the script first
         rigidbody = ausaxs.prepare_rigidbody_refinement(text)
-        rigidbody.validate()
+        rigidbody.run()
+
+    def on_validate(self, text: str):
+        """Validate the script and display results in the output pane."""
+        self.gui.clearOutput()
+        buf = io.StringIO()
+        try:
+            with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(buf):
+                rigidbody = ausaxs.prepare_rigidbody_refinement(text)
+                rigidbody.validate()
+            output = buf.getvalue()
+            self.gui.appendOutput(output if output else "Validation successful.")
+        except Exception as e:
+            output = buf.getvalue()
+            if output:
+                self.gui.appendOutput(output)
+            self.gui.appendOutput(f"{e}")
 
     def on_load_pdb(self, path: str):
         pdbfile = os.path.basename(path)

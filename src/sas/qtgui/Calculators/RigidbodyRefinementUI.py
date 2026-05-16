@@ -80,11 +80,15 @@ class RigidBodyHighlighter(QSyntaxHighlighter):
 
 class RigidBodyRefinementUI(QtWidgets.QDialog):
     finished = QtCore.Signal(str)
+    validate_requested = QtCore.Signal(str)
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Rigid-body refinement")
         self.resize(1200, 800)
+
+        self._operations = []
+        self._keywords   = []
 
         self._buildUI()
         self._connectSignals()
@@ -131,9 +135,19 @@ class RigidBodyRefinementUI(QtWidgets.QDialog):
         self.editor.cursorPositionChanged.connect(self._updateBracketHighlight)
         layout.addWidget(self.editor)
 
+        # Output pane
+        layout.addWidget(QtWidgets.QLabel("Output:"))
+        self.outputPane = QtWidgets.QPlainTextEdit(self)
+        self.outputPane.setReadOnly(True)
+        self.outputPane.setFont(GuiUtils.getMonospaceFont())
+        self.outputPane.setFixedHeight(150)
+        layout.addWidget(self.outputPane)
+
         # Bottom button row
         button_layout = QtWidgets.QHBoxLayout()
         button_layout.addStretch()
+        self.btnValidate = QtWidgets.QPushButton("Validate")
+        button_layout.addWidget(self.btnValidate)
         self.btnFinish = QtWidgets.QPushButton("Finish")
         self.btnFinish.setDefault(True)
         button_layout.addWidget(self.btnFinish)
@@ -142,6 +156,7 @@ class RigidBodyRefinementUI(QtWidgets.QDialog):
     def _connectSignals(self):
         self.btnLoadPdb.clicked.connect(self._onLoadPDB)
         self.btnLoadData.clicked.connect(self._onLoadData)
+        self.btnValidate.clicked.connect(self._onValidate)
         self.btnFinish.clicked.connect(self._onFinish)
 
     def _onLoadPDB(self):
@@ -167,21 +182,51 @@ class RigidBodyRefinementUI(QtWidgets.QDialog):
         self.finished.emit(self.editor.toPlainText())
         self.accept()
 
+    def _onValidate(self):
+        """Emit a validation request with the current editor text."""
+        self.validate_requested.emit(self.editor.toPlainText())
+
+    def appendOutput(self, text: str):
+        """Append text to the output pane."""
+        self.outputPane.appendPlainText(text.rstrip("\n"))
+
+    def clearOutput(self):
+        """Clear the output pane."""
+        self.outputPane.clear()
+
     def getText(self) -> str:
         """Return the current contents of the code editor."""
         return self.editor.toPlainText()
 
     def get_valid_operations(self) -> list[str]:
         """Return a list of valid operation keywords for syntax highlighting."""
-        return ["output", "load", "save", "parameter_strategy", "print", "loop", "end"]
+        return list(self._operations)
     
     def get_valid_keywords(self) -> list[str]:
         """Return a list of valid keywords for syntax highlighting."""
-        return ["pdb", "saxs", "split", "iterations", "translate", "rotate", "msg", "colour"]
+        return list(self._keywords)
 
     def get_scope_keywords(self) -> list[str]:
         """Return a list of keywords that introduce new scopes."""
         return ["loop", "optimize_once", "on_improvement"]
+
+    def setValidElements(self, elements_and_args: dict[str, list[str]]):
+        """Update operations and keywords from backend data and re-install the highlighter.
+
+        elements_and_args maps each valid element (first token of a line) to the list
+        of argument keywords it accepts.  Elements that only appear as arguments of
+        other elements (i.e. not themselves keys) are treated as keywords.
+        """
+        op_set = set(elements_and_args.keys())
+        kw_set = {arg for args in elements_and_args.values() for arg in args} - op_set
+        self._operations = list(op_set)
+        self._keywords = list(kw_set)
+        self._highlighter = RigidBodyHighlighter(
+            self.editor.document(),
+            self._operations,
+            self._keywords,
+            self.get_scope_keywords(),
+        )
 
     def _updateBracketHighlight(self):
         """Highlight the scope opener/end pair under the cursor."""
