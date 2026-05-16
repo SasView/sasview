@@ -1,9 +1,81 @@
 import os
+import re
 
 from PySide6 import QtCore, QtWidgets
+from PySide6.QtGui import QColor, QFont, QSyntaxHighlighter, QTextCharFormat
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.CustomGUI.CodeEditor import QCodeEditor
+
+
+class RigidBodyHighlighter(QSyntaxHighlighter):
+    # Colors assigned to successive nesting depths, cycling if deeper than 4
+    _SCOPE_COLORS = ["blue", "#CC6600", "#990099", "#CC0000"]
+
+    def __init__(self, document, operations, keywords, scope_keywords):
+        super().__init__(document)
+
+        self._op_fmt = QTextCharFormat()
+        self._op_fmt.setForeground(QColor("blue"))
+        self._op_fmt.setFontWeight(QFont.Weight.Bold)
+
+        self._kw_fmt = QTextCharFormat()
+        self._kw_fmt.setForeground(QColor("purple"))
+
+        self._comment_fmt = QTextCharFormat()
+        self._comment_fmt.setForeground(QColor("green"))
+
+        self._error_fmt = QTextCharFormat()
+        self._error_fmt.setForeground(QColor("red"))
+
+        self._scope_fmts = []
+        for color in self._SCOPE_COLORS:
+            fmt = QTextCharFormat()
+            fmt.setForeground(QColor(color))
+            fmt.setFontWeight(QFont.Weight.Bold)
+            self._scope_fmts.append(fmt)
+
+        self._operations = set(operations)
+        self._keywords = set(keywords)
+        self._scope_openers = set(scope_keywords)
+        self._first_token_re = re.compile(r'\S+')
+        self._comment_re = re.compile(r'#.*')
+
+    def _fmt_for_depth(self, depth: int) -> QTextCharFormat:
+        return self._scope_fmts[depth % len(self._scope_fmts)]
+
+    def highlightBlock(self, text: str):
+        prev = self.previousBlockState()
+        depth = prev if prev >= 0 else 0
+
+        # Highlight comment suffix first (green wins over any keyword inside a comment)
+        comment_match = self._comment_re.search(text)
+        if comment_match:
+            self.setFormat(comment_match.start(), len(comment_match.group()), self._comment_fmt)
+            scannable = text[:comment_match.start()]
+        else:
+            scannable = text
+
+        # Highlight first non-whitespace token only
+        token_match = self._first_token_re.search(scannable)
+        new_depth = depth
+        if token_match:
+            token = token_match.group()
+            if token == "end":
+                # Decrease depth first so `end` shares its opener's color
+                new_depth = max(0, depth - 1)
+                self.setFormat(token_match.start(), len(token), self._fmt_for_depth(new_depth))
+            elif token in self._scope_openers:
+                self.setFormat(token_match.start(), len(token), self._fmt_for_depth(depth))
+                new_depth = depth + 1
+            elif token in self._operations:
+                self.setFormat(token_match.start(), len(token), self._op_fmt)
+            elif token in self._keywords:
+                self.setFormat(token_match.start(), len(token), self._kw_fmt)
+            else:
+                self.setFormat(token_match.start(), len(token), self._error_fmt)
+
+        self.setCurrentBlockState(new_depth)
 
 
 class RigidBodyRefinementUI(QtWidgets.QDialog):
@@ -17,7 +89,6 @@ class RigidBodyRefinementUI(QtWidgets.QDialog):
         self._buildUI()
         self._connectSignals()
 
-        self.plain_text = ""
         self.on_load_pdb_hook = None
         self.on_load_data_hook = None
 
@@ -51,7 +122,12 @@ class RigidBodyRefinementUI(QtWidgets.QDialog):
         # Code editor
         self.editor = QCodeEditor(self)
         self.editor.setFont(GuiUtils.getMonospaceFont())
-        self.editor.textChanged.connect(self._onTextChanged)
+        self._highlighter = RigidBodyHighlighter(
+            self.editor.document(),
+            self.get_valid_operations(),
+            self.get_valid_keywords(),
+            self.get_scope_keywords(),
+        )
         layout.addWidget(self.editor)
 
         # Bottom button row
@@ -92,7 +168,7 @@ class RigidBodyRefinementUI(QtWidgets.QDialog):
 
     def getText(self) -> str:
         """Return the current contents of the code editor."""
-        return self.plain_text
+        return self.editor.toPlainText()
 
     def get_valid_operations(self) -> list[str]:
         """Return a list of valid operation keywords for syntax highlighting."""
@@ -106,56 +182,9 @@ class RigidBodyRefinementUI(QtWidgets.QDialog):
         """Return a list of keywords that introduce new scopes."""
         return ["loop", "optimize_once", "on_improvement"]
 
-    def get_syntax_colored_string(self, text: str) -> str:
-        """Return the given text wrapped in HTML for syntax coloring"""
-        if "#" in text: 
-            comment_index = text.index("#")
-            code_part = text[:comment_index]
-            comment_part = text[comment_index:]
-            text = code_part + f"<span style='color: green'>{comment_part}</span>"
-
-        i = 0
-        # consume leading whitespace safely (handle empty or all-whitespace lines)
-        while i < len(text) and text[i].isspace():
-            i += 1
-        whitespace = text[:i]
-        text = text[i:]
-
-        tokens = text.split()
-        token = tokens[0] if tokens else ""
-
-        if token in self.get_valid_operations():
-            # highlight only the leading token
-            text = f"<span style='color: blue; font-weight: bold'>{token}</span>" + text[len(token):]
-        elif token in self.get_valid_keywords():
-            text = f"<span style='color: purple'>{token}</span>" + text[len(token):]
-        # convert leading whitespace to non-breaking spaces so HTML preserves indentation
-        whitespace_html = whitespace.replace(' ', '&nbsp;').replace('\t', '&nbsp;'*4)
-        return whitespace_html + text
-
-    def _onTextChanged(self):
-        """Update the plain text version of the editor contents whenever it changes."""
-        # self.editor.blockSignals(True)
-        # line_index = self.editor.textCursor().blockNumber()
-        # current_line = self.editor.document().findBlockByNumber(line_index).text()
-        # syntaxed_line = self.get_syntax_colored_string(current_line)
-        # text = self.editor.toPlainText()
-        # self.plain_text = text
-        # lines = text.splitlines()
-        # if line_index < len(lines):
-        #     lines[line_index] = syntaxed_line
-        # self.editor.clear()
-        # for line in lines:
-        #     self.editor.appendHtml(line)
-        # self.editor.blockSignals(False)
-        return
-
     def setText(self, text: str):
         """Replace the entire contents of the code editor."""
-        self.editor.clear()
-        self.plain_text = text
-        for line in text.splitlines():
-            self.editor.appendHtml(self.get_syntax_colored_string(line))
+        self.editor.setPlainText(text)
 
     def set_load_pdb_hook(self, hook):
         """Set a callback function to be called when a PDB file is loaded."""
