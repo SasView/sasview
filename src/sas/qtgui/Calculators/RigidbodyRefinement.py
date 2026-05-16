@@ -1,6 +1,7 @@
 import os
 
 import sas.qtgui.Calculators.RigidbodyRefinementUI as RigidBodyRefinementUI
+import pyausaxs as ausaxs
 
 class RigidBodyRefinement:
     class BlockLoad:
@@ -30,9 +31,15 @@ class RigidBodyRefinement:
         self.gui = RigidBodyRefinementUI.RigidBodyRefinementUI(*args)
         self.gui.set_load_pdb_hook(self.on_load_pdb)
         self.gui.set_load_data_hook(self.on_load_data)
+        self.gui.finished.connect(self.on_finish)
 
         self.block_load = self.BlockLoad()
         self.gui.setText(self.default_text())
+
+    def on_finish(self, text: str):
+        """Callback function to be called when the user finishes editing the script."""
+        rigidbody = ausaxs.prepare_rigidbody_refinement(text)
+        rigidbody.validate()
 
     def on_load_pdb(self, path: str):
         pdbfile = os.path.basename(path)
@@ -54,8 +61,8 @@ class RigidBodyRefinement:
     def default_text(self) -> str:
         return r"""output output/rigidbody/normal/
 load {
-    pdb tests/files/LAR1-2.pdb
-    saxs tests/files/LAR1-2.dat
+    pdb test/sascalculator/data/LAR1-2.pdb
+    saxs test/sascalculator/data/LAR1-2.dat
     split 9, 99
 }
 save initial_state.pdb

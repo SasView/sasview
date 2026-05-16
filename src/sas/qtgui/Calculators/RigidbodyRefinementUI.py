@@ -2,7 +2,7 @@ import os
 import re
 
 from PySide6 import QtCore, QtWidgets
-from PySide6.QtGui import QColor, QFont, QSyntaxHighlighter, QTextCharFormat
+from PySide6.QtGui import QColor, QFont, QSyntaxHighlighter, QTextCharFormat, QTextCursor, QTextFormat
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.CustomGUI.CodeEditor import QCodeEditor
@@ -128,6 +128,7 @@ class RigidBodyRefinementUI(QtWidgets.QDialog):
             self.get_valid_keywords(),
             self.get_scope_keywords(),
         )
+        self.editor.cursorPositionChanged.connect(self._updateBracketHighlight)
         layout.addWidget(self.editor)
 
         # Bottom button row
@@ -181,6 +182,66 @@ class RigidBodyRefinementUI(QtWidgets.QDialog):
     def get_scope_keywords(self) -> list[str]:
         """Return a list of keywords that introduce new scopes."""
         return ["loop", "optimize_once", "on_improvement"]
+
+    def _updateBracketHighlight(self):
+        """Highlight the scope opener/end pair under the cursor."""
+        block = self.editor.textCursor().block()
+        tokens = block.text().lstrip().split()
+        first_token = tokens[0] if tokens else ""
+
+        scope_openers = set(self.get_scope_keywords())
+        if first_token not in scope_openers and first_token != "end":
+            self.editor.setBracketSelections([])
+            return
+
+        pair_block = self._find_scope_pair(block, first_token, scope_openers)
+        if pair_block is None:
+            self.editor.setBracketSelections([])
+            return
+
+        fmt = QTextCharFormat()
+        fmt.setBackground(QColor("#D6EAF8"))
+        fmt.setProperty(QTextFormat.FullWidthSelection, True)
+
+        selections = []
+        for b in (block, pair_block):
+            sel = QtWidgets.QTextEdit.ExtraSelection()
+            sel.format = fmt
+            sel.cursor = QTextCursor(b)
+            sel.cursor.clearSelection()
+            selections.append(sel)
+
+        self.editor.setBracketSelections(selections)
+
+    def _find_scope_pair(self, block, first_token: str, scope_openers: set):
+        """Return the block that matches the scope opener or 'end' on the given block."""
+        if first_token in scope_openers:
+            block_iter = block.next()
+            stack = 0
+            while block_iter.isValid():
+                token = block_iter.text().lstrip().split()
+                token = token[0] if token else ""
+                if token in scope_openers:
+                    stack += 1
+                elif token == "end":
+                    if stack == 0:
+                        return block_iter
+                    stack -= 1
+                block_iter = block_iter.next()
+        else:  # first_token == "end"
+            block_iter = block.previous()
+            stack = 0
+            while block_iter.isValid():
+                token = block_iter.text().lstrip().split()
+                token = token[0] if token else ""
+                if token == "end":
+                    stack += 1
+                elif token in scope_openers:
+                    if stack == 0:
+                        return block_iter
+                    stack -= 1
+                block_iter = block_iter.previous()
+        return None
 
     def setText(self, text: str):
         """Replace the entire contents of the code editor."""
