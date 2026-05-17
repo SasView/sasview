@@ -1,9 +1,9 @@
-import contextlib
-import io
 import os
 import traceback
 
 import sas.qtgui.Calculators.RigidbodyRefinementUI as RigidBodyRefinementUI
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Plotting.PlotterData import Data1D
 import pyausaxs as ausaxs
 
 class RigidBodyRefinement:
@@ -42,25 +42,44 @@ class RigidBodyRefinement:
         self.gui.setText(self.default_text())
 
     def on_finish(self, text: str):
-        """Callback function to be called when the user finishes editing the script."""
-        self.on_validate(text)  # Validate the script first
-        rigidbody = ausaxs.prepare_rigidbody_refinement(text)
-        rigidbody.run()
+        """Run the refinement script, showing results in the output pane."""
+        self.gui.clearOutput()
+        try:
+            rigidbody = ausaxs.prepare_rigidbody_refinement(text)
+            self._send_results_to_data_explorer(rigidbody.run())
+            self.gui.appendOutput("Refinement completed.")
+        except Exception as e:
+            self.gui.appendOutput(f"{e}")
+
+    def _send_results_to_data_explorer(self, res):
+        """Send the refinement results (q, I, I_err, I_model) to the Data Explorer."""
+        q, I, I_err, I_model = res[:, 0], res[:, 1], res[:, 2], res[:, 3]
+
+        data_exp = Data1D(x=q, y=I, dy=I_err)
+        data_exp.title = "Rigidbody refinement (data)"
+        data_exp.id = data_exp.title
+        data_exp.xaxis(r'\rm{Q}', r'\AA^{-1}')
+        data_exp.yaxis(r'\rm{Intensity}', 'cm^{-1}')
+
+        data_model = Data1D(x=q, y=I_model)
+        data_model.title = "Rigidbody refinement (model)"
+        data_model.id = data_model.title
+        data_model.xaxis(r'\rm{Q}', r'\AA^{-1}')
+        data_model.yaxis(r'\rm{Intensity}', 'cm^{-1}')
+
+        item_exp = GuiUtils.createModelItemWithPlot(data_exp, name=data_exp.title)
+        GuiUtils.updateModelItemWithPlot(item_exp, data_model, name=data_model.title)
+        GuiUtils.communicator.updateModelFromPerspectiveSignal.emit(item_exp)
+        GuiUtils.communicator.forcePlotDisplaySignal.emit([item_exp, data_model])
 
     def on_validate(self, text: str):
         """Validate the script and display results in the output pane."""
         self.gui.clearOutput()
-        buf = io.StringIO()
         try:
-            with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(buf):
-                rigidbody = ausaxs.prepare_rigidbody_refinement(text)
-                rigidbody.validate()
-            output = buf.getvalue()
-            self.gui.appendOutput(output if output else "Validation successful.")
+            rigidbody = ausaxs.prepare_rigidbody_refinement(text)
+            rigidbody.validate()
+            self.gui.appendOutput("Validation successful.")
         except Exception as e:
-            output = buf.getvalue()
-            if output:
-                self.gui.appendOutput(output)
             self.gui.appendOutput(f"{e}")
 
     def on_load_pdb(self, path: str):
@@ -89,7 +108,7 @@ load {
 }
 save initial_state.pdb
 save trajectory.xyz
-parameter_strategy {
+parameter_generator {
     iterations 3
     translate 1
     rotate 1

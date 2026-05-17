@@ -201,7 +201,7 @@ class RigidBodyRefinementUI(QtWidgets.QDialog):
     def get_valid_operations(self) -> list[str]:
         """Return a list of valid operation keywords for syntax highlighting."""
         return list(self._operations)
-    
+
     def get_valid_keywords(self) -> list[str]:
         """Return a list of valid keywords for syntax highlighting."""
         return list(self._keywords)
