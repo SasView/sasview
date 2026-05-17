@@ -1,3 +1,4 @@
+import html
 import os
 import re
 
@@ -6,6 +7,44 @@ from PySide6.QtGui import QColor, QFont, QSyntaxHighlighter, QTextCharFormat, QT
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.CustomGUI.CodeEditor import QCodeEditor
+
+# ANSI SGR code → CSS hex colour for a light-background widget.
+# Codes not listed (0 = reset, 30 = black, 97 = bright-white) produce
+# unstyled text so they remain legible on a white background.
+_ANSI_RE = re.compile(r'\x1b\[(\d+)m')
+_ANSI_COLOR_MAP: dict[int, str] = {
+    31: "#cc0000",  # red          – warnings
+    32: "#006600",  # green        – accepted steps
+    33: "#cc6600",  # yellow/amber – cautions
+    34: "#0000cc",  # blue
+    35: "#990099",  # magenta
+    36: "#007777",  # cyan
+    37: "#777777",  # light grey
+    90: "#555555",  # dark grey
+    91: "#dd0000",  # bright red
+    92: "#008800",  # bright green
+    93: "#996600",  # bright yellow/amber
+    94: "#0044cc",  # bright blue
+    95: "#aa00aa",  # bright magenta
+    96: "#007799",  # bright cyan
+}
+
+
+def _ansi_to_html(text: str) -> str:
+    """Convert ANSI SGR colour codes in *text* to HTML <span> tags."""
+    parts = []
+    pos = 0
+    color: str | None = None
+    for match in _ANSI_RE.finditer(text):
+        segment = html.escape(text[pos:match.start()])
+        if segment:
+            parts.append(f'<span style="color:{color};">{segment}</span>' if color else segment)
+        color = _ANSI_COLOR_MAP.get(int(match.group(1)))
+        pos = match.end()
+    segment = html.escape(text[pos:])
+    if segment:
+        parts.append(f'<span style="color:{color};">{segment}</span>' if color else segment)
+    return "".join(parts)
 
 
 class RigidBodyHighlighter(QSyntaxHighlighter):
@@ -72,7 +111,7 @@ class RigidBodyHighlighter(QSyntaxHighlighter):
                 self.setFormat(token_match.start(), len(token), self._op_fmt)
             elif token in self._keywords:
                 self.setFormat(token_match.start(), len(token), self._kw_fmt)
-            else:
+            elif token is not "}":
                 self.setFormat(token_match.start(), len(token), self._error_fmt)
 
         self.setCurrentBlockState(new_depth)
@@ -186,8 +225,14 @@ class RigidBodyRefinementUI(QtWidgets.QDialog):
         self.validate_requested.emit(self.editor.toPlainText())
 
     def appendOutput(self, text: str):
-        """Append text to the output pane."""
-        self.outputPane.appendPlainText(text.rstrip("\n"))
+        """Append one line of (optionally ANSI-coloured) text to the output pane."""
+        text = text.rstrip("\n")
+        cursor = self.outputPane.textCursor()
+        cursor.movePosition(QTextCursor.MoveOperation.End)
+        if self.outputPane.toPlainText():
+            cursor.insertBlock()
+        cursor.insertHtml(_ansi_to_html(text))
+        self.outputPane.ensureCursorVisible()
 
     def clearOutput(self):
         """Clear the output pane."""
