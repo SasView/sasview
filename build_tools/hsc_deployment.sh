@@ -1,0 +1,1 @@
+apt-get -y install --no-install-recommends libegl1 libopengl0 libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils xvfb libxcb-cursor0
