@@ -1,5 +1,4 @@
 import os
-import traceback
 
 import sas.qtgui.Calculators.RigidbodyRefinementUI as RigidBodyRefinementUI
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
@@ -42,14 +41,22 @@ class RigidBodyRefinement:
         self.gui.setText(self.default_text())
 
     def on_finish(self, text: str):
-        """Run the refinement script, showing results in the output pane."""
+        """Run the refinement script and display results."""
         self.gui.clearOutput()
+        self.gui.setRunning(True)
         try:
             rigidbody = ausaxs.prepare_rigidbody_refinement(text)
-            self._send_results_to_data_explorer(rigidbody.run())
+            ausaxs.set_output_callback(self.gui.appendOutput)
+            try:
+                result = rigidbody.run()
+            finally:
+                ausaxs.reset_output_callback()
+            self._send_results_to_data_explorer(result)
             self.gui.appendOutput("Refinement completed.")
         except Exception as e:
             self.gui.appendOutput(f"{e}")
+        finally:
+            self.gui.setRunning(False)
 
     def _send_results_to_data_explorer(self, res):
         """Send the refinement results (q, I, I_err, I_model) to the Data Explorer."""

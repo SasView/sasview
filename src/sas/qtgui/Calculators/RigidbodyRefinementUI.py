@@ -178,9 +178,8 @@ class RigidBodyRefinementUI(QtWidgets.QDialog):
             if self.on_load_data_hook: self.on_load_data_hook(path)
 
     def _onFinish(self):
-        """Emit the current editor text and close the dialog."""
+        """Emit the current editor text; dialog stays open to show live output."""
         self.finished.emit(self.editor.toPlainText())
-        self.accept()
 
     def _onValidate(self):
         """Emit a validation request with the current editor text."""
@@ -193,6 +192,11 @@ class RigidBodyRefinementUI(QtWidgets.QDialog):
     def clearOutput(self):
         """Clear the output pane."""
         self.outputPane.clear()
+
+    def setRunning(self, running: bool):
+        """Disable interactive elements while a refinement run is in progress."""
+        self.btnFinish.setEnabled(not running)
+        self.btnValidate.setEnabled(not running)
 
     def getText(self) -> str:
         """Return the current contents of the code editor."""
