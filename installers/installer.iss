@@ -2,8 +2,8 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "SasView"
-#define MyAppVersion "6.1.3"
-#define MyAppPublisher "(c) 2009 - 2026, UTK, NIST, UMD, ORNL, ISIS, ESS, ILL, ANSTO, TU Delft, DLS, SciLifeLab, and the scattering community"
+#define MyAppVersion "6.2.0a1"
+#define MyAppPublisher "(c) 2009 - 2026, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO, BAM, TU Delft, and DLS"
 #define MyAppURL "http://www.sasview.org"
 #define MyAppExeName "sasview.exe"
 
