@@ -325,13 +325,17 @@ if os.path.exists('rst_prolog'):
 
 numfig = True
 
-if sphinx.version_info[0] >= 3:   # CRUFT
 
-    # Skip the monkey-patched 'sas.models' which grafts the sasmodels classes
-    # back into their old location in sasview, but causes autodoc to explode.
-    def autodoc_skip_member_handler(app, what, name, obj, skip, options):
-        return name.startswith("sas.models")
+def autodoc_skip_member_handler(app, what, name, obj, would_skip, options):
+    """customise which functions are included in the apidocs
 
-    def setup(app):
-        # Connect the autodoc-skip-member event from apidoc to the callback
-        app.connect('autodoc-skip-member', autodoc_skip_member_handler)
+    returns True to indicate that an item should be skipped
+    """
+    if name.startswith("sas.models"):
+        return True
+
+    return would_skip
+
+def setup(app):
+    # Connect the autodoc-skip-member event from apidoc to the callback
+    app.connect('autodoc-skip-member', autodoc_skip_member_handler)
