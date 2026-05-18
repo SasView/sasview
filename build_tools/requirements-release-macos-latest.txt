@@ -139,8 +139,8 @@ rlPyCairo==0.4.0
 roman==5.2
 roman-numerals==4.1.0
 rpds-py==0.30.0
-sasdata @ git+https://github.com/SasView/sasdata.git@release-0.12.0
-sasmodels @ git+https://github.com/SasView/sasmodels.git@release-1.1.0
+sasdata @ git+https://github.com/SasView/sasdata.git@release_0.12.0
+sasmodels @ git+https://github.com/SasView/sasmodels.git@release_1.1.0
 scipy==1.17.1
 setuptools==82.0.1
 shiboken6==6.11.1
