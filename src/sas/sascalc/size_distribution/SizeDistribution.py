@@ -23,11 +23,11 @@ logger = logging.getLogger(__name__)
 
 def add_gaussian_noise(x: npt.ArrayLike, dx: npt.ArrayLike, seed: int | None = None) -> npt.NDArray:
     """
-    Add Gaussian noise to data based on the sigma of the Guassian uncertainty
+    Add Gaussian noise to data based on the sigma of the Gaussian uncertainty
     value associated with the data.
 
-    :param x: nput intensity values
-    :param dx: sigma of Guassian uncertainties associated with the intensities
+    :param x: input intensity values
+    :param dx: sigma of Gaussian uncertainties associated with the intensities
     :param seed: random seed for reproducibility (default: None)
     :return: data with added Gaussian noise
     """
@@ -190,8 +190,8 @@ class sizeDistribution:
         self._binDiff: np.ndarray = np.array([])
         self._volumes: np.ndarray | None = None
 
-        # Return Values after the MaxEnt should
-        self.BinMagnitude_maxEnt: np.ndarray = np.zeros_like(self.bins)
+        # Return Values after the MaxEnt fit
+        self.BinMagnitude_maxEnt: np.ndarray = np.array([], dtype=float)
         self.BinMagnitude_Errs: np.ndarray | None = None
         self.BinMag_numberDist: np.ndarray | None = None
         self.number_cdf: np.ndarray | None = None
@@ -534,7 +534,7 @@ class sizeDistribution:
         1. Subtract intensities from the raw data.
         2. Trim the data to the correct q-range for maxEnt; Create new trimmed Data1D object to return after MaxEnt.
         3. Generate Model Data based of the trimmed data.
-        4. Create a list of intensities for maxEnt, if full_fit == True , call add_gausisan_noise nreps times;
+        4. Create a list of intensities for maxEnt, if full_fit == True , call add_gaussian_noise nreps times;
             pass just subtracted intensities.
         5. Calculate initial bin weights, sigma, and return.
 
@@ -550,7 +550,8 @@ class sizeDistribution:
         pars_keys = ["x", "y", "dx", "dy"]
         trim_data_pars = {}
 
-        assert len(sub_intensities.y) == len(self._data.y)
+        if len(sub_intensities.y) != len(self._data.y):
+            logger.error("The length of the subtracted intensities does not match the length of the data. ")
 
         for pkey in pars_keys:
             check_data = pkey in list(self._data.__dict__.keys())
@@ -619,7 +620,7 @@ class sizeDistribution:
                 ChiSq.append(chisq)
                 BinMag.append(bin_magnitude)
                 IMaxEnt.append(icalc)
-                convergence.append([converged, conv_iter])
+                convergence.append((converged, conv_iter))
                 if not converged:
                     logger.warning(
                         "Maximum Entropy did not converge. Try increasing the weight factor "
@@ -627,7 +628,7 @@ class sizeDistribution:
                     )
             except ZeroDivisionError:
                 logger.error(
-                    "Divide by Zero Error occured in maximum entropy fitting. "
+                    "Divide by Zero Error occurred in maximum entropy fitting. "
                     "Try increasing the weight factor to increase the error weighting"
                 )
 
@@ -664,7 +665,14 @@ class sizeDistribution:
 
         return convergence
 
-    def calculate_statistics(self, bin_mag: list) -> None:
+    def calculate_statistics(self, bin_mag: npt.ArrayLike) -> None:
+        """
+        Calculate statistics from the MaxEnt results, including volume fraction cumulative distribution function (CDF),
+        number distribution, and related statistics such as mean, median, and mode.
+        
+        :param bin_mag: list of bin magnitudes from the MaxEnt fits
+        """
+        bin_mag = np.asarray(bin_mag)
         maxent_cdf_array = integrate.cumulative_trapezoid(bin_mag / (2 * self._binDiff), 2 * self.bins, axis=1)
         self.BinMag_numberDist = self.BinMagnitude_maxEnt / ellipse_volume(self.aspectRatio * self.bins, self.bins)
 
