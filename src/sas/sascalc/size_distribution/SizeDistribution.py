@@ -13,8 +13,8 @@ import numpy.typing as npt
 from scipy import integrate, optimize, stats
 
 from sasdata.dataloader.data_info import Data1D
-from sasmodels.core import load_model
-from sasmodels.direct_model import DirectModel
+from sasmodels.core import build_model, load_model_info
+from sasmodels.direct_model import call_Fq
 
 from sas.sascalc.size_distribution.maxEnt_method import maxEntMethod
 
@@ -114,6 +114,7 @@ def background_fit(
         # Fit only scale
         def fit_func(x: npt.ArrayLike, b: float) -> npt.ArrayLike:
             return line_func(x, b, power)
+
         init_guess = linearized_data.y[0]
 
     else:
@@ -177,6 +178,7 @@ class sizeDistribution:
         self._resolution: float | None = None
 
         self.model_matrix: np.ndarray | None = None
+        self._volumes = None
 
         # Advanced parameters for MaxEnt
         self._iterMax: int = 5000
@@ -483,8 +485,6 @@ class sizeDistribution:
         :param moddata: Data1D object that has the data trimmed depending on background
             subtraction or power law subtracted from the data. Also self.qMin and self.qMax.
         """
-        model = load_model(self.model)
-
         pars = {
             "sld": self.contrast,
             "sld_solvent": 0.0,
@@ -492,15 +492,38 @@ class sizeDistribution:
             "scale": 1.0,
         }
 
-        kernel = DirectModel(moddata, model)
-
         intensities = []
+        volumes = []
+
+        # Build a single Kernel to compute both intensity and volume per bin
+        model_info = load_model_info(self.model)
+        model_obj = build_model(model_info)
+        calculator = model_obj.make_kernel((moddata.x,))
+
         for bin in self.bins:
-            pars["radius_equatorial"] = bin
-            pars["radius_polar"] = bin * self.aspectRatio
-            intensities.append(kernel(**pars))
+            p = pars.copy()
+            p["radius_equatorial"] = bin
+            p["radius_polar"] = bin * self.aspectRatio
+
+            call_pars = p.copy()
+            _, Fsq, _, volume, volume_ratio = call_Fq(calculator, call_pars)
+
+            # Compute intensity using kernel convention: combined_scale = scale / shell_volume
+            scale_val = p.get("scale", 1.0)
+            background_val = p.get("background", 0.0)
+            combined_scale = scale_val / volume
+
+            intensity = combined_scale * Fsq + background_val
+            intensities.append(intensity)
+
+            # Volume ratio is 1 for solid particles
+            if volume_ratio is not None:
+                volume *= volume_ratio
+
+            volumes.append(volume)
 
         self.model_matrix = np.vstack(intensities).T
+        self._volumes = np.array(volumes)
 
     def calc_volume_weighted_dist(self, binmag: np.ndarray) -> None:
         """
@@ -669,7 +692,7 @@ class sizeDistribution:
         """
         Calculate statistics from the MaxEnt results, including volume fraction cumulative distribution function (CDF),
         number distribution, and related statistics such as mean, median, and mode.
-        
+
         :param bin_mag: list of bin magnitudes from the MaxEnt fits
         """
         bin_mag = np.asarray(bin_mag)
