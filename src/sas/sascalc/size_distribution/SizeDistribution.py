@@ -55,7 +55,7 @@ def line_func(x: npt.ArrayLike, b: float, m: float) -> npt.ArrayLike:
 
     .. math:: y = A x^m
     ln(y) = ln(A) + m*ln(x)
-    where b = ln(A) and m = m
+    where b = ln(A)
 
     :param x: independent variable
     :param b: ln(A) where A is the scale factor
@@ -219,7 +219,7 @@ class sizeDistribution:
 
     @data.setter
     def data(self, value: Data1D) -> None:
-        """Set the data ."""
+        """Set the data."""
         self._data = value
 
     @property
@@ -320,15 +320,15 @@ class sizeDistribution:
 
     def set_bins(self) -> None:
         """Set the bins for the size distribution based on the current diamMin, diamMax, nbins, and logbin settings."""
-        # bins are in radius distances
+        # Bins are in radius distances, so half of diamMin and diamMax
         if self.logbin:
-            self._bins = np.logspace(np.log10(self.diamMin), np.log10(self.diamMax), self.nbins + 1, True) / 2
+            self._bins = np.logspace(np.log10(self.diamMin), np.log10(self.diamMax), self.nbins + 1, True) * 0.5
         else:
-            self._bins = np.linspace(self.diamMin, self.diamMax, self.nbins + 1, True) / 2
+            self._bins = np.linspace(self.diamMin, self.diamMax, self.nbins + 1, True) * 0.5
 
         self._bin_edges = self._bins
         self._binDiff = np.diff(self._bins)
-        self._bins = self._bins[:-1] + self._binDiff / 2
+        self._bins = self._bins[:-1] + self._binDiff * 0.5
 
     @property
     def model(self) -> str:
@@ -481,7 +481,7 @@ class sizeDistribution:
         probably should be generalized to a class to use maxent on any parameter of interest w/in the model.
         For now, the pars are fixed.
         :param moddata: Data1D object that has the data trimmed depending on background
-            subtraction or powerlaw subtracted from the data. Also self.qMin and self.qMax.
+            subtraction or power law subtracted from the data. Also self.qMin and self.qMax.
         """
         model = load_model(self.model)
 
@@ -532,10 +532,10 @@ class sizeDistribution:
     ) -> tuple[Data1D, list[npt.NDArray], npt.NDArray, npt.NDArray]:
         """
         1. Subtract intensities from the raw data.
-        2. Trim the data to the correct q-range for maxEnt; Create new trimmed Data1D object to return after MaxEnt.
+        2. Trim the data to the correct q-range for maxEnt; create new trimmed Data1D object to return after MaxEnt.
         3. Generate Model Data based of the trimmed data.
         4. Create a list of intensities for maxEnt, if full_fit == True , call add_gaussian_noise nreps times;
-            pass just subtracted intensities.
+            if False, pass just the subtracted intensities.
         5. Calculate initial bin weights, sigma, and return.
 
         :param sub_intensities: Data1D object with y=A*x^M + B; should have dy as well
@@ -591,14 +591,14 @@ class sizeDistribution:
 
     def run_maxEnt(
         self,
-        maxentdata: Data1D,
+        maxEntData: Data1D,
         intensities: list[npt.NDArray],
         BinsBack: npt.NDArray,
         sigma: npt.NDArray,
     ) -> list[tuple[bool, int]]:
         """
         Run the Maximum Entropy method on the provided intensities and return the results.
-        :param maxentdata: Data1D object that will be updated with the results of the MaxEnt fit (y and dy)
+        :param maxEntData: Data1D object that will be updated with the results of the MaxEnt fit (y and dy)
         :param intensities: list of intensity arrays to run MaxEnt on
         :param BinsBack: initial bin magnitudes for the MaxEnt fit
         :param sigma: array of weights for the MaxEnt fit
@@ -616,7 +616,12 @@ class sizeDistribution:
                 chisq, bin_magnitude, icalc, converged, conv_iter = MethodCall.MaxEnt_SB(
                     intensity, sigma, self.model_matrix, BinsBack, self.iterMax, report=False
                 )
-
+            except ZeroDivisionError:
+                logger.error(
+                    "Divide by Zero Error occurred in maximum entropy fitting. "
+                    "Try increasing the weight factor to increase the error weighting"
+                )
+            else:
                 ChiSq.append(chisq)
                 BinMag.append(bin_magnitude)
                 IMaxEnt.append(icalc)
@@ -626,11 +631,6 @@ class sizeDistribution:
                         "Maximum Entropy did not converge. Try increasing the weight factor "
                         "to increase the weighting effect."
                     )
-            except ZeroDivisionError:
-                logger.error(
-                    "Divide by Zero Error occurred in maximum entropy fitting. "
-                    "Try increasing the weight factor to increase the error weighting"
-                )
 
         # If all bin magnitudes are NaN, raise an error and let the caller handle it
         if np.isnan(BinMag).all():
@@ -642,18 +642,18 @@ class sizeDistribution:
             self.BinMagnitude_maxEnt = np.mean(BinMag, axis=0) / (2.0 * self._binDiff)
 
             self.BinMagnitude_Errs = None
-            maxentdata.y = np.mean(IMaxEnt, axis=0)
-            maxentdata.dy = None
-            self.Iq_maxEnt = maxentdata
+            maxEntData.y = np.mean(IMaxEnt, axis=0)
+            maxEntData.dy = None
+            self.Iq_maxEnt = maxEntData
 
         elif len(intensities) > 1:
             self.chiSq_maxEnt = np.mean(ChiSq)
             self.BinMagnitude_maxEnt = np.mean(BinMag, axis=0) / (2.0 * self._binDiff)
 
             self.BinMagnitude_Errs = np.std(BinMag, axis=0) / (2.0 * self._binDiff)
-            maxentdata.y = np.mean(IMaxEnt, axis=0)
-            maxentdata.dy = np.std(IMaxEnt, axis=0)
-            self.Iq_maxEnt = maxentdata
+            maxEntData.y = np.mean(IMaxEnt, axis=0)
+            maxEntData.dy = np.std(IMaxEnt, axis=0)
+            self.Iq_maxEnt = maxEntData
 
         else:
             logger.error(
