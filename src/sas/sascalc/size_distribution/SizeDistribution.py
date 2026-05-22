@@ -453,7 +453,7 @@ class sizeDistribution:
         """Return the weights for the size distribution."""
         return self._weights
 
-    def update_weights(self, sigma: np.ndarray | None = None) -> None:
+    def update_weights(self, sigma: Data1D | None = None) -> None:
         """Update the weights based on the current weightType and the provided sigma or data uncertainties."""
         if sigma is None:
             wdata = self.data
