@@ -43,7 +43,7 @@ def add_gaussian_noise(x: npt.ArrayLike, dx: npt.ArrayLike, seed: int | None = N
 
     # Generate and add noise
     rng = np.random.default_rng(seed)
-    noise = rng.normal(0, std_dev)
+    noise = rng.normal(0.0, std_dev)
     noisy_data = data + noise
 
     return noisy_data
@@ -120,7 +120,7 @@ def background_fit(
         # Fit both the power and scale
 
         fit_func = line_func
-        init_guess = (linearized_data.y[0], 4)
+        init_guess = (linearized_data.y[0], 4.0)
 
     param_result, pcov = optimize.curve_fit(
         fit_func, linearized_data.x, linearized_data.y, init_guess, sigma=linearized_data.dy
@@ -145,7 +145,7 @@ def ellipse_volume(rp: float, re: float) -> float:
     :param re: equatorial radius
     :return: volume of the ellipsoid
     """
-    return (4 * np.pi / 3) * rp * re**2
+    return (4.0 * np.pi / 3.0) * rp * re**2.0
 
 
 class sizeDistribution:
@@ -160,8 +160,8 @@ class sizeDistribution:
         self._ndx_qmax: int = -1
 
         # MaxEntropy bin parameters
-        self._diamMin: float = 10
-        self._diamMax: float = 100000
+        self._diamMin: float = 10.0
+        self._diamMax: float = 100000.0
         self._nbins: int = 2
         self._logbin: bool = True
         self._bins: np.ndarray | None = None
@@ -508,18 +508,18 @@ class sizeDistribution:
         Calculate the volume weighted distribution.
         """
         if self.logbin:
-            radbins = np.logspace(np.log10(self.diamMin), np.log10(self.diamMax), self.nbins + 1, True) / 2
+            radbins = np.logspace(np.log10(self.diamMin), np.log10(self.diamMax), self.nbins + 1, True) * 0.5
 
         else:
-            radbins = np.linspace(self.diamMin, self.diamMax, self.nbins + 1, True) / 2
+            radbins = np.linspace(self.diamMin, self.diamMax, self.nbins + 1, True) * 0.5
 
         self.volume_bins = ellipse_volume(self.aspectRatio * radbins, radbins)
         self.vbin_diff = np.diff(self.volume_bins)
-        self.volume_bins = self.volume_bins[:-1] + self.vbin_diff / 2
-        self.volume_fraction = binmag * self.volume_bins / (2 * self.vbin_diff)
+        self.volume_bins = self.volume_bins[:-1] + self.vbin_diff * 0.5
+        self.volume_fraction = binmag * self.volume_bins / (2.0 * self.vbin_diff)
 
         if self.BinMagnitude_Errs is not None:
-            self.volume_fraction_errs = self.BinMagnitude_Errs * (self.volume_bins / (2 * self.vbin_diff))
+            self.volume_fraction_errs = self.BinMagnitude_Errs * (self.volume_bins / (2.0 * self.vbin_diff))
         else:
             self.volume_fraction_errs = None
 
@@ -673,19 +673,19 @@ class sizeDistribution:
         :param bin_mag: list of bin magnitudes from the MaxEnt fits
         """
         bin_mag = np.asarray(bin_mag)
-        maxent_cdf_array = integrate.cumulative_trapezoid(bin_mag / (2 * self._binDiff), 2 * self.bins, axis=1)
+        maxent_cdf_array = integrate.cumulative_trapezoid(bin_mag / (2.0 * self._binDiff), 2.0 * self.bins, axis=1)
         self.BinMag_numberDist = self.BinMagnitude_maxEnt / ellipse_volume(self.aspectRatio * self.bins, self.bins)
 
         rvdist = stats.rv_histogram(
-            (self.BinMagnitude_maxEnt, self._bin_edges * 2), density=True
+            (self.BinMagnitude_maxEnt, self._bin_edges * 2.0), density=True
         )  # volume fraction weighted
-        number_cdf = integrate.cumulative_trapezoid(self.BinMag_numberDist, 2 * self.bins)
+        number_cdf = integrate.cumulative_trapezoid(self.BinMag_numberDist, 2.0 * self.bins)
         self.number_cdf = number_cdf / number_cdf[-1]
 
         self.volumefrac_cdf = np.mean(maxent_cdf_array, axis=0) / np.mean(maxent_cdf_array[:, -1])
         self.MaxEnt_statistics["volume"] = np.mean(maxent_cdf_array[:, -1])
         self.MaxEnt_statistics["volume_err"] = np.std(maxent_cdf_array[:, -1])
-        self.MaxEnt_statistics["mode"] = 2 * self.bins[np.argmax(self.BinMag_numberDist)]  # number density
+        self.MaxEnt_statistics["mode"] = 2.0 * self.bins[np.argmax(self.BinMag_numberDist)]  # number density
         ndx_med = np.where(self.volumefrac_cdf >= 0.5)[0][0]
-        self.MaxEnt_statistics["median"] = 2 * self.bins[ndx_med]  # volume fraction weighted Median
+        self.MaxEnt_statistics["median"] = 2.0 * self.bins[ndx_med]  # volume fraction weighted Median
         self.MaxEnt_statistics["mean"] = rvdist.mean()  # volume fraction weighted mean
