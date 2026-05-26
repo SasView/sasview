@@ -6,6 +6,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 
 from sasdata.dataloader.data_info import Data1D as LoadData1D
 
+import sas.qtgui.Plotting.PlotHelper as PlotHelper
 from sas.qtgui.Perspectives.perspective import Perspective
 from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionLogic import (
     SizeDistributionLogic,
@@ -534,7 +535,31 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         if result_details:
             report.add_table_dict(result_details, ("Result", "Value"))
 
+        images = self.getImages()
+        # Add existing figures to the report (use their axes title if present)
+        for fig in images:
+            title = fig.axes[0].get_title() if fig.axes else None
+            report.add_plot(fig, figure_title=title)
+
         return report.report_data
+
+    def getImages(self) -> list:
+        """Return live Matplotlib figures for the current model item.
+
+        This collects the Data1D/Data2D ids for `self._model_item` and then
+        delegates to `PlotHelper.figures_for_plot_ids`. Returns empty list
+        if no model item or no plots found.
+        """
+        model_item = getattr(self, '_model_item', None)
+        if not model_item:
+            return []
+
+        plot_data = GuiUtils.plotsFromModel("", model_item)
+        plot_ids = [p.id for p in plot_data if hasattr(p, 'id')]
+        if not plot_ids:
+            return []
+
+        return PlotHelper.figures_for_plot_ids(plot_ids)
 
     def removeData(self, data_list: list | None = None) -> None:
         """Remove the existing data reference from the Size Distribution Perspective."""
