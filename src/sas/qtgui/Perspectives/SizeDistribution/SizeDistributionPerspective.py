@@ -24,6 +24,8 @@ from sas.qtgui.Perspectives.SizeDistribution.UI.SizeDistributionUI import (
 )
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Utilities import GuiUtils
+from sas.qtgui.Utilities.Reports import ReportBase, format_report_parameters
+from sas.qtgui.Utilities.Reports.reportdata import ReportData
 
 ASPECT_RATIO: float = 1.0
 DIAMETER_MIN: float = 10.0
@@ -121,6 +123,11 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
 
     def isSerializable(self) -> bool:
         """Tell the caller that this perspective writes its state."""
+        return True
+
+    @property
+    def supports_reports(self) -> bool:
+        """Tell the caller that this perspective can generate reports."""
         return True
 
     def closeEvent(self, event: QtGui.QCloseEvent) -> None:
@@ -501,6 +508,33 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             "power_low_q": self.txtPowerLowQ.text(),
             "scale_low_q": self.txtScaleLowQ.text(),
         }
+
+    def getReport(self) -> ReportData | None:
+        """Build a report for the current Size Distribution analysis."""
+        if self.logic.data is None:
+            return None
+
+        report = ReportBase("Size Distribution")
+        report.add_data_details(self.logic.data)
+
+        report.add_table_dict(format_report_parameters(self.getState()), ("Parameter", "Value"))
+
+        result_details: dict[str, str] = {}
+        if self.txtChiSq.text().strip():
+            result_details["Chi Squared"] = self.txtChiSq.text().strip()
+        if self.txtVolume.text().strip():
+            result_details["Volume"] = self.txtVolume.text().strip()
+        if self.txtDiameterMean.text().strip():
+            result_details["Diameter Mean"] = self.txtDiameterMean.text().strip()
+        if self.txtDiameterMedian.text().strip():
+            result_details["Diameter Median"] = self.txtDiameterMedian.text().strip()
+        if self.txtDiameterMode.text().strip():
+            result_details["Diameter Mode"] = self.txtDiameterMode.text().strip()
+
+        if result_details:
+            report.add_table_dict(result_details, ("Result", "Value"))
+
+        return report.report_data
 
     def removeData(self, data_list: list | None = None) -> None:
         """Remove the existing data reference from the Size Distribution Perspective."""
