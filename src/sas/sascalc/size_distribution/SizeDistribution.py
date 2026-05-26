@@ -13,7 +13,7 @@ import numpy.typing as npt
 from scipy import integrate, optimize, stats
 
 from sasdata.dataloader.data_info import Data1D
-from sasmodels.core import build_model, load_model_info
+from sasmodels.core import load_model
 from sasmodels.direct_model import call_Fq
 
 from sas.sascalc.size_distribution.maxEnt_method import maxEntMethod
@@ -496,8 +496,7 @@ class sizeDistribution:
         volumes = []
 
         # Build a single Kernel to compute both intensity and volume per bin
-        model_info = load_model_info(self.model)
-        model_obj = build_model(model_info)
+        model_obj = load_model(self.model)
         calculator = model_obj.make_kernel((moddata.x,))
 
         for bin in self.bins:
@@ -505,8 +504,7 @@ class sizeDistribution:
             p["radius_equatorial"] = bin
             p["radius_polar"] = bin * self.aspectRatio
 
-            call_pars = p.copy()
-            _, Fsq, _, volume, volume_ratio = call_Fq(calculator, call_pars)
+            _, Fsq, _, volume, volume_ratio = call_Fq(calculator, p)
 
             # Compute intensity using kernel convention: combined_scale = scale / shell_volume
             scale_val = p.get("scale", 1.0)
@@ -517,9 +515,7 @@ class sizeDistribution:
             intensities.append(intensity)
 
             # Volume ratio is 1 for solid particles
-            if volume_ratio is not None:
-                volume *= volume_ratio
-
+            volume *= volume_ratio
             volumes.append(volume)
 
         self.model_matrix = np.vstack(intensities).T
