@@ -58,3 +58,22 @@ def idOfPlot(plot):
             break
 
     return plot_id
+
+
+def figures_for_plot_ids(plot_ids: list[str]) -> list:
+    """
+    Return a list of Matplotlib `Figure` objects for active plotters whose data ids
+    are in `plot_ids`. Returns an empty list if no matches are found.
+    """
+    graphs = []
+    shown_plot_names = currentPlotIds()
+
+    for name in shown_plot_names:
+        plotter = plotById(name)
+        data = getattr(plotter, 'data', None)
+        if data and getattr(data[0], 'id', None) in plot_ids:
+            fig = getattr(plotter, 'figure', None)
+            if fig is not None:
+                graphs.append(fig)
+
+    return graphs
