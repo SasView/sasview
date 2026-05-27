@@ -6,6 +6,8 @@ which can not be instantiated repeatedly so IDs are session-specific.
 import sys
 import weakref
 
+from matplotlib.figure import Figure
+
 # TODO Refactor to allow typing without circular import
 #from sas.qtgui.Plotting.PlotterBase import PlotterBase
 
@@ -60,19 +62,29 @@ def idOfPlot(plot):
     return plot_id
 
 
-def figures_for_plot_ids(plot_ids: list[str]) -> list:
+def figures_for_plot_ids(plot_ids: list) -> list[Figure]:
     """
     Return a list of Matplotlib `Figure` objects for active plotters whose data ids
-    are in `plot_ids`. Returns an empty list if no matches are found.
+    are in `plot_ids`.
+
+    Notes:
+    - `plot_ids` may contain non-string IDs (e.g., integers) and may include `None`.
+      `None` values are ignored.
+    - Returns an empty list if no matches are found.
     """
-    graphs = []
+    graphs: list[Figure] = []
+    # filter out None so comparisons are meaningful
+    allowed_ids: list = [pid for pid in plot_ids if pid is not None]
+    if not allowed_ids:
+        return graphs
+
     shown_plot_names = currentPlotIds()
 
     for name in shown_plot_names:
         plotter = plotById(name)
-        data = getattr(plotter, 'data', None)
-        if data and getattr(data[0], 'id', None) in plot_ids:
-            fig = getattr(plotter, 'figure', None)
+        data = getattr(plotter, "data", None)
+        if data and getattr(data[0], "id", None) in allowed_ids:
+            fig = getattr(plotter, "figure", None)
             if fig is not None:
                 graphs.append(fig)
 

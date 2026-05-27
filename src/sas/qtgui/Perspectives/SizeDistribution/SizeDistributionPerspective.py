@@ -2,6 +2,7 @@ import logging
 from types import TracebackType
 
 import numpy as np
+from matplotlib.figure import Figure
 from PySide6 import QtCore, QtGui, QtWidgets
 
 from sasdata.dataloader.data_info import Data1D as LoadData1D
@@ -543,7 +544,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
 
         return report.report_data
 
-    def getImages(self) -> list:
+    def getImages(self) -> list[Figure]:
         """Return live Matplotlib figures for the current model item.
 
         This collects the Data1D/Data2D ids for `self._model_item` and then
@@ -555,9 +556,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             return []
 
         plot_data = GuiUtils.plotsFromModel("", model_item)
-        plot_ids = [p.id for p in plot_data if hasattr(p, 'id')]
-        if not plot_ids:
-            return []
+        plot_ids = [p.id for p in plot_data]
 
         return PlotHelper.figures_for_plot_ids(plot_ids)
 

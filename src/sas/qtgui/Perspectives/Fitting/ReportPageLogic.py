@@ -8,12 +8,12 @@ from io import BytesIO
 import html2text
 from bumps import options
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.figure import Figure
 
 from sasmodels import __version__ as SASMODELS_VERSION
 
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Plotting.PlotterBase import PlotterBase
 from sas.qtgui.Utilities.Reports.reportdata import ReportData
 from sas.system.version import __version__ as SASVIEW_VERSION
 
@@ -81,7 +81,7 @@ class ReportPageLogic:
 
         return report
 
-    def buildPlotsForReport(self, images: list[PlotterBase]) -> str:
+    def buildPlotsForReport(self, images: list[Figure]) -> str:
         """ Convert Matplotlib figure 'fig' into a <img> tag for HTML use using base64 encoding. """
         html = FEET_1.format(self.data.name)
 
@@ -200,7 +200,7 @@ class ReportPageLogic:
                 batch_results_table += '</table>'
         return batch_results_table
 
-    def getImages(self) -> list[PlotterBase]:
+    def getImages(self) -> list[Figure]:
         """Create MPL figures for the current fit.
 
         Uses `PlotHelper.figures_for_plot_ids` to collect any live figures shown
