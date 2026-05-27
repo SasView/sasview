@@ -7,7 +7,6 @@ from io import BytesIO
 
 import html2text
 from bumps import options
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 
 from sasmodels import __version__ as SASMODELS_VERSION
@@ -86,7 +85,6 @@ class ReportPageLogic:
         html = FEET_1.format(self.data.name)
 
         for fig in images:
-            canvas = FigureCanvas(fig)
             png_output = BytesIO()
             try:
                 dpi = 150 if sys.platform == "darwin" else 75
@@ -99,7 +97,6 @@ class ReportPageLogic:
             feet = FEET_3 if sys.platform == "darwin" else FEET_2
             html += feet.format(data_to_print) + ELINE
             png_output.close()
-            del canvas
         return html
 
     def reportParams(self) -> str:
@@ -157,7 +154,7 @@ class ReportPageLogic:
             smear_format = CENTRE.format(f"Smearing Information: {smear_format}")
         return smear_format
 
-    def getResultsPlots(self) -> list[FigureCanvas]:
+    def getResultsPlots(self) -> list[Figure]:
         """Gather the plots from the bumps results panel."""
         plots = []
         if hasattr(self.parent, 'parent') and hasattr(self.parent.parent, 'results_panel'):
