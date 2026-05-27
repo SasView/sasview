@@ -139,16 +139,6 @@ def background_fit(
     return param_result, param_err
 
 
-def ellipse_volume(rp: float, re: float) -> float:
-    """
-    Calculate the volume of an ellipsoid given the polar and equatorial radii.
-    :param rp: polar radius
-    :param re: equatorial radius
-    :return: volume of the ellipsoid
-    """
-    return (4.0 * np.pi / 3.0) * rp * re**2.0
-
-
 class sizeDistribution:
     """Class for performing size distribution analysis using the Maximum Entropy method."""
 
@@ -178,7 +168,7 @@ class sizeDistribution:
         self._resolution: float | None = None
 
         self.model_matrix: np.ndarray | None = None
-        self._volumes = None
+        self._volumes: np.ndarray | None = None
 
         # Advanced parameters for MaxEnt
         self._iterMax: int = 5000
@@ -190,7 +180,6 @@ class sizeDistribution:
 
         self._bin_edges: np.ndarray = np.array([])
         self._binDiff: np.ndarray = np.array([])
-        self._volumes: np.ndarray | None = None
 
         # Return Values after the MaxEnt fit
         self.BinMagnitude_maxEnt: np.ndarray = np.array([], dtype=float)
@@ -526,13 +515,7 @@ class sizeDistribution:
         This is not used right now.
         Calculate the volume weighted distribution.
         """
-        if self.logbin:
-            radbins = np.logspace(np.log10(self.diamMin), np.log10(self.diamMax), self.nbins + 1, True) * 0.5
-
-        else:
-            radbins = np.linspace(self.diamMin, self.diamMax, self.nbins + 1, True) * 0.5
-
-        self.volume_bins = ellipse_volume(self.aspectRatio * radbins, radbins)
+        self.volume_bins = self._volumes
         self.vbin_diff = np.diff(self.volume_bins)
         self.volume_bins = self.volume_bins[:-1] + self.vbin_diff * 0.5
         self.volume_fraction = binmag * self.volume_bins / (2.0 * self.vbin_diff)
@@ -693,7 +676,7 @@ class sizeDistribution:
         """
         bin_mag = np.asarray(bin_mag)
         maxent_cdf_array = integrate.cumulative_trapezoid(bin_mag / (2.0 * self._binDiff), 2.0 * self.bins, axis=1)
-        self.BinMag_numberDist = self.BinMagnitude_maxEnt / ellipse_volume(self.aspectRatio * self.bins, self.bins)
+        self.BinMag_numberDist = self.BinMagnitude_maxEnt / self._volumes
 
         rvdist = stats.rv_histogram(
             (self.BinMagnitude_maxEnt, self._bin_edges * 2.0), density=True
