@@ -385,7 +385,11 @@ class Plotter2DWidget(PlotterBase):
         if (slicer_widget := getattr(self, 'slicer_widget', None)):
             slicer_widget.updateSlicersList()
 
-        self.canvas.draw()
+        try:
+            self.canvas.draw()
+        except RuntimeError:
+            # Canvas may have been destroyed already, ignore if so
+            pass
 
     def onEditSlicer(self):
         """
