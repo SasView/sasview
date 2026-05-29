@@ -77,7 +77,6 @@ class AnnulusInteractor(BaseInteractor, SlicerModel, StackableMixin):
         self.clear_markers()
         self.outer_circle.clear()
         self.inner_circle.clear()
-        self.base.connect.clearall()
 
     def update(self):
         """
