@@ -301,6 +301,10 @@ class Plotter2DWidget(PlotterBase):
         self._slicer_color_index = 0
         self._removeSlicerPlots()
 
+        # Notify the slicer parameters dialog (if open) so its list stays in sync
+        if (slicer_widget := getattr(self, 'slicer_widget', None)):
+            slicer_widget.updateSlicersList()
+
         self.canvas.draw()
 
         # Close the box sum widget if it exists
@@ -376,6 +380,10 @@ class Plotter2DWidget(PlotterBase):
         # If no slicers remain, set self.slicer to None
         if self.slicer not in self.slicers.values():
             self.slicer = next(iter(self.slicers.values()), None)
+
+        # Notify the slicer parameters dialog (if open) so its list stays in sync
+        if (slicer_widget := getattr(self, 'slicer_widget', None)):
+            slicer_widget.updateSlicersList()
 
         self.canvas.draw()
 
