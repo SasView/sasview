@@ -348,6 +348,37 @@ class Plotter2DWidget(PlotterBase):
                     break
         return slicer_plots
 
+    def removeSlicersForPlotWindow(self, plot_window):
+        """
+        Remove any slicers associated with a closed slicer plot window.
+        """
+        # Identify slicers associated with the closed plot window
+        removed_slicers = [
+            name for name, slicer in self.slicers.items()
+            if getattr(slicer, '_plot_window', None) is plot_window
+        ]
+
+        if not removed_slicers:
+            return
+
+        # Remove identified slicers from the parent plot's slicer list and clear them
+        for name in removed_slicers:
+            if slicer := self.slicers.pop(name, None):
+                slicer.clear() if hasattr(slicer, 'clear') else None
+
+
+        # Remove associated plots from the slicer_plots_dict
+        for name, window in list(getattr(self, 'slicer_plots_dict', {}).items()):
+            if window is plot_window:
+                del self.slicer_plots_dict[name]
+
+        # Switch to another remaining slicer if the current one was removed
+        # If no slicers remain, set self.slicer to None
+        if self.slicer not in self.slicers.values():
+            self.slicer = next(iter(self.slicers.values()), None)
+
+        self.canvas.draw()
+
     def onEditSlicer(self):
         """
         Present a dialog for manipulating the current slicer
@@ -529,8 +560,8 @@ class Plotter2DWidget(PlotterBase):
             item.removeRow(plot.row())
 
     def _removeSlicerPlots(self):
-        """  
-        Clear the previous slicer plots  
+        """
+        Clear the previous slicer plot
         """
         # Clear the old slicer plots so they don't reappear later
         if not hasattr(self, '_item'):
@@ -890,3 +921,9 @@ class Plotter2D(QtWidgets.QDialog, Plotter2DWidget):
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/res/ball.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.setWindowIcon(icon)
+
+    def closeEvent(self, event):
+        """
+        Delegate close handling to the plotter widget implementation.
+        """
+        Plotter2DWidget.closeEvent(self, event)
