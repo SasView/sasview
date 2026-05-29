@@ -44,4 +44,9 @@ class BoxSum(QtWidgets.QDialog, Ui_BoxSumUI):
         self.setFixedSize(self.minimumSizeHint())
 
         # Handle the Close button click
-        self.buttonBox.button(QtWidgets.QDialogButtonBox.Close).clicked.connect(lambda:self.closeWidgetSignal.emit())
+        self.buttonBox.button(QtWidgets.QDialogButtonBox.Close).clicked.connect(self.close)
+
+    def closeEvent(self, event):
+        """Emit the closeWidgetSignal when the dialog is closed via window manager."""
+        self.closeWidgetSignal.emit()
+        super(BoxSum, self).closeEvent(event)

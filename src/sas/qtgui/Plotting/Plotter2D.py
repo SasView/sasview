@@ -678,14 +678,22 @@ class Plotter2DWidget(PlotterBase):
         self.slicer.update()
 
         def boxWidgetClosed():
+            """
+            When the BoxSum widget is closed, clear the slicer.
+            """
             # Need to disconnect the signal!!
             self.boxwidget.closeWidgetSignal.disconnect()
-            # reset box on "Edit Slicer Parameters" window close
+            # Reset box on "Edit Slicer Parameters" window close
             self.manager.parent.workspace().removeSubWindow(self.boxwidget_subwindow)
-            self.boxwidget = None
-            # Clear the reference in the slicer
+
+            # If a BoxSum slicer still exists, clear it and redraw.
             if self.slicer is not None:
-                self.slicer.widget = None
+                self.slicer.clear()
+                self.slicer = None
+                self.canvas.draw()
+
+            # Clear stored widget reference
+            self.boxwidget = None
 
         # Get the BoxSumCalculator model.
         self.box_sum_model = self.slicer.model()
