@@ -2043,11 +2043,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         elif hasattr(kernel_module, 'parameters'):
             # built-in and custom models
-            self.logic.model_parameters = modelinfo.make_parameter_table(getattr(kernel_module, 'parameters', []))
-
-        elif hasattr(kernel_module, 'model_info'):
-            # for sum/multiply models
-            self.logic.model_parameters = kernel_module.model_info.parameters
+            info = modelinfo.make_model_info(kernel_module)
+            self.logic.model_parameters = info.parameters
 
         elif hasattr(kernel_module, 'Model') and hasattr(kernel_module.Model, "_model_info"):
             # this probably won't work if there's no model_info, but just in case

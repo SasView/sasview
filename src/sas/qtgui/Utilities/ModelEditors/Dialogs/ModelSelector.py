@@ -167,7 +167,8 @@ class ModelSelector(QtWidgets.QDialog, Ui_ModelSelector):
             self.model_parameters = kernel_module.model_info.parameters
         elif hasattr(kernel_module, 'parameters'):
             # built-in and custom models
-            self.model_parameters = modelinfo.make_parameter_table(getattr(kernel_module, 'parameters', []))
+            info = modelinfo.make_model_info(kernel_module)
+            self.model_parameters = info.parameters
         elif hasattr(kernel_module, 'Model') and hasattr(kernel_module.Model, "_model_info"):
             # this probably won't work if there's no model_info, but just in case
             self.model_parameters = kernel_module.Model._model_info.parameters
