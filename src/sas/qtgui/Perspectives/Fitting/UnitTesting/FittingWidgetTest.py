@@ -659,11 +659,11 @@ class FittingWidgetTest:
         # Change the category index so we have a model available
         category_index = widget.cbCategory.findText("Sphere")
         widget.cbCategory.setCurrentIndex(category_index)
-        model_index = widget.cbModel.findText("adsorbed_layer")
+        model_index = widget.cbModel.findText("core_shell_sphere")
         widget.cbModel.setCurrentIndex(model_index)
 
         # Check the magnetic model
-        assert widget.magnetism_widget._magnet_model.rowCount() == 10
+        assert widget.magnetism_widget._magnet_model.rowCount() == 13
         assert widget.magnetism_widget._magnet_model.columnCount() == 5
 
         # Test the header
