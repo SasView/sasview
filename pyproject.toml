@@ -202,7 +202,7 @@ filterwarnings = [
 ]
 testpaths = [
     "src",
-    "tests",
+    "test",
 ]
 pythonpath = "src"
 norecursedirs = [
