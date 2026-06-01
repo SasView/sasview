@@ -185,8 +185,7 @@ environment = { PYTHONPATH = "../../../src" }
 [tool.pytest.ini_options]
 minversion = "6.0"
 python_files = [
-    "u*py",
-    "*Test*py",
+    "*[Tt]est*.py",
 ]
 python_classes = [
     "*Test",
