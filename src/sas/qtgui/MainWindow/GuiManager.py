@@ -6,7 +6,7 @@ import webbrowser
 
 from packaging.version import Version
 from PySide6.QtCore import QLocale, Qt
-from PySide6.QtGui import QStandardItem
+from PySide6.QtGui import QStandardItem, QTextCursor
 from PySide6.QtWidgets import QDockWidget, QLabel, QMessageBox, QProgressBar, QTextBrowser
 from twisted.internet import reactor
 
@@ -80,9 +80,6 @@ class GuiManager:
         # Decide on a locale
         QLocale.setDefault(QLocale('en_US'))
 
-        # Redefine exception hook to not explicitly crash the app.
-        sys.excepthook = self.info
-
         # Ensure the user directory has all required layout and files
         create_user_files_if_needed()
 
@@ -124,9 +121,6 @@ class GuiManager:
         if self.WhatsNew.has_new_messages(): # Not a static method
             self.WhatsNew.show()
 
-    def info(self, type, value, tb):
-        logger.error("".join(traceback.format_exception(type, value, tb)))
-
     def addWidgets(self):
         """
         Populate the main window with widgets
@@ -139,6 +133,8 @@ class GuiManager:
         self.logDockWidget.setVisible(False)
 
         self.listWidget = QTextBrowser()
+        # We could put error log styling here:
+        # self.listWidget.setStyleSheet("QTextBrowser { line-height: 1.0; }")
         self.logDockWidget.setWidget(self.listWidget)
         self._workspace.addDockWidget(Qt.BottomDockWidgetArea, self.logDockWidget)
 
@@ -244,7 +240,6 @@ class GuiManager:
             model_list = ModelManager().cat_model_list()
             CategoryInstaller.check_install(model_list=model_list)
         except Exception:
-            import traceback
             logger.error("Category manager: could not load SasView models")
             logger.error(traceback.format_exc())
 
@@ -500,7 +495,18 @@ class GuiManager:
         """Appends a message to the list widget in the Log Explorer. Use this
         instead of listWidget.insertPlainText() to facilitate auto-scrolling"""
         (message, record) = signal
-        self.listWidget.append(message.strip())
+
+        # Move cursor to the end of text and append the next log message;
+        # Don't use append() to add the block since it messes up the formatting
+        # we do is SasviewLogger. Instead put a <br> between every entry.
+        # Scroll the text so that it is visible.
+        cursor = self.listWidget.textCursor()
+        cursor.movePosition(QTextCursor.End)
+        cursor.insertHtml(f"\n<br>\n{message.strip()}")
+        self.listWidget.ensureCursorVisible()
+
+        # Show the mess inside the log widget. Qt is doing too much!
+        # print("\n\n===log contains: ", self.listWidget.toHtml())
 
         # Display log if message is warning (30) or higher
         # 10: Debug
@@ -623,9 +629,6 @@ class GuiManager:
 
     def showWelcomeMessage(self):
         """ Show the Welcome panel, when required """
-        # Assure the welcome screen is requested
-        show_welcome_widget = True
-
         if config.SHOW_WELCOME_PANEL:
             self.actionWelcome()
 

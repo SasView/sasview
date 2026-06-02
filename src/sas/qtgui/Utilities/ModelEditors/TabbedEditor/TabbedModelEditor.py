@@ -466,10 +466,8 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             logger.error(msg)
             # print four last lines of the stack trace
             # this will point out the exact line failing
-            all_lines = traceback.format_exc().split("\n")
+            all_lines = traceback.format_exc().strip().split("\n")
             last_lines = all_lines[-4:]
-            traceback_to_show = "\n".join(last_lines)
-            logger.error(traceback_to_show)
 
             # Set the status bar message
             # GuiUtils.communicator.statusBarUpdateSignal.emit("Model check failed")
