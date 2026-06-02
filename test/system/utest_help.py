@@ -3,6 +3,8 @@
 from pathlib import Path, PurePosixPath
 from unittest.mock import patch
 
+import pytest
+
 from sas.system._help import _HelpSystem, _release_version
 
 
@@ -40,7 +42,7 @@ class TestHelpSystemOnlineUrl:
     def test_online_url_basic(self, _mock):
         with patch("sas.system.version.__version__", "6.1.2"):
             url = self.hs._online_url(
-                Path("user/qtgui/Perspectives/Fitting/fitting_help.html")
+                "/user/qtgui/Perspectives/Fitting/fitting_help.html"
             )
         assert url == (
             "https://www.sasview.org/docs/v6.1.2"
@@ -50,7 +52,7 @@ class TestHelpSystemOnlineUrl:
     def test_online_url_dev_version(self):
         with patch("sas.system.version.__version__", "6.1.2.dev159+g77be83657"):
             url = self.hs._online_url(
-                Path("user/qtgui/Perspectives/Fitting/fitting_help.html")
+                "/user/qtgui/Perspectives/Fitting/fitting_help.html"
             )
         assert url.startswith("https://www.sasview.org/docs/v6.1.2/")
         assert "+g77be83657" not in url
@@ -59,17 +61,17 @@ class TestHelpSystemOnlineUrl:
     def test_online_url_with_fragment(self):
         with patch("sas.system.version.__version__", "6.1.2"):
             url = self.hs._online_url(
-                Path("user/qtgui/Perspectives/Fitting/fitting_help.html"),
+                "/user/qtgui/Perspectives/Fitting/fitting_help.html",
                 "simultaneous-fits",
             )
         assert url.endswith("fitting_help.html#simultaneous-fits")
 
-    def test_online_url_uses_posix_separators(self):
-        with patch("sas.system.version.__version__", "6.1.2"):
-            url = self.hs._online_url(
-                Path("user") / "qtgui" / "Perspectives" / "Fitting" / "fitting_help.html"
-            )
-        assert "\\" not in url
+
+testurls = [
+    "user/fitting.html",
+    "/user/fitting.html",
+    "//user/fitting.html",
+]
 
 
 class TestShowHelp:
@@ -78,64 +80,71 @@ class TestShowHelp:
     def setup_method(self):
         self.hs = _HelpSystem()
 
+    @pytest.mark.parametrize("url", testurls)
     @patch("sas.system._help.webbrowser")
-    def test_local_docs_opened(self, mock_wb, tmp_path):
+    def test_local_docs_opened(self, mock_wb, tmp_path, url):
         """When local docs exist, open them via file URI."""
         doc = tmp_path / "user" / "fitting.html"
         doc.parent.mkdir(parents=True)
         doc.write_text("<html></html>")
 
         self.hs.path = tmp_path
-        self.hs.show_help("user/fitting.html")
+        self.hs.show_help(url)
 
         mock_wb.open.assert_called_once()
         opened_url = mock_wb.open.call_args[0][0]
         assert opened_url.startswith("file:///")
         assert "fitting.html" in opened_url
+        assert "//user" not in opened_url
 
+    @pytest.mark.parametrize("url", testurls)
     @patch("sas.system._help.webbrowser")
-    def test_local_docs_with_fragment(self, mock_wb, tmp_path):
+    def test_local_docs_with_fragment(self, mock_wb, tmp_path, url):
         """Fragment (#anchor) must be preserved for local files."""
         doc = tmp_path / "user" / "fitting.html"
         doc.parent.mkdir(parents=True)
         doc.write_text("<html></html>")
 
         self.hs.path = tmp_path
-        self.hs.show_help("user/fitting.html#constraints")
+        self.hs.show_help(f"{url}#constraints")
 
         opened_url = mock_wb.open.call_args[0][0]
         assert opened_url.endswith("#constraints")
 
+    @pytest.mark.parametrize("url", testurls)
     @patch("sas.system._help.webbrowser")
-    def test_online_fallback_when_local_missing(self, mock_wb, tmp_path):
+    def test_online_fallback_when_local_missing(self, mock_wb, tmp_path, url):
         """When local docs don't exist, fall back to online URL."""
         self.hs.path = tmp_path  # empty dir — no docs
         with patch("sas.system.version.__version__", "6.1.2"):
-            self.hs.show_help("user/fitting.html")
+            self.hs.show_help(url)
 
         opened_url = mock_wb.open.call_args[0][0]
         assert opened_url == (
             "https://www.sasview.org/docs/v6.1.2/user/fitting.html"
         )
 
+    @pytest.mark.parametrize("url", testurls)
     @patch("sas.system._help.webbrowser")
-    def test_online_fallback_no_absolute_path_leak(self, mock_wb, tmp_path):
+    def test_online_fallback_no_absolute_path_leak(self, mock_wb, tmp_path, url):
         """The online URL must never contain the local filesystem path."""
         self.hs.path = tmp_path
         with patch("sas.system.version.__version__", "6.1.2"):
-            self.hs.show_help("user/fitting.html")
+            self.hs.show_help(url)
 
         opened_url = mock_wb.open.call_args[0][0]
         assert str(tmp_path) not in opened_url
         assert "C:" not in opened_url
         assert "Users" not in opened_url
+        assert "//user" not in opened_url
 
+    @pytest.mark.parametrize("url", testurls)
     @patch("sas.system._help.webbrowser")
-    def test_online_fallback_when_path_is_none(self, mock_wb):
+    def test_online_fallback_when_path_is_none(self, mock_wb, url):
         """When HELP_SYSTEM.path is None, fall back to online."""
         self.hs.path = None
         with patch("sas.system.version.__version__", "6.1.2"):
-            self.hs.show_help("user/fitting.html")
+            self.hs.show_help(url)
 
         opened_url = mock_wb.open.call_args[0][0]
         assert opened_url.startswith("https://www.sasview.org/docs/v6.1.2/")
@@ -169,27 +178,33 @@ class TestShowHelp:
             "https://www.sasview.org/docs/v6.1.2/user/fitting.html"
         )
 
+    @pytest.mark.parametrize("url", testurls)
     @patch("sas.system._help.webbrowser")
-    def test_leading_slashes_stripped(self, mock_wb, tmp_path):
+    def test_leading_slashes_stripped(self, mock_wb, tmp_path, url):
         """Leading slashes on the relative URL are stripped."""
         doc = tmp_path / "user" / "fitting.html"
         doc.parent.mkdir(parents=True)
         doc.write_text("<html></html>")
 
         self.hs.path = tmp_path
-        self.hs.show_help("//user/fitting.html")
+        self.hs.show_help(url)
 
         opened_url = mock_wb.open.call_args[0][0]
         assert "fitting.html" in opened_url
+        assert "//user" not in opened_url
 
+    @pytest.mark.parametrize("url", testurls)
     @patch("sas.system._help.webbrowser")
-    def test_path_object_accepted(self, mock_wb, tmp_path):
+    def test_path_object_accepted(self, mock_wb, tmp_path, url):
         """A Path object should be accepted as input."""
         doc = tmp_path / "user" / "fitting.html"
         doc.parent.mkdir(parents=True)
         doc.write_text("<html></html>")
 
         self.hs.path = tmp_path
-        self.hs.show_help(Path("user/fitting.html"))
+        self.hs.show_help(Path(url))
 
         mock_wb.open.assert_called_once()
+        opened_url = mock_wb.open.call_args[0][0]
+        assert "fitting.html" in opened_url
+        assert "//user" not in opened_url
