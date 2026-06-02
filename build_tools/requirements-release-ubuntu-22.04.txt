@@ -16,7 +16,7 @@ beautifulsoup4==4.14.3
 bidict==0.23.1
 blinker==1.9.0
 BTrees==6.4
-bumps==1.0.5
+bumps==1.0.5rc0
 certifi==2026.4.22
 cffi==2.0.0
 cfgv==3.5.0
