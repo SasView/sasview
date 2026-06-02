@@ -131,7 +131,7 @@ class CorrelationTable(QtWidgets.QWidget):
             if parsed:
                 # Use parse_var to extract all values, then format them for display
                 row_data = [
-                    parsed.name,
+                    parsed.label,
                     f"{parsed.mean:.6g}",
                     f"{parsed.median:.6g}",
                     f"{parsed.best:.6g}",
