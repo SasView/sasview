@@ -7,6 +7,9 @@ os.environ.setdefault("QT_API", "pyside6")
 
 import pytest
 
+# Run the tests in offscreen mode
+os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+
 # We are assuming that the tests are running in a virtual environment with
 # sasview, sasmodels and sasdata already installed, perhaps in dev mode
 # using "pip install -e".

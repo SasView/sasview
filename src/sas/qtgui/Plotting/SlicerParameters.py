@@ -117,8 +117,8 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         self.delegate = EditDelegate(self, validate_method=self.validate_method)
         self.lstParams.setItemDelegate(self.delegate)
 
-        # respond to graph deletion
-        self.communicator.activeGraphsSignal.connect(self.updatePlotList)
+        # Respond to graph additions/removals and close if the owner plot goes away.
+        self.communicator.activeGraphsSignal.connect(self.onActiveGraphsChanged)
 
         # Set up paths
         self.txtLocation.setText(self.save_location)
@@ -158,9 +158,29 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         header.setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
         header.setStretchLastSection(True)
 
+    def onActiveGraphsChanged(self, graph_data: list | None = None):
+        """
+        Update plot lists and close this dialog if its parent plot was closed.
+        """
+        self.updatePlotList()
+
+        # Guard against unexpected signal emissions
+        if not isinstance(graph_data, (list, tuple)) or len(graph_data) != 2:
+            return
+
+        # If closed, it should be a list of [plot_object, was_removed_boolean].
+        closed_plot, was_removed = graph_data
+        if was_removed and closed_plot is self.parent:
+            self.close()
+
     def updatePlotList(self):
         """Update the list of active plots"""
-        self.active_plots = self.parent.getActivePlots()
+        try:
+            self.active_plots = self.parent.getActivePlots()
+        except RuntimeError:
+            # Parent plot widget can already be deleted during teardown.
+            self.close()
+            return
         self.setPlotsList()
         self.updateSlicerPlotList()
 
