@@ -21,6 +21,7 @@ from sas.sascalc.util import ExtrapolationParameters
 
 # local
 from ..perspective import Perspective
+from ..UndoRedo import DictSnapshotCommand, UndoStack
 from .InvariantDetails import DetailsDialog
 from .InvariantUtils import WIDGETS, safe_float
 from .UI.TabbedInvariantUI import Ui_tabbedInvariantUI
@@ -67,6 +68,10 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.detailsDialog = DetailsDialog(self)
         self.detailsDialog.cmdOK.clicked.connect(self.enableStatus)
 
+        # Undo/redo infrastructure
+        self._undo_stack_obj = UndoStack(self)
+        self._undo_baseline: dict | None = None
+
         # Data
         self._data: Data1D | None = None
         self._path: str = ""
@@ -90,6 +95,11 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         # Go to the first data item
         self.mapper.toFirst()
 
+        # Undo/redo: connect capture signals after all widgets are initialized
+        self._setupUndoConnections()
+        self._rebaseline_undo_state()
+        self._undo_stack_obj.clear()
+
     @property
     def extrapolation_parameters(self) -> ExtrapolationParameters | None:
         if self._data is not None:
@@ -104,6 +114,108 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             )
         else:
             return None
+
+    @property
+    def undo_stack(self):
+        """Return the undo stack for this perspective.
+
+        Overrides ``Perspective.undo_stack`` (which returns ``None``).
+        """
+        return self._undo_stack_obj
+
+    # ------------------------------------------------------------------
+    # Undo/redo contract methods
+    # ------------------------------------------------------------------
+
+    def _get_parameter_dict(self) -> dict:
+        """Capture current input-only state (excludes computed outputs).
+
+        Called by ``UndoStack._auto_snapshot()`` for recovery snapshots.
+        """
+        return {
+            "background": self.txtBackgd.text(),
+            "scale": self.txtScale.text(),
+            "contrast": self.txtContrast.text(),
+            "contrast_err": self.txtContrastErr.text(),
+            "porod": self.txtPorodCst.text(),
+            "porod_err": self.txtPorodCstErr.text(),
+            "volfrac1": self.txtVolFrac1.text(),
+            "volfrac1_err": self.txtVolFrac1Err.text(),
+            "enable_contrast": self.rbContrast.isChecked(),
+            "enable_volfrac": self.rbVolFrac.isChecked(),
+            "guinier_end_low_q_ex": self.txtGuinierEnd_ex.text(),
+            "porod_start_high_q_ex": self.txtPorodStart_ex.text(),
+            "porod_end_high_q_ex": self.txtPorodEnd_ex.text(),
+            "power_low_q_ex": self.txtLowQPower_ex.text(),
+            "power_high_q_ex": self.txtHighQPower_ex.text(),
+            "enable_low_q_ex": self.chkLowQ_ex.isChecked(),
+            "enable_high_q_ex": self.chkHighQ_ex.isChecked(),
+            "low_q_guinier_ex": self.rbLowQGuinier_ex.isChecked(),
+            "low_q_power_ex": self.rbLowQPower_ex.isChecked(),
+            "low_q_fit_ex": self.rbLowQFit_ex.isChecked(),
+            "low_q_fix_ex": self.rbLowQFix_ex.isChecked(),
+            "high_q_fit_ex": self.rbHighQFit_ex.isChecked(),
+            "high_q_fix_ex": self.rbHighQFix_ex.isChecked(),
+        }
+
+    def _restore_parameter_values(self, state: dict) -> None:
+        """Apply a state dict to all input widgets.
+
+        Called by ``DictSnapshotCommand.undo/redo`` and
+        ``UndoStack.reset_to_last_good()``.
+        Must run inside ``undo_stack.suppressed()`` to avoid creating
+        spurious undo entries from widget signal handlers.
+        """
+        with self._undo_stack_obj.suppressed():
+            self.txtBackgd.setText(str(state.get("background", "0.0")))
+            self.txtScale.setText(str(state.get("scale", "1.0")))
+            self.txtContrast.setText(str(state.get("contrast", "")))
+            self.txtContrastErr.setText(str(state.get("contrast_err", "")))
+            self.txtPorodCst.setText(str(state.get("porod", "")))
+            self.txtPorodCstErr.setText(str(state.get("porod_err", "")))
+            self.txtVolFrac1.setText(str(state.get("volfrac1", "")))
+            self.txtVolFrac1Err.setText(str(state.get("volfrac1_err", "")))
+            self.rbContrast.setChecked(bool(state.get("enable_contrast", True)))
+            self.rbVolFrac.setChecked(bool(state.get("enable_volfrac", False)))
+            self.txtGuinierEnd_ex.setText(str(state.get("guinier_end_low_q_ex", "")))
+            self.txtPorodStart_ex.setText(str(state.get("porod_start_high_q_ex", "")))
+            self.txtPorodEnd_ex.setText(str(state.get("porod_end_high_q_ex", "")))
+            self.txtLowQPower_ex.setText(str(state.get("power_low_q_ex", str(DEFAULT_POWER_VALUE))))
+            self.txtHighQPower_ex.setText(str(state.get("power_high_q_ex", str(DEFAULT_POWER_VALUE))))
+            self.chkLowQ_ex.setChecked(bool(state.get("enable_low_q_ex", False)))
+            self.chkHighQ_ex.setChecked(bool(state.get("enable_high_q_ex", False)))
+            self.rbLowQGuinier_ex.setChecked(bool(state.get("low_q_guinier_ex", False)))
+            self.rbLowQPower_ex.setChecked(bool(state.get("low_q_power_ex", False)))
+            self.rbLowQFit_ex.setChecked(bool(state.get("low_q_fit_ex", False)))
+            self.rbLowQFix_ex.setChecked(bool(state.get("low_q_fix_ex", False)))
+            self.rbHighQFit_ex.setChecked(bool(state.get("high_q_fit_ex", False)))
+            self.rbHighQFix_ex.setChecked(bool(state.get("high_q_fix_ex", False)))
+            self.update_from_model()
+
+    def _captureUndoState(self, description: str = "Change") -> None:
+        """Push a DictSnapshotCommand if the current state differs from the baseline.
+
+        Call on each committed user edit (``editingFinished``, ``toggled``,
+        slider release, etc.).  The baseline-diff approach ensures cascade
+        signals (radio button groups, checkbox chains) produce at most one
+        undo entry per user action.
+        """
+        # Guard: no baseline means we are still initializing
+        if self._undo_baseline is None:
+            return
+        new_state = self._get_parameter_dict()
+        if new_state != self._undo_baseline:
+            self._undo_stack_obj.push(
+                DictSnapshotCommand(self._undo_baseline, new_state, description)
+            )
+            self._undo_baseline = new_state
+
+    def _rebaseline_undo_state(self) -> None:
+        """Update the undo baseline to the current state without pushing a command.
+
+        Call after programmatic state changes (project load, data swap, etc.)
+        """
+        self._undo_baseline = self._get_parameter_dict()
 
     def initialize_variables(self) -> None:
         """Initialize class variables."""
@@ -164,6 +276,49 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.txtPorodEnd_ex.setValidator(GuiUtils.DoubleValidator())
         self.txtLowQPower_ex.setValidator(GuiUtils.DoubleValidator())
         self.txtHighQPower_ex.setValidator(GuiUtils.DoubleValidator())
+
+    def _setupUndoConnections(self) -> None:
+        """Connect undo-capture signals for all user-editable input widgets.
+
+        Uses ``editingFinished`` for text edits (commit boundary) and
+        ``toggled`` for checkboxes / radio buttons.  The baseline-diff in
+        ``_captureUndoState`` ensures cascade signals produce one entry.
+        """
+        # Text edits — commit boundary (not per-keystroke)
+        text_edits = [
+            self.txtBackgd, self.txtScale,
+            self.txtContrast, self.txtContrastErr,
+            self.txtPorodCst, self.txtPorodCstErr,
+            self.txtVolFrac1, self.txtVolFrac1Err,
+            self.txtGuinierEnd_ex, self.txtPorodStart_ex, self.txtPorodEnd_ex,
+            self.txtLowQPower_ex, self.txtHighQPower_ex,
+        ]
+        for te in text_edits:
+            te.editingFinished.connect(lambda desc="Edit value": self._captureUndoState(desc))
+
+        # Checkboxes
+        self.chkLowQ_ex.toggled.connect(
+            lambda _: self._captureUndoState("Toggle low-Q extrapolation"))
+        self.chkHighQ_ex.toggled.connect(
+            lambda _: self._captureUndoState("Toggle high-Q extrapolation"))
+
+        # Radio button groups
+        self.rbContrast.toggled.connect(
+            lambda _: self._captureUndoState("Toggle contrast/volfrac"))
+        self.rbVolFrac.toggled.connect(
+            lambda _: self._captureUndoState("Toggle contrast/volfrac"))
+        self.rbLowQGuinier_ex.toggled.connect(
+            lambda _: self._captureUndoState("Change low-Q extrapolation type"))
+        self.rbLowQPower_ex.toggled.connect(
+            lambda _: self._captureUndoState("Change low-Q extrapolation type"))
+        self.rbLowQFit_ex.toggled.connect(
+            lambda _: self._captureUndoState("Change low-Q power mode"))
+        self.rbLowQFix_ex.toggled.connect(
+            lambda _: self._captureUndoState("Change low-Q power mode"))
+        self.rbHighQFit_ex.toggled.connect(
+            lambda _: self._captureUndoState("Change high-Q power mode"))
+        self.rbHighQFix_ex.toggled.connect(
+            lambda _: self._captureUndoState("Change high-Q power mode"))
 
     def setup_default_enablement(self) -> None:
         """Setup the default enablement of the widgets."""
@@ -319,6 +474,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         # Modify the Calculate button to indicate background process
         self.enable_calculation(enabled=False, display="Calculating...")
 
+        # Disable undo during calculation
+        self._undo_stack_obj.set_enabled(False)
+
         # Send the calculations to separate thread.
         d = threads.deferToThread(self.calculate_thread, extrapolation)
 
@@ -329,6 +487,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
     def on_calculation_failed(self, reason: Failure) -> None:
         """Handle calculation failure."""
         logger.error(f"calculation failed: {reason}")
+        self._undo_stack_obj.set_enabled(True)
         self.check_status()
 
     def deferredPlot(self, model: QtGui.QStandardItemModel, extrapolation: str | None = None) -> None:
@@ -339,6 +498,10 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         if extrapolation is None and self.extrapolation_made:
             reactor.callFromThread(lambda: self._manager.filesWidget.newPlot())
             self.extrapolation_made = False
+
+        # Re-enable undo after calculation completes
+        self._undo_stack_obj.set_enabled(True)
+        self._rebaseline_undo_state()
 
         self.check_status()
 
@@ -905,6 +1068,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.model.setItem(WIDGETS.W_POROD_START_EX, QtGui.QStandardItem(format_string % state.point_2))
         self.model.setItem(WIDGETS.W_POROD_END_EX, QtGui.QStandardItem(format_string % state.point_3))
         self.correct_extrapolation_values()
+        self._captureUndoState("Change extrapolation slider")
 
     def on_extrapolation_text_editing(self) -> None:
         """Handle when user edits any of the extrapolation text boxes."""
@@ -991,11 +1155,12 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         data_q_max = float(self.format_sig_fig(self._data.x.max()))  # Actual data max
         messages = []
 
-        # block signals to avoid recursive calls
+        # block signals and suppress undo to avoid spurious entries
         with (
             QtCore.QSignalBlocker(self.txtGuinierEnd_ex),
             QtCore.QSignalBlocker(self.txtPorodStart_ex),
             QtCore.QSignalBlocker(self.txtPorodEnd_ex),
+            self._undo_stack_obj.suppressed(),
         ):
             # start by updating p2 as it is used in multiple checks
             if self.validity_flags[0]:  # point_2 <= data_q_min
@@ -1447,6 +1612,12 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
         self.mapper.toFirst()
 
+        # Clear undo stack + re-baseline for fresh data
+        with self._undo_stack_obj.suppressed():
+            pass  # no programmatic changes to undo-suppress here
+        self._undo_stack_obj.clear()
+        self._rebaseline_undo_state()
+
     def removeData(self, data_list: list | None = None) -> None:
         """Remove the existing data reference from the Invariant Perspective."""
         if not data_list or self._model_item not in data_list:
@@ -1500,6 +1671,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self._calculator = invariant.InvariantCalculator(
             data=self._data, background=self._background, scale=self._scale
         )
+
+        # Re-baseline undo state after loading data from file
+        self._rebaseline_undo_state()
 
     def serializeAll(self) -> dict:
         """
@@ -1589,42 +1763,47 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             msg = "Invariant.updateFromParameters expects a dictionary"
             raise TypeError(f"{msg}: {c_name} received")
 
-        # Assign values to 'Invariant' tab inputs - use defaults if not found
-        self.txtTotalQMin.setText(str(params.get("total_q_min", "0.0")))
-        self.txtTotalQMax.setText(str(params.get("total_q_max", "0.0")))
-        self.txtVolFract.setText(str(params.get("vol_fraction", "")))
-        self.txtVolFractErr.setText(str(params.get("vol_fraction_err", "")))
-        self.txtContrastOut.setText(str(params.get("contrast_out", "")))
-        self.txtContrastOutErr.setText(str(params.get("contrast_out_err", "")))
-        self.txtSpecSurf.setText(str(params.get("specific_surface", "")))
-        self.txtSpecSurfErr.setText(str(params.get("specific_surface_err", "")))
-        self.txtInvariantTot.setText(str(params.get("invariant_total", "")))
-        self.txtInvariantTotErr.setText(str(params.get("invariant_total_err", "")))
-        self.txtBackgd.setText(str(params.get("background", "0.0")))
-        self.txtScale.setText(str(params.get("scale", "1.0")))
-        self.txtContrast.setText(str(params.get("contrast", "")))
-        self.txtContrastErr.setText(str(params.get("contrast_err", "0.0")))
-        self.txtPorodCst.setText(str(params.get("porod", "0.0")))
-        self.txtVolFrac1.setText(str(params.get("volfrac1", "0.0")))
-        self.txtVolFrac1Err.setText(str(params.get("volfrac1_err", "0.0")))
+        # Suppress undo during programmatic load — handled after restore
+        with self._undo_stack_obj.suppressed():
+            # Assign values to 'Invariant' tab inputs - use defaults if not found
+            self.txtTotalQMin.setText(str(params.get("total_q_min", "0.0")))
+            self.txtTotalQMax.setText(str(params.get("total_q_max", "0.0")))
+            self.txtVolFract.setText(str(params.get("vol_fraction", "")))
+            self.txtVolFractErr.setText(str(params.get("vol_fraction_err", "")))
+            self.txtContrastOut.setText(str(params.get("contrast_out", "")))
+            self.txtContrastOutErr.setText(str(params.get("contrast_out_err", "")))
+            self.txtSpecSurf.setText(str(params.get("specific_surface", "")))
+            self.txtSpecSurfErr.setText(str(params.get("specific_surface_err", "")))
+            self.txtInvariantTot.setText(str(params.get("invariant_total", "")))
+            self.txtInvariantTotErr.setText(str(params.get("invariant_total_err", "")))
+            self.txtBackgd.setText(str(params.get("background", "0.0")))
+            self.txtScale.setText(str(params.get("scale", "1.0")))
+            self.txtContrast.setText(str(params.get("contrast", "")))
+            self.txtContrastErr.setText(str(params.get("contrast_err", "0.0")))
+            self.txtPorodCst.setText(str(params.get("porod", "0.0")))
+            self.txtVolFrac1.setText(str(params.get("volfrac1", "0.0")))
+            self.txtVolFrac1Err.setText(str(params.get("volfrac1_err", "0.0")))
 
-        # Extrapolation tab - use new _ex suffix variables
-        self.txtGuinierEnd_ex.setText(str(params.get("guinier_end_low_q_ex", "")))
-        self.txtPorodStart_ex.setText(str(params.get("porod_start_high_q_ex", "")))
-        self.txtPorodEnd_ex.setText(str(params.get("porod_end_high_q_ex", "")))
-        self.txtLowQPower_ex.setText(str(params.get("power_low_q_ex", DEFAULT_POWER_VALUE)))
-        self.txtHighQPower_ex.setText(str(params.get("power_high_q_ex", DEFAULT_POWER_VALUE)))
-        self.chkLowQ_ex.setChecked(params.get("enable_low_q_ex", False))
-        self.chkHighQ_ex.setChecked(params.get("enable_high_q_ex", False))
-        self.rbLowQGuinier_ex.setChecked(params.get("low_q_guinier_ex", False))
-        self.rbLowQPower_ex.setChecked(params.get("low_q_power_ex", False))
-        self.rbLowQFit_ex.setChecked(params.get("low_q_fit_ex", False))
-        self.rbLowQFix_ex.setChecked(params.get("low_q_fix_ex", False))
-        self.rbHighQFit_ex.setChecked(params.get("high_q_fit_ex", False))
-        self.rbHighQFix_ex.setChecked(params.get("high_q_fix_ex", False))
+            # Extrapolation tab - use new _ex suffix variables
+            self.txtGuinierEnd_ex.setText(str(params.get("guinier_end_low_q_ex", "")))
+            self.txtPorodStart_ex.setText(str(params.get("porod_start_high_q_ex", "")))
+            self.txtPorodEnd_ex.setText(str(params.get("porod_end_high_q_ex", "")))
+            self.txtLowQPower_ex.setText(str(params.get("power_low_q_ex", DEFAULT_POWER_VALUE)))
+            self.txtHighQPower_ex.setText(str(params.get("power_high_q_ex", DEFAULT_POWER_VALUE)))
+            self.chkLowQ_ex.setChecked(params.get("enable_low_q_ex", False))
+            self.chkHighQ_ex.setChecked(params.get("enable_high_q_ex", False))
+            self.rbLowQGuinier_ex.setChecked(params.get("low_q_guinier_ex", False))
+            self.rbLowQPower_ex.setChecked(params.get("low_q_power_ex", False))
+            self.rbLowQFit_ex.setChecked(params.get("low_q_fit_ex", False))
+            self.rbLowQFix_ex.setChecked(params.get("low_q_fix_ex", False))
+            self.rbHighQFit_ex.setChecked(params.get("high_q_fit_ex", False))
+            self.rbHighQFix_ex.setChecked(params.get("high_q_fix_ex", False))
 
-        # Update once all inputs are changed
-        self.update_from_model()
+            # Update once all inputs are changed
+            self.update_from_model()
+
+        # Re-baseline after programmatic restore
+        self._rebaseline_undo_state()
 
     def allowBatch(self) -> bool:
         """Tell the caller that we don't accept multiple data instances."""

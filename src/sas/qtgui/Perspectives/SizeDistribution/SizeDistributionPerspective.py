@@ -7,6 +7,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from sasdata.dataloader.data_info import Data1D as LoadData1D
 
 from sas.qtgui.Perspectives.perspective import Perspective
+from sas.qtgui.Perspectives.UndoRedo import DictSnapshotCommand, UndoStack
 from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionLogic import (
     SizeDistributionLogic,
 )
@@ -75,6 +76,10 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         # The window should not close
         self._allowClose: bool = False
 
+        # Undo/redo infrastructure
+        self._undo_stack_obj = UndoStack(self)
+        self._undo_baseline: dict | None = None
+
         self._data: LoadData1D | None = None
         self._path: str = ""
         self.fit_thread: SizeDistributionThread | None = None
@@ -100,6 +105,11 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         # Set base window state
         self.setupWindow()
 
+        # Undo/redo: baseline after full initialization
+        self._setupUndoConnections()
+        self._rebaseline_undo_state()
+        self._undo_stack_obj.clear()
+
     ######################################################################
     # Base Perspective Class Definitions
 
@@ -124,6 +134,14 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         """Tell the caller that this perspective writes its state."""
         return True
 
+    @property
+    def undo_stack(self):
+        """Return the undo stack for this perspective.
+
+        Overrides ``Perspective.undo_stack`` (which returns ``None``).
+        """
+        return self._undo_stack_obj
+
     def closeEvent(self, event: QtGui.QCloseEvent) -> None:
         """Overwrite QDialog close method to allow for custom widget close."""
         # Close report widgets before closing/minimizing main widget
@@ -138,6 +156,176 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             event.ignore()
             # Maybe we should just minimize
             self.setWindowState(QtCore.Qt.WindowMinimized)
+
+    # ------------------------------------------------------------------
+    # Undo/redo contract methods
+    # ------------------------------------------------------------------
+
+    def _get_parameter_dict(self) -> dict:
+        """Capture current input-only state from widgets.
+
+        Mirrors ``getState()`` but also includes weighting and power-fit
+        radio buttons not captured by the existing serializer.
+        """
+        return {
+            "range_q_min": self.txtMinRange.text(),
+            "range_q_max": self.txtMaxRange.text(),
+            "aspect_ratio": self.txtAspectRatio.text(),
+            "d_min": self.txtMinDiameter.text(),
+            "d_max": self.txtMaxDiameter.text(),
+            "num_d_bins": self.txtBinsDiameter.text(),
+            "log_binning": self.chkLogBinning.isChecked(),
+            "contrast": self.txtContrast.text(),
+            "sky_background": self.txtSkyBackgd.text(),
+            "num_iterations": self.txtIterations.text(),
+            "background": self.txtBackgd.text(),
+            "subtract_low_q": self.chkLowQ.isChecked(),
+            "power_low_q": self.txtPowerLowQ.text(),
+            "scale_low_q": self.txtScaleLowQ.text(),
+            "wgt_factor": self.txtWgtFactor.text(),
+            "wgt_percent": self.txtWgtPercent.text(),
+            "weight_1": self.rbWeighting1.isChecked(),
+            "weight_2": self.rbWeighting2.isChecked(),
+            "weight_3": self.rbWeighting3.isChecked(),
+            "weight_4": self.rbWeighting4.isChecked(),
+            "fit_power": self.rbFitPower.isChecked(),
+            "fix_power": self.rbFixPower.isChecked(),
+        }
+
+    def _restore_parameter_values(self, state: dict) -> None:
+        """Apply a state dict to all input widgets AND the underlying model.
+
+        Must update model items because ``setText`` alone does not sync
+        through a ``QDataWidgetMapper`` — the model must be explicitly
+        updated for data-load paths to see the correct values.
+        """
+        with self._undo_stack_obj.suppressed():
+            # Text widgets
+            self.txtMinRange.setText(str(state.get("range_q_min", "0.0")))
+            self.txtMaxRange.setText(str(state.get("range_q_max", "0.0")))
+            self.txtAspectRatio.setText(str(state.get("aspect_ratio", str(ASPECT_RATIO))))
+            self.txtMinDiameter.setText(str(state.get("d_min", str(DIAMETER_MIN))))
+            self.txtMaxDiameter.setText(str(state.get("d_max", str(DIAMETER_MAX))))
+            self.txtBinsDiameter.setText(str(state.get("num_d_bins", str(NUM_DIAMETER_BINS))))
+            self.txtContrast.setText(str(state.get("contrast", str(CONTRAST))))
+            self.txtSkyBackgd.setText(str(state.get("sky_background", str(SKY_BACKGROUND))))
+            self.txtIterations.setText(str(state.get("num_iterations", str(NUM_ITERATIONS))))
+            self.txtBackgd.setText(str(state.get("background", str(BACKGROUND))))
+            self.txtPowerLowQ.setText(str(state.get("power_low_q", str(POWER_LOW_Q))))
+            self.txtScaleLowQ.setText(str(state.get("scale_low_q", str(SCALE_LOW_Q))))
+            self.txtWgtFactor.setText(str(state.get("wgt_factor", str(WEIGHT_FACTOR))))
+            self.txtWgtPercent.setText(str(state.get("wgt_percent", str(WEIGHT_PERCENT))))
+
+            # Checkboxes
+            self.chkLogBinning.setChecked(bool(state.get("log_binning", True)))
+            self.chkLowQ.setChecked(bool(state.get("subtract_low_q", False)))
+
+            # Radio buttons (mutually exclusive groups)
+            if bool(state.get("weight_1", True)):
+                self.rbWeighting1.setChecked(True)
+            elif bool(state.get("weight_2", False)):
+                self.rbWeighting2.setChecked(True)
+            elif bool(state.get("weight_3", False)):
+                self.rbWeighting3.setChecked(True)
+            elif bool(state.get("weight_4", False)):
+                self.rbWeighting4.setChecked(True)
+
+            if bool(state.get("fix_power", True)):
+                self.rbFixPower.setChecked(True)
+            elif bool(state.get("fit_power", False)):
+                self.rbFitPower.setChecked(True)
+
+            # Sync model items (QDataWidgetMapper is one-way, model not
+            # updated by setText alone)
+            self.model.item(WIDGETS.W_QMIN).setText(
+                str(state.get("range_q_min", "0.0")))
+            self.model.item(WIDGETS.W_QMAX).setText(
+                str(state.get("range_q_max", "0.0")))
+            self.model.item(WIDGETS.W_ASPECT_RATIO).setText(
+                str(state.get("aspect_ratio", str(ASPECT_RATIO))))
+            self.model.item(WIDGETS.W_DMIN).setText(
+                str(state.get("d_min", str(DIAMETER_MIN))))
+            self.model.item(WIDGETS.W_DMAX).setText(
+                str(state.get("d_max", str(DIAMETER_MAX))))
+            self.model.item(WIDGETS.W_DBINS).setText(
+                str(state.get("num_d_bins", str(NUM_DIAMETER_BINS))))
+            self.model.item(WIDGETS.W_CONTRAST).setText(
+                str(state.get("contrast", str(CONTRAST))))
+            self.model.item(WIDGETS.W_SKY_BACKGROUND).setText(
+                str(state.get("sky_background", str(SKY_BACKGROUND))))
+            self.model.item(WIDGETS.W_NUM_ITERATIONS).setText(
+                str(state.get("num_iterations", str(NUM_ITERATIONS))))
+            self.model.item(WIDGETS.W_BACKGROUND).setText(
+                str(state.get("background", str(BACKGROUND))))
+            self.model.item(WIDGETS.W_POWER_LOW_Q).setText(
+                str(state.get("power_low_q", str(POWER_LOW_Q))))
+            self.model.item(WIDGETS.W_SCALE_LOW_Q).setText(
+                str(state.get("scale_low_q", str(SCALE_LOW_Q))))
+            self.model.item(WIDGETS.W_WEIGHT_FACTOR).setText(
+                str(state.get("wgt_factor", str(WEIGHT_FACTOR))))
+            self.model.item(WIDGETS.W_WEIGHT_PERCENT).setText(
+                str(state.get("wgt_percent", str(WEIGHT_PERCENT))))
+            self.model.item(WIDGETS.W_LOG_BINNING).setText(
+                str(state.get("log_binning", True)).lower())
+            self.model.item(WIDGETS.W_SUBTRACT_LOW_Q).setText(
+                str(state.get("subtract_low_q", False)).lower())
+
+        # Update derived UI state (low Q enablement)
+        self.onLowQStateChanged(
+            QtCore.Qt.CheckState.Checked.value if bool(state.get("subtract_low_q", False))
+            else QtCore.Qt.CheckState.Unchecked.value)
+
+    def _captureUndoState(self, description: str = "Change") -> None:
+        """Push a DictSnapshotCommand if current state differs from baseline."""
+        if self._undo_baseline is None:
+            return
+        new_state = self._get_parameter_dict()
+        if new_state != self._undo_baseline:
+            self._undo_stack_obj.push(
+                DictSnapshotCommand(self._undo_baseline, new_state, description)
+            )
+            self._undo_baseline = new_state
+
+    def _rebaseline_undo_state(self) -> None:
+        """Update undo baseline without pushing a command."""
+        self._undo_baseline = self._get_parameter_dict()
+
+    def _setupUndoConnections(self) -> None:
+        """Connect undo-capture signals for user-editable input widgets."""
+        # Text edits — editingFinished as commit boundary
+        text_edits = [
+            self.txtMinRange, self.txtMaxRange,
+            self.txtAspectRatio, self.txtMinDiameter, self.txtMaxDiameter,
+            self.txtBinsDiameter, self.txtContrast,
+            self.txtSkyBackgd, self.txtIterations,
+            self.txtBackgd, self.txtPowerLowQ, self.txtScaleLowQ,
+            self.txtWgtFactor, self.txtWgtPercent,
+        ]
+        for te in text_edits:
+            te.editingFinished.connect(
+                lambda desc="Edit value": self._captureUndoState(desc))
+
+        # Checkboxes
+        self.chkLogBinning.toggled.connect(
+            lambda _: self._captureUndoState("Toggle log binning"))
+        self.chkLowQ.toggled.connect(
+            lambda _: self._captureUndoState("Toggle subtract low-Q"))
+
+        # Weighting radio buttons
+        self.rbWeighting1.toggled.connect(
+            lambda _: self._captureUndoState("Change weighting"))
+        self.rbWeighting2.toggled.connect(
+            lambda _: self._captureUndoState("Change weighting"))
+        self.rbWeighting3.toggled.connect(
+            lambda _: self._captureUndoState("Change weighting"))
+        self.rbWeighting4.toggled.connect(
+            lambda _: self._captureUndoState("Change weighting"))
+
+        # Power fit/fix radio buttons
+        self.rbFitPower.toggled.connect(
+            lambda _: self._captureUndoState("Change power mode"))
+        self.rbFixPower.toggled.connect(
+            lambda _: self._captureUndoState("Change power mode"))
 
     ######################################################################
     # Initialization routines
@@ -308,6 +496,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
     def onQuickFit(self) -> None:
         """Perform a quick fit of the size distribution."""
         self.is_calculating = True
+        self._undo_stack_obj.set_enabled(False)
         self.enableButtons()
 
         params = self.getMaxEntParams()
@@ -324,6 +513,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
     def onFullFit(self) -> None:
         """Perform a full fit of the size distribution."""
         self.is_calculating = True
+        self._undo_stack_obj.set_enabled(False)
         self.enableButtons()
 
         params = self.getMaxEntParams()
@@ -343,7 +533,9 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         qmax: float = 0.0
         if self.logic.data_is_loaded:
             qmin, qmax = self.logic.computeDataRange()
-        self.updateQRange(qmin, qmax)
+        with self._undo_stack_obj.suppressed():
+            self.updateQRange(qmin, qmax)
+        self._captureUndoState("Reset Q range")
 
     def onLowQStateChanged(self, state: int) -> None:
         """Slot for state change of the subtract power law checkbox."""
@@ -362,9 +554,11 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         if fit_result is None:
             return
         constant = fit_result[0]
-        self.txtBackgd.setText(f"{constant:5g}")
+        with self._undo_stack_obj.suppressed():
+            self.txtBackgd.setText(f"{constant:5g}")
         self.updateBackground()
         self.plotData()
+        self._captureUndoState("Fit flat background")
 
     def onFitPowerLaw(self) -> None:
         """Fit background power law and update plot."""
@@ -377,7 +571,8 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             scale, power_fit = fit_result
             # by convention, the power is shown without a minus sign
             power = -1.0 * power_fit
-            self.txtPowerLowQ.setText(f"{power:5g}")
+            with self._undo_stack_obj.suppressed():
+                self.txtPowerLowQ.setText(f"{power:5g}")
         else:
             # if the power should be fixed, pass the value from the input box
             _, _, power_fixed = self.getBackgroundParams()
@@ -386,9 +581,11 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
                 return
             scale = fit_result[0]
         # update the scale
-        self.txtScaleLowQ.setText(f"{scale:5g}")
+        with self._undo_stack_obj.suppressed():
+            self.txtScaleLowQ.setText(f"{scale:5g}")
         self.updateBackground()
         self.plotData()
+        self._captureUndoState("Fit power law background")
 
     def eventFilter(self, widget: QtCore.QObject, event: QtCore.QEvent) -> bool:
         """Catch enter key presses and update data plot."""
@@ -457,6 +654,10 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self.enableButtons()
 
         self.plotData()
+
+        # Clear undo stack + re-baseline for fresh data
+        self._undo_stack_obj.clear()
+        self._rebaseline_undo_state()
 
     def plotData(self) -> None:
         """Plot data, background and background subtracted data."""
@@ -531,6 +732,10 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self.enableButtons()
         self.clearStatistics()
 
+        # Clear undo stack + re-baseline after data removal
+        self._undo_stack_obj.clear()
+        self._rebaseline_undo_state()
+
     def serializeAll(self) -> dict:
         """
         Serialize the size distribution state so data can be saved.
@@ -579,21 +784,23 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             c_name: str = params.__class__.__name__
             msg: str = "SizeDistribution.updateFromParameters expects a dictionary"
             raise TypeError(f"{msg}: {c_name} received")
-        # Assign values to 'Parameters' tab inputs - use defaults if not found
-        self.txtMinRange.setText(str(params.get("range_q_min", "0.0")))
-        self.txtMaxRange.setText(str(params.get("range_q_max", "0.0")))
-        self.txtAspectRatio.setText(str(params.get("aspect_ratio", str(ASPECT_RATIO))))
-        self.txtMinDiameter.setText(str(params.get("d_min", str(DIAMETER_MIN))))
-        self.txtMaxDiameter.setText(str(params.get("d_max", str(DIAMETER_MAX))))
-        self.txtBinsDiameter.setText(str(params.get("num_d_bins", str(NUM_DIAMETER_BINS))))
-        self.chkLogBinning.setChecked(params.get("log_binning", True))
-        self.txtContrast.setText(str(params.get("contrast", str(CONTRAST))))
-        self.txtSkyBackgd.setText(str(params.get("sky_background", str(SKY_BACKGROUND))))
-        self.txtIterations.setText(str(params.get("num_iterations", str(NUM_ITERATIONS))))
-        self.txtBackgd.setText(str(params.get("background", str(BACKGROUND))))
-        self.chkLowQ.setChecked(params.get("subtract_low_q", False))
-        self.txtPowerLowQ.setText(str(params.get("power_low_q", str(POWER_LOW_Q))))
-        self.txtScaleLowQ.setText(str(params.get("scale_low_q", str(SCALE_LOW_Q))))
+        with self._undo_stack_obj.suppressed():
+            # Assign values to 'Parameters' tab inputs - use defaults if not found
+            self.txtMinRange.setText(str(params.get("range_q_min", "0.0")))
+            self.txtMaxRange.setText(str(params.get("range_q_max", "0.0")))
+            self.txtAspectRatio.setText(str(params.get("aspect_ratio", str(ASPECT_RATIO))))
+            self.txtMinDiameter.setText(str(params.get("d_min", str(DIAMETER_MIN))))
+            self.txtMaxDiameter.setText(str(params.get("d_max", str(DIAMETER_MAX))))
+            self.txtBinsDiameter.setText(str(params.get("num_d_bins", str(NUM_DIAMETER_BINS))))
+            self.chkLogBinning.setChecked(params.get("log_binning", True))
+            self.txtContrast.setText(str(params.get("contrast", str(CONTRAST))))
+            self.txtSkyBackgd.setText(str(params.get("sky_background", str(SKY_BACKGROUND))))
+            self.txtIterations.setText(str(params.get("num_iterations", str(NUM_ITERATIONS))))
+            self.txtBackgd.setText(str(params.get("background", str(BACKGROUND))))
+            self.chkLowQ.setChecked(params.get("subtract_low_q", False))
+            self.txtPowerLowQ.setText(str(params.get("power_low_q", str(POWER_LOW_Q))))
+            self.txtScaleLowQ.setText(str(params.get("scale_low_q", str(SCALE_LOW_Q))))
+        self._rebaseline_undo_state()
 
     def updateQRange(self, q_range_min: float, q_range_max: float) -> None:
         """Update the local model based on calculated values."""
@@ -610,6 +817,8 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         """Handle error in the calculation thread."""
         # re-enable the fit buttons
         self.is_calculating = False
+        self._undo_stack_obj.set_enabled(True)
+        self._rebaseline_undo_state()
         self.enableButtons()
         logger.exception("Fitting failed", exc_info=(etype, value, traceback))
 
@@ -622,6 +831,8 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         """
         # re-enable the fit buttons
         self.is_calculating = False
+        self._undo_stack_obj.set_enabled(True)
+        self._rebaseline_undo_state()
         self.enableButtons()
         if result is None:
             msg = "Fitting failed."
