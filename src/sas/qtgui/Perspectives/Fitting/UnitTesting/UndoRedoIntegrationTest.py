@@ -37,8 +37,8 @@ from sas.qtgui.Perspectives.Fitting.UndoRedo import (
     ParameterMinMaxCommand,
     ParameterValueCommand,
     SmearingOptionsCommand,
-    UndoStack,
 )
+from sas.qtgui.Perspectives.UndoRedo import UndoStack
 from sas.qtgui.Utilities import GuiUtils
 from sas.sascalc.fit.models import ModelManager, ModelManagerBase
 

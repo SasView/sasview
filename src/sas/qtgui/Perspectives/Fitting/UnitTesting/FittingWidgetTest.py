@@ -15,7 +15,7 @@ from sas import config
 from sas.qtgui.Perspectives.Fitting import FittingUtilities, FittingWidget
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 from sas.qtgui.Perspectives.Fitting.ModelThread import Calc2D
-from sas.qtgui.Perspectives.Fitting.UndoRedo import UndoStack
+from sas.qtgui.Perspectives.UndoRedo import UndoStack
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 from sas.qtgui.Utilities import GuiUtils

@@ -24,8 +24,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-# Re-export shared infrastructure so existing imports keep working
-# (FittingWidget imports UndoStack from here)
+# Base class for Fitting-specific commands — imported from shared module
 from sas.qtgui.Perspectives.UndoRedo import UndoCommand  # noqa: E402
 
 logger = logging.getLogger(__name__)

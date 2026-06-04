@@ -24,13 +24,15 @@ import pytest
 
 from sas.qtgui.Perspectives.Fitting.UndoRedo import (
     CheckboxToggleCommand,
-    CompoundCommand,
     FitOptionsCommand,
     FitResultCommand,
     ModelSelectionCommand,
     ParameterMinMaxCommand,
     ParameterValueCommand,
     SmearingOptionsCommand,
+)
+from sas.qtgui.Perspectives.UndoRedo import (
+    CompoundCommand,
     UndoCommand,
     UndoStack,
 )

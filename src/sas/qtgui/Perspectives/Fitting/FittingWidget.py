@@ -44,9 +44,9 @@ from sas.qtgui.Perspectives.Fitting.UndoRedo import (
     ParameterMinMaxCommand,
     ParameterValueCommand,
     SmearingOptionsCommand,
-    UndoStack,
 )
 from sas.qtgui.Perspectives.Fitting.ViewDelegate import ModelViewDelegate
+from sas.qtgui.Perspectives.UndoRedo import UndoStack
 from sas.qtgui.Plotting.Plotter import PlotterWidget
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
 from sas.qtgui.Utilities.BackgroundColor import BG_DEFAULT, BG_ERROR
