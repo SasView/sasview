@@ -195,7 +195,6 @@ class UndoStack(QtCore.QObject):
 
         if self._undo_stack and self._undo_stack[-1].can_merge(cmd):
             self._undo_stack[-1] = self._undo_stack[-1].merge(cmd)
-            logger.debug("UndoStack: merged into %r", self._undo_stack[-1])
         else:
             self._undo_stack.append(cmd)
             if len(self._undo_stack) > self._max_depth:
@@ -205,9 +204,6 @@ class UndoStack(QtCore.QObject):
                 )
 
         self._redo_stack.clear()
-        logger.debug(
-            "UndoStack: pushed %r (depth=%d)", cmd, len(self._undo_stack)
-        )
         self.stackChanged.emit()
 
     def undo(self) -> None:
@@ -223,10 +219,7 @@ class UndoStack(QtCore.QObject):
             self._consecutive_failures = 0
             self._auto_snapshot()
             self._refresh_view()
-            logger.debug(
-                "UndoStack: undo %r (undo=%d, redo=%d)",
-                cmd, len(self._undo_stack), len(self._redo_stack),
-            )
+
         except Exception:
             tb = traceback.format_exc()
             logger.warning("UndoStack: undo failed for %r:\n%s", cmd, tb)
@@ -249,10 +242,7 @@ class UndoStack(QtCore.QObject):
             self._consecutive_failures = 0
             self._auto_snapshot()
             self._refresh_view()
-            logger.debug(
-                "UndoStack: redo %r (undo=%d, redo=%d)",
-                cmd, len(self._undo_stack), len(self._redo_stack),
-            )
+
         except Exception:
             tb = traceback.format_exc()
             logger.warning("UndoStack: redo failed for %r:\n%s", cmd, tb)
@@ -276,7 +266,6 @@ class UndoStack(QtCore.QObject):
         self._redo_stack.clear()
         self._last_good_state = None
         self._consecutive_failures = 0
-        logger.debug("UndoStack: cleared")
         self.stackChanged.emit()
 
     def set_enabled(self, enabled: bool) -> None:
@@ -286,7 +275,6 @@ class UndoStack(QtCore.QObject):
         immediately (e.g. buttons grey out when a calculation starts).
         """
         self._enabled = enabled
-        logger.debug("UndoStack: set_enabled=%s", enabled)
         self.stackChanged.emit()
 
     @contextlib.contextmanager
@@ -300,14 +288,10 @@ class UndoStack(QtCore.QObject):
         """
         was_enabled = self._enabled
         self._enabled = False
-        logger.debug("UndoStack: suppression entered")
         try:
             yield
         finally:
             self._enabled = was_enabled
-            logger.debug(
-                "UndoStack: suppression lifted (enabled=%s)", self._enabled
-            )
 
     def undo_text(self) -> str:
         """Human-readable label for Undo (suitable for tooltip)."""
@@ -324,10 +308,6 @@ class UndoStack(QtCore.QObject):
     def save_last_good_state(self, state: dict) -> None:
         """Store *state* as the recovery snapshot."""
         self._last_good_state = dict(state)
-        logger.debug(
-            "UndoStack: last_good_state saved (%d params)",
-            len(self._last_good_state),
-        )
 
     def reset_to_last_good(self) -> None:
         """Restore widget parameters from the most recent good snapshot.
@@ -336,16 +316,9 @@ class UndoStack(QtCore.QObject):
         failure dialog.  If no snapshot exists, logs a warning and returns.
         """
         if self._last_good_state is None:
-            logger.warning(
-                "UndoStack: reset_to_last_good called but no snapshot available"
-            )
             return
         try:
             self._widget._restore_parameter_values(self._last_good_state)
-            logger.info(
-                "UndoStack: reset to last good state (%d params)",
-                len(self._last_good_state),
-            )
         except Exception:
             logger.warning(
                 "UndoStack: reset_to_last_good failed:\n%s",
@@ -405,10 +378,6 @@ class UndoStack(QtCore.QObject):
             return
         if isinstance(state, dict):
             self._last_good_state = dict(state)
-            logger.debug(
-                "UndoStack: auto-saved last_good_state (%d params)",
-                len(self._last_good_state),
-            )
 
     def _refresh_view(self) -> None:
         """Force viewport repaint after undo/redo (for QTreeView-based widgets).

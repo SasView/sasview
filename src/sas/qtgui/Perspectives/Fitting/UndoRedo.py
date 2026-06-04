@@ -25,10 +25,8 @@ import logging
 from typing import Any
 
 # Re-export shared infrastructure so existing imports keep working
-# (FittingWidget imports these from here)
-from sas.qtgui.Perspectives.UndoRedo import (  # noqa: E402
-    UndoCommand,
-)
+# (FittingWidget imports UndoStack from here)
+from sas.qtgui.Perspectives.UndoRedo import UndoCommand  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
