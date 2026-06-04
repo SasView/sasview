@@ -316,9 +316,16 @@ class UndoStack(QtCore.QObject):
         failure dialog.  If no snapshot exists, logs a warning and returns.
         """
         if self._last_good_state is None:
+            logger.warning(
+                "UndoStack: reset_to_last_good called but no snapshot available"
+            )
             return
         try:
             self._widget._restore_parameter_values(self._last_good_state)
+            logger.info(
+                "UndoStack: reset to last good state (%d params)",
+                len(self._last_good_state),
+            )
         except Exception:
             logger.warning(
                 "UndoStack: reset_to_last_good failed:\n%s",

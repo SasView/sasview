@@ -46,7 +46,7 @@ def mock_message_box(monkeypatch):
     """Suppress all QMessageBox dialogs for the entire test module."""
     mock = MagicMock()
     monkeypatch.setattr(
-        "sas.qtgui.Perspectives.Fitting.UndoRedo.QtWidgets.QMessageBox", mock
+        "sas.qtgui.Perspectives.UndoRedo.QtWidgets.QMessageBox", mock
     )
     return mock
 
@@ -675,7 +675,7 @@ class TestUndoStackFailure:
         stack.push(failing_undo_cmd)
         with caplog.at_level(
             logging.WARNING,
-            logger="sas.qtgui.Perspectives.Fitting.UndoRedo",
+            logger="sas.qtgui.Perspectives.UndoRedo",
         ):
             stack.undo()
         assert any("undo failed" in m.lower() for m in caplog.messages)
@@ -690,7 +690,7 @@ class TestUndoStackFailure:
         stack._redo_stack[-1] = failing_redo_cmd
         with caplog.at_level(
             logging.WARNING,
-            logger="sas.qtgui.Perspectives.Fitting.UndoRedo",
+            logger="sas.qtgui.Perspectives.UndoRedo",
         ):
             stack.redo()
         assert any("redo failed" in m.lower() for m in caplog.messages)
@@ -739,7 +739,7 @@ class TestUndoStackFailure:
     def test_reset_without_snapshot_logs_warning(self, stack, caplog):
         with caplog.at_level(
             logging.WARNING,
-            logger="sas.qtgui.Perspectives.Fitting.UndoRedo",
+            logger="sas.qtgui.Perspectives.UndoRedo",
         ):
             stack.reset_to_last_good()
         assert any("no snapshot" in m.lower() for m in caplog.messages)
