@@ -124,7 +124,7 @@ class FittingWidgetMod(FittingWidget.FittingWidget):
 def _suppress_message_boxes(monkeypatch):
     """Suppress QMessageBox dialogs globally."""
     monkeypatch.setattr(
-        "sas.qtgui.Perspectives.Fitting.UndoRedo.QtWidgets.QMessageBox",
+        "sas.qtgui.Perspectives.UndoRedo.QtWidgets.QMessageBox",
         MagicMock(),
     )
 
