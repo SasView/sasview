@@ -7,7 +7,6 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from sasdata.dataloader.data_info import Data1D as LoadData1D
 
 from sas.qtgui.Perspectives.perspective import Perspective
-from sas.qtgui.Perspectives.UndoRedo import DictSnapshotCommand, UndoStack
 from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionLogic import (
     SizeDistributionLogic,
 )
@@ -23,6 +22,7 @@ from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionUtils import (
 from sas.qtgui.Perspectives.SizeDistribution.UI.SizeDistributionUI import (
     Ui_SizeDistribution,
 )
+from sas.qtgui.Perspectives.UndoRedo import DictSnapshotCommand, UndoStack
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Utilities import GuiUtils
 

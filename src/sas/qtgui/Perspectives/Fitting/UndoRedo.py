@@ -24,17 +24,13 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-logger = logging.getLogger(__name__)
-
 # Re-export shared infrastructure so existing imports keep working
 # (FittingWidget imports these from here)
-from sas.qtgui.Perspectives.UndoRedo import (  # noqa: F401
-    CompoundCommand,
-    DictSnapshotCommand,
+from sas.qtgui.Perspectives.UndoRedo import (  # noqa: E402
     UndoCommand,
-    UndoStack,
 )
 
+logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
 # Concrete commands — Fitting-specific
