@@ -275,8 +275,10 @@ class FittingWidgetTest:
         # Try to change back to default
         widget.cbCategory.setCurrentIndex(0)
 
-        # Observe no such luck
-        assert widget.cbCategory.currentIndex() == 8
+        # Observe no such luck - it bounces back to the previously chosen
+        # category. (Use the looked-up index rather than a hard-coded one;
+        # the category positions depend on the installed model set.)
+        assert widget.cbCategory.currentIndex() == category_index
         assert widget.cbModel.count() == 29
 
         # Set the structure factor
@@ -328,11 +330,16 @@ class FittingWidgetTest:
         # Observe calculateQGridForModel called
         assert widget.calculateQGridForModel.called
 
-    def testSelectFactor(self, widget):
+    def testSelectFactor(self, widget, mocker):
         """
         Assure proper behaviour on changing structure factor
         """
         widget.show()
+        # Mock the background calculation. Selecting a model/structure factor
+        # kicks off an asynchronous Q-grid calculation that briefly disables the
+        # interactive controls (incl. cmdPlot) until it completes. Mocking it
+        # keeps the control-enablement assertions below from racing that thread.
+        mocker.patch.object(widget, 'calculateQGridForModel')
         # Change the category index so we have some models
         category_index = widget.cbCategory.findText("Cylinder")
         widget.cbCategory.setCurrentIndex(category_index)
@@ -369,9 +376,12 @@ class FittingWidgetTest:
         assert not widget.cbModel.isEnabled()
         assert widget._model_model.rowCount() == 0
 
-        # Choose the last factor
-        last_index = widget.cbStructureFactor.count()
-        widget.cbStructureFactor.setCurrentIndex(last_index-1)
+        # Choose a structure factor with a known parameter set. hayter_msa has
+        # 6 parameters which, together with the heading row, gives 7 rows.
+        # (Don't rely on "the last factor" - the available structure factors
+        # depend on the installed sasmodels version.)
+        sf_index = widget.cbStructureFactor.findText('hayter_msa')
+        widget.cbStructureFactor.setCurrentIndex(sf_index)
         # Do we have all the rows (incl. radius_effective & heading row)?
         assert widget._model_model.rowCount() == 7
 
@@ -528,7 +538,7 @@ class FittingWidgetTest:
         widget.cbModel.setCurrentIndex(model_index)
 
         # click on a poly parameter checkbox
-        index = widget.polydispersity_widget.poly_model.index(0,0)
+        widget.polydispersity_widget.poly_model.index(0,0)
 
         # Set the checbox
         widget.polydispersity_widget.poly_model.item(0,0).setCheckState(QtCore.Qt.CheckState.Checked)
@@ -686,7 +696,7 @@ class FittingWidgetTest:
 
         # Test rows
         for row in range(widget.magnetism_widget._magnet_model.rowCount()):
-            func_index = widget.magnetism_widget._magnet_model.index(row, 0)
+            widget.magnetism_widget._magnet_model.index(row, 0)
             assert '_' in widget.magnetism_widget._magnet_model.item(row, 0).text()
 
 
@@ -923,7 +933,7 @@ class FittingWidgetTest:
         # Spying on status update signal
         update_spy = QtSignalSpy(widget, widget.communicator.statusBarUpdateSignal)
 
-        with threads.deferToThread as MagicMock:
+        with threads.deferToThread:
             widget.onFit()
             # thread called
             assert threads.deferToThread.called

@@ -1895,7 +1895,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Fill in the structure factors combo box with defaults
         """
         structure_factor_list = self.master_category_dict.pop(CATEGORY_STRUCTURE)
-        factors = [factor[0] for factor in structure_factor_list]
+        # Only offer structure factors that are actually loadable. The
+        # categorization file (which may be a stale user file) can list models
+        # that are not present in the installed sasmodels, and selecting one of
+        # those would raise a KeyError in self.models[...] and leave the page
+        # in a broken state.
+        factors = [factor[0] for factor in structure_factor_list if factor[0] in self.models]
         factors.insert(0, STRUCTURE_DEFAULT)
         self.cbStructureFactor.clear()
         self.cbStructureFactor.addItems(sorted(factors))
