@@ -7,7 +7,7 @@ from PySide6.QtTest import QTest
 from sasdata.dataloader.loader import Loader
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Perspectives.Corfunc.CorfuncPerspective import CorfuncWindow
+from sas.qtgui.Perspectives.Corfunc.CorfuncPerspective import WIDGETS, CorfuncWindow
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.UnitTesting import base_path
 
@@ -78,7 +78,7 @@ class CorfuncTest:
             os.stat(filename)
         except OSError:
             assert False, "ISIS_98929.TXT does not exist"
-        f = Loader().load(filename)
+        Loader().load(filename)
         mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=(filename, ''))
 
         assert widget.txtBackground.text() == ''
@@ -158,6 +158,21 @@ class CorfuncTest:
         self.checkFakeDataState(widget)
         widget.removeData([self.fakeData])
         self.checkDefaults(widget)
+
+    def testUndoRestoreReconnectsModelChangedOnError(self, widget, mocker):
+        widget.model.itemChanged.disconnect(widget.model_changed)
+        model_changed = mocker.Mock()
+        widget.model_changed = model_changed
+        widget.model.itemChanged.connect(widget.model_changed)
+        set_item = mocker.patch.object(widget.model, 'setItem', side_effect=RuntimeError("restore failed"))
+
+        with pytest.raises(RuntimeError):
+            widget._restore_parameter_values({})
+
+        mocker.stop(set_item)
+        widget.model.setItem(WIDGETS.W_BACKGROUND, QtGui.QStandardItem("1.0"))
+
+        model_changed.assert_called()
 
     def checkFakeDataState(self, widget):
         assert widget.txtFilename.text() == 'data'

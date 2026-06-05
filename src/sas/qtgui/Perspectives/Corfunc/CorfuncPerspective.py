@@ -203,44 +203,46 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         """
         # Disconnect model to prevent cascading model_changed signals
         self.model.itemChanged.disconnect(self.model_changed)
-        with self._undo_stack_obj.suppressed():
-            # Text widgets
-            self.txtBackground.setText(str(state.get("background", "")))
-            self.txtGuinierA.setText(str(state.get("guinier_a", "")))
-            self.txtGuinierB.setText(str(state.get("guinier_b", "")))
-            self.txtPorodK.setText(str(state.get("porod_k", "")))
-            self.txtPorodSigma.setText(str(state.get("porod_sigma", "")))
-            self.txtLowerQMax.setText(str(state.get("lower_q_max", "")))
-            self.txtUpperQMin.setText(str(state.get("upper_q_min", "")))
-            self.txtUpperQMax.setText(str(state.get("upper_q_max", "")))
+        try:
+            with self._undo_stack_obj.suppressed():
+                # Text widgets
+                self.txtBackground.setText(str(state.get("background", "")))
+                self.txtGuinierA.setText(str(state.get("guinier_a", "")))
+                self.txtGuinierB.setText(str(state.get("guinier_b", "")))
+                self.txtPorodK.setText(str(state.get("porod_k", "")))
+                self.txtPorodSigma.setText(str(state.get("porod_sigma", "")))
+                self.txtLowerQMax.setText(str(state.get("lower_q_max", "")))
+                self.txtUpperQMin.setText(str(state.get("upper_q_min", "")))
+                self.txtUpperQMax.setText(str(state.get("upper_q_max", "")))
 
-            # Checkboxes
-            self.fitBackground.setChecked(bool(state.get("fit_background", False)))
-            self.fitGuinier.setChecked(bool(state.get("fit_guinier", False)))
-            self.fitPorod.setChecked(bool(state.get("fit_porod", False)))
+                # Checkboxes
+                self.fitBackground.setChecked(bool(state.get("fit_background", False)))
+                self.fitGuinier.setChecked(bool(state.get("fit_guinier", False)))
+                self.fitPorod.setChecked(bool(state.get("fit_porod", False)))
 
-            # Radio buttons
-            self.radTangentAuto.setChecked(bool(state.get("tangent_auto", True)))
-            self.radTangentInflection.setChecked(bool(state.get("tangent_inflection", False)))
-            self.radTangentMidpoint.setChecked(bool(state.get("tangent_midpoint", False)))
-            self.radLongPeriodAuto.setChecked(bool(state.get("long_period_auto", True)))
-            self.radLongPeriodMax.setChecked(bool(state.get("long_period_max", False)))
-            self.radLongPeriodDouble.setChecked(bool(state.get("long_period_double", False)))
+                # Radio buttons
+                self.radTangentAuto.setChecked(bool(state.get("tangent_auto", True)))
+                self.radTangentInflection.setChecked(bool(state.get("tangent_inflection", False)))
+                self.radTangentMidpoint.setChecked(bool(state.get("tangent_midpoint", False)))
+                self.radLongPeriodAuto.setChecked(bool(state.get("long_period_auto", True)))
+                self.radLongPeriodMax.setChecked(bool(state.get("long_period_max", False)))
+                self.radLongPeriodDouble.setChecked(bool(state.get("long_period_double", False)))
 
-            # Update model items so calculation uses restored values
-            # (setText fires textEdited but Corfunc's handler only validates,
-            # it does NOT update the model — that only happens on editingFinished)
-            self.model.setItem(WIDGETS.W_BACKGROUND,
-                QtGui.QStandardItem(str(state.get("background", ""))))
-            self.model.setItem(WIDGETS.W_QMIN,
-                QtGui.QStandardItem(str(state.get("lower_q_max", ""))))
-            self.model.setItem(WIDGETS.W_QMAX,
-                QtGui.QStandardItem(str(state.get("upper_q_min", ""))))
-            self.model.setItem(WIDGETS.W_QCUTOFF,
-                QtGui.QStandardItem(str(state.get("upper_q_max", ""))))
+                # Update model items so calculation uses restored values
+                # (setText fires textEdited but Corfunc's handler only validates,
+                # it does NOT update the model — that only happens on editingFinished)
+                self.model.setItem(WIDGETS.W_BACKGROUND,
+                    QtGui.QStandardItem(str(state.get("background", ""))))
+                self.model.setItem(WIDGETS.W_QMIN,
+                    QtGui.QStandardItem(str(state.get("lower_q_max", ""))))
+                self.model.setItem(WIDGETS.W_QMAX,
+                    QtGui.QStandardItem(str(state.get("upper_q_min", ""))))
+                self.model.setItem(WIDGETS.W_QCUTOFF,
+                    QtGui.QStandardItem(str(state.get("upper_q_max", ""))))
 
-            self.update_readonly()
-        self.model.itemChanged.connect(self.model_changed)
+                self.update_readonly()
+        finally:
+            self.model.itemChanged.connect(self.model_changed)
 
     def _captureUndoState(self, description: str = "Change") -> None:
         """Push a DictSnapshotCommand if current state differs from baseline."""
@@ -565,7 +567,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.update_readonly()
 
     def allow_go(self, reason: str | None = None):
-        """ 
+        """
         Disable Go button if reason is provided or if no data is loaded
         :param reason: Reason why Go button should be disabled
         """

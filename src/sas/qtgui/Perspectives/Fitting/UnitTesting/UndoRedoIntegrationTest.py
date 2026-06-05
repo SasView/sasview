@@ -24,7 +24,7 @@ import os
 from unittest.mock import MagicMock
 
 import pytest
-from PySide6 import QtCore, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 
 from sasmodels.sasview_model import load_custom_model
 
@@ -39,6 +39,7 @@ from sas.qtgui.Perspectives.Fitting.UndoRedo import (
     SmearingOptionsCommand,
 )
 from sas.qtgui.Perspectives.UndoRedo import UndoStack
+from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Utilities import GuiUtils
 from sas.sascalc.fit.models import ModelManager, ModelManagerBase
 
@@ -224,6 +225,41 @@ class TestParameterValueUndo:
             else QtCore.Qt.Checked
         )
         assert len(w.undo_stack._undo_stack) == initial_count
+
+
+# ---------------------------------------------------------------------------
+# TestDatasetUndoHistory
+# ---------------------------------------------------------------------------
+
+class TestDatasetUndoHistory:
+
+    def test_data_load_clears_existing_undo_history(self, widget_with_model, monkeypatch):
+        """Loading replacement data must drop undo commands from the previous data."""
+        w = widget_with_model
+        w.undo_stack.push(ParameterValueCommand("radius", 1.0, 2.0))
+        assert w.undo_stack.can_undo()
+
+        data = Data1D(x=[0.01, 0.02], y=[1.0, 2.0])
+        monkeypatch.setattr(GuiUtils, 'dataFromItem', lambda *a, **kw: data)
+
+        w.dataFromItems(QtGui.QStandardItem("replacement data"))
+
+        assert not w.undo_stack.can_undo()
+        assert not w.undo_stack.can_redo()
+
+    def test_batch_file_switch_clears_existing_undo_history(self, widget_with_model, monkeypatch):
+        """Batch file selection changes the active logic, so undo history must reset."""
+        w = widget_with_model
+        w.undo_stack.push(ParameterValueCommand("radius", 1.0, 2.0))
+        assert w.undo_stack.can_undo()
+
+        monkeypatch.setattr(w, 'updateQRange', lambda *a, **kw: None)
+
+        w.onSelectBatchFilename(1)
+
+        assert w.data_index == 1
+        assert not w.undo_stack.can_undo()
+        assert not w.undo_stack.can_redo()
 
 
 # ---------------------------------------------------------------------------

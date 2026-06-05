@@ -224,6 +224,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         assert isinstance(value[0], QtGui.QStandardItem)
 
+        if hasattr(self, "undo_stack"):
+            self.undo_stack.clear()
+
         # Keep reference to all datasets for batch
         self.all_data = value
 
@@ -1256,6 +1259,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Update the logic based on the selected file in batch fitting
         """
+        if data_index != self.data_index:
+            self.undo_stack.clear()
         self.data_index = data_index
         self.updateQRange()
 
