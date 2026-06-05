@@ -1695,7 +1695,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return
 
         # Capture parameter snapshot BEFORE fit results are applied
-        old_params = self._get_parameter_dict()
+        # (main + polydispersity + magnetism, since a fit can modify all three)
+        old_snapshot = self._get_fit_result_snapshot()
 
         # Don't recalculate chi2 - it's in res.fitness already
         self.fitResults = True
@@ -1737,9 +1738,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.lblChi2Value.setText(chi2_repr)
 
         # Push a single FitResultCommand for the entire fit
-        new_params = self._get_parameter_dict()
-        if old_params != new_params:
-            self.undo_stack.push(FitResultCommand(old_params, new_params))
+        new_snapshot = self._get_fit_result_snapshot()
+        if old_snapshot != new_snapshot:
+            self.undo_stack.push(FitResultCommand(old_snapshot, new_snapshot))
 
 
     def prepareFitters(self, fitter: Fit | None = None, fit_id: int = 0, weight_increase: int = 1) -> tuple[list[Fit], int]:
@@ -3249,6 +3250,94 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             for name, value in params.items():
                 self.logic.kernel_module.setParam(name, value)
                 self._update_model_param_value(name, value)
+            self.calculateQGridForModel()
+
+    def _update_poly_param_value(self, param_name: str, value: float) -> None:
+        """Update the polydispersity UI model item for *param_name* (``<name>.width``)."""
+        poly_model = self.polydispersity_widget.poly_model
+        for row in range(poly_model.rowCount()):
+            name_item = poly_model.item(row, 0)
+            if name_item is None:
+                continue
+            row_name = str(name_item.text()).rsplit()[-1] + '.width'
+            if row_name == param_name:
+                value_item = poly_model.item(row, 1)
+                if value_item:
+                    value_item.setText(GuiUtils.formatNumber(value, high=True))
+                return
+
+    def _update_magnet_param_value(self, param_name: str, value: float) -> None:
+        """Update the magnetism UI model item for *param_name*."""
+        magnet_model = self.magnetism_widget._magnet_model
+        for row in range(magnet_model.rowCount()):
+            name_item = magnet_model.item(row, 0)
+            if name_item is None:
+                continue
+            if str(name_item.text()) == param_name:
+                value_item = magnet_model.item(row, 1)
+                if value_item:
+                    value_item.setText(GuiUtils.formatNumber(value, high=True))
+                return
+
+    def _get_poly_param_dict(self) -> dict:
+        """Return ``{<name>.width: value}`` for all polydisperse parameters."""
+        if self.logic.kernel_module is None:
+            return {}
+        poly_model = self.polydispersity_widget.poly_model
+        result = {}
+        for row in range(poly_model.rowCount()):
+            name_item = poly_model.item(row, 0)
+            if name_item is None:
+                continue
+            param_name = str(name_item.text()).rsplit()[-1] + '.width'
+            try:
+                result[param_name] = self.logic.kernel_module.getParam(param_name)
+            except (KeyError, ValueError):
+                continue
+        return result
+
+    def _get_magnet_param_dict(self) -> dict:
+        """Return ``{param_name: value}`` for all magnetism parameters."""
+        if self.logic.kernel_module is None:
+            return {}
+        magnet_model = self.magnetism_widget._magnet_model
+        result = {}
+        for row in range(magnet_model.rowCount()):
+            name_item = magnet_model.item(row, 0)
+            if name_item is None:
+                continue
+            param_name = str(name_item.text())
+            try:
+                result[param_name] = self.logic.kernel_module.getParam(param_name)
+            except (KeyError, ValueError):
+                continue
+        return result
+
+    def _get_fit_result_snapshot(self) -> dict:
+        """Capture main, polydispersity and magnetism parameter values.
+
+        Returns a structured dict consumed by ``FitResultCommand``::
+
+            {"main": {...}, "poly": {...}, "magnet": {...}}
+        """
+        return {
+            "main": self._get_parameter_dict(),
+            "poly": self._get_poly_param_dict(),
+            "magnet": self._get_magnet_param_dict(),
+        }
+
+    def _restore_fit_result_snapshot(self, snapshot: dict) -> None:
+        """Restore main, polydispersity and magnetism values from a snapshot."""
+        with self.undo_stack.suppressed():
+            for name, value in snapshot.get("main", {}).items():
+                self.logic.kernel_module.setParam(name, value)
+                self._update_model_param_value(name, value)
+            for name, value in snapshot.get("poly", {}).items():
+                self.logic.kernel_module.setParam(name, value)
+                self._update_poly_param_value(name, value)
+            for name, value in snapshot.get("magnet", {}).items():
+                self.logic.kernel_module.setParam(name, value)
+                self._update_magnet_param_value(name, value)
             self.calculateQGridForModel()
 
     def _get_parameter_dict(self) -> dict:

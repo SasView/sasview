@@ -78,11 +78,12 @@ class ParameterValueCommand(UndoCommand):
         """Merge *self* (earlier) with *other* (later).
 
         The merged command undoes all the way to *self*'s old value and
-        redoes all the way to *other*'s new value.  The *self* timestamp
-        (earlier edit) is preserved.
+        redoes all the way to *other*'s new value.  The *other* timestamp
+        (latest edit) is carried forward so that the coalescing window is
+        measured from the most recent edit, not the first one in the group.
         """
         merged = ParameterValueCommand(self._param_name, self._old_val, other._new_val)
-        merged.timestamp = self.timestamp
+        merged.timestamp = other.timestamp
         return merged
 
 
@@ -228,23 +229,30 @@ class CheckboxToggleCommand(UndoCommand):
 class FitResultCommand(UndoCommand):
     """Full parameter snapshot before and after a fit.
 
-    ``old_params`` MUST be captured at the very start of ``fitComplete()``,
+    The snapshots are structured dicts of the form::
+
+        {"main": {name: value}, "poly": {name.width: value}, "magnet": {name: value}}
+
+    covering the main kernel parameters as well as the polydispersity-width
+    and magnetism parameters that a fit can also modify.
+
+    ``old_snapshot`` MUST be captured at the very start of ``fitComplete()``,
     before ``updateModelFromList()`` is called (see UNDO_PLAN_CLAUDE.md,
     Step 2.6 — Critical ordering).
 
-    Delegates to ``widget._restore_parameter_values(params)``
+    Delegates to ``widget._restore_fit_result_snapshot(snapshot)``
     (added in Phase 2).
     """
 
     def __init__(
-        self, old_params: dict[str, float], new_params: dict[str, float]
+        self, old_snapshot: dict[str, dict], new_snapshot: dict[str, dict]
     ) -> None:
         super().__init__("Fit result")
-        self._old_params = dict(old_params)
-        self._new_params = dict(new_params)
+        self._old_snapshot = {key: dict(val) for key, val in old_snapshot.items()}
+        self._new_snapshot = {key: dict(val) for key, val in new_snapshot.items()}
 
     def undo(self, widget) -> None:
-        widget._restore_parameter_values(self._old_params)
+        widget._restore_fit_result_snapshot(self._old_snapshot)
 
     def redo(self, widget) -> None:
-        widget._restore_parameter_values(self._new_params)
+        widget._restore_fit_result_snapshot(self._new_snapshot)

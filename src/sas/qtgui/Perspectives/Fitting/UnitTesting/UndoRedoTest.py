@@ -147,11 +147,14 @@ class TestParameterValueCommand:
         assert merged._new_val == 3.0
         assert merged.param_name == "radius"
 
-    def test_merge_preserves_earlier_timestamp(self):
+    def test_merge_carries_latest_timestamp(self):
+        # The coalescing window is measured from the most recent edit, so the
+        # merged command must carry the later command's timestamp.
         cmd1 = ParameterValueCommand("r", 1.0, 2.0)
         cmd2 = ParameterValueCommand("r", 2.0, 3.0)
+        cmd2.timestamp = cmd1.timestamp + 1.0
         merged = cmd1.merge(cmd2)
-        assert merged.timestamp == cmd1.timestamp
+        assert merged.timestamp == cmd2.timestamp
 
     def test_param_name_property(self):
         cmd = ParameterValueCommand("scale", 1.0, 2.0)
@@ -331,24 +334,38 @@ class TestCheckboxToggleCommand:
 
 class TestFitResultCommand:
 
+    @staticmethod
+    def _snapshot(main, poly=None, magnet=None):
+        return {"main": main, "poly": poly or {}, "magnet": magnet or {}}
+
     def test_undo_restores_pre_fit_params(self, widget):
-        cmd = FitResultCommand({"radius": 1.0}, {"radius": 2.5})
+        old = self._snapshot({"radius": 1.0})
+        cmd = FitResultCommand(old, self._snapshot({"radius": 2.5}))
         cmd.undo(widget)
-        widget._restore_parameter_values.assert_called_once_with({"radius": 1.0})
+        widget._restore_fit_result_snapshot.assert_called_once_with(old)
 
     def test_redo_restores_post_fit_params(self, widget):
-        cmd = FitResultCommand({"radius": 1.0}, {"radius": 2.5})
+        new = self._snapshot({"radius": 2.5})
+        cmd = FitResultCommand(self._snapshot({"radius": 1.0}), new)
         cmd.redo(widget)
-        widget._restore_parameter_values.assert_called_once_with({"radius": 2.5})
+        widget._restore_fit_result_snapshot.assert_called_once_with(new)
+
+    def test_undo_restores_poly_and_magnet(self, widget):
+        old = self._snapshot(
+            {"radius": 1.0}, poly={"radius.width": 0.1}, magnet={"up_frac_i": 0.5}
+        )
+        cmd = FitResultCommand(old, self._snapshot({"radius": 2.5}))
+        cmd.undo(widget)
+        widget._restore_fit_result_snapshot.assert_called_once_with(old)
 
     def test_params_are_deep_copied(self):
-        old = {"radius": 1.0}
-        cmd = FitResultCommand(old, {})
-        old["radius"] = 999.0
-        assert cmd._old_params["radius"] == 1.0
+        old = self._snapshot({"radius": 1.0})
+        cmd = FitResultCommand(old, self._snapshot({}))
+        old["main"]["radius"] = 999.0
+        assert cmd._old_snapshot["main"]["radius"] == 1.0
 
     def test_description_is_fit_result(self):
-        cmd = FitResultCommand({}, {})
+        cmd = FitResultCommand(self._snapshot({}), self._snapshot({}))
         assert cmd.description == "Fit result"
 
 
