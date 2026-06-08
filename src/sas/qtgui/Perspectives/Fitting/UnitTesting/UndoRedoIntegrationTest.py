@@ -16,7 +16,8 @@ Test organisation:
     TestSmearingOptionsUndo           — smearing state changes
     TestCheckboxToggleUndo            — poly / magnetism / 2D toggles
     TestFitResultUndo                 — undo after a fit completes
-    TestUndoStackDisabledDuringFit    — stack disabled while fitting
+    TestUndoStackDuringFit            — stack stays enabled while fitting
+    TestGuiManagerUndoHookSignalChain — GUI action refresh signal chain
     TestOptionsWidgetSetState         — OptionsWidget.setState() round-trip
 """
 import glob
@@ -543,8 +544,11 @@ class TestFitResultUndo:
 
     def test_fit_complete_pushes_fit_result_command(self, widget_with_model, monkeypatch):
         """fitComplete should push a FitResultCommand."""
+        import copy
         w = widget_with_model
         w.undo_stack.clear()
+        # The pre-fit snapshot is captured from kernel_module_copy (set in onFit).
+        w.kernel_module_copy = copy.deepcopy(w.logic.kernel_module)
 
         # Mock methods that would crash without real fit data
         monkeypatch.setattr(w.polydispersity_widget, 'updatePolyModelFromList', lambda *a, **kw: None)
@@ -574,9 +578,11 @@ class TestFitResultUndo:
         top_cmd = w.undo_stack._undo_stack[-1]
         assert isinstance(top_cmd, FitResultCommand)
 
-    def test_fit_complete_reenables_undo_stack(self, widget_with_model, monkeypatch):
-        """fitComplete must re-enable the undo stack (disabled during fit)."""
+    def test_fit_complete_keeps_undo_stack_enabled(self, widget_with_model, monkeypatch):
+        """fitComplete should leave the undo stack enabled."""
+        import copy
         w = widget_with_model
+        w.kernel_module_copy = copy.deepcopy(w.logic.kernel_module)
 
         monkeypatch.setattr(w.fitting_controller, 'updateModelFromList', lambda *a, **kw: None)
         monkeypatch.setattr(w.polydispersity_widget, 'updatePolyModelFromList', lambda *a, **kw: None)
@@ -587,7 +593,6 @@ class TestFitResultUndo:
             lambda *a, **kw: {n: (v, 0.01) for n, v in w._get_parameter_dict().items()}
         )
 
-        w.undo_stack.set_enabled(False)
         result = self._make_fit_result(w)
         w.fitComplete(result)
         assert w.undo_stack._enabled
@@ -604,15 +609,46 @@ class TestFitResultUndo:
         w.fitComplete(None)
         assert not w.undo_stack.can_undo()
 
+    def test_undo_fit_removes_error_column(self, widget_with_model, monkeypatch):
+        """Undoing a fit must remove the now-stale error column from the table."""
+        import copy
+        w = widget_with_model
+        w.undo_stack.clear()
+        w.kernel_module_copy = copy.deepcopy(w.logic.kernel_module)
+
+        # Let the real updateModelFromList run so the error column is added.
+        monkeypatch.setattr(w.polydispersity_widget, 'updatePolyModelFromList', lambda *a, **kw: None)
+        monkeypatch.setattr(w.magnetism_widget, 'updateMagnetModelFromList', lambda *a, **kw: None)
+        monkeypatch.setattr(w, 'onPlot', lambda *a, **kw: None)
+
+        old_params = w._get_parameter_dict()
+        param_dict = {n: (v + 1.0, 0.01) for n, v in old_params.items()}
+        monkeypatch.setattr(w.fitting_controller, 'paramDictFromResults', lambda *a, **kw: param_dict)
+
+        assert not w.has_error_column
+        cols_before = w._model_model.columnCount()
+
+        result = self._make_fit_result(w)
+        w.fitComplete(result)
+
+        # The fit added an error column.
+        assert w.has_error_column
+        assert w._model_model.columnCount() == cols_before + 1
+
+        # Undo removes it again.
+        w.undo_stack.undo()
+        assert not w.has_error_column
+        assert w._model_model.columnCount() == cols_before
+
 
 # ---------------------------------------------------------------------------
-# TestUndoStackDisabledDuringFit
+# TestUndoStackDuringFit
 # ---------------------------------------------------------------------------
 
-class TestUndoStackDisabledDuringFit:
+class TestUndoStackDuringFit:
 
-    def test_onfit_disables_undo_stack(self, widget_with_model, monkeypatch):
-        """onFit must disable the undo stack when fitting starts."""
+    def test_onfit_leaves_undo_stack_enabled(self, widget_with_model, monkeypatch):
+        """onFit should leave the undo stack enabled (suppressed() handles blocking)."""
         w = widget_with_model
 
         monkeypatch.setattr(w.fitting_controller, 'prepareFitters', lambda *a, **kw: ([MagicMock()], 0))
@@ -620,18 +656,109 @@ class TestUndoStackDisabledDuringFit:
         monkeypatch.setattr('twisted.internet.threads.deferToThread', lambda *a, **kw: MagicMock())
 
         w.onFit()
-        assert not w.undo_stack._enabled
+        assert w.undo_stack._enabled
 
-    def test_stopfit_reenables_undo_stack(self, widget_with_model, monkeypatch):
-        """stopFit must re-enable the undo stack."""
+    def test_stopfit_keeps_undo_stack_enabled(self, widget_with_model, monkeypatch):
+        """stopFit should leave the undo stack enabled."""
         w = widget_with_model
         w.calc_fit = MagicMock()
         w.calc_fit.isrunning.return_value = True
-        w.undo_stack.set_enabled(False)
 
         monkeypatch.setattr(w, 'enableInteractiveElements', lambda *a, **kw: None)
         w.stopFit()
         assert w.undo_stack._enabled
+
+
+# ---------------------------------------------------------------------------
+# TestGuiManagerUndoHookSignalChain
+# ---------------------------------------------------------------------------
+
+class TestGuiManagerUndoHookSignalChain:
+    """Verify the signal chain that keeps the GUI undo/redo actions in sync
+    after a fit completes, reproducing the wiring done in
+    GuiManager._connect_undo_redo_hooks and the communicator fallback."""
+
+    def _make_fit_result(self, widget):
+        """Create a minimal fake fit result tuple."""
+        res = MagicMock()
+        res.fitness = 1.5
+        res.pvec = [1.0, 2.0, 3.0]
+        res.stderr = [0.1, 0.2, 0.3]
+        param_names = [
+            p.name for p in widget.logic.kernel_module._model_info.parameters.kernel_parameters
+        ]
+        res.pname = param_names[:len(res.pvec)]
+        return ([[res]], 0.5)
+
+    def _prepare_fit_complete(self, w, monkeypatch):
+        """Common fitComplete boilerplate: stub side effects, mutate the live
+        kernel so new_snapshot differs from the pre-fit snapshot."""
+        import copy
+        w.undo_stack.clear()
+        w.kernel_module_copy = copy.deepcopy(w.logic.kernel_module)
+
+        monkeypatch.setattr(w.polydispersity_widget, 'updatePolyModelFromList', lambda *a, **kw: None)
+        monkeypatch.setattr(w.magnetism_widget, 'updateMagnetModelFromList', lambda *a, **kw: None)
+        monkeypatch.setattr(w, 'onPlot', lambda *a, **kw: None)
+
+        old_params = w._get_parameter_dict()
+        param_dict = {n: (v + 1.0, 0.01) for n, v in old_params.items()}
+        monkeypatch.setattr(w.fitting_controller, 'paramDictFromResults', lambda *a, **kw: param_dict)
+
+        def fake_update(pd):
+            for name, (val, _err) in pd.items():
+                w.logic.kernel_module.setParam(name, val)
+
+        monkeypatch.setattr(w.fitting_controller, 'updateModelFromList', fake_update)
+
+    def test_stack_changed_calls_handler_on_push(self, widget_with_model):
+        """stackChanged should fire when push() is called."""
+        w = widget_with_model
+        handler_calls = []
+        w.undo_stack.stackChanged.connect(lambda: handler_calls.append(True))
+        w.undo_stack.push(ParameterValueCommand("scale", 1.0, 2.0))
+        assert len(handler_calls) >= 1
+
+    def test_fit_complete_triggers_action_enable_via_signal_chain(
+        self, widget_with_model, monkeypatch
+    ):
+        """Connect stackChanged to a GuiManager-style handler that reads the
+        active stack and calls actionUndo.setEnabled. After fitComplete the
+        action must end up enabled."""
+        w = widget_with_model
+        self._prepare_fit_complete(w, monkeypatch)
+
+        action_undo = MagicMock()
+        action_redo = MagicMock()
+
+        def update_undo_redo_actions():
+            action_undo.setEnabled(w.undo_stack.can_undo())
+            action_redo.setEnabled(w.undo_stack.can_redo())
+
+        w.undo_stack.stackChanged.connect(update_undo_redo_actions)
+
+        action_undo.reset_mock()
+        action_redo.reset_mock()
+
+        result = self._make_fit_result(w)
+        w.fitComplete(result)
+
+        assert action_undo.setEnabled.call_args_list[-1] == ((True,),)
+        assert w.undo_stack.can_undo()
+
+    def test_fit_complete_emits_communicator_fallback(self, widget_with_model, monkeypatch):
+        """fitComplete must emit undoRedoUpdateSignal as a reliable fallback
+        for refreshing the GUI action state."""
+        w = widget_with_model
+        self._prepare_fit_complete(w, monkeypatch)
+
+        signal_calls = []
+        w.communicator.undoRedoUpdateSignal.connect(lambda: signal_calls.append(True))
+
+        result = self._make_fit_result(w)
+        w.fitComplete(result)
+
+        assert len(signal_calls) >= 1
 
 
 # ---------------------------------------------------------------------------

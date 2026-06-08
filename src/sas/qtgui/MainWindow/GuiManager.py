@@ -652,6 +652,7 @@ class GuiManager:
         self.communicator.plotFromNameSignal.connect(self.showPlotFromName)
         self.communicator.updateModelFromDataOperationPanelSignal.connect(self.updateModelFromDataOperationPanel)
         self.communicator.activeGraphsSignal.connect(self.updatePlotItems)
+        self.communicator.undoRedoUpdateSignal.connect(self._update_undo_redo_actions)
 
 
     def addTriggers(self):

@@ -1584,7 +1584,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Disable some elements
         self.disableInteractiveElements()
-        self.undo_stack.set_enabled(False)
+        # The undo stack stays enabled during the fit; intermediate parameter
+        # updates are blocked via the suppressed() context manager instead.
 
     def stopFit(self) -> None:
         """
@@ -1595,10 +1596,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.calc_fit.stop()
         #re-enable the Fit button
         self.enableInteractiveElements()
-        self.undo_stack.set_enabled(True)
 
         msg = "Fitting cancelled."
         self.communicator.statusBarUpdateSignal.emit(msg)
+        self.communicator.undoRedoUpdateSignal.emit()
 
     def updateFit(self) -> None:
         """
@@ -1690,7 +1691,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         #re-enable the Fit button
         self.enableInteractiveElements()
-        self.undo_stack.set_enabled(True)
 
         if not result or not result[0] or not result[0][0]:
             msg = "Fitting failed."
@@ -1700,8 +1700,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return
 
         # Capture parameter snapshot BEFORE fit results are applied
-        # (main + polydispersity + magnetism, since a fit can modify all three)
-        old_snapshot = self._get_fit_result_snapshot()
+        # (main + polydispersity + magnetism, since a fit can modify all three).
+        # The fit mutates the live kernel module in place, so capture the
+        # pre-fit values from kernel_module_copy (the deepcopy made in onFit).
+        old_snapshot = self._get_fit_result_snapshot(self.kernel_module_copy)
 
         # Don't recalculate chi2 - it's in res.fitness already
         self.fitResults = True
@@ -1746,6 +1748,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         new_snapshot = self._get_fit_result_snapshot()
         if old_snapshot != new_snapshot:
             self.undo_stack.push(FitResultCommand(old_snapshot, new_snapshot))
+
+        # Ensure undo/redo action state is refreshed in the GUI manager.
+        # The push above emits stackChanged, but if the per-stack signal
+        # connection was disrupted (e.g. tab change during processEvents
+        # in onPlot), this communicator signal provides a reliable fallback.
+        self.communicator.undoRedoUpdateSignal.emit()
 
 
     def prepareFitters(self, fitter: Fit | None = None, fit_id: int = 0, weight_increase: int = 1) -> tuple[list[Fit], int]:
@@ -3284,9 +3292,17 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                     value_item.setText(GuiUtils.formatNumber(value, high=True))
                 return
 
-    def _get_poly_param_dict(self) -> dict:
-        """Return ``{<name>.width: value}`` for all polydisperse parameters."""
-        if self.logic.kernel_module is None:
+    def _get_poly_param_dict(self, kernel_module=None) -> dict:
+        """Return ``{<name>.width: value}`` for all polydisperse parameters.
+
+        Parameter *names* are taken from the polydispersity UI model (stable
+        across a fit); *values* are read from ``kernel_module`` so a pre-fit
+        snapshot can be captured from ``kernel_module_copy`` (defaults to the
+        live kernel module).
+        """
+        if kernel_module is None:
+            kernel_module = self.logic.kernel_module
+        if kernel_module is None:
             return {}
         poly_model = self.polydispersity_widget.poly_model
         result = {}
@@ -3296,14 +3312,21 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 continue
             param_name = str(name_item.text()).rsplit()[-1] + '.width'
             try:
-                result[param_name] = self.logic.kernel_module.getParam(param_name)
+                result[param_name] = kernel_module.getParam(param_name)
             except (KeyError, ValueError):
                 continue
         return result
 
-    def _get_magnet_param_dict(self) -> dict:
-        """Return ``{param_name: value}`` for all magnetism parameters."""
-        if self.logic.kernel_module is None:
+    def _get_magnet_param_dict(self, kernel_module=None) -> dict:
+        """Return ``{param_name: value}`` for all magnetism parameters.
+
+        As with :meth:`_get_poly_param_dict`, *values* are read from
+        ``kernel_module`` (defaults to the live kernel module) so a pre-fit
+        snapshot can be captured from ``kernel_module_copy``.
+        """
+        if kernel_module is None:
+            kernel_module = self.logic.kernel_module
+        if kernel_module is None:
             return {}
         magnet_model = self.magnetism_widget._magnet_model
         result = {}
@@ -3313,27 +3336,38 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 continue
             param_name = str(name_item.text())
             try:
-                result[param_name] = self.logic.kernel_module.getParam(param_name)
+                result[param_name] = kernel_module.getParam(param_name)
             except (KeyError, ValueError):
                 continue
         return result
 
-    def _get_fit_result_snapshot(self) -> dict:
+    def _get_fit_result_snapshot(self, kernel_module=None) -> dict:
         """Capture main, polydispersity and magnetism parameter values.
+
+        Reads values from ``kernel_module`` (defaults to the live kernel
+        module). The pre-fit snapshot in ``fitComplete`` MUST be captured
+        from ``self.kernel_module_copy``, since the fit mutates the live
+        kernel module in place.
 
         Returns a structured dict consumed by ``FitResultCommand``::
 
             {"main": {...}, "poly": {...}, "magnet": {...}}
         """
         return {
-            "main": self._get_parameter_dict(),
-            "poly": self._get_poly_param_dict(),
-            "magnet": self._get_magnet_param_dict(),
+            "main": self._get_parameter_dict(kernel_module),
+            "poly": self._get_poly_param_dict(kernel_module),
+            "magnet": self._get_magnet_param_dict(kernel_module),
         }
 
     def _restore_fit_result_snapshot(self, snapshot: dict) -> None:
-        """Restore main, polydispersity and magnetism values from a snapshot."""
+        """Restore main, polydispersity and magnetism values from a snapshot.
+
+        A FitResultCommand snapshot only carries parameter *values*, not the
+        fitted uncertainties, so any error column shown in the tables is no
+        longer valid once the values are restored. Remove it.
+        """
         with self.undo_stack.suppressed():
+            self._remove_error_columns()
             for name, value in snapshot.get("main", {}).items():
                 self.logic.kernel_module.setParam(name, value)
                 self._update_model_param_value(name, value)
@@ -3345,13 +3379,58 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 self._update_magnet_param_value(name, value)
             self.calculateQGridForModel()
 
-    def _get_parameter_dict(self) -> dict:
-        """Return ``{param_name: float_value}`` for all current kernel params."""
-        if self.logic.kernel_module is None:
+    def _remove_error_columns(self) -> None:
+        """Remove the fitted-uncertainty (error) column from the main,
+        polydispersity and magnetism tables, restoring the no-error layout.
+
+        Safe to call when no error column is present (each section is guarded
+        by its ``has_*_error_column`` flag).
+        """
+        # --- main model (and its polydispersity sub-rows) ---
+        if self.has_error_column:
+            def deletePolyErrorColumn(row):
+                item = self._model_model.item(row, 0)
+                if item is None or not item.hasChildren():
+                    return
+                poly_item = item.child(0)
+                if poly_item is None or not poly_item.hasChildren():
+                    return
+                poly_item.removeColumn(2)
+
+            self._model_model.removeColumn(2)
+            self.iterateOverModel(deletePolyErrorColumn)
+            self.lstParams.itemDelegate().removeErrorColumn()
+            FittingUtilities.addHeadersToModel(self._model_model)
+            self.has_error_column = False
+
+        # --- polydispersity model ---
+        if self.polydispersity_widget.has_poly_error_column:
+            self.polydispersity_widget.poly_model.removeColumn(2)
+            self.polydispersity_widget.lstPoly.itemDelegate().removeErrorColumn()
+            FittingUtilities.addPolyHeadersToModel(self.polydispersity_widget.poly_model)
+            self.polydispersity_widget.has_poly_error_column = False
+
+        # --- magnetism model ---
+        if self.magnetism_widget.has_magnet_error_column:
+            self.magnetism_widget._magnet_model.removeColumn(2)
+            self.magnetism_widget.lstMagnetic.itemDelegate().removeErrorColumn()
+            FittingUtilities.addHeadersToModel(self.magnetism_widget._magnet_model)
+            self.magnetism_widget.has_magnet_error_column = False
+
+    def _get_parameter_dict(self, kernel_module=None) -> dict:
+        """Return ``{param_name: float_value}`` for all current kernel params.
+
+        Values are read from ``kernel_module`` (defaults to the live kernel
+        module) so a pre-fit snapshot can be captured from
+        ``kernel_module_copy``.
+        """
+        if kernel_module is None:
+            kernel_module = self.logic.kernel_module
+        if kernel_module is None:
             return {}
         return {
-            p.name: self.logic.kernel_module.getParam(p.name)
-            for p in self.logic.kernel_module._model_info.parameters.kernel_parameters
+            p.name: kernel_module.getParam(p.name)
+            for p in kernel_module._model_info.parameters.kernel_parameters
         }
 
     def _get_fit_options_dict(self) -> dict:
