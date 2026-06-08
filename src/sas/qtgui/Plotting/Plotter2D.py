@@ -303,6 +303,8 @@ class Plotter2DWidget(PlotterBase):
 
         # Notify the slicer parameters dialog (if open) so its list stays in sync
         if (slicer_widget := getattr(self, 'slicer_widget', None)):
+            slicer_widget.slicer_models.clear()
+            slicer_widget.setModel(None)
             slicer_widget.updateSlicersList()
 
         self.canvas.draw()
@@ -384,6 +386,18 @@ class Plotter2DWidget(PlotterBase):
         # Notify the slicer parameters dialog (if open) so its list stays in sync
         if (slicer_widget := getattr(self, 'slicer_widget', None)):
             slicer_widget.updateSlicersList()
+            if self.slicer is None:
+                slicer_widget.slicer_models.clear()
+                slicer_widget.setModel(None)
+            else:
+                # Select and display the model for the new active slicer
+                for slicer_name, slicer_obj in self.slicers.items():
+                    if slicer_obj is self.slicer:
+                        slicer_widget.checkSlicerByName(slicer_name)
+                        print("Checked slicer")
+                        break
+                if hasattr(self.slicer, 'model'):
+                     slicer_widget.setModel(self.slicer.model())
 
         try:
             self.canvas.draw()
