@@ -385,6 +385,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             self.high_extrapolation_plot.symbol = "Line"
             self.high_extrapolation_plot.custom_color = "#2ca02c"
             self.high_extrapolation_plot.show_errors = False
+            self.high_extrapolation_plot.show_q_range_sliders = True
+            self.high_extrapolation_plot.slider_draggable = False
             GuiUtils.updateModelItemWithPlot(
                 self._model_item, self.high_extrapolation_plot, self.high_extrapolation_plot.title
             )
@@ -394,6 +396,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             self.low_extrapolation_plot.symbol = "Line"
             self.low_extrapolation_plot.custom_color = "#ff7f0e"
             self.low_extrapolation_plot.show_errors = False
+            self.low_extrapolation_plot.show_q_range_sliders = True
+            self.low_extrapolation_plot.slider_draggable = False
             GuiUtils.updateModelItemWithPlot(
                 self._model_item, self.low_extrapolation_plot, self.low_extrapolation_plot.title
             )
