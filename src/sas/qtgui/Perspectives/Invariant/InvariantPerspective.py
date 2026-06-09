@@ -136,6 +136,12 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.slider = ExtrapolationSlider(perspective=SliderPerspective.INVARIANT)
         self.sliderLayout.insertWidget(1, self.slider)
 
+    def _refresh_extrapolation_plots(self) -> None:
+        """Refresh any visible extrapolation plots so the range markers stay in sync."""
+        plots = [plot for plot in [self.low_extrapolation_plot, self.high_extrapolation_plot] if plot is not None]
+        for plot in plots:
+            self.communicator.plotUpdateSignal.emit([plot])
+
     def setup_tooltips(self) -> None:
         """Setup tooltips for the widgets"""
         self.cmdStatus.setToolTip("Get more details of computation such as fraction from extrapolation")
@@ -387,6 +393,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             self.high_extrapolation_plot.show_errors = False
             self.high_extrapolation_plot.show_q_range_sliders = True
             self.high_extrapolation_plot.slider_draggable = False
+            self.high_extrapolation_plot.slider_perspective_name = "Invariant"
+            self.high_extrapolation_plot.slider_low_q_input = ["txtPorodStart_ex"]
+            self.high_extrapolation_plot.slider_high_q_input = ["txtPorodEnd_ex"]
             GuiUtils.updateModelItemWithPlot(
                 self._model_item, self.high_extrapolation_plot, self.high_extrapolation_plot.title
             )
@@ -398,6 +407,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             self.low_extrapolation_plot.show_errors = False
             self.low_extrapolation_plot.show_q_range_sliders = True
             self.low_extrapolation_plot.slider_draggable = False
+            self.low_extrapolation_plot.slider_perspective_name = "Invariant"
+            self.low_extrapolation_plot.slider_high_q_input = ["txtGuinierEnd_ex"]
             GuiUtils.updateModelItemWithPlot(
                 self._model_item, self.low_extrapolation_plot, self.low_extrapolation_plot.title
             )
@@ -900,12 +911,15 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.model.setItem(WIDGETS.W_POROD_START_EX, QtGui.QStandardItem(format_string % state.point_2))
         self.model.setItem(WIDGETS.W_POROD_END_EX, QtGui.QStandardItem(format_string % state.point_3))
         self.correct_extrapolation_values()
+        self._refresh_extrapolation_plots()
 
     def on_extrapolation_text_editing(self) -> None:
         """Handle when user edits any of the extrapolation text boxes."""
         if self.extrapolation_parameters is None or self._data is None:
             return
         self.check_extrapolation_values()
+        if not any(getattr(self, "validity_flags", [])):
+            self.apply_parameters_from_ui()
 
     def on_extrapolation_text_edited(self) -> None:
         """Handle when user finishes editing any of the extrapolation text boxes."""
@@ -1053,6 +1067,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
         # re-validate to update any UI flags
         self.check_extrapolation_values()
+        self._refresh_extrapolation_plots()
 
     def checkVolFrac(self) -> None:
         """Check if volfrac1 is strictly between 0 and 1."""

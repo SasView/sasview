@@ -207,6 +207,9 @@ class LineInteractor(BaseInteractor):
 
     def _get_input_or_callback(self, connection_list: list[str] = None) -> QLineEdit | QTextEdit | None:
         """ Returns an input or callback method based on a list of inputs/commands """
+        # If no connection list provided, nothing to do
+        if not connection_list:
+            return None
         connection = None
         if isinstance(connection_list, list):
             connection = self.perspective
@@ -215,7 +218,8 @@ class LineInteractor(BaseInteractor):
                     connection = getattr(connection, item)
                 except Exception:
                     return None
-        return connection
+            return connection
+        return None
 
     def _set_q(self, value: float) -> None:
         """ Call the q setter callback method if it exists """
