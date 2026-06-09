@@ -303,6 +303,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           os: ${{ matrix.os }}
+          release-build: ${{ env.RELEASE_BRANCH_BUILD }}
 
       ### Run tests
 
