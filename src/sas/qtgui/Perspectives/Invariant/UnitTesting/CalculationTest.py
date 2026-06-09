@@ -259,46 +259,66 @@ class TestInvariantCalculateThread(UIHelpersMixin):
             assert getattr(plot, "has_errors", None) is False
 
     def test_plot_result(self, mocker):
-        """Test plot_result updates model item and emits plot request when extrapolation plots exist."""
-
-        mock_close = mocker.patch.object(self.window._manager.filesWidget, "closePlotsForItem")
+        """Test plot_result creates a combined extrapolation plot when extrapolation mode changes."""
         mock_update_model_item_with_plot = mocker.patch.object(
             Invariant.InvariantPerspective.GuiUtils, "updateModelItemWithPlot"
         )
-        emitted = []
-        self.window.communicator.plotRequestedSignal.connect(lambda plots: emitted.append(plots))
+
+        requested = []
+        updated = []
+
+        self.window.communicator.plotRequestedSignal.connect(lambda plots: requested.append(plots))
+        self.window.communicator.plotUpdateSignal.connect(lambda plots: updated.append(plots))
+
         mock_details = mocker.patch.object(self.window, "update_details_widget")
         mock_progress = mocker.patch.object(self.window, "update_progress_bars")
+        mock_close  = mocker.patch.object(self.window._manager.filesWidget, "closePlotsForItem")
 
         mock_calc = mocker.MagicMock()
         self.window._calculator = mock_calc
+
         extra_high = self.set_extra_high(mock_calc, mocker)
         extra_low = self.set_extra_low(mock_calc, mocker)
 
         self.window.high_extrapolation_plot = self.window._manager.createGuiData(extra_high)
-        title = "High-Q extrapolation"
-        self.window.high_extrapolation_plot.name = title
-        self.window.high_extrapolation_plot.title = title
+        high_title = "High-Q extrapolation"
+        self.window.high_extrapolation_plot.name = high_title
+        self.window.high_extrapolation_plot.title = high_title
 
         self.window.low_extrapolation_plot = self.window._manager.createGuiData(extra_low)
-        title = "Low-Q extrapolation"
-        self.window.low_extrapolation_plot.name = title
-        self.window.low_extrapolation_plot.title = title
+        low_title = "Low-Q extrapolation"
+        self.window.low_extrapolation_plot.name = low_title
+        self.window.low_extrapolation_plot.title = low_title
+
+        self.window._high_extrapolate = True
+        self.window._low_extrapolate = True
+
+        # Simulate first extrapolation plot creation.
         self.window.extrapolation_made = False
+        self.window._plotted_extrapolation_mode = None
 
         mock_model = mocker.Mock()
         mock_model.name = "test_model"
 
         self.window.plot_result(mock_model)
 
-        mock_close.assert_called_once_with(self.window._model_item)
-
         assert mock_update_model_item_with_plot.call_count == 2
 
-        assert len(emitted) == 1
-        emitted_arg = emitted[0]
-        assert isinstance(emitted_arg, list)
-        assert emitted_arg[0] is self.window._model_item
+        assert len(requested) == 1
+        requested_arg = requested[0]
+
+        assert isinstance(requested_arg, list)
+        assert requested_arg[0] is self.window._model_item
+        assert self.window.high_extrapolation_plot in requested_arg
+        assert self.window.low_extrapolation_plot in requested_arg
+
+        # First plot creation should use plotRequestedSignal, not plotUpdateSignal.
+        assert updated == []
+
+        assert self.window.extrapolation_made is True
+        assert self.window._plotted_extrapolation_mode == [True, True]
+
+        mock_close.assert_called_once_with(self.window._model_item)
 
         assert getattr(self.window.high_extrapolation_plot, "symbol", None) == "Line"
         assert getattr(self.window.low_extrapolation_plot, "symbol", None) == "Line"
@@ -306,6 +326,59 @@ class TestInvariantCalculateThread(UIHelpersMixin):
         mock_details.assert_called_once()
         mock_progress.assert_called_once()
 
+    def test_plot_result_updates_existing_extrapolation_plot_when_mode_unchanged(self, mocker):
+        """Test plot_result updates existing extrapolation plots in place when only ranges change."""
+        mocker.patch.object(
+            Invariant.InvariantPerspective.GuiUtils, "updateModelItemWithPlot"
+        )
+
+        requested = []
+        updated = []
+
+        self.window.communicator.plotRequestedSignal.connect(lambda plots: requested.append(plots))
+        self.window.communicator.plotUpdateSignal.connect(lambda plots: updated.append(plots))
+
+        mocker.patch.object(self.window, "update_details_widget")
+        mocker.patch.object(self.window, "update_progress_bars")
+        mock_close_plots = mocker.patch.object(self.window._manager.filesWidget, "closePlotsForItem")
+        mock_refresh = mocker.patch.object(self.window, "_refresh_extrapolation_plots")
+
+        mock_calc = mocker.MagicMock()
+        self.window._calculator = mock_calc
+
+        extra_high = self.set_extra_high(mock_calc, mocker)
+        extra_low = self.set_extra_low(mock_calc, mocker)
+
+        self.window.high_extrapolation_plot = self.window._manager.createGuiData(extra_high)
+        self.window.high_extrapolation_plot.name = "High-Q extrapolation"
+        self.window.high_extrapolation_plot.title = "High-Q extrapolation"
+
+        self.window.low_extrapolation_plot = self.window._manager.createGuiData(extra_low)
+        self.window.low_extrapolation_plot.name = "Low-Q extrapolation"
+        self.window.low_extrapolation_plot.title = "Low-Q extrapolation"
+
+        self.window._high_extrapolate = True
+        self.window._low_extrapolate = True
+
+        # Simulate that the combined low+high plot already exists.
+        self.window.extrapolation_made = True
+        self.window._plotted_extrapolation_mode = [True, True]
+
+        mock_model = mocker.Mock()
+        mock_model.name = "test_model"
+
+        self.window.plot_result(mock_model)
+
+        # Same mode should not recreate the plot.
+        assert requested == []
+        mock_close_plots.assert_not_called()
+
+        # Existing high and low extrapolation curves should be updated in place.
+        assert len(updated) == 2
+        assert [self.window.high_extrapolation_plot] in updated
+        assert [self.window.low_extrapolation_plot] in updated
+
+        mock_refresh.assert_called_once()
 
 @pytest.mark.parametrize("window_class", ["real_data"], indirect=True)
 @pytest.mark.usefixtures("window_class")
@@ -413,7 +486,7 @@ class TestInvariantCalculateHelpers(UIHelpersMixin):
 
         self.window.deferredPlot(mock_model, extrapolation=None)
 
-        assert sync_reactor.callFromThread.call_count == 2
+        assert sync_reactor.callFromThread.call_count == 1
         mock_plot.assert_called_once_with(mock_model)
         mock_check.assert_called_once()
         mock_newplot.assert_called_once()
