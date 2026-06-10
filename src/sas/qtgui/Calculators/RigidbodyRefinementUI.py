@@ -111,7 +111,7 @@ class RigidBodyHighlighter(QSyntaxHighlighter):
                 self.setFormat(token_match.start(), len(token), self._op_fmt)
             elif token in self._keywords:
                 self.setFormat(token_match.start(), len(token), self._kw_fmt)
-            elif token is not "}":
+            elif token != "}":
                 self.setFormat(token_match.start(), len(token), self._error_fmt)
 
         self.setCurrentBlockState(new_depth)
@@ -344,7 +344,7 @@ class RigidBodyRefinementUI(QtWidgets.QDialog):
     def set_load_pdb_hook(self, hook):
         """Set a callback function to be called when a PDB file is loaded."""
         self.on_load_pdb_hook = hook
-    
+
     def set_load_data_hook(self, hook):
         """Set a callback function to be called when a data file is loaded."""
         self.on_load_data_hook = hook

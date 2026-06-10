@@ -1,9 +1,11 @@
 import os
 
+import pyausaxs as ausaxs
+
 import sas.qtgui.Calculators.RigidbodyRefinementUI as RigidBodyRefinementUI
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.PlotterData import Data1D
-import pyausaxs as ausaxs
+
 
 class RigidBodyRefinement:
     class BlockLoad:

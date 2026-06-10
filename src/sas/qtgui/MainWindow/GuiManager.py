@@ -23,8 +23,8 @@ from sas.qtgui.Calculators.DataOperationUtilityPanel import DataOperationUtility
 from sas.qtgui.Calculators.DensityPanel import DensityPanel
 from sas.qtgui.Calculators.KiessigPanel import KiessigPanel
 from sas.qtgui.Calculators.ResolutionCalculatorPanel import ResolutionCalculatorPanel
-from sas.qtgui.Calculators.Shape2SAS.DesignWindow import DesignWindow as Shape2SAS
 from sas.qtgui.Calculators.RigidbodyRefinement import RigidBodyRefinement
+from sas.qtgui.Calculators.Shape2SAS.DesignWindow import DesignWindow as Shape2SAS
 from sas.qtgui.Calculators.SldPanel import SldPanel
 from sas.qtgui.Calculators.SlitSizeCalculator import SlitSizeCalculator
 from sas.qtgui.MainWindow.Acknowledgements import Acknowledgements
