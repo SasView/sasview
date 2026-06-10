@@ -18,15 +18,19 @@ from sas.qtgui.Plotting.WindowTitle import WindowTitle
 DEFAULT_CMAP = mpl.cm.jet
 
 class CustomToolbar(NavigationToolbar):
+    """
+    Custom toolbar adding a "Send to Data Explorer" action.
+
+    :param canvas: Matplotlib canvas
+    :param parent: Parent Qt widget
+    """
     def __init__(self, canvas, parent=None):
         super().__init__(canvas, parent)
         self.parent = parent
         self.add_custom_button()
 
     def add_custom_button(self):
-        # I have been told that a Button is better
-        # But all NavigationToolbar interactions are Actions
-        # This way all can be called with:
+        # All actions can be called with:
         #   self._actions['xxx']
         custom_icon = QtGui.QIcon()  # You can load an icon here if you want e.g., QtGui.QIcon("path/to/icon.png")
         custom_action = QtGui.QAction(custom_icon, "Send to Data Explorer", self)
