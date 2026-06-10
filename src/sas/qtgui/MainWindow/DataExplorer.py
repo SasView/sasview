@@ -844,6 +844,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             _ = msgbox.exec_()
 
     def freezeFromName(self, search_name = None):
+        """
+        Convert target_plot-data into a separate dataset (CustomNavigation-Button: "sendToDataExplorer").
+        It searches the target_plot-data in the model and creates a new dataset in the Explorer. 
+        """
         def findName(model, target_name: str, column: int=0)-> tuple:
             for row in range(model.rowCount()):
                 if model.item(row, column).text() == target_name:
