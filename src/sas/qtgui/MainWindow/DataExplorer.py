@@ -843,19 +843,21 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
             _ = msgbox.exec_()
 
-    def freezeFromName(self, search_name = None):
+    def freezeFromName(self, search_name: str = None):
         """
         Convert target_plot-data into a separate dataset (CustomNavigation-Button: "sendToDataExplorer").
         It searches the target_plot-data in the model and creates a new dataset in the Explorer. 
+
+        :param search_name: <class 'str'>
         """
         def findName(model, target_name: str, column: int=0)-> tuple:
             for row in range(model.rowCount()):
                 if model.item(row, column).text() == target_name:
                     return row, -1
-                for row2 in range(model.item(row, column).rowCount()):
-                    tmp = model.item(row, column).child(row2, column)
+                for item_row in range(model.item(row, column).rowCount()):
+                    tmp = model.item(row, column).child(item_row, column)
                     if tmp.text() == target_name:
-                            return row, row2
+                            return row, item_row
             return -1, -1
 
         model = self.model

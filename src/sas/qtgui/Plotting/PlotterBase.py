@@ -19,17 +19,21 @@ DEFAULT_CMAP = mpl.cm.jet
 
 class CustomToolbar(NavigationToolbar):
     """
-    Custom toolbar adding a "Send to Data Explorer" action.
-
+    Adding custom Actions to the NavigationToolbar, which are visible in 1D/2D plots.
+    
+    Currently added actions:
+    - "Send to Data Explorer":
     :param canvas: Matplotlib canvas
     :param parent: Parent Qt widget
+    :emit: <class 'str'> name of 1D/2D plot 
+
     """
     def __init__(self, canvas, parent=None):
         super().__init__(canvas, parent)
         self.parent = parent
-        self.add_custom_button()
+        self.addAction_SendToExplorer()
 
-    def add_custom_button(self):
+    def addAction_SendToExplorer(self):
         # All actions can be called with:
         #   self._actions['xxx']
         custom_icon = QtGui.QIcon()  # You can load an icon here if you want e.g., QtGui.QIcon("path/to/icon.png")
@@ -41,6 +45,7 @@ class CustomToolbar(NavigationToolbar):
     def sendToDataExplorer(self):
         for item in self.parent.data:
             GuiUtils.communicator.freezeDataNameSignal.emit(item.name)
+            break  # short fix but it is not the soluction for the problem
 
 class PlotterBase(QtWidgets.QWidget):
     #TODO: Describe what this class is
