@@ -943,15 +943,12 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         if self.extrapolation_parameters is None or self._data is None:
             return
         self.check_extrapolation_values()
-        if not any(getattr(self, "validity_flags", [])):
-            self.apply_parameters_from_ui()
 
     def on_extrapolation_text_edited(self) -> None:
         """Handle when user finishes editing any of the extrapolation text boxes."""
-        # First update the model with new values
-        self.apply_parameters_from_ui()
-        # Then correct any invalid values
         self.correct_extrapolation_values()
+        self.apply_parameters_from_ui()
+        self._refresh_extrapolation_plots()
 
     def format_sig_fig(self, value: float) -> str:
         """Format a float to 7 significant figures as a string."""
@@ -1065,9 +1062,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                 messages.append(f"The maximum value is {qmax:.7g}.")
                 self.txtPorodEnd_ex.setText(self.format_sig_fig(qmax))
 
-        # update slider and model
-        self.apply_parameters_from_ui()
-
         if messages:
             messages.append("Values have been adjusted to the nearest valid value.")
             QtWidgets.QMessageBox.warning(self, "Invalid Extrapolation Values", "\n".join(messages))
@@ -1081,18 +1075,15 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         if self.extrapolation_parameters is None:
             return
         # update the slider (this may emit a signal that will call on_extrapolation_slider_changed)
-        self.slider.extrapolation_parameters = self.extrapolation_parameters._replace(
-            point_1=safe_float(p1), point_2=safe_float(p2), point_3=safe_float(p3)
-        )
+        with QtCore.QSignalBlocker(self.slider):
+            self.slider.extrapolation_parameters = self.extrapolation_parameters._replace(
+                point_1=safe_float(p1), point_2=safe_float(p2), point_3=safe_float(p3)
+            )
 
         # update model item text too
         self.model.setItem(WIDGETS.W_GUINIER_END_EX, QtGui.QStandardItem(p1))
         self.model.setItem(WIDGETS.W_POROD_START_EX, QtGui.QStandardItem(p2))
         self.model.setItem(WIDGETS.W_POROD_END_EX, QtGui.QStandardItem(p3))
-
-        # re-validate to update any UI flags
-        self.check_extrapolation_values()
-        self._refresh_extrapolation_plots()
 
     def checkVolFrac(self) -> None:
         """Check if volfrac1 is strictly between 0 and 1."""
