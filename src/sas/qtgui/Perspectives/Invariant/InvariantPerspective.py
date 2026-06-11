@@ -1062,6 +1062,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                 messages.append(f"The maximum value is {qmax:.7g}.")
                 self.txtPorodEnd_ex.setText(self.format_sig_fig(qmax))
 
+        # Re-validate to update any UI flags
+        self.check_extrapolation_values()
+
         if messages:
             messages.append("Values have been adjusted to the nearest valid value.")
             QtWidgets.QMessageBox.warning(self, "Invalid Extrapolation Values", "\n".join(messages))
