@@ -430,6 +430,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
         if len(plots) > 1:
             # Only emit a plot update if the composition of extrapolation plots has changed
+            # ie. both -> low only, high only -> none, etc.
             current_mode = [self._low_extrapolate, self._high_extrapolate]
             previous_mode = getattr(self, "_plotted_extrapolation_mode", None)
             force_replot = getattr(self, "_force_extrapolation_replot", False)
@@ -656,12 +657,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             # Enable the status button (schedule on GUI thread)
             _ui(self.cmdStatus.setEnabled, True)
 
-            if calculation_failed:
-                # leave status disabled if something critical failed
-                _ui(self.cmdStatus.setEnabled, False)
-                logger.warning(f"Calculation failed: {msg}")
-                return self.model
-
             # add extrapolation plots (schedule GUI changes where needed)
             if low_success:
                 qmin_ext = float(self.extrapolation_parameters.ex_q_min)
@@ -702,6 +697,12 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                 self.high_extrapolation_plot._yunit = temp_data._yunit
                 if self._high_fit:
                     _safe_update_model(WIDGETS.W_HIGHQ_POWER_VALUE_EX, power_high)
+
+            if calculation_failed:
+                # leave status disabled if something critical failed
+                _ui(self.cmdStatus.setEnabled, False)
+                logger.warning(f"Calculation failed: {msg}")
+                return self.model
 
             # convert any "ERROR" to numeric zeros before summing
             if qstar_high == "ERROR":
