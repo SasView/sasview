@@ -500,4 +500,4 @@ The plots for the individual slicers will be stacked.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note:: This help document was last modified by Sujaya Shrestha, 24 December 2025.
+.. note:: This help document was last modified by Christian Wögerbauer, 12 June 2026.

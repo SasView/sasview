@@ -34,8 +34,6 @@ class CustomToolbar(NavigationToolbar):
         self.addAction_SendToExplorer()
 
     def addAction_SendToExplorer(self):
-        # All actions can be called with:
-        #   self._actions['xxx']
         custom_icon = QtGui.QIcon()  # You can load an icon here if you want e.g., QtGui.QIcon("path/to/icon.png")
         custom_action = QtGui.QAction(custom_icon, "Send to Data Explorer", self)
         custom_action.setToolTip("Send all data to the Data Explorer")
