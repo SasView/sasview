@@ -355,8 +355,10 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         def finish_calculation() -> None:
             self.plot_result(model)
 
-            # Recreate the initial plot if no extrapolation was used and plot was previously closed
-            if extrapolation is None and self.extrapolation_made:
+            no_extrapolation_plots = (self.low_extrapolation_plot is None) and (self.high_extrapolation_plot is None)
+
+            # Recreate the initial plot if no extrapolation plots are present
+            if self.extrapolation_made and no_extrapolation_plots:
                 self._manager.filesWidget.newPlot()
                 self.extrapolation_made = False
                 self._plotted_extrapolation_mode = None
