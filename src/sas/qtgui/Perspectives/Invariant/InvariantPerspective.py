@@ -11,7 +11,6 @@ from twisted.python.failure import Failure
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Utilities.ObjectLibrary as ol
-from sas.qtgui.Plotting import PlotterData
 from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
 from sas.qtgui.Utilities.BackgroundColor import BG_DEFAULT, BG_ERROR
 from sas.qtgui.Utilities.ExtrapolationSlider import ExtrapolationSlider, SliderPerspective
@@ -128,32 +127,33 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self._high_power_value: float | None = DEFAULT_POWER_VALUE
 
         # Define plots
-        self.high_extrapolation_plot: PlotterData | None = None
-        self.low_extrapolation_plot: PlotterData | None = None
+        self.high_extrapolation_plot: Data1D | None = None
+        self.low_extrapolation_plot: Data1D | None = None
         self.extrapolation_made: bool = False
+        self.force_extrapolation_replot: bool = False
 
     def setup_slider(self) -> None:
         """Setup the extrapolation slider."""
         self.slider = ExtrapolationSlider(perspective=SliderPerspective.INVARIANT)
         self.sliderLayout.insertWidget(1, self.slider)
 
-    def _refresh_extrapolation_plots(self, state=None) -> None:
+    def _refresh_extrapolation_plots(self) -> None:
         """Refresh any visible extrapolation plot markers in place.
 
         Updating the existing `QRangeSlider` artists is much cheaper than replacing the
         whole plot, so use that path whenever the plot window is already open.
         """
-        plots = [plot for plot in [self.low_extrapolation_plot, self.high_extrapolation_plot] if plot is not None]
+        plots = [
+            plot for plot in [self.low_extrapolation_plot, self.high_extrapolation_plot]
+            if plot is not None
+        ]
         # Directly obtain the plot widget and update its slider positions.
         data_explorer = ol.getObject("DataExplorer")
+        active_plots = getattr(data_explorer, "active_plots", {})
 
         for plot in plots:
-            plot_widget = data_explorer.active_plots.get(plot.name)
-
-            if state is not None and getattr(state, "dragging_line_position", None) is not None:
-                plot_widget.update_slider_positions(plot.name, state)
-            else:
-                plot_widget.update_slider_positions(plot.name)
+            plot_widget = active_plots.get(plot.name)
+            plot_widget.update_slider_positions(plot.name)
 
     def setup_tooltips(self) -> None:
         """Setup tooltips for the widgets"""
@@ -398,7 +398,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         # Send the modified model item to replace initial plot
         plots = [self._model_item]
 
-        if self._high_extrapolate and self.high_extrapolation_plot:
+        if self._high_extrapolate and self.high_extrapolation_plot is not None:
             self.high_extrapolation_plot.plot_role = DataRole.ROLE_DEFAULT
             self.high_extrapolation_plot.symbol = "Line"
             self.high_extrapolation_plot.custom_color = "#2ca02c"
@@ -412,7 +412,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                 self._model_item, self.high_extrapolation_plot, self.high_extrapolation_plot.title
             )
             plots.append(self.high_extrapolation_plot)
-        if self._low_extrapolate and self.low_extrapolation_plot:
+        if self._low_extrapolate and self.low_extrapolation_plot is not None:
             self.low_extrapolation_plot.plot_role = DataRole.ROLE_DEFAULT
             self.low_extrapolation_plot.symbol = "Line"
             self.low_extrapolation_plot.custom_color = "#ff7f0e"
@@ -430,12 +430,14 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             # Only emit a plot update if the composition of extrapolation plots has changed
             current_mode = [self._low_extrapolate, self._high_extrapolate]
             previous_mode = getattr(self, "_plotted_extrapolation_mode", None)
+            force_replot = getattr(self, "_force_extrapolation_replot", False)
 
-            if current_mode != previous_mode:
+            if current_mode != previous_mode or force_replot:
                 self._manager.filesWidget.closePlotsForItem(self._model_item)
                 self.communicator.plotRequestedSignal.emit(plots)
                 self.extrapolation_made = True
                 self._plotted_extrapolation_mode = current_mode
+                self._force_extrapolation_replot = False
             else:
                 # Update the existing extrapolation plots in place without re-emitting the whole plot
                 for plot in plots[1:]:
@@ -563,6 +565,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                         _ui(self._model_item.removeRow, item.row())
                         break
                 self.low_extrapolation_plot = None
+                self._force_extrapolation_replot = True
 
             _safe_update_model(WIDGETS.D_LOW_QSTAR, qstar_low)
             _safe_update_model(WIDGETS.D_LOW_QSTAR_ERR, qstar_low_err)
@@ -576,6 +579,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                         _ui(self._model_item.removeRow, item.row())
                         break
                 self.high_extrapolation_plot = None
+                self._force_extrapolation_replot = True
 
             _safe_update_model(WIDGETS.D_HIGH_QSTAR, qstar_high)
             _safe_update_model(WIDGETS.D_HIGH_QSTAR_ERR, qstar_high_err)
