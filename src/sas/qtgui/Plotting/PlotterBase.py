@@ -349,6 +349,15 @@ class PlotterBase(QtWidgets.QWidget):
         """
         Overwrite the close event adding helper notification
         """
+        data_list = self.data if isinstance(self.data, list) else [self.data]
+
+        # Clear the associated slicers, if any
+        for data in data_list:
+            if callable(slicer_owner := getattr(data, "slicerOwner", None)):
+                if owner := slicer_owner():
+                    owner.removeSlicersForPlotWindow(self)
+                    break
+
         self.clearQRangeSliders()
         # Please remove me from your database.
         PlotHelper.deletePlot(PlotHelper.idOfPlot(self))
