@@ -363,7 +363,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             if self.extrapolation_made and no_extrapolation_plots:
                 self._manager.filesWidget.newPlot()
                 self.extrapolation_made = False
-                self._plotted_extrapolation_mode = None
 
             self.check_status()
 
