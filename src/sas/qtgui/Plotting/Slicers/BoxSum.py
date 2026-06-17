@@ -10,6 +10,7 @@ from sas.qtgui.Utilities.GuiUtils import formatNumber, toDouble
 
 logger = logging.getLogger(__name__)
 
+
 class BoxSumCalculator(BaseInteractor):
     """
     BoxSumCalculator Class computes properties (such as sum and average of
@@ -175,9 +176,9 @@ class BoxSumCalculator(BaseInteractor):
         Clear the slicer and all connected events related to this slicer
         """
         self.clear_markers()
-        self.horizontal_lines.clear()
-        self.vertical_lines.clear()
-        self.center.clear()
+        for lines in (self.horizontal_lines, self.vertical_lines, self.center):
+            if getattr(lines, "axes", None) is not None:
+                lines.clear()
         # Close the associated widget if it exists
         if self.widget is not None:
             self.widget.closeWidgetSignal.emit()
@@ -484,8 +485,9 @@ class VerticalDoubleLine(BaseInteractor):
         Clear this slicer  and its markers
         """
         self.clear_markers()
-        self.right_line.remove()
-        self.left_line.remove()
+        for line in (self.right_line, self.left_line):
+            if hasattr(line, "remove") and line in getattr(self.axes, "lines", []):
+                line.remove()
 
     def update(self, x1=None, x2=None, y1=None, y2=None, width=None, height=None, center=None):
         """
@@ -650,8 +652,9 @@ class HorizontalDoubleLine(BaseInteractor):
         Clear this figure and its markers
         """
         self.clear_markers()
-        self.bottom_line.remove()
-        self.top_line.remove()
+        for line in (self.bottom_line, self.top_line):
+            if hasattr(line, "remove") and line in getattr(self.axes, "lines", []):
+                line.remove()
 
     def update(self, x1=None, x2=None, y1=None, y2=None, width=None, height=None, center=None):
         """
