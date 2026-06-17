@@ -43,7 +43,6 @@ class CustomToolbar(NavigationToolbar):
     def sendToDataExplorer(self):
         for item in self.parent.data:
             GuiUtils.communicator.freezeDataNameSignal.emit(item.name)
-            break  # short fix but it is not the soluction for the problem
 
 class PlotterBase(QtWidgets.QWidget):
     #TODO: Describe what this class is
