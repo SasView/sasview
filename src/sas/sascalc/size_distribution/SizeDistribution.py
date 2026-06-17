@@ -168,7 +168,7 @@ class sizeDistribution:
         self._resolution: float | None = None
 
         self.model_matrix: np.ndarray | None = None
-        self._volumes: np.ndarray | None = None
+        self.volumes: np.ndarray | None = None
 
         # Advanced parameters for MaxEnt
         self._iterMax: int = 5000
@@ -502,20 +502,17 @@ class sizeDistribution:
 
             intensity = combined_scale * Fsq + background_val
             intensities.append(intensity)
-
-            # Volume ratio is 1 for solid particles
-            volume *= volume_ratio
             volumes.append(volume)
 
         self.model_matrix = np.vstack(intensities).T
-        self._volumes = np.array(volumes)
+        self.volumes = np.array(volumes)
 
     def calc_volume_weighted_dist(self, binmag: np.ndarray) -> None:
         """
         This is not used right now.
         Calculate the volume weighted distribution.
         """
-        self.volume_bins = self._volumes
+        self.volume_bins = self.volumes
         self.vbin_diff = np.diff(self.volume_bins)
         self.volume_bins = self.volume_bins[:-1] + self.vbin_diff * 0.5
         self.volume_fraction = binmag * self.volume_bins / (2.0 * self.vbin_diff)
@@ -676,7 +673,7 @@ class sizeDistribution:
         """
         bin_mag = np.asarray(bin_mag)
         maxent_cdf_array = integrate.cumulative_trapezoid(bin_mag / (2.0 * self._binDiff), 2.0 * self.bins, axis=1)
-        self.BinMag_numberDist = self.BinMagnitude_maxEnt / self._volumes
+        self.BinMag_numberDist = self.BinMagnitude_maxEnt / self.volumes
 
         rvdist = stats.rv_histogram(
             (self.BinMagnitude_maxEnt, self._bin_edges * 2.0), density=True
