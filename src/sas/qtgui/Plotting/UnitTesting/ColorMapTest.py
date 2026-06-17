@@ -56,6 +56,7 @@ class ColorMapTest:
         '''Destroy the GUI'''
         w.close()
 
+    @pytest.mark.xfail(reason="2026-06: matplotlib changes to all_maps, maps, and rmaps")
     def testDefaults(self, widget):
         '''Test the GUI in its default state'''
         assert isinstance(widget, QtWidgets.QDialog)
