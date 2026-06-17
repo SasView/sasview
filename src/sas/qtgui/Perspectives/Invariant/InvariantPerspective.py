@@ -153,6 +153,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
         for plot in plots:
             plot_widget = active_plots.get(plot.name)
+            if plot_widget is None:
+                continue
             plot_widget.update_slider_positions(plot.name)
 
     def setup_tooltips(self) -> None:
@@ -397,10 +399,15 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.model = model
         self._data = GuiUtils.dataFromItem(self._model_item)
 
+        # Close the initial data plot that was created in setData()
+        if (self.high_extrapolation_plot or self.low_extrapolation_plot) and not self.extrapolation_made:
+            self._manager.filesWidget.closePlotsForItem(self._model_item)
+            self.extrapolation_made = True
+
         # Send the modified model item to replace initial plot
         plots = [self._model_item]
 
-        if self._high_extrapolate and self.high_extrapolation_plot is not None:
+        if self.high_extrapolation_plot:
             self.high_extrapolation_plot.plot_role = DataRole.ROLE_DEFAULT
             self.high_extrapolation_plot.symbol = "Line"
             self.high_extrapolation_plot.custom_color = "#2ca02c"
@@ -414,7 +421,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                 self._model_item, self.high_extrapolation_plot, self.high_extrapolation_plot.title
             )
             plots.append(self.high_extrapolation_plot)
-        if self._low_extrapolate and self.low_extrapolation_plot is not None:
+        if self.low_extrapolation_plot:
             self.low_extrapolation_plot.plot_role = DataRole.ROLE_DEFAULT
             self.low_extrapolation_plot.symbol = "Line"
             self.low_extrapolation_plot.custom_color = "#ff7f0e"
@@ -429,23 +436,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             plots.append(self.low_extrapolation_plot)
 
         if len(plots) > 1:
-            # Only emit a plot update if the composition of extrapolation plots has changed
-            # ie. both -> low only, high only -> none, etc.
-            current_mode = [self._low_extrapolate, self._high_extrapolate]
-            previous_mode = getattr(self, "_plotted_extrapolation_mode", None)
-            force_replot = getattr(self, "_force_extrapolation_replot", False)
-
-            if current_mode != previous_mode or force_replot:
-                self._manager.filesWidget.closePlotsForItem(self._model_item)
-                self.communicator.plotRequestedSignal.emit(plots)
-                self.extrapolation_made = True
-                self._plotted_extrapolation_mode = current_mode
-                self._force_extrapolation_replot = False
-            else:
-                # Update the existing extrapolation plots in place without re-emitting the whole plot
-                for plot in plots[1:]:
-                    self.communicator.plotUpdateSignal.emit([plot])
-                self._refresh_extrapolation_plots()
+            self.communicator.plotRequestedSignal.emit(plots)
 
         # Update the details dialog in case it is open
         self.update_details_widget()
