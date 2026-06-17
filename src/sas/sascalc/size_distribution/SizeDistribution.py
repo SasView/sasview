@@ -536,7 +536,7 @@ class sizeDistribution:
         1. Subtract intensities from the raw data.
         2. Trim the data to the correct q-range for maxEnt; create new trimmed Data1D object to return after MaxEnt.
         3. Generate Model Data based of the trimmed data.
-        4. Create a list of intensities for maxEnt, if full_fit == True , call add_gaussian_noise nreps times;
+        4. Create a list of intensities for maxEnt; if full_fit == True, call add_gaussian_noise nreps times;
             if False, pass just the subtracted intensities.
         5. Calculate initial bin weights, sigma, and return.
 
