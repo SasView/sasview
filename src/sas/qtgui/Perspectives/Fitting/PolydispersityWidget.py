@@ -253,7 +253,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         # Note: last argument needs extra space padding for decent display of the control
         checked_list = ["Distribution of " + param_name, str(width),
                         str(min), str(max),
-                        str(npts), str(nsigs), "gaussian      ",'']
+                        str(npts), str(nsigs), "",'']
         FittingUtilities.addCheckedListToModel(self.poly_model, checked_list)
 
         all_items = self.poly_model.rowCount()
