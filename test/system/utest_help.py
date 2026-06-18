@@ -3,7 +3,7 @@
 from pathlib import Path, PurePosixPath
 from unittest.mock import patch
 
-from sas.system._help import _HelpSystem, _release_version
+from sas.system._help import _HelpSystem, _online_doc_base, _release_version
 
 
 class PosixTestPath(PurePosixPath):
@@ -29,6 +29,22 @@ class TestReleaseVersion:
         assert _release_version("6.1.2.post1") == "6.1.2"
 
 
+class TestOnlineDocBase:
+    """Tests for online documentation base URL selection."""
+
+    def test_release_uses_archived_docs(self):
+        assert _online_doc_base("6.1.2") == "https://www.sasview.org/docs/old_docs/6.1.2"
+
+    def test_post_release_uses_archived_docs(self):
+        assert _online_doc_base("6.1.2.post1") == "https://www.sasview.org/docs/old_docs/6.1.2"
+
+    def test_dev_release_uses_current_docs(self):
+        assert _online_doc_base("6.1.2.dev159+g77be83657") == "https://www.sasview.org/docs"
+
+    def test_pre_release_uses_current_docs(self):
+        assert _online_doc_base("6.2.0a1") == "https://www.sasview.org/docs"
+
+
 class TestHelpSystemOnlineUrl:
     """Tests for _HelpSystem._online_url()"""
 
@@ -43,7 +59,7 @@ class TestHelpSystemOnlineUrl:
                 Path("user/qtgui/Perspectives/Fitting/fitting_help.html")
             )
         assert url == (
-            "https://www.sasview.org/docs/v6.1.2"
+            "https://www.sasview.org/docs/old_docs/6.1.2"
             "/user/qtgui/Perspectives/Fitting/fitting_help.html"
         )
 
@@ -52,7 +68,8 @@ class TestHelpSystemOnlineUrl:
             url = self.hs._online_url(
                 Path("user/qtgui/Perspectives/Fitting/fitting_help.html")
             )
-        assert url.startswith("https://www.sasview.org/docs/v6.1.2/")
+        assert url.startswith("https://www.sasview.org/docs/")
+        assert "/old_docs/" not in url
         assert "+g77be83657" not in url
         assert ".dev159" not in url
 
@@ -115,7 +132,7 @@ class TestShowHelp:
 
         opened_url = mock_wb.open.call_args[0][0]
         assert opened_url == (
-            "https://www.sasview.org/docs/v6.1.2/user/fitting.html"
+            "https://www.sasview.org/docs/old_docs/6.1.2/user/fitting.html"
         )
 
     @patch("sas.system._help.webbrowser")
@@ -138,7 +155,7 @@ class TestShowHelp:
             self.hs.show_help("user/fitting.html")
 
         opened_url = mock_wb.open.call_args[0][0]
-        assert opened_url.startswith("https://www.sasview.org/docs/v6.1.2/")
+        assert opened_url.startswith("https://www.sasview.org/docs/old_docs/6.1.2/")
 
     @patch("sas.system._help.webbrowser")
     def test_absolute_path_stripped_for_online(self, mock_wb, tmp_path):
@@ -151,7 +168,7 @@ class TestShowHelp:
 
         opened_url = mock_wb.open.call_args[0][0]
         assert opened_url == (
-            "https://www.sasview.org/docs/v6.1.2/user/fitting.html"
+            "https://www.sasview.org/docs/old_docs/6.1.2/user/fitting.html"
         )
 
     @patch("sas.system._help.webbrowser")
@@ -166,7 +183,7 @@ class TestShowHelp:
 
         opened_url = mock_wb.open.call_args[0][0]
         assert opened_url == (
-            "https://www.sasview.org/docs/v6.1.2/user/fitting.html"
+            "https://www.sasview.org/docs/old_docs/6.1.2/user/fitting.html"
         )
 
     @patch("sas.system._help.webbrowser")
