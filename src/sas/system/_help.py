@@ -2,6 +2,8 @@ import logging
 import webbrowser
 from pathlib import Path
 
+from sas.system.web import get_current_release_version
+
 logger = logging.getLogger(__name__)
 
 
@@ -75,8 +77,15 @@ class _HelpSystem:
         """Construct the online documentation URL for the current version."""
         from sas.system.version import __version__
 
-        version = _release_version(__version__)
-        base = f"https://www.sasview.org/docs/v{version}"
+        release_version = get_current_release_version()
+        active_version = _release_version(__version__)
+
+        # The base URL is different for the latest version of docs.
+        if release_version == active_version:
+            base = "https://www.sasview.org/docs/"
+        else:
+            base = f"https://www.sasview.org/docs/old_docs/{active_version}"
+
         url = f"{base}/{relative_path.as_posix()}"
         if fragment:
             url += "#" + fragment

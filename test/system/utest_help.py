@@ -5,6 +5,8 @@ from unittest.mock import patch
 
 from sas.system._help import _HelpSystem, _release_version
 
+TEST_VERSION = '4.2.2'
+
 
 class PosixTestPath(PurePosixPath):
     """Pure POSIX path with the minimal filesystem API used by _HelpSystem."""
@@ -38,26 +40,26 @@ class TestHelpSystemOnlineUrl:
 
     @patch("sas.system._help.HELP_SYSTEM")
     def test_online_url_basic(self, _mock):
-        with patch("sas.system.version.__version__", "6.1.2"):
+        with patch("sas.system.version.__version__", TEST_VERSION):
             url = self.hs._online_url(
                 Path("user/qtgui/Perspectives/Fitting/fitting_help.html")
             )
         assert url == (
-            "https://www.sasview.org/docs/v6.1.2"
+            f"https://www.sasview.org/docs/old_docs/{TEST_VERSION}"
             "/user/qtgui/Perspectives/Fitting/fitting_help.html"
         )
 
     def test_online_url_dev_version(self):
-        with patch("sas.system.version.__version__", "6.1.2.dev159+g77be83657"):
+        with patch("sas.system.version.__version__", f"{TEST_VERSION}.dev159+g77be83657"):
             url = self.hs._online_url(
                 Path("user/qtgui/Perspectives/Fitting/fitting_help.html")
             )
-        assert url.startswith("https://www.sasview.org/docs/v6.1.2/")
+        assert url.startswith(f"https://www.sasview.org/docs/old_docs/{TEST_VERSION}/")
         assert "+g77be83657" not in url
         assert ".dev159" not in url
 
     def test_online_url_with_fragment(self):
-        with patch("sas.system.version.__version__", "6.1.2"):
+        with patch("sas.system.version.__version__", TEST_VERSION):
             url = self.hs._online_url(
                 Path("user/qtgui/Perspectives/Fitting/fitting_help.html"),
                 "simultaneous-fits",
@@ -65,7 +67,7 @@ class TestHelpSystemOnlineUrl:
         assert url.endswith("fitting_help.html#simultaneous-fits")
 
     def test_online_url_uses_posix_separators(self):
-        with patch("sas.system.version.__version__", "6.1.2"):
+        with patch("sas.system.version.__version__", TEST_VERSION):
             url = self.hs._online_url(
                 Path("user") / "qtgui" / "Perspectives" / "Fitting" / "fitting_help.html"
             )
@@ -110,19 +112,19 @@ class TestShowHelp:
     def test_online_fallback_when_local_missing(self, mock_wb, tmp_path):
         """When local docs don't exist, fall back to online URL."""
         self.hs.path = tmp_path  # empty dir — no docs
-        with patch("sas.system.version.__version__", "6.1.2"):
+        with patch("sas.system.version.__version__", TEST_VERSION):
             self.hs.show_help("user/fitting.html")
 
         opened_url = mock_wb.open.call_args[0][0]
         assert opened_url == (
-            "https://www.sasview.org/docs/v6.1.2/user/fitting.html"
+            f"https://www.sasview.org/docs/old_docs/{TEST_VERSION}/user/fitting.html"
         )
 
     @patch("sas.system._help.webbrowser")
     def test_online_fallback_no_absolute_path_leak(self, mock_wb, tmp_path):
         """The online URL must never contain the local filesystem path."""
         self.hs.path = tmp_path
-        with patch("sas.system.version.__version__", "6.1.2"):
+        with patch("sas.system.version.__version__", TEST_VERSION):
             self.hs.show_help("user/fitting.html")
 
         opened_url = mock_wb.open.call_args[0][0]
@@ -134,11 +136,11 @@ class TestShowHelp:
     def test_online_fallback_when_path_is_none(self, mock_wb):
         """When HELP_SYSTEM.path is None, fall back to online."""
         self.hs.path = None
-        with patch("sas.system.version.__version__", "6.1.2"):
+        with patch("sas.system.version.__version__", TEST_VERSION):
             self.hs.show_help("user/fitting.html")
 
         opened_url = mock_wb.open.call_args[0][0]
-        assert opened_url.startswith("https://www.sasview.org/docs/v6.1.2/")
+        assert opened_url.startswith(f"https://www.sasview.org/docs/old_docs/{TEST_VERSION}/")
 
     @patch("sas.system._help.webbrowser")
     def test_absolute_path_stripped_for_online(self, mock_wb, tmp_path):
@@ -146,12 +148,12 @@ class TestShowHelp:
         root should be stripped when building the online fallback URL."""
         self.hs.path = tmp_path  # empty — no local docs
         absolute_url = tmp_path / "user" / "fitting.html"
-        with patch("sas.system.version.__version__", "6.1.2"):
+        with patch("sas.system.version.__version__", TEST_VERSION):
             self.hs.show_help(str(absolute_url))
 
         opened_url = mock_wb.open.call_args[0][0]
         assert opened_url == (
-            "https://www.sasview.org/docs/v6.1.2/user/fitting.html"
+            f"https://www.sasview.org/docs/old_docs/{TEST_VERSION}/user/fitting.html"
         )
 
     @patch("sas.system._help.webbrowser")
@@ -161,12 +163,12 @@ class TestShowHelp:
         absolute_url = "/tmp/sasview-docs/user/fitting.html"
 
         with patch("sas.system._help.Path", PosixTestPath):
-            with patch("sas.system.version.__version__", "6.1.2"):
+            with patch("sas.system.version.__version__", TEST_VERSION):
                 self.hs.show_help(absolute_url)
 
         opened_url = mock_wb.open.call_args[0][0]
         assert opened_url == (
-            "https://www.sasview.org/docs/v6.1.2/user/fitting.html"
+            f"https://www.sasview.org/docs/old_docs/{TEST_VERSION}/user/fitting.html"
         )
 
     @patch("sas.system._help.webbrowser")
