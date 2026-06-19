@@ -216,6 +216,25 @@ class TestParameterValueUndo:
         w.undo_stack.undo()
         assert w.logic.kernel_module.getParam("radius") == old_val
 
+    def test_value_undo_redo_recomputes_plot(self, widget_with_model, mocker):
+        """Undo/redo of a value change must recompute the theory so the plot
+        stays in sync with the parameter table.
+
+        Regression for the desync krzywon reported on PR #3995: undoing a
+        parameter value updated the table cell but left the plotted curve
+        stale, because ParameterValueCommand did not recompute (unlike every
+        snapshot-based restore path)."""
+        w = widget_with_model
+        w.undo_stack.push(ParameterValueCommand("radius", 10.0, 99.0))
+        spy = mocker.patch.object(w, "calculateQGridForModel")
+
+        w.undo_stack.undo()
+        assert spy.call_count >= 1, "undo did not recompute the theory plot"
+
+        spy.reset_mock()
+        w.undo_stack.redo()
+        assert spy.call_count >= 1, "redo did not recompute the theory plot"
+
     def test_checkbox_column_does_not_push_command(self, widget_with_model):
         """Toggling the 'fit' checkbox (column 0) must NOT push an undo command."""
         w = widget_with_model
@@ -299,6 +318,21 @@ class TestParameterMinMaxUndo:
         assert isinstance(top_cmd, ParameterMinMaxCommand)
         assert top_cmd._bound == "max"
         assert top_cmd._new_val == 500.0
+
+    def test_minmax_undo_redo_recomputes_plot(self, widget_with_model, mocker):
+        """Undo/redo of a bound change must recompute the theory, keeping the
+        plot in sync with the parameter table (see
+        TestParameterValueUndo.test_value_undo_redo_recomputes_plot)."""
+        w = widget_with_model
+        w.undo_stack.push(ParameterMinMaxCommand("radius", "min", 1.0, 5.0))
+        spy = mocker.patch.object(w, "calculateQGridForModel")
+
+        w.undo_stack.undo()
+        assert spy.call_count >= 1, "undo did not recompute the theory plot"
+
+        spy.reset_mock()
+        w.undo_stack.redo()
+        assert spy.call_count >= 1, "redo did not recompute the theory plot"
 
 
 # ---------------------------------------------------------------------------

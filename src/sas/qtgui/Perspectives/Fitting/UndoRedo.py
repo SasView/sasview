@@ -54,13 +54,21 @@ class ParameterValueCommand(UndoCommand):
     def param_name(self) -> str:
         return self._param_name
 
+    def _apply(self, widget, value: float) -> None:
+        widget.logic.kernel_module.setParam(self._param_name, value)
+        widget._update_model_param_value(self._param_name, value)
+        # Recompute the theory so the plot reflects the restored input value.
+        # The snapshot-based restore paths (_restore_parameter_values,
+        # _apply_fit_options, _restore_fit_result_snapshot, ...) all end with a
+        # recompute; without this an undo/redo updates the parameter table but
+        # leaves the plotted curve stale, desyncing the view from the params.
+        widget.calculateQGridForModel()
+
     def undo(self, widget) -> None:
-        widget.logic.kernel_module.setParam(self._param_name, self._old_val)
-        widget._update_model_param_value(self._param_name, self._old_val)
+        self._apply(widget, self._old_val)
 
     def redo(self, widget) -> None:
-        widget.logic.kernel_module.setParam(self._param_name, self._new_val)
-        widget._update_model_param_value(self._param_name, self._new_val)
+        self._apply(widget, self._new_val)
 
     #: Maximum age difference (seconds) between two edits to the same parameter
     #: that may still be coalesced into a single undo entry.  Edits farther
@@ -114,6 +122,9 @@ class ParameterMinMaxCommand(UndoCommand):
         idx = self._BOUND_INDEX[self._bound]
         widget.logic.kernel_module.details[self._param_name][idx] = value
         widget._update_model_param_limit(self._param_name, self._bound, value)
+        # Keep the plotted theory in sync with the restored bound, matching the
+        # snapshot-based restore paths (see ParameterValueCommand._apply).
+        widget.calculateQGridForModel()
 
     def undo(self, widget) -> None:
         self._apply(widget, self._old_val)
