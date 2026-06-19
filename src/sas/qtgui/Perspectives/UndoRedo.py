@@ -147,7 +147,9 @@ class UndoStack(QtCore.QObject):
     - Handle command execution failures: log at WARNING, show a dialog,
       and offer ``reset_to_last_good()`` when failures repeat.
 
-    The stack depth defaults to ``config.UNDO_STACK_MAX_DEPTH`` (200).
+    The stack depth defaults to ``config.UNDO_STACK_MAX_DEPTH`` (200). This
+    depth is applied per page/tab/widget (each widget owns its own
+    ``UndoStack``); it is not a global limit shared across all widgets.
 
     Usage::
 
