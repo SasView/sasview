@@ -130,7 +130,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.high_extrapolation_plot: Data1D | None = None
         self.low_extrapolation_plot: Data1D | None = None
         self.extrapolation_made: bool = False
-        self.force_extrapolation_replot: bool = False
 
     def setup_slider(self) -> None:
         """Setup the extrapolation slider."""
@@ -558,7 +557,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                         _ui(self._model_item.removeRow, item.row())
                         break
                 self.low_extrapolation_plot = None
-                self._force_extrapolation_replot = True
 
             _safe_update_model(WIDGETS.D_LOW_QSTAR, qstar_low)
             _safe_update_model(WIDGETS.D_LOW_QSTAR_ERR, qstar_low_err)
@@ -572,7 +570,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                         _ui(self._model_item.removeRow, item.row())
                         break
                 self.high_extrapolation_plot = None
-                self._force_extrapolation_replot = True
 
             _safe_update_model(WIDGETS.D_HIGH_QSTAR, qstar_high)
             _safe_update_model(WIDGETS.D_HIGH_QSTAR_ERR, qstar_high_err)
