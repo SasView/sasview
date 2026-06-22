@@ -372,7 +372,7 @@ class WedgeInteractorQ(WedgeInteractor):
     def __init__(self, base, axes, item=None, color="black", zorder=3):
         WedgeInteractor.__init__(self, base, axes, item=item, color=color)
         self.base = base
-        super()._post_data()
+        #super()._post_data()
 
     def _post_data(self, new_sector=None, nbins=None):
         from sasdata.data_util.manipulations import SectorQ
@@ -390,7 +390,7 @@ class WedgeInteractorPhi(WedgeInteractor):
     def __init__(self, base, axes, item=None, color="black", zorder=3):
         WedgeInteractor.__init__(self, base, axes, item=item, color=color)
         self.base = base
-        super()._post_data()
+        #super()._post_data()
 
     def _post_data(self, new_sector=None, nbins=None):
         from sasdata.data_util.manipulations import SectorPhi
