@@ -83,6 +83,9 @@ class Data1D(PlottableData1D, LoadData1D):
         self.slider_high_q_setter = []  # List of attributes that lead to a setter to tie a high Q method to the slider
         self.slider_high_q_getter = []  # List of attributes that lead to a getter to tie a high Q method to the slider
 
+        # Trust bar for size distribution perspective
+        self.show_trust_bar = False  # Should the trust bar be shown?
+
     def setSlicerOwner(self, owner):
         """
         Store the 2D plot window that owns a slicer-generated 1D plot.

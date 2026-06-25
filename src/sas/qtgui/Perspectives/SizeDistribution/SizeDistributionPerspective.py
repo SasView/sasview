@@ -635,15 +635,26 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         plots = [self._model_item]
         qmin_fit = float(self.txtMinRange.text())
         qmax_fit = float(self.txtMaxRange.text())
+
         self.size_distr_plot, self.trust_plot = self.logic.newSizeDistrPlot(result, qmin_fit, qmax_fit)
         if self.size_distr_plot is not None:
+            # set the trust range for the size distribution plot
+            self.size_distr_plot.show_trust_bar = True
+            trust_range = self.logic.computeTrustRange(qmin_fit, qmax_fit)
+            self.size_distr_plot.trust_range = {
+                "d_low": trust_range[0],
+                "d_high": trust_range[1],
+            }
+
             title = self.size_distr_plot.name
             GuiUtils.updateModelItemWithPlot(self._model_item, self.size_distr_plot, title)
             plots.append(self.size_distr_plot)
+
         if self.trust_plot is not None:
             title = self.trust_plot.name
             GuiUtils.updateModelItemWithPlot(self._model_item, self.trust_plot, title)
             plots.append(self.trust_plot)
+
         self.communicator.plotRequestedSignal.emit(plots)
 
         # add fit to data plot
