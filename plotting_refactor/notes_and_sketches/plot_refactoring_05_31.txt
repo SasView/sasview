@@ -1,0 +1,21 @@
+2D mockup for next week
+
+
+highlight a plot by clicking and then it is enlarged and when you click another one it goes back
+	how can the plots be recognized
+
+manipulations for one plot so that it is only in that particular plot
+
+
+sasview beta is coming out soon
+
+inside the qtreewidget one can access the class of the original item that was added to the tree by
+	using data or something
+
+qstandarditems have children that keep the objects that are originally fed 
+
+
+shared intensity bar for all plots
+
+
+push my project to git
