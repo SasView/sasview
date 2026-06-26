@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>577</width>
-    <height>671</height>
+    <height>600</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -32,6 +32,65 @@
    <string>Size Distribution</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_7">
+   <item row="1" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout_8">
+     <property name="sizeConstraint">
+      <enum>QLayout::SizeConstraint::SetDefaultConstraint</enum>
+     </property>
+     <item>
+      <widget class="QPushButton" name="quickFitButton">
+       <property name="toolTip">
+        <string>Perform a quick fit using fixed iteration parameters.</string>
+       </property>
+       <property name="text">
+        <string>Quick fit</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="fullFitButton">
+       <property name="toolTip">
+        <string>Perform a full fit with all parameters optimized.</string>
+       </property>
+       <property name="text">
+        <string>Full fit</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Orientation::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Policy::Expanding</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>200</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="helpButton">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="toolTip">
+        <string>Open the Size Distribution perspective help documentation.</string>
+       </property>
+       <property name="text">
+        <string>Help</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
    <item row="0" column="0">
     <widget class="QTabWidget" name="SizeDistributionTabWidget">
      <property name="sizePolicy">
@@ -251,7 +310,7 @@
          </layout>
         </widget>
        </item>
-       <item row="3" column="0" alignment="Qt::AlignTop">
+       <item row="3" column="0" alignment="Qt::AlignmentFlag::AlignTop">
         <widget class="QGroupBox" name="boxOutput">
          <property name="title">
           <string>Output</string>
@@ -392,14 +451,14 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="3" rowspan="5">
-           <spacer name="horizontalSpacer_7">
+          <item row="3" column="3">
+           <spacer name="horizontalSpacer_3">
             <property name="orientation">
-             <enum>Qt::Horizontal</enum>
+             <enum>Qt::Orientation::Horizontal</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>200</width>
+              <width>40</width>
               <height>20</height>
              </size>
             </property>
@@ -430,6 +489,28 @@
               </property>
              </widget>
             </item>
+            <item row="0" column="4">
+             <widget class="QLineEdit" name="txtMaxRange">
+              <property name="minimumSize">
+               <size>
+                <width>80</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Maximum
+                value of Q.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
+               </string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="3">
+             <widget class="QLabel" name="lblMaxRange">
+              <property name="text">
+               <string>Max range</string>
+              </property>
+             </widget>
+            </item>
             <item row="0" column="1">
              <widget class="QLineEdit" name="txtMinRange">
               <property name="minimumSize">
@@ -454,29 +535,7 @@
               </property>
              </widget>
             </item>
-            <item row="1" column="0">
-             <widget class="QLabel" name="lblMaxRange">
-              <property name="text">
-               <string>Max range</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <widget class="QLineEdit" name="txtMaxRange">
-              <property name="minimumSize">
-               <size>
-                <width>80</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="toolTip">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Maximum
-                value of Q.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
-               </string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="2">
+            <item row="0" column="5">
              <widget class="QLabel" name="label_15">
               <property name="text">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span
@@ -486,19 +545,6 @@
              </widget>
             </item>
            </layout>
-          </item>
-          <item row="0" column="1" rowspan="2">
-           <spacer name="horizontalSpacer_8">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>217</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
           </item>
           <item row="0" column="2">
            <widget class="QPushButton" name="cmdReset">
@@ -521,130 +567,57 @@
           <string>Method parameters</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_21">
-          <item row="0" column="0">
-           <widget class="QLabel" name="lblSkyBackgd">
-            <property name="text">
-             <string>MaxEnt Sky Background:</string>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="1">
-           <widget class="QLineEdit" name="txtSkyBackgd">
-            <property name="toolTip">
-             <string>Sky background parameter for the Maximum Entropy method (suggested: 1e-6)</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2">
-           <widget class="QLabel" name="label_9">
-            <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Suggested: 1e-6&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="lblIterations">
-            <property name="text">
-             <string>Iterations:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="txtIterations">
-            <property name="toolTip">
-             <string>Number of iterations for the Maximum Entropy method.</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QGroupBox" name="boxWeighting">
-         <property name="title">
-          <string>Weighting</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_20">
-          <item row="0" column="0">
-           <layout class="QGridLayout" name="verticalLayout">
-            <item row="0" column="0">
-             <widget class="QRadioButton" name="rbWeighting1">
+           <layout class="QHBoxLayout" name="horizontalLayout_6">
+            <item>
+             <widget class="QLabel" name="lblSkyBackgd">
               <property name="text">
-               <string>None</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-              <property name="toolTip">
-               <string>No weighting applied to the data.</string>
+               <string>MaxEnt Sky Background:</string>
               </property>
              </widget>
             </item>
-            <item row="1" column="0">
-             <widget class="QRadioButton" name="rbWeighting2">
-              <property name="text">
-               <string>Use dI Data</string>
-              </property>
+            <item>
+             <widget class="QLineEdit" name="txtSkyBackgd">
               <property name="toolTip">
-               <string>Weight data by its error values (dI).</string>
+               <string>Sky background parameter for the Maximum Entropy method (suggested: 1e-6)</string>
               </property>
              </widget>
             </item>
-            <item row="2" column="0">
-             <widget class="QRadioButton" name="rbWeighting3">
+            <item>
+             <widget class="QLabel" name="label_9">
               <property name="text">
-               <string>Use |sqrt(I Data)|</string>
-              </property>
-              <property name="toolTip">
-               <string>Weight data by the square root of intensity values.</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Suggested: 1e-6&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
              </widget>
             </item>
-            <item row="3" column="0">
-             <widget class="QRadioButton" name="rbWeighting4">
-              <property name="text">
-               <string>Use % |I Data|</string>
+            <item>
+             <spacer name="horizontalSpacer_2">
+              <property name="orientation">
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
-              <property name="toolTip">
-               <string>Weight data as a percentage of intensity values.</string>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QLabel" name="lblIterations">
+              <property name="text">
+               <string>Iterations:</string>
               </property>
              </widget>
             </item>
-            <item row="3" column="1">
-             <widget class="QLineEdit" name="txtWgtPercent">
+            <item>
+             <widget class="QLineEdit" name="txtIterations">
               <property name="toolTip">
-               <string>Percentage value for percentage-based weighting.</string>
+               <string>Number of iterations for the Maximum Entropy method.</string>
               </property>
              </widget>
             </item>
            </layout>
-          </item>
-          <item row="0" column="1">
-           <widget class="QLabel" name="lblWgtFactor">
-            <property name="text">
-             <string>Weight factor:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2">
-           <widget class="QLineEdit" name="txtWgtFactor">
-            <property name="toolTip">
-             <string>Overall weighting factor to apply to the data.</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="3">
-           <spacer name="horizontalSpacer_9">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>50</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
           </item>
          </layout>
         </widget>
@@ -655,17 +628,83 @@
           <string>Background</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_12">
+          <item row="4" column="0" colspan="2">
+           <widget class="QGroupBox" name="powerLawQRangeGroupBox">
+            <property name="title">
+             <string>Fit power law Q range</string>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_4">
+             <item row="0" column="0">
+              <layout class="QHBoxLayout" name="horizontalLayout_3">
+               <item>
+                <widget class="QLabel" name="label_7">
+                 <property name="text">
+                  <string>Min:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="txtPowerLawQMin">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="toolTip">
+                  <string>Minimum Q value for fitting the power-law background.</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="label_12">
+                 <property name="text">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="label_14">
+                 <property name="text">
+                  <string>Max:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="txtPowerLawQMax">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="toolTip">
+                  <string>Maximum Q value for fitting the power-law background.</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="label_17">
+                 <property name="text">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </widget>
+          </item>
           <item row="0" column="0">
            <widget class="QLabel" name="lblBackgd">
             <property name="text">
              <string>Flat background:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="txtBackgd">
-            <property name="toolTip">
-             <string>Flat background value (constant background in cm^-1).</string>
             </property>
            </widget>
           </item>
@@ -675,6 +714,13 @@
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;cm&lt;span style=&quot;
               vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
              </string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="txtBackgd">
+            <property name="toolTip">
+             <string>Flat background value (constant background in cm^-1).</string>
             </property>
            </widget>
           </item>
@@ -688,15 +734,18 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="0" colspan="3">
+          <item row="1" column="3">
+           <widget class="QPushButton" name="cmdFitFlatBackground">
+            <property name="toolTip">
+             <string>Fit the flat background component to the data in the specified Q range.</string>
+            </property>
+            <property name="text">
+             <string>Fit flat background</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0" colspan="4">
            <layout class="QGridLayout" name="gridLayout_14">
-            <item row="0" column="0">
-             <widget class="QLabel" name="lblPowerLowQ">
-              <property name="text">
-               <string>Power:</string>
-              </property>
-             </widget>
-            </item>
             <item row="0" column="1">
              <widget class="QLineEdit" name="txtPowerLowQ">
               <property name="toolTip">
@@ -726,29 +775,20 @@
              </layout>
             </item>
             <item row="0" column="3">
-             <spacer name="horizontalSpacer">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeType">
-               <enum>QSizePolicy::Expanding</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>100</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item row="1" column="0">
              <widget class="QLabel" name="lblScaleLowQ">
               <property name="text">
                <string>Scale:</string>
               </property>
              </widget>
             </item>
-            <item row="1" column="1">
+            <item row="0" column="0">
+             <widget class="QLabel" name="lblPowerLowQ">
+              <property name="text">
+               <string>Power:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="4">
              <widget class="QLineEdit" name="txtScaleLowQ">
               <property name="toolTip">
                <string>Scale applied to the power-law function.</string>
@@ -757,7 +797,17 @@
             </item>
            </layout>
           </item>
-          <item row="1" column="0" colspan="2">
+          <item row="4" column="3">
+           <widget class="QPushButton" name="cmdFitPowerLaw">
+            <property name="toolTip">
+             <string>Fit the power-law component to the data in the specified Q range.</string>
+            </property>
+            <property name="text">
+             <string>Fit power law</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0" colspan="3">
            <widget class="QGroupBox" name="qRangeGroupBox">
             <property name="title">
              <string>Fit flat background Q range</string>
@@ -777,14 +827,14 @@
                  <property name="enabled">
                   <bool>true</bool>
                  </property>
-                 <property name="toolTip">
-                  <string>Minimum Q value for fitting the flat background.</string>
-                 </property>
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                    <horstretch>0</horstretch>
                    <verstretch>0</verstretch>
                   </sizepolicy>
+                 </property>
+                 <property name="toolTip">
+                  <string>Minimum Q value for fitting the flat background.</string>
                  </property>
                 </widget>
                </item>
@@ -807,14 +857,14 @@
                  <property name="enabled">
                   <bool>true</bool>
                  </property>
-                 <property name="toolTip">
-                  <string>Maximum Q value for fitting the flat background.</string>
-                 </property>
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                    <horstretch>0</horstretch>
                    <verstretch>0</verstretch>
                   </sizepolicy>
+                 </property>
+                 <property name="toolTip">
+                  <string>Maximum Q value for fitting the flat background.</string>
                  </property>
                 </widget>
                </item>
@@ -830,98 +880,86 @@
             </layout>
            </widget>
           </item>
-          <item row="1" column="3">
-           <widget class="QPushButton" name="cmdFitFlatBackground">
-            <property name="text">
-             <string>Fit flat background</string>
-            </property>
-            <property name="toolTip">
-             <string>Fit the flat background component to the data in the specified Q range.</string>
-            </property>
-           </widget>
+         </layout>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QGroupBox" name="boxWeighting">
+         <property name="title">
+          <string>Weighting</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_20">
+          <item row="0" column="0">
+           <layout class="QGridLayout" name="verticalLayout">
+            <item row="0" column="1">
+             <widget class="QRadioButton" name="rbWeighting2">
+              <property name="toolTip">
+               <string>Weight data by its error values (dI).</string>
+              </property>
+              <property name="text">
+               <string>Use dI Data</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QRadioButton" name="rbWeighting1">
+              <property name="toolTip">
+               <string>No weighting applied to the data.</string>
+              </property>
+              <property name="text">
+               <string>None</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QRadioButton" name="rbWeighting3">
+              <property name="toolTip">
+               <string>Weight data by the square root of intensity values.</string>
+              </property>
+              <property name="text">
+               <string>Use |sqrt(I Data)|</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
-          <item row="4" column="0" colspan="2">
-           <widget class="QGroupBox" name="powerLawQRangeGroupBox">
-            <property name="title">
-             <string>Fit power law Q range</string>
-            </property>
-            <layout class="QGridLayout" name="gridLayout_4">
-             <item row="0" column="0">
-              <layout class="QHBoxLayout" name="horizontalLayout_3">
-               <item>
-                <widget class="QLabel" name="label_7">
-                 <property name="text">
-                  <string>Min:</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QLineEdit" name="txtPowerLawQMin">
-                 <property name="enabled">
-                  <bool>true</bool>
-                 </property>
-                 <property name="toolTip">
-                  <string>Minimum Q value for fitting the power-law background.</string>
-                 </property>
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QLabel" name="label_12">
-                 <property name="text">
-                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QLabel" name="label_14">
-                 <property name="text">
-                  <string>Max:</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QLineEdit" name="txtPowerLawQMax">
-                 <property name="enabled">
-                  <bool>true</bool>
-                 </property>
-                 <property name="toolTip">
-                  <string>Maximum Q value for fitting the power-law background.</string>
-                 </property>
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QLabel" name="label_17">
-                 <property name="text">
-                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item row="4" column="3">
-           <widget class="QPushButton" name="cmdFitPowerLaw">
-            <property name="text">
-             <string>Fit power law</string>
-            </property>
-            <property name="toolTip">
-             <string>Fit the power-law component to the data in the specified Q range.</string>
-            </property>
-           </widget>
+          <item row="1" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_5">
+            <item>
+             <widget class="QRadioButton" name="rbWeighting4">
+              <property name="toolTip">
+               <string>Weight data as a percentage of intensity values.</string>
+              </property>
+              <property name="text">
+               <string>Use % |I Data|:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="txtWgtPercent">
+              <property name="toolTip">
+               <string>Percentage value for percentage-based weighting.</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="lblWgtFactor">
+              <property name="text">
+               <string>Weight factor:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="txtWgtFactor">
+              <property name="toolTip">
+               <string>Overall weighting factor to apply to the data.</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
@@ -929,65 +967,6 @@
       </layout>
      </widget>
     </widget>
-   </item>
-   <item row="1" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout_8">
-     <property name="sizeConstraint">
-      <enum>QLayout::SetDefaultConstraint</enum>
-     </property>
-     <item>
-      <widget class="QPushButton" name="quickFitButton">
-       <property name="text">
-        <string>Quick fit</string>
-       </property>
-       <property name="toolTip">
-        <string>Perform a quick fit using fixed iteration parameters.</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="fullFitButton">
-       <property name="text">
-        <string>Full fit</string>
-       </property>
-       <property name="toolTip">
-        <string>Perform a full fit with all parameters optimized.</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeType">
-        <enum>QSizePolicy::Expanding</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>200</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QPushButton" name="helpButton">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>Help</string>
-       </property>
-       <property name="toolTip">
-        <string>Open the Size Distribution perspective help documentation.</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
    </item>
   </layout>
  </widget>
