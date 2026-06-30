@@ -14,5 +14,8 @@
 		<!-- Disable Executable Page Protection Entitlement -->
 		<key>com.apple.security.cs.disable-executable-page-protection</key>
 		<true/>
+        <!-- Allows read access to user-selected files/folders -->
+        <key>com.apple.security.files.user-selected.read-write</key>
+        <true/>
 	</dict>
 </plist>
