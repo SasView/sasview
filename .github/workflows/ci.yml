@@ -339,7 +339,7 @@ jobs:
 
   installer-matrix:
     needs: [matrix, build-sasview]
-    if: github.event_name != 'push' || github.ref_name == 'main'
+    if: github.event_name != 'push' || github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/')
 
     strategy:
       fail-fast: false

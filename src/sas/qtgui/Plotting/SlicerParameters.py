@@ -512,8 +512,17 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
             return
         # Get the current slicer name
         slicer_item = self.getCheckedSlicer()
-        # Remove the slicer from the dictionary
-        if slicer_item in self.parent.slicers:
+        self._removeSlicers([slicer_item])
+
+    def _removeSlicers(self, slicer_names):
+        """
+        Remove one or more slicers from the dialog and the parent plot.
+        """
+        removed_any = False
+        for slicer_item in slicer_names:
+            if slicer_item not in self.parent.slicers:
+                continue
+
             slicer_obj = self.parent.slicers[slicer_item]
             # Clear only this slicer's markers without affecting other slicers
             # Use clear_markers() which uses connect.clear(*markers) instead of clearall()
@@ -523,21 +532,27 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
             # Remove from slicer_models cache
             if slicer_item in self.slicer_models:
                 del self.slicer_models[slicer_item]
-            # update the canvas
-            self.parent.canvas.draw()
-            # update the slicer list
-            self.updateSlicersList()
-            # Select the next remaining slicer if any exist
-            if len(self.parent.slicers) > 0:
-                # Get the first remaining slicer
-                next_slicer_name = next(iter(self.parent.slicers.keys()))
-                # Update self.parent.slicer to point to the remaining slicer
-                self.parent.slicer = self.parent.slicers[next_slicer_name]
-                self.checkSlicerByName(next_slicer_name)
-            else:
-                # No slicers left, clear the model and slicer reference
-                self.parent.slicer = None
-                self.setModel(None)
+            removed_any = True
+
+        if not removed_any:
+            return
+
+        # Update the canvas
+        self.parent.canvas.draw()
+        # Update the slicers list
+        self.updateSlicersList()
+
+        # Select the next remaining slicer if any exist
+        if len(self.parent.slicers) > 0:
+            # Get the first remaining slicer
+            next_slicer_name = next(iter(self.parent.slicers.keys()))
+            # Update self.parent.slicer to point to the remaining slicer
+            self.parent.slicer = self.parent.slicers[next_slicer_name]
+            self.checkSlicerByName(next_slicer_name)
+        else:
+            # No slicers left, clear the model and slicer reference
+            self.parent.slicer = None
+            self.setModel(None)
 
     def deleteAllSlicerPlots(self, quiet=False):
         """

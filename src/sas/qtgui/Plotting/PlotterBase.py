@@ -18,16 +18,22 @@ from sas.qtgui.Plotting.WindowTitle import WindowTitle
 DEFAULT_CMAP = mpl.cm.jet
 
 class CustomToolbar(NavigationToolbar):
+    """
+    Adding custom Actions to the NavigationToolbar, which are visible in 1D/2D plots.
+    
+    Currently added actions:
+    - "Send to Data Explorer":
+    :param canvas: Matplotlib canvas
+    :param parent: Parent Qt widget
+    :emit: <class 'str'> name of 1D/2D plot 
+
+    """
     def __init__(self, canvas, parent=None):
         super().__init__(canvas, parent)
         self.parent = parent
-        self.add_custom_button()
+        self.addAction_SendToExplorer()
 
-    def add_custom_button(self):
-        # I have been told that a Button is better
-        # But all NavigationToolbar interactions are Actions
-        # This way all can be called with:
-        #   self._actions['xxx']
+    def addAction_SendToExplorer(self):
         custom_icon = QtGui.QIcon()  # You can load an icon here if you want e.g., QtGui.QIcon("path/to/icon.png")
         custom_action = QtGui.QAction(custom_icon, "Send to Data Explorer", self)
         custom_action.setToolTip("Send all data to the Data Explorer")
@@ -349,6 +355,15 @@ class PlotterBase(QtWidgets.QWidget):
         """
         Overwrite the close event adding helper notification
         """
+        data_list = self.data if isinstance(self.data, list) else [self.data]
+
+        # Clear the associated slicers, if any
+        for data in data_list:
+            if callable(slicer_owner := getattr(data, "slicerOwner", None)):
+                if owner := slicer_owner():
+                    owner.removeSlicersForPlotWindow(self)
+                    break
+
         self.clearQRangeSliders()
         # Please remove me from your database.
         PlotHelper.deletePlot(PlotHelper.idOfPlot(self))

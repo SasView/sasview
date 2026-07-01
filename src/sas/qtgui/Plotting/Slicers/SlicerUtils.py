@@ -66,7 +66,7 @@ class StackableMixin:
         """
         Ensure data is returned as a list.
         Returns an empty list if data is None, a single-item list if data is a single item
-        
+
         :param data: Data which may be None, a single item, or a list
         :return: List of data items
         """
@@ -172,6 +172,7 @@ class StackableMixin:
         :return: The actual ID assigned to the plot
         """
         new_plot.custom_color = self.color
+        new_plot.setSlicerOwner(self.base)
 
         # Add to model
         GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
@@ -197,6 +198,7 @@ class StackableMixin:
         :param item: The data explorer item
         """
         # Add to model
+        new_plot.setSlicerOwner(self.base)
         GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
 
         # Signal to create plot
