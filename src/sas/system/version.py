@@ -3,7 +3,7 @@ from packaging.version import Version
 try:
     from ._version import __version__
 except ImportError:
-    __version__ = "6.1.3"
+    __version__ = "6.2.0b1"
 
 __release_date__ = "2026"
 __version_parsed__ = Version(__version__)
