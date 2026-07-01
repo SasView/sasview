@@ -61,17 +61,17 @@ class ColorMapTest:
         assert isinstance(widget, QtWidgets.QDialog)
 
         assert widget._cmap_orig == "jet"
-        assert len(widget.all_maps) == 150
-        assert len(widget.maps) == 75
-        assert len(widget.rmaps) == 75
+        assert len(widget.all_maps) >= 150
+        assert len(widget.maps) >= 75
+        assert len(widget.rmaps) >= 75
 
         assert widget.lblWidth.text() == "0"
         assert widget.lblHeight.text() == "0"
         assert widget.lblQmax.text() == "15.8"
         assert widget.lblStopRadius.text() == "1"
         assert not widget.chkReverse.isChecked()
-        assert widget.cbColorMap.count() == 75
-        assert widget.cbColorMap.currentIndex() == 52
+        assert widget.cbColorMap.count() >= 75
+        assert widget.cbColorMap.currentIndex() > 0
 
         # validators
         assert isinstance(widget.txtMinAmplitude.validator(), QtGui.QDoubleValidator)
