@@ -375,6 +375,32 @@ class Plotter2DWidget(PlotterBase):
         # If we are not stacking or the final slicer plot is not active, generate a new one
         self.num_slicer_plots[slicer_type] += 1
 
+    def _slicerUsesPlotWindow(self, slicer, plot_window):
+        """
+        Return True if slicer, or any nested slicer it owns, is associated
+        with plot_window.
+        """
+        stack = [slicer]
+        seen = set()
+
+        while stack:
+            current = stack.pop()
+            if id(current) in seen:
+                continue
+            seen.add(id(current))
+
+            if getattr(current, "_plot_window", None) is plot_window:
+                return True
+
+            children = getattr(current, "slicers", None)
+            if children:
+                if isinstance(children, dict):
+                    stack.extend(children.values())
+                else:
+                    stack.extend(children)
+
+        return False
+
     def removeSlicersForPlotWindow(self, plot_window):
         """
         Remove any slicers associated with a closed slicer plot window.
@@ -382,7 +408,7 @@ class Plotter2DWidget(PlotterBase):
         # Identify slicers associated with the closed plot window
         removed_slicers = [
             name for name, slicer in self.slicers.items()
-            if getattr(slicer, '_plot_window', None) is plot_window
+            if self._slicerUsesPlotWindow(slicer, plot_window)
         ]
 
         if not removed_slicers:
@@ -415,7 +441,6 @@ class Plotter2DWidget(PlotterBase):
                 for slicer_name, slicer_obj in self.slicers.items():
                     if slicer_obj is self.slicer:
                         slicer_widget.checkSlicerByName(slicer_name)
-                        print("Checked slicer")
                         break
                 if hasattr(self.slicer, 'model'):
                      slicer_widget.setModel(self.slicer.model())
