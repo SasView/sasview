@@ -149,7 +149,8 @@ class WedgeInteractor(BaseInteractor, SlicerModel, StackableMixin):
     def _get_slicer_type_id(self):
         """Return the slicer type identifier"""
         return (
-            f"Wedge{self.averager.__name__}" + self.data.name if self.averager is not None else "Wedge" + self.data.name
+            f"Wedge{self.averager.__name__}{self.data.name}Plot{str(self.base.num_slicer_plots["Wedge"])}" if self.averager is not None else
+            f"Wedge{self.data.name}Plot{str(self.base.num_slicer_plots["Wedge"])}"
         )
 
     def _post_data(self, new_sector=None, nbins=None):
@@ -228,7 +229,8 @@ class WedgeInteractor(BaseInteractor, SlicerModel, StackableMixin):
 
         # Assign unique id per slicer instance and use it as the display name
         if self._plot_id is None:
-            base_id = "Wedge" + self.averager.__name__ + self.data.name
+            self.base.incrementNumSlicerPlots("Wedge")
+            base_id = f"Wedge{self.averager.__name__}{self.data.name}Plot{str(self.base.num_slicer_plots["Wedge"])}"
             self._plot_id = generate_unique_plot_id(base_id, self._item)
 
         new_plot.id = self._plot_id
@@ -372,7 +374,6 @@ class WedgeInteractorQ(WedgeInteractor):
     def __init__(self, base, axes, item=None, color="black", zorder=3):
         WedgeInteractor.__init__(self, base, axes, item=item, color=color)
         self.base = base
-        super()._post_data()
 
     def _post_data(self, new_sector=None, nbins=None):
         from sasdata.data_util.manipulations import SectorQ
@@ -390,7 +391,6 @@ class WedgeInteractorPhi(WedgeInteractor):
     def __init__(self, base, axes, item=None, color="black", zorder=3):
         WedgeInteractor.__init__(self, base, axes, item=item, color=color)
         self.base = base
-        super()._post_data()
 
     def _post_data(self, new_sector=None, nbins=None):
         from sasdata.data_util.manipulations import SectorPhi
