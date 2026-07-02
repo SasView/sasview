@@ -1411,21 +1411,21 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         assert type(data).__name__ in ['Data1D', 'Data2D']
 
         ids_keys = list(self.active_plots.keys())
-        #ids_vals = [val.data.name for val in self.active_plots.values()]
 
+        # We test for wheter the data_id starts with any of the plot_ids
+        # to account for additional slicers with an "_#" label
         data_id = data.name
-        if data_id in ids_keys:
+        plot_ids = [id for id in ids_keys if data_id.startswith(id)]
+
+        # if exactly one plot matches, update that plot
+        if len(plot_ids) == 1:
+            plot_id = plot_ids[0]
             # We have data, let's replace data that needs replacing
             if data.plot_role != DataRole.ROLE_DATA:
-                self.active_plots[data_id].replacePlot(data_id, data)
+                self.active_plots[plot_id].replacePlot(data_id, data)
                 # restore minimized window, if applicable
-                self.active_plots[data_id].showNormal()
+                self.active_plots[plot_id].showNormal()
             return True
-        #elif data_id in ids_vals:
-        #    if data.plot_role != DataRole.ROLE_DATA:
-        #        list(self.active_plots.values())[ids_vals.index(data_id)].replacePlot(data_id, data)
-        #        self.active_plots[data_id].showNormal()
-        #    return True
         return False
 
     def chooseFiles(self):

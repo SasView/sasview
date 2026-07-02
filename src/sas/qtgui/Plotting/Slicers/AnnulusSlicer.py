@@ -60,7 +60,7 @@ class AnnulusInteractor(BaseInteractor, SlicerModel, StackableMixin):
 
     def _get_slicer_type_id(self):
         """Return the slicer type identifier"""
-        return "AnnulusPhi" + self.data.name
+        return f"AnnulusPhi{self.data.name}Plot{str(self.base.num_slicer_plots["Annulus"])}"
 
     def set_layer(self, n):
         """
@@ -142,7 +142,8 @@ class AnnulusInteractor(BaseInteractor, SlicerModel, StackableMixin):
 
         # Assign unique id per slicer instance and use it as the display name
         if self._plot_id is None:
-            base_id = "AnnulusPhi" + self.data.name
+            self.base.incrementNumSlicerPlots("Annulus")
+            base_id = f"AnnulusPhi{self.data.name}Plot{str(self.base.num_slicer_plots["Annulus"])}"
             self._plot_id = generate_unique_plot_id(base_id, self._item)
 
         new_plot.id = self._plot_id
