@@ -85,20 +85,6 @@ class PlotterWidget(PlotterBase):
         else:
             self._data.append(value)
 
-        if value._xunit:
-            self.xLabel = "%s(%s)"%(value._xaxis, value._xunit)
-        else:
-            self.xLabel = "%s"%(value._xaxis)
-        if value._yunit:
-            self.yLabel = "%s(%s)"%(value._yaxis, value._yunit)
-        else:
-            self.yLabel = "%s"%(value._yaxis)
-
-        if value.scale == 'linear' or value.isSesans:
-            self.xscale = 'linear'
-            self.yscale = 'linear'
-        self.title(title=value.name)
-
     def plot(self, data=None, color=None, marker=None, hide_error=False, transform=True):
         """
         Add a new plot of self._data to the chart.
