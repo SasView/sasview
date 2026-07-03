@@ -14,7 +14,7 @@ from scipy import integrate, optimize, stats
 
 from sasdata.dataloader.data_info import Data1D
 from sasmodels.core import load_model
-from sasmodels.direct_model import DirectModel
+from sasmodels.direct_model import call_Fq
 
 from sas.sascalc.size_distribution.maxEnt_method import maxEntMethod
 
@@ -114,6 +114,7 @@ def background_fit(
         # Fit only scale
         def fit_func(x: npt.ArrayLike, b: float) -> npt.ArrayLike:
             return line_func(x, b, power)
+
         init_guess = linearized_data.y[0]
 
     else:
@@ -136,16 +137,6 @@ def background_fit(
     param_result[0] = np.exp(param_result[0])
 
     return param_result, param_err
-
-
-def ellipse_volume(rp: float, re: float) -> float:
-    """
-    Calculate the volume of an ellipsoid given the polar and equatorial radii.
-    :param rp: polar radius
-    :param re: equatorial radius
-    :return: volume of the ellipsoid
-    """
-    return (4.0 * np.pi / 3.0) * rp * re**2
 
 
 class sizeDistribution:
@@ -177,6 +168,7 @@ class sizeDistribution:
         self._resolution: float | None = None
 
         self.model_matrix: np.ndarray | None = None
+        self.volumes: np.ndarray | None = None
 
         # Advanced parameters for MaxEnt
         self._iterMax: int = 5000
@@ -188,7 +180,6 @@ class sizeDistribution:
 
         self._bin_edges: np.ndarray = np.array([])
         self._binDiff: np.ndarray = np.array([])
-        self._volumes: np.ndarray | None = None
 
         # Return Values after the MaxEnt fit
         self.BinMagnitude_maxEnt: np.ndarray = np.array([], dtype=float)
@@ -483,8 +474,6 @@ class sizeDistribution:
         :param moddata: Data1D object that has the data trimmed depending on background
             subtraction or power law subtracted from the data. Also self.qMin and self.qMax.
         """
-        model = load_model(self.model)
-
         pars = {
             "sld": self.contrast,
             "sld_solvent": 0.0,
@@ -492,28 +481,38 @@ class sizeDistribution:
             "scale": 1.0,
         }
 
-        kernel = DirectModel(moddata, model)
-
         intensities = []
+        volumes = []
+
+        # Build a single Kernel to compute both intensity and volume per bin
+        model_obj = load_model(self.model)
+        calculator = model_obj.make_kernel((moddata.x,))
+
         for bin in self.bins:
-            pars["radius_equatorial"] = bin
-            pars["radius_polar"] = bin * self.aspectRatio
-            intensities.append(kernel(**pars))
+            p = pars.copy()
+            p["radius_equatorial"] = bin
+            p["radius_polar"] = bin * self.aspectRatio
+
+            _, Fsq, _, volume, volume_ratio = call_Fq(calculator, p)
+
+            # Compute intensity using kernel convention: combined_scale = scale / shell_volume
+            scale_val = p.get("scale", 1.0)
+            background_val = p.get("background", 0.0)
+            combined_scale = scale_val / volume
+
+            intensity = combined_scale * Fsq + background_val
+            intensities.append(intensity)
+            volumes.append(volume)
 
         self.model_matrix = np.vstack(intensities).T
+        self.volumes = np.array(volumes)
 
     def calc_volume_weighted_dist(self, binmag: np.ndarray) -> None:
         """
         This is not used right now.
         Calculate the volume weighted distribution.
         """
-        if self.logbin:
-            radbins = np.logspace(np.log10(self.diamMin), np.log10(self.diamMax), self.nbins + 1, True) * 0.5
-
-        else:
-            radbins = np.linspace(self.diamMin, self.diamMax, self.nbins + 1, True) * 0.5
-
-        self.volume_bins = ellipse_volume(self.aspectRatio * radbins, radbins)
+        self.volume_bins = self.volumes
         self.vbin_diff = np.diff(self.volume_bins)
         self.volume_bins = self.volume_bins[:-1] + self.vbin_diff * 0.5
         self.volume_fraction = binmag * self.volume_bins / (2.0 * self.vbin_diff)
@@ -669,12 +668,12 @@ class sizeDistribution:
         """
         Calculate statistics from the MaxEnt results, including volume fraction cumulative distribution function (CDF),
         number distribution, and related statistics such as mean, median, and mode.
-        
+
         :param bin_mag: list of bin magnitudes from the MaxEnt fits
         """
         bin_mag = np.asarray(bin_mag)
         maxent_cdf_array = integrate.cumulative_trapezoid(bin_mag / (2.0 * self._binDiff), 2.0 * self.bins, axis=1)
-        self.BinMag_numberDist = self.BinMagnitude_maxEnt / ellipse_volume(self.aspectRatio * self.bins, self.bins)
+        self.BinMag_numberDist = self.BinMagnitude_maxEnt / self.volumes
 
         rvdist = stats.rv_histogram(
             (self.BinMagnitude_maxEnt, self._bin_edges * 2.0), density=True
