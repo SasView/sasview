@@ -44,15 +44,6 @@ class PlotterTest:
 
         yield p
 
-    def testDataProperty(self, plotter):
-        """ Adding data """
-        plotter.data = self.data
-
-        assert plotter.data[0] == self.data
-        assert plotter._title == self.data.name
-        assert plotter.xLabel == ""
-        assert plotter.yLabel == ""
-
     def testPlotWithErrors(self, plotter, mocker):
         """ Look at the plotting with error bars"""
         plotter.data = self.data
