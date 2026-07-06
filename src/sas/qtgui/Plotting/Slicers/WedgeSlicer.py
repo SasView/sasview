@@ -219,10 +219,11 @@ class WedgeInteractor(BaseInteractor, SlicerModel, StackableMixin):
         new_plot.detector = self.data.detector
         # If the data file does not tell us what the axes are, just assume...
         if self.averager.__name__ == "SectorPhi":
-            # angular plots usually require a linear x scale and better with
-            # a linear y scale as well.
+            # Angular slice x values can be negative, so these must be linear.
             new_plot.xaxis(r"\rm{\phi}", "degrees")
             new_plot.plot_role = DataRole.ROLE_ANGULAR_SLICE
+            new_plot.xtransform = "x"
+            new_plot.ytransform = "y"
         else:
             new_plot.xaxis(r"\rm{Q}", "A^{-1}")
         new_plot.yaxis(r"\rm{Intensity} ", "cm^{-1}")
