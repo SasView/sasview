@@ -232,6 +232,12 @@ class StackableMixin:
         # Preserve color
         new_plot.custom_color = self.color
 
+        # Set slicer owner
+        new_plot.setSlicerOwner(self.base)
+
+        # Replace plot data
+        self._plot_window.replacePlot(new_plot.id, new_plot)
+
         # Update model
         GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.name)
 
