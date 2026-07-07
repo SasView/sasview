@@ -22,7 +22,7 @@ class CustomToolbar(NavigationToolbar):
     Adding custom Actions to the NavigationToolbar, which are visible in 1D/2D plots.
     
     Currently added actions:
-    - "Send to Data Explorer":
+    - "Freeze Datasets":
     :param canvas: Matplotlib canvas
     :param parent: Parent Qt widget
     :emit: <class 'str'> name of 1D/2D plot 
@@ -31,18 +31,15 @@ class CustomToolbar(NavigationToolbar):
     def __init__(self, canvas, parent=None):
         super().__init__(canvas, parent)
         self.parent = parent
-        self.addAction_SendToExplorer()
-
-    def addAction_SendToExplorer(self):
         custom_icon = QtGui.QIcon()  # You can load an icon here if you want e.g., QtGui.QIcon("path/to/icon.png")
-        custom_action = QtGui.QAction(custom_icon, "Send to Data Explorer", self)
-        custom_action.setToolTip("Send all data to the Data Explorer")
-        custom_action.triggered.connect(self.sendToDataExplorer)
+        custom_action = QtGui.QAction(custom_icon, "Freeze Datasets", self)
+        custom_action.setToolTip("Send all datasets to the Data Explorer")
+        custom_action.triggered.connect(self.freezeDatasets)
         self.insertAction(self.actions()[-1], custom_action)
 
-    def sendToDataExplorer(self):
-        for item in self.parent.data:
-            GuiUtils.communicator.freezeDataNameSignal.emit(item.name)
+    def freezeDatasets(self):
+        for dataset in self.parent.data:
+            GuiUtils.communicator.freezeDataNameSignal.emit(dataset.name)
 
 class PlotterBase(QtWidgets.QWidget):
     #TODO: Describe what this class is

@@ -5,6 +5,7 @@ import logging
 import os
 import sys
 import time
+from contextlib import suppress
 from pathlib import Path
 
 from PySide6 import QtCore, QtGui, QtWidgets
@@ -845,8 +846,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
     def freezeFromName(self, search_name: str = None):
         """
-        Convert target_plot-data into a separate dataset (CustomNavigation-Button: "sendToDataExplorer").
-        It searches the target_plot-data in the model and creates a new dataset in the Explorer. 
+        Convert target_plot-data into a separate dataset (CustomNavigation-Button: "freezeDatasets").
+        It searches the target_plot-data in the model and creates a new dataset in the Data Explorer. 
 
         :param search_name: <class 'str'>
         """
@@ -931,7 +932,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         Convert checked results (fitted model, residuals) into separate dataset.
         """
         outer_index = -1
-        theories_copied = 0
+        items_copied = 0
         orig_model_size = self.model.rowCount()
         while outer_index < orig_model_size:
             outer_index += 1
@@ -952,20 +953,20 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 if inner_item.checkState() != QtCore.Qt.Checked:
                     continue
                 self.model.beginResetModel()
-                theories_copied += 1
+                items_copied += 1
                 new_item = self.cloneTheory(inner_item)
                 self.model.appendRow(new_item)
                 self.model.endResetModel()
 
         freeze_msg = ""
-        if theories_copied == 0:
+        if items_copied == 0:
             return
-        elif theories_copied == 1:
-            freeze_msg = "1 theory copied to a separate data set"
-        elif theories_copied > 1:
-            freeze_msg = "%i theories copied to separate data sets" % theories_copied
+        elif items_copied == 1:
+            freeze_msg = "1 item copied to a separate data set"
+        elif items_copied > 1:
+            freeze_msg = f"{items_copied} items copied to separate data sets"
         else:
-            freeze_msg = "Unexpected number of theories copied: %i" % theories_copied
+            freeze_msg = f"Unexpected number of items copied: {items_copied}"
             raise AttributeError(freeze_msg)
         self.communicator.statusBarUpdateSignal.emit(freeze_msg)
 
@@ -998,9 +999,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         elif theories_copied == 1:
             freeze_msg = "1 theory copied from the Theory tab as a data set"
         elif theories_copied > 1:
-            freeze_msg = "%i theories copied from the Theory tab as data sets" % theories_copied
+            freeze_msg = f"{theories_copied} theories copied from the Theory tab as data sets"
         else:
-            freeze_msg = "Unexpected number of theories copied: %i" % theories_copied
+            freeze_msg = f"Unexpected number of theories copied: {theories_copied}"
             raise AttributeError(freeze_msg)
         self.communicator.statusBarUpdateSignal.emit(freeze_msg)
         # Actively switch tabs
@@ -1025,13 +1026,18 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         new_name = new_item.text() + '_@' + time_bit
         new_item.setText(new_name)
         # Change the underlying data so it is no longer a theory
-        try:
+        with suppress(AttributeError):
             new_item.child(0).data().is_data = True
             new_item.child(0).data().symbol = 'Circle'
             new_item.child(0).data().id = new_name
-        except AttributeError:
-            # no data here, pass
-            pass
+            new_item.child(0).data().name = f"Frozen{orig_data.name}"
+            new_item.child(0).data().title = f"Frozen{orig_data.title}"
+        # Ensure data from slicer plots will not be identified as
+        # a slicer plot when replotted
+        with suppress(AttributeError):
+            delattr(new_item.child(0).data(), "type_id")
+            delattr(new_item.child(0).data(), "custom_color")
+
         return new_item
 
     def recursivelyCloneItem(self, item):
@@ -1411,21 +1417,21 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         assert type(data).__name__ in ['Data1D', 'Data2D']
 
         ids_keys = list(self.active_plots.keys())
-        #ids_vals = [val.data.name for val in self.active_plots.values()]
 
+        # We test for whether the data_id starts with any of the plot_ids
+        # to account for additional slicers with an "_#" label
         data_id = data.name
-        if data_id in ids_keys:
+        plot_ids = [id for id in ids_keys if data_id.startswith(id)]
+
+        # if exactly one plot matches, update that plot
+        if len(plot_ids) == 1:
+            plot_id = plot_ids[0]
             # We have data, let's replace data that needs replacing
             if data.plot_role != DataRole.ROLE_DATA:
-                self.active_plots[data_id].replacePlot(data_id, data)
+                self.active_plots[plot_id].replacePlot(data_id, data)
                 # restore minimized window, if applicable
-                self.active_plots[data_id].showNormal()
+                self.active_plots[plot_id].showNormal()
             return True
-        #elif data_id in ids_vals:
-        #    if data.plot_role != DataRole.ROLE_DATA:
-        #        list(self.active_plots.values())[ids_vals.index(data_id)].replacePlot(data_id, data)
-        #        self.active_plots[data_id].showNormal()
-        #    return True
         return False
 
     def chooseFiles(self):

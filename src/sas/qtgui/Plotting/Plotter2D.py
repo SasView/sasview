@@ -68,6 +68,12 @@ class Plotter2DWidget(PlotterBase):
         self.slicer_widget = None
         self.stackplots = config.STACK_PLOTS  # whether to stack multiple slicer plots
         self.slicer_plots_dict = {}  # keep track of slicer plots
+        self.num_slicer_plots = {
+            "Annulus": 0,
+            "Box": 0,
+            "Sector": 0,
+            "Wedge": 0
+        }
         self.vmin = None
         self.vmax = None
         self.im = None
@@ -354,6 +360,47 @@ class Plotter2DWidget(PlotterBase):
                     break
         return slicer_plots
 
+    def incrementNumSlicerPlots(self, slicer_type: str):
+        """Add a new slicer plot to the appropriate index if one is being generated."""
+        if self.stackplots:
+            # Check whether the most recent plot of this slicer is active for stacking,
+            # otherwise generate a new plot
+            slicer_plots = self.getActiveSlicerPlots()
+            current_plot_string = f"Plot{self.num_slicer_plots[slicer_type]}"
+            for plot_id in slicer_plots:
+                if plot_id.startswith(slicer_type) and current_plot_string in plot_id:
+                    # We can stack the current plot on the existing one, so return
+                    return
+
+        # If we are not stacking or the final slicer plot is not active, generate a new one
+        self.num_slicer_plots[slicer_type] += 1
+
+    def _slicerUsesPlotWindow(self, slicer, plot_window):
+        """
+        Return True if slicer, or any nested slicer it owns, is associated
+        with plot_window.
+        """
+        stack = [slicer]
+        seen = set()
+
+        while stack:
+            current = stack.pop()
+            if id(current) in seen:
+                continue
+            seen.add(id(current))
+
+            if getattr(current, "_plot_window", None) is plot_window:
+                return True
+
+            children = getattr(current, "slicers", None)
+            if children:
+                if isinstance(children, dict):
+                    stack.extend(children.values())
+                else:
+                    stack.extend(children)
+
+        return False
+
     def removeSlicersForPlotWindow(self, plot_window):
         """
         Remove any slicers associated with a closed slicer plot window.
@@ -361,7 +408,7 @@ class Plotter2DWidget(PlotterBase):
         # Identify slicers associated with the closed plot window
         removed_slicers = [
             name for name, slicer in self.slicers.items()
-            if getattr(slicer, '_plot_window', None) is plot_window
+            if self._slicerUsesPlotWindow(slicer, plot_window)
         ]
 
         if not removed_slicers:
@@ -394,7 +441,6 @@ class Plotter2DWidget(PlotterBase):
                 for slicer_name, slicer_obj in self.slicers.items():
                     if slicer_obj is self.slicer:
                         slicer_widget.checkSlicerByName(slicer_name)
-                        print("Checked slicer")
                         break
                 if hasattr(self.slicer, 'model'):
                      slicer_widget.setModel(self.slicer.model())
