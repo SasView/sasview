@@ -15,6 +15,7 @@ datas = []
 datas.append((os.path.join(PYTHON_PACKAGES, 'debugpy'), 'debugpy'))
 datas.append((os.path.join(PYTHON_PACKAGES, 'jedi'), 'jedi'))
 datas.append((os.path.join(PYTHON_PACKAGES, 'zmq'), 'zmq'))
+datas.append(('../src/sas/example_data', './example_data'))
 
 # clobber the minimal file with the full one for the installer bundle
 datas.append(('credits.html', 'sas/system/'))
