@@ -15,6 +15,12 @@ default_view = "icon-view"
 include_icon_view_settings = True
 icon_size = 128
 icon_locations = {
-    app_name: (150, 220),
-    "Applications": (450, 220),
+    app_name: (
+        int(defines.get("app_icon_x", 175)),  # noqa: F821
+        int(defines.get("app_icon_y", 180)),  # noqa: F821
+    ),
+    "Applications": (
+        int(defines.get("applications_icon_x", 425)),  # noqa: F821
+        int(defines.get("applications_icon_y", 180)),  # noqa: F821
+    ),
 }

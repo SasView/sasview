@@ -11,6 +11,14 @@ DMG_NAME="${1:-SasView6.dmg}"
 BACKGROUND="${SCRIPT_DIR}/dmg_background.png"
 VOLUME_NAME="SasView6"
 
+# Icon positions in dmgbuild points (bottom-left origin). The 1200x800
+# background is shown in a 600x400 window, with the arrow centered at
+# roughly (305, 180); place icons on either side at the same height.
+APP_ICON_X=175
+APP_ICON_Y=180
+APPLICATIONS_ICON_X=425
+APPLICATIONS_ICON_Y=180
+
 if [[ "$(uname -s)" != "Darwin" ]]; then
     echo "create_dmg.sh must be run on macOS." >&2
     exit 1
@@ -41,6 +49,10 @@ dmgbuild -s "${SCRIPT_DIR}/dmg_settings.py" \
     -D "staging_dir=${STAGING_DIR}" \
     -D "app_name=${APP_NAME}" \
     -D "background=${BACKGROUND}" \
+    -D "app_icon_x=${APP_ICON_X}" \
+    -D "app_icon_y=${APP_ICON_Y}" \
+    -D "applications_icon_x=${APPLICATIONS_ICON_X}" \
+    -D "applications_icon_y=${APPLICATIONS_ICON_Y}" \
     "${VOLUME_NAME}" \
     "${DIST_DIR}/${DMG_NAME}"
 
