@@ -9,18 +9,16 @@ files = [os.path.join(staging_dir, app_name)]
 symlinks = {"Applications": "/Applications"}
 hide_extensions = [app_name]
 
-background = defines["background"]  # noqa: F821
+# Built-in drag-to-Applications background (no custom PNG assets).
+background = "builtin-arrow"
+
 window_rect = ((200, 120), (600, 400))
 default_view = "icon-view"
 include_icon_view_settings = True
 icon_size = 128
+
+# Positions matched to builtin-arrow for a 600x400 window.
 icon_locations = {
-    app_name: (
-        int(defines.get("app_icon_x", 175)),  # noqa: F821
-        int(defines.get("app_icon_y", 180)),  # noqa: F821
-    ),
-    "Applications": (
-        int(defines.get("applications_icon_x", 425)),  # noqa: F821
-        int(defines.get("applications_icon_y", 180)),  # noqa: F821
-    ),
+    app_name: (180, 170),
+    "Applications": (430, 170),
 }
