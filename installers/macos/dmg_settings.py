@@ -12,13 +12,13 @@ hide_extensions = [app_name]
 # Built-in drag-to-Applications background (no custom PNG assets).
 background = "builtin-arrow"
 
-window_rect = ((200, 120), (600, 400))
+window_rect = ((200, 120), (640, 280))
 default_view = "icon-view"
 include_icon_view_settings = True
 icon_size = 128
 
-# Positions matched to builtin-arrow for a 600x400 window.
+# Positions from the dmgbuild builtin-arrow example (640x280 window).
 icon_locations = {
-    app_name: (180, 170),
-    "Applications": (430, 170),
+    app_name: (140, 120),
+    "Applications": (500, 120),
 }
