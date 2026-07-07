@@ -9,7 +9,7 @@ STAGING_DIR="${DIST_DIR}/dmg-staging"
 APP_NAME="SasView6.app"
 DMG_NAME="${1:-SasView6.dmg}"
 BACKGROUND="${SCRIPT_DIR}/dmg_background.png"
-VOLUME_NAME="Install SasView"
+VOLUME_NAME="SasView6"
 
 if [[ "$(uname -s)" != "Darwin" ]]; then
     echo "create_dmg.sh must be run on macOS." >&2
