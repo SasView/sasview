@@ -11,9 +11,9 @@ DMG_NAME="${1:-SasView6.dmg}"
 BACKGROUND="${SCRIPT_DIR}/dmg_background.png"
 VOLUME_NAME="SasView6"
 
-# Icon positions in dmgbuild points (bottom-left origin). The 1200x800
-# background is shown in a 600x400 window, with the arrow centered at
-# roughly (305, 180); place icons on either side at the same height.
+# Icon positions in dmgbuild points (bottom-left origin). Matched to the
+# 1200x800 background (2x for a 600x400 window) with a compact arrow at
+# roughly (300, 180) between the two icons.
 APP_ICON_X=175
 APP_ICON_Y=180
 APPLICATIONS_ICON_X=425
