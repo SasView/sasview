@@ -8,8 +8,9 @@ DIST_DIR="${REPO_ROOT}/installers/dist"
 STAGING_DIR="${DIST_DIR}/dmg-staging"
 APP_NAME="SasView6.app"
 DMG_NAME="${1:-SasView6.dmg}"
-BACKGROUND="${SCRIPT_DIR}/dmg_background.png"
 VOLUME_NAME="SasView6"
+BACKGROUND="${SCRIPT_DIR}/dmg_background.png"
+BACKGROUND_2X="${SCRIPT_DIR}/dmg_background@2x.png"
 
 if [[ "$(uname -s)" != "Darwin" ]]; then
     echo "create_dmg.sh must be run on macOS." >&2
@@ -26,6 +27,11 @@ if [[ ! -f "${BACKGROUND}" ]]; then
     exit 1
 fi
 
+if [[ ! -f "${BACKGROUND_2X}" ]]; then
+    echo "Missing ${BACKGROUND_2X} (HiDPI companion for dmg_background.png)." >&2
+    exit 1
+fi
+
 if ! command -v dmgbuild >/dev/null 2>&1; then
     echo "dmgbuild is required. Install with: pip install dmgbuild" >&2
     exit 1
@@ -37,10 +43,15 @@ cp -R "${DIST_DIR}/${APP_NAME}" "${STAGING_DIR}/"
 
 rm -f "${DIST_DIR}/${DMG_NAME}"
 
+# Eject any previously mounted copy so Finder does not reuse a cached layout.
+if mount | grep -q "/Volumes/${VOLUME_NAME}"; then
+    hdiutil detach "/Volumes/${VOLUME_NAME}" >/dev/null 2>&1 || true
+fi
+
 dmgbuild -s "${SCRIPT_DIR}/dmg_settings.py" \
+    -D "settings_dir=${SCRIPT_DIR}" \
     -D "staging_dir=${STAGING_DIR}" \
     -D "app_name=${APP_NAME}" \
-    -D "background=${BACKGROUND}" \
     "${VOLUME_NAME}" \
     "${DIST_DIR}/${DMG_NAME}"
 
