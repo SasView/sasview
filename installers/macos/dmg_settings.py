@@ -9,8 +9,8 @@ files = [os.path.join(staging_dir, app_name)]
 symlinks = {"Applications": "/Applications"}
 hide_extensions = [app_name]
 
-# Built-in drag-to-Applications background (no custom PNG assets).
-background = "builtin-arrow"
+# Static background with drag-and-drop instructions (640x280 + @2x).
+background = defines["background"]  # noqa: F821
 
 window_rect = ((200, 120), (640, 280))
 default_view = "icon-view"

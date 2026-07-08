@@ -8,6 +8,7 @@ DIST_DIR="${REPO_ROOT}/installers/dist"
 STAGING_DIR="${DIST_DIR}/dmg-staging"
 APP_NAME="SasView6.app"
 DMG_NAME="${1:-SasView6.dmg}"
+BACKGROUND="${SCRIPT_DIR}/dmg_background.png"
 VOLUME_NAME="SasView6"
 
 if [[ "$(uname -s)" != "Darwin" ]]; then
@@ -17,6 +18,11 @@ fi
 
 if [[ ! -d "${DIST_DIR}/${APP_NAME}" ]]; then
     echo "Expected ${DIST_DIR}/${APP_NAME} to exist. Build the app bundle first." >&2
+    exit 1
+fi
+
+if [[ ! -f "${BACKGROUND}" ]]; then
+    echo "Missing ${BACKGROUND}." >&2
     exit 1
 fi
 
@@ -34,6 +40,7 @@ rm -f "${DIST_DIR}/${DMG_NAME}"
 dmgbuild -s "${SCRIPT_DIR}/dmg_settings.py" \
     -D "staging_dir=${STAGING_DIR}" \
     -D "app_name=${APP_NAME}" \
+    -D "background=${BACKGROUND}" \
     "${VOLUME_NAME}" \
     "${DIST_DIR}/${DMG_NAME}"
 
