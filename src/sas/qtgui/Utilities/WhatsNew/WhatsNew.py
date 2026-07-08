@@ -166,17 +166,14 @@ class WhatsNewWidget(QDialog, Ui_WhatsNewUI):
         self.set_enable_disable_prev_next()
 
     def set_enable_disable_prev_next(self):
-        """ Set the appropriate enable state on the navigation buttons"""
+        """Set the appropriate enable state on the navigation buttons."""
 
-        if self.current_index == 0:
-            self.prevButton.setEnabled(False)
-        else:
-            self.prevButton.setEnabled(True)
+        self.prevButton.setEnabled(self.current_index > 0)
+        self.nextButton.setEnabled(self.current_index < self.max_index - 1)
 
-        if self.current_index >= self.max_index - 1:
-            self.nextButton.setEnabled(False)
-        else:
-            self.nextButton.setEnabled(True)
+        self.lblPage.setText(
+            f"{self.current_index + 1} / {self.max_index}"
+        )
 
     def show_file(self):
         """ Set the text of the window to the file with the current index"""
