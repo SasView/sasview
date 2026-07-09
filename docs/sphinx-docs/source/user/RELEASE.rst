@@ -30,7 +30,7 @@ New in Version 6.2.0
 
 This is a feature release, which comes with a number of new features, improvements, and bug fixes as listed below.
 
-This version of SasView is built with Sasmodels v1.2.0, Sasdata v0.12.0, and bumps v1.0.3.
+This version of SasView is built with Sasmodels v1.1.0, Sasdata v0.12.0, and Bumps v1.0.5.
 
 New Features
 ^^^^^^^^^^^^ 
@@ -137,6 +137,23 @@ Bug Fixes
 * Fix Dmax explorer plot turning into a scatter plot when resetting view by @jellybean2004 in https://github.com/SasView/sasview/pull/3894
 * Fix error propagation in power law by @jellybean2004 in https://github.com/SasView/sasview/pull/3898
 * Fix structure factor copy/paste handling by @krzywon in https://github.com/SasView/sasview/pull/3940
+* Don't include magnetism parameters in pure python models by @pkienzle in https://github.com/SasView/sasview/pull/3961
+* Change docpath handling to accept absolute-looking paths within the d… by @llimeht in https://github.com/SasView/sasview/pull/3992
+* Fix private names config for sphinx (for 6.2.0) by @llimeht in https://github.com/SasView/sasview/pull/3994
+* Resized images and changed to a light background for What's new by @jellybean2004
+* WhatsNew polyhedron image switched to light background by @sara-mokhtari in https://github.com/SasView/sasview/pull/4002
+* 3968: PD function shadowing [Release 6.2.0] by @krzywon in https://github.com/SasView/sasview/pull/4004
+* Refactors slicers to remove unnecessary "updatePlot" calls by @DrPaulSharp in https://github.com/SasView/sasview/pull/4006
+* Makes colormaptest robust against matplotlib changes by @llimeht in https://github.com/SasView/sasview/pull/4008
+* Adds code to replace plot data for modified slicers by @DrPaulSharp in https://github.com/SasView/sasview/pull/4014
+* Handles encoding issues in loading credits.html by @llimeht in https://github.com/SasView/sasview/pull/4015
+* Fixes bugs for cloned slicer plots by @DrPaulSharp in https://github.com/SasView/sasview/pull/4021
+* Fixes mask editor bug by @DrPaulSharp in https://github.com/SasView/sasview/pull/4024
+* Checks slicer children for removal by @jellybean2004 in https://github.com/SasView/sasview/pull/4025
+* Fixes symmetric wedge phi plots by @jellybean2004 in https://github.com/SasView/sasview/pull/4029
+* MacOS drag and drop installer by @wpotrzebowski in https://github.com/SasView/sasview/pull/4030
+* Adds example data from SasData repository by @dehoni in https://github.com/SasView/sasview/pull/4033
+
 
 Known Issues
 ^^^^^^^^^^^^
