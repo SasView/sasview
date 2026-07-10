@@ -14,6 +14,7 @@ Features
 ========
 
 Jump to:
+:ref:`release_6_2_0`
 :ref:`release_6_1_3` | :ref:`release_6_1_2` | :ref:`release_6_1_1` | :ref:`release_6_1_0`
  | :ref:`release_6_0_1` | :ref:`release_6_0_0`
  | :ref:`release_5_0_6` | :ref:`release_5_0_5` | :ref:`release_5_0_4` | :ref:`release_5_0_3` | :ref:`release_5_0_2`
@@ -22,6 +23,144 @@ Jump to:
  | :ref:`release_4_0_1` | :ref:`release_4_0_0`
  | :ref:`release_3_1_2` | :ref:`release_3_1_1` | :ref:`release_3_1_0` | :ref:`release_3_0_0`
  | :ref:`release_2_2_1` | :ref:`release_2_2_0`
+
+.. _release_6_2_0:
+New in Version 6.2.0
+--------------------
+
+This is a feature release, which comes with a number of new features, improvements, and bug fixes as listed below.
+
+This version of SasView is built with Sasmodels v1.1.0, Sasdata v0.12.0, and Bumps v1.0.5.
+
+New Features
+^^^^^^^^^^^^ 
+
+* Multiple slicers are now supported, including plot stacking and symmetric slicers by @jellybean2004 in https://github.com/SasView/sasview/pull/3758, https://github.com/SasView/sasview/pull/3806, https://github.com/SasView/sasview/pull/3832 and https://github.com/SasView/sasview/pull/3837
+* The Invariant perspective has been given a major facelift, with a more user-friendly navigation. It now supports the calculation of SLD contrast from volume fraction (reverse calculation) and uncertainties on input parameters by @jellybean2004 in https://github.com/SasView/sasview/pull/3789 and https://github.com/SasView/sasview/pull/3835
+* A new button is now available for any 1D plot to be sent to the Data Explorer for further analysis by @ChristianWoegerbauer in https://github.com/SasView/sasview/pull/3763
+* Support for SAXS fitting v2 has been added by @klytje in https://github.com/SasView/sasview/pull/3786
+
+Improvements
+^^^^^^^^^^^^
+
+* Improvements in Corfunc slider, UI and documentation by @jellybean2004 and @DrPaulSharp in https://github.com/SasView/sasview/pull/3587, https://github.com/SasView/sasview/pull/3850, https://github.com/SasView/sasview/pull/3851, https://github.com/SasView/sasview/pull/3908
+* Add Shape2SAS plugin models (not available to users) by @klytje in https://github.com/SasView/sasview/pull/3544
+* Set wedge slicer fold default to True by @jellybean2004 in https://github.com/SasView/sasview/pull/3601
+* Show correlation stats as a table by @rozyczko in https://github.com/SasView/sasview/pull/3754
+* Make data operation window resizable and update docs by @Cristian2299 in https://github.com/SasView/sasview/pull/3755
+* Implement Close Project functionality by @rozyczko in https://github.com/SasView/sasview/pull/3757
+* Make Return act as Tab in parameter tables by @rozyczko in https://github.com/SasView/sasview/pull/3760
+* Refactor and improve the fitting widget by @rozyczko in https://github.com/SasView/sasview/pull/3776
+* Change Guinier extrapolation to radius squared by @DrPaulSharp in https://github.com/SasView/sasview/pull/3841
+* Implement horizontal resize by @rozyczko in https://github.com/SasView/sasview/pull/3848
+* Add Help context menu item by @rozyczko in https://github.com/SasView/sasview/pull/3849
+* Remove hardcoded background colours and standardise UI by @jellybean2004 in https://github.com/SasView/sasview/pull/3862
+* Restore fold for sector slicers by @jellybean2004 in https://github.com/SasView/sasview/pull/3878
+* Add corrected intensities to Corfunc output by @jellybean2004 in https://github.com/SasView/sasview/pull/3907
+* Improve fitting reports by @krzywon in https://github.com/SasView/sasview/pull/3870
+* Normalise wedge slicer phi to (-180,180] by @jellybean2004 in https://github.com/SasView/sasview/pull/3928
+* Close slicer parameter window with 2D plot by @jellybean2004 in https://github.com/SasView/sasview/pull/3930
+* Adds dummy err_data to residual data for slicers to work by @jellybean2004 in https://github.com/SasView/sasview/pull/3931
+* Redraw Box Sum after parameters are updated by @jellybean2004 in https://github.com/SasView/sasview/pull/3946
+* Add tooltips to perspective UIs by @jellybean2004 in https://github.com/SasView/sasview/pull/3950
+
+Infrastructure
+^^^^^^^^^^^^^^
+
+* Dependabot: include all action updates in one PR by @krzywon in https://github.com/SasView/sasview/pull/3602
+* Reduce duplicate CI builds and improve workflows by @llimeht in https://github.com/SasView/sasview/pull/3642
+* Upgrade Python to 3.12 by @DrPaulSharp in https://github.com/SasView/sasview/pull/3649
+* Set Python 3.13 for the next release by @llimeht in https://github.com/SasView/sasview/pull/3652
+* Rework CI variables by @llimeht in https://github.com/SasView/sasview/pull/3653
+* Update installation documentation by @DrPaulSharp in https://github.com/SasView/sasview/pull/3657
+* Add Credits/Licences dialog with relevant licence and copyright data by @llimeht in https://github.com/SasView/sasview/pull/3680
+* Improve PR job handling by @llimeht in https://github.com/SasView/sasview/pull/3734
+* Remove requirement pins from release branches by @llimeht in https://github.com/SasView/sasview/pull/3743
+* Update install instructions, README, and add resources by @TLO218 in https://github.com/SasView/sasview/pull/3753
+* Add UI file for What's New window by @rozyczko in https://github.com/SasView/sasview/pull/3759
+* Enable building custom branches by @wpotrzebowski in https://github.com/SasView/sasview/pull/3769
+* Centralise release Python version definition by @llimeht in https://github.com/SasView/sasview/pull/3782
+* Add CLI argument for data path by @krzywon in https://github.com/SasView/sasview/pull/3814
+* Add Python 3.14 as a supported interpreter by @llimeht in https://github.com/SasView/sasview/pull/3822
+* Improve release tooling by @llimeht in https://github.com/SasView/sasview/pull/3823
+* Fix installer test job name display by @llimeht in https://github.com/SasView/sasview/pull/3840
+* Fix duplicated CI job runs on pull requests by @backmari in https://github.com/SasView/sasview/pull/3866
+* Release automation script rework and remove authors by @krzywon in https://github.com/SasView/sasview/pull/3872 and https://github.com/SasView/sasview/pull/3918
+* Remove `DISPLAY: 99` value from CI by @krzywon in https://github.com/SasView/sasview/pull/3893
+* Add builds to CI for pushes to main by @DrPaulSharp in https://github.com/SasView/sasview/pull/3917
+* Use the new official DigiCert action by @rozyczko in https://github.com/SasView/sasview/pull/3937
+* Fix invocation of `compile_licenses.py` by @llimeht in https://github.com/SasView/sasview/pull/3938
+* Remove `.coverage` file by @krzywon in https://github.com/SasView/sasview/pull/3942
+* Add MPL hooks by @krzywon in https://github.com/SasView/sasview/pull/3944
+* Temporarily pin and then unpin the pyausaxs version by @DrPaulSharp and @klytje in https://github.com/SasView/sasview/pull/3951 and https://github.com/SasView/sasview/pull/3953
+
+Code quality
+^^^^^^^^^^^^
+
+* Make ruff more verbose about what it does not like by @llimeht in https://github.com/SasView/sasview/pull/3666
+* Generalize Corfunc slider by @jellybean2004 in https://github.com/SasView/sasview/pull/3833
+* Implement SliderPerspective properly by @jellybean2004 in https://github.com/SasView/sasview/pull/3859
+* Clean up and reformat Invariant perspective by @jellybean2004 in https://github.com/SasView/sasview/pull/3861
+* Use `GuiUtil.communicator` wherever possible by @krzywon in https://github.com/SasView/sasview/pull/3863 and https://github.com/SasView/sasview/pull/3936
+* Reactivate GUI tests from the CI by @krzywon in https://github.com/SasView/sasview/pull/3867
+* Clean up inversion code by @jellybean2004 in https://github.com/SasView/sasview/pull/3881
+* Improve and add tests for Invariant Perspective UI and calculator by @jellybean2004 in https://github.com/SasView/sasview/pull/3888 and https://github.com/SasView/sasview/pull/3897
+* Fix GSC GUI unit test by @krzywon in https://github.com/SasView/sasview/pull/3906
+* Add offscreen mode to top-level `conftest.py` by @jellybean2004 in https://github.com/SasView/sasview/pull/3911
+* Remove print statements from sascalc tests by @krzywon in https://github.com/SasView/sasview/pull/3922
+* Clean up Size Distribution perspective UI files by @jellybean2004 in https://github.com/SasView/sasview/pull/3948
+
+Bug Fixes
+^^^^^^^^^
+
+* Fix nightly build issues by @DrPaulSharp in https://github.com/SasView/sasview/pull/3650 and https://github.com/SasView/sasview/pull/3651
+* Remove relative import in `main.py` by @DrPaulSharp in https://github.com/SasView/sasview/pull/3656
+* Fix startup bug by @DrPaulSharp in https://github.com/SasView/sasview/pull/3732
+* Fix stray references to `run.py` by @DrPaulSharp in https://github.com/SasView/sasview/pull/3733
+* Fix C++ conversion error in plotting by @jellybean2004 in https://github.com/SasView/sasview/pull/3745
+* Fix typo in the documentation for adding files via upload by @conanr-create in https://github.com/SasView/sasview/pull/3751
+* Exclude C&S fitting tabs from `tab_id` calculation by @rozyczko in https://github.com/SasView/sasview/pull/3756
+* Fix dispersity parameter naming for the multishell model by @dehoni in https://github.com/SasView/sasview/pull/3779
+* Fix name selection issue in the Data Operations Panel by @krzywon in https://github.com/SasView/sasview/pull/3810
+* Fix replace fit button handling after project load by @krzywon in https://github.com/SasView/sasview/pull/3816
+* Fix keypair alias after certificate update by @rozyczko in https://github.com/SasView/sasview/pull/3817
+* Restrict custom plot button to the Data Explorer by @DrPaulSharp in https://github.com/SasView/sasview/pull/3828
+* Remove uv lock file by @jellybean2004 in https://github.com/SasView/sasview/pull/3852
+* Fix handling of None in `kernel_module` by @rozyczko in https://github.com/SasView/sasview/pull/3845
+* Fix truthiness logic check by @rozyczko in https://github.com/SasView/sasview/pull/3846
+* Fix 2D polydispersity bug by @DrPaulSharp in https://github.com/SasView/sasview/pull/3855
+* Fix model reordering in constrained fitting by @rozyczko in https://github.com/SasView/sasview/pull/3857
+* Fix invariant graphs by @jellybean2004 in https://github.com/SasView/sasview/pull/3869
+* Fix optimizer loading after project load by @krzywon in https://github.com/SasView/sasview/pull/3871
+* Fix unique ID generation for multiple slicers by @jellybean2004 in https://github.com/SasView/sasview/pull/3879
+* Fix scaling bug in 1D plots by @DrPaulSharp in https://github.com/SasView/sasview/pull/3889
+* Fix Dmax explorer plot turning into a scatter plot when resetting view by @jellybean2004 in https://github.com/SasView/sasview/pull/3894
+* Fix error propagation in power law by @jellybean2004 in https://github.com/SasView/sasview/pull/3898
+* Fix structure factor copy/paste handling by @krzywon in https://github.com/SasView/sasview/pull/3940
+* Don't include magnetism parameters in pure python models by @pkienzle in https://github.com/SasView/sasview/pull/3961
+* Change docpath handling to accept absolute-looking paths within the d… by @llimeht in https://github.com/SasView/sasview/pull/3992
+* Fix private names config for sphinx (for 6.2.0) by @llimeht in https://github.com/SasView/sasview/pull/3994
+* Resized images and changed to a light background for What's new by @jellybean2004
+* WhatsNew polyhedron image switched to light background by @sara-mokhtari in https://github.com/SasView/sasview/pull/4002
+* 3968: PD function shadowing [Release 6.2.0] by @krzywon in https://github.com/SasView/sasview/pull/4004
+* Refactors slicers to remove unnecessary "updatePlot" calls by @DrPaulSharp in https://github.com/SasView/sasview/pull/4006
+* Makes colormaptest robust against matplotlib changes by @llimeht in https://github.com/SasView/sasview/pull/4008
+* Adds code to replace plot data for modified slicers by @DrPaulSharp in https://github.com/SasView/sasview/pull/4014
+* Handles encoding issues in loading credits.html by @llimeht in https://github.com/SasView/sasview/pull/4015
+* Fixes bugs for cloned slicer plots by @DrPaulSharp in https://github.com/SasView/sasview/pull/4021
+* Fixes mask editor bug by @DrPaulSharp in https://github.com/SasView/sasview/pull/4024
+* Checks slicer children for removal by @jellybean2004 in https://github.com/SasView/sasview/pull/4025
+* Fixes symmetric wedge phi plots by @jellybean2004 in https://github.com/SasView/sasview/pull/4029
+* MacOS drag and drop installer by @wpotrzebowski in https://github.com/SasView/sasview/pull/4030
+* Adds example data from SasData repository by @dehoni in https://github.com/SasView/sasview/pull/4033
+
+
+Known Issues
+^^^^^^^^^^^^
+All known bugs and feature requests can be found in the issues on github.
+
+`sasview issues <https://github.com/SasView/sasview/issues>`_ | `sasmodels issues <https://github.com/SasView/sasmodels/issues>`_ | `sasdata issues <https://github.com/SasView/sasdata/issues>`_
+
 
 .. _release_6_1_3:
 New in Version 6.1.3

@@ -2896,9 +2896,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             val = GuiUtils.toDouble(row[1].text())
             self.logic.kernel_module.setParam(par, val)
 
-        # Change 'n' in the parameter model; also causes recalculation
-        self._model_model.item(self._n_shells_row, 1).setText(str(index))
-
         # Update relevant models
         self.polydispersity_widget.setPolyModel()
         if self.canHaveMagnetism():
