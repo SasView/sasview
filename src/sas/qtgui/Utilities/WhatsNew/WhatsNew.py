@@ -151,7 +151,7 @@ class WhatsNewWidget(QDialog, Ui_WhatsNewUI):
             )
 
         self.all_messages = []
-            
+
         for version in new_message_directories:
             self.all_messages.extend(
                 sorted(new_messages[version], key=lambda path: path.name)
