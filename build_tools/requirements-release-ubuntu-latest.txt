@@ -147,7 +147,7 @@ simple-websocket==1.1.0
 siphash24==1.8
 six==1.17.0
 snowballstemmer==3.0.1
-soupsieve==2.8.3
+soupsieve==2.8.4
 Sphinx==9.1.0
 sphinxcontrib-applehelp==2.0.0
 sphinxcontrib-devhelp==2.0.0
