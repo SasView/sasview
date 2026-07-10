@@ -74,7 +74,7 @@ matplotlib==3.10.9
 matplotlib-inline==0.2.2
 mccabe==0.7.0
 mpld3==0.5.12
-msgpack==1.1.2
+msgpack==1.2.1
 multidict==6.7.1
 MultiMapping==5.1
 multipart==1.3.1
