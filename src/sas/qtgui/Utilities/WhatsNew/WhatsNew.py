@@ -132,13 +132,31 @@ class WhatsNewWidget(QDialog, Ui_WhatsNewUI):
 
         # # Gather new files
         new_messages = whats_new_messages(only_recent=only_recent)
-        new_message_directories = [key for key in new_messages]
-        new_message_directories.sort(key=reduced_version, reverse=True)
+
+        if only_recent:
+            # Only show the current version, if there are any messages for it
+            current_version = reduced_version(sasview_version)
+
+            new_message_directories = [
+                version
+                for version in new_messages
+                if reduced_version(version) == current_version
+            ]
+        else:
+            # Show all messages, sorted by version, newest first
+            new_message_directories = sorted(
+                new_messages,
+                key=reduced_version,
+                reverse=True,
+            )
 
         self.all_messages = []
 
         for version in new_message_directories:
-            self.all_messages += new_messages[version]
+            self.all_messages.extend(new_messages[version])
+
+        for version in new_message_directories:
+            self.all_messages.extend(new_messages[version])
 
         self.max_index = len(self.all_messages)
         self.current_index = 0
