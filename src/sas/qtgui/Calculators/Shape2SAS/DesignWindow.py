@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QPushButton,
     QSizePolicy,
+    QTabWidget,
     QVBoxLayout,
     QWidget,
 )
@@ -80,6 +81,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         self.plot = QPushButton("Plot")
         self.modelTabButtonOptions.horizontalLayout_5.insertWidget(1, self.plot)
         self.plot.setToolTip("Plot the model")
+        self.modelTabButtonOptions.horizontalLayout_5.insertWidget(1, self.plot)
 
         self.line2 = QFrame()
         self.line2.setFrameShape(QFrame.VLine)
@@ -110,15 +112,71 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         modelVbox.setContentsMargins(10,10,10,10)
         modelHbox.setContentsMargins(10,10,10,10)
         modelSection = QWidget()
-        modelHbox.addWidget(self.subunitTable)
-        modelHbox.addWidget(self.viewerModel.Viewmodel_modul)
-        modelSection.setLayout(modelHbox)
 
-        modelVbox.addWidget(modelSection)
-        modelVbox.addWidget(self.modelTabButtonOptions)
+        # Right-hand tabbed plot area
+        self.plotTabs = QTabWidget()
+        self.plotTabs.setObjectName("plotTabs")
+        self.plotTabs.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Expanding,
+        )
+
+        # Model viewer tab
+        self.viewerTab = QWidget()
+        viewerTabLayout = QVBoxLayout(self.viewerTab)
+        viewerTabLayout.setContentsMargins(0, 0, 0, 0)
+
+        viewerTabLayout.addWidget(
+            self.viewerModel.scatterContainer,
+            stretch=1,
+        )
+        viewerTabLayout.addWidget(self.viewerModel.viewerButtons)
+        viewerTabLayout.addWidget(self.viewerModel.viewerModelRadius)
+
+        # Theoretical scattering tab
+        self.scatteringTab = QWidget()
+        scatteringTabLayout = QVBoxLayout(self.scatteringTab)
+        scatteringTabLayout.setContentsMargins(0, 0, 0, 0)
+
+        scatteringTabLayout.addWidget(
+            self.viewerModel.scattering,
+            stretch=1,
+        )
+
+        self.plotTabs.addTab(
+            self.viewerTab,
+            "Model Viewer",
+        )
+        self.plotTabs.addTab(
+            self.scatteringTab,
+            "Scattering Profile",
+        )
+        self.plotTabs.setCurrentWidget(self.viewerTab)
+
+        # Left-hand table and right-hand tabs
+        modelHbox.addWidget(self.subunitTable)
+        modelHbox.addWidget(self.plotTabs)
+
+        modelHbox.setStretch(0, 1)
+        modelHbox.setStretch(1, 2)
+
+        modelSection.setLayout(modelHbox)
+        modelSection.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Expanding,
+        )
+
+        modelVbox.addWidget(modelSection, stretch=1)
+        modelVbox.addWidget(
+            self.modelTabButtonOptions,
+            stretch=0,
+        )
+
         self.model.setLayout(modelVbox)
 
-        #plot scene
+        ### Build Virtual SAXS Experiment tab
+
+        # This is the separate simulated SAXS plot area.
         self.scatteringProf = QWidget()
         self.scatteringProf.setContentsMargins(0, 0, 0, 0)
         self.scatteringProf.setObjectName("scatteringProf")
@@ -768,7 +826,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         self.setFig.grid(True)
 
         self.scatteringScene.addWidget(self.canvas)
-        self.scatteringProf.setLayout(self.scatteringScene)
+        self.canvas.draw_idle()
 
     def sendSimulatedSAXSToDataExplorer(self):
         """Send simulated data to the Data Explorer in SasView"""
