@@ -312,10 +312,6 @@
    </property>
   </action>
   <action name="actionLoad_SASBDB">
-   <property name="icon">
-    <iconset>
-     <normaloff>:/res/file_send-128.png</normaloff>:/res/file_send-128.png</iconset>
-   </property>
    <property name="text">
     <string>Load from SASBDB...</string>
    </property>
