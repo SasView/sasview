@@ -19,7 +19,7 @@ class ResponsiveGraphicsView(QGraphicsView):
 
     def fitScene(self):
         """Fit the scene to the view, keeping the aspect ratio."""
-        
+
         scene = self.scene()
 
         if scene is None:
@@ -46,6 +46,7 @@ class ResponsiveGraphicsView(QGraphicsView):
 
 class ViewerModel(QWidget):
     """Graphics view of designed model"""
+
     def __init__(self, parent=None):
         super().__init__()
 
@@ -83,7 +84,7 @@ class ViewerModel(QWidget):
 
         self.initialiseAxis()
 
-        #General controls
+        # General controls
         ### xy, xz, yz buttons (Class ViewerButtons)
         self.viewerButtons = ViewerButtons()
         self.viewerModelRadius = ViewerModelRadius()
@@ -94,7 +95,7 @@ class ViewerModel(QWidget):
         self.scatter.scene().activeCamera().zoomLevelChanged.connect(self.onZoomChanged)
         self.viewerModelRadius.doubleSpinBox.valueChanged.connect(self.setZoom)
 
-        #2D plot of P(q)
+        # 2D plot of P(q)
         self.scattering = ResponsiveGraphicsView()
         self.scattering.setMinimumSize(QSize(271, 271))
         self.scattering.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
@@ -106,7 +107,7 @@ class ViewerModel(QWidget):
 
         ###Layout for GUI
         layout = QVBoxLayout()
-        layout.setContentsMargins(0, 10, 0, 0)#remove margins
+        layout.setContentsMargins(0, 10, 0, 0)  # remove margins
 
         spacer = QSpacerItem(271, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         subunitTableLabel = QLabel("Scattering of P(q)")
@@ -141,12 +142,11 @@ class ViewerModel(QWidget):
         ax.set_ylabel("P(q)")
         ax.plot(theo.q, theo.I, "-k", label="P(q)")
 
-        ax.set_xscale('log')
-        ax.set_yscale('log')
+        ax.set_xscale("log")
+        ax.set_yscale("log")
 
         ax.legend()
         ax.grid(True)
-
 
         canvas = FigureCanvas(figure)
         canvas.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
@@ -199,7 +199,7 @@ class ViewerModel(QWidget):
         max_range = max(x_max - x_min, y_max - y_min, z_max - z_min)
 
         # Add some padding
-        half_range = (max_range*1.1) / 2
+        half_range = (max_range * 1.1) / 2
 
         # Set equal ranges for all axes centered on their respective centers
         self.X_ax.setRange(x_center - half_range, x_center + half_range)
@@ -216,8 +216,8 @@ class ViewerModel(QWidget):
         colours = design.colour
 
         for series in self.dict_series.values():
-           data = []
-           series.dataProxy().resetArray(data)
+            data = []
+            series.dataProxy().resetArray(data)
 
         # Check if we have any data at all
         if not distr.x or len(distr.x) == 0:
@@ -230,9 +230,7 @@ class ViewerModel(QWidget):
         for subunit in range(len(colours)):
             # Skip empty subunits - handle numpy arrays properly
             try:
-                if (subunit >= len(distr.x)
-                        or not hasattr(distr.x[subunit], '__len__')
-                        or len(distr.x[subunit]) == 0):
+                if subunit >= len(distr.x) or not hasattr(distr.x[subunit], "__len__") or len(distr.x[subunit]) == 0:
                     continue
             except (ValueError, TypeError):
                 # Handle numpy array comparison issues
@@ -241,7 +239,11 @@ class ViewerModel(QWidget):
             series = self.dict_series[colours[subunit]]
             data = []
             for index in range(len(distr.x[subunit])):
-                data.append(QScatterDataItem(QVector3D(distr.x[subunit][index], distr.y[subunit][index], distr.z[subunit][index])))
+                data.append(
+                    QScatterDataItem(
+                        QVector3D(distr.x[subunit][index], distr.y[subunit][index], distr.z[subunit][index])
+                    )
+                )
 
             minx = min(minx, min(distr.x[subunit]))
             maxx = max(maxx, max(distr.x[subunit]))
@@ -282,14 +284,14 @@ class ViewerModel(QWidget):
     def setClearModelPlot(self):
         """Clear the model plot"""
 
-        #reset model
+        # reset model
         for series in self.dict_series.values():
             data = []
             series.dataProxy().resetArray(data)
 
-        #reset view
+        # reset view
         self.scene.clear()
         self.scatter.scene().activeCamera().setCameraPosition(0, 0, 110)
 
-        #reset axis
+        # reset axis
         self.setAxis((-10, 10), (-10, 10), (-10, 10))
