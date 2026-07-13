@@ -22,7 +22,7 @@ SASBDB_API_BASE = "https://www.sasbdb.org/rest-api"
 class SASBDBDatasetInfo:
     """
     Parsed metadata from a SASBDB dataset entry.
-    
+
     Contains key information extracted from the SASBDB REST API response.
     """
     # Identifiers
@@ -90,7 +90,7 @@ class SASBDBDatasetInfo:
 def parseMetadata(metadata: dict) -> SASBDBDatasetInfo:
     """
     Parse SASBDB API response into a structured SASBDBDatasetInfo object.
-    
+
     :param metadata: Raw JSON dictionary from SASBDB API
     :return: Parsed SASBDBDatasetInfo object
     """
@@ -220,7 +220,7 @@ def _get_str(data: dict, *keys: str) -> str:
     """
     Get string value from dictionary, trying multiple possible keys.
     Also searches in nested dictionaries (sample, molecule, experiment, etc.).
-    
+
     :param data: Dictionary to search
     :param keys: Possible key names to try
     :return: String value or empty string if not found
@@ -348,7 +348,7 @@ def _get_float(data: dict, *keys: str) -> float | None:
     """
     Get float value from dictionary, trying multiple possible keys.
     Also searches in nested dictionaries (sample, molecule, experiment, etc.).
-    
+
     :param data: Dictionary to search
     :param keys: Possible key names to try
     :return: Float value or None if not found
@@ -378,7 +378,7 @@ def _get_float(data: dict, *keys: str) -> float | None:
 def getDatasetMetadata(dataset_id: str) -> dict | None:
     """
     Fetch dataset metadata from SASBDB API.
-    
+
     :param dataset_id: SASBDB dataset identifier (e.g., "SASDN24" - full 7-character ID)
     :return: Dictionary containing dataset metadata, or None if error
     """
@@ -419,10 +419,10 @@ def getDatasetMetadata(dataset_id: str) -> dict | None:
 def getDataFileUrl(metadata: dict) -> str | None:
     """
     Extract data file URL from dataset metadata.
-    
+
     Looks for common field names in the metadata JSON that might contain
     the data file URL or path. Also checks for SASBDB-specific fields.
-    
+
     :param metadata: Dictionary containing dataset metadata
     :return: URL string for the data file, or None if not found
     """
@@ -462,9 +462,9 @@ def getDataFileUrl(metadata: dict) -> str | None:
     ]
 
     # Check top-level fields
-    for field in possible_fields:
-        if field in metadata:
-            value = metadata[field]
+    for field_name in possible_fields:
+        if field_name in metadata:
+            value = metadata[field_name]
             if isinstance(value, str) and (value.startswith('http') or value.startswith('/')):
                 # If relative URL, make it absolute
                 if value.startswith('/'):
@@ -517,7 +517,7 @@ def getDataFileUrl(metadata: dict) -> str | None:
 def downloadDataFile(url: str, filepath: str) -> bool:
     """
     Download a data file from the given URL to the specified filepath.
-    
+
     :param url: URL of the data file to download
     :param filepath: Local filepath where the file should be saved
     :return: True if download successful, False otherwise
@@ -550,14 +550,14 @@ def downloadDataFile(url: str, filepath: str) -> bool:
 def _normalizeDatasetId(dataset_id: str) -> str | None:
     """
     Normalize a SASBDB dataset identifier.
-    
+
     SASBDB identifiers are 7 characters long, typically in format:
     - "SASDN24" (prefix + number)
     - "SASDB1234" (if 4-digit number)
     - etc.
-    
+
     The API requires the full 7-character identifier.
-    
+
     :param dataset_id: Input dataset identifier
     :return: Normalized identifier (uppercase, stripped), or None if invalid
     """
@@ -580,13 +580,13 @@ def _normalizeDatasetId(dataset_id: str) -> str | None:
 def downloadDataset(dataset_id: str, output_dir: str | None = None) -> tuple[str | None, SASBDBDatasetInfo | None]:
     """
     Download a complete dataset from SASBDB.
-    
+
     This is a convenience function that:
     1. Fetches metadata
     2. Extracts data file URL
     3. Downloads the data file
     4. Returns the local filepath and parsed metadata
-    
+
     :param dataset_id: SASBDB dataset identifier
     :param output_dir: Directory to save the file (defaults to temp directory)
     :return: Tuple of (path to downloaded file, parsed metadata info) or (None, None) if error
@@ -630,7 +630,7 @@ def downloadDataset(dataset_id: str, output_dir: str | None = None) -> tuple[str
 def _guessFileExtension(url: str, metadata: dict) -> str:
     """
     Guess the file extension from URL or metadata.
-    
+
     :param url: Data file URL
     :param metadata: Dataset metadata
     :return: File extension (e.g., ".dat", ".txt", ".csv")

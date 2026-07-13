@@ -772,8 +772,8 @@ class GuiManager:
 
         Opens a dialog to download and load a dataset from SASBDB.
         """
-        from sas.qtgui.Utilities.SASBDB.SASBDBDownloadDialog import SASBDBDownloadDialog
         from sas.qtgui.Utilities.SASBDB.sasbdb_loader import load_downloaded_dataset
+        from sas.qtgui.Utilities.SASBDB.SASBDBDownloadDialog import SASBDBDownloadDialog
 
         dialog = SASBDBDownloadDialog(parent=self._workspace)
         if dialog.exec():
