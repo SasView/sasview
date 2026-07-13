@@ -3,7 +3,7 @@ from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from PySide6.QtCore import QSize
 from PySide6.QtDataVisualization import Q3DScatter, QScatter3DSeries, QScatterDataItem, QValue3DAxis
-from PySide6.QtGui import QColor, QVector3D
+from PySide6.QtGui import QColor, QVector3D, Qt
 from PySide6.QtWidgets import QGraphicsScene, QGraphicsView, QLabel, QSizePolicy, QSpacerItem, QVBoxLayout, QWidget
 
 from sas.qtgui.Calculators.Shape2SAS.PlotAspects.plotAspects import ViewerPlotDesign
@@ -12,6 +12,36 @@ from sas.qtgui.Calculators.Shape2SAS.PlotAspects.plotAspects import ViewerPlotDe
 from sas.qtgui.Calculators.Shape2SAS.ViewerAllOptions import ViewerButtons, ViewerModelRadius
 from sas.sascalc.shape2sas.Models import ModelPointDistribution
 from sas.sascalc.shape2sas.TheoreticalScattering import TheoreticalScattering
+
+
+class ResponsiveGraphicsView(QGraphicsView):
+    """QGraphicsView that keeps its scene fitted to the available area."""
+
+    def fitScene(self):
+        """Fit the scene to the view, keeping the aspect ratio."""
+        
+        scene = self.scene()
+
+        if scene is None:
+            return
+
+        # Get the bounding rectangle of all items in the scene
+        scene_rect = scene.itemsBoundingRect()
+
+        if scene_rect.isEmpty():
+            return
+
+        # Set the scene rectangle and fit it to the view
+        self.setSceneRect(scene_rect)
+        self.fitInView(
+            scene_rect,
+            Qt.AspectRatioMode.KeepAspectRatio,
+        )
+
+    def resizeEvent(self, event):
+        """Handle the resize event to keep the scene fitted."""
+        super().resizeEvent(event)
+        self.fitScene()
 
 
 class ViewerModel(QWidget):
@@ -65,9 +95,11 @@ class ViewerModel(QWidget):
         self.viewerModelRadius.doubleSpinBox.valueChanged.connect(self.setZoom)
 
         #2D plot of P(q)
-        self.scattering = QGraphicsView()
+        self.scattering = ResponsiveGraphicsView()
         self.scattering.setMinimumSize(QSize(271, 271))
         self.scattering.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.scattering.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.scattering.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.scattering.setBackgroundBrush(QColor(255, 255, 255))
         self.scene = QGraphicsScene()
         self.scattering.setScene(self.scene)
@@ -97,6 +129,12 @@ class ViewerModel(QWidget):
         self.scene.clear()
 
         figure = Figure()
+        figure.subplots_adjust(
+            left=0.16,
+            right=0.96,
+            top=0.90,
+            bottom=0.15,
+        )
         ax = figure.add_subplot(111)
         ax.set_title("P(q) plot")
         ax.set_xlabel("q")
@@ -111,9 +149,11 @@ class ViewerModel(QWidget):
 
 
         canvas = FigureCanvas(figure)
+        canvas.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        canvas.updateGeometry()
         self.scene.addWidget(canvas)
-        self.scattering.fitInView(self.scene.sceneRect())
-        self.scatter.show()
+        self.scattering.fitScene()
+        canvas.draw_idle()
 
     def initialiseAxis(self):
         """Initialise axis for the model"""
