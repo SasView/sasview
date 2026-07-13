@@ -7,6 +7,7 @@ datasets and retrieving metadata.
 
 import logging
 import os
+import re
 import tempfile
 from dataclasses import dataclass, field
 
@@ -16,6 +17,8 @@ logger = logging.getLogger(__name__)
 
 # Base API URL - SASBDB REST API
 SASBDB_API_BASE = "https://www.sasbdb.org/rest-api"
+_SASBDB_ID_PATTERN = re.compile(r'^SAS[A-Z]{2}\d+$')
+INVALID_DATASET_ID_MESSAGE = "Enter the full 7-character SASBDB code (e.g. SASDN24)."
 
 
 @dataclass
@@ -496,19 +499,6 @@ def getDataFileUrl(metadata: dict) -> str | None:
             if result:
                 return result
 
-    # If we have an entry ID, try constructing a download URL
-    # Format might be: /rest-api/entry/{id}/download/ or similar
-    entry_id = metadata.get('entry_id') or metadata.get('id') or metadata.get('sasbdb_id')
-    if entry_id:
-        # Try common download endpoint patterns
-        download_endpoints = [
-            f"{SASBDB_API_BASE}/entry/{entry_id}/download/",
-            f"{SASBDB_API_BASE}/entry/{entry_id}/data/",
-            f"{SASBDB_API_BASE}/entry/{entry_id}/file/",
-        ]
-        # Return first endpoint (we'll try them in downloadDataFile if needed)
-        return download_endpoints[0]
-
     logger.warning("Could not find data file URL in metadata")
     logger.debug(f"Metadata keys: {list(metadata.keys())}")
     return None
@@ -551,12 +541,7 @@ def _normalizeDatasetId(dataset_id: str) -> str | None:
     """
     Normalize a SASBDB dataset identifier.
 
-    SASBDB identifiers are 7 characters long, typically in format:
-    - "SASDN24" (prefix + number)
-    - "SASDB1234" (if 4-digit number)
-    - etc.
-
-    The API requires the full 7-character identifier.
+    SASBDB identifiers are 7 characters long, e.g. "SASDN24".
 
     :param dataset_id: Input dataset identifier
     :return: Normalized identifier (uppercase, stripped), or None if invalid
@@ -564,17 +549,24 @@ def _normalizeDatasetId(dataset_id: str) -> str | None:
     if not dataset_id:
         return None
 
-    # Remove whitespace and convert to uppercase
     normalized = dataset_id.strip().upper()
+    if len(normalized) != 7 or not _SASBDB_ID_PATTERN.match(normalized):
+        logger.warning(f"Invalid SASBDB dataset ID: {dataset_id!r}")
+        return None
 
-    # SASBDB identifiers are typically 7 characters
-    # Accept identifiers that are 4-10 characters to be flexible
-    if len(normalized) < 4 or len(normalized) > 10:
-        logger.warning(f"Dataset ID length unusual: {len(normalized)} characters for '{normalized}'")
-        # Still try it, but warn
-
-    # Return the normalized identifier as-is (API expects full identifier)
     return normalized
+
+
+def validateDatasetId(dataset_id: str) -> tuple[str | None, str | None]:
+    """
+    Validate and normalize a SASBDB dataset identifier.
+
+    :return: Tuple of (normalized_id, error_message)
+    """
+    normalized = _normalizeDatasetId(dataset_id)
+    if normalized:
+        return normalized, None
+    return None, INVALID_DATASET_ID_MESSAGE
 
 
 def downloadDataset(dataset_id: str, output_dir: str | None = None) -> tuple[str | None, SASBDBDatasetInfo | None]:
@@ -600,14 +592,12 @@ def downloadDataset(dataset_id: str, output_dir: str | None = None) -> tuple[str
     dataset_info = parseMetadata(metadata)
 
     # Get data file URL
-    data_url = getDataFileUrl(metadata)
+    data_url = dataset_info.intensities_data_url or getDataFileUrl(metadata)
     if not data_url:
         logger.error(f"Could not find data file URL in metadata for dataset {dataset_id}")
         return None, dataset_info  # Return metadata even if download fails
 
-    # Store the data URL in the info object
-    if not dataset_info.intensities_data_url:
-        dataset_info.intensities_data_url = data_url
+    dataset_info.intensities_data_url = data_url
 
     # Determine output directory
     if output_dir is None:

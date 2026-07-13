@@ -8,7 +8,7 @@ import tempfile
 
 from PySide6 import QtWidgets
 
-from .sasbdb_api import SASBDBDatasetInfo, downloadDataset
+from .sasbdb_api import SASBDBDatasetInfo, downloadDataset, validateDatasetId
 from .sasbdb_loader import metadata_summary
 from .UI.SASBDBDownloadDialogUI import Ui_SASBDBDownloadDialogUI
 
@@ -36,28 +36,33 @@ class SASBDBDownloadDialog(QtWidgets.QDialog, Ui_SASBDBDownloadDialogUI):
             self._showError("Please enter a dataset identifier.")
             return
 
+        normalized_id, validation_error = validateDatasetId(dataset_id)
+        if validation_error:
+            self._showError(validation_error)
+            return
+
         self._set_busy(True)
         self.lblStatus.setText("Downloading dataset...")
 
         try:
-            filepath, dataset_info = downloadDataset(dataset_id, tempfile.gettempdir())
+            filepath, dataset_info = downloadDataset(normalized_id, tempfile.gettempdir())
             self.dataset_info = dataset_info
 
             if filepath and os.path.exists(filepath):
                 self.downloaded_filepath = filepath
                 summary = metadata_summary(dataset_info) if dataset_info else ""
-                status = f"Successfully downloaded dataset {dataset_id}"
+                status = f"Successfully downloaded dataset {normalized_id}"
                 if summary:
                     status += f"\n{summary}"
                 self.lblStatus.setText(status)
                 self.accept()
             else:
                 self._showError(
-                    f"Failed to download dataset {dataset_id}.\n"
+                    f"Failed to download dataset {normalized_id}.\n"
                     "Please check the dataset identifier and try again."
                 )
         except Exception as e:
-            logger.error(f"Error downloading dataset {dataset_id}: {e}", exc_info=True)
+            logger.error(f"Error downloading dataset {normalized_id}: {e}", exc_info=True)
             self._showError(f"Error downloading dataset:\n{e}")
         finally:
             self._set_busy(False)
@@ -82,9 +87,4 @@ class SASBDBDownloadDialog(QtWidgets.QDialog, Ui_SASBDBDownloadDialogUI):
 
     def onHelp(self):
         from sas.qtgui.Utilities import GuiUtils
-        help_location = "user/qtgui/Utilities/SASBDB/sasbdb_download_help.html"
-        parent = self.parent()
-        if parent and hasattr(parent, "guiManager"):
-            parent.guiManager.showHelp(help_location)
-        else:
-            GuiUtils.showHelp(help_location)
+        GuiUtils.showHelp("user/qtgui/Utilities/SASBDB/sasbdb_download_help.html")

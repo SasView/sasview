@@ -24,7 +24,7 @@
    <item>
     <widget class="QLineEdit" name="txtDatasetId">
      <property name="placeholderText">
-      <string>e.g., 1234 or SASDB1234</string>
+      <string>e.g., SASDN24</string>
      </property>
     </widget>
    </item>

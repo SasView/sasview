@@ -1,6 +1,7 @@
 """
 Global defaults and various utility functions usable by the general GUI
 """
+import ast
 import json
 import logging
 import numbers
@@ -532,66 +533,13 @@ def openLink(url):
         raise AttributeError(msg)
 
 
-def _formatDictValue(value, max_depth=2) -> str:
-    """
-    Format a dictionary value for display, extracting useful information.
-    
-    :param value: Dictionary or other value to format
-    :param max_depth: Maximum nesting depth to process
-    :return: Formatted string representation
-    """
-    if not isinstance(value, dict):
-        return str(value)
-
-    if max_depth <= 0:
-        return "{...}"
-
-    # Extract common useful fields from dictionaries
-    parts = []
-
-    # Instrument/source dictionaries
-    if 'name' in value:
-        parts.append(value['name'])
-    if 'beamline_name' in value:
-        parts.append(f"Beamline: {value['beamline_name']}")
-    if 'type' in value:
-        parts.append(f"Type: {value['type']}")
-    if 'city' in value and 'country' in value:
-        parts.append(f"{value['city']}, {value['country']}")
-    elif 'city' in value:
-        parts.append(value['city'])
-    elif 'country' in value:
-        parts.append(value['country'])
-
-    # Detector dictionaries
-    if 'detector' in str(value).lower() or 'type' in value:
-        if 'name' in value:
-            parts.append(f"Detector: {value['name']}")
-        if 'type' in value and 'name' not in value:
-            parts.append(f"Detector: {value['type']}")
-        if 'resolution' in value:
-            parts.append(f"Resolution: {value['resolution']}")
-
-    if parts:
-        return " | ".join(parts)
-
-    # Fallback: show key-value pairs for shallow dicts
-    if len(value) <= 3:
-        return ", ".join(f"{k}: {v}" for k, v in value.items() if not isinstance(v, dict))
-
-    return "{...}"
-
-
 def _formatDictLine(line: str) -> str:
     """
     Extract and format dictionary information from a line.
-    
+
     :param line: Line that may contain a dictionary representation
     :return: Formatted line with dictionary info extracted, or original line if no dict found
     """
-    import ast
-    import re
-
     stripped = line.strip()
 
     # Check if line contains a dictionary
@@ -676,13 +624,60 @@ def _formatDictLine(line: str) -> str:
     return line
 
 
+def _isSASBDBData(data) -> bool:
+    meta = getattr(data, 'meta_data', None) or {}
+    return 'SASBDB_code' in meta
+
+
+def _cleanDataSummaryText(text: str, data) -> str:
+    """Reformat dict lines in data summaries for SASBDB datasets only."""
+    if not _isSASBDBData(data):
+        return text
+
+    cleaned_lines = []
+    for line in text.split('\n'):
+        stripped = line.strip()
+        if ("{" in stripped and "'" in stripped and ":" in stripped and
+            (stripped.startswith("{'") or
+             re.search(r':\s*\{', stripped) or
+             re.search(r"\{'[^']+':", stripped))):
+            if stripped.count('{') > 0 and stripped.count('}') > 0:
+                cleaned_lines.append(_formatDictLine(line))
+            else:
+                cleaned_lines.append(line)
+        else:
+            cleaned_lines.append(line)
+    return '\n'.join(cleaned_lines)
+
+
+def _truncateAuthors(authors: str, max_len: int = 50) -> str:
+    """Truncate an author list at complete names, appending 'et al.' if needed."""
+    if len(authors) <= max_len:
+        return authors
+
+    names = [name.strip() for name in authors.split(',') if name.strip()]
+    if not names:
+        return authors
+
+    shown = names[0]
+    for name in names[1:]:
+        candidate = f"{shown}, {name}"
+        if len(candidate) + len(' et al.') > max_len:
+            return f"{shown} et al."
+        shown = candidate
+
+    if len(shown) > max_len:
+        return f"{shown[:max_len - len(' et al.')].rstrip(', ')} et al."
+    return shown
+
+
 def _formatSASBDBMetadata(data) -> str:
     """
     Format SASBDB metadata from data object for display.
-    
+
     Displays instrument, sample, source info and meta_data dictionary
     for datasets loaded from SASBDB in a clean, concise format.
-    
+
     :param data: Data1D or Data2D object
     :return: Formatted string with SASBDB metadata, or empty string if none
     """
@@ -822,11 +817,7 @@ def _formatSASBDBMetadata(data) -> str:
     # Publication info (compact, only if available)
     pub_parts = []
     if meta.get('SASBDB_authors'):
-        # Truncate authors if too long
-        authors = meta['SASBDB_authors']
-        if len(authors) > 50:
-            authors = authors[:47] + "..."
-        pub_parts.append(f"Authors: {authors}")
+        pub_parts.append(f"Authors: {_truncateAuthors(meta['SASBDB_authors'])}")
     if meta.get('SASBDB_DOI'):
         pub_parts.append(f"DOI: {meta['SASBDB_DOI']}")
     if meta.get('SASBDB_PMID'):
@@ -857,32 +848,7 @@ def retrieveData1d(data):
         #logger.error(msg)
         raise ValueError(msg)
 
-    text = data.__str__()
-
-    # Format dictionary representations instead of removing them
-    import re
-    lines = text.split('\n')
-    cleaned_lines = []
-    for line in lines:
-        stripped = line.strip()
-        # Check if line contains a dictionary representation
-        if ("{" in stripped and "'" in stripped and ":" in stripped and
-            (stripped.startswith("{'") or
-             re.search(r':\s*\{', stripped) or  # Matches "Instrument: {"
-             re.search(r"\{'[^']+':", stripped))):  # Matches "{'key':"
-            # Count opening and closing braces to detect dict structures
-            open_braces = stripped.count('{')
-            close_braces = stripped.count('}')
-            # If it looks like a dictionary, format it instead of skipping
-            if open_braces > 0 and close_braces > 0:
-                formatted_line = _formatDictLine(line)
-                if formatted_line != line:  # Only add if it was successfully formatted
-                    cleaned_lines.append(formatted_line)
-            else:
-                cleaned_lines.append(line)
-        else:
-            cleaned_lines.append(line)
-    text = '\n'.join(cleaned_lines)
+    text = _cleanDataSummaryText(data.__str__(), data)
 
     # Add SASBDB metadata if present
     text += _formatSASBDBMetadata(data)
@@ -930,32 +896,7 @@ def retrieveData2d(data):
         msg = "Incorrect type passed to retrieveData2d"
         raise AttributeError(msg)
 
-    text = data.__str__()
-
-    # Format dictionary representations instead of removing them
-    import re
-    lines = text.split('\n')
-    cleaned_lines = []
-    for line in lines:
-        stripped = line.strip()
-        # Check if line contains a dictionary representation
-        if ("{" in stripped and "'" in stripped and ":" in stripped and
-            (stripped.startswith("{'") or
-             re.search(r':\s*\{', stripped) or  # Matches "Instrument: {"
-             re.search(r"\{'[^']+':", stripped))):  # Matches "{'key':"
-            # Count opening and closing braces to detect dict structures
-            open_braces = stripped.count('{')
-            close_braces = stripped.count('}')
-            # If it looks like a dictionary, format it instead of skipping
-            if open_braces > 0 and close_braces > 0:
-                formatted_line = _formatDictLine(line)
-                if formatted_line != line:  # Only add if it was successfully formatted
-                    cleaned_lines.append(formatted_line)
-            else:
-                cleaned_lines.append(line)
-        else:
-            cleaned_lines.append(line)
-    text = '\n'.join(cleaned_lines)
+    text = _cleanDataSummaryText(data.__str__(), data)
 
     # Add SASBDB metadata if present
     text += _formatSASBDBMetadata(data)

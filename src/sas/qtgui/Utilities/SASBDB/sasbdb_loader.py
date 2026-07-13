@@ -72,8 +72,17 @@ def load_downloaded_dataset(files_widget, parent, filepath: str | None,
         return
 
     try:
-        loaded_data, _ = files_widget.readData([filepath])
-        if dataset_info and loaded_data:
+        loaded_data, load_message = files_widget.readData([filepath])
+        if not loaded_data:
+            logger.error("Failed to load SASBDB dataset from %s: %s", filepath, load_message)
+            QMessageBox.warning(
+                parent,
+                "Load Error",
+                f"Failed to load downloaded dataset:\n{load_message}",
+            )
+            return
+
+        if dataset_info:
             populate_metadata(loaded_data, dataset_info)
 
         entry_id = dataset_info.code or dataset_info.entry_id if dataset_info else None
@@ -105,7 +114,8 @@ def _apply_metadata(data, info: SASBDBDatasetInfo) -> None:
     if info.instrument and not data.instrument:
         data.instrument = info.instrument
     if info.code:
-        data.run = data.run or []
+        if not data.run:
+            data.run = []
         if info.code not in data.run:
             data.run.append(info.code)
 
