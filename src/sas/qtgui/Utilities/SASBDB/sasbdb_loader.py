@@ -10,6 +10,7 @@ from PySide6.QtWidgets import QMessageBox
 from sasdata.dataloader.data_info import Sample, Source
 
 from .sasbdb_api import SASBDBDatasetInfo
+from .sasbdb_display import metadata_summary
 
 logger = logging.getLogger(__name__)
 
@@ -25,44 +26,6 @@ _META_FIELDS = (
     ("SASBDB_DOI", "publication_doi", None),
     ("SASBDB_PMID", "publication_pmid", None),
 )
-
-
-def metadata_summary(info: SASBDBDatasetInfo) -> str:
-    """Format dataset metadata for display or logging."""
-    lines = []
-    if info.title:
-        lines.append(f"Title: {info.title}")
-    if info.sample_name:
-        lines.append(f"Sample: {info.sample_name}")
-    if info.molecule_name:
-        lines.append(f"Molecule: {info.molecule_name}")
-    if info.concentration:
-        lines.append(f"Concentration: {info.concentration} {info.concentration_unit}")
-    if info.buffer_description:
-        lines.append(f"Buffer: {info.buffer_description}")
-    if info.instrument:
-        lines.append(f"Instrument: {info.instrument}")
-    if info.wavelength:
-        lines.append(f"Wavelength: {info.wavelength} {info.wavelength_unit}")
-    if info.temperature:
-        lines.append(f"Temperature: {info.temperature} {info.temperature_unit}")
-    if info.rg is not None:
-        rg = f"Rg: {info.rg:.2f}"
-        if info.rg_error:
-            rg += f" ± {info.rg_error:.2f}"
-        lines.append(f"{rg} Å")
-    if info.i0 is not None:
-        i0 = f"I(0): {info.i0}"
-        if info.i0_error:
-            i0 += f" ± {info.i0_error}"
-        lines.append(i0)
-    if info.dmax is not None:
-        lines.append(f"Dmax: {info.dmax} Å")
-    if info.molecular_weight is not None:
-        lines.append(f"MW: {info.molecular_weight:.1f} kDa")
-    if info.publication_doi:
-        lines.append(f"DOI: {info.publication_doi}")
-    return "\n".join(lines)
 
 
 def load_downloaded_dataset(files_widget, parent, filepath: str | None,

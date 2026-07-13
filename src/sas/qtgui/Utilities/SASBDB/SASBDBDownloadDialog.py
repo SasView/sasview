@@ -9,7 +9,7 @@ import tempfile
 from PySide6 import QtWidgets
 
 from .sasbdb_api import SASBDBDatasetInfo, downloadDataset, validateDatasetId
-from .sasbdb_loader import metadata_summary
+from .sasbdb_display import metadata_summary
 from .UI.SASBDBDownloadDialogUI import Ui_SASBDBDownloadDialogUI
 
 logger = logging.getLogger(__name__)
