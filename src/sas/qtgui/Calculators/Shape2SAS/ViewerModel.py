@@ -3,7 +3,7 @@ from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from PySide6.QtCore import QSize
 from PySide6.QtDataVisualization import Q3DScatter, QScatter3DSeries, QScatterDataItem, QValue3DAxis
-from PySide6.QtGui import QColor, QVector3D, Qt
+from PySide6.QtGui import QColor, Qt, QVector3D
 from PySide6.QtWidgets import QGraphicsScene, QGraphicsView, QLabel, QSizePolicy, QSpacerItem, QVBoxLayout, QWidget
 
 from sas.qtgui.Calculators.Shape2SAS.PlotAspects.plotAspects import ViewerPlotDesign

@@ -2,7 +2,7 @@
 import re
 from types import MethodType
 
-from PySide6.QtCore import QSize, Qt
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QCheckBox,
     QDialog,
@@ -190,8 +190,8 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
             self.SAXSTabButtons, 2, 0, 1, 2, Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignRight
         )
         self.SAXSExperiment.setLayout(self.gridLayout_2)
-        
-        
+
+
         # TODO: implement in a future project
         # Building Constraint window
         self.constraint = Constraints(parent=self)
