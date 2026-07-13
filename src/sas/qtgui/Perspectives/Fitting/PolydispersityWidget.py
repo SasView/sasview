@@ -253,7 +253,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         # Note: last argument needs extra space padding for decent display of the control
         checked_list = ["Distribution of " + param_name, str(width),
                         str(min), str(max),
-                        str(npts), str(nsigs), "gaussian      ",'']
+                        str(npts), str(nsigs), "",'']
         FittingUtilities.addCheckedListToModel(self.poly_model, checked_list)
 
         all_items = self.poly_model.rowCount()
@@ -412,7 +412,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         Update the polydispersity model with new parameters, create the errors column
         """
         assert isinstance(param_dict, dict)
-        if not dict:
+        if not param_dict:
             return
 
         def updateFittedValues(row_i: int) -> None:
@@ -477,7 +477,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         Update the polydispersity model with new parameters, create the errors column
         """
         assert isinstance(param_dict, dict)
-        if not dict:
+        if not param_dict:
             return
 
         def updateFittedValues(row: int) -> None:

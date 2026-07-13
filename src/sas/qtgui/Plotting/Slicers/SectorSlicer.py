@@ -44,6 +44,8 @@ class SectorInteractor(BaseInteractor, SlicerModel, StackableMixin):
         # Connect the plot to event
         self.connect = self.base.connect
 
+        self.fold: bool = True
+
         # Compute qmax limit to reset the graph
         x = numpy.power(max(self.data.xmax, numpy.fabs(self.data.xmin)), 2)
         y = numpy.power(max(self.data.ymax, numpy.fabs(self.data.ymin)), 2)
@@ -125,7 +127,7 @@ class SectorInteractor(BaseInteractor, SlicerModel, StackableMixin):
 
     def _get_slicer_type_id(self):
         """Return the slicer type identifier"""
-        return "SectorQ" + self.data.name
+        return f"SectorQ{self.data.name}Plot{str(self.base.num_slicer_plots["Sector"])}"
 
     def _post_data(self, nbins=None):
         """
@@ -146,8 +148,13 @@ class SectorInteractor(BaseInteractor, SlicerModel, StackableMixin):
         if nbins is None:
             nbins = self.nbins
         sect = SectorQ(r_min=0.0, r_max=radius, phi_min=phimin + numpy.pi, phi_max=phimax + numpy.pi, nbins=nbins)
+        sect.fold = self.fold
 
-        sector = sect(self.data)
+        sect.fold = self.fold
+        if self.fold:
+            sector = sect(self.data)
+        else:
+            sector = sect(self.data)
         # Create 1D data resulting from average
 
         if hasattr(sector, "dxl"):
@@ -173,7 +180,8 @@ class SectorInteractor(BaseInteractor, SlicerModel, StackableMixin):
 
         # Assign unique id per slicer instance and use it as the display name
         if self._plot_id is None:
-            base_id = "SectorQ" + self.data.name
+            self.base.incrementNumSlicerPlots("Sector")
+            base_id = f"SectorQ{self.data.name}Plot{str(self.base.num_slicer_plots["Sector"])}"
             self._plot_id = generate_unique_plot_id(base_id, self._item)
 
         new_plot.id = self._plot_id
@@ -250,6 +258,7 @@ class SectorInteractor(BaseInteractor, SlicerModel, StackableMixin):
         params["Phi [deg]"] = self.main_line.theta * 180 / numpy.pi
         params["Delta_Phi [deg]"] = numpy.fabs(self.left_line.phi * 180 / numpy.pi)
         params["nbins"] = self.nbins
+        params["fold"] = self.fold
         return params
 
     def setParams(self, params):
@@ -269,6 +278,7 @@ class SectorInteractor(BaseInteractor, SlicerModel, StackableMixin):
             params["Delta_Phi [deg]"] = MIN_PHI
 
         self.nbins = int(params["nbins"])
+        self.fold = params["fold"]
         self.main_line.theta = main
         # Reset the slicer parameters
         self.main_line.update()

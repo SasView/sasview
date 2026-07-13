@@ -27,7 +27,7 @@ class FitPageTest:
         assert not page.data_is_loaded
         assert page.name == ""
         assert page.data is None
-        assert page.logic.kernel_module is None
+        assert page.kernel_module is None
         assert page.parameters_to_fit == []
 
     def testSave(self):

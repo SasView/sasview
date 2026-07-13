@@ -1,5 +1,4 @@
 import logging
-import os
 import sys
 from importlib import resources
 
@@ -73,11 +72,6 @@ def get_highdpi_scaling():
     return 1.0
 
 def run_sasview(file_list: list[str] | None = None):
-    # Disable GPU. This is a workaround for the issue with the QtWebEngine on some Win 10 systems
-    # https://github.com/SasView/sasview/issues/3384
-    # TODO: remove when the issue is fixed in QtWebEngine
-    os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu"
-
     # Check for updates
     maybe_prompt_new_version_download()
     config.save()
@@ -128,7 +122,7 @@ def run_sasview(file_list: list[str] | None = None):
     # Trigger an event to pass the filepath(s) to the GUI without requiring an API change
     if file_list:
         for file in file_list:
-            mainwindow.guiManager.communicate.fileTriggerSignal.emit(file)
+            mainwindow.guiManager.communicator.fileTriggerSignal.emit(file)
 
     timer = QTimer()
     timer.timeout.connect(lambda: None)

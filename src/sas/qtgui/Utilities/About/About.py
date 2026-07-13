@@ -20,6 +20,7 @@ from PySide6.QtWidgets import (
 import sas.system.version
 from sas.qtgui.Utilities import GuiUtils
 from sas.system import legal, web
+from sas.system.citation import __ACKNOWLEDGEMENT__
 
 
 class About(QDialog):
@@ -168,18 +169,12 @@ class About(QDialog):
         </html>
         """
 
-        more_text = """
+        more_text = f"""
         <html>
             <head/>
             <body>
                 <p>
-                    This work originally developed as part of the DANSE project funded by the NSF under
-                     grant DMR-0520547, and currently maintained by UTK, NIST, UMD, ORNL, ISIS, ESS, ILL,
-                     ANSTO, TU Delft, DLS, SciLifeLab, and the scattering community.
-                </p>
-                <p>
-                    SasView also contains code developed with funding from the EU Horizon 2020 programme under
-                     the SINE2020 project (Grant No 654000).
+                    {__ACKNOWLEDGEMENT__}
                 </p>
             </body>
         </html>"""

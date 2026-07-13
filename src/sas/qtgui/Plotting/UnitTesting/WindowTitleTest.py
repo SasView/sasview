@@ -27,13 +27,13 @@ class WindowTitleTest:
     def testTitle(self, widget):
         '''Modify the title'''
         widget.show()
-        QtWidgets.qApp.processEvents()
+        QtWidgets.QApplication.processEvents()
         # make sure we have the pre-set title
         assert widget.txtTitle.text() == "some title"
         # Clear the control and set it to something else
         widget.txtTitle.clear()
         widget.txtTitle.setText("5 elephants")
-        QtWidgets.qApp.processEvents()
+        QtWidgets.QApplication.processEvents()
         # Retrieve value
         new_title = widget.title()
         # Check

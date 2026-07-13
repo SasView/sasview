@@ -52,7 +52,7 @@ class FittingState:
     on_model_changed: Callable[[], None] | None = None
 
     # Signal emitter for status updates
-    communicate: Any | None = None
+    communicator: Any | None = None
 
     def canHaveMagnetism(self, kernel_module: Any = None) -> bool:
         """

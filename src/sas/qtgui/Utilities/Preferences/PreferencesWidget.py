@@ -5,6 +5,8 @@ from PySide6.QtWidgets import QCheckBox, QComboBox, QFrame, QHBoxLayout, QLabel,
 
 from sas.system import config
 
+from ..BackgroundColor import BG_DEFAULT, BG_WARNING
+
 ConfigType = str | bool | float | int | list[str | float | int]
 logger = logging.getLogger(__name__)
 
@@ -208,7 +210,7 @@ class PreferencesWidget(QWidget):
         :param key: The string representation of the key the QLineEdit value is stored as in the configuration system.
         :return: None
         """
-        edit.setStyleSheet("background-color: white")
+        edit.setStyleSheet(BG_DEFAULT)
         validator = edit.validator()
         text = edit.text()
         (state, val, pos) = validator.validate(str(text), 0) if validator else (0, text, 0)
@@ -216,7 +218,7 @@ class PreferencesWidget(QWidget):
         if state == QValidator.Acceptable or not validator:
             self._stageChange(key, text)
         else:
-            edit.setStyleSheet("background-color: yellow")
+            edit.setStyleSheet(BG_WARNING)
             self._unStageChange(key)
             self._setInvalid(key)
 

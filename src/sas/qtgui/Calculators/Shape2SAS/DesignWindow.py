@@ -23,7 +23,7 @@ from sas.qtgui.Calculators.Shape2SAS.UI.DesignWindowUI import Ui_Shape2SAS
 from sas.qtgui.Calculators.Shape2SAS.ViewerModel import ViewerModel
 from sas.qtgui.Perspectives.perspective import Perspective
 from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Utilities.GuiUtils import createModelItemWithPlot
+from sas.qtgui.Utilities.GuiUtils import communicator, createModelItemWithPlot
 
 # Local SasView
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor
@@ -59,7 +59,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         self.parent = parent
 
         self._manager = parent
-        self.communicator = self._manager.communicator()
+        self.communicator = communicator
 
         ############Building GUI##############
         ###create build model tab

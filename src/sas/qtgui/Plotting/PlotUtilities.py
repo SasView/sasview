@@ -130,7 +130,7 @@ def get_bins(qx_data, qy_data):
     # No qx or qy given in a vector format
     if qx_data is None or qy_data is None \
             or qx_data.ndim != 1 or qy_data.ndim != 1:
-        return data
+        return qx_data, qy_data
 
     # find max and min values of qx and qy
     xmax = qx_data.max()
@@ -295,9 +295,11 @@ def getValidColor(color):
         if len(color) == 1:
             if color not in list (COLORS_LETTER.keys()):
                 raise AttributeError
-        elif color in list(COLORS.keys()):
+        # Convert letter code to RGB format
+            color = COLORS_LETTER[color]
+        elif color.capitalize() in list(COLORS.keys()):
             # or the full word
-            pass
+            color = COLORS[color.capitalize()]
         else:
             # or an RGB string
             assert(color[0]=="#" and len(color) == 7)

@@ -25,9 +25,7 @@ class ReportDialogTest:
         class dummy_manager(QtWidgets.QWidget):
             _parent = QtWidgets.QWidget()
             def communicator(self):
-                return GuiUtils.Communicate()
-            def communicate(self):
-                return GuiUtils.Communicate()
+                return GuiUtils.communicator
 
         class dummy_report:
             html = "test_html"

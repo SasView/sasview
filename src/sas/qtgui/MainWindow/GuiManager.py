@@ -3,7 +3,6 @@ import os
 import sys
 import traceback
 import webbrowser
-from pathlib import Path
 
 from packaging.version import Version
 from PySide6.QtCore import QLocale, Qt
@@ -41,8 +40,6 @@ from sas.qtgui.Perspectives.perspective import Perspective
 from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionPerspective import SizeDistributionWindow
 from sas.qtgui.Utilities.About.About import About
 from sas.qtgui.Utilities.About.Credits import Credits
-
-# from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
 from sas.qtgui.Utilities.FileConverter import FileConverterWidget
 from sas.qtgui.Utilities.GridPanel import BatchOutputPanel
 from sas.qtgui.Utilities.HidableDialog import hidable_dialog
@@ -145,8 +142,8 @@ class GuiManager:
         self.logDockWidget.setWidget(self.listWidget)
         self._workspace.addDockWidget(Qt.BottomDockWidgetArea, self.logDockWidget)
 
-        # Preferences Panel must exist before perspectives are loaded
-        self.preferences = PreferencesPanel(self._parent)
+        # Preferences Panel initialized in loadAllPerspectives()
+        self.preferences = None
 
         # Load all perspectives - Preferences panel must exist
         self.loadAllPerspectives()
@@ -200,6 +197,7 @@ class GuiManager:
         """ Load all the perspectives"""
         # Close any existing perspectives to prevent multiple open instances
         self.closeAllPerspectives()
+        self.preferences = PreferencesPanel(self._parent)
         # Load all perspectives
         loaded_dict = {} # dictionary that will ultimately keep track of all perspective instances
         for name, perspective in Perspectives.PERSPECTIVES.items():
@@ -231,6 +229,7 @@ class GuiManager:
                     perspective.close()
                 except Exception as e:
                     logger.warning(f"Unable to close {name} perspective\n{e}")
+        self.preferences = None
         self.loadedPerspectives = {}
         self._current_perspective = None
 
@@ -356,39 +355,8 @@ class GuiManager:
 
     @classmethod
     def showHelp(cls, url):
-        """
-        Open a local url in the default browser
-        """
-        if not HELP_SYSTEM.path:
-            logger.error("Help documentation was not found.")
-            return
-
-        counter = 1
-        window_name = "help_window"
-        # Remove leading forward slashes from relative paths to allow easy Path building
-        if isinstance(url, str):
-            url = url.lstrip("//")
-        url = Path(url)
-        if str(HELP_SYSTEM.path.resolve()) not in str(url.absolute()):
-            url_abs = HELP_SYSTEM.path / url
-        else:
-            url_abs = Path(url)
-        try:
-            # In order to have multiple help windows open simultaneously, we need to create a new class variable
-            # If we just reassign the old one, the old window will be destroyed
-
-            # Have we found a name not assigned to a window?
-            potential_help_window = getattr(cls, window_name, None)
-            while potential_help_window and potential_help_window.isVisible():
-                window_name = f"help_window_{counter}"
-                potential_help_window = getattr(cls, window_name, None)
-                counter += 1
-
-            # Assign new variable to the GuiManager
-            setattr(cls, window_name, GuiUtils.showHelp(url_abs))
-
-        except Exception as ex:
-            logger.warning("Cannot display help. %s" % ex)
+        """Open documentation in the default browser."""
+        HELP_SYSTEM.show_help(url)
 
     def workspace(self):
         """
@@ -503,10 +471,6 @@ class GuiManager:
             msg = "No perspective is currently active."
             logger.info(msg)
 
-    def communicator(self):
-        """ Accessor for the communicator """
-        return self.communicate
-
     def perspective(self):
         """ Accessor for the perspective """
         return self._current_perspective
@@ -587,7 +551,7 @@ class GuiManager:
 
             # save the paths etc.
             self.saveCustomConfig()
-            self.communicate.closeSignal.emit()
+            self.communicator.closeSignal.emit()
             reactor.callFromThread(reactor.stop)
             return True
 
@@ -635,17 +599,17 @@ class GuiManager:
                     webbrowser.open(version_info["download_url"])
                 else:
                     webbrowser.open(web.download_url)
-                self.communicate.statusBarUpdateSignal.emit(msg)
+                self.communicator.statusBarUpdateSignal.emit(msg)
             else:
                 msg = "You have the latest version"
-                self.communicate.statusBarUpdateSignal.emit(msg)
+                self.communicator.statusBarUpdateSignal.emit(msg)
         except:
             msg = "guiframe: could not get latest application"
             msg += " version number\n  %s" % sys.exc_info()[1]
             logger.error(msg)
             msg = "Could not connect to the application server."
             msg += " Please try again later."
-            self.communicate.statusBarUpdateSignal.emit(msg)
+            self.communicator.statusBarUpdateSignal.emit(msg)
 
     def actionWelcome(self):
         """ Show the Welcome panel """
@@ -669,18 +633,18 @@ class GuiManager:
         """
         Method defining all signal connections for the gui manager
         """
-        self.communicate = GuiUtils.communicate
-        self.communicate.fileDataReceivedSignal.connect(self.fileWasRead)
-        self.communicate.statusBarUpdateSignal.connect(self.updateStatusBar)
-        self.communicate.updatePerspectiveWithDataSignal.connect(self.updatePerspective)
-        self.communicate.progressBarUpdateSignal.connect(self.updateProgressBar)
-        self.communicate.perspectiveChangedSignal.connect(self.perspectiveChanged)
-        self.communicate.updateTheoryFromPerspectiveSignal.connect(self.updateTheoryFromPerspective)
-        self.communicate.deleteIntermediateTheoryPlotsSignal.connect(self.deleteIntermediateTheoryPlotsByTabId)
-        self.communicate.plotRequestedSignal.connect(self.showPlot)
-        self.communicate.plotFromNameSignal.connect(self.showPlotFromName)
-        self.communicate.updateModelFromDataOperationPanelSignal.connect(self.updateModelFromDataOperationPanel)
-        self.communicate.activeGraphsSignal.connect(self.updatePlotItems)
+        self.communicator = GuiUtils.communicator
+        self.communicator.fileDataReceivedSignal.connect(self.fileWasRead)
+        self.communicator.statusBarUpdateSignal.connect(self.updateStatusBar)
+        self.communicator.updatePerspectiveWithDataSignal.connect(self.updatePerspective)
+        self.communicator.progressBarUpdateSignal.connect(self.updateProgressBar)
+        self.communicator.perspectiveChangedSignal.connect(self.perspectiveChanged)
+        self.communicator.updateTheoryFromPerspectiveSignal.connect(self.updateTheoryFromPerspective)
+        self.communicator.deleteIntermediateTheoryPlotsSignal.connect(self.deleteIntermediateTheoryPlotsByTabId)
+        self.communicator.plotRequestedSignal.connect(self.showPlot)
+        self.communicator.plotFromNameSignal.connect(self.showPlotFromName)
+        self.communicator.updateModelFromDataOperationPanelSignal.connect(self.updateModelFromDataOperationPanel)
+        self.communicator.activeGraphsSignal.connect(self.updatePlotItems)
 
 
     def addTriggers(self):
@@ -785,8 +749,8 @@ class GuiManager:
         self._workspace.actionCheck_for_update.triggered.connect(self.actionCheck_for_update)
         self._workspace.actionWhat_s_New.triggered.connect(self.actionWhatsNew)
 
-        self.communicate.sendDataToGridSignal.connect(self.showBatchOutput)
-        self.communicate.resultPlotUpdateSignal.connect(self.showFitResults)
+        self.communicator.sendDataToGridSignal.connect(self.showBatchOutput)
+        self.communicator.resultPlotUpdateSignal.connect(self.showFitResults)
 
 
     #============ FILE =================
@@ -1241,7 +1205,7 @@ class GuiManager:
         """
         """
         data, theory = self.filesWidget.getAllFlatData()
-        self.communicate.sendDataToPanelSignal.emit(dict(data, **theory))
+        self.communicator.sendDataToPanelSignal.emit(dict(data, **theory))
 
         self.DataOperation.show()
 
@@ -1436,7 +1400,7 @@ class GuiManager:
 
     def actionEditMask(self):
 
-        self.communicate.extMaskEditorSignal.emit()
+        self.communicator.extMaskEditorSignal.emit()
 
     #============ ANALYSIS =================
     def actionFitting(self):

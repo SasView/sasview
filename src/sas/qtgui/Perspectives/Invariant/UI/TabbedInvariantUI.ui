@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>650</width>
-    <height>580</height>
+    <height>600</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,7 +19,7 @@
   <property name="minimumSize">
    <size>
     <width>650</width>
-    <height>580</height>
+    <height>600</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -31,7 +31,7 @@
      <x>10</x>
      <y>10</y>
      <width>631</width>
-     <height>521</height>
+     <height>551</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -47,7 +47,7 @@
     </size>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="tabMain">
     <attribute name="title">
@@ -86,6 +86,9 @@
                <property name="readOnly">
                 <bool>true</bool>
                </property>
+               <property name="toolTip">
+                <string>Minimum Q used for total invariant calculation (1/Angstrom).</string>
+               </property>
               </widget>
              </item>
              <item>
@@ -102,6 +105,9 @@
                </property>
                <property name="readOnly">
                 <bool>true</bool>
+               </property>
+               <property name="toolTip">
+                <string>Maximum Q used for total invariant calculation (1/Angstrom).</string>
                </property>
               </widget>
              </item>
@@ -135,7 +141,10 @@
              <bool>false</bool>
             </property>
             <property name="readOnly">
-             <bool>false</bool>
+             <bool>true</bool>
+            </property>
+            <property name="toolTip">
+             <string>Data file being analyzed.</string>
             </property>
            </widget>
           </item>
@@ -151,100 +160,134 @@
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_5">
         <item>
-         <layout class="QGridLayout" name="gridLayout_3">
-          <item row="0" column="0">
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
            <widget class="QLabel" name="lblBackground">
             <property name="text">
              <string>Background:</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="txtBackgd"/>
-          </item>
-          <item row="0" column="2">
-           <widget class="QLabel" name="lblBackgroundUnits">
-            <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;cm&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <item>
+           <widget class="QLineEdit" name="txtBackgd">
+            <property name="toolTip">
+             <string>Background to subtract from the scattering data.</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="4">
-           <widget class="QLineEdit" name="txtContrast"/>
-          </item>
-          <item row="0" column="3">
-           <widget class="QLabel" name="lblContrast">
-            <property name="text">
-             <string>Contrast:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="4">
-           <widget class="QLineEdit" name="txtVolFrac2"/>
-          </item>
-          <item row="1" column="3">
-           <widget class="QLabel" name="lblVF1">
-            <property name="text">
-             <string>Volume Fraction 1:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="4">
-           <widget class="QLineEdit" name="txtVolFrac1"/>
-          </item>
-          <item row="0" column="5">
-           <widget class="QLabel" name="lblContrastUnits">
-            <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-2&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="txtScale"/>
-          </item>
-          <item row="2" column="3">
-           <widget class="QLabel" name="lblVF2">
-            <property name="text">
-             <string>Volume Fraction 2:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
+          <item>
            <widget class="QLabel" name="lblScale">
             <property name="text">
              <string>Scale:</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
+          <item>
+           <widget class="QLineEdit" name="txtScale">
+            <property name="toolTip">
+             <string>Scale factor used for the invariant and extrapolation calculations.</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QGridLayout" name="gridLayout_10">
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="txtVolFrac1">
+            <property name="toolTip">
+             <string>Volume fraction of the minority phase.</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QLabel" name="lblPM_5">
+            <property name="text">
+             <string>+/-</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="txtContrast">
+            <property name="toolTip">
+             <string>Scattering length density contrast.</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="4">
+           <widget class="QLabel" name="lblContrastUnits_in">
+            <property name="text">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-2&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="3">
+           <widget class="QLineEdit" name="txtVolFrac1Err">
+            <property name="toolTip">
+             <string>Uncertainty in the volume fraction of the minority phase.</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QLabel" name="lblPM_7">
+            <property name="text">
+             <string>+/-</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="3">
+           <widget class="QLineEdit" name="txtContrastErr">
+            <property name="toolTip">
+             <string>Uncertainty in the scattering length density contrast.</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLabel" name="lblPM_6">
+            <property name="text">
+             <string>+/-</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <widget class="QLineEdit" name="txtPorodCstErr">
+            <property name="toolTip">
+             <string>Uncertainty in the Porod constant.</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
            <widget class="QLabel" name="lblPorodCst">
             <property name="text">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Porod constant:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="2">
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="txtPorodCst">
+            <property name="toolTip">
+             <string>Optional Porod constant.</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="4">
            <widget class="QLabel" name="lblPorodCstUnits">
             <property name="text">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;(cm Å&lt;span style=&quot; vertical-align:super;&quot;&gt;4&lt;/span&gt;)&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="txtPorodCst">
-            <property name="toolTip">
-             <string>Porod constant (optional)</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="6">
+          <item row="1" column="0">
            <widget class="QRadioButton" name="rbContrast">
             <property name="text">
-             <string>Use Contrast</string>
+             <string>Contrast:</string>
+            </property>
+            <property name="toolTip">
+             <string>Use contrast to calculate the volume fraction.</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="6" rowspan="2">
+          <item row="2" column="0">
            <widget class="QRadioButton" name="rbVolFrac">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
@@ -253,8 +296,10 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Use Volume
- Fraction</string>
+             <string>Volume Fraction:</string>
+            </property>
+            <property name="toolTip">
+             <string>Use volume fraction to calculate the contrast.</string>
             </property>
            </widget>
           </item>
@@ -298,6 +343,9 @@
           </property>
           <property name="readOnly">
            <bool>true</bool>
+          </property>
+          <property name="toolTip">
+           <string>Calculated volume fraction of the minority phase.</string>
           </property>
          </widget>
         </item>
@@ -346,7 +394,7 @@
         <item row="3" column="4">
          <widget class="QLabel" name="lblSpecificSurfaceUnits">
           <property name="text">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
          </widget>
         </item>
@@ -367,6 +415,9 @@
           <property name="readOnly">
            <bool>true</bool>
           </property>
+          <property name="toolTip">
+           <string>Uncertainty in the calculated volume fraction.</string>
+          </property>
          </widget>
         </item>
         <item row="3" column="1">
@@ -385,6 +436,9 @@
           </property>
           <property name="readOnly">
            <bool>true</bool>
+          </property>
+          <property name="toolTip">
+           <string>Specific surface area (surface per unit volume).</string>
           </property>
          </widget>
         </item>
@@ -434,6 +488,9 @@
           <property name="readOnly">
            <bool>true</bool>
           </property>
+          <property name="toolTip">
+           <string>Uncertainty in the total invariant.</string>
+          </property>
          </widget>
         </item>
         <item row="3" column="3">
@@ -452,6 +509,9 @@
           </property>
           <property name="readOnly">
            <bool>true</bool>
+          </property>
+          <property name="toolTip">
+           <string>Uncertainty in the specific surface area.</string>
           </property>
          </widget>
         </item>
@@ -485,6 +545,9 @@
           <property name="readOnly">
            <bool>true</bool>
           </property>
+          <property name="toolTip">
+           <string>Calculated scattering length density contrast.</string>
+          </property>
          </widget>
         </item>
         <item row="2" column="2">
@@ -510,6 +573,16 @@
           </property>
           <property name="readOnly">
            <bool>true</bool>
+          </property>
+          <property name="toolTip">
+           <string>Uncertainty in the calculated scattering length density contrast.</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="4">
+         <widget class="QLabel" name="lblContrastUnits_out">
+          <property name="text">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-2&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
          </widget>
         </item>
@@ -606,7 +679,7 @@
            </widget>
           </item>
           <item row="1" column="2">
-           <widget class="QLabel" name="labelUnits_2">
+           <widget class="QLabel" name="lblGuinierEndUnits">
             <property name="text">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
@@ -709,7 +782,7 @@
            </widget>
           </item>
           <item row="1" column="3">
-           <widget class="QLabel" name="labelUnits">
+           <widget class="QLabel" name="lblPorodStartUnits">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
               <horstretch>0</horstretch>
@@ -771,7 +844,7 @@
            </widget>
           </item>
           <item row="2" column="3">
-           <widget class="QLabel" name="labelUnits_3">
+           <widget class="QLabel" name="lblPorodEndUnits">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
               <horstretch>0</horstretch>
@@ -863,8 +936,8 @@
   <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>531</y>
+     <x>10</x>
+     <y>560</y>
      <width>611</width>
      <height>31</height>
     </rect>
@@ -873,7 +946,7 @@
     <item>
      <widget class="QPushButton" name="cmdCalculate">
       <property name="toolTip">
-       <string>Compute invariant</string>
+       <string>Run the invariant calculation.</string>
       </property>
       <property name="text">
        <string>Calculate</string>
@@ -899,7 +972,7 @@
        <bool>false</bool>
       </property>
       <property name="toolTip">
-       <string>Get more details of computation such as fraction from extrapolation</string>
+       <string>Show more calculation details, including extrapolation fractions and Q* values.</string>
       </property>
       <property name="text">
        <string>Status</string>
@@ -909,7 +982,7 @@
     <item>
      <widget class="QPushButton" name="cmdHelp">
       <property name="toolTip">
-       <string/>
+       <string>Open the Invariant perspective help documentation.</string>
       </property>
       <property name="text">
        <string>Help</string>
@@ -924,12 +997,24 @@
   <tabstop>txtName</tabstop>
   <tabstop>txtTotalQMin</tabstop>
   <tabstop>txtTotalQMax</tabstop>
-  <tabstop>txtVolFract</tabstop>
-  <tabstop>txtVolFractErr</tabstop>
-  <tabstop>txtSpecSurf</tabstop>
-  <tabstop>txtSpecSurfErr</tabstop>
-  <tabstop>txtInvariantTot</tabstop>
-  <tabstop>txtInvariantTotErr</tabstop>
+  <tabstop>txtBackgd</tabstop>
+  <tabstop>txtScale</tabstop>
+  <tabstop>txtPorodCst</tabstop>
+  <tabstop>txtPorodCstErr</tabstop>
+  <tabstop>txtContrast</tabstop>
+  <tabstop>txtContrastErr</tabstop>
+  <tabstop>txtVolFrac1</tabstop>
+  <tabstop>txtVolFrac1Err</tabstop>
+  <tabstop>chkLowQ_ex</tabstop>
+  <tabstop>rbLowQGuinier_ex</tabstop>
+  <tabstop>rbLowQPower_ex</tabstop>
+  <tabstop>rbLowQFit_ex</tabstop>
+  <tabstop>rbLowQFix_ex</tabstop>
+  <tabstop>txtLowQPower_ex</tabstop>
+  <tabstop>chkHighQ_ex</tabstop>
+  <tabstop>rbHighQFit_ex</tabstop>
+  <tabstop>rbHighQFix_ex</tabstop>
+  <tabstop>txtHighQPower_ex</tabstop>
   <tabstop>cmdCalculate</tabstop>
   <tabstop>cmdStatus</tabstop>
   <tabstop>cmdHelp</tabstop>

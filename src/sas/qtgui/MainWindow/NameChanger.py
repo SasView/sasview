@@ -18,7 +18,7 @@ class ChangeName(QtWidgets.QDialog, Ui_ChangeCategoryUI):
         self.setModal(True)
 
         self.parent = parent
-        self.communicator = self.parent.communicator
+        self.communicator = GuiUtils.communicator
         self.communicator.dataDeletedSignal.connect(self.removeData)
         self.manager = self.parent.manager
 

@@ -1,4 +1,5 @@
 import logging
+from collections.abc import Callable
 
 from sasdata.dataloader.data_info import Data1D
 
@@ -13,22 +14,19 @@ logger = logging.getLogger(__name__)
 
 
 class SizeDistributionThread(CalcThread):
-    """Thread performing the fit"""
+    """Thread performing the fit."""
 
     def __init__(
         self,
         data: Data1D,
         background: Data1D,
         params: MaxEntParameters,
-        completefn=None,
-        updatefn=None,
-        yieldtime=0.01,
-        worktime=0.01,
-        exception_handler=None,
-    ):
-        """
-        Initialize parameters
-        """
+        completefn: Callable[[MaxEntResult], None] | None = None,
+        updatefn: Callable | None = None,
+        yieldtime: float = 0.01,
+        worktime: float = 0.01,
+        exception_handler: Callable | None = None,
+    ) -> None:
         CalcThread.__init__(
             self,
             completefn,
@@ -37,12 +35,13 @@ class SizeDistributionThread(CalcThread):
             worktime,
             exception_handler=exception_handler,
         )
-        self.data = data
-        self.background = background
-        self.params = params
-        self.starttime = 0
+        self.data: Data1D = data
+        self.background: Data1D = background
+        self.params: MaxEntParameters = params
+        self.starttime: float = 0
 
-    def compute(self, *args, **kwargs):
+    def compute(self, *args, **kwargs) -> None:
+        """Perform the size distribution fit."""
         sd = sizeDistribution(self.data)
         sd.qMin = self.params.qmin
         sd.qMax = self.params.qmax
@@ -53,15 +52,12 @@ class SizeDistributionThread(CalcThread):
         sd.model = self.params.model
         sd.iterMax = self.params.max_iterations
         sd.skyBackground = self.params.sky_background
-        sd.useWeights = True
         sd.weightType = self.params.weight_type
         sd.weightFactor = self.params.weight_factor
         sd.weightPercent = self.params.weight_percent
         sd.nbins = self.params.num_bins
 
-        trim_data, intensities, init_bins_back, sigma = sd.prep_maxEnt(
-            self.background, full_fit=self.params.full_fit
-        )
+        trim_data, intensities, init_bins_back, sigma = sd.prep_maxEnt(self.background, full_fit=self.params.full_fit)
         convergence_info = sd.run_maxEnt(trim_data, intensities, init_bins_back, sigma)
 
         convergences, num_iters = zip(*convergence_info)

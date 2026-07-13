@@ -11,6 +11,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from sasmodels.modelinfo import Parameter
 
 from sas.qtgui.Utilities import GuiUtils
+from sas.qtgui.Utilities.BackgroundColor import BG_DEFAULT, BG_ERROR
 from sas.qtgui.Utilities.ModelEditors.Dialogs.ModelSelector import ModelSelector
 from sas.qtgui.Utilities.ModelEditors.Dialogs.ParameterEditDialog import ParameterEditDialog
 from sas.qtgui.Utilities.ModelEditors.ReparamEditor.UI.ReparameterizationEditorUI import Ui_ReparameterizationEditor
@@ -296,19 +297,19 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         # Write the new model to the file
         model_text = self.generateModelText()
         self.writeModel(output_file_path, model_text)
-        self.parent.communicate.customModelDirectoryChanged.emit()  # Refresh the list of custom models
+        GuiUtils.communicator.customModelDirectoryChanged.emit()  # Refresh the list of custom models
 
         # Test the model for errors (file must be generated first)
         error_line = self.checkModel(output_file_path)
         if error_line > 0:
             return
 
-        self.txtFunction.setStyleSheet("")
+        self.txtFunction.setStyleSheet(BG_DEFAULT)
         self.addTooltips()  # Reset the tooltips
 
         # Notify user that model was written sucessfully
         msg = f"Reparameterized model {model_name} successfully created."
-        self.parent.communicate.statusBarUpdateSignal.emit(msg)
+        GuiUtils.communicator.statusBarUpdateSignal.emit(msg)
         logger.info(msg)
 
         self.is_modified = False
@@ -453,11 +454,11 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
             logger.error(traceback_to_show)
 
             # Set the status bar message
-            # GuiUtils.Communicate.statusBarUpdateSignal.emit("Model check failed")
-            self.parent.communicate.statusBarUpdateSignal.emit("Model check failed")
+            # GuiUtils.communicator.statusBarUpdateSignal.emit("Model check failed")
+            GuiUtils.communicator.statusBarUpdateSignal.emit("Model check failed")
 
             # Format text box with error indicators
-            self.txtFunction.setStyleSheet("border: 5px solid red")
+            self.txtFunction.setStyleSheet(BG_ERROR)
             # last_lines = traceback.format_exc().split('\n')[-4:]
             traceback_to_show = '\n'.join(last_lines)
             self.txtFunction.setToolTip(traceback_to_show)

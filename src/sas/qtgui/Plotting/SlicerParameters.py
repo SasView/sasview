@@ -19,6 +19,11 @@ from sas.qtgui.Plotting import PlotHelper
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.Slicers.AnnulusSlicer import AnnulusInteractor
 from sas.qtgui.Plotting.Slicers.BoxSlicer import BoxInteractorX, BoxInteractorY
+from sas.qtgui.Plotting.Slicers.MultiSlicerBase import (
+    SectorInteractorMulti,
+    WedgeInteractorPhiMulti,
+    WedgeInteractorQMulti,
+)
 from sas.qtgui.Plotting.Slicers.SectorSlicer import SectorInteractor
 from sas.qtgui.Plotting.Slicers.WedgeSlicer import WedgeInteractorPhi, WedgeInteractorQ
 
@@ -34,6 +39,19 @@ class FittingType(Enum):
     FITTING_BATCH: int = 2
     INVERSION_SINGLE: int = 3
     INVERSION_BATCH: int = 4
+
+
+class SymmetricDefinitions(Enum):
+    """Definitions for symmetric slicers"""
+
+    WEDGE_PHI = ("Wedge (Phi)", WedgeInteractorPhi, WedgeInteractorPhiMulti)
+    WEDGE_Q = ("Wedge (Q)", WedgeInteractorQ, WedgeInteractorQMulti)
+    SECTOR = ("Sector", SectorInteractor, SectorInteractorMulti)
+
+    def __init__(self, display_name, single_class, multi_class):
+        self.display_name = display_name
+        self.single_class = single_class
+        self.multi_class = multi_class
 
 
 FITTING_TYPES: set[int] = {FittingType.FITTING_SINGLE, FittingType.FITTING_BATCH}  # 1, 2
@@ -99,8 +117,8 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         self.delegate = EditDelegate(self, validate_method=self.validate_method)
         self.lstParams.setItemDelegate(self.delegate)
 
-        # respond to graph deletion
-        self.communicator.activeGraphsSignal.connect(self.updatePlotList)
+        # Respond to graph additions/removals and close if the owner plot goes away.
+        self.communicator.activeGraphsSignal.connect(self.onActiveGraphsChanged)
 
         # Set up paths
         self.txtLocation.setText(self.save_location)
@@ -140,14 +158,34 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         header.setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
         header.setStretchLastSection(True)
 
+    def onActiveGraphsChanged(self, graph_data: list | None = None):
+        """
+        Update plot lists and close this dialog if its parent plot was closed.
+        """
+        self.updatePlotList()
+
+        # Guard against unexpected signal emissions
+        if not isinstance(graph_data, (list, tuple)) or len(graph_data) != 2:
+            return
+
+        # If closed, it should be a list of [plot_object, was_removed_boolean].
+        closed_plot, was_removed = graph_data
+        if was_removed and closed_plot is self.parent:
+            self.close()
+
     def updatePlotList(self):
-        """ Update the list of active plots """
-        self.active_plots = self.parent.getActivePlots()
+        """Update the list of active plots"""
+        try:
+            self.active_plots = self.parent.getActivePlots()
+        except RuntimeError:
+            # Parent plot widget can already be deleted during teardown.
+            self.close()
+            return
         self.setPlotsList()
         self.updateSlicerPlotList()
 
     def updateSlicerPlotList(self):
-        """ Update the list of active slicer plots """
+        """Update the list of active slicer plots"""
         self.active_slicer_plots = self.parent.getActiveSlicerPlots()
         self.setSlicerPlotsList()
 
@@ -172,7 +210,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         self.lstSlicers.clear()
 
         # Create a button group for radio button behavior
-        if not hasattr(self, 'slicerButtonGroup'):
+        if not hasattr(self, "slicerButtonGroup"):
             self.slicerButtonGroup = QtWidgets.QButtonGroup(self)
             self.slicerButtonGroup.setExclusive(True)
 
@@ -181,7 +219,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         if self.model is not None:
             # Find which slicer has this model
             for slicer_name, slicer_obj in self.parent.slicers.items():
-                if hasattr(slicer_obj, '_model') and slicer_obj._model is self.model:
+                if hasattr(slicer_obj, "_model") and slicer_obj._model is self.model:
                     slicer_to_select = slicer_name
                     break
 
@@ -216,7 +254,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
             # Store the slicer's model
             if item in self.parent.slicers:
                 slicer_obj = self.parent.slicers[item]
-                if hasattr(slicer_obj, '_model'):
+                if hasattr(slicer_obj, "_model"):
                     self.slicer_models[str(item)] = slicer_obj._model
 
             # Connect radio button to update handler
@@ -226,7 +264,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         """
         Returns the currently checked slicer (radio button)
         """
-        if not hasattr(self, 'slicerButtonGroup'):
+        if not hasattr(self, "slicerButtonGroup"):
             return None
 
         checked_button = self.slicerButtonGroup.checkedButton()
@@ -325,6 +363,9 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         # Stack Plots
         self.cbStackPlots.toggled.connect(self.onStackPlotsChanged)
 
+        # Apply symmetric slicers
+        self.cmdApplySym.clicked.connect(self.onApplySymmetricSlicers)
+
         # Initialize slicer combobox to the current slicer
         current_slicer = type(self.parent.slicer)
         for index in self.callbacks:
@@ -355,9 +396,6 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         """change the parameters based on the slicer chosen"""
         if index == 0:  # No interactor
             return
-            # self.parent.onClearSlicer()
-            # self.setModel(None)
-            # self.onGeneratePlots(False)
         else:
             slicer = self.callbacks[index]
             if self.active_plots.keys():
@@ -372,9 +410,6 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         """replace the slicer with the one chosen"""
         if index == 0:  # No interactor
             return
-            # self.parent.onClearSlicer()
-            # self.setModel(None)
-            # self.onGeneratePlots(False)
         else:
             # delete the currently selected slicer
             self.onDelete()
@@ -466,16 +501,28 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         Delete the current slicer
         """
         # Pop up a confirmation dialog
-        reply = QtWidgets.QMessageBox.question(self, 'Delete Slicer',
-                                             'Are you sure you want to delete this slicer?',
-                                             QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
-                                             QtWidgets.QMessageBox.No)
+        reply = QtWidgets.QMessageBox.question(
+            self,
+            "Delete Slicer",
+            "Are you sure you want to delete this slicer?",
+            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+            QtWidgets.QMessageBox.No,
+        )
         if reply == QtWidgets.QMessageBox.No:
             return
         # Get the current slicer name
         slicer_item = self.getCheckedSlicer()
-        # Remove the slicer from the dictionary
-        if slicer_item in self.parent.slicers:
+        self._removeSlicers([slicer_item])
+
+    def _removeSlicers(self, slicer_names):
+        """
+        Remove one or more slicers from the dialog and the parent plot.
+        """
+        removed_any = False
+        for slicer_item in slicer_names:
+            if slicer_item not in self.parent.slicers:
+                continue
+
             slicer_obj = self.parent.slicers[slicer_item]
             # Clear only this slicer's markers without affecting other slicers
             # Use clear_markers() which uses connect.clear(*markers) instead of clearall()
@@ -485,32 +532,51 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
             # Remove from slicer_models cache
             if slicer_item in self.slicer_models:
                 del self.slicer_models[slicer_item]
-            # update the canvas
-            self.parent.canvas.draw()
-            # update the slicer list
-            self.updateSlicersList()
-            # Select the next remaining slicer if any exist
-            if len(self.parent.slicers) > 0:
-                # Get the first remaining slicer
-                next_slicer_name = next(iter(self.parent.slicers.keys()))
-                # Update self.parent.slicer to point to the remaining slicer
-                self.parent.slicer = self.parent.slicers[next_slicer_name]
-                self.checkSlicerByName(next_slicer_name)
-            else:
-                # No slicers left, clear the model and slicer reference
-                self.parent.slicer = None
-                self.setModel(None)
+            removed_any = True
 
-    def onDeleteSlicerPlots(self):
+        if not removed_any:
+            return
+
+        # Update the canvas
+        self.parent.canvas.draw()
+        # Update the slicers list
+        self.updateSlicersList()
+
+        # Select the next remaining slicer if any exist
+        if len(self.parent.slicers) > 0:
+            # Get the first remaining slicer
+            next_slicer_name = next(iter(self.parent.slicers.keys()))
+            # Update self.parent.slicer to point to the remaining slicer
+            self.parent.slicer = self.parent.slicers[next_slicer_name]
+            self.checkSlicerByName(next_slicer_name)
+        else:
+            # No slicers left, clear the model and slicer reference
+            self.parent.slicer = None
+            self.setModel(None)
+
+    def deleteAllSlicerPlots(self, quiet=False):
+        """
+        Check all slicer plots in the list for deletion
+        """
+        for row in range(self.lstSlicerPlots.count()):
+            item = self.lstSlicerPlots.item(row)
+            item.setCheckState(QtCore.Qt.Checked)
+
+        self.onDeleteSlicerPlots(quiet=quiet)
+
+    def onDeleteSlicerPlots(self, quiet=False):
         """
         Delete selected slicer plots
         """
         # Pop a confirmation warning
-        msg = "Are you sure you want to delete the selected plots?"
-        reply = QtWidgets.QMessageBox.question(self, "Warning", msg, QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.No)
+        if not quiet:
+            msg = "Are you sure you want to delete the selected plots?"
+            reply = QtWidgets.QMessageBox.question(
+                self, "Warning", msg, QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.No
+            )
 
-        if reply == QtWidgets.QMessageBox.No:
-            return
+            if reply == QtWidgets.QMessageBox.No:
+                return
 
         # Iterate over the list backwards and delete checked items
         # Backwards to avoid index shifting issues
@@ -525,7 +591,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
                 plot_id = PlotHelper.idOfPlot(plot_widget)
 
                 # Close the plot window if it exists
-                if hasattr(plot_widget, 'close'):
+                if hasattr(plot_widget, "close"):
                     plot_widget.close()
 
                 # Remove from PlotHelper
@@ -541,10 +607,10 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
                     del self.active_plots[plot_name]
 
                 # Remove from the manager's plot_widgets if it exists
-                if hasattr(self.parent.manager, 'plot_widgets') and plot_id in self.parent.manager.plot_widgets:
+                if hasattr(self.parent.manager, "plot_widgets") and plot_id in self.parent.manager.plot_widgets:
                     subwindow = self.parent.manager.plot_widgets[plot_id]
                     # Remove from workspace
-                    if hasattr(self.parent.manager.parent, 'workspace'):
+                    if hasattr(self.parent.manager.parent, "workspace"):
                         self.parent.manager.parent.workspace().removeSubWindow(subwindow)
                     del self.parent.manager.plot_widgets[plot_id]
 
@@ -554,12 +620,106 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         # Update the slicer plots list to reflect deletions
         self.setSlicerPlotsList()
 
+    def onApplySymmetricSlicers(self):
+        """
+        Apply multiple symmetric slicers.
+        Removes any existing multi-slicer first since only one can exist at a time.
+        """
+
+        # Check if there are existing slicers or slicer plots
+        if self.parent.slicers or len(self.parent.slicer_plots_dict) > 0:
+            reply = QtWidgets.QMessageBox.question(
+                self,
+                "Existing Slicers Detected",
+                "Applying symmetric slicers will remove existing slicers and their plots.\nDo you want to continue?",
+                QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+                QtWidgets.QMessageBox.No,
+            )
+            if reply == QtWidgets.QMessageBox.No:
+                return
+            self.parent.onClearSlicer()
+            self.deleteAllSlicerPlots(quiet=True)
+
+        # Get the slicer type from combobox
+        slicer_type_index = self.cbSlicerType.currentIndex()
+
+        # Map combobox index to SymmetricDefinitions enum
+        symmetric_mapping = {
+            0: None,
+            1: SymmetricDefinitions.SECTOR,
+            2: SymmetricDefinitions.WEDGE_Q,
+            3: SymmetricDefinitions.WEDGE_PHI,
+        }
+
+        slicer_def = symmetric_mapping.get(slicer_type_index)
+
+        if slicer_def is None:
+            QtWidgets.QMessageBox.warning(self, "No Slicer Selected", "Please select a slicer type.")
+            return
+
+        # Get the multi-slicer class from the enum
+        slicer_class = slicer_def.multi_class
+
+        # Get the count
+        try:
+            count = int(self.txtSlicerCount.text())
+            if count < 1:
+                raise ValueError("Count must be positive")
+        except (ValueError, AttributeError):
+            QtWidgets.QMessageBox.warning(
+                self, "Invalid Count", "Please enter a valid positive number for slicer count."
+            )
+            return
+
+        # Warn if count is large
+        threshold = 4 if slicer_def == SymmetricDefinitions.SECTOR else 8
+
+        if count > threshold:
+            reply = QtWidgets.QMessageBox.question(
+                self,
+                "That is a lot of slicers!",
+                f"Are you sure you want to create more than {threshold} slicers? This may lead to severe performance issues.",
+                QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+                QtWidgets.QMessageBox.No,
+            )
+            if reply == QtWidgets.QMessageBox.No:
+                return
+
+        # Stack plots
+        self.parent.stackplots = True
+
+        # Create the multi-slicer
+        item = getattr(self.parent, "_item", None)
+
+        # Create slicer with count parameter
+        multi_slicer = slicer_class(
+            base=self.parent, axes=self.parent.ax, count=count, item=item, color="black", zorder=3
+        )
+
+        # Generate a unique name using the display name from the enum
+        slicer_name = f"{slicer_def.display_name}_Multi_{count}"
+
+        # Add to parent's slicers dict
+        self.parent.slicers[slicer_name] = multi_slicer
+
+        # Set as active slicer
+        self.parent.slicer = multi_slicer
+
+        # Set the model
+        if hasattr(multi_slicer, "_model"):
+            self.setModel(multi_slicer._model)
+
+        # Update the canvas
+        self.parent.canvas.draw()
+
+        # Update the slicers list
+        self.updateSlicersList()
+
     def onStackPlotsChanged(self, checked: bool):
         """
         Handle stack plots checkbox change
         """
         self.parent.stackplots = checked
-
 
     def applyPlotter(self, plot):
         """
@@ -714,7 +874,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         Clear the slicer by calling its clear() method.
         The slicer's clear() method handles all cleanup for that specific slicer type.
         """
-        if hasattr(slicer_obj, 'clear'):
+        if hasattr(slicer_obj, "clear"):
             slicer_obj.clear()
 
     def updateSlicersList(self):
@@ -727,7 +887,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         """
         Check (select) a slicer radio button by name
         """
-        if not hasattr(self, 'slicerButtonGroup'):
+        if not hasattr(self, "slicerButtonGroup"):
             return
 
         # Find and check the radio button with this slicer name
@@ -754,10 +914,11 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         elif slicer_name in self.parent.slicers:
             # Get the model from the slicer object
             slicer_obj = self.parent.slicers[slicer_name]
-            if hasattr(slicer_obj, '_model'):
+            if hasattr(slicer_obj, "_model"):
                 if slicer_name not in self.slicer_models:
                     self.slicer_models[slicer_name] = slicer_obj._model
                 self.setModel(slicer_obj._model)
+
 
 class ProxyModel(QtCore.QIdentityProxyModel):
     """

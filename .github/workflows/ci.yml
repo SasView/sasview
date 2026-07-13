@@ -132,6 +132,8 @@ jobs:
 
       - name: Generate job configuration matrix
         id: set-matrix
+        env:
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
         run: python .github/workflows/matrix.py >> $GITHUB_OUTPUT
 
 
@@ -194,7 +196,7 @@ jobs:
           cp dist/*whl ~/.cache/cache-wheel/
 
       - name: Store wheel of ${{ matrix.dependency.name }} for use
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: build-dependency-${{ matrix.dependency.name }}-wheel
           path: |
@@ -242,7 +244,7 @@ jobs:
           sudo eatmydata apt-get -y install libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils xvfb libegl-dev libcairo2-dev
 
       - name: Fetch wheels of sibling projects
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           path: dist/
           pattern: build-dependency-*-wheel
@@ -263,7 +265,7 @@ jobs:
           python -m build --no-isolation --sdist --wheel
 
       - name: Publish sdist
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: sasview-sdist
           path: |
@@ -271,7 +273,7 @@ jobs:
           if-no-files-found: error
 
       - name: Publish wheel package
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: sasview-wheel
           path: |
@@ -318,19 +320,26 @@ jobs:
           cd $RUNNER_TEMP
           python -m pytest -v -s test
 
-      # - name: Test GUI (Linux)
-      #   if: ${{ matrix.os == 'ubuntu-latest' }}
-      #   env:
-      #     PYOPENCL_COMPILER_OUTPUT: 1
-      #   run: |
-      #     # Suppress SIGSEGV from the tests until they can be fixed
-      #     retval=0
-      #     xvfb-run -a --server-args="-screen 0 1600x900x24" python -m pytest -rsx -v src/sas/qtgui/ || retval=$?
-      #     if [ $retval -eq 139 ]; then echo "WARNING: Python interpreter exited with Segmentation Fault. This normally indicates that Qt objects were not correctly deleted. This error is currently suppressed in SasView's test suite."; retval=0; fi
-      #     exit $retval
+      - name: Test GUI (Linux)
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        env:
+          PYOPENCL_COMPILER_OUTPUT: 1
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          # Ensure all test running dependencies are installed (https://pytest-qt.readthedocs.io/en/latest/troubleshooting.html)
+          sudo apt install -y libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils
+          /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1920x1200x24 -ac +extension GLX
+          # Run the UI generation routine (with force recreate enabled)
+          python src/sas/qtgui/convertUI.py -f
+          # Suppress SIGSEGV from the tests until they can be fixed
+          retval=0
+          xvfb-run -a --server-args="-screen 0 1600x900x24" python -m pytest -rsx -v src/sas/qtgui/ || retval=$?
+          if [ $retval -eq 139 ]; then echo "WARNING: Python interpreter exited with Segmentation Fault. This normally indicates that Qt objects were not correctly deleted. This error is currently suppressed in SasView's test suite."; retval=0; fi
+          exit $retval
 
   installer-matrix:
     needs: [matrix, build-sasview]
+    if: github.event_name != 'push' || github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/')
 
     strategy:
       fail-fast: false
@@ -393,7 +402,7 @@ jobs:
 
       - name: Collect a debug tarball of the installer package
         if: ${{ matrix.installer }}
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: Debug-SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
           path: |
@@ -414,8 +423,8 @@ jobs:
       - name: Build sasview installer dmg file (OSX)
         if: ${{ startsWith(matrix.os, 'macos') }}
         run: |
-          cd installers/dist
-          hdiutil create $MACOS_DMG_NAME -srcfolder SasView6.app -ov -format UDZO
+          uv pip install dmgbuild
+          installers/macos/create_dmg.sh "$MACOS_DMG_NAME"
 
       - name: Build sasview installer tarball (Linux)
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
@@ -441,7 +450,8 @@ jobs:
           python ../../build_tools/fix_qt_folder_names_for_codesign.py SasView6.app
           python  ../../build_tools/code_sign_osx.py
           codesign --verify --options=runtime --entitlements ../../build_tools/entitlements.plist --timestamp --deep --verbose=4 --force --sign "Developer ID Application: The International Scattering Alliance (8CX8K63BQM)" SasView6.app
-          hdiutil create $MACOS_DMG_NAME -srcfolder SasView6.app -ov -format UDZO
+          uv pip install dmgbuild
+          ../../installers/macos/create_dmg.sh "$MACOS_DMG_NAME"
           codesign -s "Developer ID Application: The International Scattering Alliance (8CX8K63BQM)" $MACOS_DMG_NAME
 
       - name: Notarize Release Build (OSX)
@@ -461,35 +471,29 @@ jobs:
         with:
           product-path: installers/dist/SasView6-${{ matrix.os }}.dmg
 
-      - name: Install DigiCert Client tools from Github Custom Actions marketplace
-        if: ${{ startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
-        uses: digicert/ssm-code-signing@v1.1.1
-
-      - name: Set up P12 certificate
+      - name: Setup SM_CLIENT_CERT_FILE from base64 secret data
         if: ${{ startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
         run: |
           echo "${{ secrets.WINDOZE_CERT_DATA }}" | base64 --decode > /d/Certificate_pkcs12.p12
         shell: bash
 
-      - name: Set keylocker variables
-        if: ${{ startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
-        id: variables
-        run: |
-          echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
-          echo "SM_HOST=${{ secrets.KEYLOCKER_HOST }}" >> "$GITHUB_ENV"
-          echo "SM_API_KEY=${{ secrets.KEYLOCKER_API_KEY }}" >> "$GITHUB_ENV"
-          echo "SM_CLIENT_CERT_FILE=D:\\Certificate_pkcs12.p12" >> "$GITHUB_ENV"
-          echo "SM_CLIENT_CERT_PASSWORD=${{ secrets.WINDOZE_CERT_PASSWORD }}" >> "$GITHUB_ENV"
-        shell: bash
 
-      - name: Sign the binary using keypair alias
+      - name: Setup Software Trust Manager
         if: ${{ startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
-        run: |
-           smctl sign --keypair-alias key_1369544803 --input installers/dist/setupSasView.exe
-        shell: cmd
+        uses: digicert/code-signing-software-trust-action@v1
+        with:
+              simple-signing-mode: true
+              # If the below 2 parameters are supplied, then smctl executable is invoked to attempt the signing.
+              input: installers/dist/setupSasView.exe
+              keypair-alias: ${{ secrets.KEYLOCKER_KEYPAIR_ALIAS }}
+        env:
+              SM_HOST: ${{ secrets.KEYLOCKER_HOST }}
+              SM_API_KEY: ${{ secrets.KEYLOCKER_API_KEY }}
+              SM_CLIENT_CERT_FILE: D:\\Certificate_pkcs12.p12
+              SM_CLIENT_CERT_PASSWORD: ${{ secrets.WINDOZE_CERT_PASSWORD }}
 
       - name: Publish installer package
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
           path: |
@@ -502,6 +506,7 @@ jobs:
 
   test-installer:
     needs: [ matrix, installer-matrix ]
+    if: github.event_name != 'push' || github.ref_name == 'main'
 
     strategy:
       fail-fast: false
@@ -538,7 +543,7 @@ jobs:
 
       - name: Retrieve installer (workflow image)
         if: ${{ env.INSTALLER_USE_OLD_IMAGE != 'true' }}
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         id: download
         with:
           name: SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
@@ -557,7 +562,7 @@ jobs:
       - name: Retrieve installer (old image)
         if: ${{ env.INSTALLER_USE_OLD_IMAGE == 'true' }}
         id: download-old-installer
-        uses: dawidd6/action-download-artifact@v12
+        uses: dawidd6/action-download-artifact@v21
         with:
           # Select a specific installer image based on the GitHub Actions run id
           run_id: ${{ env.INSTALLER_OLD_RUNID }}
@@ -671,7 +676,7 @@ jobs:
       - name: Retrieve installer debug tarball
         if: ${{ env.INSTALLER_USE_DEBUG == 'true' }}
         id: download-old-debug
-        uses: dawidd6/action-download-artifact@v12
+        uses: dawidd6/action-download-artifact@v21
         with:
           # Select a specific installer image based on the GitHub Actions run id
           run_id: ${{ env.INSTALLER_OLD_RUNID }}

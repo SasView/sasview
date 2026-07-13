@@ -4,6 +4,8 @@ FitPanel class contains fields allowing to fit  models and  data
 """
 from PySide6 import QtCore, QtWidgets
 
+from sas.qtgui.Utilities.GuiUtils import communicator
+
 
 class ResultPanel(QtWidgets.QTabWidget):
     """
@@ -22,7 +24,7 @@ class ResultPanel(QtWidgets.QTabWidget):
         """
         super(ResultPanel, self).__init__(parent)
         self.manager = manager
-        self.communicator = self.manager.communicator()
+        self.communicator = communicator
         self.setMinimumSize(400, 400)
         self.data_id = None
 
@@ -67,6 +69,11 @@ class ResultPanel(QtWidgets.QTabWidget):
             self.addTab(self.traceView, "Parameter Trace")
         else:
             for view in (self.correlationView, self.uncertaintyView, self.traceView):
+                # When switching from DREAM to another optimizer, the views are hidden, but data remains. Setting the
+                # state and clearing the figure are important for outside accessors, so they don't grab stale plots
+                # from a previous fit
+                view.state = None
+                view.figure.clear()
                 view.close()
         # no tabs in the widget - possibly LM optimizer. Mark "closed"
         if self.count()==0:

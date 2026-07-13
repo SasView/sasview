@@ -16,19 +16,23 @@ class SlicerModel:
         Set up the Qt model for data handling between controls
         """
         parameters = self.getParams()
-        self._model.removeRows(0, self._model.rowCount())
-        # Crete/overwrite model items
-        for parameter in list(parameters.keys()):
-            item1 = QtGui.QStandardItem(parameter)
-            if isinstance(parameters[parameter], bool):
-                item2 = QtGui.QStandardItem(parameters[parameter])
-                item2.setCheckable(True)
-                item2.setCheckState(QtCore.Qt.Checked if parameters[parameter] else QtCore.Qt.Unchecked)
-            else:
-                item2 = QtGui.QStandardItem(GuiUtils.formatNumber(parameters[parameter]))
-            self._model.appendRow([item1, item2])
-        self._model.setHeaderData(0, QtCore.Qt.Horizontal, "Parameter")
-        self._model.setHeaderData(1, QtCore.Qt.Horizontal, "Value")
+        blocked = self._model.blockSignals(True)
+        try:
+            self._model.removeRows(0, self._model.rowCount())
+            # Crete/overwrite model items
+            for parameter in list(parameters.keys()):
+                item1 = QtGui.QStandardItem(parameter)
+                if isinstance(parameters[parameter], bool):
+                    item2 = QtGui.QStandardItem(parameters[parameter])
+                    item2.setCheckable(True)
+                    item2.setCheckState(QtCore.Qt.Checked if parameters[parameter] else QtCore.Qt.Unchecked)
+                else:
+                    item2 = QtGui.QStandardItem(GuiUtils.formatNumber(parameters[parameter]))
+                self._model.appendRow([item1, item2])
+            self._model.setHeaderData(0, QtCore.Qt.Horizontal, "Parameter")
+            self._model.setHeaderData(1, QtCore.Qt.Horizontal, "Value")
+        finally:
+            self._model.blockSignals(blocked)
 
     def setParamsFromModel(self):
         """
@@ -44,9 +48,11 @@ class SlicerModel:
             else:
                 params[param_name] = float(self._model.item(row_index, 1).text())
 
-        self.update_model = False
-        self.setParams(params)
-        self.update_model = True
+        blocked = self._model.blockSignals(True)
+        try:
+            self.setParams(params)
+        finally:
+            self._model.blockSignals(blocked)
 
     def setParamsFromModelItem(self, item):
         """
@@ -61,9 +67,11 @@ class SlicerModel:
         else:
             params[param_name] = float(self._model.item(row_index, 1).text())
 
-        self.update_model = False
-        self.setParams(params)
-        self.update_model = True
+        blocked = self._model.blockSignals(True)
+        try:
+            self.setParams(params)
+        finally:
+            self._model.blockSignals(blocked)
 
     def model(self):
         '''getter for the model'''
@@ -73,7 +81,7 @@ class SlicerModel:
         ''' pure virtual '''
         raise NotImplementedError("Parameter getter must be implemented in derived class.")
 
-    def setParams(self):
+    def setParams(self, params):
         ''' pure virtual '''
         raise NotImplementedError("Parameter setter must be implemented in derived class.")
 

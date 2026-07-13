@@ -23,10 +23,12 @@ import sas.sascalc.calculator.gsc_model as gsc_model
 from sas.qtgui.Plotting.Arrow3D import Arrow3D
 from sas.qtgui.Plotting.PlotterBase import PlotterBase
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
+from sas.qtgui.Utilities.BackgroundColor import BG_DEFAULT, BG_ERROR, BG_WARNING
 from sas.qtgui.Utilities.GenericReader import GenReader
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor
 from sas.sascalc.calculator import sas_gen
 from sas.sascalc.calculator.geni import create_beta_plot, f_of_q, radius_of_gyration
+from sas.sascalc.calculator.sas_gen import ComputationType
 from sas.system.user import find_plugins_dir
 
 # Local UI
@@ -41,18 +43,13 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
     calculationFinishedSignal = QtCore.Signal()
     loadingFinishedSignal = QtCore.Signal(list, bool)
 
-    # class constants for textbox background colours
-    TEXTBOX_DEFAULT_STYLESTRING = 'background-color: rgb(255, 255, 255);'
-    TEXTBOX_WARNING_STYLESTRING = 'background-color: rgb(255, 226, 110);'
-    TEXTBOX_ERROR_STYLESTRING = 'background-color: rgb(255, 182, 193);'
-
     def __init__(self, parent=None):
         super(GenericScatteringCalculator, self).__init__()
         self.setupUi(self)
         self.setFixedSize(self.minimumSizeHint())
 
         self.manager = parent
-        self.communicator = self.manager.communicator()
+        self.communicator = GuiUtils.communicator
         self.model = sas_gen.GenSAS()
         self.omf_reader = sas_gen.OMFReader()
         self.sld_reader = sas_gen.SLDReader()
@@ -89,7 +86,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.setup_display()
 
         # combox box
-        self.cbOptionsCalc.currentIndexChanged.connect(self.change_is_avg)
+        self.cbOptionsCalc.currentIndexChanged.connect(self.change_computation_type)
         # prevent layout shifting when widget hidden
         # TODO: Is there a way to lcoate this policy in the ui file?
         sizePolicy = self.cbOptionsCalc.sizePolicy()
@@ -472,12 +469,12 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         elif sender.hasAcceptableInput() and senderInvalid:
             self.invalidLineEdits.remove(sender)
             self.toggle_error_functionality()
-            sender.setStyleSheet(self.TEXTBOX_DEFAULT_STYLESTRING)
+            sender.setStyleSheet(BG_DEFAULT)
         # If the LineEdit has had an invalid value stored then remove functionality
         elif (not sender.hasAcceptableInput()) and (not senderInvalid):
             self.invalidLineEdits.append(sender)
             self.toggle_error_functionality()
-            sender.setStyleSheet(self.TEXTBOX_ERROR_STYLESTRING)
+            sender.setStyleSheet(BG_ERROR)
         # If the LineEdit is an acceptable value according to the regex apply warnings
         # This functionality was previously found in check_value()
         if sender not in self.invalidLineEdits:
@@ -489,9 +486,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 max_step =  3*max(xnodes, ynodes, znodes)
                     # limits qmin > maxq / nodes
                 if value < 2 or value > max_step:
-                    self.txtNoQBins.setStyleSheet(self.TEXTBOX_WARNING_STYLESTRING)
+                    self.txtNoQBins.setStyleSheet(BG_WARNING)
                 else:
-                    self.txtNoQBins.setStyleSheet(self.TEXTBOX_DEFAULT_STYLESTRING)
+                    self.txtNoQBins.setStyleSheet(BG_DEFAULT)
             elif sender == self.txtQxMax:
                 xstepsize = float(self.txtXstepsize.text())
                 ystepsize = float(self.txtYstepsize.text())
@@ -499,9 +496,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 value = float(str(self.txtQxMax.text()))
                 max_q = numpy.pi / (max(xstepsize, ystepsize, zstepsize))
                 if value <= 0 or value > max_q or value < float(self.txtQxMin.text()):
-                    self.txtQxMax.setStyleSheet(self.TEXTBOX_WARNING_STYLESTRING)
+                    self.txtQxMax.setStyleSheet(BG_WARNING)
                 else:
-                    self.txtQxMax.setStyleSheet(self.TEXTBOX_DEFAULT_STYLESTRING)
+                    self.txtQxMax.setStyleSheet(BG_DEFAULT)
                 #if 2D scattering, program sets qmin to -qmax
                 if not self.is_avg:
                     self.txtQxMin.setText(str(-value))
@@ -512,9 +509,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 value = float(str(self.txtQxMin.text()))
                 min_q = numpy.pi / (min(xstepsize, ystepsize, zstepsize))
                 if value <= 0 or value > min_q or value > float(self.txtQxMax.text()):
-                    self.txtQxMin.setStyleSheet(self.TEXTBOX_WARNING_STYLESTRING)
+                    self.txtQxMin.setStyleSheet(BG_WARNING)
                 else:
-                    self.txtQxMin.setStyleSheet(self.TEXTBOX_DEFAULT_STYLESTRING)
+                    self.txtQxMin.setStyleSheet(BG_DEFAULT)
 
 
 
@@ -621,7 +618,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.cbOptionsCalc.setVisible(allow)
         if (allow):
             # A helper function to set up the averaging system
-            self.change_is_avg()
+            self.change_computation_type()
         else:
             # If magnetic data present then no averaging is allowed
             self.is_avg = False
@@ -633,7 +630,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.checkboxLogSpace.setEnabled(not self.is_mag)
 
 
-    def change_is_avg(self):
+    def change_computation_type(self):
         """Adjusts the GUI for whether 1D averaging is enabled
 
         If the user has chosen to carry out Debye full averaging then the magnetic sld
@@ -658,6 +655,22 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.checkboxLogSpace.setEnabled(self.is_avg)
         self.checkboxPluginModel.setEnabled(self.is_avg)
 
+        # set the type of calculation
+        self.model.set_computation_type(ComputationType(self.cbOptionsCalc.currentIndex()))
+        match self.cbOptionsCalc.currentIndex():
+            case 0 | 1 | 2:
+                pass
+            case 3:
+                self.checkboxPluginModel.setEnabled(False)
+                self.checkboxPluginModel.setChecked(True)
+                self.txtFileName.setText("saxs_fitting")
+                self.txtFileName.setEnabled(False)
+                self.cmdCompute.setText("Generate plugin model")
+                return
+            case _:
+                raise RuntimeError(f"Unknown computation type selected: {self.cbOptionsCalc.currentIndex()}")
+
+        self.cmdCompute.setText("Compute")
         if self.is_avg:
             self.txtMx.setText("0.0")
             self.txtMy.setText("0.0")
@@ -704,13 +717,20 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             load_nuc = self.sender() == self.cmdNucLoad
             # request a file from the user
             if load_nuc:
-                f_type = """
-                    All supported files (*.SLD *.sld *.pdb *.PDB, *.vtk, *.VTK);;
-                        SLD files (*.SLD *.sld);;
-                        PDB files (*.pdb *.PDB);;
-                        VTK files (*.vtk *.VTK);;
-                        All files (*.*)
-                """
+                if self.model.type is ComputationType.SAXS:
+                    f_type = """
+                        All supported files (*.CIF *.cif *.pdb *.PDB);;
+                            CIF files (*.CIF *.cif);;
+                            PDB files (*.pdb *.PDB);;
+                    """
+                else:
+                    f_type = """
+                        All supported files (*.SLD *.sld *.pdb *.PDB, *.vtk, *.VTK);;
+                            SLD files (*.SLD *.sld);;
+                            PDB files (*.pdb *.PDB);;
+                            VTK files (*.vtk *.VTK);;
+                            All files (*.*)
+                    """
             else:
                 f_type = """
                     All supported files (*.OMF *.omf *.SLD *.sld, *.vtk, *.VTK);;
@@ -720,6 +740,11 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                         All files (*.*)
                 """
             self.datafile = QtWidgets.QFileDialog.getOpenFileName(self, "Choose a file", "", f_type)[0]
+
+            if self.model.type is ComputationType.SAXS:
+                self.txtNucData.setText(os.path.basename(str(self.datafile)))
+                return
+
             # If a file has been sucessfully chosen
             if self.datafile:
                 # set basic data about the file
@@ -1412,6 +1437,49 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
         Copied from previous version
         """
+
+        if self.model.type is ComputationType.SAXS:
+            if self.datafile is None:
+                raise RuntimeError("No structure file is loaded! SAXS calculations require a structure file.")
+            from sas.qtgui.Calculators.SAXSPluginModelGenerator import get_base_plugin_name, write_plugin_model
+            write_plugin_model(self.datafile)
+            self.communicator.customModelDirectoryChanged.emit() # notify that a new plugin model is available
+
+            # try to bring the fit panel into focus and select the newly generated plugin
+            try:
+                self.manager.actionFitting() # switch to fitting window
+                per = self.manager.perspective() # internal access into the fitting window's state
+                # currentFittingWidget is provided by the Fitting perspective
+                fw = getattr(per, 'currentFittingWidget', None)
+                if fw is not None:
+                    # select the plugin models category & our newly generated model
+                    idx = fw.cbCategory.findText("Plugin Models")
+                    if idx == -1: return
+
+                    # force population of model combobox
+                    fw.cbCategory.setCurrentIndex(idx)
+                    fw.onSelectCategory()
+
+                    # plugin name base is 'SAXS fit'
+                    # the actual model name includes a structure tag, e.g. 'SAXS fit (2epe)'
+                    model_name = get_base_plugin_name()
+                    midx = fw.cbModel.findText(model_name, QtCore.Qt.MatchStartsWith)
+                    if midx == -1: return
+
+                    # load the model into the parameter table
+                    fw.cbModel.setCurrentIndex(midx)
+                    fw.onSelectModel()
+
+                    # make sure the perspective window is visible and focused
+                    self.close() # close the calculator window to highlight the changes to the fitting window
+                    per.show()
+
+            except Exception:
+                logger.warning("Failed to bring the newly generated plugin model into focus. Please report this issue.")
+                pass
+
+            return
+
         try:
             # create the combined sld data and update from gui
             sld_data = self.create_full_sld_data()
@@ -1541,7 +1609,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             model_str, model_path = gsc_model.generate_plugin(self.txtFileName.text(), self.data_to_plot, self.xValues,
                                                               self.fQ, self.rGMass)
             TabbedModelEditor.writeFile(model_path, model_str)
-            self.manager.communicate.customModelDirectoryChanged.emit()
+            self.communicator.customModelDirectoryChanged.emit()
 
             # Notify the user
             msg = "Custom model " + str(model_path.absolute()) + " successfully created."

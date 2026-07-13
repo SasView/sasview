@@ -10,7 +10,7 @@ from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionPerspective import 
     SizeDistributionWindow,
 )
 from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Utilities.GuiUtils import Communicate
+from sas.qtgui.Utilities.GuiUtils import communicator
 
 
 class SizeDistributionTest:
@@ -22,10 +22,7 @@ class SizeDistributionTest:
 
         class dummy_manager:
             HELP_DIRECTORY_LOCATION = "html"
-            communicate = Communicate()
-
-            def communicator(self):
-                return self.communicate
+            communicator = communicator
 
         w = SizeDistributionWindow(parent=dummy_manager())
         w._parent = QtWidgets.QMainWindow()
@@ -55,7 +52,7 @@ class SizeDistributionTest:
         # mapper
         assert isinstance(widget.mapper, QtWidgets.QDataWidgetMapper)
         # buttons
-        assert widget.calculateThisButton.isEnabled()
+        assert not widget.quickFitButton.isEnabled()
         assert widget.helpButton.isEnabled()
 
     def testDefaults(self, widget):
@@ -65,7 +62,7 @@ class SizeDistributionTest:
     def testRemoveData(self, widget):
         """Test data removal from widget"""
         widget.setData([self.fakeData1])
-        assert widget._data is not None
+        assert widget.logic.data is not None
         widget.removeData([self.fakeData1])
         assert widget._data is None
 
