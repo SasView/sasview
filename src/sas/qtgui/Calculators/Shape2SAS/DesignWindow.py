@@ -2,7 +2,7 @@
 import re
 from types import MethodType
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import (
     QCheckBox,
     QDialog,
@@ -76,7 +76,6 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         self.modelTabButtonOptions.horizontalLayout_5.insertWidget(1, self.checkTheoreticalScattering)
         self.plot = QPushButton("Plot")
         self.modelTabButtonOptions.horizontalLayout_5.insertWidget(1, self.plot)
-        self.modelTabButtonOptions.horizontalLayout_5.insertWidget(1, self.plot)
 
         self.line2 = QFrame()
         self.line2.setFrameShape(QFrame.VLine)
@@ -109,28 +108,58 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
             QSizePolicy.Policy.Expanding,
         )
 
-        # Model viewer tab
-        self.viewerTab = QWidget()
-        viewerTabLayout = QVBoxLayout(self.viewerTab)
-        viewerTabLayout.setContentsMargins(0, 0, 0, 0)
+        # The plots are shared between the tabs, so we create them once and
+        # move them into the appropriate tab when the user switches tabs.
 
-        viewerTabLayout.addWidget(
+        # Reusable viewer panel
+        self.viewerPanel = QWidget()
+        self.viewerPanel.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Expanding,
+        )
+
+        viewerPanelLayout = QVBoxLayout(self.viewerPanel)
+        viewerPanelLayout.setContentsMargins(0, 0, 0, 0)
+
+        viewerPanelLayout.addWidget(
             self.viewerModel.scatterContainer,
             stretch=1,
         )
-        viewerTabLayout.addWidget(self.viewerModel.viewerButtons)
-        viewerTabLayout.addWidget(self.viewerModel.viewerModelRadius)
+        viewerPanelLayout.addWidget(self.viewerModel.viewerButtons)
+        viewerPanelLayout.addWidget(self.viewerModel.viewerModelRadius)
 
-        # Theoretical scattering tab
-        self.scatteringTab = QWidget()
-        scatteringTabLayout = QVBoxLayout(self.scatteringTab)
-        scatteringTabLayout.setContentsMargins(0, 0, 0, 0)
+        # Reusable scattering-profile panel
+        self.profilePanel = QWidget()
+        self.profilePanel.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Expanding,
+        )
 
-        scatteringTabLayout.addWidget(
+        profilePanelLayout = QVBoxLayout(self.profilePanel)
+        profilePanelLayout.setContentsMargins(0, 0, 0, 0)
+
+        profilePanelLayout.addWidget(
             self.viewerModel.scattering,
             stretch=1,
         )
 
+        # Model viewer tab
+        self.viewerTab = QWidget()
+        self.viewerTabLayout = QVBoxLayout(self.viewerTab)
+        self.viewerTabLayout.setContentsMargins(0, 0, 0, 0)
+
+        # Scattering-profile tab
+        self.scatteringTab = QWidget()
+        self.scatteringTabLayout = QVBoxLayout(self.scatteringTab)
+        self.scatteringTabLayout.setContentsMargins(0, 0, 0, 0)
+
+        # Combined viewer/profile tab
+        self.combinedTab = QWidget()
+        self.combinedTabLayout = QVBoxLayout(self.combinedTab)
+        self.combinedTabLayout.setContentsMargins(0, 0, 0, 0)
+        self.combinedTabLayout.setSpacing(5)
+
+        # Add tabs
         self.plotTabs.addTab(
             self.viewerTab,
             "Model Viewer",
@@ -139,7 +168,16 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
             self.scatteringTab,
             "Scattering Profile",
         )
+        self.plotTabs.addTab(
+            self.combinedTab,
+            "Combined",
+        )
+
+        self.plotTabs.currentChanged.connect(self.onPlotTabChanged)
         self.plotTabs.setCurrentWidget(self.viewerTab)
+
+        # Perform the initial widget placement
+        self.onPlotTabChanged(self.plotTabs.currentIndex())
 
         # Left-hand table and right-hand tabs
         modelHbox.addWidget(self.subunitTable)
@@ -191,7 +229,6 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         )
         self.SAXSExperiment.setLayout(self.gridLayout_2)
 
-
         # TODO: implement in a future project
         # Building Constraint window
         self.constraint = Constraints(parent=self)
@@ -201,7 +238,6 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         self.setupTooltips()
 
         self.enableButtons(False)
-
 
     def setupSlots(self):
         """Connect signals and slots for the GUI."""
@@ -240,6 +276,83 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         self.SAXSTabButtons.reset.setToolTip("Reset this page to default")
         self.plotSAXS.setToolTip("Plot simulated SAXS data")
         self.sendSimToSasView.setToolTip("Send simulated SAXS data to SasView Data Explorer")
+
+    def onPlotTabChanged(self, index):
+        """Move the viewer and profile panels into the selected tab."""
+
+        current_tab = self.plotTabs.widget(index)
+
+        if current_tab is self.viewerTab:
+            # Move the viewer panel into the viewer-only tab
+            self.viewerTabLayout.addWidget(
+                self.viewerPanel,
+                stretch=1,
+            )
+
+            self.viewerPanel.show()
+            self.profilePanel.hide()
+
+            # Q3DScatter is a native window and must be explicitly shown
+            self.viewerModel.scatterContainer.show()
+            self.viewerModel.scatter.setVisible(True)
+            self.viewerModel.scatter.requestUpdate()
+
+        elif current_tab is self.scatteringTab:
+            # Move the profile panel into the profile-only tab
+            self.scatteringTabLayout.addWidget(
+                self.profilePanel,
+                stretch=1,
+            )
+
+            self.viewerPanel.hide()
+            self.profilePanel.show()
+
+            # Explicitly hide the native 3D window to prevent overlays
+            self.viewerModel.scatter.setVisible(False)
+            self.viewerModel.scatterContainer.hide()
+
+            # Wait until the tab has its final size before fitting the plot
+            QTimer.singleShot(0, self.fitScatteringProfile)
+
+        elif current_tab is self.combinedTab:
+            # Move both panels into the combined tab
+            self.combinedTabLayout.addWidget(self.viewerPanel, stretch=1)
+            self.combinedTabLayout.addWidget(self.profilePanel, stretch=1)
+
+            self.viewerPanel.show()
+            self.profilePanel.show()
+
+            self.viewerModel.scatterContainer.show()
+            self.viewerModel.scatter.setVisible(True)
+            self.viewerModel.scatter.requestUpdate()
+
+            QTimer.singleShot(0, self.fitScatteringProfile)
+
+    def fitScatteringProfile(self):
+        """Fit the scattering scene to the available profile-view area."""
+
+        scattering_view = self.viewerModel.scattering
+
+        # Use ResponsiveGraphicsView.fitScene() when available
+        if hasattr(scattering_view, "fitScene"):
+            scattering_view.fitScene()
+            return
+
+        scene = scattering_view.scene()
+
+        if scene is None:
+            return
+
+        scene_rect = scene.itemsBoundingRect()
+
+        if scene_rect.isEmpty():
+            return
+
+        scattering_view.setSceneRect(scene_rect)
+        scattering_view.fitInView(
+            scene_rect,
+            Qt.AspectRatioMode.KeepAspectRatio,
+        )
 
     def showConstraintWindow(self):
         """Get the Constraint window"""
@@ -630,6 +743,9 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
 
         else:
             self.viewerModel.setClearScatteringPlot()
+
+        # Restore the correct native-window visibility and plot sizing
+        self.onPlotTabChanged(self.plotTabs.currentIndex())
 
     def onSubunitTableReset(self):
         """Reset subunit table to default."""
