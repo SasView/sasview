@@ -275,8 +275,8 @@ class FittingWidgetTest:
         # Try to change back to default
         widget.cbCategory.setCurrentIndex(0)
 
-        # Observe no such luck
-        assert widget.cbCategory.currentIndex() == 8
+        # Restores the previous category index (not a fixed combo position).
+        assert widget.cbCategory.currentIndex() == category_index
         assert widget.cbModel.count() == 29
 
         # Set the structure factor
