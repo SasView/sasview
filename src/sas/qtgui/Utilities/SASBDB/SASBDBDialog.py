@@ -1641,7 +1641,6 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
                 return None
 
             import sas.qtgui.Plotting.PlotHelper as PlotHelper
-            from sas.qtgui.Plotting.PlotterData import DataRole
 
             if fitting_widget.logic.kernel_module is None:
                 logger.debug("No kernel module for residual plot search")
