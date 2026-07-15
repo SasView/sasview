@@ -10,7 +10,7 @@ import sys
 
 from dominate import tags
 from dominate.util import raw
-from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtWidgets
 
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 from sas.qtgui.Utilities.Reports.reports import ReportBase
