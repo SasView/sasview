@@ -23,7 +23,7 @@ Dataset Identifier
 
 Enter a valid SASBDB dataset identifier in the input field. The identifier can be:
 
-- A 7-character SASBDB code (e.g., ``SASDN24``, ``SASDB1234``)
+- A 7-character SASBDB code (e.g., ``SASDN24``)
 - The identifier is case-insensitive and will be automatically normalized
 
 Examples of valid identifiers:
@@ -40,15 +40,6 @@ When you click **Download and Load**:
 3. **Data Download**: The experimental data file is downloaded to a temporary location
 4. **Data Loading**: The downloaded data is automatically loaded into SasView
 5. **Metadata Population**: Metadata from SASBDB is automatically populated into the loaded dataset
-
-Progress Indicator
-------------------
-
-During the download process, you will see:
-
-- A progress bar indicating the download is in progress
-- Status messages showing the current operation
-- A success message with a summary of the loaded dataset
 
 Metadata Population
 --------------------
@@ -106,23 +97,6 @@ The metadata is displayed in a compact format with key information organized by 
 - Structural parameters (Rg, I(0), Dmax, MW, etc.)
 - Publication information
 
-Error Handling
---------------
-
-If an error occurs during download:
-
-- An error message will be displayed explaining the issue
-- Common errors include:
-  - Invalid dataset identifier format
-  - Dataset not found in SASBDB
-  - Network connection issues
-  - API service unavailable
-
-If you encounter errors:
-
-1. Verify the dataset identifier is correct
-2. Check your internet connection
-3. Try again after a few moments if the SASBDB service is temporarily unavailable
 
 Tips
 ----
