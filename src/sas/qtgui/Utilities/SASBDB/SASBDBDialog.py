@@ -25,6 +25,7 @@ from sas.qtgui.Utilities.SASBDB.sasbdb_data import (
     SASBDBProject,
     SASBDBSample,
 )
+from sas.qtgui.Utilities.SASBDB.sasbdb_data_collector import SASBDBDataCollector
 from sas.qtgui.Utilities.SASBDB.sasbdb_exporter import SASBDBExporter
 from sas.qtgui.Utilities.SASBDB.UI.SASBDBDialogUI import Ui_SASBDBDialogUI
 
@@ -177,6 +178,73 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
         self._guinier_plot_a = None
         self._guinier_plot_b = None
 
+    def _parse_float(self, text: str) -> float | None:
+        """Parse a stripped text field as float; return None if empty or invalid."""
+        text = text.strip()
+        if not text:
+            return None
+        try:
+            return float(text)
+        except ValueError:
+            return None
+
+    def _parse_int(self, text: str) -> int | None:
+        """Parse a stripped text field as int; return None if empty or invalid."""
+        text = text.strip()
+        if not text:
+            return None
+        try:
+            return int(text)
+        except ValueError:
+            return None
+
+    def _parse_float_field(self, widget) -> float | None:
+        """Parse a QLineEdit (or similar) as float."""
+        return self._parse_float(widget.text())
+
+    def _parse_int_field(self, widget) -> int | None:
+        """Parse a QLineEdit (or similar) as int."""
+        return self._parse_int(widget.text())
+
+    def _current_fitting_widget(self):
+        """Return the active FittingWidget from the parent perspective, or None."""
+        parent = self.parent()
+        if parent is None:
+            return None
+
+        current_perspective = None
+        if hasattr(parent, '_current_perspective'):
+            current_perspective = parent._current_perspective
+        elif hasattr(parent, 'guiManager') and hasattr(parent.guiManager, '_current_perspective'):
+            current_perspective = parent.guiManager._current_perspective
+
+        if current_perspective is None:
+            return None
+
+        from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
+        if not isinstance(current_perspective, FittingWindow):
+            return None
+
+        return current_perspective.currentFittingWidget
+
+    def _fit_guinier_over_q_range(
+        self, q_lo: float, q_hi: float, *, clear_first: bool = False
+    ) -> bool:
+        """
+        Fit ln(I) vs q² over [q_lo, q_hi] and update Guinier tab fields.
+
+        :return: True when a fit was applied, False otherwise.
+        """
+        if self._guinier_source_data is None or q_lo >= q_hi:
+            return False
+        guinier, fit_info = SASBDBDataCollector.collect_guinier_from_q_range(
+            self._guinier_source_data, q_lo, q_hi
+        )
+        if guinier is None:
+            return False
+        self._apply_guinier_to_fields(guinier, clear_first=clear_first, fit_info=fit_info)
+        return True
+
     def _on_guinier_reset_clicked(self) -> None:
         """Clear all Guinier line edits and reset the plot panel."""
         self._clear_guinier_fields()
@@ -185,14 +253,11 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
 
     def _sync_guinier_plot_ab_from_rg_i0(self, guinier: SASBDBGuinier) -> None:
         """Set ln(I)=a+b q² line parameters from Rg (nm) and I(0) for plotting."""
-        from sas.qtgui.Utilities.SASBDB.sasbdb_data_collector import SASBDBDataCollector
-
         if guinier.rg is None or guinier.i0 is None or guinier.i0 <= 0:
             self._guinier_plot_a = None
             self._guinier_plot_b = None
             return
-        coll = SASBDBDataCollector()
-        scale = coll._guinier_native_q_to_nm_scale(self._guinier_source_data)
+        scale = SASBDBDataCollector._guinier_native_q_to_nm_scale(self._guinier_source_data)
         rg_native = float(guinier.rg) * scale
         self._guinier_plot_b = -(rg_native**2) / 3.0
         self._guinier_plot_a = math.log(float(guinier.i0))
@@ -312,72 +377,23 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
         """Refit when both start and end point indices are set."""
         if self._guinier_suppress_range_signals:
             return
-        sp = self.txtGuinierStartPoint.text().strip()
-        ep = self.txtGuinierEndPoint.text().strip()
-        if not sp or not ep:
-            self._refresh_guinier_plot()
-            return
-        try:
-            i_s = int(sp)
-            i_e = int(ep)
-        except ValueError:
-            self._refresh_guinier_plot()
-            return
-        if self._guinier_source_data is None:
+        i_s = self._parse_int_field(self.txtGuinierStartPoint)
+        i_e = self._parse_int_field(self.txtGuinierEndPoint)
+        if i_s is None or i_e is None:
             self._refresh_guinier_plot()
             return
         qr = self._q_lo_q_hi_from_guinier_indices(i_s, i_e)
-        if qr is None:
+        if qr is None or not self._fit_guinier_over_q_range(qr[0], qr[1]):
             self._refresh_guinier_plot()
-            return
-        q_lo, q_hi = qr
-        if q_lo >= q_hi:
-            self._refresh_guinier_plot()
-            return
-
-        from sas.qtgui.Utilities.SASBDB.sasbdb_data_collector import SASBDBDataCollector
-
-        collector = SASBDBDataCollector()
-        guinier, fit_info = collector.collect_guinier_from_q_range(
-            self._guinier_source_data, q_lo, q_hi
-        )
-        if guinier is None:
-            self._refresh_guinier_plot()
-            return
-        self._apply_guinier_to_fields(guinier, clear_first=False, fit_info=fit_info)
 
     def _on_guinier_q_range_editing_finished(self) -> None:
         """Refit ln(I) vs q² when both Q start and Q end are set."""
         if self._guinier_suppress_range_signals:
             return
-        rs = self.txtGuinierRangeStart.text().strip()
-        re = self.txtGuinierRangeEnd.text().strip()
-        if not rs or not re:
+        q_lo = self._parse_float_field(self.txtGuinierRangeStart)
+        q_hi = self._parse_float_field(self.txtGuinierRangeEnd)
+        if q_lo is None or q_hi is None or not self._fit_guinier_over_q_range(q_lo, q_hi):
             self._refresh_guinier_plot()
-            return
-        try:
-            q_lo = float(rs)
-            q_hi = float(re)
-        except ValueError:
-            self._refresh_guinier_plot()
-            return
-        if q_lo >= q_hi:
-            self._refresh_guinier_plot()
-            return
-        if self._guinier_source_data is None:
-            self._refresh_guinier_plot()
-            return
-
-        from sas.qtgui.Utilities.SASBDB.sasbdb_data_collector import SASBDBDataCollector
-
-        collector = SASBDBDataCollector()
-        guinier, fit_info = collector.collect_guinier_from_q_range(
-            self._guinier_source_data, q_lo, q_hi
-        )
-        if guinier is None:
-            self._refresh_guinier_plot()
-            return
-        self._apply_guinier_to_fields(guinier, clear_first=False, fit_info=fit_info)
 
     def _on_guinier_estimate_clicked(self) -> None:
         """Estimate: FreeSAS when range empty; fit by indices or by Q when set."""
@@ -385,8 +401,6 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
 
     def _run_free_sas_guinier_estimate(self) -> None:
         """FreeSAS auto_guinier, or WLS fit by indices / by Q range."""
-        from sas.qtgui.Utilities.SASBDB.sasbdb_data_collector import SASBDBDataCollector
-
         sp = self.txtGuinierStartPoint.text().strip()
         ep = self.txtGuinierEndPoint.text().strip()
         rs = self.txtGuinierRangeStart.text().strip()
@@ -401,10 +415,9 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
                     "Load 1D data or clear start/end point to use FreeSAS.",
                 )
                 return
-            try:
-                i_s = int(sp)
-                i_e = int(ep)
-            except ValueError:
+            i_s = self._parse_int(sp)
+            i_e = self._parse_int(ep)
+            if i_s is None or i_e is None:
                 QtWidgets.QMessageBox.warning(
                     self,
                     "Guinier estimate",
@@ -427,12 +440,7 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
                     "Start and end point must span at least two distinct q values.",
                 )
                 return
-
-            collector = SASBDBDataCollector()
-            guinier, fit_info = collector.collect_guinier_from_q_range(
-                self._guinier_source_data, q_lo, q_hi
-            )
-            if guinier is None:
+            if not self._fit_guinier_over_q_range(q_lo, q_hi):
                 QtWidgets.QMessageBox.warning(
                     self,
                     "Guinier estimate",
@@ -440,7 +448,6 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
                     "Need at least two points with I > 0 and a negative slope.",
                 )
                 return
-            self._apply_guinier_to_fields(guinier, clear_first=False, fit_info=fit_info)
             self._set_guinier_derived_fields_read_only(True)
             return
 
@@ -463,10 +470,9 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
                     "auto_guinier.",
                 )
                 return
-            try:
-                q_lo = float(rs)
-                q_hi = float(re)
-            except ValueError:
+            q_lo = self._parse_float(rs)
+            q_hi = self._parse_float(re)
+            if q_lo is None or q_hi is None:
                 QtWidgets.QMessageBox.warning(
                     self,
                     "Guinier estimate",
@@ -480,12 +486,7 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
                     "Q start must be less than Q end.",
                 )
                 return
-
-            collector = SASBDBDataCollector()
-            guinier, fit_info = collector.collect_guinier_from_q_range(
-                self._guinier_source_data, q_lo, q_hi
-            )
-            if guinier is None:
+            if not self._fit_guinier_over_q_range(q_lo, q_hi):
                 QtWidgets.QMessageBox.warning(
                     self,
                     "Guinier estimate",
@@ -494,7 +495,6 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
                     "(check q range and data).",
                 )
                 return
-            self._apply_guinier_to_fields(guinier, clear_first=False, fit_info=fit_info)
             self._set_guinier_derived_fields_read_only(True)
             return
 
@@ -517,8 +517,7 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
             )
             return
 
-        collector = SASBDBDataCollector()
-        guinier = collector.collect_guinier_from_freesas(self._guinier_source_data)
+        guinier = SASBDBDataCollector.collect_guinier_from_freesas(self._guinier_source_data)
         if guinier is None:
             QtWidgets.QMessageBox.warning(
                 self,
@@ -699,45 +698,13 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
         sample.curve_type = self.cmbCurveType.currentText() or None
         sample.angular_units = self.cmbAngularUnits.currentText() or None
         sample.intensity_units = self.cmbIntensityUnits.currentText() or None
-
-        # Parse numeric fields
-        try:
-            mw_text = self.txtExpMW.text().strip()
-            if mw_text:
-                sample.experimental_molecular_weight = float(mw_text)
-        except ValueError:
-            pass
-
+        sample.experimental_molecular_weight = self._parse_float_field(self.txtExpMW)
         sample.experiment_date = self.txtExperimentDate.text().strip() or None
         sample.beamline_instrument = self.txtBeamline.text().strip() or None
-
-        try:
-            wavelength_text = self.txtWavelength.text().strip()
-            if wavelength_text:
-                sample.wavelength = float(wavelength_text)
-        except ValueError:
-            pass
-
-        try:
-            distance_text = self.txtDistance.text().strip()
-            if distance_text:
-                sample.sample_detector_distance = float(distance_text)
-        except ValueError:
-            pass
-
-        try:
-            temp_text = self.txtTemperature.text().strip()
-            if temp_text:
-                sample.cell_temperature = float(temp_text)
-        except ValueError:
-            pass
-
-        try:
-            conc_text = self.txtConcentration.text().strip()
-            if conc_text:
-                sample.concentration = float(conc_text)
-        except ValueError:
-            pass
+        sample.wavelength = self._parse_float_field(self.txtWavelength)
+        sample.sample_detector_distance = self._parse_float_field(self.txtDistance)
+        sample.cell_temperature = self._parse_float_field(self.txtTemperature)
+        sample.concentration = self._parse_float_field(self.txtConcentration)
 
         # Molecule
         molecule = SASBDBMolecule()
@@ -745,14 +712,7 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
         molecule.long_name = self.txtLongName.text().strip() or None
         molecule.short_name = self.txtShortName.text().strip() or None
         molecule.fasta_sequence = self.txtFastaSequence.toPlainText().strip() or None
-
-        try:
-            monomer_mw_text = self.txtMonomerMW.text().strip()
-            if monomer_mw_text:
-                molecule.monomer_mw_kda = float(monomer_mw_text)
-        except ValueError:
-            pass
-
+        molecule.monomer_mw_kda = self._parse_float_field(self.txtMonomerMW)
         molecule.oligomeric_state = self.cmbOligomericState.currentText() or None
         molecule.number_of_molecules = self.spnNumberOfMolecules.value()
         molecule.uniprot_accession = self.txtUniProt.text().strip() or None
@@ -762,90 +722,37 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
         # Buffer
         buffer = SASBDBBuffer()
         buffer.description = self.txtBufferDescription.toPlainText().strip() or None
-
-        try:
-            ph_text = self.txtBufferPH.text().strip()
-            if ph_text:
-                buffer.ph = float(ph_text)
-        except ValueError:
-            pass
-
+        buffer.ph = self._parse_float_field(self.txtBufferPH)
         buffer.comment = self.txtBufferComment.toPlainText().strip() or None
         sample.buffer = buffer
 
         # Guinier
         guinier = SASBDBGuinier()
-        try:
-            rg_text = self.txtGuinierRg.text().strip()
-            if rg_text:
-                guinier.rg = float(rg_text)
-        except ValueError:
-            pass
+        guinier.rg = self._parse_float_field(self.txtGuinierRg)
+        guinier.rg_error = self._parse_float_field(self.txtGuinierRgError)
+        guinier.i0 = self._parse_float_field(self.txtGuinierI0)
+        guinier.range_start = self._parse_float_field(self.txtGuinierRangeStart)
+        guinier.range_end = self._parse_float_field(self.txtGuinierRangeEnd)
+        guinier.start_point = self._parse_int_field(self.txtGuinierStartPoint)
+        guinier.end_point = self._parse_int_field(self.txtGuinierEndPoint)
 
-        try:
-            rg_error_text = self.txtGuinierRgError.text().strip()
-            if rg_error_text:
-                guinier.rg_error = float(rg_error_text)
-        except ValueError:
-            pass
-
-        try:
-            i0_text = self.txtGuinierI0.text().strip()
-            if i0_text:
-                guinier.i0 = float(i0_text)
-        except ValueError:
-            pass
-
-        try:
-            range_start_text = self.txtGuinierRangeStart.text().strip()
-            if range_start_text:
-                guinier.range_start = float(range_start_text)
-        except ValueError:
-            pass
-
-        try:
-            range_end_text = self.txtGuinierRangeEnd.text().strip()
-            if range_end_text:
-                guinier.range_end = float(range_end_text)
-        except ValueError:
-            pass
-
-        try:
-            start_point_text = self.txtGuinierStartPoint.text().strip()
-            if start_point_text:
-                guinier.start_point = int(start_point_text)
-        except ValueError:
-            pass
-
-        try:
-            end_point_text = self.txtGuinierEndPoint.text().strip()
-            if end_point_text:
-                guinier.end_point = int(end_point_text)
-        except ValueError:
-            pass
-
-        if any([guinier.rg, guinier.i0, guinier.range_start, guinier.range_end,
-                guinier.start_point is not None, guinier.end_point is not None]):
+        if any([
+            guinier.rg is not None,
+            guinier.rg_error is not None,
+            guinier.i0 is not None,
+            guinier.range_start is not None,
+            guinier.range_end is not None,
+            guinier.start_point is not None,
+            guinier.end_point is not None,
+        ]):
             sample.guinier = guinier
 
         # Fit
         fit = SASBDBFit()
         fit.software = self.txtFitSoftware.text().strip() or None
         fit.software_version = self.txtFitVersion.text().strip() or None
-
-        try:
-            chi2_text = self.txtChiSquared.text().strip()
-            if chi2_text:
-                fit.chi_squared = float(chi2_text)
-        except ValueError:
-            pass
-
-        try:
-            cormap_text = self.txtCorMapPValue.text().strip()
-            if cormap_text:
-                fit.cormap_pvalue = float(cormap_text)
-        except ValueError:
-            pass
+        fit.chi_squared = self._parse_float_field(self.txtChiSquared)
+        fit.cormap_pvalue = self._parse_float_field(self.txtCorMapPValue)
 
         # Model section
         model_name = self.txtModelName.text().strip()
@@ -860,7 +767,7 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
                 model.log = model_parameters
             fit.models.append(model)
 
-        if any([fit.software, fit.chi_squared, fit.models]):
+        if fit.software or fit.chi_squared is not None or fit.models:
             sample.fits.append(fit)
 
         export_data.samples.append(sample)
@@ -1309,33 +1216,44 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
         body {
             font-size: 11pt;
         }
-        table {
+        table.sasbdb-table {
             font-size: 11pt;
             width: 100%;
             margin: 10px 0;
         }
-        th {
+        th.sasbdb-th {
             font-size: 11pt;
             font-weight: bold;
             background-color: #f0f0f0;
             padding: 8px;
             text-align: left;
         }
-        td {
+        td.sasbdb-field {
             font-size: 11pt;
-            padding: 6px 8px;
-        }
-        td.column-0 {
             font-weight: bold;
-            background-color: #ffffff;
-            color: #000000;
-        }
-        td.column-1 {
             background-color: #f5f5f5;
             color: #666666;
+            padding: 6px 8px;
         }
-        h3 {
+        td.sasbdb-value {
+            font-size: 11pt;
+            background-color: #ffffff;
+            color: #000000;
+            padding: 6px 8px;
+        }
+        h3.sasbdb-section {
+            margin-top: 10px;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #2c3e50;
             font-size: 13pt;
+        }
+        hr.sasbdb-section-rule {
+            margin-bottom: 10px;
+            border: 1px solid #3498db;
+        }
+        p.sasbdb-section-spacer {
+            margin-top: 15px;
         }
         """
         with report._html_doc.head:
@@ -1350,19 +1268,17 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
         :param titles: Tuple of (field_title, value_title)
         """
         with report._html_doc.getElementById("model-parameters"):
-            with tags.table(style="font-size: 11pt; width: 100%; margin: 10px 0;"):
+            with tags.table(cls="sasbdb-table"):
                 # Header row
                 with tags.tr():
-                    tags.th(titles[0], style="font-size: 11pt; font-weight: bold; background-color: #f0f0f0; padding: 8px; text-align: left;")
-                    tags.th(titles[1], style="font-size: 11pt; font-weight: bold; background-color: #f0f0f0; padding: 8px; text-align: left;")
+                    tags.th(titles[0], cls="sasbdb-th")
+                    tags.th(titles[1], cls="sasbdb-th")
 
                 # Data rows
                 for key in sorted(data.keys()):
                     with tags.tr():
-                        # Field name (left column) - bold, grey background and text
-                        tags.td(key, style="font-size: 11pt; font-weight: bold; background-color: #f5f5f5; color: #666666; padding: 6px 8px;")
-                        # Value (right column) - white background, black text
-                        tags.td(str(data[key]), style="font-size: 11pt; background-color: #ffffff; color: #000000; padding: 6px 8px;")
+                        tags.td(key, cls="sasbdb-field")
+                        tags.td(str(data[key]), cls="sasbdb-value")
 
     def _addSectionHeader(self, report: ReportBase, title: str):
         """
@@ -1372,10 +1288,9 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
         :param title: Section title
         """
         with report._html_doc.getElementById("model-parameters"):
-            # Add spacing before header
-            tags.p("", style="margin-top: 15px;")
-            tags.h3(title, style="margin-top: 10px; margin-bottom: 8px; font-weight: bold; color: #2c3e50;")
-            tags.hr(style="margin-bottom: 10px; border: 1px solid #3498db;")
+            tags.p("", cls="sasbdb-section-spacer")
+            tags.h3(title, cls="sasbdb-section")
+            tags.hr(cls="sasbdb-section-rule")
 
     def _generatePDFReport(self, export_data: SASBDBExportData, filename: str):
         """
@@ -1621,28 +1536,7 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
         :return: matplotlib.figure.Figure or None
         """
         try:
-            # Try to access the fitting widget through parent
-            parent = self.parent()
-            if parent is None:
-                return None
-
-            # Try to get current perspective (FittingPerspective)
-            current_perspective = None
-            if hasattr(parent, '_current_perspective'):
-                current_perspective = parent._current_perspective
-            elif hasattr(parent, 'guiManager') and hasattr(parent.guiManager, '_current_perspective'):
-                current_perspective = parent.guiManager._current_perspective
-
-            if current_perspective is None:
-                return None
-
-            # Check if it's a FittingPerspective
-            from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
-            if not isinstance(current_perspective, FittingWindow):
-                return None
-
-            # Get current fitting widget
-            fitting_widget = current_perspective.currentFittingWidget
+            fitting_widget = self._current_fitting_widget()
             if fitting_widget is None:
                 return None
 
@@ -1741,159 +1635,106 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
         :return: matplotlib.figure.Figure or None
         """
         try:
-            logger.info("Starting residual plot search...")
-
-            # Try to access the fitting widget through parent
-            parent = self.parent()
-            if parent is None:
-                logger.warning("No parent found for residual plot search")
-                return None
-
-            # Try to get current perspective (FittingPerspective)
-            current_perspective = None
-            if hasattr(parent, '_current_perspective'):
-                current_perspective = parent._current_perspective
-            elif hasattr(parent, 'guiManager') and hasattr(parent.guiManager, '_current_perspective'):
-                current_perspective = parent.guiManager._current_perspective
-
-            if current_perspective is None:
-                logger.warning("No current perspective found")
-                return None
-
-            # Check if it's a FittingPerspective
-            from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
-            if not isinstance(current_perspective, FittingWindow):
-                logger.warning(f"Current perspective is not FittingWindow: {type(current_perspective)}")
-                return None
-
-            # Get current fitting widget
-            fitting_widget = current_perspective.currentFittingWidget
+            fitting_widget = self._current_fitting_widget()
             if fitting_widget is None:
-                logger.warning("No current fitting widget found")
+                logger.debug("No fitting widget available for residual plot search")
                 return None
 
-            logger.info(f"Found fitting widget: {fitting_widget}")
-
-            # Get residual plots using PlotHelper
             import sas.qtgui.Plotting.PlotHelper as PlotHelper
             from sas.qtgui.Plotting.PlotterData import DataRole
 
             if fitting_widget.logic.kernel_module is None:
-                logger.warning("No kernel module found")
+                logger.debug("No kernel module for residual plot search")
                 return None
 
             modelname = fitting_widget.logic.kernel_module.name
             if not modelname:
-                logger.warning("No model name found")
+                logger.debug("No model name for residual plot search")
                 return None
 
-            logger.info(f"Model name: {modelname}")
-
-            # Get the data ID - residuals are linked to the original data, not the model
             data_id = None
-            if hasattr(fitting_widget, 'data') and fitting_widget.data:
-                data_id = fitting_widget.data.id
-                logger.info(f"Data ID: {data_id}")
-
-            if data_id is None:
-                logger.warning("No data ID found")
-                return None
-
-            # Get all shown plots
-            shown_plot_names = PlotHelper.currentPlotIds()
-            logger.info(f"Found {len(shown_plot_names)} active plots")
-
-            # Find residual plots related to this dataset
-            # Residual plot ID format: "Residual res" + str(data_id)
-            # The original ID from FittingUtilities.plotResiduals is "res" + str(data_id)
-            # Then it gets prefixed with "Residual " in calculateResiduals()
-            expected_residual_id = f"Residual res{data_id}"
-            expected_original_id = f"res{data_id}"
-            logger.info(f"Looking for residual ID: {expected_residual_id} or {expected_original_id}")
-
-            residual_plots = []
             data_name = None
             if hasattr(fitting_widget, 'data') and fitting_widget.data:
+                data_id = fitting_widget.data.id
                 data_name = getattr(fitting_widget.data, 'name', None)
-                logger.info(f"Data name: {data_name}")
 
-            # First pass: look for exact matches
-            for name in shown_plot_names:
+            if data_id is None:
+                logger.debug("No data ID for residual plot search")
+                return None
+
+            expected_residual_id = f"Residual res{data_id}"
+            expected_original_id = f"res{data_id}"
+            logger.debug(
+                "Searching residual plots for data_id=%s model=%s",
+                data_id,
+                modelname,
+            )
+
+            best_score = 0
+            best_figure = None
+            for name in PlotHelper.currentPlotIds():
                 try:
                     plotter = PlotHelper.plotById(name)
-                    if plotter and plotter.data:
-                        logger.info(f"Checking plot {name} with {len(plotter.data)} data items")
-                        # Check if this is a residual plot for our data
-                        for data_item in plotter.data:
-                            # Check if it's a residual plot
-                            if hasattr(data_item, 'plot_role'):
-                                role = data_item.plot_role
-                                logger.info(f"  Data item role: {role}, ID: {getattr(data_item, 'id', 'N/A')}, Name: {getattr(data_item, 'name', 'N/A')}")
-
-                                if role == DataRole.ROLE_RESIDUAL:
-                                    residual_id = getattr(data_item, 'id', '')
-                                    residual_name = getattr(data_item, 'name', '')
-                                    logger.info(f"  Found residual plot! ID: {residual_id}, Name: {residual_name}")
-
-                                    # Check by exact ID match
-                                    if residual_id == expected_residual_id:
-                                        logger.info(f"  Matched by exact ID: {expected_residual_id}")
-                                        residual_plots.append(plotter.figure)
-                                        break
-
-                                    # Check by original ID (without "Residual " prefix)
-                                    if residual_id == expected_original_id:
-                                        logger.info(f"  Matched by original ID: {expected_original_id}")
-                                        residual_plots.append(plotter.figure)
-                                        break
-
-                                    # Check if ID contains our data ID
-                                    if str(data_id) in residual_id:
-                                        logger.info("  Matched by data ID in residual ID")
-                                        residual_plots.append(plotter.figure)
-                                        break
-
-                                    # Fallback: check by name pattern
-                                    if residual_name and "Residual" in residual_name:
-                                        if (modelname in residual_name or
-                                            (data_name and data_name in residual_name)):
-                                            logger.info("  Matched by name pattern")
-                                            residual_plots.append(plotter.figure)
-                                            break
+                    if not plotter or not plotter.data:
+                        continue
+                    for data_item in plotter.data:
+                        score = self._score_residual_plot_match(
+                            data_item,
+                            data_id=data_id,
+                            expected_residual_id=expected_residual_id,
+                            expected_original_id=expected_original_id,
+                            modelname=modelname,
+                            data_name=data_name,
+                        )
+                        if score > best_score:
+                            best_score = score
+                            best_figure = plotter.figure
+                            logger.debug(
+                                "Residual plot candidate score=%s id=%s",
+                                score,
+                                getattr(data_item, 'id', 'unknown'),
+                            )
                 except Exception as e:
                     logger.warning(f"Error checking plot {name}: {e}")
-                    import traceback
-                    logger.warning(traceback.format_exc())
                     continue
 
-            # Return the first residual plot found
-            if residual_plots:
-                logger.info(f"Found {len(residual_plots)} residual plot(s), returning first one")
-                return residual_plots[0]
-
-            # Last resort: return any residual plot if we can't match by ID/name
-            logger.info("No exact match found, trying fallback: any residual plot")
-            for name in shown_plot_names:
-                try:
-                    plotter = PlotHelper.plotById(name)
-                    if plotter and plotter.data:
-                        for data_item in plotter.data:
-                            if (hasattr(data_item, 'plot_role') and
-                                data_item.plot_role == DataRole.ROLE_RESIDUAL):
-                                # Return any residual plot as fallback
-                                logger.info(f"Found residual plot by role only: {getattr(data_item, 'id', 'unknown')}")
-                                return plotter.figure
-                except Exception as e:
-                    logger.warning(f"Error in fallback residual search: {e}")
-                    continue
-
-            logger.warning("No residual plot found after exhaustive search")
-            return None
+            if best_figure is None:
+                logger.debug("No residual plot found")
+            return best_figure
         except Exception as e:
             logger.warning(f"Error getting residual plot figure: {e}")
-            import traceback
-            logger.warning(traceback.format_exc())
             return None
+
+    @staticmethod
+    def _score_residual_plot_match(
+        data_item,
+        *,
+        data_id,
+        expected_residual_id: str,
+        expected_original_id: str,
+        modelname: str,
+        data_name: str | None,
+    ) -> int:
+        """Score how well a plot data item matches the expected residual plot."""
+        from sas.qtgui.Plotting.PlotterData import DataRole
+
+        if not hasattr(data_item, 'plot_role'):
+            return 0
+        if data_item.plot_role != DataRole.ROLE_RESIDUAL:
+            return 0
+
+        residual_id = getattr(data_item, 'id', '')
+        residual_name = getattr(data_item, 'name', '')
+        if residual_id == expected_residual_id:
+            return 100
+        if residual_id == expected_original_id:
+            return 90
+        if str(data_id) in residual_id:
+            return 80
+        if residual_name and "Residual" in residual_name:
+            if modelname in residual_name or (data_name and data_name in residual_name):
+                return 70
+        return 10
 
     def _getModelShapeFigure(self):
         # TODO: sasmodels shape visualization

@@ -15,6 +15,7 @@ requirements and produces clean, well-formatted files.
 """
 import json
 import logging
+from dataclasses import asdict
 
 from sas.qtgui.Utilities.SASBDB.sasbdb_data import SASBDBExportData
 
@@ -53,141 +54,11 @@ class SASBDBExporter:
         
         :return: Dictionary representation of the export data
         """
-        result = {}
-
-        # Project information
-        if self.export_data.project:
-            result['project'] = {
-                'published': self.export_data.project.published,
-                'pubmed_pmid': self.export_data.project.pubmed_pmid,
-                'doi': self.export_data.project.doi,
-                'project_title': self.export_data.project.project_title,
-            }
-
-        # Samples
-        result['samples'] = []
-        for sample in self.export_data.samples:
-            sample_dict = {
-                'sample_title': sample.sample_title,
-                'curve_type': sample.curve_type,
-                'experimental_curve': sample.experimental_curve,
-                'angular_units': sample.angular_units,
-                'intensity_units': sample.intensity_units,
-                'experimental_molecular_weight': sample.experimental_molecular_weight,
-                'molecular_weight_from_i0': sample.molecular_weight_from_i0,
-                'molecular_weight_from_i0_error': sample.molecular_weight_from_i0_error,
-                'description': sample.description,
-                'experiment_date': sample.experiment_date,
-                'beamline_instrument': sample.beamline_instrument,
-                'wavelength': sample.wavelength,
-                'sample_detector_distance': sample.sample_detector_distance,
-                'cell_temperature': sample.cell_temperature,
-                'storage_temperature': sample.storage_temperature,
-                'exposure_time': sample.exposure_time,
-                'number_of_frames': sample.number_of_frames,
-                'concentration': sample.concentration,
-            }
-
-            # Molecule
-            if sample.molecule:
-                sample_dict['molecule'] = {
-                    'type': sample.molecule.type,
-                    'uniprot_accession': sample.molecule.uniprot_accession,
-                    'uniprot_range_from': sample.molecule.uniprot_range_from,
-                    'uniprot_range_to': sample.molecule.uniprot_range_to,
-                    'molecule_source': sample.molecule.molecule_source,
-                    'long_name': sample.molecule.long_name,
-                    'short_name': sample.molecule.short_name,
-                    'source_organism': sample.molecule.source_organism,
-                    'fasta_sequence': sample.molecule.fasta_sequence,
-                    'monomer_mw_kda': sample.molecule.monomer_mw_kda,
-                    'oligomeric_state': sample.molecule.oligomeric_state,
-                    'number_of_molecules': sample.molecule.number_of_molecules,
-                    'total_mw_kda': sample.molecule.total_mw_kda,
-                    'molecule_description': sample.molecule.molecule_description,
-                }
-
-            # Buffer
-            if sample.buffer:
-                sample_dict['buffer'] = {
-                    'description': sample.buffer.description,
-                    'ph': sample.buffer.ph,
-                    'comment': sample.buffer.comment,
-                }
-
-            # Guinier
-            if sample.guinier:
-                sample_dict['guinier'] = {
-                    'rg': sample.guinier.rg,
-                    'rg_error': sample.guinier.rg_error,
-                    'i0': sample.guinier.i0,
-                    'range_start': sample.guinier.range_start,
-                    'range_end': sample.guinier.range_end,
-                    'start_point': sample.guinier.start_point,
-                    'end_point': sample.guinier.end_point,
-                }
-
-            # PDDF
-            if sample.pddf:
-                sample_dict['pddf'] = {
-                    'software': sample.pddf.software,
-                    'software_version': sample.pddf.software_version,
-                    'pddf_file': sample.pddf.pddf_file,
-                    'dmax': sample.pddf.dmax,
-                    'dmax_error': sample.pddf.dmax_error,
-                    'rg': sample.pddf.rg,
-                    'rg_error': sample.pddf.rg_error,
-                    'i0': sample.pddf.i0,
-                    'porod_volume': sample.pddf.porod_volume,
-                    'mw_from_porod_volume': sample.pddf.mw_from_porod_volume,
-                }
-
-            # Fits
-            sample_dict['fits'] = []
-            for fit in sample.fits:
-                fit_dict = {
-                    'software': fit.software,
-                    'software_version': fit.software_version,
-                    'fit_data': fit.fit_data,
-                    'angular_units': fit.angular_units,
-                    'chi_squared': fit.chi_squared,
-                    'cormap_pvalue': fit.cormap_pvalue,
-                    'log_file': fit.log_file,
-                    'description': fit.description,
-                }
-
-                # Models
-                fit_dict['models'] = []
-                for model in fit.models:
-                    model_dict = {
-                        'software_or_db': model.software_or_db,
-                        'software_version': model.software_version,
-                        'model_data': model.model_data,
-                        'symmetry': model.symmetry,
-                        'log': model.log,
-                        'comment': model.comment,
-                    }
-                    fit_dict['models'].append(model_dict)
-
-                sample_dict['fits'].append(fit_dict)
-
-            result['samples'].append(sample_dict)
-
-        # Instruments
-        result['instruments'] = []
-        for instrument in self.export_data.instruments:
-            instrument_dict = {
-                'source_type': instrument.source_type,
-                'beamline_name': instrument.beamline_name,
-                'synchrotron_name': instrument.synchrotron_name,
-                'detector_manufacturer': instrument.detector_manufacturer,
-                'detector_type': instrument.detector_type,
-                'detector_resolution': instrument.detector_resolution,
-                'city': instrument.city,
-                'country': instrument.country,
-            }
-            result['instruments'].append(instrument_dict)
-
+        result = asdict(self.export_data)
+        for sample in result.get('samples', []):
+            for fit in sample.get('fits', []):
+                for model in fit.get('models', []):
+                    model.pop('visualization_params', None)
         return result
 
     def export_to_json(self, filepath: str) -> bool:

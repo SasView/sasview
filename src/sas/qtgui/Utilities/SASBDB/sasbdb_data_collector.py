@@ -390,7 +390,8 @@ class SASBDBDataCollector:
         guinier.range_end = range_end
         return guinier
 
-    def _guinier_native_q_to_nm_scale(self, data) -> float:
+    @staticmethod
+    def _guinier_native_q_to_nm_scale(data) -> float:
         """
         Factor to convert q from data native units to nm\\ :sup:`-1`.
 
@@ -414,8 +415,9 @@ class SASBDBDataCollector:
                 return 10.0
         return 1.0
 
+    @staticmethod
     def collect_guinier_from_q_range(
-        self, data, q_min: float, q_max: float
+        data, q_min: float, q_max: float
     ) -> tuple[SASBDBGuinier | None, dict | None]:
         """
         Guinier analysis by weighted linear least squares of ln(I) vs q\\ :sup:`2`.
@@ -492,7 +494,7 @@ class SASBDBDataCollector:
             return None, None
 
         rg_native = float(np.sqrt(-3.0 * b))
-        q_to_nm = self._guinier_native_q_to_nm_scale(data)
+        q_to_nm = SASBDBDataCollector._guinier_native_q_to_nm_scale(data)
         if q_to_nm == 10.0:
             rg_nm = rg_native / 10.0
         else:
@@ -524,7 +526,8 @@ class SASBDBDataCollector:
         }
         return guinier, fit_info
 
-    def collect_guinier_from_freesas(self, data) -> SASBDBGuinier | None:
+    @staticmethod
+    def collect_guinier_from_freesas(data) -> SASBDBGuinier | None:
         """
         Collect Guinier analysis results using FreeSAS auto_guinier
         
@@ -566,24 +569,8 @@ class SASBDBDataCollector:
         I_valid = I[valid_mask]
         err_valid = err[valid_mask]
 
-        # Determine unit conversion - FreeSAS expects q in nm^-1
-        # Check if data is in 1/A (Angstrom^-1) and convert to nm^-1
-        # 1 A^-1 = 10 nm^-1
-        unit_conversion = 1.0
-        if hasattr(data, "get_xaxis"):
-            try:
-                xaxis_label, xaxis_units = data.get_xaxis()
-                xaxis_label = str(xaxis_label) if xaxis_label else ""
-                xaxis_units = str(xaxis_units) if xaxis_units else ""
-                combined = f"{xaxis_label} {xaxis_units}"
-                if _x_axis_label_is_inverse_angstrom(combined):
-                    unit_conversion = 10.0
-            except (AttributeError, TypeError, ValueError):
-                pass
-        if unit_conversion == 1.0 and hasattr(data, "_xunit"):
-            xunit = str(data._xunit)
-            if _x_axis_label_is_inverse_angstrom(xunit):
-                unit_conversion = 10.0
+        # FreeSAS expects q in nm^-1; scale native q when axis is in Å^-1.
+        unit_conversion = SASBDBDataCollector._guinier_native_q_to_nm_scale(data)
 
         # Convert q to nm^-1 for FreeSAS
         q_for_freesas = q_valid * unit_conversion
