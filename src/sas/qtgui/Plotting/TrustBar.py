@@ -47,9 +47,11 @@ class TrustBar:
 
         if self.ax.get_xscale() == "log":
             x = np.geomspace(xmin, xmax, N)
+            xm = [np.sqrt(x[i] * x[i + 1]) for i in range(N - 1)]  # Geometric mean for color calculation in log scale
         else:
             x = np.linspace(xmin, xmax, N)
-            
+            xm = [0.5 * (x[i] + x[i + 1]) for i in range(N - 1)]  # Arithmetic mean for color calculation in linear scale
+
         # Create segments for the LineCollection.
         segments = [
             [(x[i], 0.5), (x[i + 1], 0.5)]
@@ -58,8 +60,8 @@ class TrustBar:
 
         # Get the color based on the midpoint of each segment
         colours = [
-            self.colour_at(0.5 * (x[i] + x[i + 1]), d_low, d_high)
-            for i in range(len(x) - 1)
+            self.colour_at(xm[i], d_low, d_high)
+            for i in range(len(xm))
         ]
         
         # Create an inset axis above the main plot for the trust bar.
@@ -94,18 +96,53 @@ class TrustBar:
         # to update the trust bar when the main plot is updated.
         self.xlim_cid = self.ax.callbacks.connect("xlim_changed", self.update)
 
-    def colour_at(self, x: float, d_low: float, d_high: float) -> tuple[float, float, float, float]:
+    def colour_at(self, x: float, d_low: float, d_high: float, tw: float = 0.5) -> tuple[float, float, float, float]:
         """
-        Determine the color of the trust bar at a given x position based on the trust range.
+        Determine the color at a given x position based on the trust range.
         
+        Gradient is defined as follows:
+        
+        red ---- yellow ---- green ---- yellow ---- red
+        -------- (low) ---------------- (high) --------
+        
+        :param x: The x position to evaluate.
+        :param d_low: The lower bound of the trust range.
+        :param d_high: The upper bound of the trust range.
+        :param tw: The transition width for color blending.
+        :return: A tuple representing the RGBA color at the given x position.
         """
-        if x < d_low:
-            return to_rgba("red")
-        elif x <= d_high:
-            return to_rgba("green")
-        else:
-            return to_rgba("red")
+        
+        # Handle logarithmic scale by transforming x, d_low, and d_high to log10 space.
+        if self.ax.get_xscale() == "log":
+            # Avoid taking log of non-positive values.
+            if x <= 0 or d_low <= 0 or d_high <= 0:
+                return to_rgba("red")
+            x = np.log10(x)
+            d_low = np.log10(d_low)
+            d_high = np.log10(d_high)
 
+        if x < d_low - tw or x > d_high + tw:
+            return to_rgba("red")
+        # Transition from red to yellow
+        if d_low - tw <= x < d_low:
+            a = (x - (d_low - tw)) / tw
+            return tuple((1 - a) * r + a * y for r, y in zip(to_rgba("red"), to_rgba("yellow")))
+        # Transition from yellow to green
+        if d_low <= x < d_low + tw:
+            a = (x - d_low) / tw
+            return tuple((1 - a) * y + a * g for y, g in zip(to_rgba("yellow"), to_rgba("green")))
+        if d_low + tw <= x <= d_high - tw:
+            return to_rgba("green")
+        # Transition from green to yellow
+        if d_high - tw < x <= d_high:
+            a = (x - (d_high - tw)) / tw
+            return tuple((1 - a) * g + a * y for g, y in zip(to_rgba("green"), to_rgba("yellow")))
+        # Transition from yellow to red
+        if d_high < x <= d_high + tw:
+            a = (x - d_high) / tw
+            return tuple((1 - a) * y + a * r for y, r in zip(to_rgba("yellow"), to_rgba("red")))
+        return to_rgba("red")
+        
     def clear(self) -> None:
         """
         Clear the trust bar from the plot. This method disconnects the xlim_changed callback
