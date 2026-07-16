@@ -41,7 +41,7 @@ class TrustBar:
 
         d_low = trust_range.get("d_low", xmin)
         d_high = trust_range.get("d_high", xmax)
-        
+
         # Create a set of x values for the trust bar. Use a logarithmic scale if the main plot is logarithmic.
         N = 1000
 
@@ -63,7 +63,7 @@ class TrustBar:
             self.colour_at(xm[i], d_low, d_high)
             for i in range(len(xm))
         ]
-        
+
         # Create an inset axis above the main plot for the trust bar.
         self.bar_ax = self.ax.inset_axes(
             (0.0, 1.02, 1.0, 0.02),
@@ -78,7 +78,7 @@ class TrustBar:
         )
 
         self.bar_ax.add_collection(self.bar)
-        
+
         # Match main plot x scaling and range.
         self.bar_ax.set_xscale(self.ax.get_xscale())
         self.bar_ax.set_xlim(self.ax.get_xlim())
@@ -111,7 +111,7 @@ class TrustBar:
         :param tw: The transition width for color blending.
         :return: A tuple representing the RGBA color at the given x position.
         """
-        
+
         # Handle logarithmic scale by transforming x, d_low, and d_high to log10 space.
         if self.ax.get_xscale() == "log":
             # Avoid taking log of non-positive values.
@@ -142,7 +142,7 @@ class TrustBar:
             a = (x - d_high) / tw
             return tuple((1 - a) * y + a * r for y, r in zip(to_rgba("yellow"), to_rgba("red")))
         return to_rgba("red")
-        
+
     def clear(self) -> None:
         """
         Clear the trust bar from the plot. This method disconnects the xlim_changed callback
