@@ -469,234 +469,6 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tabOptions">
-      <attribute name="title">
-       <string>Options</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
-       <item>
-        <widget class="QGroupBox" name="boxFittingRange">
-         <property name="title">
-          <string>Fitting range</string>
-         </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_9">
-          <item>
-           <layout class="QGridLayout" name="gridLayout_13">
-            <item row="0" column="1">
-             <widget class="QLineEdit" name="txtMinRange">
-              <property name="minimumSize">
-               <size>
-                <width>80</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="toolTip">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Minimum
-                value of Q.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
-               </string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="0">
-             <widget class="QLabel" name="lblMinRange">
-              <property name="text">
-               <string>Min</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="3">
-             <widget class="QLabel" name="lblMaxRange">
-              <property name="text">
-               <string>Max</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="4">
-             <widget class="QLineEdit" name="txtMaxRange">
-              <property name="minimumSize">
-               <size>
-                <width>80</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="toolTip">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Maximum
-                value of Q.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
-               </string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="5">
-             <widget class="QLabel" name="label_15">
-              <property name="text">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span
-                style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
-               </string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="2">
-             <widget class="QLabel" name="label_13">
-              <property name="text">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span
-                style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
-               </string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="6">
-             <widget class="QPushButton" name="cmdReset">
-              <property name="toolTip">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Reset
-              the Q range to the default.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
-             </string>
-              </property>
-              <property name="text">
-               <string>Reset</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="boxAdvancedParameters">
-         <property name="title">
-          <string>Method parameters</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_6">
-          <item>
-           <layout class="QGridLayout" name="gridLayout">
-            <item row="0" column="1">
-             <widget class="QLineEdit" name="txtSkyBackgd">
-              <property name="toolTip">
-               <string>Sky background parameter for the Maximum Entropy method (suggested: 1e-6)</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="0">
-             <widget class="QLabel" name="lblSkyBackgd">
-              <property name="text">
-               <string>MaxEnt Sky Background:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0">
-             <widget class="QLabel" name="lblIterations">
-              <property name="text">
-               <string>Iterations:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <widget class="QLineEdit" name="txtIterations">
-              <property name="toolTip">
-               <string>Number of iterations for the Maximum Entropy method.</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="boxWeighting">
-         <property name="title">
-          <string>Weighting</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_20">
-          <item row="1" column="0">
-           <layout class="QHBoxLayout" name="horizontalLayout_5"/>
-          </item>
-          <item row="0" column="0">
-           <layout class="QGridLayout" name="verticalLayout">
-            <item row="3" column="1">
-             <widget class="QLineEdit" name="txtWgtPercent">
-              <property name="toolTip">
-               <string>Percentage value for percentage-based weighting.</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="0">
-             <widget class="QRadioButton" name="rbWeighting1">
-              <property name="toolTip">
-               <string>No weighting applied to the data.</string>
-              </property>
-              <property name="text">
-               <string>None</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0">
-             <widget class="QRadioButton" name="rbWeighting2">
-              <property name="toolTip">
-               <string>Weight data by its error values (dI).</string>
-              </property>
-              <property name="text">
-               <string>Use dI Data</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="0">
-             <widget class="QRadioButton" name="rbWeighting3">
-              <property name="toolTip">
-               <string>Weight data by the square root of intensity values.</string>
-              </property>
-              <property name="text">
-               <string>Use |sqrt(I Data)|</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="3">
-             <widget class="QLineEdit" name="txtWgtFactor">
-              <property name="toolTip">
-               <string>Overall weighting factor to apply to the data.</string>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="0">
-             <widget class="QRadioButton" name="rbWeighting4">
-              <property name="toolTip">
-               <string>Weight data as a percentage of intensity values.</string>
-              </property>
-              <property name="text">
-               <string>Use % |I Data|:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="2">
-             <widget class="QLabel" name="lblWgtFactor">
-              <property name="text">
-               <string>Weight factor:</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Orientation::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
-     </widget>
      <widget class="QWidget" name="tabBackground">
       <property name="whatsThis">
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -1053,6 +825,234 @@
        </item>
        <item>
         <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Orientation::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabOptions">
+      <attribute name="title">
+       <string>Options</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QGroupBox" name="boxFittingRange">
+         <property name="title">
+          <string>Fitting range</string>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_9">
+          <item>
+           <layout class="QGridLayout" name="gridLayout_13">
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="txtMinRange">
+              <property name="minimumSize">
+               <size>
+                <width>80</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Minimum
+                value of Q.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
+               </string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="lblMinRange">
+              <property name="text">
+               <string>Min</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="3">
+             <widget class="QLabel" name="lblMaxRange">
+              <property name="text">
+               <string>Max</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="4">
+             <widget class="QLineEdit" name="txtMaxRange">
+              <property name="minimumSize">
+               <size>
+                <width>80</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Maximum
+                value of Q.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
+               </string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="5">
+             <widget class="QLabel" name="label_15">
+              <property name="text">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span
+                style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
+               </string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QLabel" name="label_13">
+              <property name="text">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span
+                style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
+               </string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="6">
+             <widget class="QPushButton" name="cmdReset">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Reset
+              the Q range to the default.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
+             </string>
+              </property>
+              <property name="text">
+               <string>Reset</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="boxAdvancedParameters">
+         <property name="title">
+          <string>Method parameters</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_6">
+          <item>
+           <layout class="QGridLayout" name="gridLayout">
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="txtSkyBackgd">
+              <property name="toolTip">
+               <string>Sky background parameter for the Maximum Entropy method (suggested: 1e-6)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="lblSkyBackgd">
+              <property name="text">
+               <string>MaxEnt Sky Background:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="lblIterations">
+              <property name="text">
+               <string>Iterations:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLineEdit" name="txtIterations">
+              <property name="toolTip">
+               <string>Number of iterations for the Maximum Entropy method.</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="boxWeighting">
+         <property name="title">
+          <string>Weighting</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_20">
+          <item row="1" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_5"/>
+          </item>
+          <item row="0" column="0">
+           <layout class="QGridLayout" name="verticalLayout">
+            <item row="3" column="1">
+             <widget class="QLineEdit" name="txtWgtPercent">
+              <property name="toolTip">
+               <string>Percentage value for percentage-based weighting.</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QRadioButton" name="rbWeighting1">
+              <property name="toolTip">
+               <string>No weighting applied to the data.</string>
+              </property>
+              <property name="text">
+               <string>None</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QRadioButton" name="rbWeighting2">
+              <property name="toolTip">
+               <string>Weight data by its error values (dI).</string>
+              </property>
+              <property name="text">
+               <string>Use dI Data</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QRadioButton" name="rbWeighting3">
+              <property name="toolTip">
+               <string>Weight data by the square root of intensity values.</string>
+              </property>
+              <property name="text">
+               <string>Use |sqrt(I Data)|</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="3">
+             <widget class="QLineEdit" name="txtWgtFactor">
+              <property name="toolTip">
+               <string>Overall weighting factor to apply to the data.</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QRadioButton" name="rbWeighting4">
+              <property name="toolTip">
+               <string>Weight data as a percentage of intensity values.</string>
+              </property>
+              <property name="text">
+               <string>Use % |I Data|:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="2">
+             <widget class="QLabel" name="lblWgtFactor">
+              <property name="text">
+               <string>Weight factor:</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Orientation::Vertical</enum>
          </property>
