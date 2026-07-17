@@ -22,6 +22,7 @@ from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
 from sas.qtgui.Plotting.QRangeSlider import QRangeSlider
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
 from sas.qtgui.Plotting.SetGraphRange import SetGraphRange
+from sas.qtgui.Plotting.TrustBar import TrustBar
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +42,8 @@ class PlotterWidget(PlotterBase):
         self.plot_lines = {}
         # Dictionary of slider interactors {plot_id:interactor}
         self.sliders = {}
+
+        self.trust_bar = TrustBar(self.ax, self.canvas)
 
         # Window for text add
         self.addText = AddText(self)
@@ -314,6 +317,10 @@ class PlotterWidget(PlotterBase):
             if existing_slider is not None and not existing_slider.is_visible:
                 sliders.toggle()
             self.sliders[data.name] = sliders
+
+        # Draw size-distribution trust bar if requested.
+        if data.show_trust_bar:
+            self.trust_bar.draw(data)
 
         # refresh canvas
         self.canvas.draw_idle()
