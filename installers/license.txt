@@ -4,12 +4,7 @@ Experiments (DANSE) project funded by the US National Science Foundation
 and is currently being developed as an open source project hosted on GitHub
 and managed by a consortium of scattering facilities.
 
-Participating facilities include: the University of Tennessee, the University 
-of Maryland, the European Spallation Source, the National Institute of 
-Standards & Technology Center for Neutron Research, the Oak Ridge National 
-Laboratory Neutron Sciences Directorate, the ISIS Neutron & Muon Source, the 
-Institut Laue Langevin, the Federal Institute for Materials Research and Testing,
-the Diamond Light Source, and Delft University of Technology.
+Contributors to SasView are affiliated with 35 institutions, including 21 universities.
 
 If you use this application to do scientific research that leads to publication, 
 we kindly ask that you acknowledge the use of the software with the following 
