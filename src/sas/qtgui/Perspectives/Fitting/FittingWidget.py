@@ -2039,8 +2039,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.logic.model_parameters = kernel_module.model_info.parameters
 
         elif hasattr(kernel_module, 'parameters'):
-            # built-in and custom models
-            self.logic.model_parameters = modelinfo.make_parameter_table(getattr(kernel_module, 'parameters', []))
+            # Built-in and custom models. Use make_model_info so the UI
+            # parameter table matches the kernel (e.g. sasmodels >= 1.1
+            # omits magnetism for pure-Python models).
+            self.logic.model_parameters = modelinfo.make_model_info(
+                kernel_module).parameters
 
         elif hasattr(kernel_module, 'model_info'):
             # for sum/multiply models
