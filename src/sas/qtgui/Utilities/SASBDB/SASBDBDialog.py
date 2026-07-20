@@ -1,19 +1,17 @@
-"""
-SASBDB Export Dialog
-
-This dialog allows users to review and edit SASBDB export data before exporting.
-"""
+"""SASBDB Export Dialog — review/edit export data before JSON/PDF/project export."""
 import logging
 import math
 import os
 import sys
 
+import numpy as np
 from dominate import tags
 from dominate.util import raw
 from PySide6 import QtCore, QtWidgets
 
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 from sas.qtgui.Utilities.Reports.reports import ReportBase
+from sas.qtgui.Utilities.SASBDB.guinier_plot_panel import GuinierPlotPanel
 from sas.qtgui.Utilities.SASBDB.sasbdb_data import (
     SASBDBBuffer,
     SASBDBExportData,
@@ -31,7 +29,6 @@ from sas.qtgui.Utilities.SASBDB.UI.SASBDBDialogUI import Ui_SASBDBDialogUI
 
 logger = logging.getLogger(__name__)
 
-# Guinier Q / Rg / I(0) fields locked after a successful Estimate (indices stay editable).
 _GUINIER_DERIVED_FIELD_NAMES = (
     "txtGuinierRangeStart",
     "txtGuinierRangeEnd",
@@ -39,31 +36,27 @@ _GUINIER_DERIVED_FIELD_NAMES = (
     "txtGuinierRgError",
     "txtGuinierI0",
 )
+_GUINIER_FIELD_NAMES = _GUINIER_DERIVED_FIELD_NAMES + (
+    "txtGuinierStartPoint",
+    "txtGuinierEndPoint",
+)
+_PDF_CSS = (
+    "body{font-size:11pt}"
+    "table.sasbdb-table{font-size:11pt;width:100%;margin:10px 0}"
+    "th.sasbdb-th{font-size:11pt;font-weight:bold;background:#f0f0f0;"
+    "padding:8px;text-align:left}"
+    "td.sasbdb-field{font-size:11pt;font-weight:bold;background:#f5f5f5;"
+    "color:#666;padding:6px 8px}"
+    "td.sasbdb-value{font-size:11pt;background:#fff;color:#000;padding:6px 8px}"
+    "h3.sasbdb-section{margin:10px 0 8px;font-weight:bold;color:#2c3e50;"
+    "font-size:13pt}"
+    "hr.sasbdb-section-rule{margin-bottom:10px;border:1px solid #3498db}"
+    "p.sasbdb-section-spacer{margin-top:15px}"
+)
 
 
 class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
-    """
-    Dialog for SASBDB export functionality.
-    
-    This dialog provides a user interface for reviewing and editing SASBDB export data
-    before exporting to JSON, PDF, and project file formats. It collects data from
-    the current SasView session (loaded datasets, fit results, metadata) and allows
-    users to complete missing information.
-    
-    The dialog includes multiple tabs for organizing different types of information:
-    - Project: Publication status and identification
-    - Sample: Experimental sample and data parameters
-    - Molecule: Biological molecule details
-    - Buffer: Buffer composition and conditions
-    - Guinier: Guinier analysis results (if available)
-    - Fit: Fit results and model information
-    - Instrument: Instrument and facility details
-    
-    :param export_data: Pre-collected SASBDB export data (optional). If not provided,
-                        an empty SASBDBExportData object will be created.
-    :param parent: Parent widget for the dialog
-    :param guinier_source_data: Optional 1D dataset for optional FreeSAS Guinier estimate
-    """
+    """Dialog to review and export SASBDB submission data (JSON, PDF, project)."""
 
     def __init__(
         self,
@@ -71,24 +64,15 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
         parent: QtCore.QObject | None = None,
         guinier_source_data=None,
     ):
-        """
-        Initialize the SASBDB dialog
-
-        :param export_data: Pre-collected SASBDB export data (optional)
-        :param parent: Parent widget
-        :param guinier_source_data: 1D data used when the user runs FreeSAS from the Guinier tab
-        """
         super().__init__(parent)
         self.setupUi(self)
 
         self._guinier_source_data = guinier_source_data
         self._guinier_plot_a: float | None = None
         self._guinier_plot_b: float | None = None
-        self._guinier_suppress_range_signals: bool = False
+        self._guinier_suppress_range_signals = False
         self._guinier_plot_panel = None
         if hasattr(self, "widgetGuinierPlot"):
-            from sas.qtgui.Utilities.SASBDB.guinier_plot_panel import GuinierPlotPanel
-
             if hasattr(self, "horizontalLayoutGuinierMain"):
                 self.horizontalLayoutGuinierMain.setAlignment(
                     self.widgetGuinierPlot,
@@ -100,141 +84,114 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
             self._guinier_plot_panel = GuinierPlotPanel(self.widgetGuinierPlot)
             plot_layout.addWidget(self._guinier_plot_panel)
 
-        # Store export data
         self.export_data = export_data or SASBDBExportData()
-
-        # Get save location from object library
         self.save_location = ObjectLibrary.getObject('SASBDBDialog_directory')
 
-        # Connect signals
         self.cmdExport.clicked.connect(self.onExport)
         self.cmdGeneratePDF.clicked.connect(self.onGeneratePDF)
         self.cmdHelp.clicked.connect(self.onHelp)
         self.cmdClose.clicked.connect(self.close)
         self.chkPublished.toggled.connect(self.onPublishedToggled)
+        self._wire_guinier_controls()
+
+        self.populateFromData()
+        self._set_guinier_derived_fields_read_only(False)
+        self.onPublishedToggled(self.chkPublished.isChecked())
+        self._refresh_guinier_plot()
+
+    def _style_action_button(self, btn) -> None:
+        btn.setAutoDefault(False)
+        btn.setDefault(False)
+        if sys.platform == "darwin":
+            btn.setAttribute(QtCore.Qt.WA_MacShowFocusRect, False)
+
+    def _wire_guinier_controls(self) -> None:
         if hasattr(self, 'btnGuinierEstimateFreeSAS'):
             self.btnGuinierEstimateFreeSAS.clicked.connect(
                 self._on_guinier_estimate_clicked)
-            # Not a dialog default: stay neutral until pressed; avoid default-button
-            # chrome (autoDefault) like the footer Export/Close actions.
-            est_btn = self.btnGuinierEstimateFreeSAS
-            est_btn.setAutoDefault(False)
-            est_btn.setDefault(False)
-            if sys.platform == "darwin":
-                est_btn.setAttribute(QtCore.Qt.WA_MacShowFocusRect, False)
-
+            self._style_action_button(self.btnGuinierEstimateFreeSAS)
         if hasattr(self, "btnGuinierReset"):
             self.btnGuinierReset.clicked.connect(self._on_guinier_reset_clicked)
-            reset_btn = self.btnGuinierReset
-            reset_btn.setAutoDefault(False)
-            reset_btn.setDefault(False)
-            if sys.platform == "darwin":
-                reset_btn.setAttribute(QtCore.Qt.WA_MacShowFocusRect, False)
-
+            self._style_action_button(self.btnGuinierReset)
         if hasattr(self, "txtGuinierStartPoint"):
             self.txtGuinierStartPoint.editingFinished.connect(
-                self._on_guinier_indices_editing_finished
-            )
+                self._on_guinier_indices_editing_finished)
             self.txtGuinierEndPoint.editingFinished.connect(
-                self._on_guinier_indices_editing_finished
-            )
+                self._on_guinier_indices_editing_finished)
         if hasattr(self, "txtGuinierRangeStart"):
             self.txtGuinierRangeStart.editingFinished.connect(
-                self._on_guinier_q_range_editing_finished
-            )
+                self._on_guinier_q_range_editing_finished)
             self.txtGuinierRangeEnd.editingFinished.connect(
-                self._on_guinier_q_range_editing_finished
-            )
-
-        # Populate UI with data
-        self.populateFromData()
-        self._set_guinier_derived_fields_read_only(False)
-
-        # Set up initial state
-        self.onPublishedToggled(self.chkPublished.isChecked())
-
-        self._refresh_guinier_plot()
+                self._on_guinier_q_range_editing_finished)
 
     def _set_guinier_derived_fields_read_only(self, readonly: bool) -> None:
-        """
-        Lock or unlock Q start/end, Rg, Rg error, and I(0).
-
-        Start and end point indices stay editable so the user can re-range and
-        use Estimate again; Reset clears everything and unlocks.
-        """
         for name in _GUINIER_DERIVED_FIELD_NAMES:
             if hasattr(self, name):
                 getattr(self, name).setReadOnly(readonly)
 
     def _clear_guinier_fields(self) -> None:
-        """Clear all Guinier line edits."""
-        self.txtGuinierRg.clear()
-        self.txtGuinierRgError.clear()
-        self.txtGuinierI0.clear()
-        self.txtGuinierRangeStart.clear()
-        self.txtGuinierRangeEnd.clear()
-        self.txtGuinierStartPoint.clear()
-        self.txtGuinierEndPoint.clear()
-        self._guinier_plot_a = None
-        self._guinier_plot_b = None
+        for name in _GUINIER_FIELD_NAMES:
+            getattr(self, name).clear()
+        self._guinier_plot_a = self._guinier_plot_b = None
+
+    @staticmethod
+    def _parse(text: str, cast):
+        text = text.strip()
+        if not text:
+            return None
+        try:
+            return cast(text)
+        except ValueError:
+            return None
 
     def _parse_float(self, text: str) -> float | None:
-        """Parse a stripped text field as float; return None if empty or invalid."""
-        text = text.strip()
-        if not text:
-            return None
-        try:
-            return float(text)
-        except ValueError:
-            return None
+        return self._parse(text, float)
 
     def _parse_int(self, text: str) -> int | None:
-        """Parse a stripped text field as int; return None if empty or invalid."""
-        text = text.strip()
-        if not text:
-            return None
-        try:
-            return int(text)
-        except ValueError:
-            return None
+        return self._parse(text, int)
 
     def _parse_float_field(self, widget) -> float | None:
-        """Parse a QLineEdit (or similar) as float."""
-        return self._parse_float(widget.text())
+        return self._parse(widget.text(), float)
 
     def _parse_int_field(self, widget) -> int | None:
-        """Parse a QLineEdit (or similar) as int."""
-        return self._parse_int(widget.text())
+        return self._parse(widget.text(), int)
+
+    @staticmethod
+    def _set_text(widget, value, fmt=None) -> None:
+        if value is None or value == "":
+            return
+        widget.setText(fmt.format(value) if fmt else str(value))
+
+    @staticmethod
+    def _set_plain(widget, value) -> None:
+        if value:
+            widget.setPlainText(value)
+
+    @staticmethod
+    def _set_combo(combo, text) -> None:
+        if not text:
+            return
+        index = combo.findText(text)
+        if index >= 0:
+            combo.setCurrentIndex(index)
 
     def _current_fitting_widget(self):
-        """Return the active FittingWidget from the parent perspective, or None."""
         parent = self.parent()
         if parent is None:
             return None
-
-        current_perspective = None
-        if hasattr(parent, '_current_perspective'):
-            current_perspective = parent._current_perspective
-        elif hasattr(parent, 'guiManager') and hasattr(parent.guiManager, '_current_perspective'):
-            current_perspective = parent.guiManager._current_perspective
-
-        if current_perspective is None:
+        perspective = getattr(parent, '_current_perspective', None)
+        if perspective is None and hasattr(parent, 'guiManager'):
+            perspective = getattr(parent.guiManager, '_current_perspective', None)
+        if perspective is None:
             return None
-
         from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
-        if not isinstance(current_perspective, FittingWindow):
+        if not isinstance(perspective, FittingWindow):
             return None
-
-        return current_perspective.currentFittingWidget
+        return perspective.currentFittingWidget
 
     def _fit_guinier_over_q_range(
         self, q_lo: float, q_hi: float, *, clear_first: bool = False
     ) -> bool:
-        """
-        Fit ln(I) vs q² over [q_lo, q_hi] and update Guinier tab fields.
-
-        :return: True when a fit was applied, False otherwise.
-        """
         if self._guinier_source_data is None or q_lo >= q_hi:
             return False
         guinier, fit_info = SASBDBDataCollector.collect_guinier_from_q_range(
@@ -242,22 +199,21 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
         )
         if guinier is None:
             return False
-        self._apply_guinier_to_fields(guinier, clear_first=clear_first, fit_info=fit_info)
+        self._apply_guinier_to_fields(
+            guinier, clear_first=clear_first, fit_info=fit_info)
         return True
 
     def _on_guinier_reset_clicked(self) -> None:
-        """Clear all Guinier line edits and reset the plot panel."""
         self._clear_guinier_fields()
         self._set_guinier_derived_fields_read_only(False)
         self._refresh_guinier_plot()
 
     def _sync_guinier_plot_ab_from_rg_i0(self, guinier: SASBDBGuinier) -> None:
-        """Set ln(I)=a+b q² line parameters from Rg (nm) and I(0) for plotting."""
         if guinier.rg is None or guinier.i0 is None or guinier.i0 <= 0:
-            self._guinier_plot_a = None
-            self._guinier_plot_b = None
+            self._guinier_plot_a = self._guinier_plot_b = None
             return
-        scale = SASBDBDataCollector._guinier_native_q_to_nm_scale(self._guinier_source_data)
+        scale = SASBDBDataCollector._guinier_native_q_to_nm_scale(
+            self._guinier_source_data)
         rg_native = float(guinier.rg) * scale
         self._guinier_plot_b = -(rg_native**2) / 3.0
         self._guinier_plot_a = math.log(float(guinier.i0))
@@ -268,113 +224,76 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
         clear_first: bool = False,
         fit_info: dict | None = None,
     ) -> None:
-        """Fill Guinier tab fields from a SASBDBGuinier object."""
         self._guinier_suppress_range_signals = True
         try:
             if clear_first:
                 self._clear_guinier_fields()
-            if guinier.rg is not None:
-                self.txtGuinierRg.setText(f"{guinier.rg:.2g}")
-            if guinier.rg_error is not None:
-                self.txtGuinierRgError.setText(f"{guinier.rg_error:.2g}")
-            if guinier.i0 is not None:
-                self.txtGuinierI0.setText(f"{guinier.i0:.2g}")
-            if guinier.range_start is not None:
-                self.txtGuinierRangeStart.setText(str(guinier.range_start))
-            if guinier.range_end is not None:
-                self.txtGuinierRangeEnd.setText(str(guinier.range_end))
-            if guinier.start_point is not None:
-                self.txtGuinierStartPoint.setText(str(guinier.start_point))
-            if guinier.end_point is not None:
-                self.txtGuinierEndPoint.setText(str(guinier.end_point))
-
+            pairs = (
+                (self.txtGuinierRg, guinier.rg, "{:.2g}"),
+                (self.txtGuinierRgError, guinier.rg_error, "{:.2g}"),
+                (self.txtGuinierI0, guinier.i0, "{:.2g}"),
+                (self.txtGuinierRangeStart, guinier.range_start, None),
+                (self.txtGuinierRangeEnd, guinier.range_end, None),
+                (self.txtGuinierStartPoint, guinier.start_point, None),
+                (self.txtGuinierEndPoint, guinier.end_point, None),
+            )
+            for widget, value, fmt in pairs:
+                if value is not None:
+                    self._set_text(widget, value, fmt)
             if fit_info is not None:
                 self._guinier_plot_a = fit_info.get("a")
                 self._guinier_plot_b = fit_info.get("b")
             elif guinier.rg is not None and guinier.i0 is not None and guinier.i0 > 0:
                 self._sync_guinier_plot_ab_from_rg_i0(guinier)
             else:
-                self._guinier_plot_a = None
-                self._guinier_plot_b = None
+                self._guinier_plot_a = self._guinier_plot_b = None
         finally:
             self._guinier_suppress_range_signals = False
         self._refresh_guinier_plot()
 
     def _refresh_guinier_plot(self) -> None:
-        """Redraw the Guinier ln(I) vs q² panel."""
         if self._guinier_plot_panel is None:
             return
-        import numpy as np
 
         data = self._guinier_source_data
-        q = (
-            np.asarray(data.x, dtype=float)
-            if data is not None and hasattr(data, "x")
-            else None
-        )
-        iy = (
-            np.asarray(data.y, dtype=float)
-            if data is not None and hasattr(data, "y")
-            else None
-        )
+        q = (np.asarray(data.x, dtype=float)
+             if data is not None and hasattr(data, "x") else None)
+        iy = (np.asarray(data.y, dtype=float)
+              if data is not None and hasattr(data, "y") else None)
         q_start = q_end = None
         rs = self.txtGuinierRangeStart.text().strip()
         re = self.txtGuinierRangeEnd.text().strip()
         if rs and re:
             try:
-                q_start = float(rs)
-                q_end = float(re)
+                q_start, q_end = float(rs), float(re)
             except ValueError:
                 pass
         self._guinier_plot_panel.update_plot(
-            q,
-            iy,
-            q_start,
-            q_end,
-            self._guinier_plot_a,
-            self._guinier_plot_b,
-        )
+            q, iy, q_start, q_end, self._guinier_plot_a, self._guinier_plot_b)
 
     def _guinier_any_field_nonempty(self) -> bool:
-        """True if any Guinier line edit has text (export validation)."""
-        for name in (
-            "txtGuinierRg",
-            "txtGuinierRgError",
-            "txtGuinierI0",
-            "txtGuinierRangeStart",
-            "txtGuinierRangeEnd",
-            "txtGuinierStartPoint",
-            "txtGuinierEndPoint",
-        ):
-            if hasattr(self, name) and getattr(self, name).text().strip():
-                return True
-        return False
+        return any(
+            hasattr(self, name) and getattr(self, name).text().strip()
+            for name in _GUINIER_FIELD_NAMES
+        )
 
     def _q_lo_q_hi_from_guinier_indices(
         self, i_start: int, i_end: int
     ) -> tuple[float, float] | None:
-        """
-        Map inclusive data indices to q-range endpoints (uses sorted index order).
-
-        :return: ``(q_lo, q_hi)`` at ``x[min(i)]`` and ``x[max(i)]``, or ``None``
-        """
         data = self._guinier_source_data
         if data is None or not hasattr(data, "x"):
             return None
-        import numpy as np
 
         x = np.asarray(data.x, dtype=float)
         n = len(x)
         if n == 0:
             return None
-        ia = int(min(i_start, i_end))
-        ib = int(max(i_start, i_end))
+        ia, ib = int(min(i_start, i_end)), int(max(i_start, i_end))
         if ia < 0 or ib >= n:
             return None
         return float(x[ia]), float(x[ib])
 
     def _on_guinier_indices_editing_finished(self) -> None:
-        """Refit when both start and end point indices are set."""
         if self._guinier_suppress_range_signals:
             return
         i_s = self._parse_int_field(self.txtGuinierStartPoint)
@@ -387,7 +306,6 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
             self._refresh_guinier_plot()
 
     def _on_guinier_q_range_editing_finished(self) -> None:
-        """Refit ln(I) vs q² when both Q start and Q end are set."""
         if self._guinier_suppress_range_signals:
             return
         q_lo = self._parse_float_field(self.txtGuinierRangeStart)
@@ -395,11 +313,12 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
         if q_lo is None or q_hi is None or not self._fit_guinier_over_q_range(q_lo, q_hi):
             self._refresh_guinier_plot()
 
-    def _on_guinier_estimate_clicked(self) -> None:
-        """Estimate: FreeSAS when range empty; fit by indices or by Q when set."""
-        self._run_free_sas_guinier_estimate()
+    def _guinier_msg(self, warning: bool, text: str) -> None:
+        box = (QtWidgets.QMessageBox.warning if warning
+               else QtWidgets.QMessageBox.information)
+        box(self, "Guinier estimate", text)
 
-    def _run_free_sas_guinier_estimate(self) -> None:
+    def _on_guinier_estimate_clicked(self) -> None:
         """FreeSAS auto_guinier, or WLS fit by indices / by Q range."""
         sp = self.txtGuinierStartPoint.text().strip()
         ep = self.txtGuinierEndPoint.text().strip()
@@ -408,283 +327,164 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
 
         if sp and ep:
             if self._guinier_source_data is None:
-                QtWidgets.QMessageBox.information(
-                    self,
-                    "Guinier estimate",
+                self._guinier_msg(False,
                     "No 1D scattering data is available for a fit by indices.\n\n"
-                    "Load 1D data or clear start/end point to use FreeSAS.",
-                )
+                    "Load 1D data or clear start/end point to use FreeSAS.")
                 return
-            i_s = self._parse_int(sp)
-            i_e = self._parse_int(ep)
+            i_s, i_e = self._parse_int(sp), self._parse_int(ep)
             if i_s is None or i_e is None:
-                QtWidgets.QMessageBox.warning(
-                    self,
-                    "Guinier estimate",
-                    "Start and end point must be integers.",
-                )
+                self._guinier_msg(True, "Start and end point must be integers.")
                 return
             qr = self._q_lo_q_hi_from_guinier_indices(i_s, i_e)
             if qr is None:
-                QtWidgets.QMessageBox.warning(
-                    self,
-                    "Guinier estimate",
-                    "Indices are out of range for the current 1D dataset.",
-                )
+                self._guinier_msg(
+                    True, "Indices are out of range for the current 1D dataset.")
                 return
             q_lo, q_hi = qr
             if q_lo >= q_hi:
-                QtWidgets.QMessageBox.warning(
-                    self,
-                    "Guinier estimate",
-                    "Start and end point must span at least two distinct q values.",
-                )
+                self._guinier_msg(True,
+                    "Start and end point must span at least two distinct q values.")
                 return
             if not self._fit_guinier_over_q_range(q_lo, q_hi):
-                QtWidgets.QMessageBox.warning(
-                    self,
-                    "Guinier estimate",
+                self._guinier_msg(True,
                     "Could not fit ln(I) vs q² for the selected indices.\n\n"
-                    "Need at least two points with I > 0 and a negative slope.",
-                )
+                    "Need at least two points with I > 0 and a negative slope.")
                 return
             self._set_guinier_derived_fields_read_only(True)
             return
 
         if sp or ep:
-            QtWidgets.QMessageBox.information(
-                self,
-                "Guinier estimate",
+            self._guinier_msg(False,
                 "Enter both start and end point for a fit by indices, or clear "
-                "both to use FreeSAS or Q start / Q end.",
-            )
+                "both to use FreeSAS or Q start / Q end.")
             return
 
         if rs and re:
             if self._guinier_source_data is None:
-                QtWidgets.QMessageBox.information(
-                    self,
-                    "Guinier estimate",
+                self._guinier_msg(False,
                     "No 1D scattering data is available for a range fit.\n\n"
                     "Load 1D data or clear Q start and Q end to use FreeSAS "
-                    "auto_guinier.",
-                )
+                    "auto_guinier.")
                 return
-            q_lo = self._parse_float(rs)
-            q_hi = self._parse_float(re)
+            q_lo, q_hi = self._parse_float(rs), self._parse_float(re)
             if q_lo is None or q_hi is None:
-                QtWidgets.QMessageBox.warning(
-                    self,
-                    "Guinier estimate",
-                    "Q start and Q end must be valid numbers.",
-                )
+                self._guinier_msg(True, "Q start and Q end must be valid numbers.")
                 return
             if q_lo >= q_hi:
-                QtWidgets.QMessageBox.warning(
-                    self,
-                    "Guinier estimate",
-                    "Q start must be less than Q end.",
-                )
+                self._guinier_msg(True, "Q start must be less than Q end.")
                 return
             if not self._fit_guinier_over_q_range(q_lo, q_hi):
-                QtWidgets.QMessageBox.warning(
-                    self,
-                    "Guinier estimate",
+                self._guinier_msg(True,
                     "Could not fit ln(I) vs q² in the selected range.\n\n"
                     "Need at least two points with I > 0 and a negative slope "
-                    "(check q range and data).",
-                )
+                    "(check q range and data).")
                 return
             self._set_guinier_derived_fields_read_only(True)
             return
 
         if rs or re:
-            QtWidgets.QMessageBox.information(
-                self,
-                "Guinier estimate",
+            self._guinier_msg(False,
                 "Enter both Q start and Q end to fit by q, or clear both for "
-                "FreeSAS auto_guinier.",
-            )
+                "FreeSAS auto_guinier.")
             return
 
         if self._guinier_source_data is None:
-            QtWidgets.QMessageBox.information(
-                self,
-                "Guinier estimate",
+            self._guinier_msg(False,
                 "No 1D scattering data is available for FreeSAS.\n\n"
                 "Open SASBDB from the Fitting perspective with 1D data loaded, "
-                "or load 1D data in the Data Explorer first.",
-            )
+                "or load 1D data in the Data Explorer first.")
             return
 
-        guinier = SASBDBDataCollector.collect_guinier_from_freesas(self._guinier_source_data)
+        guinier = SASBDBDataCollector.collect_guinier_from_freesas(
+            self._guinier_source_data)
         if guinier is None:
-            QtWidgets.QMessageBox.warning(
-                self,
-                "Guinier estimate",
+            self._guinier_msg(True,
                 "FreeSAS auto_guinier did not return a result.\n\n"
                 "Ensure the freesas package is installed and the curve is suitable "
-                "for Guinier analysis.",
-            )
+                "for Guinier analysis.")
             return
-
         self._apply_guinier_to_fields(guinier, clear_first=True, fit_info=None)
         self._set_guinier_derived_fields_read_only(True)
 
     def populateFromData(self):
-        """
-        Populate UI fields from export_data.
-        
-        This method reads the export_data object and fills in all UI form fields
-        with the available data. It handles all tabs including Project, Sample,
-        Molecule, Buffer, Guinier, Fit, and Instrument information.
-        
-        If export_data is empty or fields are missing, the corresponding UI fields
-        will remain empty for manual entry.
-        """
-        # Project tab
+        """Fill UI fields from export_data."""
         if self.export_data.project:
             project = self.export_data.project
             self.chkPublished.setChecked(project.published)
-            if project.pubmed_pmid:
-                self.txtPubmedPMID.setText(project.pubmed_pmid)
-            if project.doi:
-                self.txtDOI.setText(project.doi)
-            if project.project_title:
-                self.txtProjectTitle.setText(project.project_title)
+            self._set_text(self.txtPubmedPMID, project.pubmed_pmid)
+            self._set_text(self.txtDOI, project.doi)
+            self._set_text(self.txtProjectTitle, project.project_title)
 
-        # Sample tab (use first sample if available)
-        if self.export_data.samples:
-            sample = self.export_data.samples[0]
-            if sample.sample_title:
-                self.txtSampleTitle.setText(sample.sample_title)
-            if sample.curve_type:
-                index = self.cmbCurveType.findText(sample.curve_type)
-                if index >= 0:
-                    self.cmbCurveType.setCurrentIndex(index)
-            if sample.angular_units:
-                index = self.cmbAngularUnits.findText(sample.angular_units)
-                if index >= 0:
-                    self.cmbAngularUnits.setCurrentIndex(index)
-            if sample.intensity_units:
-                index = self.cmbIntensityUnits.findText(sample.intensity_units)
-                if index >= 0:
-                    self.cmbIntensityUnits.setCurrentIndex(index)
-            if sample.experimental_molecular_weight:
-                self.txtExpMW.setText(str(sample.experimental_molecular_weight))
-            if sample.experiment_date:
-                self.txtExperimentDate.setText(sample.experiment_date)
-            if sample.beamline_instrument:
-                self.txtBeamline.setText(sample.beamline_instrument)
-            if sample.wavelength:
-                self.txtWavelength.setText(str(sample.wavelength))
-            if sample.sample_detector_distance:
-                self.txtDistance.setText(str(sample.sample_detector_distance))
-            if sample.cell_temperature:
-                self.txtTemperature.setText(str(sample.cell_temperature))
-            if sample.concentration:
-                self.txtConcentration.setText(str(sample.concentration))
+        if not self.export_data.samples:
+            instruments = self.export_data.instruments
+            if instruments:
+                self._populate_instrument(instruments[0])
+            return
 
-            # Molecule tab
-            if sample.molecule:
-                molecule = sample.molecule
-                if molecule.type:
-                    index = self.cmbMoleculeType.findText(molecule.type)
-                    if index >= 0:
-                        self.cmbMoleculeType.setCurrentIndex(index)
-                if molecule.long_name:
-                    self.txtLongName.setText(molecule.long_name)
-                if molecule.short_name:
-                    self.txtShortName.setText(molecule.short_name)
-                if molecule.fasta_sequence:
-                    self.txtFastaSequence.setPlainText(molecule.fasta_sequence)
-                if molecule.monomer_mw_kda:
-                    self.txtMonomerMW.setText(str(molecule.monomer_mw_kda))
-                if molecule.oligomeric_state:
-                    index = self.cmbOligomericState.findText(molecule.oligomeric_state)
-                    if index >= 0:
-                        self.cmbOligomericState.setCurrentIndex(index)
-                if molecule.number_of_molecules:
-                    self.spnNumberOfMolecules.setValue(molecule.number_of_molecules)
-                if molecule.uniprot_accession:
-                    self.txtUniProt.setText(molecule.uniprot_accession)
-                if molecule.source_organism:
-                    self.txtSourceOrganism.setText(molecule.source_organism)
+        sample = self.export_data.samples[0]
+        self._set_text(self.txtSampleTitle, sample.sample_title)
+        self._set_combo(self.cmbCurveType, sample.curve_type)
+        self._set_combo(self.cmbAngularUnits, sample.angular_units)
+        self._set_combo(self.cmbIntensityUnits, sample.intensity_units)
+        self._set_text(self.txtExpMW, sample.experimental_molecular_weight)
+        self._set_text(self.txtExperimentDate, sample.experiment_date)
+        self._set_text(self.txtBeamline, sample.beamline_instrument)
+        self._set_text(self.txtWavelength, sample.wavelength)
+        self._set_text(self.txtDistance, sample.sample_detector_distance)
+        self._set_text(self.txtTemperature, sample.cell_temperature)
+        self._set_text(self.txtConcentration, sample.concentration)
 
-            # Buffer tab
-            if sample.buffer:
-                buffer = sample.buffer
-                if buffer.description:
-                    self.txtBufferDescription.setPlainText(buffer.description)
-                if buffer.ph:
-                    self.txtBufferPH.setText(str(buffer.ph))
-                if buffer.comment:
-                    self.txtBufferComment.setPlainText(buffer.comment)
+        if sample.molecule:
+            mol = sample.molecule
+            self._set_combo(self.cmbMoleculeType, mol.type)
+            self._set_text(self.txtLongName, mol.long_name)
+            self._set_text(self.txtShortName, mol.short_name)
+            self._set_plain(self.txtFastaSequence, mol.fasta_sequence)
+            self._set_text(self.txtMonomerMW, mol.monomer_mw_kda)
+            self._set_combo(self.cmbOligomericState, mol.oligomeric_state)
+            if mol.number_of_molecules:
+                self.spnNumberOfMolecules.setValue(mol.number_of_molecules)
+            self._set_text(self.txtUniProt, mol.uniprot_accession)
+            self._set_text(self.txtSourceOrganism, mol.source_organism)
 
-            # Guinier tab (manual entry by default; optional FreeSAS via Estimate button)
-            if sample.guinier:
-                self._apply_guinier_to_fields(sample.guinier, clear_first=False)
+        if sample.buffer:
+            buf = sample.buffer
+            self._set_plain(self.txtBufferDescription, buf.description)
+            self._set_text(self.txtBufferPH, buf.ph)
+            self._set_plain(self.txtBufferComment, buf.comment)
 
-            # Fit tab (use first fit if available)
-            if sample.fits:
-                fit = sample.fits[0]
-                if fit.software:
-                    self.txtFitSoftware.setText(fit.software)
-                if fit.software_version:
-                    self.txtFitVersion.setText(fit.software_version)
-                if fit.chi_squared:
-                    # Format chi-squared to 2 decimal places
-                    self.txtChiSquared.setText(f"{fit.chi_squared:.2f}")
-                if fit.cormap_pvalue:
-                    # Format to 2 significant digits
-                    self.txtCorMapPValue.setText(f"{fit.cormap_pvalue:.2g}")
+        if sample.guinier:
+            self._apply_guinier_to_fields(sample.guinier, clear_first=False)
 
-                # Model section (use first model if available)
-                if fit.models:
-                    model = fit.models[0]
-                    if model.software_or_db:
-                        self.txtModelName.setText(model.software_or_db)
+        if sample.fits:
+            fit = sample.fits[0]
+            self._set_text(self.txtFitSoftware, fit.software)
+            self._set_text(self.txtFitVersion, fit.software_version)
+            if fit.chi_squared:
+                self.txtChiSquared.setText(f"{fit.chi_squared:.2f}")
+            if fit.cormap_pvalue:
+                self.txtCorMapPValue.setText(f"{fit.cormap_pvalue:.2g}")
+            if fit.models:
+                model = fit.models[0]
+                self._set_text(self.txtModelName, model.software_or_db)
+                self._set_plain(self.txtModelParameters, model.log)
 
-                    # Format parameters if available
-                    # Parameters are stored as a formatted string in log
-                    if model.log:
-                        self.txtModelParameters.setPlainText(model.log)
-
-        # Instrument tab (use first instrument if available)
         if self.export_data.instruments:
-            instrument = self.export_data.instruments[0]
-            if instrument.source_type:
-                index = self.cmbSourceType.findText(instrument.source_type)
-                if index >= 0:
-                    self.cmbSourceType.setCurrentIndex(index)
-            if instrument.beamline_name:
-                self.txtBeamlineName.setText(instrument.beamline_name)
-            if instrument.synchrotron_name:
-                self.txtSynchrotronName.setText(instrument.synchrotron_name)
-            if instrument.detector_manufacturer:
-                self.txtDetectorManufacturer.setText(instrument.detector_manufacturer)
-            if instrument.detector_type:
-                self.txtDetectorType.setText(instrument.detector_type)
-            if instrument.detector_resolution:
-                self.txtDetectorResolution.setText(instrument.detector_resolution)
-            if instrument.city:
-                self.txtCity.setText(instrument.city)
-            if instrument.country:
-                self.txtCountry.setText(instrument.country)
+            self._populate_instrument(self.export_data.instruments[0])
+
+    def _populate_instrument(self, instrument: SASBDBInstrument) -> None:
+        self._set_combo(self.cmbSourceType, instrument.source_type)
+        self._set_text(self.txtBeamlineName, instrument.beamline_name)
+        self._set_text(self.txtSynchrotronName, instrument.synchrotron_name)
+        self._set_text(self.txtDetectorManufacturer, instrument.detector_manufacturer)
+        self._set_text(self.txtDetectorType, instrument.detector_type)
+        self._set_text(self.txtDetectorResolution, instrument.detector_resolution)
+        self._set_text(self.txtCity, instrument.city)
+        self._set_text(self.txtCountry, instrument.country)
 
     def collectFromUI(self) -> SASBDBExportData:
-        """
-        Collect data from UI fields and create SASBDBExportData.
-        
-        This method reads all UI form fields and constructs a complete SASBDBExportData
-        object containing all the information entered by the user. It handles parsing
-        of numeric fields, text fields, and dropdown selections across all tabs.
-        
-        :return: SASBDBExportData object containing all collected data from the UI
-        """
+        """Build SASBDBExportData from UI fields."""
         export_data = SASBDBExportData()
-
-        # Project
         project = SASBDBProject()
         project.published = self.chkPublished.isChecked()
         project.pubmed_pmid = self.txtPubmedPMID.text().strip() or None
@@ -692,7 +492,6 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
         project.project_title = self.txtProjectTitle.text().strip() or None
         export_data.project = project
 
-        # Sample
         sample = SASBDBSample()
         sample.sample_title = self.txtSampleTitle.text().strip() or None
         sample.curve_type = self.cmbCurveType.currentText() or None
@@ -706,7 +505,6 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
         sample.cell_temperature = self._parse_float_field(self.txtTemperature)
         sample.concentration = self._parse_float_field(self.txtConcentration)
 
-        # Molecule
         molecule = SASBDBMolecule()
         molecule.type = self.cmbMoleculeType.currentText() or None
         molecule.long_name = self.txtLongName.text().strip() or None
@@ -719,286 +517,174 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
         molecule.source_organism = self.txtSourceOrganism.text().strip() or None
         sample.molecule = molecule
 
-        # Buffer
         buffer = SASBDBBuffer()
         buffer.description = self.txtBufferDescription.toPlainText().strip() or None
         buffer.ph = self._parse_float_field(self.txtBufferPH)
         buffer.comment = self.txtBufferComment.toPlainText().strip() or None
         sample.buffer = buffer
 
-        # Guinier
-        guinier = SASBDBGuinier()
-        guinier.rg = self._parse_float_field(self.txtGuinierRg)
-        guinier.rg_error = self._parse_float_field(self.txtGuinierRgError)
-        guinier.i0 = self._parse_float_field(self.txtGuinierI0)
-        guinier.range_start = self._parse_float_field(self.txtGuinierRangeStart)
-        guinier.range_end = self._parse_float_field(self.txtGuinierRangeEnd)
-        guinier.start_point = self._parse_int_field(self.txtGuinierStartPoint)
-        guinier.end_point = self._parse_int_field(self.txtGuinierEndPoint)
-
-        if any([
-            guinier.rg is not None,
-            guinier.rg_error is not None,
-            guinier.i0 is not None,
-            guinier.range_start is not None,
-            guinier.range_end is not None,
-            guinier.start_point is not None,
-            guinier.end_point is not None,
-        ]):
+        guinier = SASBDBGuinier(
+            rg=self._parse_float_field(self.txtGuinierRg),
+            rg_error=self._parse_float_field(self.txtGuinierRgError),
+            i0=self._parse_float_field(self.txtGuinierI0),
+            range_start=self._parse_float_field(self.txtGuinierRangeStart),
+            range_end=self._parse_float_field(self.txtGuinierRangeEnd),
+            start_point=self._parse_int_field(self.txtGuinierStartPoint),
+            end_point=self._parse_int_field(self.txtGuinierEndPoint),
+        )
+        if any(v is not None for v in (
+                guinier.rg, guinier.rg_error, guinier.i0, guinier.range_start,
+                guinier.range_end, guinier.start_point, guinier.end_point)):
             sample.guinier = guinier
 
-        # Fit
-        fit = SASBDBFit()
-        fit.software = self.txtFitSoftware.text().strip() or None
-        fit.software_version = self.txtFitVersion.text().strip() or None
-        fit.chi_squared = self._parse_float_field(self.txtChiSquared)
-        fit.cormap_pvalue = self._parse_float_field(self.txtCorMapPValue)
-
-        # Model section
+        fit = SASBDBFit(
+            software=self.txtFitSoftware.text().strip() or None,
+            software_version=self.txtFitVersion.text().strip() or None,
+            chi_squared=self._parse_float_field(self.txtChiSquared),
+            cormap_pvalue=self._parse_float_field(self.txtCorMapPValue),
+        )
         model_name = self.txtModelName.text().strip()
         model_parameters = self.txtModelParameters.toPlainText().strip()
-
         if model_name or model_parameters:
             model = SASBDBModel()
             if model_name:
                 model.software_or_db = model_name
             if model_parameters:
-                # Store parameters in log field
                 model.log = model_parameters
             fit.models.append(model)
-
         if fit.software or fit.chi_squared is not None or fit.models:
             sample.fits.append(fit)
-
         export_data.samples.append(sample)
 
-        # Collect instrument data
-        instrument = SASBDBInstrument()
-        instrument.source_type = self.cmbSourceType.currentText() or None
-        instrument.beamline_name = self.txtBeamlineName.text().strip() or None
-        instrument.synchrotron_name = self.txtSynchrotronName.text().strip() or None
-        instrument.detector_manufacturer = self.txtDetectorManufacturer.text().strip() or None
-        instrument.detector_type = self.txtDetectorType.text().strip() or None
-        instrument.detector_resolution = self.txtDetectorResolution.text().strip() or None
-        instrument.city = self.txtCity.text().strip() or None
-        instrument.country = self.txtCountry.text().strip() or None
-
-        if any([instrument.source_type, instrument.beamline_name, instrument.synchrotron_name,
-                instrument.detector_manufacturer, instrument.city, instrument.country]):
+        instrument = SASBDBInstrument(
+            source_type=self.cmbSourceType.currentText() or None,
+            beamline_name=self.txtBeamlineName.text().strip() or None,
+            synchrotron_name=self.txtSynchrotronName.text().strip() or None,
+            detector_manufacturer=self.txtDetectorManufacturer.text().strip() or None,
+            detector_type=self.txtDetectorType.text().strip() or None,
+            detector_resolution=self.txtDetectorResolution.text().strip() or None,
+            city=self.txtCity.text().strip() or None,
+            country=self.txtCountry.text().strip() or None,
+        )
+        if any((instrument.source_type, instrument.beamline_name,
+                instrument.synchrotron_name, instrument.detector_manufacturer,
+                instrument.city, instrument.country)):
             export_data.instruments.append(instrument)
-
         return export_data
 
     def validateData(self) -> tuple[bool, str]:
-        """
-        Validate that all required fields are filled.
-        
-        This method checks all required fields according to SASBDB submission requirements:
-        - Project: Either PMID/DOI (if published) or Title (if not published)
-        - Sample: Title, Experimental MW, Experiment Date, Beamline/Instrument
-        - Molecule: Long Name, FASTA Sequence, Monomer MW
-        - Buffer: Description, pH
-        
-        :return: Tuple of (is_valid, error_message). If is_valid is False, error_message
-                 contains a description of which required fields are missing.
-        """
-        # Project validation
+        """Return (ok, error_message) for required SASBDB fields."""
+        checks = []
         if self.chkPublished.isChecked():
             if not self.txtPubmedPMID.text().strip() and not self.txtDOI.text().strip():
                 return False, "If published, either PubMed PMID or DOI is required"
         else:
-            if not self.txtProjectTitle.text().strip():
-                return False, "Project Title is required if not published"
-
-        # Sample validation
-        if not self.txtSampleTitle.text().strip():
-            return False, "Sample Title is required"
-
-        if not self.txtExpMW.text().strip():
-            return False, "Experimental Molecular Weight is required"
-
-        if not self.txtExperimentDate.text().strip():
-            return False, "Experiment Date is required"
-
-        if not self.txtBeamline.text().strip():
-            return False, "Beamline/Instrument is required"
-
-        # Molecule validation
-        if not self.txtLongName.text().strip():
-            return False, "Molecule Long Name is required"
-
-        if not self.txtFastaSequence.toPlainText().strip():
-            return False, "FASTA Sequence is required"
-
-        if not self.txtMonomerMW.text().strip():
-            return False, "Monomer MW (kDa) is required"
-
-        # Buffer validation
-        if not self.txtBufferDescription.toPlainText().strip():
-            return False, "Buffer Description is required"
-
-        if not self.txtBufferPH.text().strip():
-            return False, "Buffer pH is required"
+            checks.append((self.txtProjectTitle.text().strip(),
+                           "Project Title is required if not published"))
+        checks.extend([
+            (self.txtSampleTitle.text().strip(), "Sample Title is required"),
+            (self.txtExpMW.text().strip(),
+             "Experimental Molecular Weight is required"),
+            (self.txtExperimentDate.text().strip(), "Experiment Date is required"),
+            (self.txtBeamline.text().strip(), "Beamline/Instrument is required"),
+            (self.txtLongName.text().strip(), "Molecule Long Name is required"),
+            (self.txtFastaSequence.toPlainText().strip(),
+             "FASTA Sequence is required"),
+            (self.txtMonomerMW.text().strip(), "Monomer MW (kDa) is required"),
+            (self.txtBufferDescription.toPlainText().strip(),
+             "Buffer Description is required"),
+            (self.txtBufferPH.text().strip(), "Buffer pH is required"),
+        ])
+        for ok, msg in checks:
+            if not ok:
+                return False, msg
 
         if hasattr(self, "txtGuinierStartPoint") and self._guinier_any_field_nonempty():
             sp = self.txtGuinierStartPoint.text().strip()
             ep = self.txtGuinierEndPoint.text().strip()
             if not sp or not ep:
-                return (
-                    False,
+                return False, (
                     "Guinier: start and end point are required when any Guinier "
-                    "field is filled.",
-                )
+                    "field is filled.")
             try:
-                i_s = int(sp)
-                i_e = int(ep)
+                i_s, i_e = int(sp), int(ep)
             except ValueError:
                 return False, "Guinier: start and end point must be integers."
             if i_s < 0 or i_e < 0:
                 return False, "Guinier: indices must be non-negative."
             if i_s >= i_e:
-                return (
-                    False,
-                    "Guinier: start point index must be less than end point index.",
-                )
+                return False, (
+                    "Guinier: start point index must be less than end point index.")
             data = self._guinier_source_data
             if data is not None and hasattr(data, "x"):
-                import numpy as np
-
                 n = len(np.asarray(data.x))
                 if n and (i_s >= n or i_e >= n):
-                    return (
-                        False,
+                    return False, (
                         "Guinier: start and end point must be within the 1D data "
-                        "length.",
-                    )
-
+                        "length.")
         return True, ""
 
     def onPublishedToggled(self, checked: bool):
-        """
-        Enable/disable published-related fields
-        
-        :param checked: Whether published checkbox is checked
-        """
         self.txtPubmedPMID.setEnabled(checked)
         self.txtDOI.setEnabled(checked)
         self.txtProjectTitle.setEnabled(not checked)
 
     def onHelp(self):
-        """
-        Show the SASBDB Export help documentation.
-        
-        Opens the help window with the SASBDB Export documentation.
-        The help file is located at /user/qtgui/Utilities/SASBDB/sasbdb_help.html
-        """
         help_url = "/user/qtgui/Utilities/SASBDB/sasbdb_help.html"
-
-        # Try to use parent's showHelp method if available (GuiManager)
         parent_window = self.parent()
         if parent_window is not None:
             if hasattr(parent_window, 'showHelp'):
                 parent_window.showHelp(help_url)
                 return
-            elif hasattr(parent_window, 'guiManager') and hasattr(parent_window.guiManager, 'showHelp'):
-                parent_window.guiManager.showHelp(help_url)
+            gui = getattr(parent_window, 'guiManager', None)
+            if gui is not None and hasattr(gui, 'showHelp'):
+                gui.showHelp(help_url)
                 return
-
-        # Fallback to GuiUtils.showHelp
         from sas.qtgui.Utilities.GuiUtils import showHelp
         showHelp(help_url)
 
+    def _choose_save_path(self, title: str, default_name: str, filt: str) -> str | None:
+        location = (self.save_location if self.save_location is not None
+                    else os.path.expanduser('~'))
+        path, _ = QtWidgets.QFileDialog.getSaveFileName(
+            self, title, os.path.join(str(location), default_name), filt, "")
+        if not path:
+            return None
+        self.save_location = os.path.dirname(path)
+        ObjectLibrary.addObject('SASBDBDialog_directory', self.save_location)
+        return path
+
     def onExport(self):
-        """
-        Handle export button click.
-        
-        This method performs the complete export process:
-        1. Validates that all required fields are filled
-        2. Collects data from the UI
-        3. Prompts user to select a location and filename for the JSON file
-        4. Saves three files to the selected directory:
-           - JSON file (user-selected filename): Main SASBDB export data
-           - PDF file (auto-named): PDF report with all export information
-           - Project file (auto-named): SasView project file for the current session
-        
-        The PDF and project files are automatically named based on the JSON filename.
-        For example, if the JSON file is "my_export.json", the other files will be
-        "my_export.pdf" and "my_export_project.json".
-        
-        After export, displays a success/failure message and closes the dialog if
-        all files were saved successfully.
-        """
-        # Validate data
+        """Validate, then write JSON + PDF + project beside the chosen JSON path."""
         is_valid, error_msg = self.validateData()
         if not is_valid:
-            QtWidgets.QMessageBox.warning(
-                self,
-                "Validation Error",
-                error_msg
-            )
+            QtWidgets.QMessageBox.warning(self, "Validation Error", error_msg)
             return
 
-        # Collect data from UI
         export_data = self.collectFromUI()
-
-        # Choose save location
-        if self.save_location is None:
-            location = os.path.expanduser('~')
-        else:
-            location = self.save_location
-
-        default_name = os.path.join(str(location), 'sasbdb_export.json')
-
-        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(
-            self,
-            'Export SASBDB Data',
-            default_name,
-            'JSON file (*.json)',
-            ""
-        )
-        json_filename = filename_tuple[0]
+        json_filename = self._choose_save_path(
+            'Export SASBDB Data', 'sasbdb_export.json', 'JSON file (*.json)')
         if not json_filename:
             return
-
-        # Update save location
-        self.save_location = os.path.dirname(json_filename)
-        ObjectLibrary.addObject('SASBDBDialog_directory', self.save_location)
-
-        # Ensure .json extension
         if not json_filename.endswith('.json'):
             json_filename += '.json'
 
-        # Extract base name (without extension) and directory
         base_name = os.path.splitext(os.path.basename(json_filename))[0]
         directory = os.path.dirname(json_filename)
-
-        # Generate filenames for PDF and project
         pdf_filename = os.path.join(directory, f"{base_name}.pdf")
         project_filename = os.path.join(directory, f"{base_name}_project.json")
 
-        # Track success/failure for each file
-        results = {
-            'json': False,
-            'pdf': False,
-            'project': False
-        }
-        errors = {
-            'json': None,
-            'pdf': None,
-            'project': None
-        }
+        results = {'json': False, 'pdf': False, 'project': False}
+        errors = {'json': None, 'pdf': None, 'project': None}
 
-        # 1. Export JSON file
         try:
-            exporter = SASBDBExporter(export_data)
-            results['json'] = exporter.export_to_json(json_filename)
+            results['json'] = SASBDBExporter(export_data).export_to_json(json_filename)
             if not results['json']:
                 errors['json'] = "Failed to export JSON file"
         except Exception as e:
             logger.error(f"Error exporting JSON: {e}", exc_info=True)
             errors['json'] = str(e)
 
-        # 2. Generate PDF file
         try:
             self._generatePDFReport(export_data, pdf_filename)
             results['pdf'] = True
@@ -1006,663 +692,366 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
             logger.error(f"Error generating PDF: {e}", exc_info=True)
             errors['pdf'] = str(e)
 
-        # 3. Save project file
         try:
             results['project'] = self._saveProjectFile(project_filename)
             if not results['project']:
-                errors['project'] = "Failed to save project file (GuiManager not accessible or no data available)"
+                errors['project'] = (
+                    "Failed to save project file "
+                    "(GuiManager not accessible or no data available)")
         except Exception as e:
             logger.error(f"Error saving project file: {e}", exc_info=True)
             errors['project'] = str(e)
 
-        # Show results message
         success_count = sum(1 for v in results.values() if v)
-        total_count = len(results)
-
-        if success_count == total_count:
-            # All files saved successfully
-            message = "All files exported successfully:\n\n"
-            message += f"• JSON: {json_filename}\n"
-            message += f"• PDF: {pdf_filename}\n"
-            message += f"• Project: {project_filename}"
-            QtWidgets.QMessageBox.information(
-                self,
-                "Export Successful",
-                message
-            )
+        paths = {'json': json_filename, 'pdf': pdf_filename, 'project': project_filename}
+        labels = {'json': 'JSON', 'pdf': 'PDF', 'project': 'Project'}
+        if success_count == 3:
+            msg = "All files exported successfully:\n\n" + "\n".join(
+                f"• {labels[k]}: {paths[k]}" for k in paths)
+            QtWidgets.QMessageBox.information(self, "Export Successful", msg)
             self.close()
         elif success_count > 0:
-            # Partial success
-            message = f"Export completed with {success_count} of {total_count} files saved:\n\n"
-            if results['json']:
-                message += f"✓ JSON: {json_filename}\n"
-            else:
-                message += f"✗ JSON: {errors['json'] or 'Failed'}\n"
-
-            if results['pdf']:
-                message += f"✓ PDF: {pdf_filename}\n"
-            else:
-                message += f"✗ PDF: {errors['pdf'] or 'Failed'}\n"
-
-            if results['project']:
-                message += f"✓ Project: {project_filename}\n"
-            else:
-                message += f"✗ Project: {errors['project'] or 'Failed'}\n"
-
+            lines = []
+            for key in paths:
+                if results[key]:
+                    lines.append(f"✓ {labels[key]}: {paths[key]}")
+                else:
+                    lines.append(f"✗ {labels[key]}: {errors[key] or 'Failed'}")
             QtWidgets.QMessageBox.warning(
-                self,
-                "Partial Export Success",
-                message
-            )
+                self, "Partial Export Success",
+                f"Export completed with {success_count} of 3 files saved:\n\n"
+                + "\n".join(lines))
         else:
-            # All failed
-            message = "Failed to export all files:\n\n"
-            message += f"• JSON: {errors['json'] or 'Failed'}\n"
-            message += f"• PDF: {errors['pdf'] or 'Failed'}\n"
-            message += f"• Project: {errors['project'] or 'Failed'}\n\n"
-            message += "Please check the logs for details."
             QtWidgets.QMessageBox.critical(
-                self,
-                "Export Failed",
-                message
-            )
+                self, "Export Failed",
+                "Failed to export all files:\n\n"
+                + "\n".join(f"• {labels[k]}: {errors[k] or 'Failed'}" for k in paths)
+                + "\n\nPlease check the logs for details.")
 
     def _saveProjectFile(self, filepath: str) -> bool:
-        """
-        Save SasView project file programmatically without showing file dialog.
-        
-        This method replicates the functionality of GuiManager.actionSave_Project()
-        but saves to a specified filepath without user interaction. It collects
-        data from the current SasView session including:
-        - All loaded data files from filesWidget
-        - All serializable perspectives and their data
-        - Current perspective state
-        
-        :param filepath: Full path where the project file should be saved
-        :return: True if the project file was saved successfully, False otherwise.
-                 Returns False if GuiManager is not accessible, filesWidget is missing,
-                 or if an error occurs during saving.
-        This replicates the functionality of GuiManager.actionSave_Project() but
-        saves to a specified filepath instead of prompting the user.
-        
-        :param filepath: Full path where the project file should be saved
-        :return: True if successful, False otherwise
-        """
+        """Save current session project to filepath without a file dialog."""
         try:
-            # Access GuiManager via parent window
             parent_window = self.parent()
             if parent_window is None:
                 logger.warning("Cannot save project file: dialog has no parent window")
                 return False
-
-            # Try to get guiManager from parent
-            gui_manager = None
-            if hasattr(parent_window, 'guiManager'):
-                gui_manager = parent_window.guiManager
-            elif hasattr(parent_window, 'gui_manager'):
-                gui_manager = parent_window.gui_manager
-
+            gui_manager = (getattr(parent_window, 'guiManager', None)
+                           or getattr(parent_window, 'gui_manager', None))
             if gui_manager is None:
-                logger.warning("Cannot save project file: GuiManager not accessible from parent window")
+                logger.warning(
+                    "Cannot save project file: GuiManager not accessible from parent")
                 return False
-
-            # Get serialized data from filesWidget
-            if not hasattr(gui_manager, 'filesWidget') or gui_manager.filesWidget is None:
+            if not getattr(gui_manager, 'filesWidget', None):
                 logger.warning("Cannot save project file: filesWidget not available")
                 return False
 
             all_data = gui_manager.filesWidget.getSerializedData()
-            final_data = {}
-            for id, data in all_data.items():
-                final_data[id] = {'fit_data': data}
-
-            # Get serialized data from all perspectives
+            final_data = {id_: {'fit_data': data} for id_, data in all_data.items()}
             analysis = {}
-            if hasattr(gui_manager, 'loadedPerspectives'):
-                for name, per in gui_manager.loadedPerspectives.items():
-                    if hasattr(per, 'isSerializable') and per.isSerializable():
-                        perspective_data = per.serializeAll()
-                        for key, value in perspective_data.items():
-                            if key in final_data:
-                                final_data[key].update(value)
-                            elif 'cs_tab' in key:
-                                final_data[key] = value
-                        # Merge analysis data
-                        analysis.update(perspective_data)
+            for _name, per in getattr(gui_manager, 'loadedPerspectives', {}).items():
+                if getattr(per, 'isSerializable', lambda: False)():
+                    perspective_data = per.serializeAll()
+                    for key, value in perspective_data.items():
+                        if key in final_data:
+                            final_data[key].update(value)
+                        elif 'cs_tab' in key:
+                            final_data[key] = value
+                    analysis.update(perspective_data)
 
-            # Add batch and grid data if available
-            if hasattr(gui_manager, 'grid_window') and hasattr(gui_manager.grid_window, 'data_dict'):
-                final_data['batch_grid'] = gui_manager.grid_window.data_dict
-            else:
-                final_data['batch_grid'] = {}
-
+            grid = getattr(gui_manager, 'grid_window', None)
+            final_data['batch_grid'] = getattr(grid, 'data_dict', {}) if grid else {}
             final_data['is_batch'] = analysis.get('is_batch', 'False')
+            current = getattr(gui_manager, '_current_perspective', None)
+            final_data['visible_perspective'] = current.name if current else ''
 
-            # Add visible perspective if available
-            if hasattr(gui_manager, '_current_perspective') and gui_manager._current_perspective:
-                final_data['visible_perspective'] = gui_manager._current_perspective.name
-            else:
-                final_data['visible_perspective'] = ''
-
-            # Save using GuiUtils.saveData()
             import sas.qtgui.Utilities.GuiUtils as GuiUtils
             with open(filepath, 'w') as outfile:
                 GuiUtils.saveData(outfile, final_data)
-
             logger.info(f"Project file saved to {filepath}")
             return True
-
         except Exception as e:
             logger.error(f"Error saving project file: {e}", exc_info=True)
             return False
 
     def onGeneratePDF(self):
-        """
-        Handle Generate PDF button click
-        """
-        # Collect data from UI
         export_data = self.collectFromUI()
-
-        # Choose save location
-        if self.save_location is None:
-            location = os.path.expanduser('~')
-        else:
-            location = self.save_location
-
-        default_name = os.path.join(str(location), 'sasbdb_report.pdf')
-
-        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(
-            self,
-            'Save PDF Report',
-            default_name,
-            'PDF file (*.pdf)',
-            ""
-        )
-        filename = filename_tuple[0]
+        filename = self._choose_save_path(
+            'Save PDF Report', 'sasbdb_report.pdf', 'PDF file (*.pdf)')
         if not filename:
             return
-
-        # Update save location
-        self.save_location = os.path.dirname(filename)
-        ObjectLibrary.addObject('SASBDBDialog_directory', self.save_location)
-
-        # Ensure .pdf extension
         if not filename.endswith('.pdf'):
             filename += '.pdf'
-
-        # Generate PDF
         try:
             self._generatePDFReport(export_data, filename)
             QtWidgets.QMessageBox.information(
-                self,
-                "PDF Generated",
-                f"PDF report generated successfully:\n{filename}"
-            )
+                self, "PDF Generated",
+                f"PDF report generated successfully:\n{filename}")
         except Exception as e:
             logger.error(f"Error generating PDF: {e}", exc_info=True)
             QtWidgets.QMessageBox.critical(
-                self,
-                "PDF Generation Failed",
-                f"Failed to generate PDF report:\n{str(e)}"
-            )
+                self, "PDF Generation Failed",
+                f"Failed to generate PDF report:\n{str(e)}")
 
     def _addCustomStyles(self, report: ReportBase):
-        """
-        Add custom CSS styles for better PDF formatting
-        
-        :param report: ReportBase instance
-        """
-        custom_css = """
-        body {
-            font-size: 11pt;
-        }
-        table.sasbdb-table {
-            font-size: 11pt;
-            width: 100%;
-            margin: 10px 0;
-        }
-        th.sasbdb-th {
-            font-size: 11pt;
-            font-weight: bold;
-            background-color: #f0f0f0;
-            padding: 8px;
-            text-align: left;
-        }
-        td.sasbdb-field {
-            font-size: 11pt;
-            font-weight: bold;
-            background-color: #f5f5f5;
-            color: #666666;
-            padding: 6px 8px;
-        }
-        td.sasbdb-value {
-            font-size: 11pt;
-            background-color: #ffffff;
-            color: #000000;
-            padding: 6px 8px;
-        }
-        h3.sasbdb-section {
-            margin-top: 10px;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #2c3e50;
-            font-size: 13pt;
-        }
-        hr.sasbdb-section-rule {
-            margin-bottom: 10px;
-            border: 1px solid #3498db;
-        }
-        p.sasbdb-section-spacer {
-            margin-top: 15px;
-        }
-        """
         with report._html_doc.head:
-            tags.style(raw(custom_css))
+            tags.style(raw(_PDF_CSS))
 
-    def _addStyledTable(self, report: ReportBase, data: dict, titles: tuple = ("Field", "Value")):
-        """
-        Add a styled table with larger font and grey field names
-        
-        :param report: ReportBase instance
-        :param data: Dictionary of field-value pairs
-        :param titles: Tuple of (field_title, value_title)
-        """
+    def _addStyledTable(self, report: ReportBase, data: dict,
+                        titles: tuple = ("Field", "Value")):
         with report._html_doc.getElementById("model-parameters"):
             with tags.table(cls="sasbdb-table"):
-                # Header row
                 with tags.tr():
                     tags.th(titles[0], cls="sasbdb-th")
                     tags.th(titles[1], cls="sasbdb-th")
-
-                # Data rows
                 for key in sorted(data.keys()):
                     with tags.tr():
                         tags.td(key, cls="sasbdb-field")
                         tags.td(str(data[key]), cls="sasbdb-value")
 
     def _addSectionHeader(self, report: ReportBase, title: str):
-        """
-        Add a section header to the report
-        
-        :param report: ReportBase instance
-        :param title: Section title
-        """
         with report._html_doc.getElementById("model-parameters"):
             tags.p("", cls="sasbdb-section-spacer")
             tags.h3(title, cls="sasbdb-section")
             tags.hr(cls="sasbdb-section-rule")
 
-    def _generatePDFReport(self, export_data: SASBDBExportData, filename: str):
-        """
-        Generate a PDF report with all entries and plot
-        
-        :param export_data: SASBDB export data
-        :param filename: Output PDF filename
-        """
-        # Create report
-        report = ReportBase("SASBDB Export Report")
+    def _pdf_section(self, report: ReportBase, title: str, items: list) -> None:
+        """Add a PDF section from (label, value) pairs; skip empty values."""
+        data = {label: value for label, value in items if value not in (None, "", False)}
+        if data:
+            self._addSectionHeader(report, title)
+            self._addStyledTable(report, data)
 
-        # Add custom styles for better formatting
+    def _generatePDFReport(self, export_data: SASBDBExportData, filename: str):
+        report = ReportBase("SASBDB Export Report")
         self._addCustomStyles(report)
 
-        # Add project information
         if export_data.project:
-            project = export_data.project
-            project_data = {
-                "Published": "Yes" if project.published else "No",
-            }
-            if project.pubmed_pmid:
-                project_data["PubMed PMID"] = project.pubmed_pmid
-            if project.doi:
-                project_data["DOI"] = project.doi
-            if project.project_title:
-                project_data["Project Title"] = project.project_title
+            p = export_data.project
+            self._pdf_section(report, "Project Information", [
+                ("Published", "Yes" if p.published else "No"),
+                ("PubMed PMID", p.pubmed_pmid),
+                ("DOI", p.doi),
+                ("Project Title", p.project_title),
+            ])
 
-            if project_data:
-                self._addSectionHeader(report, "Project Information")
-                self._addStyledTable(report, project_data)
-
-        # Add sample information
         if export_data.samples:
-            sample = export_data.samples[0]
-            sample_data = {}
-            if sample.sample_title:
-                sample_data["Sample Title"] = sample.sample_title
-            if sample.curve_type:
-                sample_data["Curve Type"] = sample.curve_type
-            if sample.angular_units:
-                sample_data["Angular Units"] = sample.angular_units
-            if sample.intensity_units:
-                sample_data["Intensity Units"] = sample.intensity_units
-            if sample.experimental_molecular_weight:
-                sample_data["Experimental MW"] = f"{sample.experimental_molecular_weight} kDa"
-            if sample.experiment_date:
-                sample_data["Experiment Date"] = sample.experiment_date
-            if sample.beamline_instrument:
-                sample_data["Beamline/Instrument"] = sample.beamline_instrument
-            if sample.wavelength:
-                sample_data["Wavelength"] = f"{sample.wavelength} nm"
-            if sample.sample_detector_distance:
-                sample_data["Sample-Detector Distance"] = f"{sample.sample_detector_distance} m"
-            if sample.cell_temperature:
-                sample_data["Cell Temperature"] = f"{sample.cell_temperature} °C"
-            if sample.concentration:
-                sample_data["Concentration"] = f"{sample.concentration} mg/ml"
+            s = export_data.samples[0]
+            self._pdf_section(report, "Sample/Data Information", [
+                ("Sample Title", s.sample_title),
+                ("Curve Type", s.curve_type),
+                ("Angular Units", s.angular_units),
+                ("Intensity Units", s.intensity_units),
+                ("Experimental MW",
+                 f"{s.experimental_molecular_weight} kDa"
+                 if s.experimental_molecular_weight else None),
+                ("Experiment Date", s.experiment_date),
+                ("Beamline/Instrument", s.beamline_instrument),
+                ("Wavelength", f"{s.wavelength} nm" if s.wavelength else None),
+                ("Sample-Detector Distance",
+                 f"{s.sample_detector_distance} m"
+                 if s.sample_detector_distance else None),
+                ("Cell Temperature",
+                 f"{s.cell_temperature} °C" if s.cell_temperature else None),
+                ("Concentration",
+                 f"{s.concentration} mg/ml" if s.concentration else None),
+            ])
 
-            if sample_data:
-                self._addSectionHeader(report, "Sample/Data Information")
-                self._addStyledTable(report, sample_data)
+            if s.molecule:
+                m = s.molecule
+                seq = m.fasta_sequence
+                if seq and len(seq) > 100:
+                    seq = seq[:100] + "..."
+                self._pdf_section(report, "Molecule Information", [
+                    ("Type", m.type),
+                    ("Long Name", m.long_name),
+                    ("Short Name", m.short_name),
+                    ("UniProt Accession", m.uniprot_accession),
+                    ("FASTA Sequence", seq),
+                    ("Monomer MW",
+                     f"{m.monomer_mw_kda} kDa" if m.monomer_mw_kda else None),
+                    ("Number of Molecules",
+                     str(m.number_of_molecules) if m.number_of_molecules else None),
+                    ("Oligomeric State", m.oligomeric_state),
+                    ("Total MW", f"{m.total_mw_kda} kDa" if m.total_mw_kda else None),
+                ])
 
-            # Add molecule information
-            if sample.molecule:
-                mol = sample.molecule
-                mol_data = {}
-                if mol.type:
-                    mol_data["Type"] = mol.type
-                if mol.long_name:
-                    mol_data["Long Name"] = mol.long_name
-                if mol.short_name:
-                    mol_data["Short Name"] = mol.short_name
-                if mol.uniprot_accession:
-                    mol_data["UniProt Accession"] = mol.uniprot_accession
-                if mol.fasta_sequence:
-                    # Truncate long sequences for display
-                    seq = mol.fasta_sequence
-                    if len(seq) > 100:
-                        seq = seq[:100] + "..."
-                    mol_data["FASTA Sequence"] = seq
-                if mol.monomer_mw_kda:
-                    mol_data["Monomer MW"] = f"{mol.monomer_mw_kda} kDa"
-                if mol.number_of_molecules:
-                    mol_data["Number of Molecules"] = str(mol.number_of_molecules)
-                if mol.oligomeric_state:
-                    mol_data["Oligomeric State"] = mol.oligomeric_state
-                if mol.total_mw_kda:
-                    mol_data["Total MW"] = f"{mol.total_mw_kda} kDa"
+            if s.buffer:
+                b = s.buffer
+                self._pdf_section(report, "Buffer Information", [
+                    ("Description", b.description),
+                    ("pH", str(b.ph) if b.ph else None),
+                    ("Comment", b.comment),
+                ])
 
-                if mol_data:
-                    self._addSectionHeader(report, "Molecule Information")
-                    self._addStyledTable(report, mol_data)
+            if s.guinier:
+                g = s.guinier
+                self._pdf_section(report, "Guinier Analysis", [
+                    ("Q Start", str(g.range_start) if g.range_start is not None else None),
+                    ("Q End", str(g.range_end) if g.range_end is not None else None),
+                    ("Start point",
+                     str(g.start_point) if g.start_point is not None else None),
+                    ("End point",
+                     str(g.end_point) if g.end_point is not None else None),
+                    ("Rg", f"{g.rg} nm" if g.rg is not None else None),
+                    ("Rg Error", f"{g.rg_error} nm" if g.rg_error is not None else None),
+                    ("I(0)", str(g.i0) if g.i0 is not None else None),
+                ])
 
-            # Add buffer information
-            if sample.buffer:
-                buffer = sample.buffer
-                buffer_data = {}
-                if buffer.description:
-                    buffer_data["Description"] = buffer.description
-                if buffer.ph:
-                    buffer_data["pH"] = str(buffer.ph)
-                if buffer.comment:
-                    buffer_data["Comment"] = buffer.comment
+            for fit_i, fit in enumerate(s.fits):
+                title = ("Fit Information" if fit_i == 0
+                         else f"Fit Information ({fit_i + 1})")
+                self._pdf_section(report, title, [
+                    ("Software", fit.software),
+                    ("Software Version", fit.software_version),
+                    ("Chi-squared",
+                     f"{fit.chi_squared:.4f}" if fit.chi_squared is not None else None),
+                    ("CorMap p-value",
+                     f"{fit.cormap_pvalue:.4f}"
+                     if fit.cormap_pvalue is not None else None),
+                    ("Angular Units", fit.angular_units),
+                    ("Description", fit.description),
+                ])
+                for model_i, model in enumerate(fit.models):
+                    mtitle = ("Model Information" if model_i == 0
+                              else f"Model Information ({model_i + 1})")
+                    self._pdf_section(report, mtitle, [
+                        ("Software/DB", model.software_or_db),
+                        ("Software Version", model.software_version),
+                        ("Symmetry", model.symmetry),
+                        ("Model Data", model.model_data),
+                        ("Comment", model.comment),
+                    ])
 
-                if buffer_data:
-                    self._addSectionHeader(report, "Buffer Information")
-                    self._addStyledTable(report, buffer_data)
-
-            # Add Guinier information
-            if sample.guinier:
-                guinier = sample.guinier
-                guinier_data = {}
-                # Q range start and end at top
-                if guinier.range_start is not None:
-                    guinier_data["Q Start"] = str(guinier.range_start)
-                if guinier.range_end is not None:
-                    guinier_data["Q End"] = str(guinier.range_end)
-                if guinier.start_point is not None:
-                    guinier_data["Start point"] = str(guinier.start_point)
-                if guinier.end_point is not None:
-                    guinier_data["End point"] = str(guinier.end_point)
-                if guinier.rg is not None:
-                    guinier_data["Rg"] = f"{guinier.rg} nm"
-                if guinier.rg_error is not None:
-                    guinier_data["Rg Error"] = f"{guinier.rg_error} nm"
-                if guinier.i0 is not None:
-                    guinier_data["I(0)"] = str(guinier.i0)
-
-                if guinier_data:
-                    self._addSectionHeader(report, "Guinier Analysis")
-                    self._addStyledTable(report, guinier_data)
-
-            # Add fit information
-            if sample.fits:
-                fit_count = 0
-                for fit in sample.fits:
-                    fit_data = {}
-                    if fit.software:
-                        fit_data["Software"] = fit.software
-                    if fit.software_version:
-                        fit_data["Software Version"] = fit.software_version
-                    if fit.chi_squared is not None:
-                        fit_data["Chi-squared"] = f"{fit.chi_squared:.4f}"
-                    if fit.cormap_pvalue is not None:
-                        fit_data["CorMap p-value"] = f"{fit.cormap_pvalue:.4f}"
-                    if fit.angular_units:
-                        fit_data["Angular Units"] = fit.angular_units
-                    if fit.description:
-                        fit_data["Description"] = fit.description
-
-                    if fit_data:
-                        fit_title = "Fit Information" if fit_count == 0 else f"Fit Information ({fit_count + 1})"
-                        self._addSectionHeader(report, fit_title)
-                        self._addStyledTable(report, fit_data)
-
-                    # Add model information
-                    if fit.models:
-                        model_count = 0
-                        for model in fit.models:
-                            model_data = {}
-                            if model.software_or_db:
-                                model_data["Software/DB"] = model.software_or_db
-                            if model.software_version:
-                                model_data["Software Version"] = model.software_version
-                            if model.symmetry:
-                                model_data["Symmetry"] = model.symmetry
-                            if model.model_data:
-                                model_data["Model Data"] = model.model_data
-                            if model.comment:
-                                model_data["Comment"] = model.comment
-
-                            if model_data:
-                                model_title = "Model Information" if model_count == 0 else f"Model Information ({model_count + 1})"
-                                self._addSectionHeader(report, model_title)
-                                self._addStyledTable(report, model_data)
-                            model_count += 1
-                    fit_count += 1
-
-        # Add instrument information
         if export_data.instruments:
-            instrument = export_data.instruments[0]
-            inst_data = {}
-            if instrument.source_type:
-                inst_data["Source Type"] = instrument.source_type
-            if instrument.beamline_name:
-                inst_data["Beamline/Instrument"] = instrument.beamline_name
-            if instrument.synchrotron_name:
-                inst_data["Synchrotron/Facility"] = instrument.synchrotron_name
-            if instrument.detector_manufacturer:
-                inst_data["Detector Manufacturer/Model"] = instrument.detector_manufacturer
-            if instrument.detector_type:
-                inst_data["Detector Type"] = instrument.detector_type
-            if instrument.detector_resolution:
-                inst_data["Detector Resolution"] = instrument.detector_resolution
-            if instrument.city:
-                inst_data["City"] = instrument.city
-            if instrument.country:
-                inst_data["Country"] = instrument.country
+            inst = export_data.instruments[0]
+            self._pdf_section(report, "Instrument Information", [
+                ("Source Type", inst.source_type),
+                ("Beamline/Instrument", inst.beamline_name),
+                ("Synchrotron/Facility", inst.synchrotron_name),
+                ("Detector Manufacturer/Model", inst.detector_manufacturer),
+                ("Detector Type", inst.detector_type),
+                ("Detector Resolution", inst.detector_resolution),
+                ("City", inst.city),
+                ("Country", inst.country),
+            ])
 
-            if inst_data:
-                self._addSectionHeader(report, "Instrument Information")
-                self._addStyledTable(report, inst_data)
+        self._add_plots_to_report(report)
+        report.save_pdf(filename)
 
-        # Try to add plot with model from fitting widget
+    def _add_plots_to_report(self, report: ReportBase) -> None:
         plot_fig = self._getPlotFigureWithModel()
         if plot_fig:
             try:
-                report.add_plot(plot_fig, image_type="png", figure_title="Data and Model Fit")
+                report.add_plot(
+                    plot_fig, image_type="png", figure_title="Data and Model Fit")
             except Exception as e:
                 logger.warning(f"Could not add plot to PDF: {e}")
         else:
-            # Fallback: try to get simple data plot
             try:
                 plot_fig = self._getPlotFigure()
                 if plot_fig:
-                    report.add_plot(plot_fig, image_type="png", figure_title="Data Plot")
+                    report.add_plot(
+                        plot_fig, image_type="png", figure_title="Data Plot")
             except Exception as e:
                 logger.warning(f"Could not add plot to PDF: {e}")
 
-        # Try to add residual plot
         residual_fig = self._getResidualPlotFigure()
         if residual_fig:
             try:
-                report.add_plot(residual_fig, image_type="png", figure_title="Residuals")
+                report.add_plot(
+                    residual_fig, image_type="png", figure_title="Residuals")
             except Exception as e:
                 logger.warning(f"Could not add residual plot to PDF: {e}")
 
-        # Save PDF
-        report.save_pdf(filename)
-
     def _getPlotFigureWithModel(self):
-        """
-        Try to get a matplotlib figure with data and model from the fitting widget
-        
-        :return: matplotlib.figure.Figure or None
-        """
         try:
             fitting_widget = self._current_fitting_widget()
             if fitting_widget is None:
                 return None
-
-            # Use ReportPageLogic to get plot images (same as Report Results)
             from sas.qtgui.Perspectives.Fitting import FittingUtilities
             from sas.qtgui.Perspectives.Fitting.ReportPageLogic import ReportPageLogic
 
-            # Get the index (same way as getReport does)
             index = None
-            if hasattr(fitting_widget, 'all_data') and fitting_widget.all_data:
+            if getattr(fitting_widget, 'all_data', None):
                 index = fitting_widget.all_data[fitting_widget.data_index]
             elif hasattr(fitting_widget, 'theory_item'):
                 index = fitting_widget.theory_item
-
             if index is None or fitting_widget.logic.kernel_module is None:
                 return None
 
-            # Create ReportPageLogic instance
             params = FittingUtilities.getStandardParam(fitting_widget._model_model)
-            poly_params = []
-            magnet_params = []
-            if (hasattr(fitting_widget, 'chkPolydispersity') and
-                fitting_widget.chkPolydispersity.isChecked() and
-                fitting_widget.polydispersity_widget.poly_model.rowCount() > 0):
-                poly_params = FittingUtilities.getStandardParam(fitting_widget.polydispersity_widget.poly_model)
-            if (hasattr(fitting_widget, 'chkMagnetism') and
-                fitting_widget.chkMagnetism.isChecked() and
-                hasattr(fitting_widget, 'canHaveMagnetism') and
-                fitting_widget.canHaveMagnetism() and
-                fitting_widget.magnetism_widget._magnet_model.rowCount() > 0):
-                magnet_params = FittingUtilities.getStandardParam(fitting_widget.magnetism_widget._magnet_model)
+            poly_params = magnet_params = []
+            if (getattr(fitting_widget, 'chkPolydispersity', None)
+                    and fitting_widget.chkPolydispersity.isChecked()
+                    and fitting_widget.polydispersity_widget.poly_model.rowCount() > 0):
+                poly_params = FittingUtilities.getStandardParam(
+                    fitting_widget.polydispersity_widget.poly_model)
+            if (getattr(fitting_widget, 'chkMagnetism', None)
+                    and fitting_widget.chkMagnetism.isChecked()
+                    and hasattr(fitting_widget, 'canHaveMagnetism')
+                    and fitting_widget.canHaveMagnetism()
+                    and fitting_widget.magnetism_widget._magnet_model.rowCount() > 0):
+                magnet_params = FittingUtilities.getStandardParam(
+                    fitting_widget.magnetism_widget._magnet_model)
 
-            report_logic = ReportPageLogic(
+            images = ReportPageLogic(
                 fitting_widget,
                 kernel_module=fitting_widget.logic.kernel_module,
                 data=fitting_widget.data,
                 index=index,
-                params=params + poly_params + magnet_params
-            )
-
-            # Get plot figures
-            images = report_logic.getImages()
-            if images and len(images) > 0:
-                # Return the first plot figure
-                return images[0]
-
-            return None
+                params=params + poly_params + magnet_params,
+            ).getImages()
+            return images[0] if images else None
         except Exception as e:
             logger.warning(f"Error getting plot figure with model: {e}")
             return None
 
     def _getPlotFigure(self):
-        """
-        Try to get a matplotlib figure from the current data/plot (fallback)
-        
-        :return: matplotlib.figure.Figure or None
-        """
         try:
-            # Try to get data from export_data and create a simple plot
-            if self.export_data.samples:
-                sample = self.export_data.samples[0]
-                # Try to load data from experimental_curve file if available
-                if sample.experimental_curve and os.path.exists(sample.experimental_curve):
-                    try:
-                        import matplotlib.pyplot as plt
+            if not self.export_data.samples:
+                return None
+            sample = self.export_data.samples[0]
+            if not (sample.experimental_curve
+                    and os.path.exists(sample.experimental_curve)):
+                return None
+            import matplotlib.pyplot as plt
+            from sasdata.dataloader.loader import Loader
 
-                        from sasdata.dataloader.loader import Loader
-
-                        loader = Loader()
-                        data_list = loader.load(sample.experimental_curve)
-                        if data_list:
-                            data = data_list[0]
-                            # Create plot
-                            fig, ax = plt.subplots(figsize=(8, 6))
-                            ax.errorbar(data.x, data.y, yerr=data.dy, fmt='o', markersize=3, capsize=2)
-                            ax.set_xlabel(f"Q ({sample.angular_units or '1/nm'})")
-                            ax.set_ylabel(f"I ({sample.intensity_units or 'arbitrary'})")
-                            ax.set_title(sample.sample_title or "SAS Data")
-                            ax.set_yscale('log')
-                            ax.set_xscale('log')
-                            ax.grid(True, alpha=0.3)
-                            plt.tight_layout()
-                            return fig
-                    except Exception as e:
-                        logger.warning(f"Could not load data file for plotting: {e}")
-
-            return None
+            data_list = Loader().load(sample.experimental_curve)
+            if not data_list:
+                return None
+            data = data_list[0]
+            fig, ax = plt.subplots(figsize=(8, 6))
+            ax.errorbar(data.x, data.y, yerr=data.dy, fmt='o', markersize=3, capsize=2)
+            ax.set_xlabel(f"Q ({sample.angular_units or '1/nm'})")
+            ax.set_ylabel(f"I ({sample.intensity_units or 'arbitrary'})")
+            ax.set_title(sample.sample_title or "SAS Data")
+            ax.set_yscale('log')
+            ax.set_xscale('log')
+            ax.grid(True, alpha=0.3)
+            plt.tight_layout()
+            return fig
         except Exception as e:
             logger.warning(f"Error getting plot figure: {e}")
             return None
 
     def _getResidualPlotFigure(self):
-        """
-        Try to get a matplotlib figure of the residual plot from the fitting widget
-        
-        :return: matplotlib.figure.Figure or None
-        """
         try:
             fitting_widget = self._current_fitting_widget()
-            if fitting_widget is None:
-                logger.debug("No fitting widget available for residual plot search")
+            if fitting_widget is None or fitting_widget.logic.kernel_module is None:
                 return None
-
             import sas.qtgui.Plotting.PlotHelper as PlotHelper
 
-            if fitting_widget.logic.kernel_module is None:
-                logger.debug("No kernel module for residual plot search")
-                return None
-
             modelname = fitting_widget.logic.kernel_module.name
-            if not modelname:
-                logger.debug("No model name for residual plot search")
+            data = getattr(fitting_widget, 'data', None)
+            if not modelname or not data:
                 return None
-
-            data_id = None
-            data_name = None
-            if hasattr(fitting_widget, 'data') and fitting_widget.data:
-                data_id = fitting_widget.data.id
-                data_name = getattr(fitting_widget.data, 'name', None)
-
-            if data_id is None:
-                logger.debug("No data ID for residual plot search")
-                return None
-
+            data_id = data.id
+            data_name = getattr(data, 'name', None)
             expected_residual_id = f"Residual res{data_id}"
             expected_original_id = f"res{data_id}"
-            logger.debug(
-                "Searching residual plots for data_id=%s model=%s",
-                data_id,
-                modelname,
-            )
 
-            best_score = 0
-            best_figure = None
+            best_score, best_figure = 0, None
             for name in PlotHelper.currentPlotIds():
                 try:
                     plotter = PlotHelper.plotById(name)
@@ -1670,27 +1059,14 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
                         continue
                     for data_item in plotter.data:
                         score = self._score_residual_plot_match(
-                            data_item,
-                            data_id=data_id,
+                            data_item, data_id=data_id,
                             expected_residual_id=expected_residual_id,
                             expected_original_id=expected_original_id,
-                            modelname=modelname,
-                            data_name=data_name,
-                        )
+                            modelname=modelname, data_name=data_name)
                         if score > best_score:
-                            best_score = score
-                            best_figure = plotter.figure
-                            logger.debug(
-                                "Residual plot candidate score=%s id=%s",
-                                score,
-                                getattr(data_item, 'id', 'unknown'),
-                            )
+                            best_score, best_figure = score, plotter.figure
                 except Exception as e:
                     logger.warning(f"Error checking plot {name}: {e}")
-                    continue
-
-            if best_figure is None:
-                logger.debug("No residual plot found")
             return best_figure
         except Exception as e:
             logger.warning(f"Error getting residual plot figure: {e}")
@@ -1698,22 +1074,13 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
 
     @staticmethod
     def _score_residual_plot_match(
-        data_item,
-        *,
-        data_id,
-        expected_residual_id: str,
-        expected_original_id: str,
-        modelname: str,
-        data_name: str | None,
+        data_item, *, data_id, expected_residual_id, expected_original_id,
+        modelname, data_name,
     ) -> int:
-        """Score how well a plot data item matches the expected residual plot."""
         from sas.qtgui.Plotting.PlotterData import DataRole
 
-        if not hasattr(data_item, 'plot_role'):
+        if getattr(data_item, 'plot_role', None) != DataRole.ROLE_RESIDUAL:
             return 0
-        if data_item.plot_role != DataRole.ROLE_RESIDUAL:
-            return 0
-
         residual_id = getattr(data_item, 'id', '')
         residual_name = getattr(data_item, 'name', '')
         if residual_id == expected_residual_id:
@@ -1722,8 +1089,8 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
             return 90
         if str(data_id) in residual_id:
             return 80
-        if residual_name and "Residual" in residual_name:
-            if modelname in residual_name or (data_name and data_name in residual_name):
-                return 70
+        if residual_name and "Residual" in residual_name and (
+                modelname in residual_name
+                or (data_name and data_name in residual_name)):
+            return 70
         return 10
-

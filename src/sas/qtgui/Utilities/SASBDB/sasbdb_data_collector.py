@@ -16,6 +16,8 @@ populating fields from available sources in the SasView session.
 import logging
 from datetime import datetime
 
+import numpy as np
+
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
 from sas.qtgui.Utilities.SASBDB.sasbdb_data import (
     SASBDBBuffer,
@@ -35,6 +37,33 @@ except ImportError:
     SASVIEW_VERSION = "unknown"
 
 logger = logging.getLogger(__name__)
+
+
+def _meta_str(meta: dict, *keys: str) -> str | None:
+    for key in keys:
+        if key in meta and meta[key] not in (None, ""):
+            return str(meta[key])
+    return None
+
+
+def _meta_float(meta: dict, *keys: str) -> float | None:
+    for key in keys:
+        if key in meta:
+            try:
+                return float(meta[key])
+            except (ValueError, TypeError):
+                pass
+    return None
+
+
+def _meta_int(meta: dict, *keys: str) -> int | None:
+    for key in keys:
+        if key in meta:
+            try:
+                return int(meta[key])
+            except (ValueError, TypeError):
+                pass
+    return None
 
 
 def _x_axis_label_is_inverse_angstrom(text: str) -> bool:
@@ -149,43 +178,13 @@ class SASBDBDataCollector:
         # Extract metadata dictionary if available
         if hasattr(data, 'meta_data') and data.meta_data:
             meta = data.meta_data
-
-            # Try to extract common metadata fields
-            if 'experiment_date' in meta:
-                sample.experiment_date = str(meta['experiment_date'])
-            elif 'date' in meta:
-                sample.experiment_date = str(meta['date'])
-
-            if 'beamline' in meta:
-                sample.beamline_instrument = str(meta['beamline'])
-            elif 'instrument' in meta:
-                sample.beamline_instrument = str(meta['instrument'])
-
-            if 'concentration' in meta:
-                try:
-                    sample.concentration = float(meta['concentration'])
-                except (ValueError, TypeError):
-                    pass
-
-            if 'molecular_weight' in meta or 'mw' in meta:
-                try:
-                    mw_key = 'molecular_weight' if 'molecular_weight' in meta else 'mw'
-                    sample.experimental_molecular_weight = float(meta[mw_key])
-                except (ValueError, TypeError):
-                    pass
-
-            if 'exposure_time' in meta:
-                try:
-                    sample.exposure_time = float(meta['exposure_time'])
-                except (ValueError, TypeError):
-                    pass
-
-            if 'number_of_frames' in meta or 'frames' in meta:
-                try:
-                    frames_key = 'number_of_frames' if 'number_of_frames' in meta else 'frames'
-                    sample.number_of_frames = int(meta[frames_key])
-                except (ValueError, TypeError):
-                    pass
+            sample.experiment_date = _meta_str(meta, 'experiment_date', 'date')
+            sample.beamline_instrument = _meta_str(meta, 'beamline', 'instrument')
+            sample.concentration = _meta_float(meta, 'concentration')
+            sample.experimental_molecular_weight = _meta_float(
+                meta, 'molecular_weight', 'mw')
+            sample.exposure_time = _meta_float(meta, 'exposure_time')
+            sample.number_of_frames = _meta_int(meta, 'number_of_frames', 'frames')
 
         # Also check data.instrument attribute (shown in info panel)
         if hasattr(data, 'instrument') and data.instrument and not sample.beamline_instrument:
@@ -267,34 +266,28 @@ class SASBDBDataCollector:
         # Extract from metadata dictionary
         if hasattr(data, 'meta_data') and data.meta_data:
             meta = data.meta_data
-
-            # Common metadata keys for instrument information
-            if 'instrument' in meta and not instrument.beamline_name:
-                instrument.beamline_name = str(meta['instrument'])
+            if not instrument.beamline_name:
+                val = _meta_str(meta, 'instrument', 'beamline')
+                if val:
+                    instrument.beamline_name = val
+                    has_instrument_data = True
+            if not instrument.synchrotron_name:
+                val = _meta_str(meta, 'facility', 'synchrotron')
+                if val:
+                    instrument.synchrotron_name = val
+                    has_instrument_data = True
+            if not instrument.detector_manufacturer:
+                val = _meta_str(meta, 'detector')
+                if val:
+                    instrument.detector_manufacturer = val
+                    has_instrument_data = True
+            city = _meta_str(meta, 'city')
+            if city:
+                instrument.city = city
                 has_instrument_data = True
-
-            if 'beamline' in meta and not instrument.beamline_name:
-                instrument.beamline_name = str(meta['beamline'])
-                has_instrument_data = True
-
-            if 'facility' in meta and not instrument.synchrotron_name:
-                instrument.synchrotron_name = str(meta['facility'])
-                has_instrument_data = True
-
-            if 'synchrotron' in meta and not instrument.synchrotron_name:
-                instrument.synchrotron_name = str(meta['synchrotron'])
-                has_instrument_data = True
-
-            if 'detector' in meta and not instrument.detector_manufacturer:
-                instrument.detector_manufacturer = str(meta['detector'])
-                has_instrument_data = True
-
-            if 'city' in meta:
-                instrument.city = str(meta['city'])
-                has_instrument_data = True
-
-            if 'country' in meta:
-                instrument.country = str(meta['country'])
+            country = _meta_str(meta, 'country')
+            if country:
+                instrument.country = country
                 has_instrument_data = True
 
         # Return instrument only if we found some data
@@ -413,8 +406,6 @@ class SASBDBDataCollector:
                  otherwise ``{"a": intercept, "b": slope, "q_start": q_lo,
                  "q_end": q_hi}`` for plotting (native q units).
         """
-        import numpy as np
-
         if not hasattr(data, "x") or not hasattr(data, "y"):
             return None, None
 
@@ -514,7 +505,6 @@ class SASBDBDataCollector:
         :return: SASBDBGuinier object or None if analysis fails
         """
         try:
-            import numpy as np
             from freesas.autorg import auto_guinier
         except ImportError:
             logger.warning("FreeSAS not available, skipping auto_guinier")
