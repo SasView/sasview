@@ -1015,6 +1015,7 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
                     and os.path.exists(sample.experimental_curve)):
                 return None
             import matplotlib.pyplot as plt
+
             from sasdata.dataloader.loader import Loader
 
             data_list = Loader().load(sample.experimental_curve)
