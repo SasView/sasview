@@ -127,7 +127,7 @@ class SectorInteractor(BaseInteractor, SlicerModel, StackableMixin):
 
     def _get_slicer_type_id(self):
         """Return the slicer type identifier"""
-        return "SectorQ" + self.data.name
+        return f"SectorQ{self.data.name}Plot{str(self.base.num_slicer_plots["Sector"])}"
 
     def _post_data(self, nbins=None):
         """
@@ -180,7 +180,8 @@ class SectorInteractor(BaseInteractor, SlicerModel, StackableMixin):
 
         # Assign unique id per slicer instance and use it as the display name
         if self._plot_id is None:
-            base_id = "SectorQ" + self.data.name
+            self.base.incrementNumSlicerPlots("Sector")
+            base_id = f"SectorQ{self.data.name}Plot{str(self.base.num_slicer_plots["Sector"])}"
             self._plot_id = generate_unique_plot_id(base_id, self._item)
 
         new_plot.id = self._plot_id

@@ -10,6 +10,7 @@ from sas.qtgui.Utilities.GuiUtils import formatNumber, toDouble
 
 logger = logging.getLogger(__name__)
 
+
 class BoxSumCalculator(BaseInteractor):
     """
     BoxSumCalculator Class computes properties (such as sum and average of
@@ -38,7 +39,6 @@ class BoxSumCalculator(BaseInteractor):
         self.markers = []
         self.axes = axes
         self._model = None
-        self.update_model = False
         # connect the artist for the motion
         self.connect = self.base.connect
         # Reference to the widget (if any)
@@ -97,14 +97,12 @@ class BoxSumCalculator(BaseInteractor):
         # Save the name of the slicer panel associate with this slicer
         self.panel_name = ""
         # Update and post slicer parameters
-        self.update_model = False
         self.update()
         self.postData()
 
         # set up the model
         self._model = QtGui.QStandardItemModel(1, 9)
         self.setModelFromParams()
-        self.update_model = True
         self._model.itemChanged.connect(self.setParamsFromModel)
 
     def validate(self, param_name, param_value):
@@ -150,10 +148,12 @@ class BoxSumCalculator(BaseInteractor):
         params["Width"] = toDouble(self.model().item(0, 1).text())
         params["center_x"] = toDouble(self.model().item(0, 2).text())
         params["center_y"] = toDouble(self.model().item(0, 3).text())
-        self.update_model = False
-        self.setParams(params)
-        self.setReadOnlyParametersFromModel()
-        self.update_model = True
+        blocked = self._model.blockSignals(True)
+        try:
+            self.setParams(params)
+            self.setReadOnlyParametersFromModel()
+        finally:
+            self._model.blockSignals(blocked)
 
     def setPanelName(self, name):
         """
@@ -175,9 +175,9 @@ class BoxSumCalculator(BaseInteractor):
         Clear the slicer and all connected events related to this slicer
         """
         self.clear_markers()
-        self.horizontal_lines.clear()
-        self.vertical_lines.clear()
-        self.center.clear()
+        for lines in (self.horizontal_lines, self.vertical_lines, self.center):
+            if getattr(lines, "axes", None) is not None:
+                lines.clear()
         # Close the associated widget if it exists
         if self.widget is not None:
             self.widget.closeWidgetSignal.emit()
@@ -233,7 +233,7 @@ class BoxSumCalculator(BaseInteractor):
         # Dig out number of points summed, SMK & PDB, 04/03/2013
         boxtotal = Boxsum(x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
         self.total, self.totalerror, self.points = boxtotal(self.data)
-        if self.update_model:
+        if self._model is not None:
             self.setModelFromParams()
 
     def moveend(self, ev):
@@ -299,6 +299,7 @@ class BoxSumCalculator(BaseInteractor):
         self.vertical_lines.update(center=self.center, width=x_max, height=y_max)
         # compute the new error and sum given values of params
         self.postData()
+        self.draw()
 
     def draw(self):
         """Redraw canvas"""
@@ -483,8 +484,9 @@ class VerticalDoubleLine(BaseInteractor):
         Clear this slicer  and its markers
         """
         self.clear_markers()
-        self.right_line.remove()
-        self.left_line.remove()
+        for line in (self.right_line, self.left_line):
+            if hasattr(line, "remove") and line in getattr(self.axes, "lines", []):
+                line.remove()
 
     def update(self, x1=None, x2=None, y1=None, y2=None, width=None, height=None, center=None):
         """
@@ -649,8 +651,9 @@ class HorizontalDoubleLine(BaseInteractor):
         Clear this figure and its markers
         """
         self.clear_markers()
-        self.bottom_line.remove()
-        self.top_line.remove()
+        for line in (self.bottom_line, self.top_line):
+            if hasattr(line, "remove") and line in getattr(self.axes, "lines", []):
+                line.remove()
 
     def update(self, x1=None, x2=None, y1=None, y2=None, width=None, height=None, center=None):
         """

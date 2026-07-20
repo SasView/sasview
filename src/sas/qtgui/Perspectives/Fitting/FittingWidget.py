@@ -230,6 +230,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 self._logic.append(logic)
             # Option widget logic was destroyed - reestablish
             self.options_widget.logic = self._logic[0]
+            # Ensure auxiliary widgets point at the new logic instance
+            self.polydispersity_widget.logic = self._logic[0]
+            self.magnetism_widget.logic = self._logic[0]
             # update the ordering tab
             self.order_widget.updateData(self.all_data)
 
@@ -2042,12 +2045,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # Built-in and custom models. Use make_model_info so the UI
             # parameter table matches the kernel (e.g. sasmodels >= 1.1
             # omits magnetism for pure-Python models).
-            self.logic.model_parameters = modelinfo.make_model_info(
-                kernel_module).parameters
-
-        elif hasattr(kernel_module, 'model_info'):
-            # for sum/multiply models
-            self.logic.model_parameters = kernel_module.model_info.parameters
+            info = modelinfo.make_model_info(kernel_module)
+            self.logic.model_parameters = info.parameters
 
         elif hasattr(kernel_module, 'Model') and hasattr(kernel_module.Model, "_model_info"):
             # this probably won't work if there's no model_info, but just in case
@@ -2899,9 +2898,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             val = GuiUtils.toDouble(row[1].text())
             self.logic.kernel_module.setParam(par, val)
 
-        # Change 'n' in the parameter model; also causes recalculation
-        self._model_model.item(self._n_shells_row, 1).setText(str(index))
-
         # Update relevant models
         self.polydispersity_widget.setPolyModel()
         if self.canHaveMagnetism():
@@ -3598,6 +3594,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if 'model_name' not in line_dict:
             return
         model = line_dict['model_name'][0]
+        structure_factor = line_dict['fitpage_structure'][0]
         context = {}
 
         if 'multiplicity' in line_dict:
@@ -3620,7 +3617,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Create the context dictionary for parameters
         # Exclude multiplicity and number of shells params from context
-        context = {k: v for (k, v) in line_dict.items() if len(v) > 3 and k != model}
+        context = {k: v for (k, v) in line_dict.items() if len(v) > 3 and k not in [model, structure_factor]}
         context['model_name'] = model
 
         if warn_user and str(self.cbModel.currentText()) != str(context['model_name']):
@@ -3696,9 +3693,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             if param_name not in list(param_dict) or row == self._n_shells_row:
                 # Skip magnetic, polydisperse (.pd), and shell parameters - they are handled elsewhere
                 return
-            # checkbox state
-            param_checked = QtCore.Qt.Checked if param_dict[param_name][0] == "True" else QtCore.Qt.Unchecked
-            self._model_model.item(row, 0).setCheckState(param_checked)
+            # checkbox state - None means no checkbox present so don't modify
+            if param_dict[param_name][0] != "None":
+                param_checked = QtCore.Qt.Checked if param_dict[param_name][0] == "True" else QtCore.Qt.Unchecked
+                self._model_model.item(row, 0).setCheckState(param_checked)
 
             # parameter value can be either just a value or text on the combobox
             param_text = param_dict[param_name][1]

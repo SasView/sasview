@@ -174,19 +174,39 @@ as shown below.
 
 **It is for the user to decide if this interpretation has any relevance to their system!**
 
-The structural parameters extracted are:
+The structural parameters extracted are [1]:
 
 *   Long Period :math:`= L_p`
-*   Average Hard Block Thickness :math:`= L_c`
+*   Average Hard (/Short) Block Thickness :math:`= L_c`
 *   Average Core Thickness :math:`= D_0`
 *   Average Interface Thickness :math:`= D_{tr}`
-*   Eekhaut Polydispersity :math:`= \Gamma_{\text{min}}/\Gamma_{\text{max}}`
-*   Stribeck Polydispersity :math:`= \frac{L_c}{(L_c - L_p)\Gamma_{\text{max}}}`
-*   Local Crystallinity :math:`= L_c/L_p`
+*   Eekhaut Polydispersity [2] :math:`= \Gamma_{\text{min}}/\Gamma_{\text{max}}`
+*   Stribeck Polydispersity [3] :math:`= \frac{L_c}{(L_c - L_p)\Gamma_{\text{max}}}`
+*   Local Crystallinity :math:`=` Hard Block Volume Fraction :math:`= L_c/L_p`
 
 which lead to:
 
-*   Average Soft Block Thickness :math:`= L_p - L_c = L_a`
+*   Average Soft (/Long) Block Thickness :math:`= L_p - L_c = L_a`
 *   Average Chord Length :math:`= ((1/L_c) + (1/L_a))^{-1}`
 *   Average Crystalline Chord Length :math:`= \frac{L_a L_c}{\Phi_{\text{c}} (L_c + L_a)}`
 *   Non-Ideality :math:`= \left(\frac{L_p – L_p*}{L_p}\right)^2`
+
+In normal circumstances it is expected that Lc < La.
+
+
+References
+----------
+
+.. [1]
+    Strobl, G. R.; Schneider, M. *J. Polym. Sci.* (1980), 18, 1343-1359
+
+.. [2]
+    :ref:`FDR` (PDF format)
+
+.. [3]
+    Stribeck, N. *X-Ray Scattering of Soft Matter*, Springer. Berlin (2007), 138-161
+
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+.. note:: This document was last modified by Sujaya Shrestha, 25/03/2026.
