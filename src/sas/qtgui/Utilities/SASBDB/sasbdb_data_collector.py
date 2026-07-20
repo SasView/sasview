@@ -7,8 +7,7 @@ structures. The SASBDBDataCollector class handles:
 
 - Extracting sample and instrument information from Data1D/Data2D objects
 - Collecting fit results and model parameters from fitting widgets
-- Guinier analysis via ``collect_guinier_from_freesas`` (called from SASBDB dialog on request)
-- Collecting PDDF information from Corfunc analysis
+- Guinier analysis via FreeSAS or q-range linear fit (from SASBDB dialog)
 - Creating default structures for missing data
 
 The collector is designed to minimize manual data entry by automatically
@@ -19,7 +18,6 @@ from datetime import datetime
 
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
 from sas.qtgui.Utilities.SASBDB.sasbdb_data import (
-    SASBDBPDDF,
     SASBDBBuffer,
     SASBDBExportData,
     SASBDBFit,
@@ -371,25 +369,6 @@ class SASBDBDataCollector:
 
         return fit
 
-    def collect_guinier_from_linear_fit(self, rg: float, i0: float = None,
-                                         range_start: float = None,
-                                         range_end: float = None) -> SASBDBGuinier:
-        """
-        Collect Guinier analysis results
-        
-        :param rg: Radius of gyration in nm
-        :param i0: Forward scattering intensity
-        :param range_start: Start of Guinier range
-        :param range_end: End of Guinier range
-        :return: SASBDBGuinier object
-        """
-        guinier = SASBDBGuinier()
-        guinier.rg = rg
-        guinier.i0 = i0
-        guinier.range_start = range_start
-        guinier.range_end = range_end
-        return guinier
-
     @staticmethod
     def _guinier_native_q_to_nm_scale(data) -> float:
         """
@@ -628,27 +607,6 @@ class SASBDBDataCollector:
 
         return None
 
-    def collect_pddf_from_corfunc(self, dmax: float = None, rg: float = None,
-                                   i0: float = None, porod_volume: float = None,
-                                   software: str = "ATSAS") -> SASBDBPDDF:
-        """
-        Collect PDDF information from Corfunc analysis
-        
-        :param dmax: Maximum distance in nm
-        :param rg: Radius of gyration from PDDF in nm
-        :param i0: Forward scattering intensity
-        :param porod_volume: Porod volume in nm^3
-        :param software: Software used for PDDF calculation
-        :return: SASBDBPDDF object
-        """
-        pddf = SASBDBPDDF()
-        pddf.software = software
-        pddf.dmax = dmax
-        pddf.rg = rg
-        pddf.i0 = i0
-        pddf.porod_volume = porod_volume
-        return pddf
-
     def create_default_project(self) -> SASBDBProject:
         """
         Create a default project structure
@@ -680,14 +638,4 @@ class SASBDBDataCollector:
         buffer.description = "Not specified"
         buffer.ph = 7.0
         return buffer
-
-    def create_default_instrument(self) -> SASBDBInstrument:
-        """
-        Create a default instrument structure
-        
-        :return: SASBDBInstrument with default values
-        """
-        instrument = SASBDBInstrument()
-        instrument.source_type = "X-ray synchrotron"
-        return instrument
 

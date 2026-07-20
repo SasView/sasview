@@ -1518,14 +1518,6 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
             except Exception as e:
                 logger.warning(f"Could not add residual plot to PDF: {e}")
 
-        # Try to add model shape visualization if available
-        model_shape_fig = self._getModelShapeFigure()
-        if model_shape_fig:
-            try:
-                report.add_plot(model_shape_fig, image_type="png", figure_title="Model 3D Shape")
-            except Exception as e:
-                logger.warning(f"Could not add model shape to PDF: {e}")
-
         # Save PDF
         report.save_pdf(filename)
 
@@ -1734,8 +1726,4 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
             if modelname in residual_name or (data_name and data_name in residual_name):
                 return 70
         return 10
-
-    def _getModelShapeFigure(self):
-        # TODO: sasmodels shape visualization
-        return None
 

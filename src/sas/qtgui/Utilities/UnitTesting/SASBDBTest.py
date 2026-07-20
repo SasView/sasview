@@ -13,9 +13,8 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
-from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
+from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Utilities.SASBDB.sasbdb_data import (
-    SASBDBPDDF,
     SASBDBBuffer,
     SASBDBExportData,
     SASBDBFit,
@@ -534,44 +533,6 @@ class TestSASBDBDataCollector:
         assert "sld = 1e-06" in model.log  # No error for this one
         assert "scale = 1.0 ± 0.1" in model.log
 
-    def test_collect_pddf_from_corfunc(self, collector):
-        """Test collecting PDDF information"""
-        pddf = collector.collect_pddf_from_corfunc(
-            dmax=10.0,
-            rg=2.5,
-            i0=100.0,
-            porod_volume=50.0,
-            software="ATSAS"
-        )
-
-        assert isinstance(pddf, SASBDBPDDF)
-        assert pddf.dmax == 10.0
-        assert pddf.rg == 2.5
-        assert pddf.i0 == 100.0
-        assert pddf.porod_volume == 50.0
-        assert pddf.software == "ATSAS"
-
-    def test_create_default_instrument(self, collector):
-        """Test creating default instrument"""
-        instrument = collector.create_default_instrument()
-        assert isinstance(instrument, SASBDBInstrument)
-        assert instrument.source_type == "X-ray synchrotron"
-
-    def test_collect_guinier_from_linear_fit(self, collector):
-        """Test collecting Guinier from linear fit"""
-        guinier = collector.collect_guinier_from_linear_fit(
-            rg=2.5,
-            i0=100.0,
-            range_start=0.01,
-            range_end=0.05
-        )
-
-        assert isinstance(guinier, SASBDBGuinier)
-        assert guinier.rg == 2.5
-        assert guinier.i0 == 100.0
-        assert guinier.range_start == 0.01
-        assert guinier.range_end == 0.05
-
     def test_collect_guinier_from_freesas(self, collector):
         """Test collecting Guinier using FreeSAS (auto_guinier mocked via sys.modules)."""
         mock_result = MagicMock()
@@ -818,82 +779,6 @@ class TestSASBDBExporter:
             if os.path.exists(filepath):
                 os.unlink(filepath)
 
-    def test_export_experimental_data_1d(self, export_data):
-        """Test exporting experimental data for Data1D"""
-        data = Data1D(x=[0.01, 0.02, 0.03], y=[100, 50, 25])
-        data.dy = [10, 5, 2.5]
-        data.name = "Test Data"
-        data.filename = "test.dat"
-
-        exporter = SASBDBExporter(export_data)
-
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.dat', delete=False) as f:
-            filepath = f.name
-
-        try:
-            success = exporter.export_experimental_data(data, filepath)
-            assert success is True
-
-            # Verify file was created and contains data
-            assert os.path.exists(filepath)
-            with open(filepath) as f:
-                content = f.read()
-
-            assert "SASBDB Experimental Data Export" in content
-            assert "Test Data" in content
-            assert "test.dat" in content
-            assert "Q\tI\tdI" in content
-        finally:
-            if os.path.exists(filepath):
-                os.unlink(filepath)
-
-    def test_export_experimental_data_2d(self, export_data):
-        """Test exporting experimental data for Data2D"""
-        data = Data2D()
-        data.qx_data = np.array([0.01, 0.02])
-        data.qy_data = np.array([0.01, 0.02])
-        data.data = np.array([100, 50])
-        data.err_data = np.array([10, 5])
-        data.name = "Test Data 2D"
-        data.filename = "test2d.dat"
-
-        exporter = SASBDBExporter(export_data)
-
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.dat', delete=False) as f:
-            filepath = f.name
-
-        try:
-            success = exporter.export_experimental_data(data, filepath)
-            assert success is True
-
-            # Verify file was created
-            assert os.path.exists(filepath)
-            with open(filepath) as f:
-                content = f.read()
-
-            assert "SASBDB Experimental Data Export" in content
-            assert "Qx\tQy\tI\tdI" in content
-        finally:
-            if os.path.exists(filepath):
-                os.unlink(filepath)
-
-    def test_export_experimental_data_error(self, export_data):
-        """Test exporting experimental data with error"""
-        exporter = SASBDBExporter(export_data)
-
-        # Pass invalid data object
-        invalid_data = "not a data object"
-
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.dat', delete=False) as f:
-            filepath = f.name
-
-        try:
-            success = exporter.export_experimental_data(invalid_data, filepath)
-            assert success is False
-        finally:
-            if os.path.exists(filepath):
-                os.unlink(filepath)
-
     def test_remove_none_values(self, export_data):
         """Test removing None values from dictionary"""
         exporter = SASBDBExporter(export_data)
@@ -975,4 +860,62 @@ class TestSASBDBIntegration:
         finally:
             if os.path.exists(filepath):
                 os.unlink(filepath)
+
+
+class _GuinierData1Dnm:
+    """Minimal 1D curve: q in nm^-1, Guinier I = I0 exp(-Rg^2 q^2 / 3)."""
+
+    def __init__(self, rg_nm: float = 2.0, i0: float = 1.0, n: int = 60):
+        q = np.linspace(0.01, 0.12, n)
+        self.x = q
+        self.y = i0 * np.exp(-(rg_nm**2) * q**2 / 3.0)
+        self.dy = self.y * 0.01
+
+    def get_xaxis(self):
+        return ("q", "nm^{-1}")
+
+
+class _GuinierData1DA:
+    """Same physics with q in Å^-1 (Rg stored in nm in output)."""
+
+    def __init__(self, rg_nm: float = 2.0, i0: float = 1.0, n: int = 60):
+        q_nm = np.linspace(0.01, 0.12, n)
+        q_a = q_nm / 10.0
+        self.x = q_a
+        self.y = i0 * np.exp(-((rg_nm * 10.0) ** 2) * q_a**2 / 3.0)
+        self.dy = self.y * 0.01
+
+    def get_xaxis(self):
+        return ("q", "Å^{-1}")
+
+
+class TestCollectGuinierFromQRange:
+    """Tests for collect_guinier_from_q_range."""
+
+    @pytest.mark.parametrize(
+        "data_factory,atol", [(_GuinierData1Dnm, 0.05), (_GuinierData1DA, 0.08)]
+    )
+    def test_recovers_rg_i0(self, data_factory, atol):
+        data = data_factory(rg_nm=2.0, i0=1.0)
+        collector = SASBDBDataCollector()
+        q = np.asarray(data.x)
+        q_lo = float(q[5])
+        q_hi = float(q[40])
+        guinier, fit_info = collector.collect_guinier_from_q_range(data, q_lo, q_hi)
+        assert guinier is not None
+        assert fit_info is not None
+        assert fit_info["b"] < 0
+        assert guinier.rg == pytest.approx(2.0, abs=atol)
+        assert guinier.i0 == pytest.approx(1.0, abs=0.02)
+        assert guinier.range_start == pytest.approx(min(q_lo, q_hi))
+        assert guinier.range_end == pytest.approx(max(q_lo, q_hi))
+
+    def test_too_few_points(self):
+        data = _GuinierData1Dnm()
+        collector = SASBDBDataCollector()
+        q = np.asarray(data.x)
+        q0 = float(q[10])
+        guinier, fit_info = collector.collect_guinier_from_q_range(data, q0, q0)
+        assert guinier is None
+        assert fit_info is None
 

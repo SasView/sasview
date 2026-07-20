@@ -15,7 +15,6 @@ All dataclasses use Optional fields to allow for partial data entry, with
 required fields enforced during validation before export.
 """
 from dataclasses import dataclass, field
-from typing import Any
 
 
 @dataclass
@@ -67,21 +66,6 @@ class SASBDBGuinier:
 
 
 @dataclass
-class SASBDBPDDF:
-    """Pair Distance Distribution Function information"""
-    software: str | None = None  # ATSAS / BayesApp / ... / Other
-    software_version: str | None = None
-    pddf_file: str | None = None
-    dmax: float | None = None  # nm
-    dmax_error: float | None = None
-    rg: float | None = None  # nm
-    rg_error: float | None = None
-    i0: float | None = None
-    porod_volume: float | None = None  # nm^3
-    mw_from_porod_volume: float | None = None
-
-
-@dataclass
 class SASBDBInstrument:
     """Instrument information for SASBDB submission"""
     source_type: str | None = None  # Required: X-ray synchrotron / X-ray in house / Neutron source / Other
@@ -103,8 +87,6 @@ class SASBDBModel:
     symmetry: str | None = None
     log: str | None = None
     comment: str | None = None
-    # For shape visualization (not exported to JSON, only used for UI display)
-    visualization_params: dict[str, Any] | None = field(default=None, repr=False)
 
 
 @dataclass
@@ -135,7 +117,6 @@ class SASBDBSample:
     guinier: SASBDBGuinier | None = None
     molecular_weight_from_i0: float | None = None
     molecular_weight_from_i0_error: float | None = None
-    pddf: SASBDBPDDF | None = None
     description: str | None = None
     experiment_date: str | None = None  # Required
     beamline_instrument: str | None = None  # Required
