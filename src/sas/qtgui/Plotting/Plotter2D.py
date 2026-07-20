@@ -68,6 +68,12 @@ class Plotter2DWidget(PlotterBase):
         self.slicer_widget = None
         self.stackplots = config.STACK_PLOTS  # whether to stack multiple slicer plots
         self.slicer_plots_dict = {}  # keep track of slicer plots
+        self.num_slicer_plots = {
+            "Annulus": 0,
+            "Box": 0,
+            "Sector": 0,
+            "Wedge": 0
+        }
         self.vmin = None
         self.vmax = None
         self.im = None
@@ -301,6 +307,12 @@ class Plotter2DWidget(PlotterBase):
         self._slicer_color_index = 0
         self._removeSlicerPlots()
 
+        # Notify the slicer parameters dialog (if open) so its list stays in sync
+        if (slicer_widget := getattr(self, 'slicer_widget', None)):
+            slicer_widget.slicer_models.clear()
+            slicer_widget.setModel(None)
+            slicer_widget.updateSlicersList()
+
         self.canvas.draw()
 
         # Close the box sum widget if it exists
@@ -347,6 +359,97 @@ class Plotter2DWidget(PlotterBase):
                     slicer_plots[plot_id] = plot_window
                     break
         return slicer_plots
+
+    def incrementNumSlicerPlots(self, slicer_type: str):
+        """Add a new slicer plot to the appropriate index if one is being generated."""
+        if self.stackplots:
+            # Check whether the most recent plot of this slicer is active for stacking,
+            # otherwise generate a new plot
+            slicer_plots = self.getActiveSlicerPlots()
+            current_plot_string = f"Plot{self.num_slicer_plots[slicer_type]}"
+            for plot_id in slicer_plots:
+                if plot_id.startswith(slicer_type) and current_plot_string in plot_id:
+                    # We can stack the current plot on the existing one, so return
+                    return
+
+        # If we are not stacking or the final slicer plot is not active, generate a new one
+        self.num_slicer_plots[slicer_type] += 1
+
+    def _slicerUsesPlotWindow(self, slicer, plot_window):
+        """
+        Return True if slicer, or any nested slicer it owns, is associated
+        with plot_window.
+        """
+        stack = [slicer]
+        seen = set()
+
+        while stack:
+            current = stack.pop()
+            if id(current) in seen:
+                continue
+            seen.add(id(current))
+
+            if getattr(current, "_plot_window", None) is plot_window:
+                return True
+
+            children = getattr(current, "slicers", None)
+            if children:
+                if isinstance(children, dict):
+                    stack.extend(children.values())
+                else:
+                    stack.extend(children)
+
+        return False
+
+    def removeSlicersForPlotWindow(self, plot_window):
+        """
+        Remove any slicers associated with a closed slicer plot window.
+        """
+        # Identify slicers associated with the closed plot window
+        removed_slicers = [
+            name for name, slicer in self.slicers.items()
+            if self._slicerUsesPlotWindow(slicer, plot_window)
+        ]
+
+        if not removed_slicers:
+            return
+
+        # Remove identified slicers from the parent plot's slicer list and clear them
+        for name in removed_slicers:
+            if slicer := self.slicers.pop(name, None):
+                slicer.clear() if hasattr(slicer, 'clear') else None
+
+
+        # Remove associated plots from the slicer_plots_dict
+        for name, window in list(getattr(self, 'slicer_plots_dict', {}).items()):
+            if window is plot_window:
+                del self.slicer_plots_dict[name]
+
+        # Switch to another remaining slicer if the current one was removed
+        # If no slicers remain, set self.slicer to None
+        if self.slicer not in self.slicers.values():
+            self.slicer = next(iter(self.slicers.values()), None)
+
+        # Notify the slicer parameters dialog (if open) so its list stays in sync
+        if (slicer_widget := getattr(self, 'slicer_widget', None)):
+            slicer_widget.updateSlicersList()
+            if self.slicer is None:
+                slicer_widget.slicer_models.clear()
+                slicer_widget.setModel(None)
+            else:
+                # Select and display the model for the new active slicer
+                for slicer_name, slicer_obj in self.slicers.items():
+                    if slicer_obj is self.slicer:
+                        slicer_widget.checkSlicerByName(slicer_name)
+                        break
+                if hasattr(self.slicer, 'model'):
+                     slicer_widget.setModel(self.slicer.model())
+
+        try:
+            self.canvas.draw()
+        except RuntimeError:
+            # Canvas may have been destroyed already, ignore if so
+            pass
 
     def onEditSlicer(self):
         """
@@ -529,8 +632,8 @@ class Plotter2DWidget(PlotterBase):
             item.removeRow(plot.row())
 
     def _removeSlicerPlots(self):
-        """  
-        Clear the previous slicer plots  
+        """
+        Clear the previous slicer plot
         """
         # Clear the old slicer plots so they don't reappear later
         if not hasattr(self, '_item'):
@@ -639,14 +742,22 @@ class Plotter2DWidget(PlotterBase):
         self.slicer.update()
 
         def boxWidgetClosed():
+            """
+            When the BoxSum widget is closed, clear the slicer.
+            """
             # Need to disconnect the signal!!
             self.boxwidget.closeWidgetSignal.disconnect()
-            # reset box on "Edit Slicer Parameters" window close
+            # Reset box on "Edit Slicer Parameters" window close
             self.manager.parent.workspace().removeSubWindow(self.boxwidget_subwindow)
-            self.boxwidget = None
-            # Clear the reference in the slicer
+
+            # If a BoxSum slicer still exists, clear it and redraw.
             if self.slicer is not None:
-                self.slicer.widget = None
+                self.slicer.clear()
+                self.slicer = None
+                self.canvas.draw()
+
+            # Clear stored widget reference
+            self.boxwidget = None
 
         # Get the BoxSumCalculator model.
         self.box_sum_model = self.slicer.model()
@@ -890,3 +1001,9 @@ class Plotter2D(QtWidgets.QDialog, Plotter2DWidget):
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/res/ball.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.setWindowIcon(icon)
+
+    def closeEvent(self, event):
+        """
+        Delegate close handling to the plotter widget implementation.
+        """
+        Plotter2DWidget.closeEvent(self, event)

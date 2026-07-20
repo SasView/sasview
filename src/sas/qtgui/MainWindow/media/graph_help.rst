@@ -197,6 +197,16 @@ Getting data coordinates
 Clicking anywhere in the plot window will cause the current coordinates to be
 displayed in the status bar at the very bottom-left of the SasView window.
 
+Sending data to Explorer
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+Clicking the "Freeze Datasets" button sends the current plot data to the Data Explorer.
+This can also be done by right clicking on a child dataset in the Data Explorer and
+selecting "Freeze Results", or by selecting the dataset(s) of interest in the Data Explorer
+and selecting "Edit>Freeze Fit Results". This feature is primarily useful for generated
+1D plots during slicing, as data must be selected in the Data Explorer before it can be
+sent to the Fitting tool.
+
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 Dataset Menu options
@@ -493,4 +503,4 @@ The plots for the individual slicers will be stacked.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note:: This help document was last modified by Sujaya Shrestha, 24 December 2025.
+.. note:: This help document was last modified by Christian Wögerbauer, 12 June 2026.

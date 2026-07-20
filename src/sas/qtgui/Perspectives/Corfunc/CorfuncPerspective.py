@@ -896,7 +896,10 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
         if self._calculator.extrapolation_function is not None:
             q = self.data.x
-            window = SaveExtrapolatedPopup(q, self._calculator.extrapolation_function)
+            window = SaveExtrapolatedPopup(
+                q,
+                self._calculator.extrapolation_function,
+                background=self._calculator.background)
             window.exec_()
         else:
             logger.error("Save extrapolation: No extrapolation function present")

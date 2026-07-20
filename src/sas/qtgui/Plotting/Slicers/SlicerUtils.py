@@ -47,7 +47,7 @@ def generate_unique_plot_id(base_id: str, item) -> str:
     parent_item = item if item.parent() is None else item.parent()
     existing = _count_matching_ids(parent_item, base_id)
 
-    return f"{base_id}_{existing}"
+    return base_id if existing == 0 else f"{base_id}_{existing}"
 
 
 class StackableMixin:
@@ -66,7 +66,7 @@ class StackableMixin:
         """
         Ensure data is returned as a list.
         Returns an empty list if data is None, a single-item list if data is a single item
-        
+
         :param data: Data which may be None, a single item, or a list
         :return: List of data items
         """
@@ -172,15 +172,13 @@ class StackableMixin:
         :return: The actual ID assigned to the plot
         """
         new_plot.custom_color = self.color
+        new_plot.setSlicerOwner(self.base)
 
         # Add to model
         GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
 
         # Add to existing window
         plot_window.plot(data=new_plot, color=self.color, hide_error=False)
-
-        # Notify manager (batched when suspended)
-        self._emit_plot_update([new_plot])
 
         # Update slicer plots list if the slicer widget exists (do it only if not batching)
         if (slicer_widget := getattr(self.base, 'slicer_widget', None)):
@@ -197,10 +195,10 @@ class StackableMixin:
         :param item: The data explorer item
         """
         # Add to model
+        new_plot.setSlicerOwner(self.base)
         GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
 
         # Signal to create plot
-        self._emit_plot_update([new_plot])
         self.base.manager.communicator.forcePlotDisplaySignal.emit([item, new_plot])
 
         # Store references
@@ -233,6 +231,9 @@ class StackableMixin:
 
         # Preserve color
         new_plot.custom_color = self.color
+
+        # Set slicer owner
+        new_plot.setSlicerOwner(self.base)
 
         # Replace plot data
         self._plot_window.replacePlot(new_plot.id, new_plot)

@@ -1,3 +1,4 @@
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -10,6 +11,20 @@ from sas.qtgui.MainWindow.MainWindow import MainSasViewWindow
 from sas.qtgui.Plotting.LinearFit import LinearFit
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.QRangeSlider import QRangeSlider
+
+
+@pytest.fixture(scope="session", autouse=True)
+def patch_heavyweight_calculators():
+    """Prevent heavyweight calculator widgets from being instantiated during tests.
+
+    - MuMag: calls plt.figure() twice in __init__, causing 'too many figures' warnings.
+    - Shape2SAS: uses Q3DScatter (OpenGL), which crashes under the offscreen platform.
+    """
+    with (
+        patch("sas.qtgui.MainWindow.GuiManager.MuMag", MagicMock),
+        patch("sas.qtgui.MainWindow.GuiManager.Shape2SAS", MagicMock),
+    ):
+        yield
 
 
 class QRangeSlidersTest:
@@ -33,7 +48,7 @@ class QRangeSlidersTest:
 
         self.manager = GuiManager(MainWindow(None))
         self.plotter = Plotter.Plotter(self.manager.filesWidget, quickplot=True)
-        self.data = Data1D(x=[0.001,0.1,0.2,0.3,0.4], y=[1000,100,10,1,0.1])
+        self.data = Data1D(x=[0.001,0.1,0.2,0.3,0.4], y=[1000,100,10,1,0.1], dy=[100,10,1,0.1,0.01])
         self.data.name = "Test QRangeSliders class"
         self.data.show_q_range_sliders = True
         self.data.slider_update_on_move = True
@@ -93,32 +108,68 @@ class QRangeSlidersTest:
         assert self.slider.line_max.setter == widget.options_widget.updateMaxQ
         self.moveSliderAndInputs(widget.options_widget.txtMinRange, widget.options_widget.txtMaxRange)
 
-    @pytest.mark.xfail(reason="2026-02: Invariant API change - need to understand how it works")
-    def testInvariantSliders(self, slidersetup):
-        '''Test the QRangeSlider class within the context of the Invariant perspective'''
-        # Ensure invariant prespective is active and send data to it
-        self.current_perspective = 'Invariant'
+    @pytest.mark.parametrize(
+        "checkbox, start, end",
+        [
+            ("chkHighQ_ex", "txtPorodStart_ex", "txtPorodEnd_ex"),
+            ("chkLowQ_ex", None, "txtGuinierEnd_ex"),
+        ],
+        ids=["High Q", "Low Q"]
+    )
+    def testInvariantSliders(self, checkbox, start, end, slidersetup):
+        """Test the QRangeSlider class within the context of the Invariant perspective.
+
+        After the refactor, invariant sliders are purely visual.
+        They are positioned by reading a the extrapolation parameters at creation time,
+        and do NOT maintain a live connection to the text-field inputs.
+        Dragging a slider must never update the text fields in the perspective.
+        """
+
+        self.current_perspective = "Invariant"
         self.manager.perspectiveChanged(self.current_perspective)
         widget = self.manager.perspective()
-        widget._data = self.data
-        # Create slider on base data set
+        chk_widget = getattr(widget, checkbox)
+        end_widget = getattr(widget, end)
+        start_widget = getattr(widget, start) if start else None
+        chk_widget.setChecked(True)
+        self.manager.filesWidget.sendData()
+
+        assert widget._data is self.data, "Perspective should have received the data from the manager"
+        assert end_widget.text() != ""
+        if start_widget:
+            assert start_widget.text() != ""
+
+        # Mirror the slider attributes exactly as plot_result() sets them
+        self.data.show_q_range_sliders = True
+        self.data.slider_update_on_move = False
         self.data.slider_perspective_name = self.current_perspective
-        self.data.slider_low_q_input = ['txtNptsHighQ']
-        self.data.slider_low_q_setter = ['set_high_q_extrapolation_lower_limit']
-        self.data.slider_low_q_getter = ['get_high_q_extrapolation_lower_limit']
-        self.data.slider_high_q_input = ['txtExtrapolQMax']
+        self.data.slider_low_q_input = start_widget.text() if start_widget else 1e-5
+        self.data.slider_high_q_input = end_widget.text()
+
         self.plotter.plot(self.data)
         self.slider = QRangeSlider(self.plotter, self.plotter.ax, data=self.data)
-        # Check inputs are linked properly.
+
         assert len(self.plotter.sliders) == 1
-        # Move slider and ensure text input matches - Npts needs to be checked differently
-        self.moveSliderAndInputs(None, widget.txtExtrapolQMax)
-        # Check npts after moving line
+        assert not self.slider.updateOnMove, "Invariant sliders should not update on move"
+
+        # Moving the slider should not update the text fields
+        if start_widget:
+            original_start = start_widget.text()
+        original_end = end_widget.text()
+
         self.slider.line_min.move(self.data.x[1], self.data.y[1], None)
-        assert float(widget.txtNptsHighQ.text()) == pytest.approx(5, abs=1e-7)
-        # Move npts and check slider
-        widget.txtNptsHighQ.setText('2')
-        assert self.data.x[1]-self.slider.line_min.x == pytest.approx(0, abs=1e-7)
+        self.slider.line_max.move(self.data.x[-2], self.data.y[-2], None)
+
+        if start_widget:
+            assert start_widget.text() == original_start
+        assert end_widget.text() == original_end
+
+        # Editing the text fields should update the sliders
+        if start_widget:
+            start_widget.setText(f"{self.data.x[1]}")
+            assert self.slider.line_min.x == pytest.approx(float(start_widget.text()), abs=1e-7)
+        end_widget.setText(f"{self.data.x[-2]}")
+        assert self.slider.line_max.x == pytest.approx(float(end_widget.text()), abs=1e-7)
 
     def testInversionSliders(self, slidersetup):
         '''Test the QRangeSlider class within the context of the Inversion perspective'''

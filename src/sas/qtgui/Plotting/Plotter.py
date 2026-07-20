@@ -22,6 +22,7 @@ from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
 from sas.qtgui.Plotting.QRangeSlider import QRangeSlider
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
 from sas.qtgui.Plotting.SetGraphRange import SetGraphRange
+from sas.qtgui.Plotting.TrustBar import TrustBar
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +42,8 @@ class PlotterWidget(PlotterBase):
         self.plot_lines = {}
         # Dictionary of slider interactors {plot_id:interactor}
         self.sliders = {}
+
+        self.trust_bar = TrustBar(self.ax, self.canvas)
 
         # Window for text add
         self.addText = AddText(self)
@@ -78,21 +81,12 @@ class PlotterWidget(PlotterBase):
     @data.setter
     def data(self, value):
         """ data setter """
-        #self._data = value
-        self._data.append(value)
-        if value._xunit:
-            self.xLabel = "%s(%s)"%(value._xaxis, value._xunit)
+        data_names = [item.name for item in self._data]
+        if value.name in data_names:
+            data_index = data_names.index(value.name)
+            self._data[data_index] = value
         else:
-            self.xLabel = "%s"%(value._xaxis)
-        if value._yunit:
-            self.yLabel = "%s(%s)"%(value._yaxis, value._yunit)
-        else:
-            self.yLabel = "%s"%(value._yaxis)
-
-        if value.scale == 'linear' or value.isSesans:
-            self.xscale = 'linear'
-            self.yscale = 'linear'
-        self.title(title=value.name)
+            self._data.append(value)
 
     def plot(self, data=None, color=None, marker=None, hide_error=False, transform=True):
         """
@@ -105,7 +99,7 @@ class PlotterWidget(PlotterBase):
 
         # Data1D
         if isinstance(data, Data1D):
-            self.data.append(data)
+            self.data = data
 
         is_fit = (data.id=="fit")
 
@@ -323,6 +317,10 @@ class PlotterWidget(PlotterBase):
             if existing_slider is not None and not existing_slider.is_visible:
                 sliders.toggle()
             self.sliders[data.name] = sliders
+
+        # Draw size-distribution trust bar if requested.
+        if data.show_trust_bar:
+            self.trust_bar.draw(data)
 
         # refresh canvas
         self.canvas.draw_idle()

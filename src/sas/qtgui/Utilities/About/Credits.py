@@ -4,7 +4,7 @@ from PySide6.QtCore import QSize
 from PySide6.QtGui import QIcon, QPalette
 from PySide6.QtWidgets import QApplication, QDialog, QSizePolicy, QTextBrowser, QVBoxLayout
 
-from sas.system import SAS_RESOURCES
+from sas.system import legal
 
 logger = logging.getLogger(__name__)
 
@@ -54,8 +54,7 @@ class Credits(QDialog):
         """
         Modify the labels so the text corresponds to the current version
         """
-        with SAS_RESOURCES.resource("system/credits.html") as path:
-            credits = path.read_text()
+        credits = legal.credits_html
 
         if is_dark_mode():
             # Inject dark mode CSS into the credits HTML

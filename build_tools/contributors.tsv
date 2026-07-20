@@ -15,6 +15,7 @@ Name	Affiliation	Creator	Producer	RelatedPerson	ReleaseManager	ORCID	Notes
 "Cadwallader-Jones, Iestyn"	Institut Laue-Langevin	x					None
 "Campbell, Kieran"	ISIS Neutron and Muon Source	x					None
 "Cho, Jae-Hie"	"University of Tennessee, Knoxville"	x					None
+"Conan, Romain"	"Charles University"	x					None
 "Cooper-Benun, Torin"	ISIS Neutron and Muon Source	x					None
 "Cortes Hernandez, R"	"University of Tennessee, Knoxville"	x					None
 "Corona, Patrick"	"University of California, Santa Barbara"			x			None
@@ -35,6 +36,7 @@ Name	Affiliation	Creator	Producer	RelatedPerson	ReleaseManager	ORCID	Notes
 "Gerina, Mariana"	Charles University	x					None
 "Gilbert, Peter"	National Institute of Standards and Technology	x				0000-0003-1707-7517	Not sure he is properly an author vs other? check contribution.
 "Gonzalez, Miguel"	Institut Laue-Langevin	x				0000-0002-3478-0215	None
+"Grosskopf, Paul"   Institut Laue-Langevin	x				0009-0003-8057-1021	None
 "Hammond, Oliver"	European Spallation Source	x					None
 "Hansen, Thomas Bukholt"	University of Copenhagen	x				0009-0007-9154-7106	None
 "Heenan, Richard"	ISIS Neutron and Muon Source	x				0000-0002-7729-1454	None
@@ -51,7 +53,7 @@ Name	Affiliation	Creator	Producer	RelatedPerson	ReleaseManager	ORCID	Notes
 "Kline, Steve"	National Institute of Standards and Technology	x					None
 "Knudsen, Mikkel"	University of Copenhagen			x			Who is this person? What is the connection?
 "Krueger, Susan"	National Institute of Standards and Technology			x			None
-"Krzywon, Jeff"	National Institute of Standards and Technology	x			x	0000-0002-2380-4090	None
+"Krzywon, Jeff"	National Institute of Standards and Technology	x				0000-0002-2380-4090	None
 "Larsen, Andreas Haahr"	University of Copenhagen		x			0000-0002-2230-2654	None
 "Lee, Sangjoon Bob"	Columbia University		x			0000-0002-2367-3932	None
 "Lin, Jiao"	California Institute of Technology	x					None
@@ -80,6 +82,7 @@ Name	Affiliation	Creator	Producer	RelatedPerson	ReleaseManager	ORCID	Notes
 "Pellicelli, R"							Who is this person (and what it their affiliation?) How did the name show up here (could tell us who they are?)
 "Perring, Toby"	ISIS Neutron and Muon Source		x				None
 "Peterson, Pete"	Oak Ridge National Laboratory	x					None
+"Pilloni, Cristian"	"Charles University"	x					None
 "Porcar, Lionel"	Institut Laue-Langevin			x			None
 "Potrzebowski, Wojciech"	SciLifeLab at Lund University	x	x			0000-0002-7789-6779	None
 "Pozzo, Lilo"	University of Washington			x			None
@@ -95,7 +98,7 @@ Name	Affiliation	Creator	Producer	RelatedPerson	ReleaseManager	ORCID	Notes
 "Sharp, Paul"	ISIS Neutron and Muon Source	x				0000-0003-3072-6155	None
 "Shan, Xael"	National Institute of Standards and Technology	x					None
 "Shang, Yingrui"	Oak Ridge National Laboratory			x			None
-"Shrestha, Sujaya"	ISIS Neutron and Muon Source	x					None
+"Shrestha, Sujaya"	ISIS Neutron and Muon Source	x			x		None
 "Snow, Tim"	Diamond Light Source	x				0000-0001-7146-6885	None
 "Stellhorn, Annika"	European Spallation Source	x					None
 "Taylor, Jonathan"	European Spallation Source		x				None
@@ -106,6 +109,7 @@ Name	Affiliation	Creator	Producer	RelatedPerson	ReleaseManager	ORCID	Notes
 "Weigandt, Katie"	National Institute of Standards and Technology	x					None
 "Whitley, Robert"	ISIS Neutron and Muon Source	x					None
 "Wilkins, Lucas"	ISIS Neutron and Muon Source	x					None
+"Woegerbauer, Christian"	Technical University of Munich	x					None
 "Wolf, Caitlyn"	National Institute of Standards and Technology	x				0000-0002-2956-7049	None
 "Zakoutna, Dominika"	Charles University			x			None
 "Zhang, Anita"	University of Princeton	x					None
