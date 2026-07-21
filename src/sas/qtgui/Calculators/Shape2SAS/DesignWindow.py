@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QPushButton,
     QSizePolicy,
+    QSplitter,
     QTabWidget,
     QVBoxLayout,
     QWidget,
@@ -61,6 +62,9 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
 
         self._manager = parent
         self.communicator = communicator
+
+        self.setMinimumSize(1200, 650)
+        self.resize(1200, 650)
 
         ############ Building GUI ##############
         # Create build model tab
@@ -179,12 +183,22 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         # Perform the initial widget placement
         self.onPlotTabChanged(self.plotTabs.currentIndex())
 
-        # Left-hand table and right-hand tabs
-        modelHbox.addWidget(self.subunitTable)
-        modelHbox.addWidget(self.plotTabs)
+        # Moveable divider between the table and plots
+        self.modelSplitter = QSplitter(Qt.Orientation.Horizontal)
 
-        modelHbox.setStretch(0, 1)
-        modelHbox.setStretch(1, 2)
+        self.modelSplitter.addWidget(self.subunitTable)
+        self.modelSplitter.addWidget(self.plotTabs)
+
+        # Initial relative sizing: 40% table, 60% plots
+        self.modelSplitter.setStretchFactor(0, 2)
+        self.modelSplitter.setStretchFactor(1, 3)
+        # self.modelSplitter.setSizes([500, 750])
+
+        # Prevent either side from being completely collapsed
+        self.modelSplitter.setCollapsible(0, False)
+        self.modelSplitter.setCollapsible(1, False)
+
+        modelHbox.addWidget(self.modelSplitter)
 
         modelSection.setLayout(modelHbox)
         modelSection.setSizePolicy(
@@ -192,11 +206,8 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
             QSizePolicy.Policy.Expanding,
         )
 
-        modelVbox.addWidget(modelSection, stretch=1)
-        modelVbox.addWidget(
-            self.modelTabButtonOptions,
-            stretch=0,
-        )
+        modelVbox.addWidget(modelSection)
+        modelVbox.addWidget(self.modelTabButtonOptions)
 
         self.model.setLayout(modelVbox)
 
