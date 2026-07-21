@@ -143,7 +143,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         profilePanelLayout.setContentsMargins(0, 0, 0, 0)
 
         profilePanelLayout.addWidget(
-            self.viewerModel.scattering,
+            self.viewerModel.scatteringContainer,
             stretch=1,
         )
 
@@ -176,7 +176,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
             self.combinedTab,
             "Combined",
         )
-        
+
         # Keep tabs disabled until include scattering is checked
         self.plotTabs.setTabEnabled(1, False)
         self.plotTabs.setTabEnabled(2, False)
@@ -347,7 +347,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         elif current_tab is self.combinedTab:
             # Move both panels into the combined tab
             self.combinedTabLayout.addWidget(self.viewerPanel, stretch=1)
-            self.combinedTabLayout.addWidget(self.profilePanel, stretch=1)
+            self.combinedTabLayout.addWidget(self.profilePanel, stretch=2)
 
             self.viewerPanel.show()
             self.profilePanel.show()
@@ -359,30 +359,8 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
             QTimer.singleShot(0, self.fitScatteringProfile)
 
     def fitScatteringProfile(self):
-        """Fit the scattering scene to the available profile-view area."""
-
-        scattering_view = self.viewerModel.scattering
-
-        # Use ResponsiveGraphicsView.fitScene() when available
-        if hasattr(scattering_view, "fitScene"):
-            scattering_view.fitScene()
-            return
-
-        scene = scattering_view.scene()
-
-        if scene is None:
-            return
-
-        scene_rect = scene.itemsBoundingRect()
-
-        if scene_rect.isEmpty():
-            return
-
-        scattering_view.setSceneRect(scene_rect)
-        scattering_view.fitInView(
-            scene_rect,
-            Qt.AspectRatioMode.KeepAspectRatio,
-        )
+        """Redraw the profile after its tab or layout changes."""
+        self.viewerModel.scattering.draw_idle()
 
     def showConstraintWindow(self):
         """Get the Constraint window"""
