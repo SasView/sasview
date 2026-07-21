@@ -176,6 +176,10 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
             self.combinedTab,
             "Combined",
         )
+        
+        # Keep tabs disabled until include scattering is checked
+        self.plotTabs.setTabEnabled(1, False)
+        self.plotTabs.setTabEnabled(2, False)
 
         self.plotTabs.currentChanged.connect(self.onPlotTabChanged)
         self.plotTabs.setCurrentWidget(self.viewerTab)
@@ -188,11 +192,8 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
 
         self.modelSplitter.addWidget(self.subunitTable)
         self.modelSplitter.addWidget(self.plotTabs)
-
-        # Initial relative sizing: 40% table, 60% plots
         self.modelSplitter.setStretchFactor(0, 2)
         self.modelSplitter.setStretchFactor(1, 3)
-        # self.modelSplitter.setSizes([500, 750])
 
         # Prevent either side from being completely collapsed
         self.modelSplitter.setCollapsible(0, False)
@@ -257,6 +258,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         self.plot.clicked.connect(self.onClickingPlot)
         self.plugin.clicked.connect(self.showConstraintWindow)
         self.structureFactor.currentIndexChanged.connect(self.showStructureFactorOptions)
+        self.checkTheoreticalScattering.toggled.connect(self.onTheoreticalScatteringChanged)
         self.plotSAXS.clicked.connect(self.showSimulatedSAXSData)
         self.sendSimToSasView.clicked.connect(self.sendSimulatedSAXSToDataExplorer)
         self.SAXSTabButtons.closePage.clicked.connect(self.onClickingClose)
@@ -287,6 +289,23 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         self.SAXSTabButtons.reset.setToolTip("Reset this page to default")
         self.plotSAXS.setToolTip("Plot simulated SAXS data")
         self.sendSimToSasView.setToolTip("Send simulated SAXS data to SasView Data Explorer")
+
+    def onTheoreticalScatteringChanged(self, checked: bool):
+        """Handle changes to the 'Include Scattering' checkbox."""
+        print(f"Checkbox state changed: {checked}")
+        if checked:
+            print("Include Scattering checked")
+            self.plotTabs.setTabEnabled(1, True)
+            self.plotTabs.setTabEnabled(2, True)
+            self.plotTabs.setCurrentWidget(self.combinedTab)
+
+            # Replot to ensure the scattering profile is generated when the checkbox is checked
+            self.onClickingPlot()
+        else:
+            print("Include Scattering unchecked")
+            self.plotTabs.setTabEnabled(1, False)
+            self.plotTabs.setTabEnabled(2, False)
+            self.plotTabs.setCurrentWidget(self.viewerTab)
 
     def onPlotTabChanged(self, index):
         """Move the viewer and profile panels into the selected tab."""
