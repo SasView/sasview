@@ -1,16 +1,16 @@
 This software was originally developed by the University of Tennessee 
 as part of the Distributed Data Analysis of Neutron Scattering 
 Experiments (DANSE) project funded by the US National Science Foundation
-and is currently being developed as an open source project hosted on GitHub
-and managed by a consortium of scattering facilities.
-
-Contributors to SasView are affiliated with 35 institutions, including 21 universities.
+and is currently being developed as an open source project hosted on GitHub 
+with contributions from 35 institutions, including 21 universities.
 
 If you use this application to do scientific research that leads to publication, 
 we kindly ask that you acknowledge the use of the software with the following 
 sentence:
 
-*"This work benefited from the use of the SasView application, originally 
-developed under NSF award DMR-0520547."*
+This work benefited from the use of the SasView project, originally developed 
+under NSF award DMR-0520547 and containing code developed with funding from 
+the European Union’s Horizon 2020 research and innovation programme under 
+the SINE2020 project, grant agreement No 654000.
 
 Copyright (c) 2009-2026, SasView Developers
