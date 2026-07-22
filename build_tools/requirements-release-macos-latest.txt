@@ -142,7 +142,7 @@ rpds-py==0.30.0
 sasdata @ git+https://github.com/SasView/sasdata.git@release_0.12.0
 sasmodels @ git+https://github.com/SasView/sasmodels.git@release_1.1.0
 scipy==1.17.1
-setuptools==82.0.1
+setuptools==83.0.0
 shiboken6==6.11.1
 simple-websocket==1.1.0
 siphash24==1.8
