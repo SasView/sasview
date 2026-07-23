@@ -72,7 +72,7 @@ jobs:
       dependency-matrix-json: ${{ steps.set-refs.outputs.dependency_matrix }}
     steps:
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ env.RELEASE_PYVER }}
 
@@ -124,7 +124,7 @@ jobs:
 
     steps:
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ env.RELEASE_PYVER }}
 
@@ -150,7 +150,7 @@ jobs:
 
     steps:
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ env.RELEASE_PYVER }}
 
@@ -220,7 +220,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ env.RELEASE_PYVER }}
 
