@@ -153,6 +153,7 @@ Bug Fixes
 * Fixes symmetric wedge phi plots by @jellybean2004 in https://github.com/SasView/sasview/pull/4029
 * MacOS drag and drop installer by @wpotrzebowski in https://github.com/SasView/sasview/pull/4030
 * Adds example data from SasData repository by @dehoni in https://github.com/SasView/sasview/pull/4033
+* Update button name by @jellybean2004 in https://github.com/SasView/sasview/pull/4048
 
 
 Known Issues
