@@ -21,6 +21,11 @@ jobs:
         os: [ ubuntu-latest]
     needs: reuse_main_ci
 
+    # Stop existing workflows (this includes
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
+
     env:
       GH_REPO: ${{ github.repository }}
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
