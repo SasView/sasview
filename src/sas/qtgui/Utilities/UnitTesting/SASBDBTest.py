@@ -341,6 +341,7 @@ class TestSASBDBDataCollector:
         assert fit.software == "SasView"
         assert fit.chi_squared == 1.5
         assert fit.cormap_pvalue == 0.05
+        assert fit.description == "Optimizer: Levenberg-Marquardt"
         assert len(fit.models) == 1
 
         model = fit.models[0]
@@ -803,6 +804,19 @@ class TestSASBDBExporter:
         assert None not in cleaned['key4']
         assert 'key5' not in cleaned  # Empty list should be removed
 
+    def test_remove_none_values_nested_empty_structures(self, export_data):
+        """Empty nested dicts/lists of dicts are pruned recursively."""
+        exporter = SASBDBExporter(export_data)
+        test_dict = {
+            'keep': 'x',
+            'empty_dict': {},
+            'nested_empty': {'a': None, 'b': {}, 'c': [None, {'z': None}]},
+            'list_of_empty_dicts': [{}, {'z': None}],
+            'deep': {'l1': {'l2': {'l3': None}}},
+        }
+        cleaned = exporter._remove_none_values(test_dict)
+        assert cleaned == {'keep': 'x'}
+
 
 class TestSASBDBIntegration:
     """Integration tests for SASBDB functionality"""
@@ -918,4 +932,22 @@ class TestCollectGuinierFromQRange:
         guinier, fit_info = collector.collect_guinier_from_q_range(data, q0, q0)
         assert guinier is None
         assert fit_info is None
+
+    def test_weighted_fit_downweights_outlier(self):
+        """Large dy on an outlier should keep Rg near the true Guinier value."""
+        data = _GuinierData1Dnm(rg_nm=2.0, i0=1.0, n=60)
+        q = np.asarray(data.x)
+        # Corrupt one mid-range point but give it huge uncertainty.
+        mid = 20
+        data.y = np.array(data.y, dtype=float, copy=True)
+        data.dy = np.array(data.dy, dtype=float, copy=True)
+        data.y[mid] = data.y[mid] * 50.0
+        data.dy[mid] = abs(data.y[mid]) * 100.0
+        collector = SASBDBDataCollector()
+        guinier, fit_info = collector.collect_guinier_from_q_range(
+            data, float(q[5]), float(q[40]))
+        assert guinier is not None
+        assert fit_info is not None
+        assert guinier.rg == pytest.approx(2.0, abs=0.08)
+        assert guinier.i0 == pytest.approx(1.0, abs=0.05)
 

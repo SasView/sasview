@@ -103,7 +103,8 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
         btn.setAutoDefault(False)
         btn.setDefault(False)
         if sys.platform == "darwin":
-            btn.setAttribute(QtCore.Qt.WA_MacShowFocusRect, False)
+            btn.setAttribute(
+                QtCore.Qt.WidgetAttribute.WA_MacShowFocusRect, False)
 
     def _wire_guinier_controls(self) -> None:
         if hasattr(self, 'btnGuinierEstimateFreeSAS'):
@@ -568,6 +569,7 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
         )
         if any((instrument.source_type, instrument.beamline_name,
                 instrument.synchrotron_name, instrument.detector_manufacturer,
+                instrument.detector_type, instrument.detector_resolution,
                 instrument.city, instrument.country)):
             export_data.instruments.append(instrument)
         return export_data
@@ -643,6 +645,11 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
         from sas.qtgui.Utilities.GuiUtils import showHelp
         showHelp(help_url)
 
+    def closeEvent(self, event):
+        if self._guinier_plot_panel is not None:
+            self._guinier_plot_panel._close_figure()
+        super().closeEvent(event)
+
     def _choose_save_path(self, title: str, default_name: str, filt: str) -> str | None:
         location = (self.save_location if self.save_location is not None
                     else os.path.expanduser('~'))
@@ -654,6 +661,23 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
         ObjectLibrary.addObject('SASBDBDialog_directory', self.save_location)
         return path
 
+    def _confirm_sibling_overwrite(self, *paths: str) -> bool:
+        """Ask before clobbering derived export files not covered by the save dialog."""
+        existing = [p for p in paths if p and os.path.exists(p)]
+        if not existing:
+            return True
+        names = "\n".join(os.path.basename(p) for p in existing)
+        reply = QtWidgets.QMessageBox.question(
+            self,
+            "Overwrite Existing Files?",
+            "The following files already exist and will be overwritten:\n\n"
+            f"{names}\n\nContinue?",
+            QtWidgets.QMessageBox.StandardButton.Yes
+            | QtWidgets.QMessageBox.StandardButton.No,
+            QtWidgets.QMessageBox.StandardButton.No,
+        )
+        return reply == QtWidgets.QMessageBox.StandardButton.Yes
+
     def onExport(self):
         """Validate, then write JSON + PDF + project beside the chosen JSON path."""
         is_valid, error_msg = self.validateData()
@@ -663,7 +687,8 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
 
         export_data = self.collectFromUI()
         json_filename = self._choose_save_path(
-            'Export SASBDB Data', 'sasbdb_export.json', 'JSON file (*.json)')
+            'Export SASBDB Data (also writes .pdf and _project.json)',
+            'sasbdb_export.json', 'JSON file (*.json)')
         if not json_filename:
             return
         if not json_filename.endswith('.json'):
@@ -673,6 +698,9 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
         directory = os.path.dirname(json_filename)
         pdf_filename = os.path.join(directory, f"{base_name}.pdf")
         project_filename = os.path.join(directory, f"{base_name}_project.json")
+
+        if not self._confirm_sibling_overwrite(pdf_filename, project_filename):
+            return
 
         results = {'json': False, 'pdf': False, 'project': False}
         errors = {'json': None, 'pdf': None, 'project': None}
@@ -939,6 +967,11 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
         report.save_pdf(filename)
 
     def _add_plots_to_report(self, report: ReportBase) -> None:
+        import matplotlib.pyplot as plt
+
+        # Figures owned by this export path (must be closed). Live PlotHelper /
+        # results-panel figures must not be closed.
+        owned_figs = []
         plot_fig = self._getPlotFigureWithModel()
         if plot_fig:
             try:
@@ -950,6 +983,7 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
             try:
                 plot_fig = self._getPlotFigure()
                 if plot_fig:
+                    owned_figs.append(plot_fig)
                     report.add_plot(
                         plot_fig, image_type="png", figure_title="Data Plot")
             except Exception as e:
@@ -962,6 +996,9 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
                     residual_fig, image_type="png", figure_title="Residuals")
             except Exception as e:
                 logger.warning(f"Could not add residual plot to PDF: {e}")
+
+        for fig in owned_figs:
+            plt.close(fig)
 
     def _getPlotFigureWithModel(self):
         try:
@@ -1007,6 +1044,7 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
             return None
 
     def _getPlotFigure(self):
+        fig = None
         try:
             if not self.export_data.samples:
                 return None
@@ -1034,6 +1072,9 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
             return fig
         except Exception as e:
             logger.warning(f"Error getting plot figure: {e}")
+            if fig is not None:
+                import matplotlib.pyplot as plt
+                plt.close(fig)
             return None
 
     def _getResidualPlotFigure(self):

@@ -92,6 +92,49 @@ class TestSASBDBDialog:
         ok, msg = dialog.validateData()
         assert ok, msg
 
+    def test_collectFromUI_keeps_instrument_with_only_detector_fields(self, dialog):
+        """detector_type / detector_resolution alone must not drop instrument data."""
+        # Combo always has a default source type; temporarily allow empty.
+        dialog.cmbSourceType.insertItem(0, "")
+        dialog.cmbSourceType.setCurrentIndex(0)
+        dialog.txtBeamlineName.clear()
+        dialog.txtSynchrotronName.clear()
+        dialog.txtDetectorManufacturer.clear()
+        dialog.txtCity.clear()
+        dialog.txtCountry.clear()
+
+        dialog.txtDetectorType.setText("Photon counting")
+        dialog.txtDetectorResolution.setText("172 um")
+
+        export_data = dialog.collectFromUI()
+        assert len(export_data.instruments) == 1
+        inst = export_data.instruments[0]
+        assert inst.detector_type == "Photon counting"
+        assert inst.detector_resolution == "172 um"
+        assert inst.source_type is None
+        assert inst.beamline_name is None
+
+    def test_onExport_prompts_before_overwriting_sibling_files(self, dialog, mocker):
+        """Derived .pdf / _project.json must not be clobbered without confirmation."""
+        test_json = "/tmp/test_export.json"
+        mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName',
+                          return_value=(test_json, "JSON file (*.json)"))
+        mocker.patch(
+            'sas.qtgui.Utilities.SASBDB.SASBDBDialog.os.path.exists',
+            side_effect=lambda p: str(p).endswith(('.pdf', '_project.json')))
+        question_mock = mocker.patch.object(
+            QtWidgets.QMessageBox, 'question',
+            return_value=QtWidgets.QMessageBox.StandardButton.No)
+        json_mock = mocker.patch(
+            'sas.qtgui.Utilities.SASBDB.sasbdb_exporter.SASBDBExporter.export_to_json',
+            return_value=True
+        )
+
+        dialog.onExport()
+
+        question_mock.assert_called_once()
+        json_mock.assert_not_called()
+
     def test_onExport_cancels_when_no_filename(self, dialog, mocker, qtbot):
         """Test that onExport returns early when user cancels file dialog"""
         mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName',
@@ -112,6 +155,7 @@ class TestSASBDBDialog:
         test_json = "/tmp/test_export.json"
         mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName',
                           return_value=(test_json, "JSON file (*.json)"))
+        mocker.patch.object(dialog, '_confirm_sibling_overwrite', return_value=True)
 
         # Mock all three save operations to succeed
         json_mock = mocker.patch(
@@ -145,6 +189,7 @@ class TestSASBDBDialog:
         test_json = "/tmp/test_export"  # No extension
         mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName',
                           return_value=(test_json, "JSON file (*.json)"))
+        mocker.patch.object(dialog, '_confirm_sibling_overwrite', return_value=True)
 
         json_mock = mocker.patch(
             'sas.qtgui.Utilities.SASBDB.sasbdb_exporter.SASBDBExporter.export_to_json',
@@ -166,6 +211,7 @@ class TestSASBDBDialog:
         test_json = "/tmp/test_export.json"
         mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName',
                           return_value=(test_json, "JSON file (*.json)"))
+        mocker.patch.object(dialog, '_confirm_sibling_overwrite', return_value=True)
 
         mocker.patch(
             'sas.qtgui.Utilities.SASBDB.sasbdb_exporter.SASBDBExporter.export_to_json',
@@ -191,6 +237,7 @@ class TestSASBDBDialog:
         test_json = "/tmp/test_export.json"
         mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName',
                           return_value=(test_json, "JSON file (*.json)"))
+        mocker.patch.object(dialog, '_confirm_sibling_overwrite', return_value=True)
 
         # JSON succeeds, PDF fails, Project succeeds
         mocker.patch(
@@ -215,6 +262,7 @@ class TestSASBDBDialog:
         test_json = "/tmp/test_export.json"
         mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName',
                           return_value=(test_json, "JSON file (*.json)"))
+        mocker.patch.object(dialog, '_confirm_sibling_overwrite', return_value=True)
 
         mocker.patch(
             'sas.qtgui.Utilities.SASBDB.sasbdb_exporter.SASBDBExporter.export_to_json',
@@ -236,6 +284,7 @@ class TestSASBDBDialog:
         test_json = "/tmp/test_export.json"
         mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName',
                           return_value=(test_json, "JSON file (*.json)"))
+        mocker.patch.object(dialog, '_confirm_sibling_overwrite', return_value=True)
 
         mocker.patch(
             'sas.qtgui.Utilities.SASBDB.sasbdb_exporter.SASBDBExporter.export_to_json',
@@ -371,6 +420,7 @@ class TestSASBDBDialog:
         test_json = "/tmp/subfolder/test_export.json"
         mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName',
                           return_value=(test_json, "JSON file (*.json)"))
+        mocker.patch.object(dialog, '_confirm_sibling_overwrite', return_value=True)
 
         json_mock = mocker.patch(
             'sas.qtgui.Utilities.SASBDB.sasbdb_exporter.SASBDBExporter.export_to_json',
@@ -396,6 +446,7 @@ class TestSASBDBDialog:
         test_json = "/tmp/new_location/test_export.json"
         mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName',
                           return_value=(test_json, "JSON file (*.json)"))
+        mocker.patch.object(dialog, '_confirm_sibling_overwrite', return_value=True)
 
         mocker.patch(
             'sas.qtgui.Utilities.SASBDB.sasbdb_exporter.SASBDBExporter.export_to_json',

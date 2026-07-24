@@ -302,7 +302,7 @@ class SASBDBDataCollector:
         
         :param fit_data: Dictionary containing fit results (chi2, etc.)
         :param model_name: Name of the fitted model
-        :param optimizer_name: Name of the optimizer used
+        :param optimizer_name: Name of the optimizer used (stored in description)
         :param model_parameters: List of parameter tuples/lists from fitting widget
         :return: SASBDBFit object with collected data
         """
@@ -326,6 +326,9 @@ class SASBDBDataCollector:
 
         # Angular units (should match sample)
         fit.angular_units = '1/A'  # Default, will be updated from sample
+
+        if optimizer_name:
+            fit.description = f"Optimizer: {optimizer_name}"
 
         # Model information
         if model_name:

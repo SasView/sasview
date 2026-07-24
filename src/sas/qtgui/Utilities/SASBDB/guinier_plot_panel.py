@@ -30,6 +30,22 @@ class GuinierPlotPanel(QtWidgets.QWidget):
         layout.addWidget(self._canvas)
         self._show_placeholder()
 
+    def closeEvent(self, event):
+        self._close_figure()
+        super().closeEvent(event)
+
+    def _close_figure(self) -> None:
+        fig = getattr(self, "_figure", None)
+        if fig is None:
+            return
+        try:
+            import matplotlib.pyplot as plt
+            plt.close(fig)
+        except Exception as e:
+            logger.debug("Could not close Guinier figure: %s", e)
+        finally:
+            self._figure = None
+
     def _apply_compact_margins(self) -> None:
         """Tight margins so axis labels fit in a short vertical space."""
         self._figure.subplots_adjust(
@@ -37,6 +53,8 @@ class GuinierPlotPanel(QtWidgets.QWidget):
         )
 
     def _show_placeholder(self, message: str = "No 1D data") -> None:
+        if self._figure is None:
+            return
         self._axes.clear()
         self._axes.set_axis_off()
         self._axes.text(
@@ -71,6 +89,8 @@ class GuinierPlotPanel(QtWidgets.QWidget):
         :param fit_a: Intercept of ln(I) = a + b q²
         :param fit_b: Slope (must be < 0 for a physical Guinier line)
         """
+        if self._figure is None:
+            return
         if q is None or I is None or len(q) == 0:
             self._show_placeholder()
             return
