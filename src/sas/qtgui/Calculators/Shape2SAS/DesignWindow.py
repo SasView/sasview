@@ -2,7 +2,7 @@
 import re
 from types import MethodType
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import (
     QCheckBox,
     QDialog,
@@ -11,6 +11,8 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QPushButton,
     QSizePolicy,
+    QSplitter,
+    QTabWidget,
     QVBoxLayout,
     QWidget,
 )
@@ -49,7 +51,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
 
     @property
     def title(self) -> str:
-        """ Window title"""
+        """Window title"""
         return "Shape2SAS"
 
     def __init__(self, parent=None):
@@ -61,13 +63,13 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         self._manager = parent
         self.communicator = communicator
 
-        ############Building GUI##############
-        ###create build model tab
-        #Add buttons to the modelTabButtonOptions
+        self.setMinimumSize(1200, 650)
+        self.resize(1200, 650)
+
+        ############ Building GUI ##############
+        # Create build model tab
+        # Add buttons to the modelTabButtonOptions
         self.modelTabButtonOptions = ButtonOptions()
-        self.modelTabButtonOptions.help.setToolTip("Go to help page")
-        self.modelTabButtonOptions.closePage.setToolTip("Close Shape2SAS")
-        self.modelTabButtonOptions.reset.setToolTip("Reset this page to default")
         self.modelTabButtonOptions.horizontalLayout_5.setContentsMargins(0, 0, 10, 10)
 
         self.line1 = QFrame()
@@ -75,11 +77,9 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         self.modelTabButtonOptions.horizontalLayout_5.insertWidget(1, self.line1)
 
         self.checkTheoreticalScattering = QCheckBox("Include Scattering")
-        self.checkTheoreticalScattering.setToolTip("Include a theoretical scattering profile when plotting the model")
         self.modelTabButtonOptions.horizontalLayout_5.insertWidget(1, self.checkTheoreticalScattering)
         self.plot = QPushButton("Plot")
         self.modelTabButtonOptions.horizontalLayout_5.insertWidget(1, self.plot)
-        self.plot.setToolTip("Plot the model")
 
         self.line2 = QFrame()
         self.line2.setFrameShape(QFrame.VLine)
@@ -87,38 +87,133 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
 
         self.plugin = QPushButton("To plugin model")
         self.plugin.setMinimumSize(110, 24)
-        self.plugin.setToolTip("Go to the plugin model page")
         self.plugin.setEnabled(False)
         self.modelTabButtonOptions.horizontalLayout_5.insertWidget(1, self.plugin)
 
         self.plugin.setHidden(True)
         self.line2.setHidden(True)
 
-        #connect buttons
-        self.modelTabButtonOptions.reset.clicked.connect(self.onSubunitTableReset)
-        self.modelTabButtonOptions.closePage.clicked.connect(self.onClickingClose)
-        self.plot.clicked.connect(self.onClickingPlot)
-        self.plugin.clicked.connect(self.showConstraintWindow)
-
-        #create layout for build model tab
+        # Create layout for build model tab
         self.viewerModel = ViewerModel()
         self.subunitTable = SubunitTable(self.onClickingPlot)
 
         modelVbox = QVBoxLayout()
         modelHbox = QHBoxLayout()
 
-        modelVbox.setContentsMargins(10,10,10,10)
-        modelHbox.setContentsMargins(10,10,10,10)
+        modelVbox.setContentsMargins(10, 10, 10, 10)
+        modelHbox.setContentsMargins(10, 10, 10, 10)
         modelSection = QWidget()
-        modelHbox.addWidget(self.subunitTable)
-        modelHbox.addWidget(self.viewerModel.Viewmodel_modul)
+
+        # Right-hand tabbed plot area
+        self.plotTabs = QTabWidget()
+        self.plotTabs.setObjectName("plotTabs")
+        self.plotTabs.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Expanding,
+        )
+
+        # The plots are shared between the tabs, so we create them once and
+        # move them into the appropriate tab when the user switches tabs.
+
+        # Reusable viewer panel
+        self.viewerPanel = QWidget()
+        self.viewerPanel.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Expanding,
+        )
+
+        viewerPanelLayout = QVBoxLayout(self.viewerPanel)
+        viewerPanelLayout.setContentsMargins(0, 0, 0, 0)
+
+        viewerPanelLayout.addWidget(
+            self.viewerModel.scatterContainer,
+            stretch=1,
+        )
+        viewerPanelLayout.addWidget(self.viewerModel.viewerButtons)
+        viewerPanelLayout.addWidget(self.viewerModel.viewerModelRadius)
+
+        # Reusable scattering-profile panel
+        self.profilePanel = QWidget()
+        self.profilePanel.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Expanding,
+        )
+
+        profilePanelLayout = QVBoxLayout(self.profilePanel)
+        profilePanelLayout.setContentsMargins(0, 0, 0, 0)
+
+        profilePanelLayout.addWidget(
+            self.viewerModel.scatteringContainer,
+            stretch=1,
+        )
+
+        # Model viewer tab
+        self.viewerTab = QWidget()
+        self.viewerTabLayout = QVBoxLayout(self.viewerTab)
+        self.viewerTabLayout.setContentsMargins(0, 0, 0, 0)
+
+        # Scattering-profile tab
+        self.scatteringTab = QWidget()
+        self.scatteringTabLayout = QVBoxLayout(self.scatteringTab)
+        self.scatteringTabLayout.setContentsMargins(0, 0, 0, 0)
+
+        # Combined viewer/profile tab
+        self.combinedTab = QWidget()
+        self.combinedTabLayout = QVBoxLayout(self.combinedTab)
+        self.combinedTabLayout.setContentsMargins(0, 0, 0, 0)
+        self.combinedTabLayout.setSpacing(5)
+
+        # Add tabs
+        self.plotTabs.addTab(
+            self.viewerTab,
+            "Model Viewer",
+        )
+        self.plotTabs.addTab(
+            self.scatteringTab,
+            "Scattering Profile",
+        )
+        self.plotTabs.addTab(
+            self.combinedTab,
+            "Combined",
+        )
+
+        # Keep tabs disabled until include scattering is checked
+        self.plotTabs.setTabEnabled(1, False)
+        self.plotTabs.setTabEnabled(2, False)
+
+        self.plotTabs.currentChanged.connect(self.onPlotTabChanged)
+        self.plotTabs.setCurrentWidget(self.viewerTab)
+
+        # Perform the initial widget placement
+        self.onPlotTabChanged(self.plotTabs.currentIndex())
+
+        # Moveable divider between the table and plots
+        self.modelSplitter = QSplitter(Qt.Orientation.Horizontal)
+
+        self.modelSplitter.addWidget(self.subunitTable)
+        self.modelSplitter.addWidget(self.plotTabs)
+        self.modelSplitter.setStretchFactor(0, 2)
+        self.modelSplitter.setStretchFactor(1, 3)
+
+        # Prevent either side from being completely collapsed
+        self.modelSplitter.setCollapsible(0, False)
+        self.modelSplitter.setCollapsible(1, False)
+
+        modelHbox.addWidget(self.modelSplitter)
+
         modelSection.setLayout(modelHbox)
+        modelSection.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Expanding,
+        )
 
         modelVbox.addWidget(modelSection)
         modelVbox.addWidget(self.modelTabButtonOptions)
+
         self.model.setLayout(modelVbox)
 
-        #plot scene
+        # Build Virtual SAXS Experiment tab
+        # This is the separate simulated SAXS plot area.
         self.scatteringProf = QWidget()
         self.scatteringProf.setContentsMargins(0, 0, 0, 0)
         self.scatteringProf.setObjectName("scatteringProf")
@@ -131,40 +226,42 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         self.plotBoxLayout.addWidget(self.scatteringProf)
         self.group2.setLayout(self.plotBoxLayout)
 
-        ###Building Virtual SAXS Experiment tab
-        #create and set layout for buttons
+        # Create and set layout for buttons
         self.SAXSTabButtons = ButtonOptions()
-        self.SAXSTabButtons.help.setToolTip("Go to help page")
-        self.SAXSTabButtons.help.clicked.connect(self.onHelp)
-        self.SAXSTabButtons.closePage.setToolTip("Close Shape2SAS")
-        self.SAXSTabButtons.reset.setToolTip("Reset this page to default")
-        self.SAXSTabButtons.reset.clicked.connect(self.onSAXSExperimentReset)
         self.plotSAXS = QPushButton("Plot SAXS")
         self.plotSAXS.setMinimumSize(110, 24)
-        self.plotSAXS.setToolTip("Plot simulated SAXS data")
         self.SAXSTabButtons.horizontalLayout_5.insertWidget(1, self.plotSAXS)
         self.sendSimToSasView = QPushButton("Create SAXS file")
         self.sendSimToSasView.setMinimumSize(110, 24)
-        self.sendSimToSasView.setToolTip("Send simulated SAXS data to SasView Data Explorer")
         self.sendSimToSasView.setEnabled(False)
         self.SAXSTabButtons.horizontalLayout_5.setContentsMargins(0, 0, 0, 0)
         self.SAXSTabButtons.horizontalLayout_5.insertWidget(1, self.sendSimToSasView)
-        self.gridLayout_2.addWidget(self.SAXSTabButtons, 2, 0, 1, 2, Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignRight)
+        self.gridLayout_2.addWidget(
+            self.SAXSTabButtons, 2, 0, 1, 2, Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignRight
+        )
         self.SAXSExperiment.setLayout(self.gridLayout_2)
 
-        #connect buttons
+        # TODO: implement in a future project
+        # Building Constraint window
+        self.constraint = Constraints(parent=self)
+        self.constraint.setWindowFlags(Qt.Window | Qt.Tool)
+
+        self.setupSlots()
+        self.setupTooltips()
+
+        self.enableButtons(False)
+
+    def setupSlots(self):
+        """Connect signals and slots for the GUI."""
+        self.modelTabButtonOptions.reset.clicked.connect(self.onSubunitTableReset)
+        self.modelTabButtonOptions.closePage.clicked.connect(self.onClickingClose)
+        self.plot.clicked.connect(self.onClickingPlot)
+        self.plugin.clicked.connect(self.showConstraintWindow)
         self.structureFactor.currentIndexChanged.connect(self.showStructureFactorOptions)
+        self.checkTheoreticalScattering.toggled.connect(self.onTheoreticalScatteringChanged)
         self.plotSAXS.clicked.connect(self.showSimulatedSAXSData)
         self.sendSimToSasView.clicked.connect(self.sendSimulatedSAXSToDataExplorer)
         self.SAXSTabButtons.closePage.clicked.connect(self.onClickingClose)
-        self.enableButtons(False)
-
-        ###Building Virtual SANS Experiment tab
-        #TODO: implement in a future project
-
-        ###Building Constraint window
-        self.constraint = Constraints(parent=self)
-        self.constraint.setWindowFlags(Qt.Window | Qt.Tool)
         self.subunitTable.add.clicked.connect(self.addToVariableTable)
         self.subunitTable.deleteButton.clicked.connect(self.deleteFromVariableTable)
         self.subunitTable.table.clicked.connect(self.updateDeleteButton)
@@ -174,20 +271,107 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         self.constraint.buttonOptions.reset.clicked.connect(self.onConstraintReset)
         self.constraint.buttonOptions.closePage.clicked.connect(self.constraint.onClosingConstraints)
         self.constraint.buttonOptions.help.clicked.connect(self.onHelp)
-
-        #create png of each tab
         self.modelTabButtonOptions.help.clicked.connect(self.onHelp)
+        self.SAXSTabButtons.help.clicked.connect(self.onHelp)
+        self.SAXSTabButtons.reset.clicked.connect(self.onSAXSExperimentReset)
+
+    def setupTooltips(self):
+        """Set up tooltips for the GUI elements."""
+
+        self.modelTabButtonOptions.help.setToolTip("Go to help page")
+        self.modelTabButtonOptions.closePage.setToolTip("Close Shape2SAS")
+        self.modelTabButtonOptions.reset.setToolTip("Reset this page to default")
+        self.checkTheoreticalScattering.setToolTip("Include a theoretical scattering profile when plotting the model")
+        self.plot.setToolTip("Plot the model")
+        self.plugin.setToolTip("Go to the plugin model page")
+        self.SAXSTabButtons.help.setToolTip("Go to help page")
+        self.SAXSTabButtons.closePage.setToolTip("Close Shape2SAS")
+        self.SAXSTabButtons.reset.setToolTip("Reset this page to default")
+        self.plotSAXS.setToolTip("Plot simulated SAXS data")
+        self.sendSimToSasView.setToolTip("Send simulated SAXS data to SasView Data Explorer")
+
+    def onTheoreticalScatteringChanged(self, checked: bool):
+        """Handle changes to the 'Include Scattering' checkbox."""
+        print(f"Checkbox state changed: {checked}")
+        if checked:
+            print("Include Scattering checked")
+            self.plotTabs.setTabEnabled(1, True)
+            self.plotTabs.setTabEnabled(2, True)
+            self.plotTabs.setCurrentWidget(self.combinedTab)
+
+            # Replot to ensure the scattering profile is generated when the checkbox is checked
+            self.onClickingPlot()
+        else:
+            print("Include Scattering unchecked")
+            self.plotTabs.setTabEnabled(1, False)
+            self.plotTabs.setTabEnabled(2, False)
+            self.plotTabs.setCurrentWidget(self.viewerTab)
+
+    def onPlotTabChanged(self, index):
+        """Move the viewer and profile panels into the selected tab."""
+
+        current_tab = self.plotTabs.widget(index)
+
+        if current_tab is self.viewerTab:
+            # Move the viewer panel into the viewer-only tab
+            self.viewerTabLayout.addWidget(
+                self.viewerPanel,
+                stretch=1,
+            )
+
+            self.viewerPanel.show()
+            self.profilePanel.hide()
+
+            # Q3DScatter is a native window and must be explicitly shown
+            self.viewerModel.scatterContainer.show()
+            self.viewerModel.scatter.setVisible(True)
+            self.viewerModel.scatter.requestUpdate()
+
+        elif current_tab is self.scatteringTab:
+            # Move the profile panel into the profile-only tab
+            self.scatteringTabLayout.addWidget(
+                self.profilePanel,
+                stretch=1,
+            )
+
+            self.viewerPanel.hide()
+            self.profilePanel.show()
+
+            # Explicitly hide the native 3D window to prevent overlays
+            self.viewerModel.scatter.setVisible(False)
+            self.viewerModel.scatterContainer.hide()
+
+            # Wait until the tab has its final size before fitting the plot
+            QTimer.singleShot(0, self.fitScatteringProfile)
+
+        elif current_tab is self.combinedTab:
+            # Move both panels into the combined tab
+            self.combinedTabLayout.addWidget(self.viewerPanel, stretch=1)
+            self.combinedTabLayout.addWidget(self.profilePanel, stretch=2)
+
+            self.viewerPanel.show()
+            self.profilePanel.show()
+
+            self.viewerModel.scatterContainer.show()
+            self.viewerModel.scatter.setVisible(True)
+            self.viewerModel.scatter.requestUpdate()
+
+            QTimer.singleShot(0, self.fitScatteringProfile)
+
+    def fitScatteringProfile(self):
+        """Redraw the profile after its tab or layout changes."""
+        self.viewerModel.scattering.draw_idle()
 
     def showConstraintWindow(self):
         """Get the Constraint window"""
-
         self.constraint.setScreen(self.screen())
-        self.constraint.move(self.pos().x()+50, self.pos().y()+50)
+        self.constraint.move(self.pos().x() + 50, self.pos().y() + 50)
         self.constraint.show()
 
     def checkedVariables(self):
-        """Get checked variables from the variable table
-        with inserted restricted rows"""
+        """
+        Get checked variables from the variable table with inserted restricted rows.
+        """
 
         columns = self.constraint.variableTable.getCheckedVariables()
         for column in range(len(columns)):
@@ -197,21 +381,21 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         return columns
 
     def getConstraintsToTextEditor(self):
-        """Set translation and parameters constraints to the text editor"""
+        """Set translation and parameters constraints to the text editor."""
         columns = self.checkedVariables()
 
-        #no subunits inputted
+        # No subunits inputted
         if not columns:
             return
 
-        #no parameters inputted
+        # No parameters inputted
         if not any(any(column) for column in columns):
             return
 
-        toTextEditor = ['# name, units, default, [min, max], type, description']
+        toTextEditor = ["# name, units, default, [min, max], type, description"]
 
         dimPos = [OptionLayout.x, OptionLayout.y, OptionLayout.z]
-        #create parameter lists for the text editor to be edited
+        # Create parameter lists for the text editor to be edited
         for column in range(len(columns)):
             for row in range(len(columns[column])):
                 if columns[column][row]:
@@ -222,18 +406,24 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
                     else:
                         val = enumMember.value
 
-                    #get units, bounds and types from method
+                    # Get units, bounds and types from method
                     attr = getattr(OptionLayout, val)
                     method = MethodType(attr, OptionLayout)
                     _, _, units, _, types, bounds = method()
 
-                    #get inputted value from cell
+                    # Get inputted value from cell
                     inputVal = self.getSubunitTableCell(row, column)
                     inputName = self.getTableName(column, row)
 
-                    #create parameter list
-                    parameter = [inputName, units[enumMember], inputVal, bounds[enumMember],
-                                 types[enumMember], f"{inputName} for column {column + 1}"]
+                    # Create parameter list
+                    parameter = [
+                        inputName,
+                        units[enumMember],
+                        inputVal,
+                        bounds[enumMember],
+                        types[enumMember],
+                        f"{inputName} for column {column + 1}",
+                    ]
 
                     toTextEditor.append(parameter)
 
@@ -242,112 +432,114 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         return formatted
 
     def setConstraintsToTextEditor(self):
-        """Set constraints to the text editor"""
-
+        """Set constraints to the text editor."""
         constraints = self.getConstraintsToTextEditor()
         if constraints:
             formatted = constraints
             self.constraint.setConstraints(formatted)
 
-    def checkStateOfConstraints(self, fitPar: list[str], modelPars: list[list[str]], modelVals: list[list[float]],
-                                checkedPars: list[list[bool]]) -> tuple[str, str, str]:
-        """Check if the user has written constraints. Otherwise return Default"""
+    def checkStateOfConstraints(
+        self, fitPar: list[str], modelPars: list[list[str]], modelVals: list[list[float]], checkedPars: list[list[bool]]
+    ) -> tuple[str, str, str]:
+        """Check if the user has written constraints. Otherwise return Default."""
 
         constraintsStr = self.constraint.constraintTextEditor.txtEditor.toPlainText()
 
-        #Has anything been written to the text editor
+        # Has anything been written to the text editor
         if constraintsStr:
             self.constraint.log_embedded("Parsing constraints...")
             return self.constraint.parseConstraintsText(constraintsStr, fitPar, modelPars, modelVals, checkedPars)
 
-        #Did the user only check parameters and click generate plugin
+        # Did the user only check parameters and click generate plugin
         elif fitPar:
-            #Get default constraints
+            # Get default constraints
             fitParLists = self.getConstraintsToTextEditor()
             defaultConstraintsStr = self.constraint.getConstraintText(fitParLists)
             self.constraint.log_embedded("No constraints text found. Creating unconstrained model")
             return self.constraint.getConstraints(defaultConstraintsStr, fitPar, modelPars, modelVals, checkedPars)
 
-        #If not, return empty
+        # If not, return empty
         else:
-            #all parameters are constant
+            # all parameters are constant
             self.constraint.log_embedded("Creating unconstrained model.")
             return "", "", "", checkedPars
 
     def enableButtons(self, toggle: bool):
+        """Enable or disable buttons based on the toggle value."""
         self.plot.setEnabled(toggle)
         self.plugin.setEnabled(toggle)
         self.plotSAXS.setEnabled(toggle)
 
     def addToVariableTable(self):
-        """Set up parameters to the variable table"""
-        column = self.subunitTable.model.columnCount() - 1 #-1 to account for the added column
+        """Set up parameters to the variable table."""
+        column = self.subunitTable.model.columnCount() - 1  # -1 to account for the added column
         names = self.getTableNames(self.ifEmptyName, column)
 
         self.enableButtons(column >= 0)
 
-        #set variables in variable table
+        # set variables in variable table
         self.constraint.variableTable.setVariableTableData(names, column)
 
     def updateDeleteButton(self):
+        """Update the selected column in the subunit table and enable delete button."""
         selection_model = self.subunitTable.table.selectionModel()
         selected_indexes = selection_model.selectedIndexes()
         column = selected_indexes[0].column()
         self.subunitTable.selected.setValue(int(column) + 1)
 
     def deleteFromVariableTable(self):
-        """Delete parameters from the variable table"""
-        selected_column = self.subunitTable.selected_val - 1 #SubunitTable column index position
+        """Delete parameters from the variable table."""
+        selected_column = self.subunitTable.selected_val - 1  # SubunitTable column index position
         row_pos = self.constraint.variableTable.getAllTableColumnsPos()
 
-        #if no columns in the subunit table
+        # If no columns in the subunit table
         if not self.subunitTable.model.columnCount():
             numNames = self.constraint.variableTable.variableModel.rowCount()
 
-        #if selected column is the last column
+        # If selected column is the last column
         elif row_pos[selected_column] == row_pos[-1]:
             numNames = self.constraint.variableTable.variableModel.rowCount() - row_pos[-1]
 
         else:
             numNames = row_pos[selected_column + 1] - row_pos[selected_column]
 
-        #Delete rows associated with the subunit table column from variable table
+        # Delete rows associated with the subunit table column from variable table
         for delete in [row_pos[selected_column] for _ in range(numNames)]:
             self.constraint.variableTable.removeTableData(delete)
 
         self.enableButtons(self.subunitTable.model.columnCount() > 0)
 
-        #Update column number in table
-        columnNum = selected_column + 1 #column number name
-        for row in row_pos[selected_column + 1:]: #get all values after selected_column
+        # Update column number in table
+        columnNum = selected_column + 1  # column number name
+        for row in row_pos[selected_column + 1 :]:  # get all values after selected_column
             row = row - numNames
             self.constraint.variableTable.variableModel.item(row, 1).setText(str(columnNum))
             columnNum += 1
 
     def showStructureFactorOptions(self):
-        """Show options for structure factor"""
-        #get chosen structure factor
+        """Show options for structure factor."""
+        # Get chosen structure factor
         index = self.structureFactor.currentIndex()
-        #show options for chosen structure factor
+        # Show options for chosen structure factor
         self.stackedWidget.setCurrentIndex(index)
 
     def getStructureFactorValues(self):
         """
-        Read structure factor options from chosen structure
-        factor in Virtual SAXS experiment tab
+        Read structure factor options from chosen structure factor in Virtual SAXS experiment tab.
         """
         S_vals = []
 
-        #get chosen structure factor
+        # Get chosen structure factor
         index = self.structureFactor.currentIndex()
-        #find chosen widget containing the chosen structure factor options
+        # Find chosen widget containing the chosen structure factor options
         self.stackedWidget.setCurrentIndex(index)
         currentWidget = self.stackedWidget.currentWidget()
         lineEdits = currentWidget.findChildren(QLineEdit)
 
-        #get concentration value for Hardsphere case
-        #TODO: concentration is already an input value. Maybe add
-        #a texbox to explain that to the user if stackedWidget chosen?
+        # Get concentration value for Hardsphere case
+
+        # TODO: concentration is already an input value. Maybe add
+        # a texbox to explain that to the user if stackedWidget chosen?
         if index == 1:
             conc = self.volumeFraction
             S_vals.append(float(conc.text()))
@@ -363,17 +555,17 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
 
     @staticmethod
     def ifEmptyValue(value: float | str, values: list[float | str], *args, **kwargs):
-        """condition method. Append if not empty"""
+        """Condition method. Append if not empty."""
         if not value == "":
             values.append(value)
 
     @staticmethod
     def ifFitPar(value: float | str, values: list[float | str], *args, **kwargs):
-        """condition method. Append FitPar if condition. Otherwise append constant"""
+        """Condition method. Append FitPar if condition. Otherwise append constant."""
 
-        conditionFitPar = kwargs['conditionFitPar'] #list[list[str]]
-        conditionBool = kwargs['conditionBool'] #list[list[bool]]
-        row, column = args #int, int
+        conditionFitPar: list[list[str]] = kwargs["conditionFitPar"]
+        conditionBool: list[list[bool]] = kwargs["conditionBool"]
+        row, column = args  # int, int
 
         if not value == "":
             if conditionBool[column][row]:
@@ -382,7 +574,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
                 values.append(value)
 
     def getSubunitTableRow(self, condition: MethodType, row: int, **kwargs) -> list[float | str]:
-        """Get model data from a single row"""
+        """Get model data from a single row."""
 
         values = []
         columns = self.subunitTable.model.columnCount()
@@ -393,7 +585,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         return values
 
     def getSubunitTableSets(self, condition: MethodType, rows: list[int], **kwargs) -> list[list[float | str]]:
-        """Get a set of rows per column in subunit table"""
+        """Get a set of rows per column in subunit table."""
 
         sets = []
         columns = self.subunitTable.model.columnCount()
@@ -407,7 +599,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         return sets
 
     def getStandardReadOfTableData(self) -> list[list[float | str]]:
-        """Get a standard data read from subunit TableView"""
+        """Get a standard data read from subunit TableView."""
 
         columns = self.subunitTable.model.columnCount()
         if not self.subunitTable.model.item(1, columns - 1):
@@ -415,7 +607,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
 
         model = self.subunitTable.model
         layout = list(OptionLayout)
-        layout.remove(OptionLayout.Colour) #TODO: features may be in another Enum
+        layout.remove(OptionLayout.Colour)  # TODO: features may be in another Enum
         rows = len(layout)
         columns = model.columnCount()
 
@@ -430,33 +622,57 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         return data
 
     def getModelData(self, condition: MethodType, **kwargs) -> list[list[float | str]]:
-        """Get all data in the subunit table"""
+        """Get all data in the subunit table."""
 
-        #no subunits inputted
+        # No subunits inputted
         columns = self.subunitTable.model.columnCount()
         if not self.subunitTable.model.item(1, columns - 1):
             return
 
         subunit = self.getSubunitTableRow(condition, OptionLayout.get_position(OptionLayout.Subunit), **kwargs)
-        dimensions = self.getSubunitTableSets(condition, [OptionLayout.get_position(OptionLayout.x),
-                                                        OptionLayout.get_position(OptionLayout.y),
-                                                        OptionLayout.get_position(OptionLayout.z)], **kwargs)
+        dimensions = self.getSubunitTableSets(
+            condition,
+            [
+                OptionLayout.get_position(OptionLayout.x),
+                OptionLayout.get_position(OptionLayout.y),
+                OptionLayout.get_position(OptionLayout.z),
+            ],
+            **kwargs,
+        )
 
         p_s = self.getSubunitTableRow(condition, OptionLayout.get_position(OptionLayout.ΔSLD), **kwargs)
 
-        com = self.getSubunitTableSets(condition, [OptionLayout.get_position(OptionLayout.COM_x),
-                                                OptionLayout.get_position(OptionLayout.COM_y),
-                                                OptionLayout.get_position(OptionLayout.COM_z)], **kwargs)
+        com = self.getSubunitTableSets(
+            condition,
+            [
+                OptionLayout.get_position(OptionLayout.COM_x),
+                OptionLayout.get_position(OptionLayout.COM_y),
+                OptionLayout.get_position(OptionLayout.COM_z),
+            ],
+            **kwargs,
+        )
 
-        rotation_points = self.getSubunitTableSets(condition, [OptionLayout.get_position(OptionLayout.RP_x),
-                                                OptionLayout.get_position(OptionLayout.RP_y),
-                                                OptionLayout.get_position(OptionLayout.RP_z)], **kwargs)
+        rotation_points = self.getSubunitTableSets(
+            condition,
+            [
+                OptionLayout.get_position(OptionLayout.RP_x),
+                OptionLayout.get_position(OptionLayout.RP_y),
+                OptionLayout.get_position(OptionLayout.RP_z),
+            ],
+            **kwargs,
+        )
 
-        rotation = self.getSubunitTableSets(condition, [OptionLayout.get_position(OptionLayout.α),
-                                            OptionLayout.get_position(OptionLayout.β),
-                                            OptionLayout.get_position(OptionLayout.γ)], **kwargs)
+        rotation = self.getSubunitTableSets(
+            condition,
+            [
+                OptionLayout.get_position(OptionLayout.α),
+                OptionLayout.get_position(OptionLayout.β),
+                OptionLayout.get_position(OptionLayout.γ),
+            ],
+            **kwargs,
+        )
 
-        #set bool to checkbox
+        # Set bool to checkbox
         if self.subunitTable.overlap.isChecked():
             exclude_overlap = True
         else:
@@ -465,15 +681,24 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         return [subunit, dimensions, p_s, com, rotation_points, rotation, exclude_overlap]
 
     def getModelProfile(self, condition: MethodType, **kwargs) -> ModelProfile:
-        """Get model profile"""
+        """Get model profile."""
 
-        subunit, dimensions, p_s, com, rotation_points, rotation, exclude_overlap = self.getModelData(condition, **kwargs)
+        subunit, dimensions, p_s, com, rotation_points, rotation, exclude_overlap = self.getModelData(
+            condition, **kwargs
+        )
 
-        return ModelProfile(subunits=subunit, p_s=p_s, dimensions=dimensions, com=com,
-                           rotation_points=rotation_points, rotation=rotation, exclude_overlap=exclude_overlap)
+        return ModelProfile(
+            subunits=subunit,
+            p_s=p_s,
+            dimensions=dimensions,
+            com=com,
+            rotation_points=rotation_points,
+            rotation=rotation,
+            exclude_overlap=exclude_overlap,
+        )
 
     def getViewFeatures(self) -> ViewerPlotDesign:
-        """Get values affecting the illustrative aspect of Viewer"""
+        """Get values affecting the illustrative aspect of Viewer."""
         colour = []
 
         columns = self.subunitTable.model.columnCount()
@@ -483,8 +708,10 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         return ViewerPlotDesign(colour=colour)
 
     def onClickingPlot(self):
-        """Get 3D plot of the designed model in the Build model tab.
-        If checked, plot theoretical scattering from the designed model."""
+        """
+        Get 3D plot of the designed model in the Build model tab.
+        If checked, plot theoretical scattering from the designed model.
+        """
         columns = self.subunitTable.model.columnCount()
         self.plugin.setEnabled(columns > 0)
 
@@ -500,27 +727,36 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         self.viewerModel.setPlot(modelDistribution, plotDesign)
 
         # Save the Q3DScatter plot to a PNG file
-        #NOTE: The resolution is very low for this image!
-        #scatter_plot = self.viewerModel.scatter  # Assuming scatter is the Q3DScatter instance
-        #dpi = 3000
-        #image = scatter_plot.renderToImage(dpi)
-        #image.save("scatter_plot.png")
+        # NOTE: The resolution is very low for this image!
+        # scatter_plot = self.viewerModel.scatter  # Assuming scatter is the Q3DScatter instance
+        # dpi = 3000
+        # image = scatter_plot.renderToImage(dpi)
+        # image.save("scatter_plot.png")
 
-        #on being checked, plot theoretical scattering
+        # on being checked, plot theoretical scattering
         if self.checkTheoreticalScattering.isChecked():
-            scattering = TheoreticalScatteringCalculation(System=ModelSystem(PointDistribution=modelDistribution,
-                                                                        Stype="None", par=[],
-                                                                        polydispersity=0.0, conc=0.02,
-                                                                        sigma_r=0.0),
-                                                                        Calculation=SimulationParameters())
+            scattering = TheoreticalScatteringCalculation(
+                System=ModelSystem(
+                    PointDistribution=modelDistribution,
+                    Stype="None",
+                    par=[],
+                    polydispersity=0.0,
+                    conc=0.02,
+                    sigma_r=0.0,
+                ),
+                Calculation=SimulationParameters(),
+            )
             theoreticalScattering = getTheoreticalScattering(scattering)
             self.viewerModel.setScatteringPlot(theoreticalScattering)
 
         else:
             self.viewerModel.setClearScatteringPlot()
 
+        # Restore the correct native-window visibility and plot sizing
+        self.onPlotTabChanged(self.plotTabs.currentIndex())
+
     def onSubunitTableReset(self):
-        """Reset subunit table to default"""
+        """Reset subunit table to default."""
         self.subunitTable.onClearSubunitTable()
         self.constraint.variableTable.onClearTable()
         self.viewerModel.setClearScatteringPlot()
@@ -531,7 +767,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         self.enableButtons(False)
 
     def onSAXSExperimentReset(self):
-        """Reset Virtual SAXS Experiment tab to default"""
+        """Reset Virtual SAXS Experiment tab to default."""
         self.interfaceRoughness.setText("0.0")
         self.polydispersity.setText("0.0")
         self.volumeFraction.setText("0.02")
@@ -550,12 +786,12 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         self.sendSimToSasView.setEnabled(False)
 
         # Clear the plot in the Virtual SAXS Experiment tab if it has already been generated
-        if hasattr(self, 'canvas'):
+        if hasattr(self, "canvas"):
             self.canvas.figure.clf()
             self.canvas.draw()
 
     def onConstraintReset(self):
-        """Reset Constraint window to default"""
+        """Reset Constraint window to default."""
         self.constraint.clearConstraints()
         self.constraint.variableTable.setUncheckToAllCheckBoxes()
         self.constraint.variableTable.prPoints.setText("100")
@@ -564,7 +800,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         self.constraint.createPlugin.setEnabled(False)
 
     def onClickingClose(self):
-        """Close Shape2SAS GUI"""
+        """Close Shape2SAS GUI."""
 
         self.close()
         self.constraint.onClosingConstraints()
@@ -576,29 +812,29 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
 
     @staticmethod
     def ifNoCondition(name: str, names: list[str], **kwargs):
-        """condition method. Append"""
+        """Condition method. Append without any condition."""
         names.append(name)
 
     @staticmethod
     def ifEmptyName(name: str, names: list[str], **kwargs):
-        """condition method. Append if not empty"""
+        """Condition method. Append if not empty."""
 
         if name:
             names.append(name)
 
     def getTableName(self, column: int, row: int) -> str:
-        """Get the parameter name of a cell in the subunit table"""
+        """Get the parameter name of a cell in the subunit table."""
 
-        name = re.match(r'^[^\s=]+', self.subunitTable.model.item(row, column).text())
+        name = re.match(r"^[^\s=]+", self.subunitTable.model.item(row, column).text())
         if name:
             return name.group()
 
     def getTableNames(self, condition: MethodType, column: int, **kwargs) -> list[str]:
-        """Get the parameter names of a column in the subunit table"""
+        """Get the parameter names of a column in the subunit table."""
 
         names = []
         layout = list(OptionLayout)
-        layout.remove(OptionLayout.Colour) #TODO: features may be in another Enum
+        layout.remove(OptionLayout.Colour)  # TODO: features may be in another Enum
 
         for name in layout:
             layoutName = self.getTableName(column, OptionLayout.get_position(name))
@@ -607,7 +843,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         return names
 
     def getAllTableNames(self, condition: MethodType, **kwargs) -> list[list[str]]:
-        """Get all parameter names in the subunit table"""
+        """Get all parameter names in the subunit table."""
         names = []
         columns = self.subunitTable.model.columnCount()
 
@@ -617,17 +853,16 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         return names
 
     def getFitParameters(self) -> list[str]:
-        """return names of the chosen fit parameters"""
+        """Return names of the chosen fit parameters."""
 
         return self.constraint.variableTable.getCheckedTableNamesVariables()
 
     def getPluginModel(self):
-        """Generating a plugin model and sends it to
-        the Plugin Models folder in SasView"""
+        """Generating a plugin model and sends it to the Plugin Models folder in SasView."""
 
         logger.info("Generating plugin model.")
-        #no subunits inputted
-        columns = self.subunitTable.model.columnCount() #TODO: maybe give a warning to output texteditor
+        # No subunits inputted
+        columns = self.subunitTable.model.columnCount()  # TODO: maybe give a warning to output texteditor
         if not self.subunitTable.model.item(1, columns - 1):
             return
 
@@ -638,36 +873,32 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         checkedPars = self.checkedVariables()
         parVals = self.getStandardReadOfTableData()
 
-        #get chosen fit parameters
+        # Get chosen fit parameters
         fitPar = self.getFitParameters()
 
         logger.info("Retrieving and verifying constraints.")
-        #get parameters constraints
+        # Get parameters constraints
         usertext, checkedPars = self.checkStateOfConstraints(fitPar, parNames, parVals, checkedPars)
 
         logger.info("Retrieving Model.")
-        #conditional subunit table parameters
+        # Conditional subunit table parameters
         modelProfile = self.getModelProfile(self.ifFitPar, conditionBool=checkedPars, conditionFitPar=parNames)
 
         model_str, full_path = generate_plugin(
-            modelProfile,
-            [parNames, parVals],
-            usertext,
-            fitPar,
-            Npoints,
-            prPoints,
-            modelName
+            modelProfile, [parNames, parVals], usertext, fitPar, Npoints, prPoints, modelName
         )
 
-        #Write file to plugin model folder
+        # Write file to plugin model folder
         TabbedModelEditor.writeFile(full_path, model_str)
         self.communicator.customModelDirectoryChanged.emit()
         logger.info(f"Successfully generated model {modelName}!")
-        self.constraint.log_embedded(f"Plugin model {modelName} has been generated and is now available in the Fit panel.")
+        self.constraint.log_embedded(
+            f"Plugin model {modelName} has been generated and is now available in the Fit panel."
+        )
         self.constraint.createPlugin.setEnabled(False)
 
     def onCheckingInput(self, input: str, default: str) -> str:
-        """Check if the input not None. Otherwise, return default value"""
+        """Check if the input not None. Otherwise, return default value."""
 
         if not input.text():
             return default
@@ -675,18 +906,17 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
             return input.text()
 
     def plotSimulatedSAXSData(self):
-        """Plotting simulated SAXS data in the Virtual SAXS Experiment tab"""
+        """Plotting simulated SAXS data in the Virtual SAXS Experiment tab."""
         self.scatteringProf
 
     def getSimulatedSAXSData(self):
-        """Generating simulated data and sends it to
-        the Data Explorer in SasView"""
+        """Generating simulated data and sends it to the Data Explorer in SasView."""
 
         columns = self.subunitTable.model.columnCount()
         if not self.subunitTable.model.item(1, columns - 1):
             return
 
-        #Calculations
+        # Calculations
         qmin = float(self.onCheckingInput(self.qMin, "0.001"))
         qmax = float(self.onCheckingInput(self.qMax, "0.5"))
 
@@ -694,11 +924,9 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         Npr = int(self.onCheckingInput(self.Npr, "100"))
         N = int(self.onCheckingInput(self.NSimPoints, "3000"))
 
-        #name = self.onCheckingInput(self.modelName, "Model_1")
-
         par = self.getStructureFactorValues()
 
-        #SAXS parameters
+        # SAXS parameters
         Stype = self.structureFactor.currentText()
 
         sigma_r = float(self.onCheckingInput(self.interfaceRoughness, "0.0"))
@@ -706,7 +934,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         conc = float(self.onCheckingInput(self.volumeFraction, "0.02"))
         exposure = float(self.onCheckingInput(self.exposureTime, "500"))
 
-        #Generate simulated data
+        # Generate simulated data
         q = Qsampling.onQsampling(qmin, qmax, Nq)
         Sim_par = SimulationParameters(q=q, prpoints=Npr, Npoints=N)
         Profile = self.getModelProfile(self.ifEmptyValue)
@@ -714,35 +942,26 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         Distr = getPointDistribution(Profile, N)
 
         model = ModelSystem(
-            PointDistribution=Distr,
-            Stype=Stype, par=par,
-            polydispersity=polydispersity,
-            conc=conc,
-            sigma_r=sigma_r
+            PointDistribution=Distr, Stype=Stype, par=par, polydispersity=polydispersity, conc=conc, sigma_r=sigma_r
         )
 
-        Theo_I = getTheoreticalScattering(
-            TheoreticalScatteringCalculation(
-                System=model,
-                Calculation=Sim_par
-            )
-        )
+        Theo_I = getTheoreticalScattering(TheoreticalScatteringCalculation(System=model, Calculation=Sim_par))
         Sim_calc = SimulateScattering(q=Theo_I.q, I0=Theo_I.I0, I=Theo_I.I, exposure=exposure)
         Sim_SAXS = getSimulatedScattering(Sim_calc)
 
         return Sim_SAXS
 
     def showSimulatedSAXSData(self):
-        """Plotting simulated SAXS data in the Virtual SAXS Experiment tab"""
+        """Plotting simulated SAXS data in the Virtual SAXS Experiment tab."""
 
-        #check if subunit table is empty
+        # Check if subunit table is empty
         columns = self.subunitTable.model.columnCount()
         if not self.subunitTable.model.item(1, columns - 1):
             return
 
         self.sendSimToSasView.setEnabled(True)
 
-        #Clear layout for last plot
+        # Clear layout for last plot
         if self.scatteringScene.count():
             widget = self.scatteringScene.takeAt(0).widget()
             if widget:
@@ -761,24 +980,24 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         self.setFig.set_ylabel("I(q)")
         self.setFig.errorbar(simSAXS.q, simSAXS.I_sim, yerr=simSAXS.I_err, color="black", label="I(q)")
 
-        self.setFig.set_xscale('log')
-        self.setFig.set_yscale('log')
+        self.setFig.set_xscale("log")
+        self.setFig.set_yscale("log")
 
         self.setFig.legend()
         self.setFig.grid(True)
 
         self.scatteringScene.addWidget(self.canvas)
-        self.scatteringProf.setLayout(self.scatteringScene)
+        self.canvas.draw_idle()
 
     def sendSimulatedSAXSToDataExplorer(self):
-        """Send simulated data to the Data Explorer in SasView"""
+        """Send simulated data to the Data Explorer in SasView."""
 
         name = self.onCheckingInput(self.modelName, "Model_1")
         sim = self.getSimulatedSAXSData()
         if sim is not None:
             dataClass = Data1D(x=sim.q, y=sim.I_sim, dy=sim.I_err)
 
-            #Send data to SasView Data Explorer
+            # Send data to SasView Data Explorer
             data = createModelItemWithPlot(dataClass, name)
             self.communicator.updateModelFromPerspectiveSignal.emit(data)
         else:
