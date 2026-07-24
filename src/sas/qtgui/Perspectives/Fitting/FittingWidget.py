@@ -102,9 +102,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Which tab is this widget displayed in?
         self.tab_id = tab_id
 
-        import sys
-        sys.excepthook = self.info
-
         # Globals
         self.initializeGlobals()
 
@@ -188,9 +185,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         new_font = 'font-family: -apple-system, "Helvetica Neue", "Ubuntu";'
         self.label_17.setStyleSheet(new_font)
         self.label_19.setStyleSheet(new_font)
-
-    def info(self, type: Any, value: Any, tb: Any) -> None:
-        logger.error("".join(traceback.format_exception(type, value, tb)))
 
     @property
     def logic(self) -> FittingLogic:

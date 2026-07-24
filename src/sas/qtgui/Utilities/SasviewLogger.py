@@ -16,7 +16,14 @@ class SasViewLogFormatter(logging.Formatter):
         if record.levelname in self.LOG_COLORS:
             level_style = f' style="color: {self.LOG_COLORS[record.levelname]}"'
 
-        return logging.Formatter(fmt=self.LOG_FORMAT.format(level_style), datefmt=self.DATE_FORMAT).format(record)
+        # Format the timestamp, etc.
+        msg = logging.Formatter(fmt=self.LOG_FORMAT.format(level_style), datefmt=self.DATE_FORMAT).format(record)
+
+        # If it is a multiline error message then put the additional lines in a <pre> block
+        if "\n" in msg:
+            lead, tail = msg.split("\n", 1)
+            msg = f"{lead}\n<pre>{tail}</pre>"
+        return msg
 
 class QtPostman(QObject):
     messageWritten = Signal(object)

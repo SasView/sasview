@@ -1,5 +1,6 @@
 import logging
 import sys
+import traceback
 from importlib import resources
 
 from PySide6.QtCore import Qt, QTimer
@@ -16,6 +17,9 @@ from ..Utilities.NewVersion.NewVersionAvailable import maybe_prompt_new_version_
 from .UI.MainWindowUI import Ui_SasView
 
 logger = logging.getLogger(__name__)
+def log_uncaught_exception(type, value, tb):
+    formatted_tb = "".join(traceback.format_exception(type, value, tb))
+    logger.error(f"--- Uncaught exception ---\n{formatted_tb.strip()}")
 
 class MainSasViewWindow(QMainWindow, Ui_SasView):
     # Main window of the application
@@ -112,6 +116,9 @@ def run_sasview(file_list: list[str] | None = None):
 
     # Show the main SV window
     mainwindow = MainSasViewWindow()
+
+    # Redirect uncaught exceptions to logger
+    sys.excepthook = log_uncaught_exception
 
     # no more splash screen
     splash.finish(mainwindow)
