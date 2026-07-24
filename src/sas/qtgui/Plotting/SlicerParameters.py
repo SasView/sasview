@@ -740,7 +740,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         if slicer is None:
             plotter.onClearSlicer()
             return
-        plotter.setSlicer(slicer=slicer, reset=False)
+        plotter.setSlicer(slicer=slicer)
         # override slicer model
         plotter.slicer._model = self.model
         # force conversion model->parameters in slicer
