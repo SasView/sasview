@@ -215,6 +215,19 @@ class FittingPerspectiveTest:
         assert isinstance(tabs, list)
         assert len(tabs) == 2
 
+    def testUndoStackDelegatesToCurrentFittingTab(self, widget):
+        '''undo_stack should delegate to the active fitting tab'''
+        current_fitting_widget = widget.currentFittingWidget
+        assert current_fitting_widget is not None
+        assert widget.undo_stack is current_fitting_widget.undo_stack
+
+    def testUndoStackIsNoneForNonFittingTab(self, widget):
+        '''undo_stack should be None when a non-fitting tab is active'''
+        widget.addConstraintTab()
+        widget.setCurrentIndex(widget.count() - 1)
+        assert widget.currentFittingWidget is None
+        assert widget.undo_stack is None
+
     @pytest.mark.xfail(reason="2026-02: Mocker patching using old constraint API")
     def testGetActiveConstraintList(self, widget, mocker):
         '''test the active constraint getter'''

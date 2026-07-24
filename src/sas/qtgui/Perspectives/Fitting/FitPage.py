@@ -59,23 +59,3 @@ class FitPage:
         self.algorithm = None
         self.algorithm_options = {}
 
-    def save(self):
-        """
-        Serialize the current state
-        """
-        pass
-
-    def load(self, location):
-        """
-        Retrieve serialized state from specified location
-        """
-        pass
-
-    def saveAsXML(self):
-        """
-        Serialize the current state
-        """
-        # Connect to PageState.to_xml(), which serializes
-        # to the existing XML with file I(Q)
-        pass
-

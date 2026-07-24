@@ -18,11 +18,13 @@ from sas.system import config
 #  `BASE_PANELS = {"Bar Widget Options": BarWidget}`
 # PreferenceWidget Imports go here and then are added to the BASE_PANELS, but not instantiated.
 from .DisplayPreferencesWidget import DisplayPreferencesWidget
+from .GeneralPreferencesWidget import GeneralPreferencesWidget
 from .PlottingPreferencesWidget import PlottingPreferencesWidget
 
 # Pre-made option widgets
 
-BASE_PANELS = {"Plotting Settings": PlottingPreferencesWidget,
+BASE_PANELS = {"General Settings": GeneralPreferencesWidget,
+               "Plotting Settings": PlottingPreferencesWidget,
                "Display Settings": DisplayPreferencesWidget,
                }  # Type: Dict[str, Union[Type[PreferencesWidget], Callable[[],QWidget]]
 ConfigType = str | bool | float | int | list[str | float | int]

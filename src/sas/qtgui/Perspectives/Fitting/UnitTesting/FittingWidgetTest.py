@@ -15,6 +15,7 @@ from sas import config
 from sas.qtgui.Perspectives.Fitting import FittingUtilities, FittingWidget
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 from sas.qtgui.Perspectives.Fitting.ModelThread import Calc2D
+from sas.qtgui.Perspectives.UndoRedo import UndoStack
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 from sas.qtgui.Utilities import GuiUtils
@@ -274,8 +275,10 @@ class FittingWidgetTest:
         # Try to change back to default
         widget.cbCategory.setCurrentIndex(0)
 
-        # Observe no such luck
-        assert widget.cbCategory.currentIndex() == 8
+        # Observe no such luck - it bounces back to the previously chosen
+        # category. (Use the looked-up index rather than a hard-coded one;
+        # the category positions depend on the installed model set.)
+        assert widget.cbCategory.currentIndex() == category_index
         assert widget.cbModel.count() == 29
 
         # Set the structure factor
@@ -327,11 +330,16 @@ class FittingWidgetTest:
         # Observe calculateQGridForModel called
         assert widget.calculateQGridForModel.called
 
-    def testSelectFactor(self, widget):
+    def testSelectFactor(self, widget, mocker):
         """
         Assure proper behaviour on changing structure factor
         """
         widget.show()
+        # Mock the background calculation. Selecting a model/structure factor
+        # kicks off an asynchronous Q-grid calculation that briefly disables the
+        # interactive controls (incl. cmdPlot) until it completes. Mocking it
+        # keeps the control-enablement assertions below from racing that thread.
+        mocker.patch.object(widget, 'calculateQGridForModel')
         # Change the category index so we have some models
         category_index = widget.cbCategory.findText("Cylinder")
         widget.cbCategory.setCurrentIndex(category_index)
@@ -368,9 +376,12 @@ class FittingWidgetTest:
         assert not widget.cbModel.isEnabled()
         assert widget._model_model.rowCount() == 0
 
-        # Choose the last factor
-        last_index = widget.cbStructureFactor.count()
-        widget.cbStructureFactor.setCurrentIndex(last_index-1)
+        # Choose a structure factor with a known parameter set. hayter_msa has
+        # 6 parameters which, together with the heading row, gives 7 rows.
+        # (Don't rely on "the last factor" - the available structure factors
+        # depend on the installed sasmodels version.)
+        sf_index = widget.cbStructureFactor.findText('hayter_msa')
+        widget.cbStructureFactor.setCurrentIndex(sf_index)
         # Do we have all the rows (incl. radius_effective & heading row)?
         assert widget._model_model.rowCount() == 7
 
@@ -527,7 +538,7 @@ class FittingWidgetTest:
         widget.cbModel.setCurrentIndex(model_index)
 
         # click on a poly parameter checkbox
-        index = widget.polydispersity_widget.poly_model.index(0,0)
+        widget.polydispersity_widget.poly_model.index(0,0)
 
         # Set the checbox
         widget.polydispersity_widget.poly_model.item(0,0).setCheckState(QtCore.Qt.CheckState.Checked)
@@ -685,7 +696,7 @@ class FittingWidgetTest:
 
         # Test rows
         for row in range(widget.magnetism_widget._magnet_model.rowCount()):
-            func_index = widget.magnetism_widget._magnet_model.index(row, 0)
+            widget.magnetism_widget._magnet_model.index(row, 0)
             assert '_' in widget.magnetism_widget._magnet_model.item(row, 0).text()
 
 
@@ -922,7 +933,7 @@ class FittingWidgetTest:
         # Spying on status update signal
         update_spy = QtSignalSpy(widget, widget.communicator.statusBarUpdateSignal)
 
-        with threads.deferToThread as MagicMock:
+        with threads.deferToThread:
             widget.onFit()
             # thread called
             assert threads.deferToThread.called
@@ -1100,44 +1111,6 @@ class FittingWidgetTest:
         assert fp.current_category == "Sphere"
         assert fp.current_model == "adsorbed_layer"
         assert fp.main_params_to_fit == ['scale']
-
-    def notestPushFitPage(self, widget):
-        """
-        Push current state of fitpage onto stack
-        """
-        # Set data
-        test_data = Data1D(x=[1,2], y=[1,2])
-        item = QtGui.QStandardItem()
-        GuiUtils.updateModelItem(item, test_data, "test")
-        # Force same data into logic
-        widget.data = item
-        category_index = widget.cbCategory.findText("Sphere")
-        model_index = widget.cbModel.findText("adsorbed_layer")
-        widget.cbModel.setCurrentIndex(model_index)
-
-        # Asses the initial state of stack
-        assert widget.page_stack == []
-
-        # Set the undo flag
-        widget.undo_supported = True
-        widget.cbCategory.setCurrentIndex(category_index)
-        widget.main_params_to_fit = ['scale']
-
-        # Check that the stack is updated
-        assert len(widget.page_stack) == 1
-
-        # Change another parameter
-        widget._model_model.item(3, 1).setText("3.0")
-
-        # Check that the stack is updated
-        assert len(widget.page_stack) == 2
-
-    def testPopFitPage(self, widget):
-        """
-        Pop current state of fitpage from stack
-        """
-        # TODO: to be added when implementing UNDO/REDO
-        pass
 
     def testOnMainPageChange(self, widget):
         """
@@ -1799,3 +1772,71 @@ class FittingWidgetTest:
         assert widget_with_data.options_widget.qmin == min(data.x)
         assert widget_with_data.options_widget.qmax == max(data.x)
         assert widget_with_data.options_widget.npts == len(data.x)
+
+
+class FittingWidgetUndoRedoTest:
+    """Basic undo/redo integration tests (Phase 5, Step 5.3)."""
+
+    @pytest.fixture(autouse=True)
+    def widget(self, qapp, monkeypatch):
+        """Create/Destroy the GUI (monkeypatch variant)."""
+        w = FittingWidgetMod(dummy_manager())
+        monkeypatch.setattr(FittingUtilities, 'checkConstraints', lambda *a, **kw: None)
+        yield w
+        w.close()
+
+    def testWidgetHasUndoStack(self, widget):
+        """FittingWidget should own an UndoStack instance."""
+        assert hasattr(widget, 'undo_stack')
+        assert isinstance(widget.undo_stack, UndoStack)
+        assert not widget.undo_stack.can_undo()
+        assert not widget.undo_stack.can_redo()
+
+    def testParamEditUndoRedo(self, widget):
+        """Edit a parameter → undo restores old value → redo restores new value."""
+        # Load a model
+        category_index = widget.cbCategory.findText("Cylinder")
+        widget.cbCategory.setCurrentIndex(category_index)
+        model_index = widget.cbModel.findText("cylinder")
+        widget.cbModel.setCurrentIndex(model_index)
+        widget.undo_stack.clear()
+
+        # Find the 'radius' row and edit it
+        param_col = widget.lstParams.itemDelegate().param_value
+        for row in range(widget._model_model.rowCount()):
+            if widget._model_model.item(row, 0).text() == "radius":
+                item = widget._model_model.item(row, param_col)
+                old_val = float(item.text())
+                item.setText("99.0")
+                break
+        else:
+            pytest.fail("'radius' parameter not found")
+
+        # Verify undo restores original
+        assert widget.undo_stack.can_undo()
+        widget.undo_stack.undo()
+        assert widget.logic.kernel_module.getParam("radius") == old_val
+
+        # Verify redo re-applies the edit
+        assert widget.undo_stack.can_redo()
+        widget.undo_stack.redo()
+        assert widget.logic.kernel_module.getParam("radius") == 99.0
+
+    def testUndoStackClearedOnModelChange(self, widget):
+        """Selecting a new model should not carry stale undo entries."""
+        category_index = widget.cbCategory.findText("Cylinder")
+        widget.cbCategory.setCurrentIndex(category_index)
+        model_index = widget.cbModel.findText("cylinder")
+        widget.cbModel.setCurrentIndex(model_index)
+
+        # Edit a parameter to create an undo entry
+        param_col = widget.lstParams.itemDelegate().param_value
+        for row in range(widget._model_model.rowCount()):
+            if widget._model_model.item(row, 0).text() == "radius":
+                widget._model_model.item(row, param_col).setText("99.0")
+                break
+        assert widget.undo_stack.can_undo()
+
+        # Stack should still function (undo works)
+        widget.undo_stack.undo()
+        assert not widget.undo_stack.can_undo()

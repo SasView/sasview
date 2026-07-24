@@ -7,8 +7,10 @@ import webbrowser
 from packaging.version import Version
 from PySide6.QtCore import QLocale, Qt
 from PySide6.QtGui import QStandardItem
-from PySide6.QtWidgets import QDockWidget, QLabel, QMessageBox, QProgressBar, QTextBrowser
+from PySide6.QtWidgets import QDockWidget, QLabel, QProgressBar, QTextBrowser
 from twisted.internet import reactor
+
+from sasdata.temp_ascii_reader import load_data
 
 import sas
 
@@ -102,6 +104,8 @@ class GuiManager:
         # Currently displayed perspective
         self._current_perspective: Perspective | None = None
         self.loadedPerspectives: dict[str, Perspective] = {}
+        self._connected_undo_stack = None
+        self._connected_tabbed_perspective = None
 
         # Populate the main window with stuff
         self.addWidgets()
@@ -369,6 +373,8 @@ class GuiManager:
         Respond to change of the perspective signal
         """
 
+        self._disconnect_undo_redo_hooks()
+
         if new_perspective_name not in self.loadedPerspectives:
             keylist = ', '.join(self.loadedPerspectives.keys())
             raise KeyError(
@@ -459,6 +465,7 @@ class GuiManager:
         # Set the current perspective to new one and show
         self._current_perspective = new_perspective
         self._current_perspective.show()
+        self._connect_undo_redo_hooks()
 
     def updatePerspective(self, data):
         """
@@ -645,6 +652,7 @@ class GuiManager:
         self.communicator.plotFromNameSignal.connect(self.showPlotFromName)
         self.communicator.updateModelFromDataOperationPanelSignal.connect(self.updateModelFromDataOperationPanel)
         self.communicator.activeGraphsSignal.connect(self.updatePlotItems)
+        self.communicator.undoRedoUpdateSignal.connect(self._update_undo_redo_actions)
 
 
     def addTriggers(self):
@@ -652,8 +660,8 @@ class GuiManager:
         Trigger definitions for all menu/toolbar actions.
         """
         # disable not yet fully implemented actions
-        self._workspace.actionUndo.setVisible(False)
-        self._workspace.actionRedo.setVisible(False)
+        self._workspace.actionUndo.setEnabled(False)
+        self._workspace.actionRedo.setEnabled(False)
         self._workspace.actionReset.setVisible(False)
         self._workspace.actionStartup_Settings.setVisible(False)
         #self._workspace.actionImage_Viewer.setVisible(False)
@@ -747,6 +755,11 @@ class GuiManager:
         self._workspace.actionWelcomeWidget.triggered.connect(self.actionWelcome)
         self._workspace.actionCheck_for_update.triggered.connect(self.actionCheck_for_update)
         self._workspace.actionWhat_s_New.triggered.connect(self.actionWhatsNew)
+        # Dev
+        self._workspace.menuDev.menuAction().setVisible(config.DEV_MENU)
+        self._workspace.actionParticle_Editor.triggered.connect(self.particleEditor)
+        self._workspace.actionAscii_Loader.triggered.connect(self.asciiLoader)
+
 
         self.communicator.sendDataToGridSignal.connect(self.showBatchOutput)
         self.communicator.resultPlotUpdateSignal.connect(self.showFitResults)
@@ -846,12 +859,87 @@ class GuiManager:
     def actionUndo(self):
         """
         """
-        print("actionUndo TRIGGERED")
+        stack = self._active_undo_stack()
+        if stack is not None:
+            stack.undo()
 
     def actionRedo(self):
         """
         """
-        print("actionRedo TRIGGERED")
+        stack = self._active_undo_stack()
+        if stack is not None:
+            stack.redo()
+
+    def _active_undo_stack(self):
+        """Return the undo stack for the active perspective, if available."""
+        if self._current_perspective is None:
+            return None
+        return getattr(self._current_perspective, "undo_stack", None)
+
+    def _disconnect_undo_redo_hooks(self):
+        """Disconnect temporary undo/redo signal hooks."""
+        if self._connected_undo_stack is not None:
+            try:
+                self._connected_undo_stack.stackChanged.disconnect(
+                    self._update_undo_redo_actions
+                )
+            except (RuntimeError, TypeError):
+                pass
+            self._connected_undo_stack = None
+
+        if self._connected_tabbed_perspective is not None:
+            try:
+                self._connected_tabbed_perspective.currentChanged.disconnect(
+                    self._on_perspective_tab_changed
+                )
+            except (RuntimeError, TypeError):
+                pass
+            self._connected_tabbed_perspective = None
+
+    def _connect_undo_redo_hooks(self):
+        """Connect action refresh hooks for active perspective and stack."""
+        perspective = self._current_perspective
+        if perspective is None:
+            self._update_undo_redo_actions()
+            return
+
+        if hasattr(perspective, "currentChanged"):
+            try:
+                perspective.currentChanged.connect(self._on_perspective_tab_changed)
+                self._connected_tabbed_perspective = perspective
+            except (RuntimeError, TypeError):
+                self._connected_tabbed_perspective = None
+
+        stack = self._active_undo_stack()
+        if stack is not None and hasattr(stack, "stackChanged"):
+            try:
+                stack.stackChanged.connect(self._update_undo_redo_actions)
+                self._connected_undo_stack = stack
+            except (RuntimeError, TypeError):
+                self._connected_undo_stack = None
+
+        self._update_undo_redo_actions()
+
+    def _on_perspective_tab_changed(self, *_):
+        """Rewire undo hooks when active tab changes (e.g., fitting tabs)."""
+        self._disconnect_undo_redo_hooks()
+        self._connect_undo_redo_hooks()
+
+    def _update_undo_redo_actions(self):
+        """Refresh undo/redo enabled state and action tooltips."""
+        stack = self._active_undo_stack()
+
+        if stack is None:
+            self._workspace.actionUndo.setEnabled(False)
+            self._workspace.actionRedo.setEnabled(False)
+            self._workspace.actionUndo.setToolTip("Undo")
+            self._workspace.actionRedo.setToolTip("Redo")
+            return
+
+        self._workspace.actionUndo.setEnabled(stack.can_undo())
+        self._workspace.actionRedo.setEnabled(stack.can_redo())
+        self._workspace.actionUndo.setToolTip(stack.undo_text())
+        self._workspace.actionRedo.setToolTip(stack.redo_text())
 
     def actionCopy(self):
         """
@@ -1404,3 +1492,21 @@ class GuiManager:
         # file manager
         self.filesWidget.reset()
 
+
+    # ============= DEV =================
+
+    def particleEditor(self):
+        from sas.qtgui.Perspectives.ParticleEditor.DesignWindow import show_particle_editor
+        show_particle_editor()
+
+
+    def asciiLoader(self):
+        from ascii_dialog.dialog import AsciiDialog
+        dialog = AsciiDialog()
+        status = dialog.exec()
+        if status == 1:
+            loaded = load_data(dialog.params)
+            for datum in loaded:
+                logger.info(datum.summary())
+        else:
+            logger.error('ASCII Reader Closed')

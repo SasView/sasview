@@ -30,6 +30,7 @@ from sas.sascalc.corfunc.corfunc_calculator import CalculationError, CorfuncCalc
 from sas.sascalc.util import ExtrapolationInteractionState, ExtrapolationParameters
 
 from ..perspective import Perspective
+from ..UndoRedo import DictSnapshotCommand, UndoStack
 from .SaveExtrapolatedPopup import SaveExtrapolatedPopup
 from .UI.CorfuncPanel import Ui_CorfuncDialog
 from .util import WIDGETS, safe_float
@@ -69,6 +70,10 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
         self._allow_close = False
         self._model_item: QStandardItem | None = None
+
+        # Undo/redo infrastructure
+        self._undo_stack_obj = UndoStack(self)
+        self._undo_baseline: dict | None = None
 
         self.data: Data1D | None = None
         self.extrap: Data1D | None = None
@@ -122,6 +127,11 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         # Allow Go button only when data is loaded
         self.allow_go()
 
+        # Undo/redo: baseline after full initialization
+        self._setupUndoConnections()
+        self._rebaseline_undo_state()
+        self._undo_stack_obj.clear()
+
     def set_background_warning(self):
         if (self._calculator is None or
             self._calculator.background is None or
@@ -151,6 +161,140 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         Tell the caller that this perspective writes its state
         """
         return True
+
+    # ------------------------------------------------------------------
+    # Undo/redo contract methods
+    # ------------------------------------------------------------------
+
+    def _get_parameter_dict(self) -> dict:
+        """Capture current input-only state (excludes computed outputs).
+
+        Called by ``UndoStack._auto_snapshot()`` for recovery snapshots.
+        """
+        return {
+            "background": self.txtBackground.text(),
+            "guinier_a": self.txtGuinierA.text(),
+            "guinier_b": self.txtGuinierB.text(),
+            "porod_k": self.txtPorodK.text(),
+            "porod_sigma": self.txtPorodSigma.text(),
+            "lower_q_max": self.txtLowerQMax.text(),
+            "upper_q_min": self.txtUpperQMin.text(),
+            "upper_q_max": self.txtUpperQMax.text(),
+            "fit_background": self.fitBackground.isChecked(),
+            "fit_guinier": self.fitGuinier.isChecked(),
+            "fit_porod": self.fitPorod.isChecked(),
+            "tangent_auto": self.radTangentAuto.isChecked(),
+            "tangent_inflection": self.radTangentInflection.isChecked(),
+            "tangent_midpoint": self.radTangentMidpoint.isChecked(),
+            "long_period_auto": self.radLongPeriodAuto.isChecked(),
+            "long_period_max": self.radLongPeriodMax.isChecked(),
+            "long_period_double": self.radLongPeriodDouble.isChecked(),
+        }
+
+    def _restore_parameter_values(self, state: dict) -> None:
+        """Apply a state dict to all input widgets AND the underlying model.
+
+        Called by ``DictSnapshotCommand.undo/redo`` and
+        ``UndoStack.reset_to_last_good()``.
+
+        Must also update ``self.model`` items because ``setText()`` only
+        fires ``textEdited`` which in Corfunc only validates — the model
+        is only updated on ``editingFinished`` (which doesn't fire here).
+        """
+        # Disconnect model to prevent cascading model_changed signals
+        self.model.itemChanged.disconnect(self.model_changed)
+        try:
+            with self._undo_stack_obj.suppressed():
+                # Text widgets
+                self.txtBackground.setText(str(state.get("background", "")))
+                self.txtGuinierA.setText(str(state.get("guinier_a", "")))
+                self.txtGuinierB.setText(str(state.get("guinier_b", "")))
+                self.txtPorodK.setText(str(state.get("porod_k", "")))
+                self.txtPorodSigma.setText(str(state.get("porod_sigma", "")))
+                self.txtLowerQMax.setText(str(state.get("lower_q_max", "")))
+                self.txtUpperQMin.setText(str(state.get("upper_q_min", "")))
+                self.txtUpperQMax.setText(str(state.get("upper_q_max", "")))
+
+                # Checkboxes
+                self.fitBackground.setChecked(bool(state.get("fit_background", False)))
+                self.fitGuinier.setChecked(bool(state.get("fit_guinier", False)))
+                self.fitPorod.setChecked(bool(state.get("fit_porod", False)))
+
+                # Radio buttons
+                self.radTangentAuto.setChecked(bool(state.get("tangent_auto", True)))
+                self.radTangentInflection.setChecked(bool(state.get("tangent_inflection", False)))
+                self.radTangentMidpoint.setChecked(bool(state.get("tangent_midpoint", False)))
+                self.radLongPeriodAuto.setChecked(bool(state.get("long_period_auto", True)))
+                self.radLongPeriodMax.setChecked(bool(state.get("long_period_max", False)))
+                self.radLongPeriodDouble.setChecked(bool(state.get("long_period_double", False)))
+
+                # Update model items so calculation uses restored values
+                # (setText fires textEdited but Corfunc's handler only validates,
+                # it does NOT update the model — that only happens on editingFinished)
+                self.model.setItem(WIDGETS.W_BACKGROUND,
+                    QtGui.QStandardItem(str(state.get("background", ""))))
+                self.model.setItem(WIDGETS.W_QMIN,
+                    QtGui.QStandardItem(str(state.get("lower_q_max", ""))))
+                self.model.setItem(WIDGETS.W_QMAX,
+                    QtGui.QStandardItem(str(state.get("upper_q_min", ""))))
+                self.model.setItem(WIDGETS.W_QCUTOFF,
+                    QtGui.QStandardItem(str(state.get("upper_q_max", ""))))
+
+                self.update_readonly()
+        finally:
+            self.model.itemChanged.connect(self.model_changed)
+
+    def _captureUndoState(self, description: str = "Change") -> None:
+        """Push a DictSnapshotCommand if current state differs from baseline."""
+        if self._undo_baseline is None:
+            return
+        new_state = self._get_parameter_dict()
+        if new_state != self._undo_baseline:
+            self._undo_stack_obj.push(
+                DictSnapshotCommand(self._undo_baseline, new_state, description)
+            )
+            self._undo_baseline = new_state
+
+    def _rebaseline_undo_state(self) -> None:
+        """Update undo baseline without pushing a command."""
+        self._undo_baseline = self._get_parameter_dict()
+
+    def _setupUndoConnections(self) -> None:
+        """Connect undo-capture signals for all user-editable input widgets."""
+        # Text edits — editingFinished as commit boundary
+        text_edits = [
+            self.txtBackground,
+            self.txtGuinierA, self.txtGuinierB,
+            self.txtPorodK, self.txtPorodSigma,
+            self.txtLowerQMax, self.txtUpperQMin, self.txtUpperQMax,
+        ]
+        for te in text_edits:
+            te.editingFinished.connect(
+                lambda desc="Edit value": self._captureUndoState(desc))
+
+        # Fit checkboxes
+        self.fitBackground.toggled.connect(
+            lambda _: self._captureUndoState("Toggle fit background"))
+        self.fitGuinier.toggled.connect(
+            lambda _: self._captureUndoState("Toggle fit Guinier"))
+        self.fitPorod.toggled.connect(
+            lambda _: self._captureUndoState("Toggle fit Porod"))
+
+        # Tangent method radio buttons
+        self.radTangentAuto.toggled.connect(
+            lambda _: self._captureUndoState("Change tangent method"))
+        self.radTangentInflection.toggled.connect(
+            lambda _: self._captureUndoState("Change tangent method"))
+        self.radTangentMidpoint.toggled.connect(
+            lambda _: self._captureUndoState("Change tangent method"))
+
+        # Long period method radio buttons
+        self.radLongPeriodAuto.toggled.connect(
+            lambda _: self._captureUndoState("Change long period method"))
+        self.radLongPeriodMax.toggled.connect(
+            lambda _: self._captureUndoState("Change long period method"))
+        self.radLongPeriodDouble.toggled.connect(
+            lambda _: self._captureUndoState("Change long period method"))
 
     def setup_slots(self):
         """Connect the buttons to their appropriate slots."""
@@ -290,6 +434,10 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
         self.set_background_warning()
 
+        # Clear undo stack + re-baseline after data removal
+        self._undo_stack_obj.clear()
+        self._rebaseline_undo_state()
+
     def model_changed(self, _):
         """Actions to perform when the data is updated"""
 
@@ -311,6 +459,9 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self._running = True
         self.cmdExtract.setText("Calculating...")
         self.cmdExtract.repaint()
+
+        # Disable undo during calculation
+        self._undo_stack_obj.set_enabled(False)
 
         # Set up calculator
 
@@ -409,10 +560,14 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
         self._running = False
 
+        # Re-enable undo after calculation completes
+        self._undo_stack_obj.set_enabled(True)
+        self._rebaseline_undo_state()
+
         self.update_readonly()
 
     def allow_go(self, reason: str | None = None):
-        """ 
+        """
         Disable Go button if reason is provided or if no data is loaded
         :param reason: Reason why Go button should be disabled
         """
@@ -545,6 +700,14 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         else:
             return None
 
+    @property
+    def undo_stack(self):
+        """Return the undo stack for this perspective.
+
+        Overrides ``Perspective.undo_stack`` (which returns ``None``).
+        """
+        return self._undo_stack_obj
+
     def setData(self, data_item: list[QStandardItem], is_batch=False):
         """
         Obtain a QStandardItem object and dissect it to get Data1D/2D
@@ -643,6 +806,10 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
         self.tabWidget.setCurrentIndex(0)
         self.set_background_warning()
+
+        # Clear undo stack + re-baseline for fresh data
+        self._undo_stack_obj.clear()
+        self._rebaseline_undo_state()
 
 
     def setClosable(self, value=True):
@@ -757,7 +924,12 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         messages = []
 
         # block signals to avoid recursive calls
-        with QtCore.QSignalBlocker(self.txtLowerQMax), QtCore.QSignalBlocker(self.txtUpperQMin), QtCore.QSignalBlocker(self.txtUpperQMax):
+        with (
+            QtCore.QSignalBlocker(self.txtLowerQMax),
+            QtCore.QSignalBlocker(self.txtUpperQMin),
+            QtCore.QSignalBlocker(self.txtUpperQMax),
+            self._undo_stack_obj.suppressed(),
+        ):
 
             # start by updating p2 as it is used in multiple checks
             if self.validity_flags[2]:  # p2 <= data_q_min
@@ -839,6 +1011,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
                            QtGui.QStandardItem(format_string%state.point_2))
         self.model.setItem(WIDGETS.W_QCUTOFF,
                            QtGui.QStandardItem(format_string%state.point_3))
+        self._captureUndoState("Change extrapolation slider")
 
     def on_extrapolation_slider_changing(self, state: ExtrapolationInteractionState):
         """ Slider is being moved about"""
@@ -976,47 +1149,52 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             c_name = params.__class__.__name__
             msg = "Corfunc.updateFromParameters expects a dictionary"
             raise TypeError(f"{msg}: {c_name} received")
-        # Assign values to 'Invariant' tab inputs - use defaults if not found
-        # don't raise model_changed signal for a while
-        self.model.itemChanged.disconnect(self.model_changed)
-        self.model.setItem(
-            WIDGETS.W_GUINIERA, QtGui.QStandardItem(params.get('guinier_a', '0.0')))
-        self.model.setItem(
-            WIDGETS.W_GUINIERB, QtGui.QStandardItem(params.get('guinier_b', '0.0')))
-        self.model.setItem(
-            WIDGETS.W_PORODK, QtGui.QStandardItem(params.get('porod_k', '0.0')))
-        self.model.setItem(WIDGETS.W_PORODSIGMA, QtGui.QStandardItem(
-            params.get('porod_sigma', '0.0')))
-        self.model.setItem(WIDGETS.W_CORETHICK, QtGui.QStandardItem(
-            params.get('avg_core_thick', '0')))
-        self.model.setItem(WIDGETS.W_INTTHICK, QtGui.QStandardItem(
-            params.get('avg_inter_thick', '0')))
-        self.model.setItem(WIDGETS.W_HARDBLOCK, QtGui.QStandardItem(
-            params.get('avg_hard_block_thick', '0')))
-        self.model.setItem(WIDGETS.W_SOFTBLOCK, QtGui.QStandardItem(
-            params.get('avg_soft_block_thick', '0')))
-        self.model.setItem(WIDGETS.W_CRYSTAL, QtGui.QStandardItem(
-            params.get('local_crystalinity', '0')))
-        self.model.setItem(
-            WIDGETS.W_POLY_RYAN, QtGui.QStandardItem(params.get('polydispersity', '0')))
-        self.model.setItem(
-            WIDGETS.W_POLY_STRIBECK, QtGui.QStandardItem(params.get('polydispersity_stribeck', '0')))
-        self.model.setItem(
-            WIDGETS.W_PERIOD, QtGui.QStandardItem(params.get('long_period', '0')))
-        self.model.setItem(
-            WIDGETS.W_FILENAME, QtGui.QStandardItem(params.get('data_name', '')))
-        self.model.setItem(
-            WIDGETS.W_QMIN, QtGui.QStandardItem(params.get('lower_q_max', '0.01')))
-        self.model.setItem(
-            WIDGETS.W_QMAX, QtGui.QStandardItem(params.get('upper_q_min', '0.20')))
-        self.model.setItem(
-            WIDGETS.W_QCUTOFF, QtGui.QStandardItem(params.get('upper_q_max', '0.22')))
-        self.model.setItem(WIDGETS.W_BACKGROUND, QtGui.QStandardItem(
-            params.get('background', '0')))
-        # reconnect model
-        self.model.itemChanged.connect(self.model_changed)
-        self.cmdSave.setEnabled(params.get('guinier_a', '0.0') != '0.0')
-        self.cmdExtract.setEnabled(params.get('long_period', '0') != '0')
+        # Assign values to inputs - use defaults if not found
+        # Suppress undo during programmatic load
+        with self._undo_stack_obj.suppressed():
+            # don't raise model_changed signal for a while
+            self.model.itemChanged.disconnect(self.model_changed)
+            self.model.setItem(
+                WIDGETS.W_GUINIERA, QtGui.QStandardItem(params.get('guinier_a', '0.0')))
+            self.model.setItem(
+                WIDGETS.W_GUINIERB, QtGui.QStandardItem(params.get('guinier_b', '0.0')))
+            self.model.setItem(
+                WIDGETS.W_PORODK, QtGui.QStandardItem(params.get('porod_k', '0.0')))
+            self.model.setItem(WIDGETS.W_PORODSIGMA, QtGui.QStandardItem(
+                params.get('porod_sigma', '0.0')))
+            self.model.setItem(WIDGETS.W_CORETHICK, QtGui.QStandardItem(
+                params.get('avg_core_thick', '0')))
+            self.model.setItem(WIDGETS.W_INTTHICK, QtGui.QStandardItem(
+                params.get('avg_inter_thick', '0')))
+            self.model.setItem(WIDGETS.W_HARDBLOCK, QtGui.QStandardItem(
+                params.get('avg_hard_block_thick', '0')))
+            self.model.setItem(WIDGETS.W_SOFTBLOCK, QtGui.QStandardItem(
+                params.get('avg_soft_block_thick', '0')))
+            self.model.setItem(WIDGETS.W_CRYSTAL, QtGui.QStandardItem(
+                params.get('local_crystalinity', '0')))
+            self.model.setItem(
+                WIDGETS.W_POLY_RYAN, QtGui.QStandardItem(params.get('polydispersity', '0')))
+            self.model.setItem(
+                WIDGETS.W_POLY_STRIBECK, QtGui.QStandardItem(params.get('polydispersity_stribeck', '0')))
+            self.model.setItem(
+                WIDGETS.W_PERIOD, QtGui.QStandardItem(params.get('long_period', '0')))
+            self.model.setItem(
+                WIDGETS.W_FILENAME, QtGui.QStandardItem(params.get('data_name', '')))
+            self.model.setItem(
+                WIDGETS.W_QMIN, QtGui.QStandardItem(params.get('lower_q_max', '0.01')))
+            self.model.setItem(
+                WIDGETS.W_QMAX, QtGui.QStandardItem(params.get('upper_q_min', '0.20')))
+            self.model.setItem(
+                WIDGETS.W_QCUTOFF, QtGui.QStandardItem(params.get('upper_q_max', '0.22')))
+            self.model.setItem(WIDGETS.W_BACKGROUND, QtGui.QStandardItem(
+                params.get('background', '0')))
+            # reconnect model
+            self.model.itemChanged.connect(self.model_changed)
+            self.cmdSave.setEnabled(params.get('guinier_a', '0.0') != '0.0')
+            self.cmdExtract.setEnabled(params.get('long_period', '0') != '0')
+
+        # Re-baseline after programmatic restore
+        self._rebaseline_undo_state()
 
     @property
     def real_space_figure(self):

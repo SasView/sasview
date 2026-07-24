@@ -22,11 +22,37 @@ Edit
 ----
 The Edit option allows you to:
 
+- undo the most recent parameter change (``Ctrl+Z``);
+- redo a previously undone parameter change (``Ctrl+Y``);
 - copy and paste parameters between *SasView* analysis windows;
 - copy parameters from a *SasView* analysis window to the Clipboard as either tab-delimited text (compatible with Microsoft Excel) or LaTex-wrapped text;
 - generate a summary 'Report' of the most recent analysis performed;
 - reset parameter values in the P(r) Inversion analysis page;
 - freeze/copy fit results as separate data sets.
+
+The **Undo** and **Redo** commands are also available as buttons in the
+main toolbar, and their tooltips dynamically show which action will be
+reverted (e.g. "Undo Change radius").
+
+Undo/Redo is supported in the following perspectives:
+
+- **Model Fitting** – parameter changes in individual fit pages;
+- **P(r) Inversion** – parameter changes in each inversion page;
+- **Invariant** – parameter changes in the invariant calculator;
+- **Size Distribution** – parameter changes in the size distribution
+  calculator;
+- **Correlation Function** – parameter changes in the correlation
+  function analysis.
+
+Each tab or page maintains its own independent undo history, so
+switching between perspectives or fit pages preserves the undo/redo
+state of each. The default history depth is 200 actions per tab,
+configurable via the ``UNDO_STACK_MAX_DEPTH`` setting in
+:file:`src/sas/system/config/config.py`.
+
+.. note:: Undo/Redo is automatically suppressed during programmatic
+          operations such as loading a project or applying fit results,
+          to prevent spurious entries from cluttering the undo history.
 
 View
 ----

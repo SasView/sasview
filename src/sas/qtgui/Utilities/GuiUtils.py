@@ -182,6 +182,9 @@ class Communicate(QtCore.QObject):
     # Notify about a data name to be frozen and send to fitting perspective
     freezeDataNameSignal = QtCore.Signal(str)
 
+    # Request refresh of undo/redo action enabled state
+    undoRedoUpdateSignal = QtCore.Signal()
+
 communicator = Communicate()
 
 
