@@ -17,7 +17,7 @@ from sas.qtgui.Perspectives.Corfunc.RealSpaceCanvas import RealSpaceCanvas
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Utilities.BackgroundColor import BG_DEFAULT, BG_ERROR
 from sas.qtgui.Utilities.ExtrapolationSlider import ExtrapolationSlider, SliderPerspective
-from sas.qtgui.Utilities.Reports import ReportBase
+from sas.qtgui.Utilities.Reports import ReportBase, format_report_parameters
 from sas.qtgui.Utilities.Reports.reportdata import ReportData
 from sas.sascalc.corfunc.calculation_data import (
     GuinierData,
@@ -1046,17 +1046,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         report.add_data_details(self.data)
 
         # Format keys
-        parameters = self.getState()
-        fancy_parameters = {}
-
-        for key in parameters:
-            nice_key = " ".join([s.capitalize() for s in key.split("_")])
-            if parameters[key].strip() == '':
-                fancy_parameters[nice_key] = '-'
-            else:
-                fancy_parameters[nice_key] = parameters[key]
-
-        report.add_table_dict(fancy_parameters, ("Parameter", "Value"))
+        report.add_table_dict(format_report_parameters(self.getState()), ("Parameter", "Value"))
         report.add_plot(self.q_space_figure)
         report.add_plot(self.real_space_figure)
         report.add_plot(self.extraction_figure)

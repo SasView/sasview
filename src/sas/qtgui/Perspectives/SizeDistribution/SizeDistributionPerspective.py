@@ -2,10 +2,12 @@ import logging
 from types import TracebackType
 
 import numpy as np
+from matplotlib.figure import Figure
 from PySide6 import QtCore, QtGui, QtWidgets
 
 from sasdata.dataloader.data_info import Data1D as LoadData1D
 
+import sas.qtgui.Plotting.PlotHelper as PlotHelper
 from sas.qtgui.Perspectives.perspective import Perspective
 from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionLogic import (
     SizeDistributionLogic,
@@ -24,6 +26,8 @@ from sas.qtgui.Perspectives.SizeDistribution.UI.SizeDistributionUI import (
 )
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Utilities import GuiUtils
+from sas.qtgui.Utilities.Reports import ReportBase, format_report_parameters
+from sas.qtgui.Utilities.Reports.reportdata import ReportData
 
 ASPECT_RATIO: float = 1.0
 DIAMETER_MIN: float = 10.0
@@ -121,6 +125,11 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
 
     def isSerializable(self) -> bool:
         """Tell the caller that this perspective writes its state."""
+        return True
+
+    @property
+    def supports_reports(self) -> bool:
+        """Tell the caller that this perspective can generate reports."""
         return True
 
     def closeEvent(self, event: QtGui.QCloseEvent) -> None:
@@ -501,6 +510,55 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             "power_low_q": self.txtPowerLowQ.text(),
             "scale_low_q": self.txtScaleLowQ.text(),
         }
+
+    def getReport(self) -> ReportData | None:
+        """Build a report for the current Size Distribution analysis."""
+        if self.logic.data is None:
+            return None
+
+        report = ReportBase("Size Distribution")
+        report.add_data_details(self.logic.data)
+
+        report.add_table_dict(format_report_parameters(self.getState()), ("Parameter", "Value"))
+
+        result_details: dict[str, str] = {}
+        if self.txtChiSq.text().strip():
+            result_details["Chi Squared"] = self.txtChiSq.text().strip()
+        if self.txtVolume.text().strip():
+            result_details["Volume"] = self.txtVolume.text().strip()
+        if self.txtDiameterMean.text().strip():
+            result_details["Diameter Mean"] = self.txtDiameterMean.text().strip()
+        if self.txtDiameterMedian.text().strip():
+            result_details["Diameter Median"] = self.txtDiameterMedian.text().strip()
+        if self.txtDiameterMode.text().strip():
+            result_details["Diameter Mode"] = self.txtDiameterMode.text().strip()
+
+        if result_details:
+            report.add_table_dict(result_details, ("Result", "Value"))
+
+        images = self.getImages()
+        # Add existing figures to the report (use their axes title if present)
+        for fig in images:
+            title = fig.axes[0].get_title() if fig.axes else None
+            report.add_plot(fig, figure_title=title)
+
+        return report.report_data
+
+    def getImages(self) -> list[Figure]:
+        """Return live Matplotlib figures for the current model item.
+
+        This collects the Data1D/Data2D ids for `self._model_item` and then
+        delegates to `PlotHelper.figures_for_plot_ids`. Returns empty list
+        if no model item or no plots found.
+        """
+        model_item = getattr(self, '_model_item', None)
+        if not model_item:
+            return []
+
+        plot_data = GuiUtils.plotsFromModel("", model_item)
+        plot_ids = [p.id for p in plot_data]
+
+        return PlotHelper.figures_for_plot_ids(plot_ids)
 
     def removeData(self, data_list: list | None = None) -> None:
         """Remove the existing data reference from the Size Distribution Perspective."""
