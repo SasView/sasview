@@ -10,7 +10,7 @@ from twisted.internet import reactor, threads
 from twisted.python.failure import Failure
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Plotting import PlotterData
+import sas.qtgui.Utilities.ObjectLibrary as ol
 from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
 from sas.qtgui.Utilities.BackgroundColor import BG_DEFAULT, BG_ERROR
 from sas.qtgui.Utilities.ExtrapolationSlider import ExtrapolationSlider, SliderPerspective
@@ -127,14 +127,34 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self._high_power_value: float | None = DEFAULT_POWER_VALUE
 
         # Define plots
-        self.high_extrapolation_plot: PlotterData | None = None
-        self.low_extrapolation_plot: PlotterData | None = None
+        self.high_extrapolation_plot: Data1D | None = None
+        self.low_extrapolation_plot: Data1D | None = None
         self.extrapolation_made: bool = False
 
     def setup_slider(self) -> None:
         """Setup the extrapolation slider."""
         self.slider = ExtrapolationSlider(perspective=SliderPerspective.INVARIANT)
         self.sliderLayout.insertWidget(1, self.slider)
+
+    def _refresh_extrapolation_plots(self) -> None:
+        """Refresh any visible extrapolation plot markers in place.
+
+        Updating the existing `QRangeSlider` artists is much cheaper than replacing the
+        whole plot, so use that path whenever the plot window is already open.
+        """
+        plots = [
+            plot for plot in [self.low_extrapolation_plot, self.high_extrapolation_plot]
+            if plot is not None
+        ]
+        # Directly obtain the plot widget and update its slider positions.
+        data_explorer = ol.getObject("DataExplorer")
+        active_plots = getattr(data_explorer, "active_plots", {})
+
+        for plot in plots:
+            plot_widget = active_plots.get(plot.name)
+            if plot_widget is None:
+                continue
+            plot_widget.update_slider_positions(plot.name)
 
     def setup_tooltips(self) -> None:
         """Setup tooltips for the widgets"""
@@ -332,15 +352,20 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.check_status()
 
     def deferredPlot(self, model: QtGui.QStandardItemModel, extrapolation: str | None = None) -> None:
-        """Run the GUI/model update in the main thread"""
-        reactor.callFromThread(lambda: self.plot_result(model))
+        """Run the GUI/model update in the main thread."""
+        def finish_calculation() -> None:
+            self.plot_result(model)
 
-        # Recreate the initial plot if no extrapolation was used and plot was previously closed
-        if extrapolation is None and self.extrapolation_made:
-            reactor.callFromThread(lambda: self._manager.filesWidget.newPlot())
-            self.extrapolation_made = False
+            no_extrapolation_plots = (self.low_extrapolation_plot is None) and (self.high_extrapolation_plot is None)
 
-        self.check_status()
+            # Recreate the initial plot if no extrapolation plots are present
+            if self.extrapolation_made and no_extrapolation_plots:
+                self._manager.filesWidget.newPlot()
+                self.extrapolation_made = False
+
+            self.check_status()
+
+        reactor.callFromThread(finish_calculation)
 
     def check_status(self) -> None:
         """
@@ -386,10 +411,10 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             self.high_extrapolation_plot.custom_color = "#2ca02c"
             self.high_extrapolation_plot.show_errors = False
             self.high_extrapolation_plot.show_q_range_sliders = True
-            self.high_extrapolation_plot.slider_update_on_move = False
-            self.high_extrapolation_plot.slider_perspective_name = self.name
-            self.high_extrapolation_plot.slider_low_q_input = self.txtPorodStart_ex.text()
-            self.high_extrapolation_plot.slider_high_q_input = self.txtPorodEnd_ex.text()
+            self.high_extrapolation_plot.slider_draggable = False
+            self.high_extrapolation_plot.slider_perspective_name = "Invariant"
+            self.high_extrapolation_plot.slider_low_q_input = ["txtPorodStart_ex"]
+            self.high_extrapolation_plot.slider_high_q_input = ["txtPorodEnd_ex"]
             GuiUtils.updateModelItemWithPlot(
                 self._model_item, self.high_extrapolation_plot, self.high_extrapolation_plot.title
             )
@@ -400,9 +425,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             self.low_extrapolation_plot.custom_color = "#ff7f0e"
             self.low_extrapolation_plot.show_errors = False
             self.low_extrapolation_plot.show_q_range_sliders = True
-            self.low_extrapolation_plot.slider_perspective_name = self.name
-            self.low_extrapolation_plot.slider_low_q_input = self.extrapolation_parameters.ex_q_min
-            self.low_extrapolation_plot.slider_high_q_input = self.txtGuinierEnd_ex.text()
+            self.low_extrapolation_plot.slider_draggable = False
+            self.low_extrapolation_plot.slider_perspective_name = "Invariant"
+            self.low_extrapolation_plot.slider_high_q_input = ["txtGuinierEnd_ex"]
             GuiUtils.updateModelItemWithPlot(
                 self._model_item, self.low_extrapolation_plot, self.low_extrapolation_plot.title
             )
@@ -619,12 +644,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             # Enable the status button (schedule on GUI thread)
             _ui(self.cmdStatus.setEnabled, True)
 
-            if calculation_failed:
-                # leave status disabled if something critical failed
-                _ui(self.cmdStatus.setEnabled, False)
-                logger.warning(f"Calculation failed: {msg}")
-                return self.model
-
             # add extrapolation plots (schedule GUI changes where needed)
             if low_success:
                 qmin_ext = float(self.extrapolation_parameters.ex_q_min)
@@ -665,6 +684,12 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                 self.high_extrapolation_plot._yunit = temp_data._yunit
                 if self._high_fit:
                     _safe_update_model(WIDGETS.W_HIGHQ_POWER_VALUE_EX, power_high)
+
+            if calculation_failed:
+                # leave status disabled if something critical failed
+                _ui(self.cmdStatus.setEnabled, False)
+                logger.warning(f"Calculation failed: {msg}")
+                return self.model
 
             # convert any "ERROR" to numeric zeros before summing
             if qstar_high == "ERROR":
@@ -905,6 +930,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.model.setItem(WIDGETS.W_POROD_START_EX, QtGui.QStandardItem(format_string % state.point_2))
         self.model.setItem(WIDGETS.W_POROD_END_EX, QtGui.QStandardItem(format_string % state.point_3))
         self.correct_extrapolation_values()
+        self._refresh_extrapolation_plots()
 
     def on_extrapolation_text_editing(self) -> None:
         """Handle when user edits any of the extrapolation text boxes."""
@@ -914,10 +940,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
     def on_extrapolation_text_edited(self) -> None:
         """Handle when user finishes editing any of the extrapolation text boxes."""
-        # First update the model with new values
-        self.apply_parameters_from_ui()
-        # Then correct any invalid values
         self.correct_extrapolation_values()
+        self.apply_parameters_from_ui()
+        self._refresh_extrapolation_plots()
 
     def format_sig_fig(self, value: float) -> str:
         """Format a float to 7 significant figures as a string."""
@@ -1031,8 +1056,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                 messages.append(f"The maximum value is {qmax:.7g}.")
                 self.txtPorodEnd_ex.setText(self.format_sig_fig(qmax))
 
-        # update slider and model
-        self.apply_parameters_from_ui()
+        # Re-validate to update any UI flags
+        self.check_extrapolation_values()
 
         if messages:
             messages.append("Values have been adjusted to the nearest valid value.")
@@ -1047,17 +1072,15 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         if self.extrapolation_parameters is None:
             return
         # update the slider (this may emit a signal that will call on_extrapolation_slider_changed)
-        self.slider.extrapolation_parameters = self.extrapolation_parameters._replace(
-            point_1=safe_float(p1), point_2=safe_float(p2), point_3=safe_float(p3)
-        )
+        with QtCore.QSignalBlocker(self.slider):
+            self.slider.extrapolation_parameters = self.extrapolation_parameters._replace(
+                point_1=safe_float(p1), point_2=safe_float(p2), point_3=safe_float(p3)
+            )
 
         # update model item text too
         self.model.setItem(WIDGETS.W_GUINIER_END_EX, QtGui.QStandardItem(p1))
         self.model.setItem(WIDGETS.W_POROD_START_EX, QtGui.QStandardItem(p2))
         self.model.setItem(WIDGETS.W_POROD_END_EX, QtGui.QStandardItem(p3))
-
-        # re-validate to update any UI flags
-        self.check_extrapolation_values()
 
     def checkVolFrac(self) -> None:
         """Check if volfrac1 is strictly between 0 and 1."""

@@ -258,6 +258,7 @@ class TestInvariantCalculateThread(UIHelpersMixin):
             assert getattr(plot, "symbol", None) == "Line"
             assert getattr(plot, "has_errors", None) is False
 
+
     def test_plot_result(self, mocker):
         """Test plot_result updates model item and emits plot request when extrapolation plots exist."""
 
@@ -306,6 +307,51 @@ class TestInvariantCalculateThread(UIHelpersMixin):
         mock_details.assert_called_once()
         mock_progress.assert_called_once()
 
+    def test_plot_result_updates_existing_extrapolation_plot_when_mode_unchanged(self, mocker):
+        """Test plot_result updates existing extrapolation plots in place when only ranges change."""
+
+        emitted = []
+        self.window.communicator.plotRequestedSignal.connect(lambda plots: emitted.append(plots))
+
+        mocker.patch.object(self.window, "update_details_widget")
+        mocker.patch.object(self.window, "update_progress_bars")
+
+        mock_close_plots = mocker.patch.object(self.window._manager.filesWidget, "closePlotsForItem")
+        mock_update_model_item_with_plot = mocker.patch.object(
+            Invariant.InvariantPerspective.GuiUtils, "updateModelItemWithPlot"
+        )
+
+        mock_calc = mocker.MagicMock()
+        self.window._calculator = mock_calc
+
+        extra_high = self.set_extra_high(mock_calc, mocker)
+        extra_low = self.set_extra_low(mock_calc, mocker)
+
+        self.window.high_extrapolation_plot = self.window._manager.createGuiData(extra_high)
+        self.window.high_extrapolation_plot.name = "High-Q extrapolation"
+        self.window.high_extrapolation_plot.title = "High-Q extrapolation"
+
+        self.window.low_extrapolation_plot = self.window._manager.createGuiData(extra_low)
+        self.window.low_extrapolation_plot.name = "Low-Q extrapolation"
+        self.window.low_extrapolation_plot.title = "Low-Q extrapolation"
+
+        self.window._high_extrapolate = True
+        self.window._low_extrapolate = True
+        self.window.extrapolation_made = False
+
+        mock_model = mocker.Mock()
+        mock_model.name = "test_model"
+
+        self.window.plot_result(mock_model)
+
+        mock_close_plots.assert_called_once_with(self.window._model_item)
+
+        assert mock_update_model_item_with_plot.call_count == 2
+
+        assert len(emitted) == 1
+        emitted_arg = emitted[0]
+        assert isinstance(emitted_arg, list)
+        assert emitted_arg[0] is self.window._model_item
 
 @pytest.mark.parametrize("window_class", ["real_data"], indirect=True)
 @pytest.mark.usefixtures("window_class")
@@ -413,7 +459,7 @@ class TestInvariantCalculateHelpers(UIHelpersMixin):
 
         self.window.deferredPlot(mock_model, extrapolation=None)
 
-        assert sync_reactor.callFromThread.call_count == 2
+        assert sync_reactor.callFromThread.call_count == 1
         mock_plot.assert_called_once_with(mock_model)
         mock_check.assert_called_once()
         mock_newplot.assert_called_once()

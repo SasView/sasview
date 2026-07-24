@@ -798,6 +798,21 @@ class PlotterWidget(PlotterBase):
             slider = self.sliders.get(id)
             slider.toggle()
 
+    def update_slider_positions(self, plot_name: str, state=None) -> None:
+        """Update slider artist positions for a given plot in-place and redraw the canvas."""
+        slider = self.sliders[plot_name]
+
+        if state is not None and getattr(state, "dragging_line_position", None) is not None:
+            if state.working_line_id == 0:
+                slider.line_min.update(x=state.dragging_line_position, draw=False)
+            else:
+                slider.line_max.update(x=state.dragging_line_position, draw=False)
+        else:
+            slider.line_min.inputChanged()
+            slider.line_max.inputChanged()
+
+        self.canvas.draw_idle()
+
     def onFreeze(self, id):
         """
         Freezes the selected plot to a separate chart
