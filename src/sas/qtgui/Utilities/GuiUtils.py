@@ -39,6 +39,7 @@ from sas.qtgui.Plotting.ConvertUnits import convertUnit
 from sas.qtgui.Plotting.Plottables import Chisq, Plottable, PlottableFit1D, PlottableTheory1D, Text, View
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
 from sas.qtgui.Utilities.BackgroundColor import BG_DEFAULT, BG_WARNING
+from sas.qtgui.Utilities.SASBDB.sasbdb_display import append_sasbdb_data_summary
 from sas.sascalc.fit.AbstractFitEngine import FitData1D, FitData2D, FResult
 from sas.system import HELP_SYSTEM
 from sas.system.user import PATH_LIKE
@@ -549,7 +550,8 @@ def retrieveData1d(data):
         #logger.error(msg)
         raise ValueError(msg)
 
-    text = data.__str__()
+    text = append_sasbdb_data_summary(data.__str__(), data)
+
     text += 'Data Min Max:\n'
     text += 'X_min = %s:  X_max = %s\n' % (xmin, max(data.x))
     text += 'Y_min = %s:  Y_max = %s\n' % (ymin, max(data.y))
@@ -593,7 +595,8 @@ def retrieveData2d(data):
         msg = "Incorrect type passed to retrieveData2d"
         raise AttributeError(msg)
 
-    text = data.__str__()
+    text = append_sasbdb_data_summary(data.__str__(), data)
+
     text += 'Data Min Max:\n'
     text += 'I_min = %s\n' % min(data.data)
     text += 'I_max = %s\n\n' % max(data.data)

@@ -11,7 +11,8 @@ The File option allows you load data into *SasView* for analysis, or to save the
 Data can be loaded one file at a time, or by selecting multiple files, or by loading an entire folder of 
 files (in which case *SasView* will attempt to make an intelligent guess as to what to load based on the 
 file formats it recognises in the folder!). Data can also be loaded by dragging and dropping files directly
-onto Data Explorer.
+onto Data Explorer. Additionally, datasets can be downloaded directly from the SASBDB (Small Angle Scattering 
+Biological Data Bank) using **File > Load from SASBDB...** (see :ref:`SASBDB_Download` for details).
 
 A *SasView* session can also be saved and reloaded as an 'Analysis' (an individual model fit or invariant 
 calculation, etc), or as a 'Project' (everything you have done since starting your *SasView* session).

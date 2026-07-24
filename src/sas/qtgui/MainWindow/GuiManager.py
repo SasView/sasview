@@ -671,6 +671,7 @@ class GuiManager:
         # File
         self._workspace.actionLoadData.triggered.connect(self.actionLoadData)
         self._workspace.actionLoad_Data_Folder.triggered.connect(self.actionLoad_Data_Folder)
+        self._workspace.actionLoad_SASBDB.triggered.connect(self.actionLoad_SASBDB)
         self._workspace.actionOpen_Project.triggered.connect(self.actionOpen_Project)
         self._workspace.actionOpen_Analysis.triggered.connect(self.actionOpen_Analysis)
         self._workspace.actionSave.triggered.connect(self.actionSave_Project)
@@ -767,6 +768,24 @@ class GuiManager:
         Menu File/Load Data Folder
         """
         self.filesWidget.loadFolder()
+
+    def actionLoad_SASBDB(self):
+        """
+        Menu File/Load from SASBDB
+
+        Opens a dialog to download and load a dataset from SASBDB.
+        """
+        from sas.qtgui.Utilities.SASBDB.sasbdb_loader import load_downloaded_dataset
+        from sas.qtgui.Utilities.SASBDB.SASBDBDownloadDialog import SASBDBDownloadDialog
+
+        dialog = SASBDBDownloadDialog(parent=self._workspace)
+        if dialog.exec():
+            load_downloaded_dataset(
+                self.filesWidget,
+                self._workspace,
+                dialog.getDownloadedFilepath(),
+                dialog.getDatasetInfo(),
+            )
 
     def actionOpen_Project(self):
         """
