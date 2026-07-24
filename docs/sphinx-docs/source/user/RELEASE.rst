@@ -30,7 +30,7 @@ New in Version 6.2.0
 
 This is a feature release, which comes with a number of new features, improvements, and bug fixes as listed below.
 
-This version of SasView is built with Sasmodels v1.1.0, Sasdata v0.12.0, and Bumps v1.0.5.
+This version of SasView is built with Python 3.13, Sasmodels v1.1.0, Sasdata v0.12.1, and Bumps v1.0.5.
 
 New Features
 ^^^^^^^^^^^^ 
