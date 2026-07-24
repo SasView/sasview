@@ -215,8 +215,8 @@ can provide an estimate of the contrast term. Rearranging the expression for $Q^
 
     (\Delta\rho)^2 = \frac{Q^*}{2 \pi^2 \phi_1 \phi_2}
 
-where $\phi_1$ is the known volume fraction of the minority phase, and $\phi_2 =
-1 - \phi_1$.
+where $\phi_1$ is the known volume fraction of the minority phase, and
+$\phi_2 = 1 - \phi_1$.
 
 Specific Surface Area
 ^^^^^^^^^^^^^^^^^^^^^
@@ -343,12 +343,18 @@ $C_p$ can be specified (required if the specific surface area $S_v$ is desired).
 Adjust the extrapolation types as necessary by checking the relevant check boxes. 
 If power law extrapolations are chosen, the exponent can be either fitted or held fixed. 
 The range over which the extrapolations are fitted can also be adjusted by changing the
-slider positions, or entering a specific value in the relevant box. The default values
-are to use the lower and upper 15% of the data points for the low and high $q$ 
-extrapolations respectively. In most cases the default values will suffice. Click 
+slider positions in the coloured bar, or entering a specific value in the relevant box.
+The default values are to use the lower and upper 15% of the data points for the low and
+high $q$ extrapolations respectively. In most cases the default values will suffice. Click 
 the *Calculate* button to run the extrapolation.
 
-.. image:: image_extrapolated_data.png
+The extrapolated curves will be shown in the plot, and the percentage of the total $Q^*$
+value that comes from the extrapolated regions will be shown in the relevant boxes at the
+bottom of the panel. Lines showing the extrapolated regions will also be shown in the plot.
+These lines serve solely as a visual guide to the user and not to adjust the extrapolation
+range.
+
+.. image:: image_extrapolation_tab.png
 
 .. note:: As mentioned in the `Data Extrapolation` section, the 
     maximum extrapolation range is currently fixed from $10e^{-5}$ to $10$.
