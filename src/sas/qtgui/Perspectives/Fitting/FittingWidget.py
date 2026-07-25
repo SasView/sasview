@@ -1478,6 +1478,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.stopFit()
             return
 
+        # If this page takes part in a running constrained/simultaneous fit,
+        # the button reads 'Stop fit', so stop that fit instead of starting a new one
+        if self.stopConstrainedFit():
+            return
+
         # initialize fitter constants
         handler = None
         batch_inputs = {}
@@ -1530,6 +1535,22 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Disable some elements
         self.disableInteractiveElements()
+
+    def stopConstrainedFit(self) -> bool:
+        """
+        Stop the constrained/simultaneous fit this page takes part in, if any.
+        Returns True if a running constrained fit was stopped.
+        """
+        if self.parent is None:
+            return False
+        constraint_tab = self.parent.perspective().getConstraintTab()
+        if constraint_tab is None or not constraint_tab.is_running:
+            return False
+        page_name = "Page%s" % self.tab_id
+        if not any(page_name in tab for tab in constraint_tab.getTabsForFit()):
+            return False
+        constraint_tab.stopFit()
+        return True
 
     def stopFit(self) -> None:
         """
