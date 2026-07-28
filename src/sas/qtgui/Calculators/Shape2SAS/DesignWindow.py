@@ -190,6 +190,8 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         # Moveable divider between the table and plots
         self.modelSplitter = QSplitter(Qt.Orientation.Horizontal)
 
+        self.subunitTable.setMinimumWidth(650)
+
         self.modelSplitter.addWidget(self.subunitTable)
         self.modelSplitter.addWidget(self.plotTabs)
         self.modelSplitter.setStretchFactor(0, 2)
