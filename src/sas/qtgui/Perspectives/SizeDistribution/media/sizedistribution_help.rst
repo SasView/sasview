@@ -142,7 +142,7 @@ prolate ellipsoid while a value smaller than 1 is for an oblate ellipsoid.
 
    The Size Distribution analysis assumes the data is properly background
    subtracted. The smaller sizes in particular will be very sensitive to that.
-   If this is not the case for your data, proceed to the options tab as
+   If this is not the case for your data, proceed to the *Background* tab as
    described below and ensure that the background subtraction is set correctly.
 
 At this point, one can run a fit.  There are two buttons at the bottom of the
@@ -156,7 +156,13 @@ After a short time, the graph will be updated with the fit to the data using
 the resulting distribution, while a second plot will pop up showing the final
 distribution of sizes that are returned, giving the volume fraction (true or
 relative depending on whether the data are on absolute scale or not) of each
-size. Finally the *Output* section of the *Parameters* tab will show the
+size. The second plot also contains a *trust bar*, a thin gradient line above
+the plot, in which the green represents 'trustable' sizes, the yellow represents
+'suspicious' sizes, and the red represents 'not trustable' sizes, indicating where
+they are in relation to the $Q$ range of the data. The trust region is calculated
+as $1.8 \pi / Q_{max}$ to $0.95 \pi / Q_{min}$.
+
+Finally the *Output* section of the *Parameters* tab will show the
 results including whether or not the fitting converged, the reduced
 $\chi^2$, the percent volume fraction of domains (assuming absolute scaled
 data and correct contrast term) along with statistics on the diameter such
@@ -197,9 +203,10 @@ resulting total volume fraction.
 Refining the fit
 ^^^^^^^^^^^^^^^^
 In order to get a more reasonable fit, and in particular one that converges, it
-will often be necessary to adjust the parameters on the *Options* tab.
+will often be necessary to adjust the parameters on the *Background* and *Options*
+tabs.
 
-.. image:: OptionsTab.png
+.. image:: BackgroundAndOptions.png
 
 The first thing to worry about, as noted above, is the background subtraction.
 The usual high Q background can be entered if known. It can also
@@ -208,7 +215,7 @@ SasView). This is probably the most accurate way to determine the background
 if it is not known. Alternatively, if there are sufficient points in the data
 that are clearly in the flat background region, the background can be estimated
 by providing the minimum and maximum $Q$ where the data is flat and then
-pressing the ``Fit flat background`` button in the *Options* tab. The values to
+pressing the ``Fit flat background`` button in the *Background* tab. The values to
 use for the $Q$ limits can be read off the plot by moving the cursor over the
 points at the extremes and reading off the x value given in the bottom right of
 the plot.
@@ -236,7 +243,7 @@ also be limited using either the range sliders in the plot or entering the
 values in the ``Fitting range`` box of the *Options* tab. Remember that these
 $Q$ bounds define the range of diameters that can be probed using this method.
 
-.. image:: backSubtracted.png
+.. image:: BackgroundSubtracted.png
 
 Next the ``Weighting`` box parameters can be adjusted. SasView automatically
 sets the fitting to use the uncertainty data associated with the data, or,
@@ -300,4 +307,4 @@ Reference
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last modified by Paul Butler on May 30, 2025
+.. note::  This help document was last modified by Sujaya Shrestha on 28 July 2026.
