@@ -294,9 +294,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
 
     def onTheoreticalScatteringChanged(self, checked: bool):
         """Handle changes to the 'Include Scattering' checkbox."""
-        print(f"Checkbox state changed: {checked}")
         if checked:
-            print("Include Scattering checked")
             self.plotTabs.setTabEnabled(1, True)
             self.plotTabs.setTabEnabled(2, True)
             self.plotTabs.setCurrentWidget(self.combinedTab)
@@ -304,7 +302,6 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
             # Replot to ensure the scattering profile is generated when the checkbox is checked
             self.onClickingPlot()
         else:
-            print("Include Scattering unchecked")
             self.plotTabs.setTabEnabled(1, False)
             self.plotTabs.setTabEnabled(2, False)
             self.plotTabs.setCurrentWidget(self.viewerTab)
