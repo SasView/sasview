@@ -156,13 +156,7 @@ After a short time, the graph will be updated with the fit to the data using
 the resulting distribution, while a second plot will pop up showing the final
 distribution of sizes that are returned, giving the volume fraction (true or
 relative depending on whether the data are on absolute scale or not) of each
-size. The second plot also contains a *trust bar*, a thin gradient line above
-the plot, in which the green represents 'trustable' sizes, the yellow represents
-'suspicious' sizes, and the red represents 'not trustable' sizes, indicating where
-they are in relation to the $Q$ range of the data. The trust region is calculated
-as $1.8 \pi / Q_{max}$ to $0.95 \pi / Q_{min}$.
-
-Finally the *Output* section of the *Parameters* tab will show the
+size. Finally the *Output* section of the *Parameters* tab will show the
 results including whether or not the fitting converged, the reduced
 $\chi^2$, the percent volume fraction of domains (assuming absolute scaled
 data and correct contrast term) along with statistics on the diameter such
@@ -175,10 +169,12 @@ as the mean and median.
    is essentially weighted towards the largest sizes. The number
    distribution may be given in future versions.
 
-In the plot representing the distribution of sizes there are also two red
-vertical lines. These lines represent a conservative estimate of the sizes that
-are well within the $Q$ range of the fit and thus "trustable." Any amount of
-sizes outside that range should be considered highly suspect!
+The second plot, which represents the distribution of sizes that are returned,
+also contains a thin gradient line above the plot. This is the trust bar in which
+green represents 'trustable' sizes, yellow represents 'suspicious' sizes,
+and red represents 'highly suspicious' sizes, indicating where they are in 
+relation to the $Q$ range of the data. The trust region is a conservative estimate,
+calculated as $1.8 \pi / Q_{max}$ to $0.95 \pi / Q_{min}$.
 
 .. note::
 
@@ -199,6 +195,10 @@ magnitudes provides an estimate of the uncertainties on those values and the
 resulting total volume fraction.
 
 .. image:: FullFit.png
+
+One can also generate a PDF report of the results by either clicking on the report
+icon in the navigation bar in the top left corner, or going through *Edit* ->
+*Report Results*.
 
 Refining the fit
 ^^^^^^^^^^^^^^^^
