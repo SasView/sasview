@@ -564,6 +564,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Check if any parameters are ready for fitting
         self.cmdFit.setEnabled(self.haveParamsToFit())
         self.polydispersity_widget.togglePoly(isChecked)
+        self.updateData()
 
     def onPolyToggled(self, isChecked: bool) -> None:
         """
@@ -1675,6 +1676,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         self.magnetism_widget.updateMagnetModelFromList(param_dict)
 
+        # Clean up polydispersity plots if polydispersity has been disabled
+        if not self.chkPolydispersity.isChecked():
+            self.preparePlotsForDeletion(DataRole.ROLE_POLYDISPERSITY)
+
         # update charts
         self.onPlot()
 
@@ -1682,6 +1687,14 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         chi2_repr = GuiUtils.formatNumber(self.chi2, high=True)
         self.lblChi2Value.setText(chi2_repr)
 
+    def preparePlotsForDeletion(self, redundant_role):
+        """If plots with a particular role are no longer required, change their role to ROLE_DELETABLE."""
+        item_model = self.all_data[self.data_index].model()
+        plots = GuiUtils.plotsFromDisplayName(self.data.name, item_model)
+        plot_items = plots.items()
+        for _, plot in plot_items:
+            if plot.plot_role == redundant_role:
+                plot.plot_role = DataRole.ROLE_DELETABLE
 
     def prepareFitters(self, fitter: Fit | None = None, fit_id: int = 0, weight_increase: int = 1) -> tuple[list[Fit], int]:
         """
