@@ -30,7 +30,7 @@ New in Version 6.2.0
 
 This is a feature release, which comes with a number of new features, improvements, and bug fixes as listed below.
 
-This version of SasView is built with Python 3.13, Sasmodels v1.1.0, Sasdata v0.12.1, and Bumps v1.0.5.
+This version of SasView is built with Python 3.13, Sasmodels v1.1.0, Sasdata v0.12.2, and Bumps v1.0.5.
 
 New Features
 ^^^^^^^^^^^^ 
@@ -158,6 +158,7 @@ Bug Fixes
 * Update Licence with number of inst by @jellybean2004 in https://github.com/SasView/sasview/pull/4056
 * SAXS fitting What's New by @krzywon in https://github.com/SasView/sasview/pull/4058
 * Amend docs for invariant slider and image by @jellybean2004 in https://github.com/SasView/sasview/pull/4063
+* Fix call to setSlicer post API change by @krzywon in https://github.com/SasView/sasview/pull/4065
 
 
 Known Issues
