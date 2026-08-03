@@ -76,6 +76,7 @@ if not hasattr(SasviewModel, 'get_weights'):
     SasviewModel.get_weights = get_weights
 
 logger = logging.getLogger(__name__)
+polydispersity_plot_name = "{} {} polydispersity {}"
 
 class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     """
@@ -684,6 +685,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.polydispersity_widget.cmdFitSignal.connect(lambda: self.cmdFit.setEnabled(self.haveParamsToFit()))
         self.polydispersity_widget.updateDataSignal.connect(lambda: self.updateData())
         self.polydispersity_widget.iterateOverModelSignal.connect(lambda: self.iterateOverModel(self.updateFunctionCaption))
+        self.polydispersity_widget.deletePlotSignal.connect(self.setPlotDeletable)
         self.polydispersity_widget.toggledSignal.connect(self.onPolyToggled)
         self.magnetism_widget.cmdFitSignal.connect(lambda: self.cmdFit.setEnabled(self.haveParamsToFit()))
         self.magnetism_widget.updateDataSignal.connect(lambda: self.updateData())
@@ -712,7 +714,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Returns model name, by default M<tab#>, e.g. M1, M2
         """
-        return "M%i" % self.tab_id
+        return f"M{self.tab_id}"
 
     def nameForFittedData(self, name: str) -> str:
         """
@@ -720,7 +722,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         if self.is2D:
             name += "2d"
-        name = "%s [%s]" % (self.modelName(), name)
+        name = f"{self.modelName()} [{name}]"
         return name
 
     def showModelContextMenu(self, position: QtCore.QPoint) -> None:
@@ -1687,14 +1689,23 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         chi2_repr = GuiUtils.formatNumber(self.chi2, high=True)
         self.lblChi2Value.setText(chi2_repr)
 
-    def preparePlotsForDeletion(self, redundant_role):
+    def preparePlotsForDeletion(self, redundant_role: DataRole):
         """If plots with a particular role are no longer required, change their role to ROLE_DELETABLE."""
         item_model = self.all_data[self.data_index].model()
-        plots = GuiUtils.plotsFromDisplayName(self.data.name, item_model)
-        plot_items = plots.items()
-        for _, plot in plot_items:
+        plots = GuiUtils.plotsFromDisplayName(self.data.name, item_model).values()
+        for plot in plots:
             if plot.plot_role == redundant_role:
                 plot.plot_role = DataRole.ROLE_DELETABLE
+
+    def setPlotDeletable(self, parameter_name: str) -> None:
+        """Set the plot role to ROLE_DELETABLE for the polydispersity plot with the given parameter name."""
+        item_model = self.all_data[self.data_index].model()
+        plots = GuiUtils.plotsFromDisplayName(self.data.name, item_model).values()
+        data_name = self.nameForFittedData(self.data.name).split()
+        poly_plot_name = polydispersity_plot_name.format(data_name[0], parameter_name, " ".join(data_name[1:]))
+        poly_plots = [plot for plot in plots if plot.name == poly_plot_name]
+        for plot in poly_plots:
+            plot.plot_role = DataRole.ROLE_DELETABLE
 
     def prepareFitters(self, fitter: Fit | None = None, fit_id: int = 0, weight_increase: int = 1) -> tuple[list[Fit], int]:
         """
@@ -2532,9 +2543,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         for plot in FittingUtilities.plotPolydispersities(return_data.get('model', None)):
             data_id = fitted_data.id.split()
-            plot.id = "{} [{}] {}".format(data_id[0], plot.name, " ".join(data_id[1:]))
+            plot.id = "{} [{} polydispersity] {}".format(data_id[0], plot.name, " ".join(data_id[1:]))
             data_name = fitted_data.name.split()
-            plot.name = " ".join([data_name[0], plot.name] + data_name[1:])
+            plot.name = polydispersity_plot_name.format(data_name[0], plot.name, " ".join(data_name[1:]))
             self.createNewIndex(plot)
             new_plots.append(plot)
 
