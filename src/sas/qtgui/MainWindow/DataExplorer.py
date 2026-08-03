@@ -1410,11 +1410,14 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         Modify existing plot for immediate response and returns True.
         Returns false, if the plot does not exist already.
         """
-        try:  # there might be a list or a single value being passed
+        if isinstance(data, (list, tuple)):
+            if not data:
+                return False
             data = data[0]
-        except TypeError:
-            pass
-        assert type(data).__name__ in ['Data1D', 'Data2D']
+
+        if not isinstance(data, (Data1D, Data2D)):
+            logger.warning("updatePlot received unexpected type: %s", type(data).__name__)
+            return False
 
         ids_keys = list(self.active_plots.keys())
 
