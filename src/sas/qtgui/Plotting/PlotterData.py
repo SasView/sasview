@@ -70,6 +70,7 @@ class Data1D(PlottableData1D, LoadData1D):
         # Q-range slider definitions
         self.show_q_range_sliders = False  # Should sliders be shown?
         self.slider_update_on_move = True  # Should the gui update during the move?
+        self.slider_draggable = True  # Should the q-range slider lines respond to direct dragging?
         self.slider_perspective_name = ""  # Name of the perspective that this slider is associated with
         self.slider_tab_name = ""          # Name of the tab where the data set is
         # The following q-range slider variables are optional but help tie

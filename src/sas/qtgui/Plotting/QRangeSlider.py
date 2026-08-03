@@ -42,11 +42,11 @@ class QRangeSlider(BaseInteractor):
         self.line_min = LineInteractor(self, axes, zorder=zorder, x=self.x_min, y=self.y_marker_min,
                                        input=data.slider_low_q_input, setter=data.slider_low_q_setter,
                                        getter=data.slider_low_q_getter, perspective=data.slider_perspective_name,
-                                       tab=data.slider_tab_name)
+                                       tab=data.slider_tab_name, draggable=data.slider_draggable)
         self.line_max = LineInteractor(self, axes, zorder=zorder, x=self.x_max, y=self.y_marker_max,
                                        input=data.slider_high_q_input, setter=data.slider_high_q_setter,
                                        getter=data.slider_high_q_getter, perspective=data.slider_perspective_name,
-                                       tab=data.slider_tab_name)
+                                       tab=data.slider_tab_name, draggable=data.slider_draggable)
         self.has_move = True
         self.update()
 
@@ -110,7 +110,8 @@ class LineInteractor(BaseInteractor):
     Draw a single vertical line that can be dragged on a plot
     """
     def __init__(self, base: "Plotter", axes: "Plotter.ax", color: str = 'black', zorder: int = 5, x: float = 0.5, y: float = 0.5,
-                 input: list[str] = None, setter: list[str] = None, getter: list[str] = None, perspective: str = None, tab: str = None) -> None:
+                 input: list[str] = None, setter: list[str] = None, getter: list[str] = None, perspective: str = None,
+                 tab: str = None, draggable: bool = True) -> None:
         """ Initialize the line interactor object"""
         BaseInteractor.__init__(self, base, axes, color=color)
         # Plotter object
@@ -130,7 +131,7 @@ class LineInteractor(BaseInteractor):
         self.save_y = self.y_marker
         self.draw(zorder)
         # Is the slider able to move
-        self.has_move = True
+        self.has_move = draggable
         try:
             data_explorer = ol.getObject('DataExplorer')
             self.perspective = data_explorer.parent.loadedPerspectives.get(perspective, None)
@@ -206,6 +207,9 @@ class LineInteractor(BaseInteractor):
 
     def _get_input_or_callback(self, connection_list: list[str] = None) -> QLineEdit | QTextEdit | None:
         """ Returns an input or callback method based on a list of inputs/commands """
+        # If no connection list provided, nothing to do
+        if not connection_list:
+            return None
         connection = None
         if isinstance(connection_list, list):
             connection = self.perspective
@@ -214,7 +218,8 @@ class LineInteractor(BaseInteractor):
                     connection = getattr(connection, item)
                 except Exception:
                     return None
-        return connection
+            return connection
+        return None
 
     def _set_q(self, value: float) -> None:
         """ Call the q setter callback method if it exists """
@@ -268,6 +273,8 @@ class LineInteractor(BaseInteractor):
 
     def move(self, x: float, y: float, ev: QEvent) -> None:
         """ Process move to a new position, making sure that the move is allowed. """
+        if not self.has_move:
+            return
         self.has_move = True
         self.x = x
         if self.base.updateOnMove:
@@ -275,8 +282,16 @@ class LineInteractor(BaseInteractor):
         self.y_marker = self.base.data.y[(np.abs(self.base.data.x - self.x)).argmin()]
         self.update(draw=self.base.updateOnMove)
 
+    def onDrag(self, ev: QEvent) -> bool:
+        """Move the line unless direct dragging is disabled."""
+        if not self.has_move:
+            return True
+        return BaseInteractor.onDrag(self, ev)
+
     def onRelease(self, ev: QEvent) -> bool:
         """ Update the line position when the mouse button is released """
+        if not self.has_move:
+            return True
         # Set the Q value if a callable setter exists otherwise update the attached input
         self._set_q(self.x)
         self.update(draw=True)
