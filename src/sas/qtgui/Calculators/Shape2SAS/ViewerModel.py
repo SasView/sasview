@@ -3,8 +3,8 @@ from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from PySide6.QtCore import QSize
 from PySide6.QtDataVisualization import Q3DScatter, QScatter3DSeries, QScatterDataItem, QValue3DAxis
-from PySide6.QtGui import QColor, QVector3D
-from PySide6.QtWidgets import QGraphicsScene, QGraphicsView, QLabel, QSizePolicy, QSpacerItem, QVBoxLayout, QWidget
+from PySide6.QtGui import QVector3D
+from PySide6.QtWidgets import QLabel, QSizePolicy, QSpacerItem, QVBoxLayout, QWidget
 
 from sas.qtgui.Calculators.Shape2SAS.PlotAspects.plotAspects import ViewerPlotDesign
 
@@ -14,8 +14,44 @@ from sas.sascalc.shape2sas.Models import ModelPointDistribution
 from sas.sascalc.shape2sas.TheoreticalScattering import TheoreticalScattering
 
 
+class SquarePlotContainer(QWidget):
+    """Container that keeps its child canvas square and centred."""
+
+    def __init__(self, canvas, parent=None):
+        super().__init__(parent)
+
+        self.canvas = canvas
+        self.canvas.setParent(self)
+
+        self.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Expanding,
+        )
+
+        # Prevent the combined layout from crushing the plot completely.
+        self.setMinimumSize(QSize(250, 250))
+
+    def resizeEvent(self, event):
+        """Resize the canvas to be square and centred within the container."""
+        super().resizeEvent(event)
+
+        width = self.width()
+        height = self.height()
+
+        # Use whichever available dimension is smaller.
+        side = min(width, height)
+
+        # Centre the square canvas inside the container.
+        x = (width - side) // 2
+        y = (height - side) // 2
+
+        self.canvas.setGeometry(x, y, side, side)
+        self.canvas.draw_idle()
+
+
 class ViewerModel(QWidget):
     """Graphics view of designed model"""
+
     def __init__(self, parent=None):
         super().__init__()
 
@@ -53,7 +89,7 @@ class ViewerModel(QWidget):
 
         self.initialiseAxis()
 
-        #General controls
+        # General controls
         ### xy, xz, yz buttons (Class ViewerButtons)
         self.viewerButtons = ViewerButtons()
         self.viewerModelRadius = ViewerModelRadius()
@@ -64,17 +100,29 @@ class ViewerModel(QWidget):
         self.scatter.scene().activeCamera().zoomLevelChanged.connect(self.onZoomChanged)
         self.viewerModelRadius.doubleSpinBox.valueChanged.connect(self.setZoom)
 
-        #2D plot of P(q)
-        self.scattering = QGraphicsView()
-        self.scattering.setMinimumSize(QSize(271, 271))
-        self.scattering.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        self.scattering.setBackgroundBrush(QColor(255, 255, 255))
-        self.scene = QGraphicsScene()
-        self.scattering.setScene(self.scene)
+        # 2D plot of P(q)
+        self.scatteringFigure = Figure(dpi=120)
+        self.scatteringFigure.subplots_adjust(
+            left=0.16,
+            right=0.96,
+            top=0.90,
+            bottom=0.15,
+        )
+
+        self.scatteringAxes = self.scatteringFigure.add_subplot(111)
+
+        self.scattering = FigureCanvas(self.scatteringFigure)
+        self.scattering.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Expanding,
+        )
+
+        # Create a container to keep the scattering plot square and centered
+        self.scatteringContainer = SquarePlotContainer(self.scattering)
 
         ###Layout for GUI
         layout = QVBoxLayout()
-        layout.setContentsMargins(0, 10, 0, 0)#remove margins
+        layout.setContentsMargins(0, 10, 0, 0)  # remove margins
 
         spacer = QSpacerItem(271, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         subunitTableLabel = QLabel("Scattering of P(q)")
@@ -84,36 +132,26 @@ class ViewerModel(QWidget):
         layout.addWidget(self.viewerModelRadius)
         layout.addItem(spacer)
         layout.addWidget(subunitTableLabel)
-        layout.addWidget(self.scattering)
-
-        self.setLayout(layout)
-
-        self.Viewmodel_modul = QWidget()
-        self.Viewmodel_modul.setLayout(layout)
 
     def setScatteringPlot(self, theo: TheoreticalScattering):
-        """Set the scattering plot"""
+        """Set the scattering plot."""
 
-        self.scene.clear()
+        ax = self.scatteringAxes
+        ax.clear()
 
-        figure = Figure()
-        ax = figure.add_subplot(111)
         ax.set_title("P(q) plot")
         ax.set_xlabel("q")
         ax.set_ylabel("P(q)")
+
         ax.plot(theo.q, theo.I, "-k", label="P(q)")
 
-        ax.set_xscale('log')
-        ax.set_yscale('log')
+        ax.set_xscale("log")
+        ax.set_yscale("log")
 
-        ax.legend()
         ax.grid(True)
 
-
-        canvas = FigureCanvas(figure)
-        self.scene.addWidget(canvas)
-        self.scattering.fitInView(self.scene.sceneRect())
-        self.scatter.show()
+        # Redraw at the canvas's current widget size.
+        self.scattering.draw_idle()
 
     def initialiseAxis(self):
         """Initialise axis for the model"""
@@ -159,7 +197,7 @@ class ViewerModel(QWidget):
         max_range = max(x_max - x_min, y_max - y_min, z_max - z_min)
 
         # Add some padding
-        half_range = (max_range*1.1) / 2
+        half_range = (max_range * 1.1) / 2
 
         # Set equal ranges for all axes centered on their respective centers
         self.X_ax.setRange(x_center - half_range, x_center + half_range)
@@ -176,8 +214,8 @@ class ViewerModel(QWidget):
         colours = design.colour
 
         for series in self.dict_series.values():
-           data = []
-           series.dataProxy().resetArray(data)
+            data = []
+            series.dataProxy().resetArray(data)
 
         # Check if we have any data at all
         if not distr.x or len(distr.x) == 0:
@@ -190,9 +228,7 @@ class ViewerModel(QWidget):
         for subunit in range(len(colours)):
             # Skip empty subunits - handle numpy arrays properly
             try:
-                if (subunit >= len(distr.x)
-                        or not hasattr(distr.x[subunit], '__len__')
-                        or len(distr.x[subunit]) == 0):
+                if subunit >= len(distr.x) or not hasattr(distr.x[subunit], "__len__") or len(distr.x[subunit]) == 0:
                     continue
             except (ValueError, TypeError):
                 # Handle numpy array comparison issues
@@ -201,7 +237,11 @@ class ViewerModel(QWidget):
             series = self.dict_series[colours[subunit]]
             data = []
             for index in range(len(distr.x[subunit])):
-                data.append(QScatterDataItem(QVector3D(distr.x[subunit][index], distr.y[subunit][index], distr.z[subunit][index])))
+                data.append(
+                    QScatterDataItem(
+                        QVector3D(distr.x[subunit][index], distr.y[subunit][index], distr.z[subunit][index])
+                    )
+                )
 
             minx = min(minx, min(distr.x[subunit]))
             maxx = max(maxx, max(distr.x[subunit]))
@@ -237,19 +277,19 @@ class ViewerModel(QWidget):
 
     def setClearScatteringPlot(self):
         """Clear the Scattering plot"""
-        self.scene.clear()
+        self.scatteringAxes.clear()
+        self.scattering.draw_idle()
 
     def setClearModelPlot(self):
         """Clear the model plot"""
 
-        #reset model
+        # reset model
         for series in self.dict_series.values():
             data = []
             series.dataProxy().resetArray(data)
 
-        #reset view
-        self.scene.clear()
+        # reset view
         self.scatter.scene().activeCamera().setCameraPosition(0, 0, 110)
 
-        #reset axis
+        # reset axis
         self.setAxis((-10, 10), (-10, 10), (-10, 10))

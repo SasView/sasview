@@ -22,6 +22,7 @@ from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
 from sas.qtgui.Plotting.QRangeSlider import QRangeSlider
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
 from sas.qtgui.Plotting.SetGraphRange import SetGraphRange
+from sas.qtgui.Plotting.TrustBar import TrustBar
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +42,8 @@ class PlotterWidget(PlotterBase):
         self.plot_lines = {}
         # Dictionary of slider interactors {plot_id:interactor}
         self.sliders = {}
+
+        self.trust_bar = TrustBar(self.ax, self.canvas)
 
         # Window for text add
         self.addText = AddText(self)
@@ -314,6 +317,10 @@ class PlotterWidget(PlotterBase):
             if existing_slider is not None and not existing_slider.is_visible:
                 sliders.toggle()
             self.sliders[data.name] = sliders
+
+        # Draw size-distribution trust bar if requested.
+        if data.show_trust_bar:
+            self.trust_bar.draw(data)
 
         # refresh canvas
         self.canvas.draw_idle()
@@ -790,6 +797,21 @@ class PlotterWidget(PlotterBase):
         if id in self.sliders.keys():
             slider = self.sliders.get(id)
             slider.toggle()
+
+    def update_slider_positions(self, plot_name: str, state=None) -> None:
+        """Update slider artist positions for a given plot in-place and redraw the canvas."""
+        slider = self.sliders[plot_name]
+
+        if state is not None and getattr(state, "dragging_line_position", None) is not None:
+            if state.working_line_id == 0:
+                slider.line_min.update(x=state.dragging_line_position, draw=False)
+            else:
+                slider.line_max.update(x=state.dragging_line_position, draw=False)
+        else:
+            slider.line_min.inputChanged()
+            slider.line_max.inputChanged()
+
+        self.canvas.draw_idle()
 
     def onFreeze(self, id):
         """

@@ -58,7 +58,7 @@
      <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -71,14 +71,30 @@
      <item>
       <widget class="QPushButton" name="prevButton">
        <property name="text">
-        <string>Prev</string>
+        <string>‹</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="lblPage">
+       <property name="minimumSize">
+        <size>
+         <width>80</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>TextLabel</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignmentFlag::AlignCenter</set>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="nextButton">
        <property name="text">
-        <string>Next</string>
+        <string>›</string>
        </property>
       </widget>
      </item>

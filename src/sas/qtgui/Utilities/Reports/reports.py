@@ -24,6 +24,18 @@ from sas.system import SAS_RESOURCES
 logger = logging.getLogger(__name__)
 
 
+def format_report_parameters(parameters: dict[str, Any], empty_value: str = "-") -> dict[str, Any]:
+    """Return a report-friendly copy of a parameter dictionary."""
+    formatted_parameters: dict[str, Any] = {}
+    for key, value in parameters.items():
+        nice_key = " ".join(part.capitalize() for part in key.split("_"))
+        if isinstance(value, str) and value.strip() == "":
+            formatted_parameters[nice_key] = empty_value
+        else:
+            formatted_parameters[nice_key] = value
+    return formatted_parameters
+
+
 #
 # Utility classes
 #
