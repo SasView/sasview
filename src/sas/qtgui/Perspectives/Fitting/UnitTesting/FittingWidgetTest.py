@@ -274,8 +274,8 @@ class FittingWidgetTest:
         # Try to change back to default
         widget.cbCategory.setCurrentIndex(0)
 
-        # Observe no such luck
-        assert widget.cbCategory.currentIndex() == 8
+        # Restores the previous category index (not a fixed combo position).
+        assert widget.cbCategory.currentIndex() == category_index
         assert widget.cbModel.count() == 29
 
         # Set the structure factor
@@ -656,7 +656,7 @@ class FittingWidgetTest:
         Test the magnetic model setup
         """
         widget.show()
-        # Change the category index so we have a model available
+        # Use a compiled model with magnetism (pure-Python models omit it)
         category_index = widget.cbCategory.findText("Sphere")
         widget.cbCategory.setCurrentIndex(category_index)
         model_index = widget.cbModel.findText("core_shell_sphere")
@@ -739,7 +739,7 @@ class FittingWidgetTest:
         # Change the category index so we have a model available
         category_index = widget.cbCategory.findText("Sphere")
         widget.cbCategory.setCurrentIndex(category_index)
-        model_index = widget.cbModel.findText("adsorbed_layer")
+        model_index = widget.cbModel.findText("sphere")
         widget.cbModel.setCurrentIndex(model_index)
 
         # Check the enablement/text
