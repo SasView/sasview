@@ -2543,7 +2543,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         for plot in FittingUtilities.plotPolydispersities(return_data.get('model', None)):
             data_id = fitted_data.id.split()
-            plot.id = "{} [{} polydispersity] {}".format(data_id[0], plot.name, " ".join(data_id[1:]))
+            plot.id = f"{data_id[0]} [{plot.name} polydispersity] {' '.join(data_id[1:])}"
             data_name = fitted_data.name.split()
             plot.name = polydispersity_plot_name.format(data_name[0], plot.name, " ".join(data_name[1:]))
             self.createNewIndex(plot)
