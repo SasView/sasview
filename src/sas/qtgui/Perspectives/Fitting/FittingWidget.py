@@ -2054,7 +2054,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if kernel_module is None:
             # mismatch between "name" attribute and actual filename.
             curr_model = self.models[model_name]
-            name, _ = os.path.splitext(os.path.basename(curr_model.filename))
+            filename = getattr(curr_model, 'filename', None)
+            if filename is None:
+                logger.error("Can't find the model file for %s", model_name)
+                return
+            name, _ = os.path.splitext(os.path.basename(filename))
             try:
                 kernel_module = generate.load_kernel_module(name)
             except ModuleNotFoundError as ex:
