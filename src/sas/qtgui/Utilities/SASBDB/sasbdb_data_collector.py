@@ -38,6 +38,85 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
+# Unit strings that loaders may declare alongside a value.
+ANGSTROM_UNITS = frozenset({'a', 'ang', 'angstrom', 'angstroms',
+                            '\u00c5', '\u212b'})
+NANOMETRE_UNITS = frozenset({'nm', 'nanometer', 'nanometre',
+                             'nanometers', 'nanometres'})
+KELVIN_UNITS = frozenset({'k', 'kelvin'})
+CELSIUS_UNITS = frozenset({'c', 'degc', 'degreec', 'celsius', '\u00b0c'})
+
+ANGSTROM_PER_NM = 10.0
+KELVIN_OFFSET = 273.15
+# Thresholds for the magnitude heuristics used when no unit is declared.
+WAVELENGTH_ANGSTROM_THRESHOLD_NM = 1.0
+TEMPERATURE_KELVIN_THRESHOLD_C = 100.0
+
+
+def _declared_unit(obj: object, attribute: str) -> str | None:
+    """
+    Return the normalised unit string declared on an object, if any.
+
+    :param obj: Object that may carry a ``*_unit`` attribute
+    :param attribute: Name of the unit attribute to read
+    :return: Lower-case unit string without spaces, or None if the object
+        declares no usable unit
+    """
+    unit = getattr(obj, attribute, None)
+    if not isinstance(unit, str):
+        return None
+    return unit.strip().lower().replace(' ', '') or None
+
+
+def _wavelength_in_nm(wavelength: float, unit: str | None) -> float:
+    """
+    Convert a wavelength to nanometres.
+
+    The declared unit is used when it is recognised. Otherwise the value is
+    assumed to be in Angstrom when it exceeds
+    ``WAVELENGTH_ANGSTROM_THRESHOLD_NM``; that guess can be wrong for, e.g.,
+    long-wavelength neutrons quoted in nm.
+
+    :param wavelength: Wavelength value as stored in the data object
+    :param unit: Normalised unit string, or None if unknown
+    :return: Wavelength in nm
+    """
+    if unit in NANOMETRE_UNITS:
+        return wavelength
+    if unit in ANGSTROM_UNITS:
+        return wavelength / ANGSTROM_PER_NM
+    if unit is not None:
+        logger.debug("Unrecognised wavelength unit '%s'; "
+                     "falling back to magnitude heuristic", unit)
+    if wavelength > WAVELENGTH_ANGSTROM_THRESHOLD_NM:
+        return wavelength / ANGSTROM_PER_NM
+    return wavelength
+
+
+def _temperature_in_celsius(temperature: float, unit: str | None) -> float:
+    """
+    Convert a temperature to degrees Celsius.
+
+    The declared unit is used when it is recognised. Otherwise the value is
+    assumed to be in Kelvin when it exceeds
+    ``TEMPERATURE_KELVIN_THRESHOLD_C``; that guess can be wrong for, e.g.,
+    cryogenic storage temperatures quoted in Kelvin below 100 K.
+
+    :param temperature: Temperature value as stored in the data object
+    :param unit: Normalised unit string, or None if unknown
+    :return: Temperature in degrees Celsius
+    """
+    if unit in CELSIUS_UNITS:
+        return temperature
+    if unit in KELVIN_UNITS:
+        return temperature - KELVIN_OFFSET
+    if unit is not None:
+        logger.debug("Unrecognised temperature unit '%s'; "
+                     "falling back to magnitude heuristic", unit)
+    if temperature > TEMPERATURE_KELVIN_THRESHOLD_C:
+        return temperature - KELVIN_OFFSET
+    return temperature
+
 
 def _meta_str(meta: dict, *keys: str) -> str | None:
     for key in keys:
@@ -148,11 +227,9 @@ class SASBDBDataCollector:
             if hasattr(data.source, 'wavelength'):
                 wavelength = data.source.wavelength
                 if wavelength:
-                    # Convert from Angstrom to nm if needed
-                    if wavelength > 1:  # Likely in Angstrom
-                        sample.wavelength = wavelength / 10.0  # Convert to nm
-                    else:
-                        sample.wavelength = wavelength
+                    sample.wavelength = _wavelength_in_nm(
+                        wavelength,
+                        _declared_unit(data.source, 'wavelength_unit'))
 
         if hasattr(data, 'detector') and data.detector and len(data.detector) > 0:
             detector = data.detector[0]
@@ -160,26 +237,19 @@ class SASBDBDataCollector:
                 # Convert from mm to m
                 sample.sample_detector_distance = detector.distance / 1000.0
 
-            if hasattr(detector, 'pixel_size'):
-                pixel_size = detector.pixel_size
-                if hasattr(pixel_size, 'x') and pixel_size.x:
-                    # Store pixel size in mm as string
-                    sample.beamline_instrument = f"Pixel size: {pixel_size.x} mm"
-
         if hasattr(data, 'sample') and data.sample:
             if hasattr(data.sample, 'temperature') and data.sample.temperature:
-                temp = data.sample.temperature
-                # Check if conversion needed (assuming Celsius if reasonable, Kelvin if > 100)
-                if temp > 100:
-                    sample.cell_temperature = temp - 273.15  # Convert from Kelvin
-                else:
-                    sample.cell_temperature = temp
+                sample.cell_temperature = _temperature_in_celsius(
+                    data.sample.temperature,
+                    _declared_unit(data.sample, 'temperature_unit'))
 
         # Extract metadata dictionary if available
         if hasattr(data, 'meta_data') and data.meta_data:
             meta = data.meta_data
             sample.experiment_date = _meta_str(meta, 'experiment_date', 'date')
-            sample.beamline_instrument = _meta_str(meta, 'beamline', 'instrument')
+            beamline = _meta_str(meta, 'beamline', 'instrument')
+            if beamline:
+                sample.beamline_instrument = beamline
             sample.concentration = _meta_float(meta, 'concentration')
             sample.experimental_molecular_weight = _meta_float(
                 meta, 'molecular_weight', 'mw')
