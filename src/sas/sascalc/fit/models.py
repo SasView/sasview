@@ -155,6 +155,13 @@ def find_plugin_models():
             path = os.path.abspath(os.path.join(plugins_dir, filename))
             try:
                 model = load_custom_model(path)
+                # Mixture models given a custom name (e.g. built with
+                # load_model_info('A+B') and make_model_from_info) have
+                # filename set to None. We need to point it back at the plugin
+                # file so the model can be reloaded when the model name
+                # does not match the file name.
+                if getattr(model, 'filename', None) is None:
+                    model.filename = path
                 # TODO: add [plug-in] tag to model name in sasview_model
                 #if not model.name.startswith(PLUGIN_NAME_BASE):
                 #    model.name = PLUGIN_NAME_BASE + model.name
