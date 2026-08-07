@@ -393,12 +393,14 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         """
         if not self.is_running:
             return
-        self.is_running = False
+        # stop the fit thread
+        self.calc_fit.stop()
+
         #re-enable the Fit button
         self.cmdFit.setStyleSheet(BG_DEFAULT)
         self.cmdFit.setText("Fit")
-        # stop the fit thread
-        self.calc_fit.stop()
+
+        self.is_running = False
         # re-enable the fit pages participating in the fit
         self.parent.fittingStoppedSignal.emit(self.getTabsForFit())
         self.parent.communicator.statusBarUpdateSignal.emit("Fitting cancelled.")
