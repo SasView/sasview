@@ -456,6 +456,40 @@ class TestSASBDBDataCollector:
         # Should convert from mm to m
         assert sample.sample_detector_distance == 2.0
 
+    def test_collect_from_data_wavelength_declared_unit(self, collector):
+        """Declared wavelength unit wins over the magnitude heuristic"""
+        data = Data1D(x=[0.01, 0.02], y=[100, 50])
+        source = MagicMock()
+        source.wavelength = 1.5  # nm, i.e. long-wavelength neutrons
+        source.wavelength_unit = 'nm'
+        data.source = source
+
+        sample, _ = collector.collect_from_data(data)
+
+        assert abs(sample.wavelength - 1.5) < 0.001
+
+    def test_collect_from_data_temperature_declared_unit(self, collector):
+        """Declared temperature unit wins over the magnitude heuristic"""
+        data = Data1D(x=[0.01, 0.02], y=[100, 50])
+        sample_obj = MagicMock()
+        sample_obj.temperature = 77.0  # Kelvin, below the heuristic threshold
+        sample_obj.temperature_unit = 'K'
+        data.sample = sample_obj
+
+        sample, _ = collector.collect_from_data(data)
+
+        assert abs(sample.cell_temperature - (77.0 - 273.15)) < 0.1
+
+    def test_collect_from_data_metadata_keeps_instrument_string(self, collector):
+        """Metadata without a beamline key must not clear the instrument"""
+        data = Data1D(x=[0.01, 0.02], y=[100, 50])
+        data.instrument = "BL12 - ESRF"
+        data.meta_data = {'concentration': 5.0}
+
+        sample, _ = collector.collect_from_data(data)
+
+        assert sample.beamline_instrument == "BL12 - ESRF"
+
     def test_collect_from_data_metadata_variations(self, collector):
         """Test collecting metadata with various key names"""
         data = Data1D(x=[0.01, 0.02], y=[100, 50])
