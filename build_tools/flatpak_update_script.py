@@ -20,6 +20,22 @@ def prefer_wheels_str(prefer_wheels_file: Path) -> str:
     return ",".join(file_contents)
 
 
+def generate_requirements(requirements_path: Path, output_path: Path, prefer_wheels: str):
+    subprocess.call(
+        [
+            "flatpak-pip-generator",
+            "-r",
+            requirements_path,
+            "-o",
+            output_path / "python3-requirements.json",
+            "--prefer-wheels",
+            prefer_wheels,
+            "--runtime",
+            "org.kde.Sdk//6.11",
+        ]
+    )
+
+
 @command
 @option("--output-dir", default=Path.cwd() / "outputs")
 def main(output_dir: Path):
@@ -40,16 +56,5 @@ def main(output_dir: Path):
     prefer_wheels = prefer_wheels_str(prefer_wheels_file)
     if not output_dir.is_dir():
         output_dir.mkdir()
-    subprocess.call(
-        [
-            "flatpak-pip-generator",
-            "-r",
-            requirements_file,
-            "-o",
-            output_dir / "python3-requirements.json",
-            "--prefer-wheels",
-            prefer_wheels,
-            "--runtime",
-            "org.kde.Sdk//6.11",
-        ]
-    )
+    generate_requirements(requirements_file, output_dir, prefer_wheels)
+    generate_requirements(requirements_dev_file, output_dir, prefer_wheels)
