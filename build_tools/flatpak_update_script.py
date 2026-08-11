@@ -6,4 +6,23 @@
 # ]
 # ///
 
-print("hello world!")
+
+import subprocess
+from sys import stderr, exit
+from pathlib import Path
+
+
+def main():
+    try:
+        subprocess.call(["flatpak-pip-generator", "--help"])
+    except FileNotFoundError:
+        print(
+            "Error: you need to have the program 'flatpak-pip-generator' on your path. See the README for more information.",
+            file=stderr,
+        )
+        exit(1)
+    requirements_file = Path("./requirements-release-ubuntu-latest.txt")
+    requirements_dev_file = Path("./requirements-dev.txt")
+    if not (requirements_file.exists() and requirements_dev_file.exists()):
+        print("Your working directory needs to be the same as the requirements files.", file=stderr)
+        exit(1)
