@@ -11,9 +11,12 @@
 import subprocess
 from sys import stderr, exit
 from pathlib import Path
+from click import command, option
 
 
-def main():
+@command
+@option("--output-dir", default=Path.cwd() / "outputs")
+def main(output_dir: Path):
     try:
         subprocess.call(["flatpak-pip-generator", "--help"])
     except FileNotFoundError:
