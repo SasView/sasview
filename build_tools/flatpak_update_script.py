@@ -59,3 +59,7 @@ def main(output_dir: Path):
         output_dir.mkdir()
     generate_requirements(requirements_file, output_dir / "python3-requirements.json", prefer_wheels)
     generate_requirements(requirements_dev_file, output_dir / "python3-requirements-dev.json", prefer_wheels)
+
+
+if __name__ == "__main__":
+    main()
