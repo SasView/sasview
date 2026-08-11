@@ -27,7 +27,7 @@ def generate_requirements(requirements_path: Path, output_path: Path, prefer_whe
             "-r",
             requirements_path,
             "-o",
-            output_path / "python3-requirements.json",
+            output_path,
             "--prefer-wheels",
             prefer_wheels,
             "--runtime",
@@ -56,5 +56,5 @@ def main(output_dir: Path):
     prefer_wheels = prefer_wheels_str(prefer_wheels_file)
     if not output_dir.is_dir():
         output_dir.mkdir()
-    generate_requirements(requirements_file, output_dir, prefer_wheels)
-    generate_requirements(requirements_dev_file, output_dir, prefer_wheels)
+    generate_requirements(requirements_file, output_dir / "python3-requirements.json", prefer_wheels)
+    generate_requirements(requirements_dev_file, output_dir / "python3-requirements-dev.json", prefer_wheels)
