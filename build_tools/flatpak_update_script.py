@@ -24,6 +24,7 @@ def main():
         exit(1)
     requirements_file = Path("./requirements-release-ubuntu-latest.txt")
     requirements_dev_file = Path("./requirements-dev.txt")
-    if not (requirements_file.exists() and requirements_dev_file.exists()):
+    prefer_wheels_file = Path("./prefer_wheels.txt")
+    if not (requirements_file.exists() and requirements_dev_file.exists() and prefer_wheels_file.exists()):
         print("Your working directory needs to be the same as the requirements files.", file=stderr)
         exit(1)
