@@ -3,6 +3,7 @@
 # requires-python = ">=3.14"
 # dependencies = [
 #     "click>=8.4.2",
+#     "packaging>=26.3",
 #     "requirements-parser>=0.13.1",
 # ]
 # ///
