@@ -32,7 +32,8 @@ def generate_requirements(requirements_path: Path, output_path: Path, prefer_whe
             prefer_wheels,
             "--runtime",
             "org.kde.Sdk//6.11",
-        ]
+        ],
+        stderr=subprocess.STDOUT,
     )
 
 
