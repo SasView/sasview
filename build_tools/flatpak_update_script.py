@@ -14,6 +14,12 @@ from pathlib import Path
 from click import command, option
 
 
+def prefer_wheels_str(prefer_wheels_file: Path) -> str:
+    with open(prefer_wheels_file) as f:
+        file_contents = f.readlines()
+    return ",".join(file_contents)
+
+
 @command
 @option("--output-dir", default=Path.cwd() / "outputs")
 def main(output_dir: Path):
@@ -31,3 +37,19 @@ def main(output_dir: Path):
     if not (requirements_file.exists() and requirements_dev_file.exists() and prefer_wheels_file.exists()):
         print("Your working directory needs to be the same as the requirements files.", file=stderr)
         exit(1)
+    prefer_wheels = prefer_wheels_str(prefer_wheels_file)
+    if not output_dir.is_dir():
+        output_dir.mkdir()
+    subprocess.call(
+        [
+            "flatpak-pip-generator",
+            "-r",
+            requirements_file,
+            "-o",
+            output_dir / "python3-requirements.json",
+            "--prefer-wheels",
+            prefer_wheels,
+            "--runtime",
+            "org.kde.Sdk//6.11",
+        ]
+    )
