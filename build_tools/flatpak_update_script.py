@@ -2,6 +2,7 @@
 # /// script
 # requires-python = ">=3.14"
 # dependencies = [
+#     "click>=8.4.2",
 #     "requirements-parser>=0.13.1",
 # ]
 # ///
