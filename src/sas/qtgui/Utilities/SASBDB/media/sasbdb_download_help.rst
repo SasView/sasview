@@ -23,11 +23,13 @@ Dataset Identifier
 
 Enter a valid SASBDB dataset identifier in the input field. The identifier can be:
 
-- A 7-character SASBDB code (e.g., ``SASDN24``)
+- A 7-character SASBDB code: ``SAS`` followed by four alphanumeric characters
+  (e.g., ``SASDN24``, ``SASD2B2``)
 - The identifier is case-insensitive and will be automatically normalized
 
 Examples of valid identifiers:
 - ``SASDN24``
+- ``SASD2B2``
 - ``sasdn24`` (will be converted to uppercase)
 
 Download Process

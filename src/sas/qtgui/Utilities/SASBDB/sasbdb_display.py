@@ -5,7 +5,7 @@ Format SASBDB metadata for dialogs, logs, and data summary panels.
 import ast
 import re
 
-from .sasbdb_api import SASBDBDatasetInfo
+from sas.qtgui.Utilities.SASBDB.sasbdb_parse import SASBDBDatasetInfo
 
 
 def is_sasbdb_data(data) -> bool:
@@ -23,19 +23,35 @@ def metadata_summary(info: SASBDBDatasetInfo) -> str:
     if info.molecule_name:
         lines.append(f"Molecule: {info.molecule_name}")
     if info.concentration:
-        lines.append(f"Concentration: {info.concentration} {info.concentration_unit}")
+        lines.append(
+            f"Concentration: {info.concentration} {info.concentration_unit}"
+        )
     if info.buffer_description:
         lines.append(f"Buffer: {info.buffer_description}")
     if info.instrument:
         lines.append(f"Instrument: {info.instrument}")
     if info.wavelength:
-        lines.append(f"Wavelength: {info.wavelength} {info.wavelength_unit}")
+        lines.append(
+            f"Wavelength: {info.wavelength} {info.wavelength_unit}"
+        )
     if info.temperature:
-        lines.append(f"Temperature: {info.temperature} {info.temperature_unit}")
+        lines.append(
+            f"Temperature: {info.temperature} {info.temperature_unit}"
+        )
+    # Numeric fields use `is not None` so valid zeros are still shown.
     if info.rg is not None:
-        lines.append(_format_rg_line(info.rg, info.rg_error, style="label"))
+        lines.append(
+            _format_value_with_error(
+                "Rg", info.rg, info.rg_error, style="label",
+                value_format=".2f", error_format=".2f", unit=" Å",
+            )
+        )
     if info.i0 is not None:
-        lines.append(_format_i0_line(info.i0, info.i0_error, style="label"))
+        lines.append(
+            _format_value_with_error(
+                "I(0)", info.i0, info.i0_error, style="label",
+            )
+        )
     if info.dmax is not None:
         lines.append(f"Dmax: {info.dmax} Å")
     if info.molecular_weight is not None:
@@ -103,28 +119,29 @@ def format_data_panel(data) -> str:
     return "\n".join(line + "\n" for line in lines)
 
 
-def _format_rg_line(rg, rg_error=None, style="label") -> str:
-    if style == "panel":
-        text = f"Rg = {rg:.2f}"
-        if rg_error is not None:
-            text += f" ± {rg_error:.2f}"
-        return text + " Å"
-    rg_text = f"Rg: {rg:.2f}"
-    if rg_error:
-        rg_text += f" ± {rg_error:.2f}"
-    return f"{rg_text} Å"
-
-
-def _format_i0_line(i0, i0_error=None, style="label") -> str:
-    if style == "panel":
-        text = f"I(0) = {i0:.4e}"
-        if i0_error is not None:
-            text += f" ± {i0_error:.4e}"
-        return text
-    text = f"I(0): {i0}"
-    if i0_error:
-        text += f" ± {i0_error}"
-    return text
+def _format_value_with_error(
+    name: str,
+    value,
+    error=None,
+    style: str = "label",
+    value_format: str | None = None,
+    error_format: str | None = None,
+    unit: str = "",
+) -> str:
+    """Format a named value with optional uncertainty for label or panel style."""
+    value_text = (
+        format(value, value_format) if value_format is not None else str(value)
+    )
+    separator = " = " if style == "panel" else ": "
+    text = f"{name}{separator}{value_text}"
+    if error is not None:
+        error_text = (
+            format(error, error_format)
+            if error_format is not None
+            else str(error)
+        )
+        text += f" ± {error_text}"
+    return text + unit
 
 
 def _instrument_parts_from_dict(parsed_dict: dict) -> list[str]:
@@ -224,9 +241,28 @@ def _sample_line_from_data(data) -> str | None:
 def _structural_lines_from_meta(meta: dict) -> list[str]:
     lines = []
     if meta.get("SASBDB_Rg") is not None:
-        lines.append(_format_rg_line(meta["SASBDB_Rg"], meta.get("SASBDB_Rg_error"), style="panel"))
+        lines.append(
+            _format_value_with_error(
+                "Rg",
+                meta["SASBDB_Rg"],
+                meta.get("SASBDB_Rg_error"),
+                style="panel",
+                value_format=".2f",
+                error_format=".2f",
+                unit=" Å",
+            )
+        )
     if meta.get("SASBDB_I0") is not None:
-        lines.append(_format_i0_line(meta["SASBDB_I0"], meta.get("SASBDB_I0_error"), style="panel"))
+        lines.append(
+            _format_value_with_error(
+                "I(0)",
+                meta["SASBDB_I0"],
+                meta.get("SASBDB_I0_error"),
+                style="panel",
+                value_format=".4e",
+                error_format=".4e",
+            )
+        )
     if meta.get("SASBDB_Dmax") is not None:
         lines.append(f"Dmax = {meta['SASBDB_Dmax']:.2f} Å")
     if meta.get("SASBDB_MW") is not None:

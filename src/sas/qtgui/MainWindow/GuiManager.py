@@ -54,6 +54,8 @@ from sas.qtgui.Utilities.PluginManager import PluginManager
 from sas.qtgui.Utilities.Preferences.PreferencesPanel import PreferencesPanel
 from sas.qtgui.Utilities.Reports.ReportDialog import ReportDialog
 from sas.qtgui.Utilities.ResultPanel import ResultPanel
+from sas.qtgui.Utilities.SASBDB.sasbdb_loader import load_downloaded_dataset
+from sas.qtgui.Utilities.SASBDB.SASBDBDownloadDialog import SASBDBDownloadDialog
 
 # General SAS imports
 from sas.qtgui.Utilities.SasviewLogger import setup_qt_logging
@@ -772,9 +774,6 @@ class GuiManager:
 
         Opens a dialog to download and load a dataset from SASBDB.
         """
-        from sas.qtgui.Utilities.SASBDB.sasbdb_loader import load_downloaded_dataset
-        from sas.qtgui.Utilities.SASBDB.SASBDBDownloadDialog import SASBDBDownloadDialog
-
         dialog = SASBDBDownloadDialog(parent=self._workspace)
         if dialog.exec():
             load_downloaded_dataset(

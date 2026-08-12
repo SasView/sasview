@@ -9,14 +9,21 @@ import tempfile
 
 import requests
 
-from .sasbdb_parse import SASBDBDatasetInfo, parseMetadata
+from sas.qtgui.Utilities.SASBDB.sasbdb_parse import (
+    SASBDBDatasetInfo,
+    parseMetadata,
+)
 
 logger = logging.getLogger(__name__)
 
 SASBDB_API_BASE = "https://www.sasbdb.org/rest-api"
 SASBDB_SITE_BASE = "https://www.sasbdb.org"
-_SASBDB_ID_PATTERN = re.compile(r"^SAS[A-Z]{2}\d+$")
-INVALID_DATASET_ID_MESSAGE = "Enter the full 7-character SASBDB code (e.g. SASDN24)."
+# SASBDB entry codes are 7 characters: "SAS" + 4 alphanumeric characters
+# (e.g. SASDN24, SASD2B2).
+_SASBDB_ID_PATTERN = re.compile(r"^SAS[A-Z0-9]{4}$")
+INVALID_DATASET_ID_MESSAGE = (
+    "Enter the full 7-character SASBDB code (e.g. SASDN24 or SASD2B2)."
+)
 
 _URL_FIELDS = (
     "intensities_data", "intensitiesData", "data_file_url", "dataFileUrl",
@@ -29,31 +36,46 @@ _URL_FIELDS = (
 _URL_NESTED = ("entry", "data", "files", "experimental_data", "scattering_data")
 _URL_ITEM_KEYS = ("url", "path", "file", "file_url", "download_url")
 _KNOWN_EXTENSIONS = {".dat", ".txt", ".csv", ".out", ".asc"}
+_FILE_TYPE_EXTENSIONS = (
+    (["csv"], ".csv"),
+    (["txt", "text"], ".txt"),
+    (["dat", "data"], ".dat"),
+)
 
 
 def getDatasetMetadata(dataset_id: str) -> dict | None:
     """Fetch dataset metadata from the SASBDB API."""
     normalized_id = _normalizeDatasetId(dataset_id)
     if not normalized_id:
-        logger.error("Invalid dataset ID format: %s", dataset_id)
+        logger.debug("Invalid dataset ID format: %s", dataset_id)
         return None
 
     endpoint = f"{SASBDB_API_BASE}/entry/summary/{normalized_id}/"
     try:
         logger.info("Fetching dataset metadata from: %s", endpoint)
-        response = requests.get(endpoint, headers={"accept": "application/json"}, timeout=30)
+        response = requests.get(
+            endpoint, headers={"accept": "application/json"}, timeout=30
+        )
         response.raise_for_status()
-        logger.info("Successfully retrieved metadata for dataset %s", normalized_id)
+        logger.info(
+            "Successfully retrieved metadata for dataset %s", normalized_id
+        )
         return response.json()
     except requests.exceptions.HTTPError as error:
         if error.response is not None and error.response.status_code == 404:
             logger.error("Dataset %s not found (404)", normalized_id)
         else:
-            logger.error("HTTP error fetching dataset %s: %s", normalized_id, error)
+            logger.error(
+                "HTTP error fetching dataset %s: %s", normalized_id, error
+            )
     except requests.exceptions.RequestException as error:
-        logger.error("Network error fetching dataset %s: %s", normalized_id, error)
+        logger.error(
+            "Network error fetching dataset %s: %s", normalized_id, error
+        )
     except ValueError as error:
-        logger.error("Invalid JSON response for dataset %s: %s", normalized_id, error)
+        logger.error(
+            "Invalid JSON response for dataset %s: %s", normalized_id, error
+        )
     return None
 
 
@@ -119,13 +141,18 @@ def downloadDataset(
     dataset_info = parseMetadata(metadata)
     data_url = dataset_info.intensities_data_url or getDataFileUrl(metadata)
     if not data_url:
-        logger.error("Could not find data file URL in metadata for dataset %s", dataset_id)
+        logger.error(
+            "Could not find data file URL in metadata for dataset %s",
+            dataset_id,
+        )
         return None, dataset_info
 
     dataset_info.intensities_data_url = data_url
     output_dir = output_dir or tempfile.gettempdir()
     normalized_id = _normalizeDatasetId(dataset_id)
-    filename = f"SASBDB_{normalized_id}{_guessFileExtension(data_url, metadata)}"
+    filename = (
+        f"SASBDB_{normalized_id}{_guessFileExtension(data_url, metadata)}"
+    )
     filepath = os.path.join(output_dir, filename)
 
     if downloadDataFile(data_url, filepath):
@@ -134,11 +161,15 @@ def downloadDataset(
 
 
 def _normalizeDatasetId(dataset_id: str) -> str | None:
+    """Return a normalized SASBDB id, or None if the format is invalid.
+
+    Invalid input is expected for user-facing validation and is not logged;
+    callers that show a MessageBox should avoid duplicate console noise.
+    """
     if not dataset_id:
         return None
     normalized = dataset_id.strip().upper()
     if len(normalized) != 7 or not _SASBDB_ID_PATTERN.match(normalized):
-        logger.warning("Invalid SASBDB dataset ID: %r", dataset_id)
         return None
     return normalized
 
@@ -175,10 +206,7 @@ def _guessFileExtension(url: str, metadata: dict) -> str:
             if file_type is None:
                 continue
             file_type = str(file_type).lower()
-            if "csv" in file_type:
-                return ".csv"
-            if "txt" in file_type or "text" in file_type:
-                return ".txt"
-            if "dat" in file_type or "data" in file_type:
-                return ".dat"
+            for tokens, extension in _FILE_TYPE_EXTENSIONS:
+                if any(token in file_type for token in tokens):
+                    return extension
     return ".dat"

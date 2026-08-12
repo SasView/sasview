@@ -9,8 +9,8 @@ from PySide6.QtWidgets import QMessageBox
 
 from sasdata.dataloader.data_info import Sample, Source
 
-from .sasbdb_api import SASBDBDatasetInfo
-from .sasbdb_display import metadata_summary
+from sas.qtgui.Utilities.SASBDB.sasbdb_display import metadata_summary
+from sas.qtgui.Utilities.SASBDB.sasbdb_parse import SASBDBDatasetInfo
 
 logger = logging.getLogger(__name__)
 

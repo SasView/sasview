@@ -8,9 +8,16 @@ import tempfile
 
 from PySide6 import QtWidgets
 
-from .sasbdb_api import SASBDBDatasetInfo, downloadDataset, validateDatasetId
-from .sasbdb_display import metadata_summary
-from .UI.SASBDBDownloadDialogUI import Ui_SASBDBDownloadDialogUI
+from sas.qtgui.Utilities import GuiUtils
+from sas.qtgui.Utilities.SASBDB.sasbdb_api import (
+    downloadDataset,
+    validateDatasetId,
+)
+from sas.qtgui.Utilities.SASBDB.sasbdb_display import metadata_summary
+from sas.qtgui.Utilities.SASBDB.sasbdb_parse import SASBDBDatasetInfo
+from sas.qtgui.Utilities.SASBDB.UI.SASBDBDownloadDialogUI import (
+    Ui_SASBDBDownloadDialogUI,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +52,9 @@ class SASBDBDownloadDialog(QtWidgets.QDialog, Ui_SASBDBDownloadDialogUI):
         self.lblStatus.setText("Downloading dataset...")
 
         try:
-            filepath, dataset_info = downloadDataset(normalized_id, tempfile.gettempdir())
+            filepath, dataset_info = downloadDataset(
+                normalized_id, tempfile.gettempdir()
+            )
             self.dataset_info = dataset_info
 
             if filepath and os.path.exists(filepath):
@@ -62,7 +71,12 @@ class SASBDBDownloadDialog(QtWidgets.QDialog, Ui_SASBDBDownloadDialogUI):
                     "Please check the dataset identifier and try again."
                 )
         except Exception as e:
-            logger.error(f"Error downloading dataset {normalized_id}: {e}", exc_info=True)
+            logger.error(
+                "Error downloading dataset %s: %s",
+                normalized_id,
+                e,
+                exc_info=True,
+            )
             self._showError(f"Error downloading dataset:\n{e}")
         finally:
             self._set_busy(False)
@@ -86,5 +100,6 @@ class SASBDBDownloadDialog(QtWidgets.QDialog, Ui_SASBDBDownloadDialogUI):
         return self.dataset_info
 
     def onHelp(self):
-        from sas.qtgui.Utilities import GuiUtils
-        GuiUtils.showHelp("user/qtgui/Utilities/SASBDB/sasbdb_download_help.html")
+        GuiUtils.showHelp(
+            "user/qtgui/Utilities/SASBDB/sasbdb_download_help.html"
+        )
