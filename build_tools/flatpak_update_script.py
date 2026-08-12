@@ -13,6 +13,7 @@ import subprocess
 from sys import stderr, exit
 from pathlib import Path
 from click import command, option
+from click import Path as ClickPath
 
 
 def prefer_wheels_str(prefer_wheels_file: Path) -> str:
@@ -39,7 +40,7 @@ def generate_requirements(requirements_path: Path, output_path: Path, prefer_whe
 
 
 @command
-@option("--output-dir", default=Path.cwd() / "outputs")
+@option("--output-dir", type=ClickPath(path_type=Path), default=Path.cwd() / "outputs")
 def main(output_dir: Path):
     try:
         subprocess.call(
