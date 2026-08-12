@@ -14,6 +14,7 @@ from sys import stderr, exit
 from pathlib import Path
 from click import command, option
 from click import Path as ClickPath
+from os import environ
 
 
 def prefer_wheels_str(prefer_wheels_file: Path) -> str:
@@ -23,6 +24,8 @@ def prefer_wheels_str(prefer_wheels_file: Path) -> str:
 
 
 def generate_requirements(requirements_path: Path, output_path: Path, prefer_wheels: str):
+    env = environ.copy()
+    env["FLATPAK_PIP_GENERATOR_ALLOW_RESTRICTED_MODULES"] = "1"
     subprocess.call(
         [
             "flatpak-pip-generator",
@@ -36,6 +39,7 @@ def generate_requirements(requirements_path: Path, output_path: Path, prefer_whe
             "org.kde.Sdk//6.11",
         ],
         stderr=subprocess.STDOUT,
+        env=env,
     )
 
 
