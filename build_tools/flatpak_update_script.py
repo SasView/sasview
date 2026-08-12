@@ -42,7 +42,11 @@ def generate_requirements(requirements_path: Path, output_path: Path, prefer_whe
 @option("--output-dir", default=Path.cwd() / "outputs")
 def main(output_dir: Path):
     try:
-        subprocess.call(["flatpak-pip-generator", "--help"])
+        subprocess.call(
+            ["flatpak-pip-generator", "--help"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
     except FileNotFoundError:
         print(
             "Error: you need to have the program 'flatpak-pip-generator' on your path. See the README for more information.",
