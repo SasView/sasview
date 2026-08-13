@@ -52,7 +52,7 @@ def process_requirements_file(file_path: Path, output_directory: Path):
     with open(file_path) as f:
         lines = f.readlines()
     new_lines = [l for l in lines if "-r" not in l]
-    with open(output_directory / file_path.name) as f:
+    with open(output_directory / Path("processed_requirements") / file_path.name) as f:
         f.writelines(new_lines)
 
 
