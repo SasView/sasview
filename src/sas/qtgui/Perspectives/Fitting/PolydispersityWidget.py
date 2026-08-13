@@ -24,6 +24,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
     cmdFitSignal = QtCore.Signal()
     updateDataSignal = QtCore.Signal()
     iterateOverModelSignal = QtCore.Signal()
+    deletePlotSignal = QtCore.Signal(str)
     toggledSignal = QtCore.Signal(bool)  # Signal when polydispersity is enabled/disabled
 
     def __init__(self, parent: QtWidgets.QWidget | None = None) -> None:
@@ -165,6 +166,13 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
             except TypeError:
                 # Can't be converted properly, bring back the old value and exit
                 return
+
+            # If the polydispersity is changed to zero, prepare to delete an existing plot
+            if (model_column == delegate.poly_pd and
+                self.poly_params[f"{parameter_name}.width"] != 0.0 and
+                value == 0.0
+                ):
+                self.deletePlotSignal.emit(parameter_name)
 
             # Update the sasmodel
             # PD[ratio] -> width, npts -> npts, nsigs -> nsigmas

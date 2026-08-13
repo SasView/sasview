@@ -207,8 +207,8 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         # Default fitting optimizer
         self.FITTING_DEFAULT_OPTIMIZER = 'lm'
 
-        # What's New variables
-        self.LAST_WHATS_NEW_HIDDEN_VERSION = "6.0.1"
+        # What's New variables - this should refer to the previous minor version
+        self.LAST_WHATS_NEW_HIDDEN_VERSION = "6.1.3"
 
         # Last version that the update prompt was dismissed for
         self.LAST_UPDATE_DISMISSED_VERSION = "5.0.0"
