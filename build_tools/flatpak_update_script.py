@@ -14,7 +14,7 @@ from sys import stderr, exit
 from pathlib import Path
 from click import command, option
 from click import Path as ClickPath
-from os import environ
+from os import environ, getcwd
 
 
 def prefer_wheels_str(prefer_wheels_file: Path) -> str:
@@ -58,9 +58,9 @@ def main(output_dir: Path):
             file=stderr,
         )
         exit(1)
-    requirements_file = environ["PWD"] / Path("requirements-release-ubuntu-latest.txt")
-    requirements_dev_file = environ["PWD"] / Path("requirements-dev.txt")
-    prefer_wheels_file = environ["PWD"] / Path("prefer_wheels.txt")
+    requirements_file = getcwd() / Path("requirements-release-ubuntu-latest.txt")
+    requirements_dev_file = getcwd() / Path("requirements-dev.txt")
+    prefer_wheels_file = getcwd() / Path("prefer_wheels.txt")
     if not (requirements_file.exists() and requirements_dev_file.exists() and prefer_wheels_file.exists()):
         print("Your working directory needs to be the same as the requirements files.", file=stderr)
         exit(1)
