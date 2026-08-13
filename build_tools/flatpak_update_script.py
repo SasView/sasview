@@ -23,7 +23,7 @@ def packages_str(path: Path) -> str:
     return ",".join(file_contents)
 
 
-def generate_requirements(requirements_path: Path, output_path: Path, prefer_wheels: str):
+def generate_requirements(requirements_path: Path, output_path: Path, prefer_wheels: str, ignore_pkgs: str):
     env = environ.copy()
     env["FLATPAK_PIP_GENERATOR_ALLOW_RESTRICTED_MODULES"] = "1"
     subprocess.call(
@@ -35,6 +35,8 @@ def generate_requirements(requirements_path: Path, output_path: Path, prefer_whe
             output_path,
             "--prefer-wheels",
             prefer_wheels,
+            "--ignore-pkgs",
+            ignore_pkgs,
             "--runtime",
             "org.kde.Sdk//6.11",  # FIXME: The version of KDE needs to match the PySide version.
         ],
@@ -77,14 +79,18 @@ def main(output_dir: Path):
     requirements_file = process_requirements_file(Path("requirements-release-ubuntu-latest.txt"), output_dir)
     requirements_dev_file = process_requirements_file(Path("requirements-dev.txt"), output_dir)
     prefer_wheels_file = Path("prefer_wheels.txt")
+    ignore_pkgs_file = Path("ignore_packages.txt")
     if not (requirements_file.exists() and requirements_dev_file.exists() and prefer_wheels_file.exists()):
         print("Your working directory needs to be the same as the requirements files.", file=stderr)
         exit(1)
     prefer_wheels = packages_str(prefer_wheels_file)
+    ignore_pkgs = packages_str(ignore_pkgs_file)
     if not output_dir.is_dir():
         output_dir.mkdir()
-    generate_requirements(requirements_file, output_dir / "python3-requirements.json", prefer_wheels)
-    generate_requirements(requirements_dev_file, output_dir / "python3-requirements-dev.json", prefer_wheels)
+    generate_requirements(requirements_file, output_dir / "python3-requirements.json", prefer_wheels, ignore_pkgs)
+    generate_requirements(
+        requirements_dev_file, output_dir / "python3-requirements-dev.json", prefer_wheels, ignore_pkgs
+    )
 
 
 if __name__ == "__main__":
