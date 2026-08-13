@@ -43,6 +43,19 @@ def generate_requirements(requirements_path: Path, output_path: Path, prefer_whe
     )
 
 
+def process_requirements_file(file_path: Path, output_directory: Path):
+    """This function is needed to remove references to other requirement files
+    because the Flatpak builder tool needs to read each file in an isolated
+    container. This function completely strips these references because SasView
+    can be built without them. Later, its also possible the requirements can
+    just be copied where these references appears."""
+    with open(file_path) as f:
+        lines = f.readlines()
+    new_lines = [l for l in lines if "-r" not in l]
+    with open(output_directory / file_path.name) as f:
+        f.writelines(new_lines)
+
+
 @command
 @option("--output-dir", type=ClickPath(path_type=Path), default=Path.cwd() / "outputs")
 def main(output_dir: Path):
