@@ -87,10 +87,10 @@ def main(output_dir: Path):
     ignore_pkgs = packages_str(ignore_pkgs_file)
     if not output_dir.is_dir():
         output_dir.mkdir()
-    generate_requirements(requirements_file, output_dir / "python3-requirements.json", prefer_wheels, ignore_pkgs)
     generate_requirements(
         requirements_dev_file, output_dir / "python3-requirements-dev.json", prefer_wheels, ignore_pkgs
     )
+    generate_requirements(requirements_file, output_dir / "python3-requirements.json", prefer_wheels, ignore_pkgs)
 
 
 if __name__ == "__main__":
