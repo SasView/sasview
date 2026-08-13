@@ -76,8 +76,8 @@ def main(output_dir: Path):
             file=stderr,
         )
         exit(1)
-    requirements_file = process_requirements_file(Path("requirements-release-ubuntu-latest.txt"), output_dir)
     requirements_dev_file = process_requirements_file(Path("requirements-dev.txt"), output_dir)
+    requirements_file = process_requirements_file(Path("requirements-release-ubuntu-latest.txt"), output_dir)
     prefer_wheels_file = Path("prefer_wheels.txt")
     ignore_pkgs_file = Path("ignore_packages.txt")
     if not (requirements_file.exists() and requirements_dev_file.exists() and prefer_wheels_file.exists()):
