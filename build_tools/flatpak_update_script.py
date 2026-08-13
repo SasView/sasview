@@ -54,7 +54,7 @@ def process_requirements_file(file_path: Path, output_directory: Path) -> Path:
     new_lines = [l for l in lines if "-r" not in l]
     new_path = output_directory / Path("processed_requirements") / file_path.name
     new_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(new_path) as f:
+    with open(new_path, "w") as f:
         f.writelines(new_lines)
     return new_path
 
