@@ -75,7 +75,10 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
         if not self.logic.model_parameters:
             return
         self._magnet_model.clear()
-        # default initial value
+        # Add the magnetic parameters to the table.
+        # 2026-08-13 PAK: Initialize M0 values with defaults from the model (typically zero).
+        # The previous code initialized them to 0.5, 1.0, 1.5, etc., though this was
+        # not obvious since magnetic theta defaulted to zero.
         for param in self.logic.model_parameters.call_parameters:
             if param.type == 'magnetic':
                 self.addCheckedMagneticListToModel(param, param.default)
