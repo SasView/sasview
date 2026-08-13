@@ -17,8 +17,8 @@ from click import Path as ClickPath
 from os import environ, getcwd
 
 
-def prefer_wheels_str(prefer_wheels_file: Path) -> str:
-    with open(prefer_wheels_file) as f:
+def packages_str(path: Path) -> str:
+    with open(path) as f:
         file_contents = f.readlines()
     return ",".join(file_contents)
 
@@ -80,7 +80,7 @@ def main(output_dir: Path):
     if not (requirements_file.exists() and requirements_dev_file.exists() and prefer_wheels_file.exists()):
         print("Your working directory needs to be the same as the requirements files.", file=stderr)
         exit(1)
-    prefer_wheels = prefer_wheels_str(prefer_wheels_file)
+    prefer_wheels = packages_str(prefer_wheels_file)
     if not output_dir.is_dir():
         output_dir.mkdir()
     generate_requirements(requirements_file, output_dir / "python3-requirements.json", prefer_wheels)
