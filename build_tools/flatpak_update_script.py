@@ -36,7 +36,7 @@ def generate_requirements(requirements_path: Path, output_path: Path, prefer_whe
             "--prefer-wheels",
             prefer_wheels,
             "--runtime",
-            "org.kde.Sdk//6.11",
+            "org.kde.Sdk//6.11",  # FIXME: The version of KDE needs to match the PySide version.
         ],
         stderr=subprocess.STDOUT,
         env=env,
