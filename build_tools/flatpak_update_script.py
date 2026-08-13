@@ -9,7 +9,9 @@
 # ///
 
 
+from typing import cast
 import subprocess
+import requirements
 from sys import stderr, exit
 from pathlib import Path
 from click import command, option
@@ -59,6 +61,16 @@ def process_requirements_file(file_path: Path, output_directory: Path) -> Path:
     with open(new_path, "w") as f:
         f.writelines(new_lines)
     return new_path
+
+
+def get_qt_version(requirements_file: Path) -> str:
+    with open(requirements_file, "r") as f:
+        for req in requirements.parse(f):
+            if cast(str, req.name).lower() == "pyside6":
+                _, raw_version_str = req.specs[0]
+                # Only get the major, and minor numbers; ignore the patch number.
+                return ".".join(raw_version_str.split(".")[:2])
+    raise ValueError("PySide6 is missing in the supplied requirements file.")
 
 
 @command
