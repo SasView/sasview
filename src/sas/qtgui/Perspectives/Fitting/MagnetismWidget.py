@@ -314,7 +314,8 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
 
         self.magnet_params[param.name] = value
         # Also update the kernel_module to keep values in sync
-        if self.logic.kernel_module is not None:
+        if (self.logic.kernel_module is not None
+                and param.name in self.logic.kernel_module.params):
             self.logic.kernel_module.setParam(param.name, value)
 
         FittingUtilities.addCheckedListToModel(self._magnet_model, checked_list)
