@@ -47,6 +47,7 @@ from sas.qtgui.Utilities.ImageViewer import ImageViewer
 from sas.qtgui.Utilities.ModelEditors.AddMultEditor.AddMultEditor import AddMultEditor
 from sas.qtgui.Utilities.ModelEditors.ReparamEditor.ReparameterizationEditor import ReparameterizationEditor
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor
+from sas.qtgui.Utilities.MultivariateCurveResolution.MultivariateCurveResolution import MCRTool
 from sas.qtgui.Utilities.MuMag.MuMag import MuMag
 from sas.qtgui.Utilities.NewVersion.NewVersionAvailable import get_current_release_version
 from sas.qtgui.Utilities.OrientationViewer.OrientationViewer import show_orientation_viewer
@@ -182,6 +183,7 @@ class GuiManager:
         self.SLDCalculator = SldPanel(self)
         self.DVCalculator = DensityPanel(self)
         self.KIESSIGCalculator = KiessigPanel(self)
+        self.MCR_Fitter = MCRTool(self)
         self.MuMag_Fitter = MuMag(self)
         self.SlitSizeCalculator = SlitSizeCalculator(self)
         self.ResolutionCalculator = ResolutionCalculatorPanel(self)
@@ -704,6 +706,7 @@ class GuiManager:
         self._workspace.actionSLD_Calculator.triggered.connect(self.actionSLD_Calculator)
         self._workspace.actionDensity_Volume_Calculator.triggered.connect(self.actionDensity_Volume_Calculator)
         self._workspace.actionKeissig_Calculator.triggered.connect(self.actionKiessig_Calculator)
+        self._workspace.actionMCR_Fitter.triggered.connect(self.actionMCR_Fitter)
         self._workspace.actionMuMag_Fitter.triggered.connect(self.actionMuMag_Fitter)
         #self._workspace.actionKIESSING_Calculator.triggered.connect(self.actionKIESSING_Calculator)
         self._workspace.actionSlit_Size_Calculator.triggered.connect(self.actionSlit_Size_Calculator)
@@ -1011,6 +1014,11 @@ class GuiManager:
         """
         """
         self.KIESSIGCalculator.show()
+
+    def actionMCR_Fitter(self):
+        """
+        """
+        self.MCR_Fitter.show()
 
     def actionMuMag_Fitter(self):
         """
