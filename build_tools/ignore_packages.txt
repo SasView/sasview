@@ -1,5 +1,5 @@
 shiboken6
 pyside6
-pyside6-essentials
-pyside6-addons
+pyside6_essentials
+pyside6_addons
 mako
