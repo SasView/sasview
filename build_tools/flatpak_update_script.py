@@ -118,8 +118,17 @@ def install_sdk(qt_version: str):
 
 # TODO: Add strings for the help message.
 @command
-@option("--output-dir", type=ClickPath(path_type=Path), default=Path.cwd() / "outputs")
-@option("--sasview-version", required=True)
+@option(
+    "--output-dir",
+    type=ClickPath(path_type=Path),
+    default=Path.cwd() / "outputs",
+    help="The directory where the generated files will be placed.",
+)
+@option(
+    "--sasview-version",
+    required=True,
+    help="The version of SasView the Flatpak is being built for. This should be the tag (excluding the 'v') of SasView the Flatpak will build.",
+)
 def main(output_dir: Path, sasview_version: str):
     try:
         subprocess.call(
