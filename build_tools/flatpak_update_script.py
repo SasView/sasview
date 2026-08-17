@@ -130,6 +130,10 @@ def install_sdk(qt_version: str):
     help="The version of SasView the Flatpak is being built for. This should be the tag (excluding the 'v') of SasView the Flatpak will build.",
 )
 def main(output_dir: Path, sasview_version: str):
+    """This command will update the Flatpak manifest files which are in turn
+    used to build the Flatpak. It will update all the Python depdendencies to
+    match the pins which are specified in the requirements files, and update the
+    version of QT."""
     try:
         subprocess.call(
             ["flatpak-pip-generator", "--help"],
