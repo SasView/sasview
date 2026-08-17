@@ -112,6 +112,7 @@ def main(output_dir: Path):
     requirements_file = process_requirements_file(Path("requirements-release-ubuntu-latest.txt"), output_dir)
     prefer_wheels_file = Path("prefer_wheels.txt")
     ignore_pkgs_file = Path("ignore_packages.txt")
+    input_manifest_file = Path("org.sasview.sasview.yml.in")
     if not (requirements_file.exists() and requirements_dev_file.exists() and prefer_wheels_file.exists()):
         print("Your working directory needs to be the same as the requirements files.", file=stderr)
         exit(1)
@@ -126,6 +127,7 @@ def main(output_dir: Path):
     generate_requirements(
         requirements_file, output_dir / "python3-requirements.json", prefer_wheels, ignore_pkgs, qt_version
     )
+    generate_main_manifest(input_manifest_file, output_dir, qt_version, qt_version_with_patch)
 
 
 if __name__ == "__main__":
