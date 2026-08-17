@@ -38,7 +38,7 @@ def packages_str(path: Path) -> str:
     """
     with open(path) as f:
         file_contents = f.readlines()
-    return ",".join(file_contents)
+    return ",".join([content.strip() for content in file_contents])
 
 
 def generate_requirements(
