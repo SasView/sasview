@@ -65,13 +65,13 @@ def process_requirements_file(file_path: Path, output_directory: Path) -> Path:
     return new_path
 
 
-def get_qt_version(requirements_file: Path) -> str:
+def get_qt_version(requirements_file: Path) -> tuple[str, str]:
     with open(requirements_file, "r") as f:
         for req in requirements.parse(f):
             if cast(str, req.name).lower() == "pyside6":
                 _, raw_version_str = req.specs[0]
                 # Only get the major, and minor numbers; ignore the patch number.
-                return ".".join(raw_version_str.split(".")[:2])
+                return ".".join(raw_version_str.split(".")[:2]), raw_version_str
     raise ValueError("PySide6 is missing in the supplied requirements file.")
 
 
@@ -101,7 +101,7 @@ def main(output_dir: Path):
     ignore_pkgs = packages_str(ignore_pkgs_file)
     if not output_dir.is_dir():
         output_dir.mkdir()
-    qt_version = get_qt_version(requirements_file)
+    qt_version, qt_version_with_patch = get_qt_version(requirements_file)
     generate_requirements(
         requirements_dev_file, output_dir / "python3-requirements-dev.json", prefer_wheels, ignore_pkgs, qt_version
     )
