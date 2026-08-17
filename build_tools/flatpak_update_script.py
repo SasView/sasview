@@ -21,6 +21,12 @@ from os import environ, getcwd
 from string import Template
 
 
+# Template by default uses $ but this symbol is already used in the manifest for
+# a few things, including Flatpak macros. So @ is chosen instead.
+class ManifestTemplate(Template):
+    delimiter = "@"
+
+
 def packages_str(path: Path) -> str:
     with open(path) as f:
         file_contents = f.readlines()
@@ -82,7 +88,7 @@ def generate_main_manifest(
 ):
     with open(input_manifest_file) as f:
         template_manifest_contents = f.read()
-    template = Template(template_manifest_contents)
+    template = ManifestTemplate(template_manifest_contents)
     new_manifest_contents = template.substitute(qt_version=qt_version, qt_version_with_patch=qt_version_with_patch)
     with open(output_directory / input_manifest_file.name, "w") as f:
         f.write(new_manifest_contents)
