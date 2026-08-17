@@ -9,7 +9,6 @@
 # ///
 
 
-from qtpy import qt_ver
 from typing import cast
 import subprocess
 import requirements
