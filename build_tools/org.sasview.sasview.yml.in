@@ -1,0 +1,110 @@
+id: org.sasview.sasview
+runtime: org.kde.Platform
+runtime-version: @(qt_version)
+sdk: org.kde.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.llvm22
+command: sasview
+finish-args:
+  - --socket=fallback-x11
+  - --share=ipc
+  - --share=network
+  - --socket=wayland
+  - --device=dri
+  - --persist=.
+build-options:
+  append-path: /usr/lib/sdk/llvm22/bin
+  append-ld-library-path: /usr/lib/sdk/llvm22/lib
+  env:
+    LLVM_INSTALL_DIR: /usr/lib/sdk/llvm22
+    SHIBOKEN_DEBUG_LEVEL: full
+    PKG_CONFIG_PATH: /app/lib64/pkgconfig:/app/lib/pkgconfig:/app/share/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig
+modules:
+  - name: ruby
+    buildsystem: autotools
+    sources:
+      - type: archive
+        url: https://cache.ruby-lang.org/pub/ruby/4.0/ruby-4.0.6.tar.gz
+        sha256: 837d299e8f7ddf2be31a229a7a7e019d354979825117989acb3b32b1a9be262a
+  - name: ocl-icd
+    build-options:
+      arch:
+        x86_64:
+          config-opts:
+            - --enable-custom-vendordir=/usr/lib/x86_64-linux-gnu/GL/OpenCL/vendors
+        aarch64:
+          config-opts:
+            - --enable-custom-vendordir=/usr/lib/aarch64-linux-gnu/GL/OpenCL/vendors
+    config-opts:
+      - --enable-official-khronos-headers
+      - --disable-update-database
+    sources:
+      - type: git
+        url: https://github.com/OCL-dev/ocl-icd.git
+        commit: 3e1155f0796cb9ac0fe309664d98e4b0ed2c3300
+        tag: v2.3.5
+        x-checker-data:
+          type: git
+          tag-pattern: ^v([\d.]+)$
+    modules:
+      - name: khronos-opencl-headers
+        buildsystem: cmake-ninja
+        sources:
+          - type: git
+            url: https://github.com/KhronosGroup/OpenCL-Headers.git
+            commit: 8a97ebc88daa3495d6f57ec10bb515224400186f
+            tag: v2025.07.22
+            x-checker-data:
+              type: git
+              tag-pattern: ^v([\d.]+)$
+  - shared-modules/glu/glu-9.json
+  - python3-requirements-dev.json
+  - python3-requirements.json
+  - name: patchelf
+    buildsystem: autotools
+    sources:
+      - type: git
+        url: https://github.com/NixOS/patchelf.git
+        commit: 769337c227799aa60911562b6940530f4a86eb3c
+  - name: qt6-qtdatavisualization
+    buildsystem: cmake-ninja
+    sources:
+      - type: archive
+        url: https://download.qt.io/official_releases/qt/@(qt_version)/@(qt_version_with_patch)/submodules/qtdatavis3d-everywhere-src-@(qt_version_with_patch).tar.xz
+        sha256: 1e1a7b9c0a947731655334f5d79252d40cdaf58c1801074ea5e9e0821d6693ac
+    post-install:
+      - cp /app/lib/${FLATPAK_ARCH}-linux-gnu/libQt6DataVisualization.so.6 /app/lib/
+      - cp /app/lib/${FLATPAK_ARCH}-linux-gnu/libQt6DataVisualization.so /app/lib/
+  - name: pyside-setup
+    buildsystem: simple
+    build-options:
+      append-path: /usr/lib/sdk/llvm22/bin
+      append-ld-library-path: /usr/lib/sdk/llvm22/lib
+      env:
+        LLVM_INSTALL_DIR: /usr/lib/sdk/llvm22
+    build-commands:
+      - python3 setup.py build --qtpaths=/usr/bin/qtpaths --ignore-git --parallel=8
+        --log-level=verbose --flatpak
+      - python3 create_wheels.py --build-dir ./build/qfp-*-release
+      - pip install ./dist/*.whl --prefix=${FLATPAK_DEST}
+    sources:
+      - type: git
+        url: https://code.qt.io/pyside/pyside-setup.git
+        tag: @{qt_version_with_patch}
+  - name: sasview
+    buildsystem: simple
+    build-commands:
+      - pip3 install --no-deps  --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+        --prefix=${FLATPAK_DEST} "." --config-settings="--build-option=rebuild_ui"
+        --no-build-isolation
+    post-install:
+      - install -Dm0644 build_tools/application_metadata/org.sasview.sasview.metainfo.xml
+        -t /app/share/metainfo/
+      - install -Dm0644 build_tools/application_metadata/org.sasview.sasview.png -t
+        /app/share/icons/hicolor/512x512/apps/
+      - install -Dm0644 build_tools/application_metadata/org.sasview.sasview.desktop
+        -t /app/share/applications/
+    sources:
+      - type: git
+        url: https://github.com/SasView/sasview.git
+        tag: v@(sasview_version)
