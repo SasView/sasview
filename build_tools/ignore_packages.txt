@@ -4,3 +4,8 @@ pyside6_essentials
 pyside6_addons
 mako
 setuptools
+packaging
+wheel
+markdown
+cython
+pip
