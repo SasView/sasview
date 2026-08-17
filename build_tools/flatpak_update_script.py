@@ -83,19 +83,23 @@ def get_qt_version(requirements_file: Path) -> tuple[str, str]:
 
 
 def generate_main_manifest(
-    input_manifest_file: Path, output_directory: Path, qt_version: str, qt_version_with_patch: str
+    input_manifest_file: Path, output_directory: Path, qt_version: str, qt_version_with_patch: str, sasview_version: str
 ):
     with open(input_manifest_file) as f:
         template_manifest_contents = f.read()
     template = ManifestTemplate(template_manifest_contents)
-    new_manifest_contents = template.substitute(qt_version=qt_version, qt_version_with_patch=qt_version_with_patch)
+    new_manifest_contents = template.substitute(
+        qt_version=qt_version, qt_version_with_patch=qt_version_with_patch, sasview_version=sasview_version
+    )
     with open(output_directory / input_manifest_file.name, "w") as f:
         f.write(new_manifest_contents)
 
 
+# TODO: Add strings for the help message.
 @command
 @option("--output-dir", type=ClickPath(path_type=Path), default=Path.cwd() / "outputs")
-def main(output_dir: Path):
+@option("--sasview-version", required=True)
+def main(output_dir: Path, sasview_version: str):
     try:
         subprocess.call(
             ["flatpak-pip-generator", "--help"],
@@ -127,7 +131,7 @@ def main(output_dir: Path):
     generate_requirements(
         requirements_file, output_dir / "python3-requirements.json", prefer_wheels, ignore_pkgs, qt_version
     )
-    generate_main_manifest(input_manifest_file, output_dir, qt_version, qt_version_with_patch)
+    generate_main_manifest(input_manifest_file, output_dir, qt_version, qt_version_with_patch, sasview_version)
 
 
 if __name__ == "__main__":
