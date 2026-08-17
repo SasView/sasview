@@ -16,3 +16,4 @@ python-bidi
 h5py
 maturin
 pythran
+tccbox
