@@ -91,7 +91,7 @@ def generate_main_manifest(
     new_manifest_contents = template.substitute(
         qt_version=qt_version, qt_version_with_patch=qt_version_with_patch, sasview_version=sasview_version
     )
-    with open(output_directory / input_manifest_file.name, "w") as f:
+    with open(output_directory / input_manifest_file.name.removesuffix(".in"), "w") as f:
         f.write(new_manifest_contents)
 
 
