@@ -69,9 +69,9 @@ modules:
   - name: qt6-qtdatavisualization
     buildsystem: cmake-ninja
     sources:
-      - type: archive
-        url: https://download.qt.io/official_releases/qt/@{qt_version}/@{qt_version_with_patch}/submodules/qtdatavis3d-everywhere-src-@{qt_version_with_patch}.tar.xz
-        sha256: 1e1a7b9c0a947731655334f5d79252d40cdaf58c1801074ea5e9e0821d6693ac
+      - type: git
+        url: https://github.com/qt/qtdatavis3d.git
+        tag: @{qt_version_with_patch}
     post-install:
       - cp /app/lib/${FLATPAK_ARCH}-linux-gnu/libQt6DataVisualization.so.6 /app/lib/
       - cp /app/lib/${FLATPAK_ARCH}-linux-gnu/libQt6DataVisualization.so /app/lib/
