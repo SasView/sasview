@@ -9,6 +9,7 @@
 # ///
 
 
+from qtpy import qt_ver
 from typing import cast
 import subprocess
 import requirements
@@ -17,6 +18,7 @@ from pathlib import Path
 from click import command, option
 from click import Path as ClickPath
 from os import environ, getcwd
+from string import Template
 
 
 def packages_str(path: Path) -> str:
@@ -73,6 +75,17 @@ def get_qt_version(requirements_file: Path) -> tuple[str, str]:
                 # Only get the major, and minor numbers; ignore the patch number.
                 return ".".join(raw_version_str.split(".")[:2]), raw_version_str
     raise ValueError("PySide6 is missing in the supplied requirements file.")
+
+
+def generate_main_manifest(
+    input_manifest_file: Path, output_directory: Path, qt_version: str, qt_version_with_patch: str
+):
+    with open(input_manifest_file) as f:
+        template_manifest_contents = f.read()
+    template = Template(template_manifest_contents)
+    new_manifest_contents = template.substitute(qt_version=qt_version, qt_version_with_patch=qt_version_with_patch)
+    with open(output_directory / input_manifest_file.name, "w") as f:
+        f.write(new_manifest_contents)
 
 
 @command
