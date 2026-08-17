@@ -25,7 +25,9 @@ def packages_str(path: Path) -> str:
     return ",".join(file_contents)
 
 
-def generate_requirements(requirements_path: Path, output_path: Path, prefer_wheels: str, ignore_pkgs: str):
+def generate_requirements(
+    requirements_path: Path, output_path: Path, prefer_wheels: str, ignore_pkgs: str, qt_version: str
+):
     env = environ.copy()
     env["FLATPAK_PIP_GENERATOR_ALLOW_RESTRICTED_MODULES"] = "1"
     subprocess.call(
@@ -40,7 +42,7 @@ def generate_requirements(requirements_path: Path, output_path: Path, prefer_whe
             "--ignore-pkg",
             ignore_pkgs,
             "--runtime",
-            "org.kde.Sdk//6.11",  # FIXME: The version of KDE needs to match the PySide version.
+            f"org.kde.Sdk//{qt_version}",
         ],
         stderr=subprocess.STDOUT,
         env=env,
@@ -99,10 +101,13 @@ def main(output_dir: Path):
     ignore_pkgs = packages_str(ignore_pkgs_file)
     if not output_dir.is_dir():
         output_dir.mkdir()
+    qt_version = get_qt_version(requirements_file)
     generate_requirements(
-        requirements_dev_file, output_dir / "python3-requirements-dev.json", prefer_wheels, ignore_pkgs
+        requirements_dev_file, output_dir / "python3-requirements-dev.json", prefer_wheels, ignore_pkgs, qt_version
     )
-    generate_requirements(requirements_file, output_dir / "python3-requirements.json", prefer_wheels, ignore_pkgs)
+    generate_requirements(
+        requirements_file, output_dir / "python3-requirements.json", prefer_wheels, ignore_pkgs, qt_version
+    )
 
 
 if __name__ == "__main__":
