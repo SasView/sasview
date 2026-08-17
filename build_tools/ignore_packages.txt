@@ -3,3 +3,4 @@ pyside6
 pyside6_essentials
 pyside6_addons
 mako
+setuptools
