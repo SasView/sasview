@@ -20,13 +20,22 @@ from os import environ, getcwd
 from string import Template
 
 
-# Template by default uses $ but this symbol is already used in the manifest for
-# a few things, including Flatpak macros. So @ is chosen instead.
 class ManifestTemplate(Template):
+    """This class is required because Template by default uses $ as the
+    delimiter but this symbol is already used in the manifest for a few things,
+    including Flatpak macros. So this subclass uses @ instead.
+
+    """
+
     delimiter = "@"
 
 
 def packages_str(path: Path) -> str:
+    """This loads the contents of the prefer_wheels, or ignore_packages file,
+    and formats it so it can be passed into the CLI of the flatpak tool as a cli
+    arg.
+
+    """
     with open(path) as f:
         file_contents = f.readlines()
     return ",".join(file_contents)
@@ -35,6 +44,7 @@ def packages_str(path: Path) -> str:
 def generate_requirements(
     requirements_path: Path, output_path: Path, prefer_wheels: str, ignore_pkgs: str, qt_version: str
 ):
+    """Runs the Flatpak pip generator script on a given set of requirements."""
     env = environ.copy()
     env["FLATPAK_PIP_GENERATOR_ALLOW_RESTRICTED_MODULES"] = "1"
     subprocess.call(
@@ -73,6 +83,10 @@ def process_requirements_file(file_path: Path, output_directory: Path) -> Path:
 
 
 def get_qt_version(requirements_file: Path) -> tuple[str, str]:
+    """Retrieves the version of QT we are using from the PySide dependency that
+    is being used.
+
+    """
     with open(requirements_file, "r") as f:
         for req in requirements.parse(f):
             if cast(str, req.name).lower() == "pyside6":
@@ -85,6 +99,9 @@ def get_qt_version(requirements_file: Path) -> tuple[str, str]:
 def generate_main_manifest(
     input_manifest_file: Path, output_directory: Path, qt_version: str, qt_version_with_patch: str, sasview_version: str
 ):
+    """Generates the org.sasview.sasview.yml manifest file from the template. It
+    bumps the QT package, and runtime to use the correct QT version, and also
+    bumps the SasView version with the one provided by the user."""
     with open(input_manifest_file) as f:
         template_manifest_contents = f.read()
     template = ManifestTemplate(template_manifest_contents)
