@@ -1,6 +1,6 @@
 id: org.sasview.sasview
 runtime: org.kde.Platform
-runtime-version: @(qt_version)
+runtime-version: @{qt_version}
 sdk: org.kde.Sdk
 sdk-extensions:
   - org.freedesktop.Sdk.Extension.llvm22
