@@ -95,6 +95,10 @@ def generate_main_manifest(
         f.write(new_manifest_contents)
 
 
+def install_sdk(qt_version: str):
+    subprocess.call(["flatpak", "--user", "-y", "install", f"org.kde.Sdk//{qt_version}"])
+
+
 # TODO: Add strings for the help message.
 @command
 @option("--output-dir", type=ClickPath(path_type=Path), default=Path.cwd() / "outputs")
@@ -120,11 +124,12 @@ def main(output_dir: Path, sasview_version: str):
     if not (requirements_file.exists() and requirements_dev_file.exists() and prefer_wheels_file.exists()):
         print("Your working directory needs to be the same as the requirements files.", file=stderr)
         exit(1)
+    qt_version, qt_version_with_patch = get_qt_version(requirements_file)
+    install_sdk(qt_version)
     prefer_wheels = packages_str(prefer_wheels_file)
     ignore_pkgs = packages_str(ignore_pkgs_file)
     if not output_dir.is_dir():
         output_dir.mkdir()
-    qt_version, qt_version_with_patch = get_qt_version(requirements_file)
     generate_requirements(
         requirements_dev_file, output_dir / "python3-requirements-dev.json", prefer_wheels, ignore_pkgs, qt_version
     )
