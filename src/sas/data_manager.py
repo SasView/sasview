@@ -7,7 +7,7 @@ from sasdata.data import SasData
 from sas.refactored import Perspective
 
 # TODO: Add plots to this type.
-TrackedData = SasData | Perspective
+TrackedData = SasData | Perspective | Trend
 
 # TODO: Probably want to handle order, if that is even relevant.
 valid_associations: list[tuple[str | type, str | type]] = [
