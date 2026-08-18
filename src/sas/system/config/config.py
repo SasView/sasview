@@ -207,11 +207,11 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         # Default fitting optimizer
         self.FITTING_DEFAULT_OPTIMIZER = 'lm'
 
-        # What's New variables - this should refer to the previous minor version
-        self.LAST_WHATS_NEW_HIDDEN_VERSION = "6.1.3"
+        # Last version that the "What's New" menu was dismissed for
+        self.LAST_WHATS_NEW_HIDDEN_VERSION = "0.0.0"
 
         # Last version that the update prompt was dismissed for
-        self.LAST_UPDATE_DISMISSED_VERSION = "5.0.0"
+        self.LAST_UPDATE_DISMISSED_VERSION = "0.0.0"
 
         # Stack plots when using slicers
         # If true, plots generated when using slicers will be on the same canvas

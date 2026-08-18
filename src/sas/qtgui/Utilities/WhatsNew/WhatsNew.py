@@ -12,36 +12,18 @@ from sas.system import config
 from sas.system.version import __version__ as sasview_version
 
 
-def whats_new_messages(only_recent=True):
-    """ Accumulate all files that are newer than the value in the config
-
-    :param only_recent: require strictly newer stuff, strictness is needed for showing new things
-                           when there is an update, non-strictness is needed for the menu access.
-    """
+def whats_new_messages():
+    """Accumulate all files in the messages directory."""
 
     out = defaultdict(list)
     message_dir = resources.files("sas.qtgui.Utilities.WhatsNew.messages")
     for child_dir in message_dir.iterdir():
         # Get short filename
         if child_dir.is_dir():
-
-            newer = False
-
-            try:
-                if only_recent:
-                    newer = strictly_newer_than(child_dir.name, config.LAST_WHATS_NEW_HIDDEN_VERSION)
-                else:
-                    # Include current version
-                    newer = strictly_newer_than(child_dir.name, "0.0.0")
-
-            except ValueError:
-                pass
-
-            if newer:
-                for file in child_dir.iterdir():
-                    if file.name.endswith(".html"):
-                        out[child_dir.name].append(file)
-
+            dir_name = child_dir.name
+            for file in child_dir.iterdir():
+                if file.name.endswith(".html"):
+                    out[dir_name].append(file)
 
     return out
 
@@ -113,7 +95,6 @@ class WhatsNewWidget(QDialog, Ui_WhatsNewUI):
         self.browser.setOpenExternalLinks(True)
 
         if strictly_newer_than(sasview_version, config.LAST_WHATS_NEW_HIDDEN_VERSION):
-
             self.showAgain.setVisible(True)
             self.showAgain.setChecked(True)
         else:
@@ -124,16 +105,21 @@ class WhatsNewWidget(QDialog, Ui_WhatsNewUI):
         self.groupBox.layout().setContentsMargins(5, 5, 5, 5)
         self.groupBox.layout().addWidget(self.browser)
 
-
         # Callbacks
         self.closeButton.clicked.connect(self.close_me)
         self.prevButton.clicked.connect(self.prev_file)
         self.nextButton.clicked.connect(self.next_file)
 
-        # # Gather new files
-        new_messages = whats_new_messages(only_recent=only_recent)
+        # Gather new files
+        new_messages = whats_new_messages()
         new_message_directories = [key for key in new_messages]
         new_message_directories.sort(key=reduced_version, reverse=True)
+
+        if only_recent:
+            if strictly_newer_than(sasview_version, config.LAST_WHATS_NEW_HIDDEN_VERSION):
+                new_message_directories = new_message_directories[:1]
+            else:
+                new_message_directories = []
 
         self.all_messages = []
 
