@@ -148,10 +148,16 @@ def main(output_dir: Path, sasview_version: str):
         exit(1)
     requirements_dev_file = process_requirements_file(Path("requirements-dev.txt"), output_dir)
     requirements_file = process_requirements_file(Path("requirements-release-ubuntu-latest.txt"), output_dir)
+    flatpak_requirements_file = process_requirements_file(Path("flatpak_requirements.txt"), output_dir)
     prefer_wheels_file = Path("prefer_wheels.txt")
     ignore_pkgs_file = Path("ignore_packages.txt")
     input_manifest_file = Path("org.sasview.sasview.yml.in")
-    if not (requirements_file.exists() and requirements_dev_file.exists() and prefer_wheels_file.exists()):
+    if not (
+        requirements_file.exists()
+        and requirements_dev_file.exists()
+        and prefer_wheels_file.exists()
+        and flatpak_requirements_file.exists()
+    ):
         print("Your working directory needs to be the same as the requirements files.", file=stderr)
         exit(1)
     qt_version, qt_version_with_patch = get_qt_version(requirements_file)
@@ -160,6 +166,13 @@ def main(output_dir: Path, sasview_version: str):
     ignore_pkgs = packages_str(ignore_pkgs_file)
     if not output_dir.is_dir():
         output_dir.mkdir()
+    generate_requirements(
+        flatpak_requirements_file,
+        output_dir / "python3-requirements-source-build.json",
+        prefer_wheels,
+        ignore_pkgs,
+        qt_version,
+    )
     generate_requirements(
         requirements_dev_file, output_dir / "python3-requirements-dev.json", prefer_wheels, ignore_pkgs, qt_version
     )
