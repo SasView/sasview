@@ -1,5 +1,5 @@
 id: org.sasview.sasview
-runtime: org.kde.Platform
+runtime: org.kde.SDK
 runtime-version: @{qt_version}
 sdk: org.kde.Sdk
 sdk-extensions:
