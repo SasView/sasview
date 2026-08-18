@@ -27,6 +27,7 @@ def whats_new_messages():
 
     return out
 
+
 class WhatsNewBrowser(QTextBrowser):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -35,12 +36,11 @@ class WhatsNewBrowser(QTextBrowser):
         self.css_data = "<style>\n" + css + "</style>"
 
     def setHtml(self, text: str) -> None:
-        """ Overriden to inject CSS into HTML files - very, very ugly"""
+        """Overriden to inject CSS into HTML files - very, very ugly"""
         super().setHtml(text.replace("<!-- INJECT CSS HERE -->", self.css_data))
 
     def loadResource(self, kind: int, url: QUrl | str):
-
-        """ Override the resource discovery to get the images we need """
+        """Override the resource discovery to get the images we need"""
 
         if isinstance(url, QUrl):
             name = url.toString()
@@ -48,7 +48,6 @@ class WhatsNewBrowser(QTextBrowser):
             name = url
 
         if kind == 2:
-
             # This is pretty nasty, there's probably a better way
             if name.startswith("whatsnew/"):
                 parts = name.split("/")[1:]
@@ -66,14 +65,14 @@ class WhatsNewBrowser(QTextBrowser):
 
 
 class WhatsNewWidget(QDialog, Ui_WhatsNewUI):
-
-    """ What's New window: displays messages about what is new in this version of SasView
+    """What's New window: displays messages about what is new in this version of SasView
 
     It will find all files in messages.[version] if [version] is newer than the last time
     the "don't show me again" option was chosen
 
     To add new messages, just dump a (self-contained) html file into the appropriate folder
     """
+
     def __init__(self, parent=None, only_recent=True):
         """
         Parent here is the GUI Manager. Required for access to
@@ -133,18 +132,17 @@ class WhatsNewWidget(QDialog, Ui_WhatsNewUI):
         self.set_page_label()
 
         self.setMinimumSize(800, 400)
-        #self.resize(800, 600)
         self.setModal(True)
 
     def next_file(self):
-        """ Show the next available file (increment counter, show)"""
+        """Show the next available file (increment counter, show)"""
         self.current_index += 1
         self.current_index %= self.max_index
         self.show_file()
         self.set_page_label()
 
     def prev_file(self):
-        """ Go to next file"""
+        """Go to next file"""
         self.current_index -= 1
         if self.current_index < 0:
             self.current_index = self.max_index - 1
@@ -153,12 +151,10 @@ class WhatsNewWidget(QDialog, Ui_WhatsNewUI):
 
     def set_page_label(self):
         """Set the appropriate page number."""
-        self.lblPage.setText(
-            f"{self.current_index + 1} / {self.max_index}"
-        )
+        self.lblPage.setText(f"{self.current_index + 1} / {self.max_index}")
 
     def show_file(self):
-        """ Set the text of the window to the file with the current index"""
+        """Set the text of the window to the file with the current index"""
         if len(self.all_messages) > 0:
             filename = self.all_messages[self.current_index]
             with open(filename) as fid:
@@ -168,7 +164,7 @@ class WhatsNewWidget(QDialog, Ui_WhatsNewUI):
             self.browser.setHtml("<html><body><h1>You should not see this!!!</h1></body></html>")
 
     def close_me(self):
-        """ Close action, needs to save the state for showing """
+        """Close action, needs to save the state for showing"""
         if self.showAgain is not None:
             if not self.showAgain.isChecked():
                 # We choose the newest, for backwards compatability, i.e. we never reduce the last version
@@ -177,13 +173,12 @@ class WhatsNewWidget(QDialog, Ui_WhatsNewUI):
         self.close()
 
     def has_new_messages(self) -> bool:
-        """ Should the window be shown? """
+        """Should the window be shown?"""
         return bool(self.all_messages)
 
 
 def main():
-    """ Demo/testing window"""
-
+    """Demo/testing window"""
 
     app = QtWidgets.QApplication([])
 
