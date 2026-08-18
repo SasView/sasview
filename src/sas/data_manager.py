@@ -111,6 +111,15 @@ class NewDataManager(QObject):
     def get_all_associations(self, data: TrackedData) -> list[TrackedData]:
         return [assoc[0] if assoc[0] != data else assoc[1] for assoc in self.associations if data in assoc]
 
+    def make_trend(self, data: list[SasData]):
+        # TODO: This trend axes value is a placeholder, and the user should be
+        # ale to select it in a dialog.
+        trend_axis = {"field": ["magnetic", "applied_magnetic_field"]}
+        new_trend = Trend(data=data, trend_axes=trend_axis)
+        self.add_data(new_trend)
+        for datum in data:
+            self.make_association(new_trend, datum)
+
     @property
     def all_data(self) -> list[TrackedData]:
         return self._all_data_entries
