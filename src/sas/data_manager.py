@@ -1,3 +1,4 @@
+from sasdata.trend import Trend
 from PySide6.QtCore import QObject, Signal
 from PySide6.QtWidgets import QDialog
 
@@ -10,7 +11,8 @@ TrackedData = SasData | Perspective
 
 # TODO: Probably want to handle order, if that is even relevant.
 valid_associations: list[tuple[str | type, str | type]] = [
-    ('Perspective', SasData)
+    ('Perspective', SasData),
+    (Trend, SasData)
     # TODO: Include plots
 ]
 
