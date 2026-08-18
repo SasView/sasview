@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 from PySide6.QtWidgets import QFileDialog
 
 from sasdata.dataloader.loader import Loader
+from sasdata.dataloader.data_info import plottable_1D
 
 import sas.qtgui.Utilities.MultivariateCurveResolution.constants as const
 
@@ -69,66 +70,6 @@ class Curve:
 
     def getData(self) -> np.ndarray:
         return self.data.copy() * [const.XUNIT_FACTORS[self.units], 1, 1]
-
-    def plotAbsolute(self, ax: plt.Axes, units: str = "", a_cut: float = 0, error_bars: bool = False, color = const.A_DEF_COLOR, semilog: bool = True):
-        if units == "":
-            units = self.units
-        if self.data is None:
-            return
-
-        x = self.data[:, 0].copy() * const.XUNIT_FACTORS[units]
-        y = self.data[:, 1].copy()
-        dy = self.data[:, 2].copy()
-
-        if semilog:
-            ax.semilogy(x, y, color=color)
-        else:
-            ax.plot(x, y, color=color)
-        
-        if error_bars:
-            ax.fill_between(x, (y-dy), (y+dy), color=color, alpha=.25)
-    
-    def plotHoltzer(self, ax: plt.Axes, units: str = "", h_cut: float = 0, error_bars: bool = False, color = const.H_DEF_COLOR):
-        if units == "":
-            units = self.units
-        if self.data is None:
-            return
-
-        x = self.data[:, 0].copy() * const.XUNIT_FACTORS[units]
-        y = self.data[:, 1].copy()
-        dy = self.data[:, 2].copy()
-
-        ax.plot(x, y * x, color=color)
-        if error_bars:
-            ax.fill_between(x, (y-dy) * x, (y+dy) * x, color=color, alpha=.25)
-    
-    def plotKratky(self, ax: plt.Axes, units: str = "", k_cut: float = 0, error_bars: bool = False, color = const.K_DEF_COLOR):
-        if units == "":
-            units = self.units
-        if self.data is None:
-            return
-
-        x = self.data[:, 0].copy() * const.XUNIT_FACTORS[units]
-        y = self.data[:, 1].copy()
-        dy = self.data[:, 2].copy()
-
-        ax.plot(x, y * (x ** 2), color=color)
-        if error_bars:
-            ax.fill_between(x, (y-dy) * (x ** 2), (y+dy) * (x ** 2), color=color, alpha=.25)
-    
-    def plotPorod(self, ax: plt.Axes, units: str = "", p_cut: float = 0, error_bars: bool = False, color = const.P_DEF_COLOR):
-        if units == "":
-            units = self.units
-        if self.data is None:
-            return
-
-        x = self.data[:, 0].copy() * const.XUNIT_FACTORS[units]
-        y = self.data[:, 1].copy()
-        dy = self.data[:, 2].copy()
-
-        ax.plot(x, y * (x ** 4), color=color)
-        if error_bars:
-            ax.fill_between(x, (y-dy) * (x ** 4), (y+dy) * (x ** 4), color=color, alpha=.25)
 
     def __str__(self):
         # Nice printout
@@ -223,13 +164,13 @@ class ProcessContainer:
     unused_curves: int
     n_removed_curves: int
 
-    combination: Optional[List[bool]] = None
+    combination: Optional[List[bool]]
     curve_container: CurveContainer
 
     n_pure_spectra: int
     pure_spectra: list[int]
     initial_estimates: list[int]
-    initial_estimate_method: None
+    initial_estimate_method: Optional[str]
 
     constraints_preset: str
     constraints: list[int]
@@ -331,6 +272,8 @@ class MCRALSLib:
             for filename, data1d in zip(files, input_data):
                 if isinstance(data1d, Exception):
                     return data1d
+                if (not isinstance(data1d, plottable_1D)):
+                    return ValueError(f"Expected 1D data")
 
                 curve_data = np.stack([data1d.x, data1d.y, data1d.dy], axis=1)
 
@@ -398,7 +341,7 @@ class MCRALSLib:
         return imported_curves
 
     @staticmethod
-    def load_data(process: ProcessContainer, output: str):
+    def load_data(process: ProcessContainer, output: str) -> bool:
         process.list_curves = []
         all_data: list[np.ndarray] = []
 
@@ -412,52 +355,77 @@ class MCRALSLib:
                 all_data.append(curve.getData())
 
         # Add active curves to the pyCOSMiCS process
-        process.cosmics.load_data(
-            output=output,
-            all_curves=[all_data],
-            all_names=[[curve.name for curve in process.list_curves]],
-            n_experiments=1,
-            silent=True
-        )
+        try:
+            process.cosmics.load_data(
+                output=output,
+                all_curves=[all_data],
+                all_names=[[curve.name for curve in process.list_curves]],
+                n_experiments=1,
+                silent=True
+            )
 
-        # Preprocess the data
-        scale_mask: List[bool] = [curve.is_auto_scaled for curve in process.list_curves]
-        process.cosmics.normalise(mask=scale_mask)
+            # Preprocess the data
+            scale_mask: List[bool] = [curve.is_auto_scaled for curve in process.list_curves]
+            process.cosmics.normalise(mask=scale_mask)
 
-        process.cosmics.set_units(units="A")
+            process.cosmics.set_units(units="A")
 
-        process.elim_points = 3
+            process.elim_points = 3
 
-        process.cosmics.remove_leading_points(elim_points=process.elim_points)
+            process.cosmics.remove_leading_points(elim_points=process.elim_points)
 
-        process.cosmics.qrange_cuts(
-            cut_abs=process.a_cut,
-            cut_holtzer=process.h_cut,
-            cut_kratky=process.k_cut,
-            cut_porod=process.p_cut,
-            silent=True
-        )
+            process.cosmics.qrange_cuts(
+                cut_abs=process.a_cut,
+                cut_holtzer=process.h_cut,
+                cut_kratky=process.k_cut,
+                cut_porod=process.p_cut,
+                silent=True
+            )
 
-        process.cosmics.representation_matrices()
-
-    @staticmethod
-    def preview_data(process: ProcessContainer) -> plt.Figure:
-        pass
-
-    @staticmethod
-    def preview_curve(process: ProcessContainer, curve_ID: int) -> plt.Figure:
-        pass
-
-    @staticmethod
-    def PCA(process: ProcessContainer) -> plt.Figure:
-        MCRALSLib.load_data(process, "src/sas/qtgui/Utilities/MultivariateCurveResolution/cosmics_results")
-
-        # Run PCA
-        process.pca_significant_components, process.pca_sc_variance = process.cosmics.pca()
+            process.cosmics.representation_matrices()
+        except Exception as e:
+            MCRALSLib.logger.error(f"Failed to load data into 'pyCOSMiCS': {repr(e)}")
+            return False
         
-        # Render the PCA-results as a plot
-        figure: plt.Figure = process.cosmics.plot_pca_eigenvs(show=False)
-        return figure
+        return True
+
+    @staticmethod
+    def preview_data(process: ProcessContainer) -> Optional[plt.Figure]:
+        if MCRALSLib.load_data(process, "src/sas/qtgui/Utilities/MultivariateCurveResolution/cosmics_preview"):
+            return MCRALSLib.plot_data(process)
+
+    @staticmethod
+    def preview_curve_all_reps(process: ProcessContainer, curve_ID: int) -> Optional[plt.Figure]:
+        if MCRALSLib.load_data(process, "src/sas/qtgui/Utilities/MultivariateCurveResolution/cosmics_preview"):
+            return MCRALSLib.plot_curve_all_reps(process, curve_ID)
+
+    @staticmethod
+    def plot_data(process: ProcessContainer) -> plt.Figure:
+        return process.cosmics.plot_all_reps(show=False, is_grid=False)
+
+    @staticmethod
+    def plot_curve(process: ProcessContainer, curve_ID: int) -> plt.Figure:
+        return process.cosmics.plot_curve(
+            process.id_to_cosmics_index[curve_ID],
+            show=False
+        )
+
+    @staticmethod
+    def plot_curve_all_reps(process: ProcessContainer, curve_ID: int) -> plt.Figure:
+        return process.cosmics.plot_curve_all_reps(
+            process.id_to_cosmics_index[curve_ID],
+            show=False, is_grid=False
+        )
+
+    @staticmethod
+    def PCA(process: ProcessContainer) -> Optional[plt.Figure]:
+        if MCRALSLib.load_data(process, "src/sas/qtgui/Utilities/MultivariateCurveResolution/cosmics_results"):
+            # Run PCA
+            process.pca_significant_components, process.pca_sc_variance = process.cosmics.pca()
+            
+            # Render the PCA-results as a plot
+            figure: plt.Figure = process.cosmics.plot_pca(show=False)
+            return figure
 
     @staticmethod
     def InitialEstimates(process: ProcessContainer, mode: int):

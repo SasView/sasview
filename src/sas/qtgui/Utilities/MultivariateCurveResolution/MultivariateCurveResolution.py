@@ -3,6 +3,8 @@ from logging import getLogger
 import sys # for testing
 import random # for testing
 
+from copy import deepcopy
+
 import matplotlib.pylab as pl
 import matplotlib.pyplot as plt
 import numpy as np
@@ -149,29 +151,19 @@ class MCRTool(QMainWindow, Ui_MCRTool):
         self.MCRprocess.n_tot_curves  = len(self.curves)
         self.MCRprocess.unused_curves = self.MCRprocess.n_tot_curves - self.MCRprocess.n_curves
 
-        resample_checked = self.ResampleCheckedOption.isChecked()
-        scale_checked    = self.ScaleCheckedOption.isChecked()
-
         self.MCRprocess.a_cut, self.MCRprocess.h_cut, self.MCRprocess.k_cut, self.MCRprocess.p_cut = self.getQCuts()
 
         # Preprocess curves
+        resample_checked = self.ResampleCheckedOption.isChecked()
+        scale_checked    = self.ScaleCheckedOption.isChecked()
+
         for curve_item in self.curve_items.values():
             curve = curve_item.curve
-
             curve.is_removed = not curve_item.active
-
             if not curve.is_removed:
                 curve.setUnits(curve_item.units)
-
-                if (resample_checked == curve_item.resample_checked):
-                    curve.is_resampled = True
-                else:
-                    curve.is_resampled = False
-
-                if (scale_checked == curve_item.scale_checked):
-                    curve.is_auto_scaled = True
-                else:
-                    curve.is_auto_scaled = False
+                curve.is_resampled = (resample_checked == curve_item.resample_checked)
+                curve.is_auto_scaled = (scale_checked == curve_item.scale_checked)
 
         # Run PCA
         figure = MCRALSLib.PCA(self.MCRprocess)
@@ -241,6 +233,7 @@ class MCRTool(QMainWindow, Ui_MCRTool):
 
         # Go to 'Constraints' tab
         self.updateTabProgression(2)
+        self.refreshConstraintsTab()
 
     def onRunMCRALS(self):
 
@@ -331,6 +324,7 @@ class MCRTool(QMainWindow, Ui_MCRTool):
 
         # Go to 'Error analysis' tab
         self.updateTabProgression(4)
+        self.refreshErrorAnalysisTab()
 
     def onRunErrorEstimation(self):
 
@@ -455,7 +449,6 @@ class MCRTool(QMainWindow, Ui_MCRTool):
         if self.SkipErrorsButton.isChecked():
             self.ErrorEstimationBox.setEnabled(False)
             self.GenerateReportButton.setEnabled(True)
-            self.MCRprocess.done_error_estimation = False
         else:
             self.ErrorEstimationBox.setEnabled(True)
             self.GenerateReportButton.setEnabled(self.MCRprocess.done_error_estimation)
@@ -577,45 +570,46 @@ class MCRTool(QMainWindow, Ui_MCRTool):
         if p_cut == 0: p_cut = float('inf')
         return a_cut, h_cut, k_cut, p_cut
 
-    def previewCurve(self, curve_ID: int) -> None:
-        curve_item = self.curve_items[curve_ID]
-        curve = curve_item.curve
+    def preparePreviewProcess(self) -> ProcessContainer:
+        process = deepcopy(self.MCRprocess)
+        process.a_cut, process.h_cut, process.k_cut, process.p_cut = self.getQCuts()
 
-        a_cut, h_cut, k_cut, p_cut = self.getQCuts()
-
-        figure = self.defaultPreviewFigure()
-
-        curve.plotAbsolute(figure.axes[0], curve_item.units, a_cut, error_bars=True)
-        curve.plotHoltzer(figure.axes[1], curve_item.units, h_cut, error_bars=True)
-        curve.plotKratky(figure.axes[2], curve_item.units, k_cut, error_bars=True)
-        curve.plotPorod(figure.axes[3], curve_item.units, p_cut, error_bars=True)
-
-        canvas = FigureCanvas(figure)
-        canvas.draw()
-        item = QListWidgetItem()
-        item.setSizeHint(QSize(200, 1000))
-        self.GraphsViewList.insertItem(0, item)
-        self.GraphsViewList.setItemWidget(item, canvas)
-
-    def previewAllCurves(self) -> None:
-        a_cut, h_cut, k_cut, p_cut = self.getQCuts()
-
-        figure = self.defaultPreviewFigure()
+        resample_checked = self.ResampleCheckedOption.isChecked()
+        scale_checked    = self.ScaleCheckedOption.isChecked()
 
         for curve_item in self.curve_items.values():
-            if curve_item.active and (curve_item.units != ""):
-                color = pl.cm.jet(curve_item.curve.ID / self.curve_container.tot_curves)
-                curve_item.curve.plotAbsolute(figure.axes[0], curve_item.units, a_cut, color=color)
-                curve_item.curve.plotHoltzer(figure.axes[1], curve_item.units, h_cut, color=color)
-                curve_item.curve.plotKratky(figure.axes[2], curve_item.units, k_cut, color=color)
-                curve_item.curve.plotPorod(figure.axes[3], curve_item.units, p_cut, color=color)
+            curve = process.curve_container.curves[curve_item.curve.ID]
+            curve.is_removed = not curve_item.active
+            if not curve.is_removed:
+                curve.setUnits(curve_item.units)
+                curve.is_resampled = (resample_checked == curve_item.resample_checked)
+                curve.is_auto_scaled = (scale_checked == curve_item.scale_checked)
 
-        canvas = FigureCanvas(figure)
-        canvas.draw()
-        item = QListWidgetItem()
-        item.setSizeHint(QSize(200, 1000))
-        self.GraphsViewList.insertItem(0, item)
-        self.GraphsViewList.setItemWidget(item, canvas)
+        return process
+
+    def previewCurve(self, curve_ID: int):
+        process = self.preparePreviewProcess()
+        figure = MCRALSLib.preview_curve_all_reps(process, curve_ID)
+
+        if figure is not None:
+            canvas = FigureCanvas(figure)
+            canvas.draw()
+            item = QListWidgetItem()
+            item.setSizeHint(QSize(200, 1000))
+            self.GraphsViewList.insertItem(0, item)
+            self.GraphsViewList.setItemWidget(item, canvas)
+
+    def previewAllCurves(self):
+        process = self.preparePreviewProcess()
+        figure = MCRALSLib.preview_data(process)
+
+        if figure is not None:
+            canvas = FigureCanvas(figure)
+            canvas.draw()
+            item = QListWidgetItem()
+            item.setSizeHint(QSize(200, 1000))
+            self.GraphsViewList.insertItem(0, item)
+            self.GraphsViewList.setItemWidget(item, canvas)
 
     def promptDeleteSelectedCurves(self):
         delete_msg = f"Are you sure you want to delete {self.curve_item_container.countActiveCurves()} curves?"
@@ -634,6 +628,7 @@ class MCRTool(QMainWindow, Ui_MCRTool):
                         self.CurveList.removeRow(row)
 
             self.updateTabProgression(0)
+            self.refreshPrepareDataTab()
 
     selected_row_in_curve_list: int = -1
 
@@ -659,6 +654,7 @@ class MCRTool(QMainWindow, Ui_MCRTool):
                 self.CurveList.removeRow(row)
 
             self.updateTabProgression(0)
+            self.refreshPrepareDataTab()
 
     """ PCA & initial estimation Tab """
 
@@ -667,14 +663,9 @@ class MCRTool(QMainWindow, Ui_MCRTool):
             return
 
         name = self.SelectPreviewEstimateOption.currentText()
-        ID = self.curve_container.getIdFromName(name)
-        curve = self.curves[ID]
+        curve_ID = self.curve_container.getIdFromName(name)
 
-        figure = plt.Figure()
-        figure.subplots()
-        figure.axes[0].set(xlabel="q", ylabel="I(q)", title="Data set")
-
-        curve.plotAbsolute(figure.axes[0], a_cut=self.MCRprocess.a_cut, semilog=False)
+        figure = MCRALSLib.plot_curve(self.MCRprocess, curve_ID)
 
         self.PreviewInitialEstimatesBox.layout().removeWidget(self.PreviewEstimatePlot)
         self.PreviewEstimatePlot.close()
@@ -785,17 +776,6 @@ class MCRTool(QMainWindow, Ui_MCRTool):
         directory = MCRALSLib.directory_popup()
         if directory is not None:
             print(format + " " + str(metadata))
-
-    """ Other utility functions """
-
-    def defaultPreviewFigure(self) -> plt.Figure:
-        fig = plt.Figure()
-        fig.subplots(4)
-        fig.axes[0].set(xlabel="q", ylabel="I(q)", title="Data set (semilogarithmic scale)")
-        fig.axes[1].set(xlabel="q", ylabel="I(q)·q", title="Holtzer plot")
-        fig.axes[2].set(xlabel="q", ylabel="I(q)·q^2", title="Kratky plot")
-        fig.axes[3].set(xlabel="q", ylabel="I(q)·q^4", title="Porod plot")
-        return fig
 
 """ UI functionality classes """
 
