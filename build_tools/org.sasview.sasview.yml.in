@@ -58,6 +58,7 @@ modules:
               type: git
               tag-pattern: ^v([\d.]+)$
   - shared-modules/glu/glu-9.json
+  - python3-requirements-source-build.json
   - python3-requirements-dev.json
   - python3-requirements.json
   - name: patchelf
