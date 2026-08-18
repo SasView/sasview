@@ -9,15 +9,16 @@
 # ///
 
 
-from typing import cast
 import subprocess
-import requirements
-from sys import stderr, exit
+from os import environ
 from pathlib import Path
-from click import command, option
-from click import Path as ClickPath
-from os import environ, getcwd
 from string import Template
+from sys import exit, stderr
+from typing import cast
+
+import requirements
+from click import Path as ClickPath
+from click import command, option
 
 
 class ManifestTemplate(Template):
@@ -87,7 +88,7 @@ def get_qt_version(requirements_file: Path) -> tuple[str, str]:
     is being used.
 
     """
-    with open(requirements_file, "r") as f:
+    with open(requirements_file) as f:
         for req in requirements.parse(f):
             if cast(str, req.name).lower() == "pyside6":
                 _, raw_version_str = req.specs[0]
