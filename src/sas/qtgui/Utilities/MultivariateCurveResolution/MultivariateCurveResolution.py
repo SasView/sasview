@@ -153,6 +153,19 @@ class MCRTool(QMainWindow, Ui_MCRTool):
 
         self.OutlierTable.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
 
+        # Render ConcentrationErrorsList and SpectraErrorsList
+        self.ConcentrationErrorsList.horizontalHeader().setSectionResizeMode(QHeaderView.Fixed)
+        self.ConcentrationErrorsList.verticalHeader().setSectionResizeMode(QHeaderView.Fixed)
+        self.SpectraErrorsList.horizontalHeader().setSectionResizeMode(QHeaderView.Fixed)
+        self.SpectraErrorsList.verticalHeader().setSectionResizeMode(QHeaderView.Fixed)
+
+        for column, width in enumerate(const.ERRORS_LIST_COLUMN_WIDTHS):
+            self.ConcentrationErrorsList.setColumnWidth(column, width)
+            self.SpectraErrorsList.setColumnWidth(column, width)
+
+        self.ConcentrationErrorsList.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+        self.SpectraErrorsList.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+
         # Begin
         self.updateTabProgression(0)
 
@@ -234,6 +247,8 @@ class MCRTool(QMainWindow, Ui_MCRTool):
         )
 
         # Render 'Constraints' tab
+
+        # Render ConstraintsBox and ConstraintsPresetBox
         self.AmyloidFilibrationPresetOption.setChecked(True) # Default option
         if self.MCRprocess.n_pure_spectra == 0:
             self.SecSaxsPresetOption.setEnabled(False)
@@ -245,11 +260,20 @@ class MCRTool(QMainWindow, Ui_MCRTool):
             self.SpectraEqualityLabel.setEnabled(True)
         self.SpectraEqualityLabel.setText(f"Fix spectra profile(s) of {self.MCRprocess.n_pure_spectra} known species:")
 
+        # Render ChosenInitialEstimatesList
+        self.ChosenInitialEstimatesList.clear()
+        for idx, curve_ID in enumerate(self.MCRprocess.initial_estimates):
+            self.ChosenInitialEstimatesList.addItem(f"{idx + 1}. {self.curves[curve_ID].name}" + (" (known)" if curve_ID in self.MCRprocess.pure_spectra else ""))
+
         # Go to 'Constraints' tab
         self.updateTabProgression(2)
         self.refreshConstraintsTab()
 
     def onFirstRunMCRALS(self):
+
+        if not self.popupPrompt(header="Run MCRALS", msg="Running MCR-ALS might take a moment.\nDo you want to run it?"):
+            return
+
         # Collect contraints parameters
         if self.AmyloidFilibrationPresetOption.isChecked():
             self.MCRprocess.constraints_preset = "Amyloid filibration"
@@ -278,9 +302,9 @@ class MCRTool(QMainWindow, Ui_MCRTool):
         if self.SpectraEqualityCheckBox.isChecked():
             self.MCRprocess.constraints.append(6)
 
-        self.onRunMCRALS()
+        self.runMCRALS()
 
-    def onRunMCRALS(self):
+    def runMCRALS(self):
 
         # Run MCRALS with constraints
         MCRALSLib.MCRLAS(self.MCRprocess)
@@ -356,12 +380,15 @@ class MCRTool(QMainWindow, Ui_MCRTool):
 
         self.OutlierTable.sortItems(2, Qt.DescendingOrder)
 
-        self.OutlierRemovalLabel.setText(f"{self.MCRprocess.n_eliminated_curves} outlier curves removed in total")
+        self.OutlierRemovalLabel.setText(f"{self.MCRprocess.n_eliminated_curves} outlier(s) removed in total")
 
         # Go to 'MCR-ALS' tab
         self.updateTabProgression(3)
 
     def onRerunMCRALS(self):
+
+        if not self.popupPrompt(header="Run MCRALS", msg="Rerunning MCR-ALS might take a moment.\nDo you want to rerun it?"):
+            return
 
         # collect selected outliers
         outliers = []
@@ -376,7 +403,7 @@ class MCRTool(QMainWindow, Ui_MCRTool):
         # remove outliers
         if  MCRALSLib.remove_outliers(self.MCRprocess, outliers):
             # Run MCRALS
-            self.onRunMCRALS()
+            self.runMCRALS()
 
     def onSelectCombination(self):
 
@@ -393,7 +420,13 @@ class MCRTool(QMainWindow, Ui_MCRTool):
         self.updateTabProgression(4)
         self.refreshErrorAnalysisTab()
 
+    plot_conc_errors_mask: list[bool]
+    plot_abss_errors_mask: list[bool]
+
     def onRunErrorEstimation(self):
+
+        if not self.popupPrompt(header="Run Monte Carlo", msg=f"Running {self.ErrorIterationsInput.text()} Monte Carlo simulations might take a moment.\nDo you want to run them?"):
+            return
 
         # Collect parameters
         self.MCRprocess.done_error_estimation = True
@@ -401,21 +434,38 @@ class MCRTool(QMainWindow, Ui_MCRTool):
         self.MCRprocess.error_noise = self.NoiseModelCombobox.currentText()
 
         # Run error estimation
-        conc_fig, abss_fig = MCRALSLib.MonteCarlo(self.MCRprocess)
+        MCRALSLib.MonteCarlo(self.MCRprocess)
 
-        # Update ConcentrationErrorsList and SpectraErrorsList
-        self.ConcentrationErrorsBox.layout().removeWidget(self.ConcentrationErrorsPlot)
-        self.ConcentrationErrorsPlot.close()
-        self.ConcentrationErrorsPlot = FigureCanvas(conc_fig)
-        self.ConcentrationErrorsPlot.draw()
-        self.ConcentrationErrorsBox.layout().insertWidget(0, self.ConcentrationErrorsPlot, 3, Qt.AlignCenter)
-        self.ConcentrationErrorsBox.layout().update()
+        self.plot_conc_errors_mask = [True] * self.MCRprocess.n_species
+        self.plot_abss_errors_mask = [True] * self.MCRprocess.n_species
 
-        self.SpectraErrorsBox.layout().removeWidget(self.SpectraErrorsPlot)
-        self.SpectraErrorsPlot.close()
-        self.SpectraErrorsPlot = FigureCanvas(abss_fig)
-        self.SpectraErrorsPlot.draw()
-        self.SpectraErrorsBox.layout().insertWidget(0, self.SpectraErrorsPlot, 3, Qt.AlignCenter)
+        # Render ConcentrationErrorsList and SpectraErrorsList
+        self.ConcentrationErrorsList.setRowCount(0)
+        self.SpectraErrorsList.setRowCount(0)
+
+        for idx, curve_ID in enumerate(self.MCRprocess.initial_estimates):
+            row = self.ConcentrationErrorsList.rowCount()
+            self.ConcentrationErrorsList.insertRow(row)
+            self.SpectraErrorsList.insertRow(row)
+
+            # Show / hide button
+            conc_button = ShowHideButton(self.ConcentrationErrorsList.cellWidget(row, 0), idx)
+            abss_button = ShowHideButton(self.SpectraErrorsList.cellWidget(row, 0), idx)
+            self.ConcentrationErrorsList.setCellWidget(row, 0, conc_button)
+            self.SpectraErrorsList.setCellWidget(row, 0, abss_button)
+            conc_button.onClickSignal.connect(self.updateConcentrationErrorsPlot)
+            abss_button.onClickSignal.connect(self.updateSpectraErrorsPlot)
+
+            # Name
+            conc_label = QLabel(self.curves[curve_ID].name)
+            abss_label = QLabel(self.curves[curve_ID].name)
+            conc_label.setContentsMargins(5, 0, 0, 0)
+            abss_label.setContentsMargins(5, 0, 0, 0)
+            self.ConcentrationErrorsList.setCellWidget(row, 1, conc_label)
+            self.SpectraErrorsList.setCellWidget(row, 1, abss_label)
+
+        # Render ConcentrationErrorsPlot and SpectraErrorsPlot
+        self.renderErrorsPlots()
 
     def onGenerateReport(self):
 
@@ -425,7 +475,7 @@ class MCRTool(QMainWindow, Ui_MCRTool):
         # Render 'Report' Tab
         self.CombinationUsedLabel.setText(self.MCRprocess.combination)
         self.SpeciesSearchedForLabel.setText(f"{self.MCRprocess.n_species} ({self.MCRprocess.n_pure_spectra} fixed)")
-        self.NumberCurvesUsedLabel.setText(f"{self.MCRprocess.n_curves} of {self.MCRprocess.n_tot_curves} ({self.MCRprocess.n_eliminated_curves} outliers removed)")
+        self.NumberCurvesUsedLabel.setText(f"{self.MCRprocess.n_curves} of {self.MCRprocess.n_tot_curves} ({self.MCRprocess.n_eliminated_curves} outlier(s) removed)")
         self.CurvesReconstructedLabel.setText(f"({self.MCRprocess.n_species} species x {self.MCRprocess.n_curves} curves)")
 
         # Go to 'Report' Tab
@@ -655,8 +705,7 @@ class MCRTool(QMainWindow, Ui_MCRTool):
         return process
 
     def previewCurve(self, curve_ID: int):
-        process = self.preparePreviewProcess()
-        figure = MCRALSLib.preview_curve_all_reps(process, curve_ID)
+        figure = MCRALSLib.preview_curve_all_reps(self.preparePreviewProcess(), curve_ID)
 
         if figure is not None:
             canvas = FigureCanvas(figure)
@@ -667,8 +716,7 @@ class MCRTool(QMainWindow, Ui_MCRTool):
             self.GraphsViewList.setItemWidget(item, canvas)
 
     def previewAllCurves(self):
-        process = self.preparePreviewProcess()
-        figure = MCRALSLib.preview_data(process)
+        figure = MCRALSLib.preview_data(self.preparePreviewProcess())
 
         if figure is not None:
             canvas = FigureCanvas(figure)
@@ -679,10 +727,7 @@ class MCRTool(QMainWindow, Ui_MCRTool):
             self.GraphsViewList.setItemWidget(item, canvas)
 
     def promptDeleteSelectedCurves(self):
-        delete_msg = f"Are you sure you want to delete {self.curve_item_container.countActiveCurves()} curves?"
-        reply = QMessageBox.question(self, 'Confirm deletion', delete_msg, QMessageBox.Yes, QMessageBox.No)
-
-        if reply == QMessageBox.Yes:
+        if self.popupPrompt(header="Confirm deletion", msg=f"Are you sure you want to delete {self.curve_item_container.countActiveCurves()} curves?"):
             for row in reversed(range(self.CurveList.rowCount())):
 
                 name = self.CurveList.cellWidget(row, 1).text()
@@ -712,10 +757,7 @@ class MCRTool(QMainWindow, Ui_MCRTool):
         ID = self.curve_container.getIdFromName(self.CurveList.cellWidget(row, 1).text())
         curve = self.curves[ID]
 
-        delete_msg = f"Are you sure you want to delete the curve \"{curve.name}\"?"
-        reply = QMessageBox.question(self, 'Confirm deletion', delete_msg, QMessageBox.Yes, QMessageBox.No)
-
-        if reply == QMessageBox.Yes:
+        if self.popupPrompt(header="Confirm deletion", msg=f"Are you sure you want to delete the curve \"{curve.name}\"?"):
             if self.MCRprocess.deleteCurve(curve):
                 self.curve_item_container.deleteCurve(ID)
                 self.CurveList.removeRow(row)
@@ -825,6 +867,35 @@ class MCRTool(QMainWindow, Ui_MCRTool):
 
     """ Error estimation Tab """
 
+    def renderErrorsPlots(self):
+        # Render ConcentrationErrorsPlot and SpectraErrorsPlot
+        conc_fig, abss_fig = MCRALSLib.plot_monte_carlo(
+            self.MCRprocess,
+            self.plot_conc_errors_mask,
+            self.plot_abss_errors_mask
+        )
+
+        self.ConcentrationErrorsBox.layout().removeWidget(self.ConcentrationErrorsPlot)
+        self.ConcentrationErrorsPlot.close()
+        self.ConcentrationErrorsPlot = FigureCanvas(conc_fig)
+        self.ConcentrationErrorsPlot.draw()
+        self.ConcentrationErrorsBox.layout().insertWidget(0, self.ConcentrationErrorsPlot, 3, Qt.AlignCenter)
+        self.ConcentrationErrorsBox.layout().update()
+
+        self.SpectraErrorsBox.layout().removeWidget(self.SpectraErrorsPlot)
+        self.SpectraErrorsPlot.close()
+        self.SpectraErrorsPlot = FigureCanvas(abss_fig)
+        self.SpectraErrorsPlot.draw()
+        self.SpectraErrorsBox.layout().insertWidget(0, self.SpectraErrorsPlot, 3, Qt.AlignCenter)
+
+    def updateConcentrationErrorsPlot(self, mask_idx: int, state: bool):
+        self.plot_conc_errors_mask[mask_idx] = state
+        self.renderErrorsPlots()
+
+    def updateSpectraErrorsPlot(self, mask_idx: int, state: bool):
+        self.plot_abss_errors_mask[mask_idx] = state
+        self.renderErrorsPlots()
+
     """ Report Tab """
 
     def onHTMLReport(self):
@@ -852,6 +923,11 @@ class MCRTool(QMainWindow, Ui_MCRTool):
         directory = MCRALSLib.directory_popup()
         if directory is not None:
             print(format + " " + str(metadata))
+
+    """ Other utilities """
+
+    def popupPrompt(self, header: str, msg: str = "") -> bool:
+        return QMessageBox.question(self, header, msg, QMessageBox.Yes, QMessageBox.No) == QMessageBox.Yes
 
 """ UI functionality classes """
 
@@ -915,6 +991,8 @@ class ViewCurveButton(QPushButton):
 
 
 class ChiItem(QTableWidgetItem):
+    """ Displays chi-values for curves, can be used for sorting """
+
     def __init__(self, chi_value: float):
         super(ChiItem, self).__init__()
 
@@ -925,6 +1003,31 @@ class ChiItem(QTableWidgetItem):
             return self.data(Qt.UserRole) < other.data(Qt.UserRole)
         except ValueError:
             return super().__lt__(other)
+
+
+class ShowHideButton(QPushButton):
+    """ Show or hide curve button """
+
+    mask_idx: int
+
+    onClickSignal = Signal(int, bool)
+
+    def __init__(self, parent: QWidget, mask_idx: int):
+        super(ShowHideButton, self).__init__()
+        self.setParent(parent)
+
+        self.setText("Hide")
+        self.mask_idx = mask_idx
+
+        self.clicked.connect(self.onClick)
+
+    def onClick(self):
+        if self.text() == "Hide":
+            self.setText("Show")
+            self.onClickSignal.emit(self.mask_idx, False)
+        else:
+            self.setText("Hide")
+            self.onClickSignal.emit(self.mask_idx, True)
 
 
 """ UI data classes """

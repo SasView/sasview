@@ -57,7 +57,7 @@
        <enum>QTabWidget::TabPosition::North</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>4</number>
       </property>
       <widget class="QWidget" name="PrepareDataTab">
        <property name="sizePolicy">
@@ -1353,7 +1353,7 @@
           <x>1</x>
           <y>0</y>
           <width>1071</width>
-          <height>711</height>
+          <height>721</height>
          </rect>
         </property>
         <layout class="QHBoxLayout" name="ConstraintsTabLayout" stretch="0,0">
@@ -1592,7 +1592,7 @@ Non-negativity + equality</string>
           </layout>
          </item>
          <item>
-          <layout class="QVBoxLayout" name="ConstraintsBoxLayout" stretch="0,1,0">
+          <layout class="QVBoxLayout" name="ConstraintsBoxLayout" stretch="0,0,1,0">
            <property name="spacing">
             <number>0</number>
            </property>
@@ -1979,9 +1979,88 @@ Non-negativity + equality</string>
             </widget>
            </item>
            <item>
+            <widget class="QGroupBox" name="ChosenInitialEstimatesBox">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>157</height>
+              </size>
+             </property>
+             <property name="title">
+              <string>Initial estimates</string>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_13">
+              <property name="leftMargin">
+               <number>10</number>
+              </property>
+              <property name="topMargin">
+               <number>10</number>
+              </property>
+              <property name="rightMargin">
+               <number>10</number>
+              </property>
+              <property name="bottomMargin">
+               <number>10</number>
+              </property>
+              <item>
+               <widget class="QListWidget" name="ChosenInitialEstimatesList">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>72</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="editTriggers">
+                 <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+                </property>
+                <property name="defaultDropAction">
+                 <enum>Qt::DropAction::IgnoreAction</enum>
+                </property>
+                <property name="alternatingRowColors">
+                 <bool>true</bool>
+                </property>
+                <property name="selectionMode">
+                 <enum>QAbstractItemView::SelectionMode::NoSelection</enum>
+                </property>
+                <property name="supportedDragActions">
+                 <set>Qt::DropAction::IgnoreAction</set>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
             <spacer name="ConstraintsSpacer">
              <property name="orientation">
               <enum>Qt::Orientation::Vertical</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Policy::Expanding</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
@@ -2051,7 +2130,7 @@ Non-negativity + equality</string>
           <height>711</height>
          </rect>
         </property>
-        <layout class="QHBoxLayout" name="MCRALSTabLayout" stretch="2,1">
+        <layout class="QHBoxLayout" name="MCRALSTabLayout" stretch="3,2">
          <property name="spacing">
           <number>12</number>
          </property>
@@ -2327,7 +2406,7 @@ Non-negativity + equality</string>
                <rect>
                 <x>9</x>
                 <y>29</y>
-                <width>321</width>
+                <width>391</width>
                 <height>371</height>
                </rect>
               </property>
@@ -2570,13 +2649,23 @@ Non-negativity + equality</string>
                   </widget>
                  </item>
                  <item>
-                  <widget class="QListWidget" name="ConcentrationErrorsList">
+                  <widget class="QTableWidget" name="ConcentrationErrorsList">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                      <horstretch>0</horstretch>
                      <verstretch>0</verstretch>
                     </sizepolicy>
                    </property>
+                   <column>
+                    <property name="text">
+                     <string/>
+                    </property>
+                   </column>
+                   <column>
+                    <property name="text">
+                     <string>Initial estimate curve for species</string>
+                    </property>
+                   </column>
                   </widget>
                  </item>
                 </layout>
@@ -2614,13 +2703,23 @@ Non-negativity + equality</string>
                   </widget>
                  </item>
                  <item>
-                  <widget class="QListWidget" name="SpectraErrorsList">
+                  <widget class="QTableWidget" name="SpectraErrorsList">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                      <horstretch>0</horstretch>
                      <verstretch>0</verstretch>
                     </sizepolicy>
                    </property>
+                   <column>
+                    <property name="text">
+                     <string/>
+                    </property>
+                   </column>
+                   <column>
+                    <property name="text">
+                     <string>Initial estimate curve for species</string>
+                    </property>
+                   </column>
                   </widget>
                  </item>
                 </layout>

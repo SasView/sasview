@@ -509,14 +509,21 @@ class MCRALSLib:
         pass
 
     @staticmethod
-    def MonteCarlo(process: ProcessContainer) -> tuple[plt.Figure, plt.Figure]:
+    def MonteCarlo(process: ProcessContainer):
         process.cosmics.monte_carlo(
             combination=const.RESULTS_LIST_COMBINATIONS[process.combination],
             iterations=process.error_iterations,
             confidence=0.95,
             silent=True
         )
-        return process.cosmics.plot_monte_carlo(show=False)
+
+    @staticmethod
+    def plot_monte_carlo(process: ProcessContainer, conc_mask: list[bool] | None = None, abss_mask: list[bool] | None = None) -> tuple[plt.Figure, plt.Figure]:
+        return process.cosmics.plot_monte_carlo(
+            conc_mask=conc_mask,
+            abss_mask=abss_mask,
+            show=False
+        )
 
     @staticmethod
     def GenerateReport(process: ProcessContainer):
