@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from PySide6.QtWidgets import QDialog, QVBoxLayout, QLabel, QTableWidget, QHBoxLayout, QPushButton
+from PySide6.QtWidgets import QDialog, QVBoxLayout, QLabel, QTableWidget, QHBoxLayout, QPushButton, QTableWidgetItem
 
 
 @dataclass
@@ -20,7 +20,7 @@ class TrendCreation(QDialog):
 
         self.header_label = QLabel("The below table shows the axes that are selected for this trend.")
         self.table = QTableWidget()
-        self.table.setHorizontalHeaderLabels(["Axis Name", "Axis Metadata"])
+        self.update_table()
         self.add_axes_button = QPushButton("Add Axes")
 
         self.button_row = QHBoxLayout()
@@ -33,3 +33,19 @@ class TrendCreation(QDialog):
         self.layout.addWidget(self.add_axes_button)
         self.layout.addWidget(self.table)
         self.layout.addLayout(self.button_row)
+
+    def update_table(self):
+        self.table.clear()
+
+        self.table.setRowCount(len(self.proposed_trend_axes))
+        self.table.setHorizontalHeaderLabels(["Axis Name", "Axis Metadata"])
+
+        row_index = 0
+        for axis in self.proposed_trend_axes:
+            name_item = QTableWidgetItem(axis.axis_name)
+            path_item = QTableWidgetItem(", ".join(axis.axis_path))
+            self.table.setItem(row_index, 0, name_item)
+            self.table.setItem(row_index, 1, path_item)
+            row_index += 1
+
+        self.table.show()
