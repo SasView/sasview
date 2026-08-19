@@ -24,6 +24,9 @@ from sas.refactored import Perspective
 def tracked_data_name(data: TrackedData) -> str:
     if isinstance(data, SasData):
         return data.name
+    if isinstance(data, Trend):
+        # TODO: This is temporary. We need a way for a Trend to represent itself.
+        return 'Trend'
     else:
         return data.formatName
 
