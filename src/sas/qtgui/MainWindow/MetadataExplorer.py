@@ -60,6 +60,7 @@ class MetadataExplorer(QDialog):
         if selection_mode:
             self.closeButton = QPushButton("Cancel")
             self.selectButton = QPushButton("Select")
+            self.selectButton.clicked.connect(self.accept)
             self.button_row.addWidget(self.closeButton)
             self.button_row.addWidget(self.selectButton)
         else:
