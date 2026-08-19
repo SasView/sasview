@@ -13,7 +13,7 @@ from sasdata.data import SasData
 
 from sas.data_explorer_error_message import DataExplorerErrorMessage
 from sas.data_explorer_menu import DataExplorerMenu, DataExplorerMenuAction
-from sas.data_manager import NewDataManager as DataManager
+from sas.data_manager import NewDataManager as DataManager 
 from sas.data_manager import TrackedData
 from sas.qtgui.MainWindow.DataViewer import DataViewer
 from sas.refactored import Perspective
@@ -105,6 +105,7 @@ class DataExplorerTree(QTreeWidget):
     def showContextMenu(self):
         send_to = all([isinstance(datum, SasData) for datum in self.currentTrackedData])
         view_data = len(self.currentTrackedData) == 1 and isinstance(self.currentTrackedData[0], SasData)
+        make_trend = len(self.currentTrackedData) > 1 and all([isinstance_fix for datum in self.currentTrackedData])
         menu = DataExplorerMenu(self, self._data_manager, send_to, view_data)
         action = menu.exec(QCursor.pos())
         # Result will be None if the user exited the menu without selecting anything.
