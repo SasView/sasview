@@ -7,6 +7,7 @@ from PySide6.QtWidgets import (
     QTreeWidget,
     QTreeWidgetItem,
     QWidget,
+    QDialog
 )
 
 from sasdata.data import SasData
@@ -137,9 +138,10 @@ class DataExplorerTree(QTreeWidget):
             case "make_trend":
                 trend_data = cast(list[SasData], self.currentTrackedData)
                 trend_creation_dialog = TrendCreation()
-                trend_creation_dialog.exec()
-                # TODO: Do something with the dialog that was just launched.
-                self._data_manager.make_trend(trend_data)
+                creation_result = trend_creation_dialog.exec()
+                if creation_result == QDialog.DialogCode.Accepted:
+                    # TODO: Need to pass in axes
+                    self._data_manager.make_trend(trend_data)
         if len(errors):
             box = DataExplorerErrorMessage(self, errors)
             box.show()
