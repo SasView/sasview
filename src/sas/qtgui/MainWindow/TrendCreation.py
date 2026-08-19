@@ -25,6 +25,7 @@ class TrendCreation(QDialog):
         self.table = QTableWidget()
         self.update_table()
         self.add_axes_button = QPushButton("Add Axes")
+        self.add_axes_button.clicked.connect(self.handle_add_axes)
 
         self.button_row = QHBoxLayout()
         self.cancel_button = QPushButton("Cancel")
