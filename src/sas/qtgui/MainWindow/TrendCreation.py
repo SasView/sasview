@@ -12,6 +12,7 @@ class TrendCreation(QDialog):
         self.header_label = QLabel("The below table shows the axes that are selected for this trend.")
         self.table = QTableWidget()
         self.table.setHorizontalHeaderLabels(["Axis Name", "Axis Metadata"])
+        self.add_axes_button = QPushButton("Add Axes")
 
         self.button_row = QHBoxLayout()
         self.cancel_button = QPushButton("Cance ")
@@ -20,5 +21,6 @@ class TrendCreation(QDialog):
         self.button_row.addWidget(self.make_button)
 
         self.layout.addWidget(self.header_label)
+        self.layout.addWidget(self.add_axes_button)
         self.layout.addWidget(self.table)
         self.layout.addLayout(self.button_row)
