@@ -72,7 +72,7 @@ class MetadataExplorer(QDialog):
         self.setMinimumSize(800, 430)
 
     def closeEvent(self, event):
-        self.close()
+        self.reject()
 
     def buildTree(
         self,
