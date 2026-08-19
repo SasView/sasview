@@ -133,6 +133,9 @@ class DataExplorerTree(QTreeWidget):
                         self._data_manager.make_association(to_perspective, datum)
                     except ValueError as err:
                         errors.append(err)
+            case "make_trend":
+                trend_data = cast(list[SasData], self.currentTrackedData)
+                self._data_manager.make_trend(trend_data)
         if len(errors):
             box = DataExplorerErrorMessage(self, errors)
             box.show()
