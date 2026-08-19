@@ -75,7 +75,7 @@ def process_requirements_file(file_path: Path, output_directory: Path) -> Path:
     just be copied where these references appears."""
     with open(file_path) as f:
         lines = f.readlines()
-    new_lines = [l for l in lines if "-r " not in l]
+    new_lines = [l for l in lines if "-r " not in l and "-e " not in l]
     new_path = output_directory / Path("processed_requirements") / file_path.name
     new_path.parent.mkdir(parents=True, exist_ok=True)
     with open(new_path, "w") as f:
