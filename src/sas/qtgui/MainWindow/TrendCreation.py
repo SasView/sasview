@@ -1,9 +1,18 @@
+from dataclasses import dataclass
 from PySide6.QtWidgets import QDialog, QVBoxLayout, QLabel, QTableWidget, QHBoxLayout, QPushButton
+
+
+@dataclass
+class ProposedTrendAxis:
+    axis_name: str
+    axis_path: list[str]
 
 
 class TrendCreation(QDialog):
     def __init__(self):
         super().__init__()
+
+        self.proposed_trend_axes: list[ProposedTrendAxis] = []
 
         self.setWindowTitle("Trend Creation")
 
