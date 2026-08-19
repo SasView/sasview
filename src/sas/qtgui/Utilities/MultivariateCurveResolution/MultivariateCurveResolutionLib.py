@@ -112,7 +112,7 @@ class CurveContainer:
         name, dot, ext = name.rpartition(".")
 
         list_names = [curve.name.rpartition(".")[0] for curve in self.curves.values()]
-        if name in list_names:
+        if (name in list_names) or (name.endswith(const.REMOVED_TAG)):
             suffix = 1
             while f"{name}({suffix})" in list_names:
                 suffix += 1
@@ -158,7 +158,8 @@ class ProcessContainer:
     n_tot_curves: int
     n_curves: int
     unused_curves: int
-    n_removed_curves: int
+    n_eliminated_curves: int
+    eliminated_curves: list[int]
 
     combination: list[bool] | None
     curve_container: CurveContainer
@@ -191,7 +192,8 @@ class ProcessContainer:
 
         self.n_tot_curves = 0
         self.n_curves = 0
-        self.n_removed_curves = 0
+        self.n_eliminated_curves = 0
+        self.eliminated_curves = []
 
         self.pure_spectra = []
         self.initial_estimates = []
@@ -379,6 +381,10 @@ class MCRALSLib:
             )
 
             process.cosmics.representation_matrices()
+
+            process.cosmics.reset_eliminated_curves()
+            process.eliminated_curves.clear()
+
         except Exception as e:
             MCRALSLib.logger.error(f"Failed to load data into 'pyCOSMiCS': {repr(e)}")
             return False
@@ -480,6 +486,23 @@ class MCRALSLib:
             auto_clean=False,
             silent=True
         )
+
+    @staticmethod
+    def remove_outliers(process: ProcessContainer, outlier_IDs: list[int]) -> bool:
+        if process.n_curves - len(outlier_IDs) < process.n_species + 1:
+            MCRALSLib.logger.error(f"Too many outliers removed, at least {process.n_species + 1} curves required.")
+            return False
+        if not set(outlier_IDs).isdisjoint(process.initial_estimates):
+            MCRALSLib.logger.error(f"Cannot remove initial estimate curve as outlier: {process.curve_container.curves[[i for i in outlier_IDs if i in process.initial_estimates][0]].name}")
+            return False
+
+        process.eliminated_curves = outlier_IDs.copy()
+        process.n_eliminated_curves = len(process.eliminated_curves)
+
+        process.cosmics.reset_eliminated_curves()
+        process.cosmics.eliminate_curves(process.mapIDs(outlier_IDs))
+
+        return True
 
     @staticmethod
     def plot_recovered_profiles(process: ProcessContainer) -> plt.Figure:

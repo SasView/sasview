@@ -84,7 +84,7 @@ class MCRTool(QMainWindow, Ui_MCRTool):
         self.PreviewSelectedCurvesButton.clicked.connect(self.previewAllCurves)
         self.DeleteSelectedCurvesButton.clicked.connect(self.promptDeleteSelectedCurves)
 
-        self.RunMcralsButton.clicked.connect(self.onRunMCRALS)
+        self.RunMcralsButton.clicked.connect(self.onFirstRunMCRALS)
         self.AmyloidFilibrationPresetOption.clicked.connect(self.refreshConstraintsTab)
         self.TitrationSeriesPresetOption.clicked.connect(self.refreshConstraintsTab)
         self.SecSaxsPresetOption.clicked.connect(self.refreshConstraintsTab)
@@ -98,6 +98,7 @@ class MCRTool(QMainWindow, Ui_MCRTool):
 
         self.AcceptSolutionButton.clicked.connect(self.onSelectCombination)
         self.ResultsList.itemClicked.connect(self.refreshMCRALSTab)
+        self.RerunMCRALSButton.clicked.connect(self.onRerunMCRALS)
 
         self.GenerateReportButton.clicked.connect(self.onGenerateReport)
         self.RunErrorEstimationButton.clicked.connect(self.onRunErrorEstimation)
@@ -182,8 +183,8 @@ class MCRTool(QMainWindow, Ui_MCRTool):
         figure = MCRALSLib.PCA(self.MCRprocess)
 
         # Render 'PCA & initial estimates' tab
-        self.NumberSpeciesSpinner.setMaximum(min(self.MCRprocess.n_curves, const.MAX_NUMBER_SPECIES))
-        self.KnownSpeciesSpinner.setMaximum(min(self.MCRprocess.n_curves, const.MAX_NUMBER_SPECIES))
+        self.NumberSpeciesSpinner.setMaximum(min(self.MCRprocess.n_curves - 1, const.MAX_NUMBER_SPECIES))
+        self.KnownSpeciesSpinner.setMaximum(min(self.MCRprocess.n_curves - 1, const.MAX_NUMBER_SPECIES))
 
         # Render Scree plot and eigenvectors
         self.EigenvalueScreeLabel.setText(f"Heuristic on Scree plot suggests {self.MCRprocess.pca_significant_components} significant components\n(elbow at PC{self.MCRprocess.pca_significant_components}, explains {self.MCRprocess.pca_sc_variance:.5%} of variance)")
@@ -248,8 +249,7 @@ class MCRTool(QMainWindow, Ui_MCRTool):
         self.updateTabProgression(2)
         self.refreshConstraintsTab()
 
-    def onRunMCRALS(self):
-
+    def onFirstRunMCRALS(self):
         # Collect contraints parameters
         if self.AmyloidFilibrationPresetOption.isChecked():
             self.MCRprocess.constraints_preset = "Amyloid filibration"
@@ -278,11 +278,14 @@ class MCRTool(QMainWindow, Ui_MCRTool):
         if self.SpectraEqualityCheckBox.isChecked():
             self.MCRprocess.constraints.append(6)
 
+        self.onRunMCRALS()
+
+    def onRunMCRALS(self):
+
         # Run MCRALS with constraints
         MCRALSLib.MCRLAS(self.MCRprocess)
 
         # Render 'MCR-ALS' Tab
-        self.OutlierRemovalLabel.setText(f"{self.MCRprocess.n_removed_curves} outlier curves removed in total")
 
         # Render RecoveredProfilesPlot
         figure = MCRALSLib.plot_recovered_profiles(self.MCRprocess)
@@ -295,6 +298,8 @@ class MCRTool(QMainWindow, Ui_MCRTool):
         self.RecoveredProfilesBox.layout().update()
 
         # Render ResultsList
+        self.ResultsList.clear()
+
         width_hint = 0
         height_hint = 0
         for tag in const.RESULTS_LIST_COMBINATION_LABELS:
@@ -314,15 +319,18 @@ class MCRTool(QMainWindow, Ui_MCRTool):
         self.ResultsList.setMinimumHeight(height_hint + const.RESULTS_LIST_EXTRA_SIZE[1])
 
         # Render OutlierTable
-        self.OutlierTable.clearContents()
+        self.OutlierTable.setRowCount(0)
 
         for curve in self.curves.values():
+            if curve.is_removed: continue
+
             row = self.OutlierTable.rowCount()
             self.OutlierTable.insertRow(row)
 
             active_checkbox_widget = QWidget()
             active_checkbox = ActiveCheckBox(active_checkbox_widget, curve.ID)
-            active_checkbox.setCheckState(Qt.Checked)
+            active_checkbox_widget.setProperty("active_checkbox", active_checkbox)
+            active_checkbox.setCheckState(Qt.Unchecked if (curve.ID in self.MCRprocess.eliminated_curves) else Qt.Checked)
             active_checkbox_layout = QHBoxLayout(active_checkbox_widget)
             active_checkbox_layout.addWidget(active_checkbox)
             active_checkbox_layout.setAlignment(Qt.AlignCenter)
@@ -330,19 +338,45 @@ class MCRTool(QMainWindow, Ui_MCRTool):
             self.OutlierTable.setCellWidget(row, 0, active_checkbox_widget)
             active_checkbox.onToggleSignal.connect(self.toggleOutlierItem)
 
-            self.OutlierTable.setCellWidget(row, 1, QLabel(curve.name))
-            self.OutlierTable.setItem(row, 2, QTableFloatItem(const.CHI_TAG + str(random.random() * 20)[:random.randint(3, 6)]))
+            if curve.ID in self.MCRprocess.eliminated_curves:
+                name_label = QLabel(curve.name + const.REMOVED_TAG)
+                name_label.setEnabled(False)
+            else:
+                name_label = QLabel(curve.name)
+            name_label.setContentsMargins(5, 0, 0, 0)
+            name_label.setEnabled(curve.ID not in self.MCRprocess.eliminated_curves)
+            self.OutlierTable.setCellWidget(row, 1, name_label)
+
+            chi_value = float(str(random.random() * 2)[:random.randint(3, 6)])
+            chi_label = QLabel(const.CHI_TAG + str(chi_value))
+            chi_item = ChiItem(chi_value)
+            chi_label.setEnabled(curve.ID not in self.MCRprocess.eliminated_curves)
+            self.OutlierTable.setCellWidget(row, 2, chi_label)
+            self.OutlierTable.setItem(row, 2, chi_item)
 
         self.OutlierTable.sortItems(2, Qt.DescendingOrder)
+
+        self.OutlierRemovalLabel.setText(f"{self.MCRprocess.n_eliminated_curves} outlier curves removed in total")
 
         # Go to 'MCR-ALS' tab
         self.updateTabProgression(3)
 
     def onRerunMCRALS(self):
 
-        # update self.MCRprocess.n_curves
+        # collect selected outliers
+        outliers = []
+        for row in range(self.OutlierTable.rowCount()):
+            if self.OutlierTable.cellWidget(row, 0).property("active_checkbox").checkState() == Qt.Unchecked:
+                name = self.OutlierTable.cellWidget(row, 1).text()
+                if name.endswith(const.REMOVED_TAG):
+                    name = name[:-len(const.REMOVED_TAG)]
+                ID = self.curve_container.getIdFromName(name)
+                outliers.append(ID)
 
-        self.onRunMCRALS()
+        # remove outliers
+        if  MCRALSLib.remove_outliers(self.MCRprocess, outliers):
+            # Run MCRALS
+            self.onRunMCRALS()
 
     def onSelectCombination(self):
 
@@ -391,7 +425,7 @@ class MCRTool(QMainWindow, Ui_MCRTool):
         # Render 'Report' Tab
         self.CombinationUsedLabel.setText(self.MCRprocess.combination)
         self.SpeciesSearchedForLabel.setText(f"{self.MCRprocess.n_species} ({self.MCRprocess.n_pure_spectra} fixed)")
-        self.NumberCurvesUsedLabel.setText(f"{self.MCRprocess.n_curves} of {self.MCRprocess.n_tot_curves} ({self.MCRprocess.n_removed_curves} outliers removed)")
+        self.NumberCurvesUsedLabel.setText(f"{self.MCRprocess.n_curves} of {self.MCRprocess.n_tot_curves} ({self.MCRprocess.n_eliminated_curves} outliers removed)")
         self.CurvesReconstructedLabel.setText(f"({self.MCRprocess.n_species} species x {self.MCRprocess.n_curves} curves)")
 
         # Go to 'Report' Tab
@@ -412,7 +446,7 @@ class MCRTool(QMainWindow, Ui_MCRTool):
         units_defined   = self.curve_item_container.checkUnitsDefined()
         selected_curves = self.curve_item_container.countActiveCurves()
         units_changed   = self.curve_item_container.checkUnitsChanged()
-        self.SelectCurvesButton.setEnabled(         units_defined and (selected_curves > 1))
+        self.SelectCurvesButton.setEnabled(         units_defined and (selected_curves >= 2))
         self.PreviewSelectedCurvesButton.setEnabled(units_defined and (selected_curves > 0))
         self.ResetUnitsButton.setEnabled(           selected_curves > 0)
 
@@ -777,9 +811,14 @@ class MCRTool(QMainWindow, Ui_MCRTool):
 
     """ MCRALS Tab """
 
-    def toggleOutlierItem(self, curve_ID: int, checked: bool):
-        print(curve_ID)
-        print(checked)
+    def toggleOutlierItem(self, curve_ID: int, active: bool):
+        # Toggle outlier item in OutlierTable
+        name = self.curves[curve_ID].name
+        row = 0
+        while (self.OutlierTable.cellWidget(row, 1).text() not in [name, name + const.REMOVED_TAG]):
+            row += 1
+        for column in range(1, 3):
+            self.OutlierTable.cellWidget(row, column).setEnabled(active)
 
     def removeCurveItemOnRerun(self, ID: int):
         pass
@@ -875,10 +914,15 @@ class ViewCurveButton(QPushButton):
         self.onClickSignal.emit(self.curve_ID)
 
 
-class QTableFloatItem(QTableWidgetItem):
+class ChiItem(QTableWidgetItem):
+    def __init__(self, chi_value: float):
+        super(ChiItem, self).__init__()
+
+        self.setData(Qt.UserRole, chi_value)
+
     def __lt__(self, other: QTableWidgetItem) -> bool:
         try:
-            return bool(float(self.text()[len(const.CHI_TAG):]) < float(other.text()[len(const.CHI_TAG):]))
+            return self.data(Qt.UserRole) < other.data(Qt.UserRole)
         except ValueError:
             return super().__lt__(other)
 

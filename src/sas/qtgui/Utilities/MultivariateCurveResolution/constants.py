@@ -5,6 +5,7 @@ CURVE_LIST_COLUMN_WIDTHS = [30, 120, 50, 80, 50]
 OUTLIER_TABLE_COLUMN_WIDTHS = [30, 200, 150]
 
 CHI_TAG = "<χ²>="
+REMOVED_TAG = " (removed)"
 
 RESULTS_LIST_COMBINATION_LABELS = ["Absolute (A)", "Absolute + Holtzer (AH)", "Absolute + Kratky (AK)", "Absolute + Porod (AP)", "Absolute + Holtzer + Kratky (AHK)", "Absolute + Holtzer + Porod (AHP)", "Absolute + Kratky + Porod (AKP)", "All four (AHKP)"]
 RESULTS_LIST_EXTRA_SIZE = (50, 2)
