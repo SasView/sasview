@@ -38,6 +38,7 @@ class TrendCreation(QDialog):
         self.table.clear()
 
         self.table.setRowCount(len(self.proposed_trend_axes))
+        self.table.setColumnCount(2)
         self.table.setHorizontalHeaderLabels(["Axis Name", "Axis Metadata"])
 
         row_index = 0
