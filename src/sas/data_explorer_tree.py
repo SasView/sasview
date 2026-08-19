@@ -10,10 +10,11 @@ from PySide6.QtWidgets import (
 )
 
 from sasdata.data import SasData
+from sasdata.trend import Trend
 
 from sas.data_explorer_error_message import DataExplorerErrorMessage
 from sas.data_explorer_menu import DataExplorerMenu, DataExplorerMenuAction
-from sas.data_manager import NewDataManager as DataManager 
+from sas.data_manager import NewDataManager as DataManager, isinstance_fix 
 from sas.data_manager import TrackedData
 from sas.qtgui.MainWindow.DataViewer import DataViewer
 from sas.refactored import Perspective
