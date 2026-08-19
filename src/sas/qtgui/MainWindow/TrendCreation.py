@@ -24,7 +24,7 @@ class TrendCreation(QDialog):
         self.add_axes_button = QPushButton("Add Axes")
 
         self.button_row = QHBoxLayout()
-        self.cancel_button = QPushButton("Cance ")
+        self.cancel_button = QPushButton("Cancel")
         self.make_button = QPushButton("Make Trend")
         self.button_row.addWidget(self.cancel_button)
         self.button_row.addWidget(self.make_button)
