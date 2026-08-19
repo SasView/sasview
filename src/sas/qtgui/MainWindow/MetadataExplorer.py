@@ -7,7 +7,7 @@ from PySide6.QtWidgets import (
     QPushButton,
     QTreeWidget,
     QTreeWidgetItem,
-    QVBoxLayout,
+    QVBoxLayout, QHBoxLayout,
 )
 
 from sasdata.metadata import Metadata, MetaNode
@@ -51,13 +51,22 @@ class MetadataExplorer(QDialog):
             self.metadataTreeWidget.setSelectionMode(QTreeWidget.SelectionMode.MultiSelection)
 
 
-        self.closeButton = QPushButton("Close")
-        self.closeButton.clicked.connect(self.closeEvent)
 
         self.layout = QVBoxLayout(self)
         self.layout.addWidget(self.filenameLabel)
         self.layout.addWidget(self.metadataTreeWidget)
-        self.layout.addWidget(self.closeButton)
+
+        self.button_row = QHBoxLayout()
+        if selection_mode:
+            self.closeButton = QPushButton("Cancel")
+            self.selectButton = QPushButton("Select")
+            self.button_row.addWidget(self.closeButton)
+            self.button_row.addWidget(self.selectButton)
+        else:
+            self.closeButton = QPushButton("Close")
+            self.button_row.addWidget(self.closeButton)
+        self.closeButton.clicked.connect(self.closeEvent)
+        self.layout.addLayout(self.button_row)
 
         self.setWindowTitle("Metadata Explorer")
         self.setMinimumSize(800, 430)
