@@ -1,29 +1,32 @@
+import random  # for testing
+import sys  # for testing
+from copy import deepcopy
 from logging import getLogger
 
-import sys # for testing
-import random # for testing
-
-from copy import deepcopy
-
-import matplotlib.pylab as pl
-import matplotlib.pyplot as plt
-import numpy as np
-from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas # SasView MuMag uses .backend_qt5agg
-
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas  # SasView MuMag uses .backend_qt5agg
+from PySide6.QtCore import QSize, Qt, Signal
+from PySide6.QtGui import QAction, QCursor, QDoubleValidator, QIntValidator
 from PySide6.QtWidgets import (
-    QApplication, QMainWindow, QTableWidgetItem, QPushButton, QCheckBox, QComboBox, QWidget, QHBoxLayout, QVBoxLayout, QHeaderView, QSpacerItem, QSizePolicy, QLayout, QListWidgetItem, QRadioButton, QLabel, QMessageBox, QMenu, QGroupBox
-)
-
-from PySide6.QtCore import (
-    Qt, QSize, Signal
-)
-
-from PySide6.QtGui import (
-    QDoubleValidator, QIntValidator, QCursor, QAction
+    QApplication,
+    QCheckBox,
+    QHBoxLayout,
+    QHeaderView,
+    QLabel,
+    QListWidgetItem,
+    QMainWindow,
+    QMenu,
+    QMessageBox,
+    QPushButton,
+    QRadioButton,
+    QTableWidgetItem,
+    QWidget,
 )
 
 from sas.qtgui.Utilities.MultivariateCurveResolution.MultivariateCurveResolutionLib import (
-    MCRALSLib, Curve, CurveContainer, ProcessContainer
+    Curve,
+    CurveContainer,
+    MCRALSLib,
+    ProcessContainer,
 )
 from sas.qtgui.Utilities.MultivariateCurveResolution.UI.MultivariateCurveResolutionUI import Ui_MCRTool
 
@@ -128,7 +131,7 @@ class MCRTool(QMainWindow, Ui_MCRTool):
         # Progression handling
         self.MainTabs.currentChanged.connect(self.refreshTab)
 
-        # Render 'Import & prepare data' tab
+        # Render CurveList
         self.CurveList.horizontalHeader().setSectionResizeMode(QHeaderView.Fixed)
         self.CurveList.verticalHeader().setSectionResizeMode(QHeaderView.Fixed)
 
@@ -140,6 +143,16 @@ class MCRTool(QMainWindow, Ui_MCRTool):
         self.CurveList.setContextMenuPolicy(Qt.CustomContextMenu)
         self.CurveList.customContextMenuRequested.connect(self.customCurveListContextMenu)
 
+        # Render OutlierTable
+        self.OutlierTable.horizontalHeader().setSectionResizeMode(QHeaderView.Fixed)
+        self.OutlierTable.verticalHeader().setSectionResizeMode(QHeaderView.Fixed)
+
+        for column, width in enumerate(const.OUTLIER_TABLE_COLUMN_WIDTHS):
+            self.OutlierTable.setColumnWidth(column, width)
+
+        self.OutlierTable.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+
+        # Begin
         self.updateTabProgression(0)
 
     """ Main progression, ordered by Tab origin """
@@ -246,7 +259,7 @@ class MCRTool(QMainWindow, Ui_MCRTool):
             self.MCRprocess.constraints_preset = "SEC-SAXS"
         else:
             self.MCRprocess.constraints_preset = "Other"
-        
+
         self.MCRprocess.convergence_criterion = stringToFloatWithCommas(self.ConvergenceCriterionInput.text())
         self.MCRprocess.max_iterations = int(self.MaxIterationsInput.text())
 
@@ -301,12 +314,32 @@ class MCRTool(QMainWindow, Ui_MCRTool):
         self.ResultsList.setMinimumHeight(height_hint + const.RESULTS_LIST_EXTRA_SIZE[1])
 
         # Render OutlierTable
+        self.OutlierTable.clearContents()
+
+        for curve in self.curves.values():
+            row = self.OutlierTable.rowCount()
+            self.OutlierTable.insertRow(row)
+
+            active_checkbox_widget = QWidget()
+            active_checkbox = ActiveCheckBox(active_checkbox_widget, curve.ID)
+            active_checkbox.setCheckState(Qt.Checked)
+            active_checkbox_layout = QHBoxLayout(active_checkbox_widget)
+            active_checkbox_layout.addWidget(active_checkbox)
+            active_checkbox_layout.setAlignment(Qt.AlignCenter)
+            active_checkbox_layout.setContentsMargins(1, 1, 0, 0)
+            self.OutlierTable.setCellWidget(row, 0, active_checkbox_widget)
+            active_checkbox.onToggleSignal.connect(self.toggleOutlierItem)
+
+            self.OutlierTable.setCellWidget(row, 1, QLabel(curve.name))
+            self.OutlierTable.setItem(row, 2, QTableFloatItem(const.CHI_TAG + str(random.random() * 20)[:random.randint(3, 6)]))
+
+        self.OutlierTable.sortItems(2, Qt.DescendingOrder)
 
         # Go to 'MCR-ALS' tab
         self.updateTabProgression(3)
 
     def onRerunMCRALS(self):
-        
+
         # update self.MCRprocess.n_curves
 
         self.onRunMCRALS()
@@ -595,7 +628,7 @@ class MCRTool(QMainWindow, Ui_MCRTool):
             canvas = FigureCanvas(figure)
             canvas.draw()
             item = QListWidgetItem()
-            item.setSizeHint(QSize(200, 1000))
+            item.setSizeHint(QSize(200, 1200))
             self.GraphsViewList.insertItem(0, item)
             self.GraphsViewList.setItemWidget(item, canvas)
 
@@ -607,7 +640,7 @@ class MCRTool(QMainWindow, Ui_MCRTool):
             canvas = FigureCanvas(figure)
             canvas.draw()
             item = QListWidgetItem()
-            item.setSizeHint(QSize(200, 1000))
+            item.setSizeHint(QSize(200, 1200))
             self.GraphsViewList.insertItem(0, item)
             self.GraphsViewList.setItemWidget(item, canvas)
 
@@ -696,7 +729,7 @@ class MCRTool(QMainWindow, Ui_MCRTool):
                 if item.checkState() == Qt.Checked:
                     ID = self.curve_container.getIdFromName(item.text())
                     self.selected_known_species.append(ID)
-            
+
             for row in range(self.InitialEstimatesList.count()):
                 item = self.InitialEstimatesList.item(row)
                 if item.checkState() == Qt.Checked:
@@ -708,7 +741,7 @@ class MCRTool(QMainWindow, Ui_MCRTool):
     def resetInitialEstimatesListFromKnownSelected(self) -> None:
         if len(self.selected_known_species) == 0:
             return
-        
+
         self.InitialEstimatesList.itemChanged.disconnect()
 
         for row in range(self.InitialEstimatesList.count()):
@@ -741,8 +774,12 @@ class MCRTool(QMainWindow, Ui_MCRTool):
                 self.SetConcentrationProfileButton.setText("Clear")
 
                 self.imported_concentration_profile_flag = True
-    
+
     """ MCRALS Tab """
+
+    def toggleOutlierItem(self, curve_ID: int, checked: bool):
+        print(curve_ID)
+        print(checked)
 
     def removeCurveItemOnRerun(self, ID: int):
         pass
@@ -838,6 +875,14 @@ class ViewCurveButton(QPushButton):
         self.onClickSignal.emit(self.curve_ID)
 
 
+class QTableFloatItem(QTableWidgetItem):
+    def __lt__(self, other: QTableWidgetItem) -> bool:
+        try:
+            return bool(float(self.text()[len(const.CHI_TAG):]) < float(other.text()[len(const.CHI_TAG):]))
+        except ValueError:
+            return super().__lt__(other)
+
+
 """ UI data classes """
 
 class CurveItem:
@@ -880,10 +925,10 @@ class CurveItem:
     def updateUnits(self, units: str):
         self.units = units
         self.units_toggle_button.updateUnits(self.units)
-    
+
     def toggleResampleOption(self, flag: bool):
         self.resample_checked = flag
-    
+
     def toggleScaleOption(self, flag: bool):
         self.scale_checked = flag
 
@@ -908,7 +953,7 @@ class CurveItemContainer:
             if curve_item.active:
                 count += 1
         return count
-    
+
     def checkUnitsDefined(self) -> bool:
         units_defined = True
         for curve_item in self.curve_items.values():

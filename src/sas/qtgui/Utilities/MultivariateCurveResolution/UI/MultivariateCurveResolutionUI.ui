@@ -2166,20 +2166,25 @@ Non-negativity + equality</string>
                  <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
                 </property>
                 <property name="alternatingRowColors">
-                 <bool>true</bool>
+                 <bool>false</bool>
                 </property>
                 <property name="selectionMode">
                  <enum>QAbstractItemView::SelectionMode::NoSelection</enum>
                 </property>
                 <property name="sortingEnabled">
-                 <bool>true</bool>
+                 <bool>false</bool>
                 </property>
                 <property name="columnCount">
-                 <number>2</number>
+                 <number>3</number>
                 </property>
                 <property name="supportedDragActions">
                  <set>Qt::DropAction::IgnoreAction</set>
                 </property>
+                <column>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </column>
                 <column>
                  <property name="text">
                   <string>Curve</string>
@@ -2187,7 +2192,7 @@ Non-negativity + equality</string>
                 </column>
                 <column>
                  <property name="text">
-                  <string>Chi</string>
+                  <string>Average chi-value</string>
                  </property>
                 </column>
                </widget>

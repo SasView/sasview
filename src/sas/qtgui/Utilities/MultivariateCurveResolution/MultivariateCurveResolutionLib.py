@@ -1,24 +1,19 @@
+# --------------------------------------------------------------------------------
+# Import pycosmics from local directory. For release, pycosmics will most likely be imported as PyPi package
+import importlib.machinery
 import logging
 import os
 import os.path
 
-from typing import Optional, List, Tuple
-
-import numpy as np
-import matplotlib.pylab as pl
 import matplotlib.pyplot as plt
-
+import numpy as np
 from PySide6.QtWidgets import QFileDialog
 
-from sasdata.dataloader.loader import Loader
 from sasdata.dataloader.data_info import plottable_1D
+from sasdata.dataloader.loader import Loader
 
 import sas.qtgui.Utilities.MultivariateCurveResolution.constants as const
 
-
-# --------------------------------------------------------------------------------
-# Import pycosmics from local directory. For release, pycosmics will most likely be imported as PyPi package
-import importlib.machinery
 
 class CustomFinder(importlib.machinery.PathFinder):
     _path = ["../pyCOSMiCS"]
@@ -28,9 +23,11 @@ class CustomFinder(importlib.machinery.PathFinder):
         return super().find_spec(fullname, cls._path, target)
 
 import sys
+
 sys.meta_path.append(CustomFinder)
 
 import cosmics.main as pycosmics
+
 # From answer to: https://stackoverflow.com/questions/44786278/how-to-import-a-directory-as-python-module by a_guest
 # --------------------------------------------------------------------------------
 
@@ -48,9 +45,9 @@ class Curve:
     is_resampled: bool = False
     is_auto_scaled: bool = False
 
-    data: Optional[np.ndarray] = None
+    data: np.ndarray | None = None
 
-    def __init__(self, ID: int, file_name: str, default_units: str = "", name: str = "", units: str = "", data: Optional[np.ndarray] = None):
+    def __init__(self, ID: int, file_name: str, default_units: str = "", name: str = "", units: str = "", data: np.ndarray | None = None):
         self.ID = ID
 
         if units == "":
@@ -80,11 +77,11 @@ class Curve:
             f"    name: {self.name}\n",
             f"    default units: {const.DISPLAY_UNITS_TEXT[self.default_units]}\n",
             f"    units: {const.DISPLAY_UNITS_TEXT[self.units]}\n",
-            f"  Flags:\n",
+            "  Flags:\n",
             f"    removed: {self.is_removed}\n",
             f"    resampled: {self.is_resampled}\n",
             f"    scaled: {self.is_auto_scaled}\n",
-            f"  Data:\n",
+            "  Data:\n",
             str(self.data)
         ])
 
@@ -115,16 +112,15 @@ class CurveContainer:
         name, dot, ext = name.rpartition(".")
 
         list_names = [curve.name.rpartition(".")[0] for curve in self.curves.values()]
-
         if name in list_names:
             suffix = 1
             while f"{name}({suffix})" in list_names:
                 suffix += 1
             name += f"({suffix})"
-        
+
         return name + dot + ext
 
-    def addCurve(self, file_name: str, default_units: str = "", name: str = "", units: str = "", data: Optional[np.ndarray] = None) -> Curve:
+    def addCurve(self, file_name: str, default_units: str = "", name: str = "", units: str = "", data: np.ndarray | None = None) -> Curve:
         ID = self.__get_next_unique_ID()
         if name == "":
             name = file_name
@@ -164,13 +160,13 @@ class ProcessContainer:
     unused_curves: int
     n_removed_curves: int
 
-    combination: Optional[List[bool]]
+    combination: list[bool] | None
     curve_container: CurveContainer
 
     n_pure_spectra: int
     pure_spectra: list[int]
     initial_estimates: list[int]
-    initial_estimate_method: Optional[str]
+    initial_estimate_method: str | None
 
     constraints_preset: str
     constraints: list[int]
@@ -235,7 +231,7 @@ class MCRALSLib:
     logger = logging.getLogger("MCRALS")
 
     @staticmethod
-    def directory_popup() -> Optional[str]:
+    def directory_popup() -> str | None:
         directory: str  = QFileDialog.getExistingDirectory()
 
         directory.strip()
@@ -246,8 +242,8 @@ class MCRALSLib:
             return directory
 
     @staticmethod
-    def files_popup() -> Optional[str]:
-        files: List[str] = QFileDialog.getOpenFileNames()[0]
+    def files_popup() -> str | None:
+        files: list[str] = QFileDialog.getOpenFileNames()[0]
 
         files = [file.strip() for file in files]
         files = [file for file in files if file != ""]
@@ -258,11 +254,11 @@ class MCRALSLib:
             return files
 
     @staticmethod
-    def import_experiment_curves(process: ProcessContainer, files: List[str], paths: List[str]) -> List[Curve] | Exception:
+    def import_experiment_curves(process: ProcessContainer, files: list[str], paths: list[str]) -> list[Curve] | Exception:
         if (len(paths) != len(files)) or (len(paths) == 0):
             return []
-        
-        imported_curves: List[Curve] = []
+
+        imported_curves: list[Curve] = []
 
         try:
             loader = Loader()
@@ -273,7 +269,7 @@ class MCRALSLib:
                 if isinstance(data1d, Exception):
                     return data1d
                 if (not isinstance(data1d, plottable_1D)):
-                    return ValueError(f"Expected 1D data")
+                    return ValueError("Expected 1D data")
 
                 curve_data = np.stack([data1d.x, data1d.y, data1d.dy], axis=1)
 
@@ -299,18 +295,18 @@ class MCRALSLib:
         return imported_curves
 
     @staticmethod
-    def import_curve_files(process: ProcessContainer, input_directory: Optional[str] = None) -> Optional[List[List[Curve]]]:
+    def import_curve_files(process: ProcessContainer, input_directory: str | None = None) -> list[list[Curve]] | None:
         if (input_directory is None) or (not os.path.isdir(input_directory)):
             return
 
-        directories_stack: List[List[str]] = [input_directory]
+        directories_stack: list[list[str]] = [input_directory]
 
-        imported_curves: List[List[Curve]] = []
+        imported_curves: list[list[Curve]] = []
 
         idx = 0
         while idx < len(directories_stack):
             directory = directories_stack[idx]
-            
+
             directory_filenames = sorted([name for name in os.listdir(directory)])
 
             experiment_files, experiment_paths = [], []
@@ -337,7 +333,7 @@ class MCRALSLib:
                 imported_curves.append(experiment_curves)
 
             idx += 1
-        
+
         return imported_curves
 
     @staticmethod
@@ -365,7 +361,7 @@ class MCRALSLib:
             )
 
             # Preprocess the data
-            scale_mask: List[bool] = [curve.is_auto_scaled for curve in process.list_curves]
+            scale_mask: list[bool] = [curve.is_auto_scaled for curve in process.list_curves]
             process.cosmics.normalise(mask=scale_mask)
 
             process.cosmics.set_units(units="A")
@@ -386,16 +382,16 @@ class MCRALSLib:
         except Exception as e:
             MCRALSLib.logger.error(f"Failed to load data into 'pyCOSMiCS': {repr(e)}")
             return False
-        
+
         return True
 
     @staticmethod
-    def preview_data(process: ProcessContainer) -> Optional[plt.Figure]:
+    def preview_data(process: ProcessContainer) -> plt.Figure | None:
         if MCRALSLib.load_data(process, "src/sas/qtgui/Utilities/MultivariateCurveResolution/cosmics_preview"):
             return MCRALSLib.plot_data(process)
 
     @staticmethod
-    def preview_curve_all_reps(process: ProcessContainer, curve_ID: int) -> Optional[plt.Figure]:
+    def preview_curve_all_reps(process: ProcessContainer, curve_ID: int) -> plt.Figure | None:
         if MCRALSLib.load_data(process, "src/sas/qtgui/Utilities/MultivariateCurveResolution/cosmics_preview"):
             return MCRALSLib.plot_curve_all_reps(process, curve_ID)
 
@@ -418,11 +414,11 @@ class MCRALSLib:
         )
 
     @staticmethod
-    def PCA(process: ProcessContainer) -> Optional[plt.Figure]:
+    def PCA(process: ProcessContainer) -> plt.Figure | None:
         if MCRALSLib.load_data(process, "src/sas/qtgui/Utilities/MultivariateCurveResolution/cosmics_results"):
             # Run PCA
             process.pca_significant_components, process.pca_sc_variance = process.cosmics.pca()
-            
+
             # Render the PCA-results as a plot
             figure: plt.Figure = process.cosmics.plot_pca(show=False)
             return figure
@@ -490,7 +486,7 @@ class MCRALSLib:
         pass
 
     @staticmethod
-    def MonteCarlo(process: ProcessContainer) -> Tuple[plt.Figure, plt.Figure]:
+    def MonteCarlo(process: ProcessContainer) -> tuple[plt.Figure, plt.Figure]:
         process.cosmics.monte_carlo(
             combination=const.RESULTS_LIST_COMBINATIONS[process.combination],
             iterations=process.error_iterations,
@@ -504,5 +500,5 @@ class MCRALSLib:
         process.cosmics.save_info_file()
 
     @staticmethod
-    def SaveHTML(process: ProcessContainer, directory: Optional[str]):
+    def SaveHTML(process: ProcessContainer, directory: str | None):
         process.cosmics.html_report(directory, silent=True)
