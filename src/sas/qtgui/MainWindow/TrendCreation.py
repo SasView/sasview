@@ -1,3 +1,5 @@
+from sasdata.data import SasData
+from sas.qtgui.MainWindow.MetadataExplorer import MetadataExplorer
 from dataclasses import dataclass
 from PySide6.QtWidgets import QDialog, QVBoxLayout, QLabel, QTableWidget, QHBoxLayout, QPushButton, QTableWidgetItem
 
@@ -53,3 +55,17 @@ class TrendCreation(QDialog):
             row_index += 1
 
         self.table.show()
+
+    def handle_add_axes(self):
+        # TODO: This is assuming all the data in target data has the same
+        # metadata, but this of course is not guaranteed. I see two ways of
+        # resolving this:
+        #
+        # 1. Validate that the objects do share all the same metadata.
+        # 2. Only show metadata in the explorer which the data objects share.
+        # This is probably trickier to implement but would also be the most
+        # flexible.
+        metadata_dialog = MetadataExplorer(self.target_data[0].metadata, "New Trend", True)
+        result = metadata_dialog.exec()
+        if result == QDialog.DialogCode.Accepted:
+            pass  # TODO: Update proposed axes.
