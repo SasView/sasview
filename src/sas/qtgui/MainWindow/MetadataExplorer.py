@@ -35,7 +35,7 @@ def metadata_as_dict(to_convert: object):
 
 
 class MetadataExplorer(QDialog):
-    def __init__(self, metadata: Metadata, filename: str | None):
+    def __init__(self, metadata: Metadata, filename: str | None, selection_mode: bool = False):
         super().__init__()
         self.metadata_dict = metadata_as_dict(metadata)
 
@@ -45,6 +45,11 @@ class MetadataExplorer(QDialog):
         self.metadataTreeWidget = QTreeWidget()
         self.buildTree()
         self.metadataTreeWidget.header().setDefaultSectionSize(350)
+
+        self.selection_mode = selection_mode
+        if self.selection_mode:
+            self.metadataTreeWidget.setSelectionMode(QTreeWidget.SelectionMode.MultiSelection)
+
 
         self.closeButton = QPushButton("Close")
         self.closeButton.clicked.connect(self.closeEvent)
