@@ -9,10 +9,11 @@ class ProposedTrendAxis:
 
 
 class TrendCreation(QDialog):
-    def __init__(self):
+    def __init__(self, target_data: list[SasData]):
         super().__init__()
 
         self.proposed_trend_axes: list[ProposedTrendAxis] = []
+        self.target_data = target_data
 
         self.setWindowTitle("Trend Creation")
 
