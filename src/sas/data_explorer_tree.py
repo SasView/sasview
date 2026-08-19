@@ -137,7 +137,7 @@ class DataExplorerTree(QTreeWidget):
                         errors.append(err)
             case "make_trend":
                 trend_data = cast(list[SasData], self.currentTrackedData)
-                trend_creation_dialog = TrendCreation()
+                trend_creation_dialog = TrendCreation(trend_data)
                 creation_result = trend_creation_dialog.exec()
                 if creation_result == QDialog.DialogCode.Accepted:
                     # TODO: Need to pass in axes
