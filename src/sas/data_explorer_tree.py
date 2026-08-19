@@ -17,6 +17,7 @@ from sas.data_explorer_menu import DataExplorerMenu, DataExplorerMenuAction
 from sas.data_manager import NewDataManager as DataManager, isinstance_fix 
 from sas.data_manager import TrackedData
 from sas.qtgui.MainWindow.DataViewer import DataViewer
+from sas.qtgui.MainWindow.TrendCreation import TrendCreation
 from sas.refactored import Perspective
 
 
@@ -135,6 +136,9 @@ class DataExplorerTree(QTreeWidget):
                         errors.append(err)
             case "make_trend":
                 trend_data = cast(list[SasData], self.currentTrackedData)
+                trend_creation_dialog = TrendCreation()
+                trend_creation_dialog.exec()
+                # TODO: Do something with the dialog that was just launched.
                 self._data_manager.make_trend(trend_data)
         if len(errors):
             box = DataExplorerErrorMessage(self, errors)
