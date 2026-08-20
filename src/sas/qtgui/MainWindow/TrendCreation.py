@@ -69,4 +69,7 @@ class TrendCreation(QDialog):
         metadata_dialog = MetadataExplorer(self.target_data[0].metadata, "New Trend", True)
         result = metadata_dialog.exec()
         if result == QDialog.DialogCode.Accepted:
-            pass  # TODO: Update proposed axes.
+            for axis_path in metadata_dialog.getSelectedPaths:
+                # TODO: perhaps have a better way of choosing names. Maybe make them customisable?
+                self.proposed_trend_axes.append(ProposedTrendAxis(axis_name=axis_path[-1], axis_path=axis_path))
+                
