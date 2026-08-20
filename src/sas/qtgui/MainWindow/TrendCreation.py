@@ -1,7 +1,7 @@
 from sasdata.data import SasData
 from sas.qtgui.MainWindow.MetadataExplorer import MetadataExplorer
 from dataclasses import dataclass
-from PySide6.QtWidgets import QDialog, QVBoxLayout, QLabel, QTableWidget, QHBoxLayout, QPushButton, QTableWidgetItem
+from PySide6.QtWidgets import QDialog, QVBoxLayout, QLabel, QTableWidget, QHBoxLayout, QPushButton, QTableWidgetItem, QHeaderView
 
 
 @dataclass
@@ -46,6 +46,8 @@ class TrendCreation(QDialog):
         self.table.setRowCount(len(self.proposed_trend_axes))
         self.table.setColumnCount(2)
         self.table.setHorizontalHeaderLabels(["Axis Name", "Axis Metadata"])
+        self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+        self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
 
         row_index = 0
         for axis in self.proposed_trend_axes:
