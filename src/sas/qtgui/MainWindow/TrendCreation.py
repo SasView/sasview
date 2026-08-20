@@ -11,6 +11,9 @@ class ProposedTrendAxis:
     axis_path: list[str]
 
 
+def proposed_axes_as_dict(proposed_axes: list[ProposedTrendAxis]) -> dict[str, list[str]]:
+    return {axis.axis_name: axis.axis_path for axis in proposed_axes}
+
 class TrendCreation(QDialog):
     def __init__(self, target_data: list[SasData]):
         super().__init__()
