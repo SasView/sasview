@@ -112,13 +112,15 @@ class MetadataExplorer(QDialog):
                     table_root.addChild(node_item)
 
     @property
-    def getSelectedPaths(self) -> list[str]:
-        return_value: list[str] = []
+    def getSelectedPaths(self) -> list[list[str]]:
+        return_value: list[list[str]] = []
         for selected in self.metadataTreeWidget.selectedItems():
             current_item = selected
+            current_path: list[str] = []
             while current_item is not None:
-                return_value.append(current_item.data(0, Qt.ItemDataRole.DisplayRole))
+                current_path.append(current_item.data(0, Qt.ItemDataRole.DisplayRole))
                 current_item = current_item.parent()
+            return_value.append(current_path)
         return return_value
 
 if __name__ == "__main__":
