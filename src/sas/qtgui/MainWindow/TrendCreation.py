@@ -86,5 +86,5 @@ class TrendCreation(QDialog):
             # TODO: Fill in the dictionary
             _ = Trend(self.target_data, proposed_axes_as_dict(self.proposed_trend_axes))
         except ValueError as e:
-            QMessageBox.critical(None, "Trend cannot be created", e)
+            QMessageBox.critical(None, "Trend cannot be created", str(e))
                 
