@@ -124,7 +124,7 @@ class MetadataExplorer(QDialog):
                 current_path.append(get_data(current_item))
                 current_item = current_item.parent()
             return_value.append(current_path)
-        return return_value
+        return return_value[::-1]
 
 if __name__ == "__main__":
     app = QApplication([])
