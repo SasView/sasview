@@ -123,7 +123,7 @@ class MetadataExplorer(QDialog):
             while current_item is not None and get_data(current_item) not in ["raw", "root", "Metadata"]:
                 current_path.append(get_data(current_item))
                 current_item = current_item.parent()
-            return_value.append(current_path)
+            return_value.append(current_path[::-1])
         return return_value
 
 if __name__ == "__main__":
