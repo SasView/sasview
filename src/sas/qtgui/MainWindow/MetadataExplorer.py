@@ -9,7 +9,7 @@ from PySide6.QtWidgets import (
     QTreeWidgetItem,
     QVBoxLayout, QHBoxLayout,
 )
-
+from PySide6.QtCore import Qt
 from sasdata.metadata import Metadata, MetaNode
 from sasdata.quantities.quantity import Quantity
 from sasdata.temp_xml_reader import load_data
@@ -111,6 +111,15 @@ class MetadataExplorer(QDialog):
                     node_item = QTreeWidgetItem([key, str(value.contents)])
                     table_root.addChild(node_item)
 
+    @property
+    def getSelectedPaths(self) -> list[str]:
+        return_value: list[str] = []
+        for selected in self.metadataTreeWidget.selectedItems():
+            current_item = selected
+            while current_item is not None:
+                return_value.append(current_item.data(0, Qt.ItemDataRole.DisplayRole))
+                current_item = current_item.parent()
+        return return_value
 
 if __name__ == "__main__":
     app = QApplication([])
