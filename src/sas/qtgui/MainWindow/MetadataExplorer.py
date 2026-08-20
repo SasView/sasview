@@ -113,12 +113,15 @@ class MetadataExplorer(QDialog):
 
     @property
     def getSelectedPaths(self) -> list[list[str]]:
+        def get_data(item: QTreeWidgetItem):
+            return item.data(0, Qt.ItemDataRole.DisplayRole)
+
         return_value: list[list[str]] = []
         for selected in self.metadataTreeWidget.selectedItems():
             current_item = selected
             current_path: list[str] = []
-            while current_item is not None:
-                current_path.append(current_item.data(0, Qt.ItemDataRole.DisplayRole))
+            while current_item is not None and get_data(current_item) not in ["raw", "root", "Metadata"]:
+                current_path.append(get_data(current_item))
                 current_item = current_item.parent()
             return_value.append(current_path)
         return return_value
