@@ -84,6 +84,10 @@ class TrendCreation(QDialog):
     def selected_proposed_trend_axes_as_dict(self) -> dict[str, list[str]]:
         return proposed_axes_as_dict(self.proposed_trend_axes)
 
+    @property
+    def proposed_trend(self) -> Trend:
+        return Trend(self.target_data, self.selected_proposed_trend_axes_as_dict)
+
     def make_trend(self):
         """Try to make the proposed Trend, and error if it fails."""
         try:
