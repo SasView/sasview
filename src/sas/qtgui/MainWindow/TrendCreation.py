@@ -80,11 +80,15 @@ class TrendCreation(QDialog):
                 self.proposed_trend_axes.append(ProposedTrendAxis(axis_name=axis_path[-1], axis_path=axis_path))
                 self.update_table()
 
+    @property
+    def selected_proposed_trend_axes_as_dict(self) -> dict[str, list[str]]:
+        return proposed_axes_as_dict(self.proposed_trend_axes)
+
     def make_trend(self):
         """Try to make the proposed Trend, and error if it fails."""
         try:
             # TODO: Fill in the dictionary
-            _ = Trend(self.target_data, proposed_axes_as_dict(self.proposed_trend_axes))
+            _ = Trend(self.target_data, self.selected_proposed_trend_axes_as_dict)
             self.accept()
         except ValueError as e:
             QMessageBox.critical(None, "Trend cannot be created", str(e))
