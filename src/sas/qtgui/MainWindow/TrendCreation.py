@@ -35,7 +35,7 @@ class TrendCreation(QDialog):
         self.cancel_button = QPushButton("Cancel")
         self.cancel_button.clicked.connect(self.reject)
         self.make_button = QPushButton("Make Trend")
-        self.make_button.clicked.connect(self.accept)
+        self.make_button.clicked.connect(self.make_trend)
         self.button_row.addWidget(self.cancel_button)
         self.button_row.addWidget(self.make_button)
 
