@@ -1,7 +1,8 @@
 from sasdata.data import SasData
+from sasdata.trend import Trend
 from sas.qtgui.MainWindow.MetadataExplorer import MetadataExplorer
 from dataclasses import dataclass
-from PySide6.QtWidgets import QDialog, QVBoxLayout, QLabel, QTableWidget, QHBoxLayout, QPushButton, QTableWidgetItem, QHeaderView
+from PySide6.QtWidgets import QDialog, QVBoxLayout, QLabel, QTableWidget, QHBoxLayout, QPushButton, QTableWidgetItem, QHeaderView, QMessageBox
 
 
 @dataclass
@@ -75,4 +76,12 @@ class TrendCreation(QDialog):
                 # TODO: perhaps have a better way of choosing names. Maybe make them customisable?
                 self.proposed_trend_axes.append(ProposedTrendAxis(axis_name=axis_path[-1], axis_path=axis_path))
                 self.update_table()
+
+    def make_trend(self):
+        """Try to make the proposed Trend, and error if it fails."""
+        try:
+            # TODO: Fill in the dictionary
+            _ = Trend(self.target_data, {})
+        except ValueError as e:
+            QMessageBox.critical(None, "Trend cannot be created", e)
                 
