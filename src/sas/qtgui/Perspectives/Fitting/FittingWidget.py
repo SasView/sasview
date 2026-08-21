@@ -1758,6 +1758,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def preparePlotsForDeletion(self, redundant_role: DataRole):
         """If plots with a particular role are no longer required, change their role to ROLE_DELETABLE."""
+        if not self.all_data:
+            return
         item_model = self.all_data[self.data_index].model()
         plots = GuiUtils.plotsFromDisplayName(self.data.name, item_model).values()
         for plot in plots:
@@ -3443,10 +3445,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             kernel_module = self.logic.kernel_module
         if kernel_module is None:
             return {}
-        return {
-            p.name: kernel_module.getParam(p.name)
-            for p in kernel_module._model_info.parameters.kernel_parameters
-        }
+        # Use the expanded parameter dict rather than kernel_parameters:
+        # vector parameters of multiplicity models are listed there under
+        # their unexpanded names (e.g. "sld[n]"), which getParam rejects.
+        return dict(kernel_module.params)
 
     def _get_fit_options_dict(self) -> dict:
         """Return current fit options as a dict (for undo command capture)."""

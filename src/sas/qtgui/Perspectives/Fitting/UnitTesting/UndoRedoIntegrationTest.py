@@ -30,6 +30,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from sasmodels.sasview_model import load_custom_model
 
 from sas.qtgui.Perspectives.Fitting import FittingUtilities, FittingWidget
+from sas.qtgui.Perspectives.Fitting.FitThread import FitThread
 from sas.qtgui.Perspectives.Fitting.UndoRedo import (
     CheckboxToggleCommand,
     FitOptionsCommand,
@@ -688,6 +689,10 @@ class TestUndoStackDuringFit:
         monkeypatch.setattr(w.fitting_controller, 'prepareFitters', lambda *a, **kw: ([MagicMock()], 0))
         monkeypatch.setattr(w, 'disableInteractiveElements', lambda *a, **kw: None)
         monkeypatch.setattr('twisted.internet.threads.deferToThread', lambda *a, **kw: MagicMock())
+        # Non-twisted path: prevent a real FitThread from running in the
+        # background — its completion signal would fire during a later test.
+        monkeypatch.setattr(FitThread, 'queue', lambda self: None)
+        monkeypatch.setattr(FitThread, 'ready', lambda self, *a, **kw: None)
 
         w.onFit()
         assert w.undo_stack._enabled
