@@ -155,6 +155,38 @@ class Plotter2DTest:
         assert plotter.boxwidget.isVisible()
         assert isinstance(plotter.boxwidget.model, QtGui.QStandardItemModel)
 
+    def testRemoveSlicersForPlotWindowIgnoresDeletedCanvas(self, plotter, mocker):
+        """ Cleanup should not crash if the canvas is already gone """
+        slicer_window = object()
+        slicer = mocker.MagicMock()
+        slicer._plot_window = slicer_window
+        plotter.slicers = {"slicer": slicer}
+        plotter.slicer = slicer
+        plotter.slicer_plots_dict = {"plot_one": mocker.MagicMock()}
+        mocker.patch.object(plotter.canvas, "draw", side_effect=RuntimeError("deleted"))
+
+        plotter.removeSlicersForPlotWindow(slicer_window)
+
+        slicer.clear.assert_called_once()
+        assert plotter.slicer is None
+
+    def testRemoveSlicersForPlotWindowRemovesMatchingEntry(self, plotter, mocker):
+        """ Closing a 1D slicer plot should remove the matching slicer from the owner """
+        slicer_window = mocker.MagicMock()
+        slicer = mocker.MagicMock()
+        slicer._plot_window = slicer_window
+        plotter.slicers = {"slicer": slicer}
+        plotter.slicer = slicer
+        plotter.slicer_plots_dict = {"plot_one": slicer_window}
+        mocker.patch.object(plotter.canvas, "draw")
+
+        plotter.removeSlicersForPlotWindow(slicer_window)
+
+        slicer.clear.assert_called_once()
+        assert plotter.slicers == {}
+        assert plotter.slicer is None
+        assert plotter.slicer_plots_dict == {}
+
     def testContextMenuQuickPlot(self, plotter, mocker):
         """ Test the right click menu """
         plotter.createContextMenuQuick()

@@ -60,7 +60,7 @@ class AnnulusInteractor(BaseInteractor, SlicerModel, StackableMixin):
 
     def _get_slicer_type_id(self):
         """Return the slicer type identifier"""
-        return "AnnulusPhi" + self.data.name
+        return f"AnnulusPhi{self.data.name}Plot{str(self.base.num_slicer_plots["Annulus"])}"
 
     def set_layer(self, n):
         """
@@ -77,7 +77,6 @@ class AnnulusInteractor(BaseInteractor, SlicerModel, StackableMixin):
         self.clear_markers()
         self.outer_circle.clear()
         self.inner_circle.clear()
-        self.base.connect.clearall()
 
     def update(self):
         """
@@ -143,7 +142,8 @@ class AnnulusInteractor(BaseInteractor, SlicerModel, StackableMixin):
 
         # Assign unique id per slicer instance and use it as the display name
         if self._plot_id is None:
-            base_id = "AnnulusPhi" + self.data.name
+            self.base.incrementNumSlicerPlots("Annulus")
+            base_id = f"AnnulusPhi{self.data.name}Plot{str(self.base.num_slicer_plots["Annulus"])}"
             self._plot_id = generate_unique_plot_id(base_id, self._item)
 
         new_plot.id = self._plot_id
@@ -174,23 +174,23 @@ class AnnulusInteractor(BaseInteractor, SlicerModel, StackableMixin):
         if param_name == "inner_radius":
             # First, check the closeness
             if numpy.fabs(param_value - self.getParams()["outer_radius"]) < MIN_DIFFERENCE:
-                print("Inner and outer radii too close. Please adjust.")
+                logger.warning("Inner and outer radii too close. Please adjust.")
                 isValid = False
             elif param_value > self.qmax:
-                print("Inner radius exceeds maximum range. Please adjust.")
+                logger.warning("Inner radius exceeds maximum range. Please adjust.")
                 isValid = False
         elif param_name == "outer_radius":
             # First, check the closeness
             if numpy.fabs(param_value - self.getParams()["inner_radius"]) < MIN_DIFFERENCE:
-                print("Inner and outer radii too close. Please adjust.")
+                logger.warning("Inner and outer radii too close. Please adjust.")
                 isValid = False
             elif param_value > self.qmax:
-                print("Outer radius exceeds maximum range. Please adjust.")
+                logger.warning("Outer radius exceeds maximum range. Please adjust.")
                 isValid = False
         elif param_name == "nbins":
             # Can't be 0
             if param_value < 1:
-                print("Number of bins cannot be less than or equal to 0. Please adjust.")
+                logger.warning("Number of bins cannot be less than or equal to 0. Please adjust.")
                 isValid = False
 
         return isValid

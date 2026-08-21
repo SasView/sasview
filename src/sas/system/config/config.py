@@ -209,7 +209,7 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         self.UNDO_STACK_MAX_DEPTH = 200
 
         # What's New variables
-        self.LAST_WHATS_NEW_HIDDEN_VERSION = "6.0.1"
+        self.LAST_WHATS_NEW_HIDDEN_VERSION = "6.1.3"
 
         # Last version that the update prompt was dismissed for
         self.LAST_UPDATE_DISMISSED_VERSION = "5.0.0"

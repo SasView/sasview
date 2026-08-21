@@ -144,7 +144,7 @@ class WhatsNewWidget(QDialog, Ui_WhatsNewUI):
         self.current_index = 0
 
         self.show_file()
-        self.set_enable_disable_prev_next()
+        self.set_page_label()
 
         self.setMinimumSize(800, 400)
         #self.resize(800, 600)
@@ -155,7 +155,7 @@ class WhatsNewWidget(QDialog, Ui_WhatsNewUI):
         self.current_index += 1
         self.current_index %= self.max_index
         self.show_file()
-        self.set_enable_disable_prev_next()
+        self.set_page_label()
 
     def prev_file(self):
         """ Go to next file"""
@@ -163,20 +163,13 @@ class WhatsNewWidget(QDialog, Ui_WhatsNewUI):
         if self.current_index < 0:
             self.current_index = self.max_index - 1
         self.show_file()
-        self.set_enable_disable_prev_next()
+        self.set_page_label()
 
-    def set_enable_disable_prev_next(self):
-        """ Set the appropriate enable state on the navigation buttons"""
-
-        if self.current_index == 0:
-            self.prevButton.setEnabled(False)
-        else:
-            self.prevButton.setEnabled(True)
-
-        if self.current_index >= self.max_index - 1:
-            self.nextButton.setEnabled(False)
-        else:
-            self.nextButton.setEnabled(True)
+    def set_page_label(self):
+        """Set the appropriate page number."""
+        self.lblPage.setText(
+            f"{self.current_index + 1} / {self.max_index}"
+        )
 
     def show_file(self):
         """ Set the text of the window to the file with the current index"""
