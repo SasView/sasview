@@ -52,7 +52,7 @@ jobs:
   ruff:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: astral-sh/ruff-action@v3
         with:
           version: "latest"
@@ -72,7 +72,7 @@ jobs:
       dependency-matrix-json: ${{ steps.set-refs.outputs.dependency_matrix }}
     steps:
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ env.RELEASE_PYVER }}
 
@@ -124,11 +124,11 @@ jobs:
 
     steps:
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ env.RELEASE_PYVER }}
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Generate job configuration matrix
         id: set-matrix
@@ -150,7 +150,7 @@ jobs:
 
     steps:
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ env.RELEASE_PYVER }}
 
@@ -173,7 +173,7 @@ jobs:
 
       - name: Obtain wheel cache
         id: cache-wheel
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.cache/cache-wheel/
           key: wheel-${{ matrix.dependency.name }}-${{ steps.get-sha.outputs.sha }}
@@ -215,12 +215,12 @@ jobs:
 
     steps:
       - name: Obtain SasView source from git
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ env.RELEASE_PYVER }}
 
@@ -296,7 +296,7 @@ jobs:
 
     steps:
       - name: Obtain SasView source from git
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Install sasview wheel (and dependencies)
         uses: ./.github/actions/install-wheel
@@ -339,7 +339,7 @@ jobs:
 
   installer-matrix:
     needs: [matrix, build-sasview]
-    if: github.event_name != 'push' || github.ref_name == 'main'
+    if: github.event_name != 'push' || github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/')
 
     strategy:
       fail-fast: false
@@ -365,7 +365,7 @@ jobs:
 
     steps:
       - name: Obtain SasView source from git
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Install sasview wheel (and dependencies)
         uses: ./.github/actions/install-wheel
@@ -423,8 +423,8 @@ jobs:
       - name: Build sasview installer dmg file (OSX)
         if: ${{ startsWith(matrix.os, 'macos') }}
         run: |
-          cd installers/dist
-          hdiutil create $MACOS_DMG_NAME -srcfolder SasView6.app -ov -format UDZO
+          uv pip install dmgbuild
+          installers/macos/create_dmg.sh "$MACOS_DMG_NAME"
 
       - name: Build sasview installer tarball (Linux)
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
@@ -450,7 +450,8 @@ jobs:
           python ../../build_tools/fix_qt_folder_names_for_codesign.py SasView6.app
           python  ../../build_tools/code_sign_osx.py
           codesign --verify --options=runtime --entitlements ../../build_tools/entitlements.plist --timestamp --deep --verbose=4 --force --sign "Developer ID Application: The International Scattering Alliance (8CX8K63BQM)" SasView6.app
-          hdiutil create $MACOS_DMG_NAME -srcfolder SasView6.app -ov -format UDZO
+          uv pip install dmgbuild
+          ../../installers/macos/create_dmg.sh "$MACOS_DMG_NAME"
           codesign -s "Developer ID Application: The International Scattering Alliance (8CX8K63BQM)" $MACOS_DMG_NAME
 
       - name: Notarize Release Build (OSX)
@@ -561,7 +562,7 @@ jobs:
       - name: Retrieve installer (old image)
         if: ${{ env.INSTALLER_USE_OLD_IMAGE == 'true' }}
         id: download-old-installer
-        uses: dawidd6/action-download-artifact@v21
+        uses: dawidd6/action-download-artifact@v23
         with:
           # Select a specific installer image based on the GitHub Actions run id
           run_id: ${{ env.INSTALLER_OLD_RUNID }}
@@ -675,7 +676,7 @@ jobs:
       - name: Retrieve installer debug tarball
         if: ${{ env.INSTALLER_USE_DEBUG == 'true' }}
         id: download-old-debug
-        uses: dawidd6/action-download-artifact@v21
+        uses: dawidd6/action-download-artifact@v23
         with:
           # Select a specific installer image based on the GitHub Actions run id
           run_id: ${{ env.INSTALLER_OLD_RUNID }}

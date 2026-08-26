@@ -172,7 +172,7 @@ class BoxInteractor(BaseInteractor, SlicerModel, StackableMixin):
         self.center.save(ev)
 
     def _get_slicer_type_id(self):
-        return f"BoxSlicer{self.direction}{self.data.name}"
+        return f"BoxSlicer{self.direction}{self.data.name}Plot{self.base.num_slicer_plots["Box"]}"
 
     def _post_data(self, new_slab=None, nbins=None, direction=None):
         """
@@ -269,7 +269,8 @@ class BoxInteractor(BaseInteractor, SlicerModel, StackableMixin):
 
         # Assign unique id per slicer instance and use it as the display name
         if self._plot_id is None:
-            base_id = "BoxAverage" + self.direction + self.data.name
+            self.base.incrementNumSlicerPlots("Box")
+            base_id = f"BoxAverage{self.direction}{self.data.name}Plot{str(self.base.num_slicer_plots["Box"])}"
             self._plot_id = generate_unique_plot_id(base_id, self._item)
 
         new_plot.id = self._plot_id

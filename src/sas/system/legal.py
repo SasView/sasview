@@ -1,5 +1,4 @@
 import datetime
-from pathlib import Path
 
 from ._resources import SAS_RESOURCES
 
@@ -24,10 +23,17 @@ class Legal:
                     </body>
                 </html>"""
 
-
     @property
-    def credits_html(self) -> Path:
-        return SAS_RESOURCES.resource("system/credits.html")
+    def credits_html(self) -> str:
+        with SAS_RESOURCES.resource("system/credits.html") as res:
+            # The data from pip-licenses should already be normalised to UTF-8
+            # but it could have other encodings in it; here, we
+            # - ensure that UTF-8 is used for the file regardless of the quirks
+            #   of the underlying platform
+            # - ensure reading the file is robust by coercing the data to
+            #   UTF-8, replacing unknown codepoints with REPLACEMENT CHARACTER
+            #   markers.
+            return res.read_text(encoding='utf-8', errors='replace')
 
 
 legal = Legal()
