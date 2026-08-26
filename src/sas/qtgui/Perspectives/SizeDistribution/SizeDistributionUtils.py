@@ -29,6 +29,7 @@ WIDGETS = enum(
 
 
 class WeightType(StrEnum):
+    """Enumeration of weight types for the size distribution fit."""
     NONE = "None"
     DI = "dI"
     SQRT_I = "sqrt(I Data)"
@@ -37,6 +38,7 @@ class WeightType(StrEnum):
 
 @dataclass
 class MaxEntParameters:
+    """Parameters for the maximum entropy size distribution fit."""
     qmin: float = 0.0
     qmax: float = 0.1
     dmin: float = 10.0
@@ -49,7 +51,7 @@ class MaxEntParameters:
     sky_background: float = 1.0e-6
     max_iterations: int = 100
     use_weights: bool = True
-    weight_type: WeightType = WeightType.DI
+    weight_type: WeightType | None = WeightType.DI
     weight_factor: float = 1.0
     weight_percent: float = 1.0
     full_fit: bool = True
@@ -57,6 +59,7 @@ class MaxEntParameters:
 
 @dataclass
 class MaxEntResult:
+    """Results of the maximum entropy size distribution fit."""
     convergences: list[bool]
     num_iters: list[int]
     chisq: float

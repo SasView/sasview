@@ -247,6 +247,27 @@ class FittingWidgetTest:
         #Test what is current text in the combobox
         assert fittingWindow.cbCategory.currentText(), "None"
 
+    def testSelectModelWithoutFilename(self, widget, mocker, caplog):
+        """
+        Selecting a model whose class carries no filename (e.g. a mixture
+        model built programmatically with make_model_from_info) must log an
+        error instead of raising TypeError in os.path.basename(None).
+        Regression test for issue #4047.
+        """
+        class DummyMixtureModel:
+            name = "dummy_mixture"
+            filename = None
+
+        widget.models["dummy_mixture"] = DummyMixtureModel
+        # force the name-based lookup to fail so the filename fallback runs
+        mocker.patch.object(FittingWidget.generate, 'load_kernel_module',
+                            side_effect=ModuleNotFoundError("dummy_mixture"))
+
+        with caplog.at_level(logging.ERROR):
+            widget.fromModelToQModel("dummy_mixture")
+
+        assert "Can't find the model file for dummy_mixture" in caplog.text
+
     def testSignals(self, widget):
         """
         Test the widget emitted signals
@@ -659,11 +680,11 @@ class FittingWidgetTest:
         # Change the category index so we have a model available
         category_index = widget.cbCategory.findText("Sphere")
         widget.cbCategory.setCurrentIndex(category_index)
-        model_index = widget.cbModel.findText("adsorbed_layer")
+        model_index = widget.cbModel.findText("core_shell_sphere")
         widget.cbModel.setCurrentIndex(model_index)
 
         # Check the magnetic model
-        assert widget.magnetism_widget._magnet_model.rowCount() == 10
+        assert widget.magnetism_widget._magnet_model.rowCount() == 13
         assert widget.magnetism_widget._magnet_model.columnCount() == 5
 
         # Test the header

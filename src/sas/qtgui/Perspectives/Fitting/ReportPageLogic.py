@@ -7,12 +7,12 @@ from io import BytesIO
 
 import html2text
 from bumps import options
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.figure import Figure
 
 from sasmodels import __version__ as SASMODELS_VERSION
 
+import sas.qtgui.Plotting.PlotHelper as PlotHelper
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Plotting.PlotterBase import PlotterBase
 from sas.qtgui.Utilities.Reports.reportdata import ReportData
 from sas.system.version import __version__ as SASVIEW_VERSION
 
@@ -80,12 +80,11 @@ class ReportPageLogic:
 
         return report
 
-    def buildPlotsForReport(self, images: list[PlotterBase]) -> str:
+    def buildPlotsForReport(self, images: list[Figure]) -> str:
         """ Convert Matplotlib figure 'fig' into a <img> tag for HTML use using base64 encoding. """
         html = FEET_1.format(self.data.name)
 
         for fig in images:
-            canvas = FigureCanvas(fig)
             png_output = BytesIO()
             try:
                 dpi = 150 if sys.platform == "darwin" else 75
@@ -98,7 +97,6 @@ class ReportPageLogic:
             feet = FEET_3 if sys.platform == "darwin" else FEET_2
             html += feet.format(data_to_print) + ELINE
             png_output.close()
-            del canvas
         return html
 
     def reportParams(self) -> str:
@@ -156,7 +154,7 @@ class ReportPageLogic:
             smear_format = CENTRE.format(f"Smearing Information: {smear_format}")
         return smear_format
 
-    def getResultsPlots(self) -> list[FigureCanvas]:
+    def getResultsPlots(self) -> list[Figure]:
         """Gather the plots from the bumps results panel."""
         plots = []
         if hasattr(self.parent, 'parent') and hasattr(self.parent.parent, 'results_panel'):
@@ -199,27 +197,18 @@ class ReportPageLogic:
                 batch_results_table += '</table>'
         return batch_results_table
 
-    def getImages(self) -> list[PlotterBase]:
-        """Create MPL figures for the current fit"""
-        graphs = []
+    def getImages(self) -> list[Figure]:
+        """Create MPL figures for the current fit.
+
+        Uses `PlotHelper.figures_for_plot_ids` to collect any live figures shown
+        for the dataset, then appends result-panel figures.
+        """
         modelname = self.kernel_module.name
         if not modelname or self._index is None:
             return []
+
         plot_ids = [plot.id for plot in GuiUtils.plotsFromModel(modelname, self._index)]
-
-        # Active plots
-        import sas.qtgui.Plotting.PlotHelper as PlotHelper
-        shown_plot_names = PlotHelper.currentPlotIds()
-
-        # current_plots = list of graph names of currently shown plots
-        # which are related to this dataset
-        current_plots = [name for name in shown_plot_names if PlotHelper.plotById(name).data[0].id in plot_ids]
-
-        for name in current_plots:
-            # get the plotter object first
-            plotter = PlotHelper.plotById(name)
-            graphs.append(plotter.figure)
-
+        graphs = PlotHelper.figures_for_plot_ids(plot_ids)
         graphs.extend(self.getResultsPlots())
 
         return graphs

@@ -337,7 +337,6 @@ class sas_gen_test(unittest.TestCase):
 
         np.random.seed(seed=1984)
         angles = stats.uniform(0, 2*np.pi).rvs([100, 3])
-        print(angles)
         for alpha, beta, gamma in angles:
             R_s2s = euler_rotation_matrix(alpha, beta, gamma)
             R_scipy_XYZ = Rotation.from_euler('ZYX', [gamma, beta, alpha]).as_matrix()

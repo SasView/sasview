@@ -1443,7 +1443,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 raise RuntimeError("No structure file is loaded! SAXS calculations require a structure file.")
             from sas.qtgui.Calculators.SAXSPluginModelGenerator import get_base_plugin_name, write_plugin_model
             write_plugin_model(self.datafile)
-            self.manager.communicator().customModelDirectoryChanged.emit() # notify that a new plugin model is available
+            self.communicator.customModelDirectoryChanged.emit() # notify that a new plugin model is available
 
             # try to bring the fit panel into focus and select the newly generated plugin
             try:

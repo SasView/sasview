@@ -9,6 +9,16 @@ from sas.qtgui.Plotting.Slicers.SectorSlicer import LineInteractor
 from sas.qtgui.Plotting.Slicers.SlicerUtils import StackableMixin, generate_unique_plot_id
 
 
+def _normalize_phi_for_wedge_display(phi_deg, delta_phi_deg):
+    """Normalize phi to match wedge display convention across +/-180 boundary."""
+    phi_normalized = np.mod(phi_deg - 180.0, 360.0) - 180.0
+    # Handle the case where phi is negative, but the wedge extends across the -180 boundary.
+    # Display phi as a positive angle above 180 to match the plot range.
+    if phi_normalized < 0 and (phi_normalized - delta_phi_deg) < -180.0:
+        phi_normalized += 360.0
+    return phi_normalized
+
+
 class WedgeInteractor(BaseInteractor, SlicerModel, StackableMixin):
     """
     This WedgeInteractor is a cross between the SectorInteractor and the
@@ -139,7 +149,8 @@ class WedgeInteractor(BaseInteractor, SlicerModel, StackableMixin):
     def _get_slicer_type_id(self):
         """Return the slicer type identifier"""
         return (
-            f"Wedge{self.averager.__name__}" + self.data.name if self.averager is not None else "Wedge" + self.data.name
+            f"Wedge{self.averager.__name__}{self.data.name}Plot{str(self.base.num_slicer_plots["Wedge"])}" if self.averager is not None else
+            f"Wedge{self.data.name}Plot{str(self.base.num_slicer_plots["Wedge"])}"
         )
 
     def _post_data(self, new_sector=None, nbins=None):
@@ -208,17 +219,19 @@ class WedgeInteractor(BaseInteractor, SlicerModel, StackableMixin):
         new_plot.detector = self.data.detector
         # If the data file does not tell us what the axes are, just assume...
         if self.averager.__name__ == "SectorPhi":
-            # angular plots usually require a linear x scale and better with
-            # a linear y scale as well.
+            # Angular slice x values can be negative, so these must be linear.
             new_plot.xaxis(r"\rm{\phi}", "degrees")
             new_plot.plot_role = DataRole.ROLE_ANGULAR_SLICE
+            new_plot.xtransform = "x"
+            new_plot.ytransform = "y"
         else:
             new_plot.xaxis(r"\rm{Q}", "A^{-1}")
         new_plot.yaxis(r"\rm{Intensity} ", "cm^{-1}")
 
         # Assign unique id per slicer instance and use it as the display name
         if self._plot_id is None:
-            base_id = "Wedge" + self.averager.__name__ + self.data.name
+            self.base.incrementNumSlicerPlots("Wedge")
+            base_id = f"Wedge{self.averager.__name__}{self.data.name}Plot{str(self.base.num_slicer_plots["Wedge"])}"
             self._plot_id = generate_unique_plot_id(base_id, self._item)
 
         new_plot.id = self._plot_id
@@ -308,8 +321,10 @@ class WedgeInteractor(BaseInteractor, SlicerModel, StackableMixin):
         params = {}
         params["r_min"] = self.inner_arc.radius
         params["r_max"] = self.outer_arc.radius
-        params["phi [deg]"] = self.central_line.theta * 180 / np.pi
-        params["delta_phi [deg]"] = self.radial_lines.phi * 180 / np.pi
+        delta_phi_deg = self.radial_lines.phi * 180 / np.pi
+        phi_deg = self.central_line.theta * 180 / np.pi
+        params["phi [deg]"] = _normalize_phi_for_wedge_display(phi_deg, delta_phi_deg)
+        params["delta_phi [deg]"] = delta_phi_deg
         params["nbins"] = self.nbins
         return params
 
@@ -323,7 +338,10 @@ class WedgeInteractor(BaseInteractor, SlicerModel, StackableMixin):
         """
         self.r1 = params["r_min"]
         self.r2 = params["r_max"]
-        self.theta = params["phi [deg]"] * np.pi / 180
+
+        phi_normalized = _normalize_phi_for_wedge_display(params["phi [deg]"], params["delta_phi [deg]"])
+        self.theta = phi_normalized * np.pi / 180
+
         self.phi = params["delta_phi [deg]"] * np.pi / 180
         self.nbins = int(params["nbins"])
 
@@ -332,6 +350,11 @@ class WedgeInteractor(BaseInteractor, SlicerModel, StackableMixin):
         self.radial_lines.update(r1=self.r1, r2=self.r2, theta=self.theta, phi=self.phi)
         self.central_line.update(theta=self.theta)
         self._post_data()
+
+        # Refresh the model to show normalized phi value in the parameter field
+        if phi_normalized != params["phi [deg]"]:
+            self.setModelFromParams()
+
         self.draw()
 
     def draw(self):
@@ -352,7 +375,6 @@ class WedgeInteractorQ(WedgeInteractor):
     def __init__(self, base, axes, item=None, color="black", zorder=3):
         WedgeInteractor.__init__(self, base, axes, item=item, color=color)
         self.base = base
-        super()._post_data()
 
     def _post_data(self, new_sector=None, nbins=None):
         from sasdata.data_util.manipulations import SectorQ
@@ -370,246 +392,9 @@ class WedgeInteractorPhi(WedgeInteractor):
     def __init__(self, base, axes, item=None, color="black", zorder=3):
         WedgeInteractor.__init__(self, base, axes, item=item, color=color)
         self.base = base
-        super()._post_data()
 
     def _post_data(self, new_sector=None, nbins=None):
         from sasdata.data_util.manipulations import SectorPhi
 
         super()._post_data(SectorPhi)
 
-
-class WedgeInteractorPhiMulti(BaseInteractor, SlicerModel, StackableMixin):
-    """
-    Creates multiple symmetric wedge slicers that move together as a unit.
-    """
-
-    def __init__(self, base, axes, count, item=None, color="black", zorder=3):
-        BaseInteractor.__init__(self, base, axes, color=color)
-        SlicerModel.__init__(self)
-        StackableMixin.__init__(self)
-
-        self.markers = []
-        self.axes = axes
-        self._item = item
-        self.base = base
-
-        self.qmax = max(self.data.xmax, np.fabs(self.data.xmin), self.data.ymax, np.fabs(self.data.ymin))
-        self.dqmin = min(np.fabs(self.data.qx_data))
-        self.connect = self.base.connect
-
-        self.count = count
-        self.wedges = []
-        self.angle_step = 2 * np.pi / self.count
-
-        self._create_slicers(zorder)
-
-        # Get data from first wedge for compatibility
-        if self.wedges:
-            self.data = self.wedges[0].data
-            self.qmax = self.wedges[0].qmax
-            self.dqmin = self.wedges[0].dqmin
-            self._model = self.wedges[0]._model
-
-            self._connect_master_wedge()
-
-    def _connect_master_wedge(self):
-        """
-        Connect the moveend signal of the first wedge to update all wedges.
-        """
-        master_wedge = self.wedges[0]
-
-        # Override the moveend method for each interacter of the master wedge
-        # Store original methods to call them later
-        self.original_moveends = {}
-
-        for interactor_name in ["inner_arc", "outer_arc", "radial_lines", "central_line"]:
-            interactor = getattr(master_wedge, interactor_name)
-            self.original_moveends[interactor_name] = interactor.moveend
-
-            # Replace with the synchronized moveend
-            interactor.moveend = lambda ev, name=interactor_name: self._synchronized_moveend(ev, name)
-
-    def _synchronized_moveend(self, ev, interactor_name):
-        """
-        Call the original moveend method and then update all wedges.
-        """
-        # Store axis limits to prevent auto-scaling
-        xlim, ylim = self.axes.get_xlim(), self.axes.get_ylim()
-
-        # Call the original moveend method
-        master = self.wedges[0]
-
-        # Master updates itself
-        master.update()
-
-        # Synchronize other wedges
-        for i, wedge in enumerate(self.wedges[1:], start=1):
-            # Copy master's radii and phi
-            wedge.r1 = master.r1
-            wedge.r2 = master.r2
-            wedge.phi = master.phi
-
-            # Calculate offset theta
-            offset_theta = i * self.angle_step
-            wedge.theta = (master.theta + offset_theta) % (2 * np.pi)
-
-            # Update all interactors
-            wedge.inner_arc.update(r=wedge.r1, phi=wedge.phi, theta=wedge.theta)
-            wedge.outer_arc.update(r=wedge.r2, phi=wedge.phi, theta=wedge.theta)
-            wedge.radial_lines.update(r1=wedge.r1, r2=wedge.r2, phi=wedge.phi, theta=wedge.theta)
-            wedge.central_line.update(theta=wedge.theta)
-
-            wedge._post_data()
-
-        master._post_data()
-
-        # Restore axis limits
-        self.axes.set_xlim(xlim)
-        self.axes.set_ylim(ylim)
-
-        # Redraw the canvas
-        self.base.draw()
-
-    def _create_slicers(self, zorder):
-        """
-        Create all wedge interactors and position them evenly around the circle.
-        """
-
-        # Store the axis limits
-        xlim, ylim = self.axes.get_xlim(), self.axes.get_ylim()
-
-        for i in range(self.count):
-            theta = i * self.angle_step
-            wedge = WedgeInteractorPhi(
-                base=self.base, axes=self.axes, item=self._item, color=self.color, zorder=zorder + i
-            )
-
-            # Disable model updates for all but the first wedge
-            if i > 0:
-                wedge.update_model = False
-
-            wedge.theta = theta
-            wedge.central_line.theta = theta
-            wedge.inner_arc.theta = theta
-            wedge.outer_arc.theta = theta
-            wedge.radial_lines.theta = theta
-
-            wedge.central_line.update()
-            wedge.inner_arc.update()
-            wedge.outer_arc.update()
-            wedge.radial_lines.update()
-
-            # Remove markers from non-master wedges
-            if i > 0:
-                self._remove_wedge_markers(wedge)
-
-            self.wedges.append(wedge)
-
-            wedge._post_data()
-
-        self.base.draw()
-
-        # Restore axis limits
-        self.axes.set_xlim(xlim)
-        self.axes.set_ylim(ylim)
-
-    def _remove_wedge_markers(self, wedge):
-        """
-        Remove markers from non-master wedges to avoid clutter.
-        The wedge lines remain visible for context but are not interactive.
-        """
-
-        # Remove markers from all interactors
-        interactors = [wedge.inner_arc, wedge.outer_arc, wedge.radial_lines, wedge.central_line]
-
-        marker_attributes = [
-            "marker",  # ArcInteractor
-            "inner_marker",  # LineInteractor (central line)
-            "l_marker",  # RadiusInteractor (left line)
-            "r_marker",  # RadiusInteractor (right line)
-            "left_marker",  # LineInteractor (side line)
-            "right_marker",  # LineInteractor (side line)
-        ]
-        line_attributes = [
-            "line",  # LineInteractor (central_line)
-            "arc",  # ArcInteractor (inner_arc, outer_arc)
-            "l_line",  # RadiusInteractor (left line)
-            "r_line",  # RadiusInteractor (right line)
-            "left_line",  # LineInteractor (side_line)
-            "right_line",  # LineInteractor (side_line)
-        ]
-
-        for interactor in interactors:
-            for attr in marker_attributes:
-                if hasattr(interactor, attr):
-                    marker = getattr(interactor, attr)
-                    if marker is not None:
-                        marker.set_visible(False)
-                        marker.set_picker(False)
-                        marker.set_pickradius(0)
-
-            # Additionally, remove line pickers to disable interactivity
-            for line_attr in line_attributes:
-                if hasattr(interactor, line_attr):
-                    line = getattr(interactor, line_attr)
-                    if line is not None:
-                        line.set_picker(False)
-                        line.set_pickradius(0)
-
-            # Disable interaction flags
-            interactor.has_move = False
-
-    def _on_moveend(self, ev):
-        """
-        Called after a dragging event.
-        Update all wedges to the new position.
-        """
-        self.update()
-        self.base.draw()
-
-    def update(self):
-        """
-        Update all wedge interactors to move together.
-        Called during interactive dragging.
-        """
-        # Store axis limits
-        xlim = self.axes.get_xlim()
-        ylim = self.axes.get_ylim()
-
-        master = self.wedges[0]
-
-        for i, wedge in enumerate(self.wedges[1:], start=1):
-            # Sync with master
-            wedge.r1 = master.r1
-            wedge.r2 = master.r2
-            wedge.phi = master.phi
-
-            # Calculate offset theta
-            offset_theta = (master.theta + i * self.angle_step) % (2 * np.pi)
-            wedge.theta = offset_theta
-
-            # Update components
-            wedge.inner_arc.radius = wedge.r1
-            wedge.inner_arc.theta = offset_theta
-            wedge.inner_arc.phi = wedge.phi
-
-            wedge.outer_arc.radius = wedge.r2
-            wedge.outer_arc.theta = offset_theta
-            wedge.outer_arc.phi = wedge.phi
-
-            wedge.radial_lines.r1 = wedge.r1
-            wedge.radial_lines.r2 = wedge.r2
-            wedge.radial_lines.theta = offset_theta
-            wedge.radial_lines.phi = wedge.phi
-
-            wedge.central_line.theta = offset_theta
-
-            # Update visuals
-            wedge.inner_arc.update()
-            wedge.outer_arc.update()
-            wedge.radial_lines.update()
-            wedge.central_line.update()
-
-        # Restore axis limits
-        self.axes.set_xlim(xlim)
-        self.axes.set_ylim(ylim)

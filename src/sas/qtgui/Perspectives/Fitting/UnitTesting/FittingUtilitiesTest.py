@@ -37,18 +37,18 @@ class FittingUtilitiesTest:
         # Use a single-shell parameter
         model_name = "barbell"
         kernel_module = generate.load_kernel_module(model_name)
-        barbell_parameters = modelinfo.make_parameter_table(getattr(kernel_module, 'parameters', []))
+        info = modelinfo.make_model_info(kernel_module)
 
-        params = FittingUtilities.getIterParams(barbell_parameters)
+        params = FittingUtilities.getIterParams(info.parameters)
         # returns empty list
         assert params == []
 
         # Use a multi-shell parameter
         model_name = "core_multi_shell"
         kernel_module = generate.load_kernel_module(model_name)
-        multishell_parameters = modelinfo.make_parameter_table(getattr(kernel_module, 'parameters', []))
+        info = modelinfo.make_model_info(kernel_module)
 
-        params = FittingUtilities.getIterParams(multishell_parameters)
+        params = FittingUtilities.getIterParams(info.parameters)
         # returns a non-empty list
         assert params != []
         assert 'sld' in str(params)
@@ -61,9 +61,9 @@ class FittingUtilitiesTest:
         # Use a single-shell parameter
         model_name = "barbell"
         kernel_module = generate.load_kernel_module(model_name)
-        barbell_parameters = modelinfo.make_parameter_table(getattr(kernel_module, 'parameters', []))
+        info = modelinfo.make_model_info(kernel_module)
 
-        param_name, param_length = FittingUtilities.getMultiplicity(barbell_parameters)
+        param_name, param_length = FittingUtilities.getMultiplicity(info.parameters)
         # returns nothing
         assert param_name == ""
         assert param_length == 0
@@ -71,9 +71,9 @@ class FittingUtilitiesTest:
         # Use a multi-shell parameter
         model_name = "core_multi_shell"
         kernel_module = generate.load_kernel_module(model_name)
-        multishell_parameters = modelinfo.make_parameter_table(getattr(kernel_module, 'parameters', []))
+        info = modelinfo.make_model_info(kernel_module)
 
-        param_name, param_length = FittingUtilities.getMultiplicity(multishell_parameters)
+        param_name, param_length = FittingUtilities.getMultiplicity(info.parameters)
 
         assert param_name == "n"
         assert param_length == 10
@@ -92,9 +92,9 @@ class FittingUtilitiesTest:
             if model.name == model_name:
                 kernel_module_o = model()
         assert kernel_module_o is not None
-        barbell_parameters = modelinfo.make_parameter_table(getattr(kernel_module, 'parameters', []))
+        info = modelinfo.make_model_info(kernel_module)
 
-        params = FittingUtilities.addParametersToModel(barbell_parameters, kernel_module_o, True)
+        params = FittingUtilities.addParametersToModel(info.parameters, kernel_module_o, True)
 
         # Test the resulting model
         assert len(params) == 7
@@ -111,9 +111,9 @@ class FittingUtilitiesTest:
             if model.name == model_name:
                 kernel_module_o = model()
         assert kernel_module_o is not None
-        multi_parameters = modelinfo.make_parameter_table(getattr(kernel_module, 'parameters', []))
+        info = modelinfo.make_model_info(kernel_module)
 
-        params = FittingUtilities.addParametersToModel(multi_parameters, kernel_module_o, False)
+        params = FittingUtilities.addParametersToModel(info.parameters, kernel_module_o, False)
 
         # Test the resulting model
         assert len(params) == 3
@@ -135,9 +135,9 @@ class FittingUtilitiesTest:
             if model.name == model_name:
                 kernel_module_o = model()
         assert kernel_module_o is not None
-        multi_parameters = modelinfo.make_parameter_table(getattr(kernel_module, 'parameters', []))
+        info = modelinfo.make_model_info(kernel_module)
 
-        params = FittingUtilities.addParametersToModel(multi_parameters, kernel_module_o, True)
+        params = FittingUtilities.addParametersToModel(info.parameters, kernel_module_o, True)
 
         # Test the resulting model
         assert len(params) == 3
@@ -169,18 +169,18 @@ class FittingUtilitiesTest:
         # Use a multi-shell parameter to see that the method doesn't include shells
         model_name = "core_multi_shell"
         kernel_module = generate.load_kernel_module(model_name)
-        multi_parameters = modelinfo.make_parameter_table(getattr(kernel_module, 'parameters', []))
+        info = modelinfo.make_model_info(kernel_module)
 
         model = QtGui.QStandardItemModel()
 
         index = 2
-        FittingUtilities.addShellsToModel(multi_parameters, model, index)
+        FittingUtilities.addShellsToModel(info.parameters, model, index)
         # There should be index*len(multi_parameters) new rows
         assert model.rowCount() == 4
 
         model = QtGui.QStandardItemModel()
         index = 5
-        FittingUtilities.addShellsToModel(multi_parameters, model, index)
+        FittingUtilities.addShellsToModel(info.parameters, model, index)
         assert model.rowCount() == 10
 
         assert model.item(1).child(0).text() == "Polydispersity"

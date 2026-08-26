@@ -76,6 +76,7 @@ if not hasattr(SasviewModel, 'get_weights'):
     SasviewModel.get_weights = get_weights
 
 logger = logging.getLogger(__name__)
+polydispersity_plot_name = "{} {} polydispersity {}"
 
 class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     """
@@ -101,9 +102,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Which tab is this widget displayed in?
         self.tab_id = tab_id
-
-        import sys
-        sys.excepthook = self.info
 
         # Globals
         self.initializeGlobals()
@@ -189,9 +187,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.label_17.setStyleSheet(new_font)
         self.label_19.setStyleSheet(new_font)
 
-    def info(self, type: Any, value: Any, tb: Any) -> None:
-        logger.error("".join(traceback.format_exception(type, value, tb)))
-
     @property
     def logic(self) -> FittingLogic:
         # make sure the logic contains at least one element
@@ -230,6 +225,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 self._logic.append(logic)
             # Option widget logic was destroyed - reestablish
             self.options_widget.logic = self._logic[0]
+            # Ensure auxiliary widgets point at the new logic instance
+            self.polydispersity_widget.logic = self._logic[0]
+            self.magnetism_widget.logic = self._logic[0]
             # update the ordering tab
             self.order_widget.updateData(self.all_data)
 
@@ -567,6 +565,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Check if any parameters are ready for fitting
         self.cmdFit.setEnabled(self.haveParamsToFit())
         self.polydispersity_widget.togglePoly(isChecked)
+        self.updateData()
 
     def onPolyToggled(self, isChecked: bool) -> None:
         """
@@ -686,6 +685,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.polydispersity_widget.cmdFitSignal.connect(lambda: self.cmdFit.setEnabled(self.haveParamsToFit()))
         self.polydispersity_widget.updateDataSignal.connect(lambda: self.updateData())
         self.polydispersity_widget.iterateOverModelSignal.connect(lambda: self.iterateOverModel(self.updateFunctionCaption))
+        self.polydispersity_widget.deletePlotSignal.connect(self.setPlotDeletable)
         self.polydispersity_widget.toggledSignal.connect(self.onPolyToggled)
         self.magnetism_widget.cmdFitSignal.connect(lambda: self.cmdFit.setEnabled(self.haveParamsToFit()))
         self.magnetism_widget.updateDataSignal.connect(lambda: self.updateData())
@@ -714,7 +714,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Returns model name, by default M<tab#>, e.g. M1, M2
         """
-        return "M%i" % self.tab_id
+        return f"M{self.tab_id}"
 
     def nameForFittedData(self, name: str) -> str:
         """
@@ -722,7 +722,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         if self.is2D:
             name += "2d"
-        name = "%s [%s]" % (self.modelName(), name)
+        name = f"{self.modelName()} [{name}]"
         return name
 
     def showModelContextMenu(self, position: QtCore.QPoint) -> None:
@@ -1678,6 +1678,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         self.magnetism_widget.updateMagnetModelFromList(param_dict)
 
+        # Clean up polydispersity plots if polydispersity has been disabled
+        if not self.chkPolydispersity.isChecked():
+            self.preparePlotsForDeletion(DataRole.ROLE_POLYDISPERSITY)
+
         # update charts
         self.onPlot()
 
@@ -1685,6 +1689,23 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         chi2_repr = GuiUtils.formatNumber(self.chi2, high=True)
         self.lblChi2Value.setText(chi2_repr)
 
+    def preparePlotsForDeletion(self, redundant_role: DataRole):
+        """If plots with a particular role are no longer required, change their role to ROLE_DELETABLE."""
+        item_model = self.all_data[self.data_index].model()
+        plots = GuiUtils.plotsFromDisplayName(self.data.name, item_model).values()
+        for plot in plots:
+            if plot.plot_role == redundant_role:
+                plot.plot_role = DataRole.ROLE_DELETABLE
+
+    def setPlotDeletable(self, parameter_name: str) -> None:
+        """Set the plot role to ROLE_DELETABLE for the polydispersity plot with the given parameter name."""
+        item_model = self.all_data[self.data_index].model()
+        plots = GuiUtils.plotsFromDisplayName(self.data.name, item_model).values()
+        data_name = self.nameForFittedData(self.data.name).split()
+        poly_plot_name = polydispersity_plot_name.format(data_name[0], parameter_name, " ".join(data_name[1:]))
+        poly_plots = [plot for plot in plots if plot.name == poly_plot_name]
+        for plot in poly_plots:
+            plot.plot_role = DataRole.ROLE_DELETABLE
 
     def prepareFitters(self, fitter: Fit | None = None, fit_id: int = 0, weight_increase: int = 1) -> tuple[list[Fit], int]:
         """
@@ -2027,7 +2048,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if kernel_module is None:
             # mismatch between "name" attribute and actual filename.
             curr_model = self.models[model_name]
-            name, _ = os.path.splitext(os.path.basename(curr_model.filename))
+            filename = getattr(curr_model, 'filename', None)
+            if filename is None:
+                logger.error("Can't find the model file for %s", model_name)
+                return
+            name, _ = os.path.splitext(os.path.basename(filename))
             try:
                 kernel_module = generate.load_kernel_module(name)
             except ModuleNotFoundError as ex:
@@ -2040,11 +2065,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         elif hasattr(kernel_module, 'parameters'):
             # built-in and custom models
-            self.logic.model_parameters = modelinfo.make_parameter_table(getattr(kernel_module, 'parameters', []))
-
-        elif hasattr(kernel_module, 'model_info'):
-            # for sum/multiply models
-            self.logic.model_parameters = kernel_module.model_info.parameters
+            info = modelinfo.make_model_info(kernel_module)
+            self.logic.model_parameters = info.parameters
 
         elif hasattr(kernel_module, 'Model') and hasattr(kernel_module.Model, "_model_info"):
             # this probably won't work if there's no model_info, but just in case
@@ -2525,9 +2547,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         for plot in FittingUtilities.plotPolydispersities(return_data.get('model', None)):
             data_id = fitted_data.id.split()
-            plot.id = "{} [{}] {}".format(data_id[0], plot.name, " ".join(data_id[1:]))
+            plot.id = f"{data_id[0]} [{plot.name} polydispersity] {' '.join(data_id[1:])}"
             data_name = fitted_data.name.split()
-            plot.name = " ".join([data_name[0], plot.name] + data_name[1:])
+            plot.name = polydispersity_plot_name.format(data_name[0], plot.name, " ".join(data_name[1:]))
             self.createNewIndex(plot)
             new_plots.append(plot)
 
@@ -2895,9 +2917,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             par = row[0].text()
             val = GuiUtils.toDouble(row[1].text())
             self.logic.kernel_module.setParam(par, val)
-
-        # Change 'n' in the parameter model; also causes recalculation
-        self._model_model.item(self._n_shells_row, 1).setText(str(index))
 
         # Update relevant models
         self.polydispersity_widget.setPolyModel()
@@ -3444,6 +3463,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if 'model_name' not in line_dict:
             return
         model = line_dict['model_name'][0]
+        structure_factor = line_dict['fitpage_structure'][0]
         context = {}
 
         if 'multiplicity' in line_dict:
@@ -3466,7 +3486,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Create the context dictionary for parameters
         # Exclude multiplicity and number of shells params from context
-        context = {k: v for (k, v) in line_dict.items() if len(v) > 3 and k != model}
+        context = {k: v for (k, v) in line_dict.items() if len(v) > 3 and k not in [model, structure_factor]}
         context['model_name'] = model
 
         if warn_user and str(self.cbModel.currentText()) != str(context['model_name']):
@@ -3542,9 +3562,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             if param_name not in list(param_dict) or row == self._n_shells_row:
                 # Skip magnetic, polydisperse (.pd), and shell parameters - they are handled elsewhere
                 return
-            # checkbox state
-            param_checked = QtCore.Qt.Checked if param_dict[param_name][0] == "True" else QtCore.Qt.Unchecked
-            self._model_model.item(row, 0).setCheckState(param_checked)
+            # checkbox state - None means no checkbox present so don't modify
+            if param_dict[param_name][0] != "None":
+                param_checked = QtCore.Qt.Checked if param_dict[param_name][0] == "True" else QtCore.Qt.Unchecked
+                self._model_model.item(row, 0).setCheckState(param_checked)
 
             # parameter value can be either just a value or text on the combobox
             param_text = param_dict[param_name][1]

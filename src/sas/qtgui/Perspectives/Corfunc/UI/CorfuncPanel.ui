@@ -168,6 +168,9 @@
                       <property name="text">
                        <string>Use Halfway Point</string>
                       </property>
+                      <property name="toolTip">
+                       <string>Use the halfway point of the correlation function for tangent line calculation</string>
+                      </property>
                       <attribute name="buttonGroup">
                        <string notr="true">buttonGroup_2</string>
                       </attribute>
@@ -184,6 +187,9 @@
                       <property name="text">
                        <string>Use Inflection Point</string>
                       </property>
+                      <property name="toolTip">
+                       <string>Use the inflection point of the correlation function for tangent line calculation</string>
+                      </property>
                       <attribute name="buttonGroup">
                        <string notr="true">buttonGroup_2</string>
                       </attribute>
@@ -196,6 +202,9 @@
                       </property>
                       <property name="checked">
                        <bool>true</bool>
+                      </property>
+                      <property name="toolTip">
+                       <string>Automatically select the best tangent point method</string>
                       </property>
                       <attribute name="buttonGroup">
                        <string notr="true">buttonGroup_2</string>
@@ -217,6 +226,9 @@
                       <property name="text">
                        <string>Use Maximum</string>
                       </property>
+                      <property name="toolTip">
+                       <string>Use the maximum value of the correlation function as the long period</string>
+                      </property>
                       <attribute name="buttonGroup">
                        <string notr="true">buttonGroup</string>
                       </attribute>
@@ -226,6 +238,9 @@
                      <widget class="QRadioButton" name="radLongPeriodDouble">
                       <property name="text">
                        <string>Use 2x Minimum</string>
+                      </property>
+                      <property name="toolTip">
+                       <string>Use twice the minimum value of the correlation function as the long period</string>
                       </property>
                       <attribute name="buttonGroup">
                        <string notr="true">buttonGroup</string>
@@ -239,6 +254,9 @@
                       </property>
                       <property name="checked">
                        <bool>true</bool>
+                      </property>
+                      <property name="toolTip">
+                       <string>Automatically select the best long period calculation method</string>
                       </property>
                       <attribute name="buttonGroup">
                        <string notr="true">buttonGroup</string>
@@ -270,6 +288,9 @@
                    <property name="checked">
                     <bool>true</bool>
                    </property>
+                   <property name="toolTip">
+                    <string>Include background in the fitting process</string>
+                   </property>
                   </widget>
                  </item>
                  <item row="0" column="2">
@@ -280,6 +301,9 @@
                    <property name="checked">
                     <bool>true</bool>
                    </property>
+                   <property name="toolTip">
+                    <string>Fit the Guinier region (low-Q) of the scattering data.</string>
+                   </property>
                   </widget>
                  </item>
                  <item row="0" column="3">
@@ -289,6 +313,9 @@
                    </property>
                    <property name="checked">
                     <bool>true</bool>
+                   </property>
+                   <property name="toolTip">
+                    <string>Fit the Porod region (high-Q) of the scattering data.</string>
                    </property>
                   </widget>
                  </item>
@@ -316,6 +343,9 @@
                      <horstretch>0</horstretch>
                      <verstretch>0</verstretch>
                     </sizepolicy>
+                   </property>
+                   <property name="toolTip">
+                    <string>Minimum Q value for Porod region fitting (1/Angstrom).</string>
                    </property>
                   </widget>
                  </item>
@@ -350,6 +380,9 @@
                      <verstretch>0</verstretch>
                     </sizepolicy>
                    </property>
+                   <property name="toolTip">
+                    <string>Maximum Q value for Porod region fitting (1/Angstrom).</string>
+                   </property>
                   </widget>
                  </item>
                  <item row="0" column="0">
@@ -372,6 +405,9 @@
                      <horstretch>0</horstretch>
                      <verstretch>0</verstretch>
                     </sizepolicy>
+                   </property>
+                   <property name="toolTip">
+                    <string>Maximum Q value for Guinier region fitting (1/Angstrom).</string>
                    </property>
                   </widget>
                  </item>
@@ -402,6 +438,9 @@
                    </property>
                    <property name="readOnly">
                     <bool>false</bool>
+                   </property>
+                   <property name="toolTip">
+                    <string>Name of the data file being analyzed</string>
                    </property>
                   </widget>
                  </item>
@@ -517,6 +556,9 @@
                      <property name="readOnly">
                       <bool>false</bool>
                      </property>
+                     <property name="toolTip">
+                      <string>Porod constant</string>
+                     </property>
                     </widget>
                    </item>
                    <item row="0" column="3">
@@ -534,12 +576,18 @@
                      <property name="readOnly">
                       <bool>false</bool>
                      </property>
+                     <property name="toolTip">
+                      <string>Constant of proportionality equal to the scattering intensity at q=0</string>
+                     </property>
                     </widget>
                    </item>
                    <item row="1" column="4">
                     <widget class="QLineEdit" name="txtPorodSigma">
                      <property name="readOnly">
                       <bool>false</bool>
+                     </property>
+                     <property name="toolTip">
+                      <string>Parameter describing the sharpness of the SLD profile at the interface. </string>
                      </property>
                     </widget>
                    </item>
@@ -558,6 +606,9 @@
                      <property name="readOnly">
                       <bool>false</bool>
                      </property>
+                     <property name="toolTip">
+                      <string>Parameter proportional to the radius of gyration</string>
+                     </property>
                     </widget>
                    </item>
                   </layout>
@@ -569,6 +620,9 @@
                      <horstretch>0</horstretch>
                      <verstretch>0</verstretch>
                     </sizepolicy>
+                   </property>
+                   <property name="toolTip">
+                    <string>Background level to be subtracted from the scattering data</string>
                    </property>
                   </widget>
                  </item>
@@ -641,6 +695,9 @@
                    <property name="readOnly">
                     <bool>true</bool>
                    </property>
+                   <property name="toolTip">
+                    <string>Polydispersity index according to Eeckhaut's method (see help documentation).</string>
+                   </property>
                   </widget>
                  </item>
                  <item row="0" column="2">
@@ -660,6 +717,9 @@
                    <property name="readOnly">
                     <bool>true</bool>
                    </property>
+                   <property name="toolTip">
+                    <string>Average thickness of the hard block phase</string>
+                   </property>
                   </widget>
                  </item>
                  <item row="2" column="1">
@@ -671,7 +731,7 @@
                     </sizepolicy>
                    </property>
                    <property name="text">
-                    <string>Eekhaut:</string>
+                    <string>Eeckhaut:</string>
                    </property>
                    <property name="alignment">
                     <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
@@ -682,6 +742,9 @@
                   <widget class="QLineEdit" name="txtPolyStribeck">
                    <property name="readOnly">
                     <bool>true</bool>
+                   </property>
+                   <property name="toolTip">
+                    <string>Polydispersity index according to Stribeck's method</string>
                    </property>
                   </widget>
                  </item>
@@ -762,6 +825,9 @@
                    <property name="readOnly">
                     <bool>true</bool>
                    </property>
+                   <property name="toolTip">
+                    <string>Average thickness of the soft block phase</string>
+                   </property>
                   </widget>
                  </item>
                  <item row="2" column="0">
@@ -841,6 +907,9 @@
                    <property name="readOnly">
                     <bool>true</bool>
                    </property>
+                   <property name="toolTip">
+                    <string>Average thickness of the interface between hard and soft blocks</string>
+                   </property>
                   </widget>
                  </item>
                  <item row="1" column="4">
@@ -859,6 +928,9 @@
                    </property>
                    <property name="readOnly">
                     <bool>true</bool>
+                   </property>
+                   <property name="toolTip">
+                    <string>Average thickness of the core</string>
                    </property>
                   </widget>
                  </item>
@@ -908,6 +980,9 @@
                    <property name="readOnly">
                     <bool>true</bool>
                    </property>
+                   <property name="toolTip">
+                    <string>Distance between one face of a lamella to the same face of the adjacent lamellae</string>
+                   </property>
                   </widget>
                  </item>
                  <item row="0" column="2">
@@ -949,6 +1024,9 @@
                    <property name="readOnly">
                     <bool>true</bool>
                    </property>
+                   <property name="toolTip">
+                    <string>Local crystallinity index of the lamellar structure (Hard block volume fraction)</string>
+                   </property>
                   </widget>
                  </item>
                 </layout>
@@ -961,7 +1039,7 @@
               <item>
                <widget class="QPushButton" name="cmdSaveExtrapolation">
                 <property name="toolTip">
-                 <string>Save the extrapolated data (non-transformed)</string>
+                    <string>Save the extrapolated data (non-transformed).</string>
                 </property>
                 <property name="text">
                  <string>Export Extrapolated</string>
@@ -977,7 +1055,7 @@
                  </sizepolicy>
                 </property>
                 <property name="toolTip">
-                 <string>Export the calculated real space correlation function to a file.</string>
+                 <string>Export the calculated real-space correlation function to a file.</string>
                 </property>
                 <property name="text">
                  <string>Export Transformed</string>
@@ -988,6 +1066,9 @@
                <widget class="QPushButton" name="cmdHelp">
                 <property name="text">
                  <string>Help</string>
+                </property>
+                <property name="toolTip">
+                 <string>Open the Corfunc perspective help documentation.</string>
                 </property>
                </widget>
               </item>

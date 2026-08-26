@@ -30,5 +30,5 @@ class WelcomePanelTest:
         assert isinstance(version, QtWidgets.QLabel)
 
         assert "SasView" in version.text()
-        for inst in "UTK, UMD, ESS, NIST, ORNL, ISIS, ILL, DLS, TUD, BAM, ANSTO".split(", "):
+        for inst in "UTK, UMD, ESS, NIST, ORNL, ISIS, ILL, DLS, TU Delft, SciLifeLab, ANSTO".split(", "):
             assert inst in ack.text()

@@ -71,11 +71,21 @@ class PlotterBaseTest:
         with pytest.raises(NotImplementedError):
             plotter.plot()
 
-    def notestOnCloseEvent(self, plotter, mocker):
-        ''' test the plotter close behaviour '''
+    def testOnCloseEventRemovesOwnedSlicerPlot(self, plotter, mocker):
+        """ Test that closing a 1D plot asks its owner to remove the matching slicer. """
+        owner = mocker.Mock()
+        data = mocker.Mock()
+        data.slicerOwner = mocker.Mock(return_value=owner)
+        plotter._data = [data]
+        event = mocker.Mock()
+
         mocker.patch.object(PlotHelper, 'deletePlot')
-        plotter.closeEvent(None)
+
+        plotter.closeEvent(event)
+
+        owner.removeSlicersForPlotWindow.assert_called_once_with(plotter)
         PlotHelper.deletePlot.assert_called()
+        event.accept.assert_called_once()
 
     def notestOnImagePrint(self, plotter, mocker):
         ''' test the workspace print '''
