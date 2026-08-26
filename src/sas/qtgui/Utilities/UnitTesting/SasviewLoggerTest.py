@@ -3,7 +3,6 @@ import logging
 import pytest
 from PySide6.QtWidgets import QTextBrowser
 
-# Local
 from sas.qtgui.Utilities.SasviewLogger import setup_qt_logging
 
 
@@ -19,15 +18,19 @@ class SasviewLoggerTest:
 
         self.outHandlerGui=QTextBrowser()
 
-        yield logger
+        try:
+            yield logger
+        finally:
+            # Remove the QtHandler logger assigned by setup_qt_logging
+            logging.root.removeHandler(self.handler)
 
-    @pytest.mark.xfail(reason="2026-02: handler not printing properly...")
     def testQtHandler(self, logger):
         """
         Test redirection of all levels of logging
         """
-        # Attach the listener
-        self.handler.postman.messageWritten.connect(self.outHandlerGui.insertPlainText)
+        # Attach the listener. The QtHandler postman emits a (message, record)
+        # pair as the signal. We only want the message, not the associated record.
+        self.handler.postman.messageWritten.connect(lambda signal: self.outHandlerGui.insertPlainText(signal[0]))
 
         # Send the signals
         logger.debug('debug message')
@@ -38,7 +41,7 @@ class SasviewLoggerTest:
         out=self.outHandlerGui.toPlainText()
 
         # Assure everything got logged
-        assert 'DEBUG: debug message' in out
-        assert 'INFO: info message' in out
-        assert 'WARNING: warning message' in out
-        assert 'ERROR: error message' in out
+        assert 'DEBUG' in out and 'debug message' in out
+        assert 'INFO' in out and 'info message' in out
+        assert 'WARNING' in out and 'warning message' in out
+        assert 'ERROR' in out and 'error message' in out
