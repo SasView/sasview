@@ -12,10 +12,10 @@
 import subprocess
 from os import environ
 from pathlib import Path
+from platform import system
 from string import Template
 from sys import exit, stderr
 from typing import cast
-from platform import system
 
 import requirements
 from click import Path as ClickPath
