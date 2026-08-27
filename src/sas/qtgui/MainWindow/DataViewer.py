@@ -1,3 +1,4 @@
+from sasdata.trend import Trend
 from PySide6.QtWidgets import (
     QDialog,
     QGridLayout,
@@ -14,10 +15,11 @@ from sas.qtgui.MainWindow.MetadataExplorer import MetadataExplorer
 
 
 class DataViewer(QDialog):
-    def __init__(self, to_view: SasData):
+    def __init__(self, to_view: SasData, associated_trend: Trend | None = None):
         super().__init__()
         self.to_view = to_view
         self.layout = QGridLayout(self)
+        self.associated_trend = associated_trend
 
         self.nameLabel = QLabel(f"Name: {self.to_view.name}")
         self.viewMetadataButton = QPushButton("View Metadata")
@@ -25,6 +27,10 @@ class DataViewer(QDialog):
         self.dataTypeLabel = QLabel(
             f"Type: {self.to_view.dataset_type.name}"
         )  # TODO: Probably a better way of printing this
+        if self.associated_trend:
+            self.trend_label = QLabel("Trend")
+            self.trend_table = QTableWidget()
+            self.buildTrendTable()
         self.dataTable = QTableWidget()
         self.dataTable.setMinimumHeight(345)
         self.buildTable()
@@ -35,6 +41,9 @@ class DataViewer(QDialog):
         self.layout.addWidget(self.nameLabel, 0, 0, 1, 1)
         self.layout.addWidget(self.viewMetadataButton, 0, 1, 1, 1)
         self.layout.addWidget(self.dataTypeLabel, 1, 0, 1, 1)
+        if self.associated_trend:
+            self.layout.addWidget(self.trend_label)
+            self.layout.addWidget(self.trend_table)
         self.layout.addWidget(self.dataTable, 2, 0, 1, 2)
         self.layout.addWidget(self.closeButton, 3, 0, 1, 2)
 
@@ -55,6 +64,9 @@ class DataViewer(QDialog):
         for i, data in enumerate(self.to_view._data_contents.values()):
             for j, datum in enumerate(data.value):
                 self.dataTable.setItem(j, i, QTableWidgetItem(str(datum)))
+
+    def buildTrendTable(self):
+        raise NotImplementedError()
 
     def openMetadataExplorer(self):
         explorer = MetadataExplorer(self.to_view.metadata, self.to_view.name)
