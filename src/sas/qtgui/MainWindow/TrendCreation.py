@@ -49,7 +49,7 @@ class TrendCreation(QDialog):
 
         self.table.setRowCount(len(self.proposed_trend_axes))
         self.table.setColumnCount(2)
-        self.table.setHorizontalHeaderLabels(["Axis Name", "Axis Metadata"])
+        self.table.setHorizontalHeaderLabels(["Axis Name", "Metadata Path"])
         self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
         self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
 
