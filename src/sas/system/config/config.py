@@ -1,4 +1,4 @@
-r""" Configuration class - stores configuration information for SasView
+r"""Configuration class - stores configuration information for SasView
 
 
 ..
@@ -139,26 +139,26 @@ from sas.system.config.config_meta import ConfigBase, ConfigMeta
 
 
 class Config(ConfigBase, metaclass=ConfigMeta):
-
     def __init__(self):
         super().__init__()
 
-
         # edit the list of file state your plugin can read
-        self.APPLICATION_WLIST = 'SasView files (*.svs)|*.svs'
-        self.APPLICATION_STATE_EXTENSION = '.svs'
-        self.PLUGIN_STATE_EXTENSIONS = ['.fitv', '.inv', '.prv', '.crf']
+        self.APPLICATION_WLIST = "SasView files (*.svs)|*.svs"
+        self.APPLICATION_STATE_EXTENSION = ".svs"
+        self.PLUGIN_STATE_EXTENSIONS = [".fitv", ".inv", ".prv", ".crf"]
         self.PLUGINS_WLIST = [
-            'Fitting files (*.fitv)|*.fitv',
-            'Invariant files (*.inv)|*.inv',
-            'P(r) files (*.prv)|*.prv',
-            'Corfunc files (*.crf)|*.crf']
+            "Fitting files (*.fitv)|*.fitv",
+            "Invariant files (*.inv)|*.inv",
+            "P(r) files (*.prv)|*.prv",
+            "Corfunc files (*.crf)|*.crf",
+        ]
 
         self.ANALYSIS_TYPES = [
-            'Fitting files (*.fitv)',
-            'Invariant files (*.inv)',
-            'P(r) files (*.prv)',
-            'Corfunc files (*.crf)']
+            "Fitting files (*.fitv)",
+            "Invariant files (*.inv)",
+            "P(r) files (*.prv)",
+            "Corfunc files (*.crf)",
+        ]
 
         self.SHOW_WELCOME_PANEL = False
 
@@ -203,16 +203,16 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         self.USE_MATPLOTLIB_TOOLBAR = True
 
         # Default fitting optimizer
-        self.FITTING_DEFAULT_OPTIMIZER = 'lm'
+        self.FITTING_DEFAULT_OPTIMIZER = "lm"
 
         # Undo/Redo stack depth per fitting tab
         self.UNDO_STACK_MAX_DEPTH = 200
 
         # What's New variables
-        self.LAST_WHATS_NEW_HIDDEN_VERSION = "6.1.3"
+        self.LAST_WHATS_NEW_HIDDEN_VERSION = "0.0.0"
 
         # Last version that the update prompt was dismissed for
-        self.LAST_UPDATE_DISMISSED_VERSION = "5.0.0"
+        self.LAST_UPDATE_DISMISSED_VERSION = "0.0.0"
 
         # Stack plots when using slicers
         # If true, plots generated when using slicers will be on the same canvas
@@ -226,7 +226,6 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         # securing the class, and for setting up reading/writing files
         #
         self.finalise()
-
 
 
 config = Config()
