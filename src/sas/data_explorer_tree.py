@@ -141,7 +141,7 @@ class DataExplorerTree(QTreeWidget):
                 creation_result = trend_creation_dialog.exec()
                 if creation_result == QDialog.DialogCode.Accepted:
                     # TODO: Need to pass in axes
-                    self._data_manager.register_trend(trend_creation_dialog.trend)
+                    self._data_manager.register_trend(trend_creation_dialog.proposed_trend)
         if len(errors):
             box = DataExplorerErrorMessage(self, errors)
             box.show()
