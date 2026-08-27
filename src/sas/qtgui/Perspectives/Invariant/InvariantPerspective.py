@@ -222,45 +222,29 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.txtPorodStart_ex.setEnabled(state)
         self.txtPorodEnd_ex.setEnabled(state)
 
-    def get_low_q_extrapolation_upper_limit(self) -> float:
+    def set_low_q_extrapolation_indices(self, lo_value: float, hi_value: float) -> None:
         """
-        Get the low Q extrapolation upper limit
+        Set the low Q extrapolation indices to the indices of the data points closest to the limits.
 
-        :return: low Q extrapolation upper limit
-        """
-        q_value: float = self._data.x[int(self._low_points) - 1]
-        return q_value
-
-    def set_low_q_extrapolation_upper_limit(self, value: float) -> None:
-        """
-        Set the low Q extrapolation upper limit
-
-        :param value: low Q extrapolation upper limit
+        :param lo_value: low Q extrapolation lower limit
+        :param hi_value: low Q extrapolation upper limit
         """
         # index of the value closest to the input value
-        idx = (np.abs(self._data.x - value)).argmin()
-        npts = idx + 1
-        self._low_points = npts
+        lo_idx = (np.abs(self._data.x - lo_value)).argmin()
+        hi_idx = (np.abs(self._data.x - hi_value)).argmin()
+        self._low_indices = [lo_idx, hi_idx]
 
-    def get_high_q_extrapolation_lower_limit(self) -> float:
+    def set_high_q_extrapolation_indices(self, lo_value: float, hi_value: float) -> None:
         """
-        Get the high Q extrapolation lower limit
+        Set the high Q extrapolation indices to the indices of the data points closest to the limits.
 
-        :return: high Q extrapolation lower limit
-        """
-        q_value: float = self._data.x[len(self._data.x) - int(self._high_points) - 1]
-        return q_value
-
-    def set_high_q_extrapolation_lower_limit(self, value: float) -> None:
-        """
-        Set the high Q extrapolation lower limit
-
-        :param value: high Q extrapolation lower limit
+        :param lo_value: high Q extrapolation lower limit
+        :param hi_value: high Q extrapolation upper limit
         """
         # index of the value closest to the input value
-        idx = (np.abs(self._data.x - value)).argmin()
-        npts = (len(self._data.x) - idx) + 1
-        self._high_points = npts
+        lo_idx = (np.abs(self._data.x - lo_value)).argmin()
+        hi_idx = (np.abs(self._data.x - hi_value)).argmin()
+        self._high_indices = [lo_idx, hi_idx]
 
     def enableStatus(self) -> None:
         """Enable the status button."""
@@ -467,11 +451,12 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                 self._low_power_value = float(self.model.item(WIDGETS.W_LOWQ_POWER_VALUE_EX).text())
 
         # determine number of points
+        q_start_val = 0.0  # TODO - implement ability to set this value
         q_end_val: float = float(self.txtGuinierEnd_ex.text())
-        self.set_low_q_extrapolation_upper_limit(q_end_val)
+        self.set_low_q_extrapolation_indices(q_start_val, q_end_val)
 
         self._calculator.set_extrapolation(
-            range="low", npts=self._low_points, function=function_low, power=self._low_power_value
+            range="low", indices=self._low_indices, function=function_low, power=self._low_power_value
         )
 
         try:
@@ -500,10 +485,11 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             self._high_power_value = float(self.model.item(WIDGETS.W_HIGHQ_POWER_VALUE_EX).text())
 
         q_start_val = float(self.txtPorodStart_ex.text())
-        self.set_high_q_extrapolation_lower_limit(q_start_val)
+        q_end_val = float(self.txtPorodEnd_ex.text())
+        self.set_high_q_extrapolation_indices(q_start_val, q_end_val)
 
         self._calculator.set_extrapolation(
-            range="high", npts=self._high_points, function=function_high, power=self._high_power_value
+            range="high", indices=self._high_indices, function=function_high, power=self._high_power_value
         )
 
         try:
@@ -647,9 +633,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             # add extrapolation plots (schedule GUI changes where needed)
             if low_success:
                 qmin_ext = float(self.extrapolation_parameters.ex_q_min)
-                if self._low_points is None:
-                    self.set_low_q_extrapolation_upper_limit(float(self.txtGuinierEnd_ex.text()))
-                extrapolated_data = self._calculator.get_extra_data_low(self._low_points, q_start=qmin_ext)
+                if self._low_indices is None:
+                    self.set_low_q_extrapolation_indices(0.0, float(self.txtGuinierEnd_ex.text()))
+                extrapolated_data = self._calculator.get_extra_data_low(q_start=qmin_ext)
                 power_low = self._calculator.get_extrapolation_power(range="low")
                 title = f"Low-Q extrapolation [{self._data.name}]"
                 self.low_extrapolation_plot = self._manager.createGuiData(extrapolated_data)

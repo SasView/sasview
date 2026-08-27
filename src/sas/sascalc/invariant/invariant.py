@@ -412,13 +412,13 @@ class InvariantCalculator:
         self._qstar_err: float = 0
 
         # Extrapolation parameters
-        self._low_extrapolation_npts: int = 4
+        self._low_extrapolation_indices: [int, int] = [0, 4]
         self._low_extrapolation_function: Transform = Guinier()
         self._low_extrapolation_power: float | None = None
         self._low_extrapolation_power_fitted: float | None = None
         self._low_q_limit: float = Q_MINIMUM
 
-        self._high_extrapolation_npts: int = 4
+        self._high_extrapolation_indices: [int, int] = [-5, -1]
         self._high_extrapolation_function: Transform = PowerLaw()
         self._high_extrapolation_power: float | None = None
         self._high_extrapolation_power_fitted: float | None = None
@@ -620,12 +620,12 @@ class InvariantCalculator:
         :return q_star: the invariant for data extrapolated at low q.
         """
         # Data boundaries for fitting
-        qmax = self._data.x[int(self._low_extrapolation_npts - 1)]
-        # Allow minimum q to be passed as an argument
-        if not low_q_limit or low_q_limit < self._data.x[0] or low_q_limit >= qmax:
-            qmin = self._data.x[0]
-        else:
+        qmin = self._data.x[self._low_extrapolation_indices[0]]
+        qmax = self._data.x[self._low_extrapolation_indices[1]]
+
+        if low_q_limit and (qmin <= low_q_limit <= qmax):
             qmin = low_q_limit
+
         # Distribution starting point
         self._low_q_limit = low_q_limit if low_q_limit else Q_MINIMUM
 
@@ -658,11 +658,10 @@ class InvariantCalculator:
         :return q_star: the invariant for data extrapolated at high q.
         """
         # Data boundaries for fitting
-        x_len = int(len(self._data.x) - 1)
-        qmin = self._data.x[int(x_len - self._high_extrapolation_npts)]
-        if not high_q_limit or high_q_limit > self._data.x[x_len] or high_q_limit <= qmin:
-            qmax = self._data.x[x_len]
-        else:
+        qmin = self._data.x[self._high_extrapolation_indices[0]]
+        qmax = self._data.x[self._high_extrapolation_indices[1]]
+
+        if high_q_limit and (qmin <= high_q_limit <= qmax):
             qmax = high_q_limit
 
         high_q_limit = high_q_limit if high_q_limit else Q_MAXIMUM
@@ -680,18 +679,15 @@ class InvariantCalculator:
 
         return self._get_qstar(data), self._get_qstar_uncertainty(data)
 
-    def get_extra_data_low(self, npts_in=None, q_start=None, npts=20):
+    def get_extra_data_low(self, q_start=None, npts=20):
         """
         Returns the extrapolated data used for the low-Q invariant calculation.
         By default, the distribution will cover the data points used for the
-        extrapolation. The number of overlap points is a parameter (npts_in).
-        By default, the maximum q-value of the distribution will be
-        the minimum q-value used when extrapolating for the purpose of the
+        extrapolation. By default, the maximum q-value of the distribution will
+        be the minimum q-value used when extrapolating for the purpose of the
         invariant calculation.
 
-        :param npts_in: number of data points for which
-            the extrapolated data overlap
-        :param q_start: is the minimum value to uses for extrapolated data
+        :param q_start: is the minimum value to use for extrapolated data
         :param npts: the number of points in the extrapolated distribution
 
         """
@@ -699,9 +695,7 @@ class InvariantCalculator:
         if q_start is None:
             q_start = self._low_q_limit
 
-        if npts_in is None:
-            npts_in = self._low_extrapolation_npts
-        q_end = self._data.x[max(0, int(npts_in - 1))]
+        q_end = max(self._data.x[0], self._data.x[self._low_extrapolation_indices[1]])
 
         if q_start >= q_end:
             return np.zeros(0), np.zeros(0)
@@ -710,25 +704,19 @@ class InvariantCalculator:
             model=self._low_extrapolation_function, npts=npts, q_start=q_start, q_end=q_end
         )
 
-    def get_extra_data_high(self, npts_in=None, q_end=Q_MAXIMUM, npts=20):
+    def get_extra_data_high(self, q_end=Q_MAXIMUM, npts=20):
         """
         Returns the extrapolated data used for the high-Q invariant calculation.
         By default, the distribution will cover the data points used for the
-        extrapolation. The number of overlap points is a parameter (npts_in).
-        By default, the maximum q-value of the distribution will be Q_MAXIMUM,
-        the maximum q-value used when extrapolating for the purpose of the
-        invariant calculation.
+        extrapolation. By default, the maximum q-value of the distribution will
+        be Q_MAXIMUM, the maximum q-value used when extrapolating for the purpose
+        of the invariant calculation.
 
-        :param npts_in: number of data points for which the
-            extrapolated data overlap
         :param q_end: is the maximum value to uses for extrapolated data
         :param npts: the number of points in the extrapolated distribution
         """
         # Get extrapolation range
-        if npts_in is None:
-            npts_in = int(self._high_extrapolation_npts)
-        _npts = len(self._data.x)
-        q_start = self._data.x[min(_npts, int(_npts - npts_in))]
+        q_start = min(self._data.x[-1], self._data.x[self._high_extrapolation_indices[0]])
 
         if q_start >= q_end:
             return np.zeros(0), np.zeros(0)
@@ -737,14 +725,13 @@ class InvariantCalculator:
             model=self._high_extrapolation_function, npts=npts, q_start=q_start, q_end=q_end
         )
 
-    def set_extrapolation(self, range, npts=4, function=None, power=None):
+    def set_extrapolation(self, range, indices, function=None, power=None):
         """
         Set the extrapolation parameters for the high or low Q-range.
         Note that this does not turn extrapolation on or off.
 
-        :param range: a keyword set the type of extrapolation . type string
-        :param npts: the numbers of q points of data to consider
-            for extrapolation
+        :param range: a keyword set the type of extrapolation. type string
+        :param indices: the indices of q points of data to consider for extrapolation
         :param function: a keyword to select the function to use
             for extrapolation.
             of type string.
@@ -763,7 +750,7 @@ class InvariantCalculator:
             if function != "power_law":
                 msg = "Extrapolation only allows a power law at high Q"
                 raise ValueError(msg)
-            self._high_extrapolation_npts = npts
+            self._high_extrapolation_indices = indices
             self._high_extrapolation_power = power
             self._high_extrapolation_power_fitted = power
         else:
@@ -771,7 +758,7 @@ class InvariantCalculator:
                 self._low_extrapolation_function = PowerLaw()
             else:
                 self._low_extrapolation_function = Guinier()
-            self._low_extrapolation_npts = npts
+            self._low_extrapolation_indices = indices
             self._low_extrapolation_power = power
             self._low_extrapolation_power_fitted = power
 

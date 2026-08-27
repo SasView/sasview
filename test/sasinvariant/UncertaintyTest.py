@@ -100,8 +100,8 @@ class TestUncertaintyClosedForm:
     def test_extrapolation_uncertainty_quadrature_decomposition(self, real_data):
         """Verify low/high/both extrapolation uncertainty combines in quadrature."""
         inv = invariant.InvariantCalculator(real_data)
-        inv.set_extrapolation("low", npts=10, function="guinier")
-        inv.set_extrapolation("high", npts=20, function="power_law")
+        inv.set_extrapolation("low", indices=[0, 9], function="guinier")
+        inv.set_extrapolation("high", indices=[-21, -1], function="power_law")
 
         q_base, dq_base = inv.get_qstar_with_error()
         q_low, dq_low = inv.get_qstar_with_error("low")
@@ -212,8 +212,8 @@ class TestUncertaintyHardcodedValues:
     def test_extrapolation_uncertainty_hardcoded_values(self, real_data):
         """Verify low/high/both extrapolation values against fixed hardcoded values."""
         inv = invariant.InvariantCalculator(real_data)
-        inv.set_extrapolation("low", npts=10, function="guinier")
-        inv.set_extrapolation("high", npts=20, function="power_law")
+        inv.set_extrapolation("low", indices=[0, 9], function="guinier")
+        inv.set_extrapolation("high", indices=[-21, -1], function="power_law")
 
         q_base, dq_base = inv.get_qstar_with_error()
         q_low, dq_low = inv.get_qstar_with_error("low")
