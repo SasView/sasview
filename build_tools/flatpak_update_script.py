@@ -15,6 +15,7 @@ from pathlib import Path
 from string import Template
 from sys import exit, stderr
 from typing import cast
+from platform import system
 
 import requirements
 from click import Path as ClickPath
@@ -117,6 +118,15 @@ def install_sdk(qt_version: str):
     subprocess.call(["flatpak", "--user", "-y", "install", f"org.kde.Sdk//{qt_version}"])
 
 
+def check_platform() -> bool:
+    if system() != "Linux":
+        print(
+            "ERROR: You appear to be running this script outside of Linux. This script needs to be run on linux because it needs to check the contents of the SDK to determine which wheel to pull in, and it can only do this on Linux. If you are not on Linux, please consult the documentation for advice."
+        )
+        return False
+    return True
+
+
 # TODO: Add strings for the help message.
 @command
 @option(
@@ -135,6 +145,8 @@ def main(output_dir: Path, sasview_version: str):
     used to build the Flatpak. It will update all the Python depdendencies to
     match the pins which are specified in the requirements files, and update the
     version of QT."""
+    if not check_platform():
+        exit(1)
     try:
         subprocess.call(
             ["flatpak-pip-generator", "--help"],
