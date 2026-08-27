@@ -28,8 +28,8 @@ class DataViewer(QDialog):
             f"Type: {self.to_view.dataset_type.name}"
         )  # TODO: Probably a better way of printing this
         if self.associated_trend:
-            self.trend_label = QLabel("Trend")
-            self.trend_table = QTableWidget()
+            self.trendLabel = QLabel("Trend")
+            self.trendTable = QTableWidget()
             self.buildTrendTable()
         self.dataTable = QTableWidget()
         self.dataTable.setMinimumHeight(345)
@@ -42,8 +42,8 @@ class DataViewer(QDialog):
         self.layout.addWidget(self.viewMetadataButton, 0, 1, 1, 1)
         self.layout.addWidget(self.dataTypeLabel, 1, 0, 1, 1)
         if self.associated_trend:
-            self.layout.addWidget(self.trend_label)
-            self.layout.addWidget(self.trend_table)
+            self.layout.addWidget(self.trendLabel)
+            self.layout.addWidget(self.trendTable)
         self.layout.addWidget(self.dataTable, 2, 0, 1, 2)
         self.layout.addWidget(self.closeButton, 3, 0, 1, 2)
 
