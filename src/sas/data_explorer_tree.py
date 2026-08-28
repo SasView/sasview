@@ -146,7 +146,7 @@ class DataExplorerTree(QTreeWidget):
             box.show()
 
     def showViewData(self):
-        associated = self._data_manager.get_association(self.currentTrackedDatum)
+        associated = self._data_manager.get_association_or_none(self.currentTrackedDatum)
         if isinstance(associated, Trend):
             trend = associated
         viewer = DataViewer(self.currentTrackedDatum, trend)
