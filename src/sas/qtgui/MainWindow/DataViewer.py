@@ -42,10 +42,13 @@ class DataViewer(QDialog):
         self.layout.addWidget(self.viewMetadataButton, 0, 1, 1, 1)
         self.layout.addWidget(self.dataTypeLabel, 1, 0, 1, 1)
         if self.associated_trend:
-            self.layout.addWidget(self.trendLabel)
-            self.layout.addWidget(self.trendTable)
-        self.layout.addWidget(self.dataTable, 2, 0, 1, 2)
-        self.layout.addWidget(self.closeButton, 3, 0, 1, 2)
+            self.layout.addWidget(self.trendLabel, 2, 0, 1, 2)
+            self.layout.addWidget(self.trendTable, 3, 0, 1, 2)
+            data_table_row = 4
+        else:
+            data_table_row = 2
+        self.layout.addWidget(self.dataTable, data_table_row, 0, 1, 2)
+        self.layout.addWidget(self.closeButton, data_table_row + 1, 0, 1, 2)
 
     def buildTable(self):
         # Make the table readonly
