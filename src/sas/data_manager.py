@@ -102,11 +102,18 @@ class NewDataManager(QObject):
         self.associations.append(proposed_assoc)
         self.new_association.emit(data_1, data_2)
 
-    def get_association(self, data: TrackedData) -> TrackedData:
+    def get_association_or_none(self, data: TrackedData) -> TrackedData | None:
         for assoc in self.associations:
             if data in assoc:
                 return assoc[0] if assoc[0] != data else assoc[1]
-        raise ValueError('Association not found.')
+        return None
+
+    def get_association(self, data: TrackedData) -> TrackedData:
+        association = self.get_association_or_none
+        if association:
+            return association
+        else:
+            raise ValueError("Association not found")
 
     def get_all_associations(self, data: TrackedData) -> list[TrackedData]:
         return [assoc[0] if assoc[0] != data else assoc[1] for assoc in self.associations if data in assoc]
