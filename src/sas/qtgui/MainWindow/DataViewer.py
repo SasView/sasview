@@ -1,4 +1,4 @@
-from sasdata.trend import Trend
+from sasdata.trend import Trend, get_metadatum_from_path
 from PySide6.QtWidgets import (
     QDialog,
     QGridLayout,
@@ -54,19 +54,32 @@ class DataViewer(QDialog):
         self.dataTable.setColumnCount(len(columns))
         # NOTE: Assumes each column has the same amount of rows, which should be
         # the case, although perhaps we should validate this.
-        self.dataTable.setRowCount(
-            len(next(iter(self.to_view._data_contents.values())).value)
-        )
+        self.dataTable.setRowCount(len(next(iter(self.to_view._data_contents.values())).value))
         self.dataTable.setHorizontalHeaderLabels(columns)
-        self.dataTable.horizontalHeader().setSectionResizeMode(
-            QHeaderView.ResizeMode.Stretch
-        )
+        self.dataTable.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         for i, data in enumerate(self.to_view._data_contents.values()):
             for j, datum in enumerate(data.value):
                 self.dataTable.setItem(j, i, QTableWidgetItem(str(datum)))
 
     def buildTrendTable(self):
-        raise NotImplementedError()
+        # This shouldn't really happen, but it makes type checkers happy that
+        # associated_trend is definitely not None.
+        if self.associated_trend is None:
+            raise ValueError("Associated trend should not be None.")
+        self.trendTable.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        self.trendTable.setColumnCount(2)
+        self.trendTable.setRowCount(len(self.associated_trend.trend_axes))
+        self.trendTable.setHorizontalHeaderLabels(["Axis", "Value"])
+
+        for index, (axis_name, axis_path) in enumerate(
+            zip(self.associated_trend.axis_names, self.associated_trend.trend_axes.values())
+        ):
+            name_item = QTableWidgetItem(axis_name)
+            # TODO: I think really Trend should have a method for doing this.
+            axis_value = get_metadatum_from_path(self.to_view, axis_path)
+            value_item = QTableWidgetItem(str(axis_value))
+            self.trendTable.setItem(index, 0, name_item)
+            self.trendTable.setItem(index, 1, value_item)
 
     def openMetadataExplorer(self):
         explorer = MetadataExplorer(self.to_view.metadata, self.to_view.name)
