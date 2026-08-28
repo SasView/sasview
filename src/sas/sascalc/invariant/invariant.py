@@ -416,7 +416,6 @@ class InvariantCalculator:
         self._low_extrapolation_function: Transform = Guinier()
         self._low_extrapolation_power: float | None = None
         self._low_extrapolation_power_fitted: float | None = None
-        self._low_q_limit: float = Q_MINIMUM
 
         self._high_extrapolation_indices: [int, int] = [-5, -1]
         self._high_extrapolation_function: Transform = PowerLaw()
@@ -627,7 +626,7 @@ class InvariantCalculator:
             qmin = low_q_limit
 
         # Distribution starting point
-        self._low_q_limit = low_q_limit if low_q_limit else Q_MINIMUM
+        low_q_limit = low_q_limit if low_q_limit else Q_MINIMUM
 
         # Extrapolate the low-Q data
         p, _ = self._fit(
@@ -636,14 +635,14 @@ class InvariantCalculator:
         self._low_extrapolation_power_fitted = p[0]
 
         data = self._get_extrapolated_data(
-            model=self._low_extrapolation_function, npts=INTEGRATION_NSTEPS, q_start=self._low_q_limit, q_end=qmin
+            model=self._low_extrapolation_function, npts=INTEGRATION_NSTEPS, q_start=low_q_limit, q_end=qmin
         )
 
         # Systematic error
         # If we have smearing, the shape of the I(q) distribution at low Q will
         # may not be a Guinier or simple power law. The following is
         # a conservative estimation for the systematic error.
-        err = qmin * qmin * math.fabs((qmin - self._low_q_limit) * (data.y[0] - data.y[INTEGRATION_NSTEPS - 1]))
+        err = qmin * qmin * math.fabs((qmin - low_q_limit) * (data.y[0] - data.y[INTEGRATION_NSTEPS - 1]))
         return self._get_qstar(data), self._get_qstar_uncertainty(data) + err
 
     def get_qstar_high(self, high_q_limit=None):
@@ -679,7 +678,7 @@ class InvariantCalculator:
 
         return self._get_qstar(data), self._get_qstar_uncertainty(data)
 
-    def get_extra_data_low(self, q_start=None, npts=20):
+    def get_extra_data_low(self, q_start=Q_MINIMUM, npts=20):
         """
         Returns the extrapolated data used for the low-Q invariant calculation.
         By default, the distribution will cover the data points used for the
@@ -692,10 +691,7 @@ class InvariantCalculator:
 
         """
         # Get extrapolation range
-        if q_start is None:
-            q_start = self._low_q_limit
-
-        q_end = max(self._data.x[0], self._data.x[self._low_extrapolation_indices[1]])
+        q_end = self._data.x[self._low_extrapolation_indices[1]]
 
         if q_start >= q_end:
             return np.zeros(0), np.zeros(0)
@@ -716,7 +712,7 @@ class InvariantCalculator:
         :param npts: the number of points in the extrapolated distribution
         """
         # Get extrapolation range
-        q_start = min(self._data.x[-1], self._data.x[self._high_extrapolation_indices[0]])
+        q_start = self._data.x[self._high_extrapolation_indices[0]]
 
         if q_start >= q_end:
             return np.zeros(0), np.zeros(0)
