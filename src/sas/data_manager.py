@@ -109,7 +109,7 @@ class NewDataManager(QObject):
         return None
 
     def get_association(self, data: TrackedData) -> TrackedData:
-        association = self.get_association_or_none
+        association = self.get_association_or_none(data)
         if association:
             return association
         else:
