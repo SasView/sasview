@@ -67,12 +67,14 @@ class DataViewer(QDialog):
     def buildTrendTable(self):
         # This shouldn't really happen, but it makes type checkers happy that
         # associated_trend is definitely not None.
+        self.trendTable.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         if self.associated_trend is None:
             raise ValueError("Associated trend should not be None.")
         self.trendTable.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.trendTable.setColumnCount(2)
         self.trendTable.setRowCount(len(self.associated_trend.trend_axes))
         self.trendTable.setHorizontalHeaderLabels(["Axis", "Value"])
+        self.trendTable.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
 
         for index, (axis_name, axis_path) in enumerate(
             zip(self.associated_trend.axis_names, self.associated_trend.trend_axes.values())
