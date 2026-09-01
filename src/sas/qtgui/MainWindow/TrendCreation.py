@@ -1,3 +1,4 @@
+from sas.refactored import NamedTrend
 from sasdata.data import SasData
 from sasdata.trend import Trend
 from sas.qtgui.MainWindow.MetadataExplorer import MetadataExplorer
@@ -95,8 +96,8 @@ class TrendCreation(QDialog):
         return proposed_axes_as_dict(self.proposed_trend_axes)
 
     @property
-    def proposed_trend(self) -> Trend:
-        return Trend(self.target_data, self.selected_proposed_trend_axes_as_dict)
+    def proposed_trend(self) -> NamedTrend:
+        return NamedTrend(self.target_data, self.selected_proposed_trend_axes_as_dict, self.proposed_name)
 
     def make_trend(self):
         """Try to make the proposed Trend, and error if it fails."""
