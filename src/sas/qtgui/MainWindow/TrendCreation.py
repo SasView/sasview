@@ -2,7 +2,7 @@ from sasdata.data import SasData
 from sasdata.trend import Trend
 from sas.qtgui.MainWindow.MetadataExplorer import MetadataExplorer
 from dataclasses import dataclass
-from PySide6.QtWidgets import QDialog, QVBoxLayout, QLabel, QTableWidget, QHBoxLayout, QPushButton, QTableWidgetItem, QHeaderView, QMessageBox, QTextEdit
+from PySide6.QtWidgets import QDialog, QVBoxLayout, QLabel, QTableWidget, QHBoxLayout, QPushButton, QTableWidgetItem, QHeaderView, QMessageBox, QLineEdit
 
 
 @dataclass
@@ -26,7 +26,7 @@ class TrendCreation(QDialog):
         self.layout = QVBoxLayout(self)
 
         self.trend_name_label = QLabel("Trend Name:")
-        self.trend_name_entry = QTextEdit()
+        self.trend_name_entry = QLineEdit()
 
         self.header_label = QLabel("The below table shows the axes that are selected for this trend.")
         self.table = QTableWidget()
