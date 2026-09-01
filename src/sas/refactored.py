@@ -84,5 +84,7 @@ class NamedTrend(Trend):
     name: str
 
     def __init__(self, data: list[SasData], trend_axes: dict[str, list[str] | list], name: str):
+        if name.strip() == "":
+            raise ValueError("A named trend cannot have an empty name.")
         super().__init__(data=data, trend_axes=trend_axes)
         self.name = name
