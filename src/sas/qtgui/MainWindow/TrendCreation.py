@@ -19,6 +19,7 @@ class TrendCreation(QDialog):
         super().__init__()
 
         self.proposed_trend_axes: list[ProposedTrendAxis] = []
+        self.proposed_name = ""
         self.target_data = target_data
 
         self.setWindowTitle("Trend Creation")
@@ -27,6 +28,7 @@ class TrendCreation(QDialog):
 
         self.trend_name_label = QLabel("Trend Name:")
         self.trend_name_entry = QLineEdit()
+        self.trend_name_entry.textChanged.connect(self.on_new_proposed_name)
 
         self.header_label = QLabel("The below table shows the axes that are selected for this trend.")
         self.table = QTableWidget()
@@ -48,6 +50,9 @@ class TrendCreation(QDialog):
         self.layout.addWidget(self.add_axes_button)
         self.layout.addWidget(self.table)
         self.layout.addLayout(self.button_row)
+
+    def on_new_proposed_name(self):
+        self.proposed_name = self.trend_name_entry.text()
 
     def update_table(self):
         self.table.clear()
