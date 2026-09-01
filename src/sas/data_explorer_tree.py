@@ -19,16 +19,22 @@ from sas.data_manager import NewDataManager as DataManager, isinstance_fix
 from sas.data_manager import TrackedData
 from sas.qtgui.MainWindow.DataViewer import DataViewer
 from sas.qtgui.MainWindow.TrendCreation import TrendCreation
-from sas.refactored import Perspective
+from sas.refactored import Perspective, NamedTrend
+import logging
 
 
 # TODO: Is this the right place for this?
 def tracked_data_name(data: TrackedData) -> str:
     if isinstance(data, SasData):
         return data.name
-    if isinstance(data, Trend):
-        # TODO: This is temporary. We need a way for a Trend to represent itself.
-        return 'Trend'
+    elif isinstance(data, NamedTrend):
+        return data.name
+    elif isinstance(data, Trend):
+        # Trends created in the data explorer should be named trends. If they're
+        # not, that indicates something has gone wrong. We won't fail here, but
+        # instead log a warning.
+        logging.warning("Trend doesn't have a name. This shouldn't be happening.")
+        return 'Unnamed Trend'
     else:
         return data.formatName
 
