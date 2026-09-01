@@ -1,5 +1,7 @@
+from sasdata.trend import Trend
 import logging
 from abc import abstractmethod
+from dataclasses import dataclass
 
 # This is ugly but necessary to avoid a cyclic dependency
 from typing import TYPE_CHECKING, cast
@@ -77,3 +79,10 @@ class Theory:
     # at the current SasView codebase, it seems they are all just Data1Ds with
     # nothing else special.
     pass
+
+class NamedTrend(Trend):
+    name: str
+
+    def __init__(self, data: list[SasData], trend_axes: dict[str, list[str] | list], name: str):
+        super().__init__(data=data, trend_axes=trend_axes)
+        self.name = name
