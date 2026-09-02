@@ -16,11 +16,11 @@ def proposed_axes_as_dict(proposed_axes: list[ProposedTrendAxis]) -> dict[str, l
     return {axis.axis_name: axis.axis_path for axis in proposed_axes}
 
 class TrendCreation(QDialog):
-    def __init__(self, target_data: list[SasData]):
+    def __init__(self, target_data: list[SasData], default_name: str):
         super().__init__()
 
         self.proposed_trend_axes: list[ProposedTrendAxis] = []
-        self.proposed_name = ""
+        self.proposed_name = default_name
         self.target_data = target_data
 
         self.setWindowTitle("Trend Creation")
