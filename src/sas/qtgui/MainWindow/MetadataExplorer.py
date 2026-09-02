@@ -1,15 +1,17 @@
 from sys import argv
 
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QApplication,
     QDialog,
+    QHBoxLayout,
     QLabel,
     QPushButton,
     QTreeWidget,
     QTreeWidgetItem,
-    QVBoxLayout, QHBoxLayout,
+    QVBoxLayout,
 )
-from PySide6.QtCore import Qt
+
 from sasdata.metadata import Metadata, MetaNode
 from sasdata.quantities.quantity import Quantity
 from sasdata.temp_xml_reader import load_data

@@ -1,9 +1,22 @@
-from sas.refactored import NamedTrend
-from sasdata.data import SasData
-from sasdata.trend import Trend
-from sas.qtgui.MainWindow.MetadataExplorer import MetadataExplorer
 from dataclasses import dataclass
-from PySide6.QtWidgets import QDialog, QVBoxLayout, QLabel, QTableWidget, QHBoxLayout, QPushButton, QTableWidgetItem, QHeaderView, QMessageBox, QLineEdit
+
+from PySide6.QtWidgets import (
+    QDialog,
+    QHBoxLayout,
+    QHeaderView,
+    QLabel,
+    QLineEdit,
+    QMessageBox,
+    QPushButton,
+    QTableWidget,
+    QTableWidgetItem,
+    QVBoxLayout,
+)
+
+from sasdata.data import SasData
+
+from sas.qtgui.MainWindow.MetadataExplorer import MetadataExplorer
+from sas.refactored import NamedTrend
 
 
 @dataclass
@@ -106,4 +119,4 @@ class TrendCreation(QDialog):
             self.accept()
         except ValueError as e:
             QMessageBox.critical(None, "Trend cannot be created", str(e))
-                
+

@@ -1,8 +1,8 @@
-from sasdata.trend import Trend
 from PySide6.QtCore import QObject, Signal
 from PySide6.QtWidgets import QDialog
 
 from sasdata.data import SasData
+from sasdata.trend import Trend
 
 from sas.refactored import Perspective
 
