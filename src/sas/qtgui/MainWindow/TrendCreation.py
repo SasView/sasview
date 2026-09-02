@@ -102,7 +102,6 @@ class TrendCreation(QDialog):
     def make_trend(self):
         """Try to make the proposed Trend, and error if it fails."""
         try:
-            # TODO: Fill in the dictionary
             _ = self.proposed_trend
             self.accept()
         except ValueError as e:
