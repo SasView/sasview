@@ -1,28 +1,34 @@
+import logging
 from typing import cast
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QCursor
-from PySide6.QtWidgets import (
-    QAbstractItemView,
-    QTreeWidget,
-    QTreeWidgetItem,
-    QWidget,
-)
+from PySide6.QtWidgets import QAbstractItemView, QDialog, QTreeWidget, QTreeWidgetItem, QWidget
 
 from sasdata.data import SasData
+from sasdata.trend import Trend
 
 from sas.data_explorer_error_message import DataExplorerErrorMessage
 from sas.data_explorer_menu import DataExplorerMenu, DataExplorerMenuAction
 from sas.data_manager import NewDataManager as DataManager
-from sas.data_manager import TrackedData
+from sas.data_manager import TrackedData, isinstance_fix
 from sas.qtgui.MainWindow.DataViewer import DataViewer
-from sas.refactored import Perspective
+from sas.qtgui.MainWindow.TrendCreation import TrendCreation
+from sas.refactored import NamedTrend, Perspective
 
 
 # TODO: Is this the right place for this?
 def tracked_data_name(data: TrackedData) -> str:
     if isinstance(data, SasData):
         return data.name
+    elif isinstance(data, NamedTrend):
+        return data.name
+    elif isinstance(data, Trend):
+        # Trends created in the data explorer should be named trends. If they're
+        # not, that indicates something has gone wrong. We won't fail here, but
+        # instead log a warning.
+        logging.warning("Trend doesn't have a name. This shouldn't be happening.")
+        return 'Unnamed Trend'
     else:
         return data.formatName
 
@@ -105,7 +111,8 @@ class DataExplorerTree(QTreeWidget):
     def showContextMenu(self):
         send_to = all([isinstance(datum, SasData) for datum in self.currentTrackedData])
         view_data = len(self.currentTrackedData) == 1 and isinstance(self.currentTrackedData[0], SasData)
-        menu = DataExplorerMenu(self, self._data_manager, send_to, view_data)
+        make_trend = len(self.currentTrackedData) > 1 and all([isinstance_fix(datum, SasData) for datum in self.currentTrackedData])
+        menu = DataExplorerMenu(self, self._data_manager, send_to, view_data, make_trend)
         action = menu.exec(QCursor.pos())
         # Result will be None if the user exited the menu without selecting anything.
         if action is None:
@@ -128,12 +135,23 @@ class DataExplorerTree(QTreeWidget):
                         self._data_manager.make_association(to_perspective, datum)
                     except ValueError as err:
                         errors.append(err)
+            case "make_trend":
+                trend_data = cast(list[SasData], self.currentTrackedData)
+                trend_creation_dialog = TrendCreation(trend_data, self._data_manager.default_new_trend_name)
+                creation_result = trend_creation_dialog.exec()
+                if creation_result == QDialog.DialogCode.Accepted:
+                    self._data_manager.register_trend(trend_creation_dialog.proposed_trend)
         if len(errors):
             box = DataExplorerErrorMessage(self, errors)
             box.show()
 
     def showViewData(self):
-        viewer = DataViewer(self.currentTrackedDatum)
+        associated = self._data_manager.get_association_or_none(self.currentTrackedDatum)
+        if isinstance(associated, Trend):
+            trend = associated
+        else:
+            trend = None
+        viewer = DataViewer(self.currentTrackedDatum, trend)
         viewer.exec()
 
     @property

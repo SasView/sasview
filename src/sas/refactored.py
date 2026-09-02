@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, cast
 from PySide6.QtWidgets import QDialog, QWidget
 
 from sasdata.data import SasData
+from sasdata.trend import Trend
 
 if TYPE_CHECKING:
     from sas.data_manager import NewDataManager as DataManager
@@ -77,3 +78,12 @@ class Theory:
     # at the current SasView codebase, it seems they are all just Data1Ds with
     # nothing else special.
     pass
+
+class NamedTrend(Trend):
+    name: str
+
+    def __init__(self, data: list[SasData], trend_axes: dict[str, list[str] | list], name: str):
+        if name.strip() == "":
+            raise ValueError("A named trend cannot have an empty name.")
+        super().__init__(data=data, trend_axes=trend_axes)
+        self.name = name

@@ -1,8 +1,10 @@
 from sys import argv
 
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QApplication,
     QDialog,
+    QHBoxLayout,
     QLabel,
     QPushButton,
     QTreeWidget,
@@ -35,7 +37,7 @@ def metadata_as_dict(to_convert: object):
 
 
 class MetadataExplorer(QDialog):
-    def __init__(self, metadata: Metadata, filename: str | None):
+    def __init__(self, metadata: Metadata, filename: str | None, selection_mode: bool = False):
         super().__init__()
         self.metadata_dict = metadata_as_dict(metadata)
 
@@ -46,19 +48,34 @@ class MetadataExplorer(QDialog):
         self.buildTree()
         self.metadataTreeWidget.header().setDefaultSectionSize(350)
 
-        self.closeButton = QPushButton("Close")
-        self.closeButton.clicked.connect(self.closeEvent)
+        self.selection_mode = selection_mode
+        if self.selection_mode:
+            self.metadataTreeWidget.setSelectionMode(QTreeWidget.SelectionMode.MultiSelection)
+
+
 
         self.layout = QVBoxLayout(self)
         self.layout.addWidget(self.filenameLabel)
         self.layout.addWidget(self.metadataTreeWidget)
-        self.layout.addWidget(self.closeButton)
+
+        self.button_row = QHBoxLayout()
+        if selection_mode:
+            self.closeButton = QPushButton("Cancel")
+            self.selectButton = QPushButton("Select")
+            self.selectButton.clicked.connect(self.accept)
+            self.button_row.addWidget(self.closeButton)
+            self.button_row.addWidget(self.selectButton)
+        else:
+            self.closeButton = QPushButton("Close")
+            self.button_row.addWidget(self.closeButton)
+        self.closeButton.clicked.connect(self.closeEvent)
+        self.layout.addLayout(self.button_row)
 
         self.setWindowTitle("Metadata Explorer")
         self.setMinimumSize(800, 430)
 
     def closeEvent(self, event):
-        self.close()
+        self.reject()
 
     def buildTree(
         self,
@@ -96,6 +113,20 @@ class MetadataExplorer(QDialog):
                     node_item = QTreeWidgetItem([key, str(value.contents)])
                     table_root.addChild(node_item)
 
+    @property
+    def getSelectedPaths(self) -> list[list[str]]:
+        def get_data(item: QTreeWidgetItem):
+            return item.data(0, Qt.ItemDataRole.DisplayRole)
+
+        return_value: list[list[str]] = []
+        for selected in self.metadataTreeWidget.selectedItems():
+            current_item = selected
+            current_path: list[str] = []
+            while current_item is not None and get_data(current_item) not in ["raw", "root", "Metadata"]:
+                current_path.append(get_data(current_item))
+                current_item = current_item.parent()
+            return_value.append(current_path[::-1])
+        return return_value
 
 if __name__ == "__main__":
     app = QApplication([])
