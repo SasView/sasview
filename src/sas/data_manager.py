@@ -124,7 +124,7 @@ class NewDataManager(QObject):
             self.make_association(trend, datum)
 
     @property
-    def default_trend_name(self) -> str:
+    def default_new_trend_name(self) -> str:
         trend_number = sum(isinstance_fix(obj, Trend) for obj in self._all_data_entries) + 1
         return f"Trend #{trend_number}"
 

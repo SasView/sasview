@@ -143,7 +143,7 @@ class DataExplorerTree(QTreeWidget):
                         errors.append(err)
             case "make_trend":
                 trend_data = cast(list[SasData], self.currentTrackedData)
-                trend_creation_dialog = TrendCreation(trend_data, self._data_manager.default_trend_name)
+                trend_creation_dialog = TrendCreation(trend_data, self._data_manager.default_new_trend_name)
                 creation_result = trend_creation_dialog.exec()
                 if creation_result == QDialog.DialogCode.Accepted:
                     self._data_manager.register_trend(trend_creation_dialog.proposed_trend)
