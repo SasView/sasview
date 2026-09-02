@@ -28,7 +28,7 @@ class TrendCreation(QDialog):
         self.layout = QVBoxLayout(self)
 
         self.trend_name_label = QLabel("Trend Name:")
-        self.trend_name_entry = QLineEdit()
+        self.trend_name_entry = QLineEdit(self.proposed_name)
         self.trend_name_entry.textChanged.connect(self.on_new_proposed_name)
 
         self.header_label = QLabel("The below table shows the axes that are selected for this trend.")
