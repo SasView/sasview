@@ -1,26 +1,20 @@
+import logging
 from typing import cast
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QCursor
-from PySide6.QtWidgets import (
-    QAbstractItemView,
-    QTreeWidget,
-    QTreeWidgetItem,
-    QWidget,
-    QDialog
-)
+from PySide6.QtWidgets import QAbstractItemView, QDialog, QTreeWidget, QTreeWidgetItem, QWidget
 
 from sasdata.data import SasData
 from sasdata.trend import Trend
 
 from sas.data_explorer_error_message import DataExplorerErrorMessage
 from sas.data_explorer_menu import DataExplorerMenu, DataExplorerMenuAction
-from sas.data_manager import NewDataManager as DataManager, isinstance_fix 
-from sas.data_manager import TrackedData
+from sas.data_manager import NewDataManager as DataManager
+from sas.data_manager import TrackedData, isinstance_fix
 from sas.qtgui.MainWindow.DataViewer import DataViewer
 from sas.qtgui.MainWindow.TrendCreation import TrendCreation
-from sas.refactored import Perspective, NamedTrend
-import logging
+from sas.refactored import NamedTrend, Perspective
 
 
 # TODO: Is this the right place for this?

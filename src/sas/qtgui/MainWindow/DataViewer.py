@@ -1,4 +1,3 @@
-from sasdata.trend import Trend, get_metadatum_from_path
 from PySide6.QtWidgets import (
     QDialog,
     QGridLayout,
@@ -10,6 +9,7 @@ from PySide6.QtWidgets import (
 )
 
 from sasdata.data import SasData
+from sasdata.trend import Trend, get_metadatum_from_path
 
 from sas.qtgui.MainWindow.MetadataExplorer import MetadataExplorer
 
