@@ -70,7 +70,9 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         self.poly_model.clear()
         self.poly_params = {}
 
-        parameters = self.logic.model_parameters.form_volume_parameters
+        # Copy: '+=' would append the orientation parameters to the sasmodels
+        # ParameterTable itself, duplicating rows on every subsequent call.
+        parameters = list(self.logic.model_parameters.form_volume_parameters)
         if self.is2D:
             parameters += self.logic.model_parameters.orientation_parameters
 
@@ -523,14 +525,17 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
             # Nsigs
             param_repr = GuiUtils.formatNumber(param_dict[param_name][5+ioffset], high=True)
             self.poly_model.item(row, 5+joffset).setText(param_repr)
-            # Function
+            # Function: the combobox index widget is the only source of truth.
+            # Never write the name into the underlying item - the delegate
+            # paints it under the combobox and it bleeds through on some
+            # platforms/styles (#4105).
             param_repr = param_dict[param_name][6+ioffset]
-            self.poly_model.item(row, 6+joffset).setText(param_repr)
             index = self.poly_model.index(row, 6+joffset)
             widget = self.lstPoly.indexWidget(index)
             if widget is not None and isinstance(widget, QtWidgets.QComboBox):
                 func_index = widget.findText(param_repr)
-                widget.setCurrentIndex(func_index)
+                if func_index >= 0:
+                    widget.setCurrentIndex(func_index)
 
             self.setFocus()
 
