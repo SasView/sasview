@@ -15,11 +15,45 @@ from pathlib import Path
 from platform import system
 from string import Template
 from sys import exit, stderr
-from typing import cast
+from typing import cast, Self
+from platform import system
+from dataclasses import dataclass
 
 import requirements
 from click import Path as ClickPath
 from click import command, option
+
+
+@dataclass
+class Files:
+    raw_requirements_dev_file: Path
+    raw_requirements_file: Path
+    raw_flatpak_requirements_file: Path
+    prefer_wheels: Path
+    ignore_pkgs: Path
+    input_manifest_file: Path
+    requirements_dev_file: Path | None = None
+    requirements_file: Path | None = None
+    flatpak_requirements_file: Path | None = None
+
+    @property
+    def processed(self) -> bool:
+        return not (
+            self.requirements_dev_file is None
+            and self.requirements_file is None
+            and self.flatpak_requirements_file is None
+        )
+
+    @classmethod
+    def generate(cls) -> Self:
+        return cls(
+            raw_requirements_dev_file=Path("requirements-dev.txt"),
+            raw_requirements_file=Path("requirements-release-ubuntu-latest.txt"),
+            raw_flatpak_requirements_file=Path("flatpak_requirements.txt"),
+            prefer_wheels=Path("prefer_wheels.txt"),
+            ignore_pkgs=Path("ignore_packages.txt"),
+            input_manifest_file=Path("org.sasview.sasview.yml.in"),
+        )
 
 
 class ManifestTemplate(Template):
