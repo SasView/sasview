@@ -37,14 +37,17 @@ class Files:
     flatpak_requirements_file: Path | None = None
 
     def verify(self) -> bool:
-        return (
+        if not (
             self.raw_requirements_dev_file.exists()
             and self.raw_requirements_file.exists()
             and self.raw_flatpak_requirements_file.exists()
             and self.prefer_wheels.exists()
             and self.ignore_pkgs.exists()
             and self.input_manifest_file.exists()
-        )
+        ):
+            print("Your working directory needs to be the same as the requirements files.", file=stderr)
+            return False
+        return True
 
     def process(self, output_directory: Path):
         self.requirements_dev_file = process_requirements_file(
@@ -194,8 +197,8 @@ def check_pip_generator_on_path() -> bool:
     return True
 
 
-def check_requirements() -> bool:
-    return check_platform() and check_pip_generator_on_path()
+def check_requirements(files: Files) -> bool:
+    return check_platform() and check_pip_generator_on_path() and files.verify()
 
 
 # TODO: Add strings for the help message.
@@ -216,11 +219,8 @@ def main(output_dir: Path, sasview_version: str):
     used to build the Flatpak. It will update all the Python depdendencies to
     match the pins which are specified in the requirements files, and update the
     version of QT."""
-    if not check_requirements():
-        exit(1)
     files = Files.generate()
-    if not files.verify():
-        print("Your working directory needs to be the same as the requirements files.", file=stderr)
+    if not check_requirements(files):
         exit(1)
     files.process(output_dir)
     qt_version, qt_version_with_patch = get_qt_version(files.requirements_file)
