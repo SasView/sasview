@@ -122,7 +122,7 @@ def check_platform() -> bool:
     if system() != "Linux":
         print(
             "ERROR: You appear to be running this script outside of Linux. "
-            "This script needs to be run on linux because it needs to check "
+            "This script needs to be run on Linux because it needs to check "
             "the contents of the SDK to determine which wheels to pull in, "
             "and it can only do this on Linux. If you are not on Linux, "
             "please consult the documentation for advice."
