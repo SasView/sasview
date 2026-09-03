@@ -36,12 +36,25 @@ class Files:
     requirements_file: Path | None = None
     flatpak_requirements_file: Path | None = None
 
-    @property
-    def processed(self) -> bool:
-        return not (
-            self.requirements_dev_file is None
-            and self.requirements_file is None
-            and self.flatpak_requirements_file is None
+    def verify(self) -> bool:
+        return (
+            self.raw_requirements_dev_file.exists()
+            and self.raw_requirements_file.exists()
+            and self.raw_flatpak_requirements_file.exists()
+            and self.prefer_wheels.exists()
+            and self.ignore_pkgs.exists()
+            and self.input_manifest_file.exists()
+        )
+
+    def process(self, output_directory: Path):
+        self.requirements_dev_file = process_requirements_file(
+            self.raw_requirements_dev_file, output_directory
+        )
+        self.requirements_file = process_requirements_file(
+            self.raw_requirements_file, output_directory
+        )
+        self.flatpak_requirements_file = process_requirements_file(
+            self.raw_flatpak_requirements_file, output_directory
         )
 
     @classmethod
@@ -205,40 +218,31 @@ def main(output_dir: Path, sasview_version: str):
     version of QT."""
     if not check_requirements():
         exit(1)
-    requirements_dev_file = process_requirements_file(Path("requirements-dev.txt"), output_dir)
-    requirements_file = process_requirements_file(Path("requirements-release-ubuntu-latest.txt"), output_dir)
-    flatpak_requirements_file = process_requirements_file(Path("flatpak_requirements.txt"), output_dir)
-    prefer_wheels_file = Path("prefer_wheels.txt")
-    ignore_pkgs_file = Path("ignore_packages.txt")
-    input_manifest_file = Path("org.sasview.sasview.yml.in")
-    if not (
-        requirements_file.exists()
-        and requirements_dev_file.exists()
-        and prefer_wheels_file.exists()
-        and flatpak_requirements_file.exists()
-    ):
+    files = Files.generate()
+    if not files.verify():
         print("Your working directory needs to be the same as the requirements files.", file=stderr)
         exit(1)
-    qt_version, qt_version_with_patch = get_qt_version(requirements_file)
+    files.process(output_dir)
+    qt_version, qt_version_with_patch = get_qt_version(files.requirements_file)
     install_sdk(qt_version)
-    prefer_wheels = packages_str(prefer_wheels_file)
-    ignore_pkgs = packages_str(ignore_pkgs_file)
+    prefer_wheels = packages_str(files.prefer_wheels)
+    ignore_pkgs = packages_str(files.ignore_pkgs)
     if not output_dir.is_dir():
         output_dir.mkdir()
     generate_requirements(
-        flatpak_requirements_file,
+        files.flatpak_requirements_file,
         output_dir / "python3-requirements-source-build.json",
         prefer_wheels,
         ignore_pkgs,
         qt_version,
     )
     generate_requirements(
-        requirements_dev_file, output_dir / "python3-requirements-dev.json", prefer_wheels, ignore_pkgs, qt_version
+        files.requirements_dev_file, output_dir / "python3-requirements-dev.json", prefer_wheels, ignore_pkgs, qt_version
     )
     generate_requirements(
-        requirements_file, output_dir / "python3-requirements.json", prefer_wheels, ignore_pkgs, qt_version
+        files.requirements_file, output_dir / "python3-requirements.json", prefer_wheels, ignore_pkgs, qt_version
     )
-    generate_main_manifest(input_manifest_file, output_dir, qt_version, qt_version_with_patch, sasview_version)
+    generate_main_manifest(files.input_manifest_file, output_dir, qt_version, qt_version_with_patch, sasview_version)
 
 
 if __name__ == "__main__":
