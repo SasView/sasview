@@ -158,6 +158,16 @@ def generate_main_manifest(
 
 
 def install_sdk(qt_version: str):
+    subprocess.call(
+        [
+            "flatpak",
+            "remote-add",
+            "--user",
+            "--if-not-exists",
+            "flathub",
+            "https://dl.flathub.org/repo/flathub.flatpakrepo",
+        ]
+    )
     subprocess.call(["flatpak", "--user", "-y", "install", f"org.kde.Sdk//{qt_version}"])
 
 
