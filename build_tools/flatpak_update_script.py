@@ -49,15 +49,9 @@ class Files:
         return True
 
     def process(self, output_directory: Path):
-        self.requirements_dev_file = process_requirements_file(
-            self.raw_requirements_dev_file, output_directory
-        )
-        self.requirements_file = process_requirements_file(
-            self.raw_requirements_file, output_directory
-        )
-        self.flatpak_requirements_file = process_requirements_file(
-            self.raw_flatpak_requirements_file, output_directory
-        )
+        self.requirements_dev_file = process_requirements_file(self.raw_requirements_dev_file, output_directory)
+        self.requirements_file = process_requirements_file(self.raw_requirements_file, output_directory)
+        self.flatpak_requirements_file = process_requirements_file(self.raw_flatpak_requirements_file, output_directory)
 
     @classmethod
     def generate(cls) -> Self:
@@ -236,7 +230,11 @@ def main(output_dir: Path, sasview_version: str):
         qt_version,
     )
     generate_requirements(
-        files.requirements_dev_file, output_dir / "python3-requirements-dev.json", prefer_wheels, ignore_pkgs, qt_version
+        files.requirements_dev_file,
+        output_dir / "python3-requirements-dev.json",
+        prefer_wheels,
+        ignore_pkgs,
+        qt_version,
     )
     generate_requirements(
         files.requirements_file, output_dir / "python3-requirements.json", prefer_wheels, ignore_pkgs, qt_version
