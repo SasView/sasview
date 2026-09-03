@@ -131,6 +131,26 @@ def check_platform() -> bool:
     return True
 
 
+def check_pip_generator_on_path() -> bool:
+    try:
+        subprocess.call(
+            ["flatpak-pip-generator", "--help"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+    except FileNotFoundError:
+        print(
+            "ERROR: you need to have the program 'flatpak-pip-generator' on your path. See the README for more information.",
+            file=stderr,
+        )
+        return False
+    return True
+
+
+def check_requirements() -> bool:
+    return check_platform() and check_pip_generator_on_path()
+
+
 # TODO: Add strings for the help message.
 @command
 @option(
@@ -149,19 +169,7 @@ def main(output_dir: Path, sasview_version: str):
     used to build the Flatpak. It will update all the Python depdendencies to
     match the pins which are specified in the requirements files, and update the
     version of QT."""
-    if not check_platform():
-        exit(1)
-    try:
-        subprocess.call(
-            ["flatpak-pip-generator", "--help"],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
-    except FileNotFoundError:
-        print(
-            "Error: you need to have the program 'flatpak-pip-generator' on your path. See the README for more information.",
-            file=stderr,
-        )
+    if not check_requirements():
         exit(1)
     requirements_dev_file = process_requirements_file(Path("requirements-dev.txt"), output_dir)
     requirements_file = process_requirements_file(Path("requirements-release-ubuntu-latest.txt"), output_dir)
