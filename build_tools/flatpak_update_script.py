@@ -10,14 +10,13 @@
 
 
 import subprocess
+from dataclasses import dataclass
 from os import environ
 from pathlib import Path
 from platform import system
 from string import Template
 from sys import exit, stderr
-from typing import cast, Self
-from platform import system
-from dataclasses import dataclass
+from typing import Self, cast
 
 import requirements
 from click import Path as ClickPath
