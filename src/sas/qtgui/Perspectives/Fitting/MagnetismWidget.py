@@ -75,17 +75,13 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
         if not self.logic.model_parameters:
             return
         self._magnet_model.clear()
-        # default initial value
-        m0 = 0.5
+        # Add the magnetic parameters to the table.
+        # 2026-08-13 PAK: Initialize M0 values with defaults from the model (typically zero).
+        # The previous code initialized them to 0.5, 1.0, 1.5, etc., though this was
+        # not obvious since magnetic theta defaulted to zero.
         for param in self.logic.model_parameters.call_parameters:
-            if param.type != 'magnetic':
-                continue
-            if "M0" in param.name:
-                m0 += 0.5
-                value = m0
-            else:
-                value = param.default
-            self.addCheckedMagneticListToModel(param, value)
+            if param.type == 'magnetic':
+                self.addCheckedMagneticListToModel(param, param.default)
 
         FittingUtilities.addHeadersToModel(self._magnet_model)
 
@@ -154,10 +150,12 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
             self.updateDataSignal.emit()
 
     def updateModel(self, model: Any | None = None) -> None:
-        # add magnetic parameters if asked
-        if self.isActive and self._magnet_model.rowCount() > 0:
+        """
+        Set model magnetism parameters from widget if magnetism is active, otherwise zero them.
+        """
+        if self._magnet_model.rowCount() > 0:
             for key, value in self.magnet_params.items():
-                model.setParam(key, value)
+                model.setParam(key, value if self.isActive else 0.)
 
     def toggleMagnetism(self, isChecked: bool) -> None:
         """
