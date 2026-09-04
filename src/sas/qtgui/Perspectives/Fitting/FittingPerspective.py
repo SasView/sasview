@@ -575,6 +575,12 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         else:
             return None
 
+    @property
+    def undo_stack(self):
+        """Return undo stack for the currently selected fitting tab."""
+        fitting_widget = self.currentFittingWidget
+        return None if fitting_widget is None else fitting_widget.undo_stack
+
     def getFitTabs(self):
         """
         Returns the list of fitting tabs

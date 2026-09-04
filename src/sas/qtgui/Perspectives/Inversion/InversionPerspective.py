@@ -316,6 +316,17 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         """Returns the tab widget currently shown."""
         return self.currentWidget()
 
+    @property
+    def undo_stack(self):
+        """Return undo stack for the currently selected Inversion tab.
+
+        Delegates to the active ``InversionWidget``'s stack, mirroring
+        ``FittingPerspective.undo_stack``.  Returns ``None`` if the current
+        widget is not an ``InversionWidget``.
+        """
+        w = self.currentWidget()
+        return getattr(w, "undo_stack", None) if isinstance(w, InversionWidget) else None
+
     def currentTabDataId(self) -> list:
         """Returns the data ID of the current tab."""
         tab_id = [item.logic.data.id for item in self.currentTab.results]
