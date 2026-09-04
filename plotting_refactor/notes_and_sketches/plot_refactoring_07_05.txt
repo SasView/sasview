@@ -1,0 +1,13 @@
+layout has more than one item remaining and thats why i cannot shrink further
+
+talking about the trend objects
+
+Thread objects for creating the data (few layers of abstraction in between)
+sasmodels kernel is a good starting point
+what it uses and what it is used by
+
+combining both functionalities from tabbed click and other demo
+
+modifier problem
+
+

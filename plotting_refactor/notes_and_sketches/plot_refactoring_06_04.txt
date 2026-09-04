@@ -1,0 +1,3 @@
+lucas demo is very good with the modifiers
+
+batch slicing - showing a slicer right next to the 2d
