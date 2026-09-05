@@ -132,6 +132,14 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         """Tell the caller that this perspective can generate reports."""
         return True
 
+    def reject(self) -> None:
+        """Ignore QDialog's Esc-to-reject behaviour.
+
+        This perspective lives inside the MDI area, so the default reject()
+        would hide the widget without going through closeEvent(), leaving an
+        empty subwindow frame behind (see issue #4001).
+        """
+
     def closeEvent(self, event: QtGui.QCloseEvent) -> None:
         """Overwrite QDialog close method to allow for custom widget close."""
         # Close report widgets before closing/minimizing main widget

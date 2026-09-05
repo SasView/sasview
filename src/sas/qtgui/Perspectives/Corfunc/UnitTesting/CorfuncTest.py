@@ -61,6 +61,13 @@ class CorfuncTest:
         assert widget.txtLongPeriod.text() == '0'
         assert widget.txtLocalCrystal.text() == '0'
 
+    def testEscapeDoesNotHideWindow(self, widget):
+        '''Esc must not hide the perspective - see issue #4001'''
+        widget.show()
+        assert widget.isVisible()
+        QTest.keyClick(widget, QtCore.Qt.Key_Escape)
+        assert widget.isVisible()
+
     # This is throwing an error. Skip for now
     @pytest.mark.skip()
     def testOnCalculate(self, widget, mocker):

@@ -3,7 +3,8 @@ import pytest
 
 mpl.use("Qt5Agg")
 
-from PySide6 import QtWidgets
+from PySide6 import QtCore, QtWidgets
+from PySide6.QtTest import QTest
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionPerspective import (
@@ -65,6 +66,13 @@ class SizeDistributionTest:
         assert widget.logic.data is not None
         widget.removeData([self.fakeData1])
         assert widget._data is None
+
+    def testEscapeDoesNotHideWindow(self, widget):
+        """Esc must not hide the perspective - see issue #4001."""
+        widget.show()
+        assert widget.isVisible()
+        QTest.keyClick(widget, QtCore.Qt.Key_Escape)
+        assert widget.isVisible()
 
     def testClose(self, widget):
         """Test methods related to closing the window"""

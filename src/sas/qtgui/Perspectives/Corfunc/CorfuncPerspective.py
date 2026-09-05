@@ -412,7 +412,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.update_readonly()
 
     def allow_go(self, reason: str | None = None):
-        """ 
+        """
         Disable Go button if reason is provided or if no data is loaded
         :param reason: Reason why Go button should be disabled
         """
@@ -652,6 +652,15 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         assert isinstance(value, bool)
 
         self._allow_close = value
+
+    def reject(self):
+        """
+        Ignore QDialog's Esc-to-reject behaviour
+
+        This perspective lives inside the MDI area, so the default reject()
+        would hide the widget without going through closeEvent(), leaving an
+        empty subwindow frame behind (see issue #4001).
+        """
 
     def closeEvent(self, event):
         """

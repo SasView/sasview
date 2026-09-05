@@ -274,6 +274,14 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         """Tell the caller that this perspective writes its state."""
         return True
 
+    def reject(self) -> None:
+        """Ignore QDialog's Esc-to-reject behaviour.
+
+        This perspective lives inside the MDI area, so the default reject()
+        would hide the widget without going through closeEvent(), leaving an
+        empty subwindow frame behind (see issue #4001).
+        """
+
     def closeEvent(self, event) -> None:
         """Overwrite QDialog close method to allow for custom widget close."""
         if self._allow_close:
