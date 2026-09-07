@@ -1,3 +1,4 @@
+from sas.qtgui.Utilities.MuMag.MuMag import MuMag
 import logging
 from os.path import basename
 
@@ -33,7 +34,7 @@ perspectives: dict[str, None | Perspective] = {
     "Invariant": None,
     "Inversion": None,
     "Dummy": DummyPerspective,
-    "Mumag": None,
+    "Mumag": MuMag,
 }
 
 
