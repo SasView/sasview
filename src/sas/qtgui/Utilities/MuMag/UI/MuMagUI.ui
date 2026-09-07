@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>MuMagTool</class>
- <widget class="QMainWindow" name="MuMagTool">
+ <widget class="QWidget" name="MuMagTool">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -13,8 +13,7 @@
   <property name="windowTitle">
    <string>MuMagTool (Experimental)</string>
   </property>
-  <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="horizontalLayout_6" stretch="1,2">
+  <layout class="QHBoxLayout" name="horizontalLayout_6" stretch="1,2">
     <item>
      <widget class="QWidget" name="widget" native="true">
       <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -414,18 +413,6 @@
      </widget>
     </item>
    </layout>
-  </widget>
-  <widget class="QMenuBar" name="menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>819</width>
-     <height>30</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <resources/>
  <connections/>
