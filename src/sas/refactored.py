@@ -37,7 +37,7 @@ class Perspective(QDialog):
 
     @property
     @abstractmethod
-    def supported_data(self) -> list[type[TrackedData]]:
+    def supported_data(self) -> set[type[TrackedData]]:
         """The types of data that can be sent to the perspective"""
 
     @property
