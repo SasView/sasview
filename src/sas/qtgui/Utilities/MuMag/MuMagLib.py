@@ -76,7 +76,7 @@ class MuMagLib:
         square_distance_from_qmax = (q_values - parameters.q_max) ** 2
         max_q_index = int(np.argmin(square_distance_from_qmax))
 
-        applied_fields = trend.get_trend_values("applied_field")
+        applied_fields = trend.get_trend_values("applied_magnetic_field")
         filtered_indices = [i for i, field in enumerate(applied_fields) if field >= parameters.min_applied_field]
         filtered_data = [trend.data[i] for i in filtered_indices]
         filtered_trend_axes = {
@@ -150,9 +150,9 @@ class MuMagLib:
         n_data = len(trend.data)
 
         #  Factor of (1e-3 / mu_0) converts from mT to A/m
-        applied_field = np.array(trend.get_trend_values("applied_field")) * (1e-3 / MuMagLib.mu_0)
-        demagnetising_field = np.array(trend.get_trend_values("demagnetising_field")) * (1e-3 / MuMagLib.mu_0)
-        saturation_magnetisation = np.array(trend.get_trend_values("saturation_magnetisation")) * (1e-3 / MuMagLib.mu_0)
+        applied_field = np.array(trend.get_trend_values("applied_magnetic_field")) * (1e-3 / MuMagLib.mu_0)
+        demagnetising_field = np.array(trend.get_trend_values("demagnetizing_field")) * (1e-3 / MuMagLib.mu_0)
+        saturation_magnetisation = np.array(trend.get_trend_values("saturation_magnetization")) * (1e-3 / MuMagLib.mu_0)
 
         # TODO: The following is how things should be done in the future, rather than hard-coding
         #  a scaling factor...
@@ -274,9 +274,9 @@ class MuMagLib:
         n_data = len(trend.data)
 
         #  Factor of (1e-3 / mu_0) converts from mT to A/m
-        applied_field = np.array(trend.get_trend_values("applied_field")) * (1e-3 / MuMagLib.mu_0)
-        demagnetising_field = np.array(trend.get_trend_values("demagnetising_field")) * (1e-3 / MuMagLib.mu_0)
-        saturation_magnetisation = np.array(trend.get_trend_values("saturation_magnetisation")) * (1e-3 / MuMagLib.mu_0)
+        applied_field = np.array(trend.get_trend_values("applied_magnetic_field")) * (1e-3 / MuMagLib.mu_0)
+        demagnetising_field = np.array(trend.get_trend_values("demagnetizing_field")) * (1e-3 / MuMagLib.mu_0)
+        saturation_magnetisation = np.array(trend.get_trend_values("saturation_magnetization")) * (1e-3 / MuMagLib.mu_0)
 
         # TODO: The following is how things should be done in the future, rather than hard-coding
         #  a scaling factor...
@@ -458,9 +458,9 @@ class MuMagLib:
     def _filename_string(trend: Trend, index: int):
         """ Get the filename string associated with a bit of experimental data """
 
-        applied_field = trend.get_trend_values("applied_field")[index]
-        saturation_magnetisation = trend.get_trend_values("saturation_magnetisation")[index]
-        demagnetising_field = trend.get_trend_values("demagnetising_field")[index]
+        applied_field = trend.get_trend_values("applied_magnetic_field")[index]
+        saturation_magnetisation = trend.get_trend_values("saturation_magnetization")[index]
+        demagnetising_field = trend.get_trend_values("demagnetizing_field")[index]
 
         return f"{applied_field}_{saturation_magnetisation}_{demagnetising_field}"
 
@@ -476,7 +476,7 @@ class MuMagLib:
         if not os.path.exists(path):
             os.mkdir(path)
 
-        applied_fields = data.input_trend.get_trend_values("applied_field")
+        applied_fields = data.input_trend.get_trend_values("applied_magnetic_field")
 
         with open(os.path.join(path, "fit_info.txt"), "w") as fid:
             fid.write("FitMagneticSANS Toolbox - SimpleFit Results Info File \n\n")
