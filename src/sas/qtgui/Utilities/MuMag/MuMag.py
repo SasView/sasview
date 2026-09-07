@@ -33,7 +33,6 @@ class MuMag(Perspective, Ui_MuMagTool):
         self.setupUi(self)
 
         # Callbacks
-        self.ImportDataButton.clicked.connect(self.importData)
         self.SimpleFitButton.clicked.connect(self.onFit)
         self.SaveResultsButton.clicked.connect(self.onSave)
         self.helpButton.clicked.connect(self.onHelp)
