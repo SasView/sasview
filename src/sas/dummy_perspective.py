@@ -27,8 +27,8 @@ class DummyPerspective(Perspective):
 
     @property
     @override
-    def supported_data(self) -> list[type[TrackedData]]:
-        return [SasData]
+    def supported_data(self) -> set[type[TrackedData]]:
+        return {SasData}
 
     @property
     @override
