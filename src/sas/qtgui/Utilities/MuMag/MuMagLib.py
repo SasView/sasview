@@ -8,16 +8,15 @@ import scipy.optimize
 from PySide6.QtWidgets import QFileDialog
 
 from sasdata.dataloader.loader import Loader
+from sasdata.trend import Trend
 
 from sas.qtgui.Utilities.MuMag.datastructures import (
-    ExperimentalData,
     ExperimentGeometry,
     FitFailure,
     FitParameters,
     FitResults,
     LeastSquaresOutputParallel,
     LeastSquaresOutputPerpendicular,
-    LoadFailure,
     SweepOutput,
 )
 
@@ -39,47 +38,14 @@ class MuMagLib:
             return directory
 
 
+    # TODO: Remove this method - MuMag now uses Trends directly
     @staticmethod
     def import_data(directory):
-        """Import experimental data and get information from filenames"""
+        """Import experimental data and get information from filenames
 
-        try:
-            # Load the data
-            loader = Loader()
-            input_names = [name for name in os.listdir(directory) if name.lower().endswith(".csv")]
-            input_paths = [os.path.join(directory, filename) for filename in input_names]
-
-            input_data = loader.load(input_paths)
-
-
-            data = []
-            for filename, data1d in zip(input_names, input_data):
-                # Check for error, and skip if necessary
-                if isinstance(data1d, Exception):
-                    MuMagLib.logger.error(f"Failed to load in data: {data1d}")
-                    continue
-
-                # Extract the metadata from the filename
-                filename_parts = filename.split(".")
-                filename = ".".join(filename_parts[:-1])
-
-                parts = filename.split("_")
-
-                applied_field = float(parts[1])  # mT
-                saturation_magnetisation = float(parts[2])  # mT
-                demagnetising_field = float(parts[3])  # mT
-
-                # Create input data object
-                data.append(ExperimentalData(
-                    scattering_curve=data1d,
-                    applied_field=applied_field,
-                    saturation_magnetisation=saturation_magnetisation,
-                    demagnetising_field=demagnetising_field))
-
-            return sorted(data, key=lambda x: x.applied_field)
-
-        except Exception as e:
-            raise LoadFailure(f"Failed to load from {directory}: " + repr(e))
+        DEPRECATED: This method is no longer used. MuMag now accepts Trend objects directly.
+        """
+        raise NotImplementedError("MuMag now uses Trends directly. This method is deprecated.")
 
     @staticmethod
     def nice_log_plot_bounds(data: list[np.ndarray]):
@@ -98,7 +64,7 @@ class MuMagLib:
 
 
     @staticmethod
-    def simple_fit(data: list[ExperimentalData], parameters: FitParameters):
+    def simple_fit(trend: Trend, parameters: FitParameters):
         """ Main fitting ("simple fit") """
 
         geometry = parameters.experiment_geometry
@@ -106,32 +72,39 @@ class MuMagLib:
         # Use an index for data upto qmax based on first data set
         # Not ideal, would be preferable make sure the data was
         # compatible, using something like interpolation TODO
-        square_distance_from_qmax = (data[0].scattering_curve.x - parameters.q_max) ** 2
+        q_values = trend.data[0].abscissae.value
+        square_distance_from_qmax = (q_values - parameters.q_max) ** 2
         max_q_index = int(np.argmin(square_distance_from_qmax))
 
-        filtered_inputs = [datum.restrict_by_index(max_q_index)
-                           for datum in data
-                           if datum.applied_field >= parameters.min_applied_field]
+        applied_fields = trend.get_trend_values("applied_field")
+        filtered_indices = [i for i, field in enumerate(applied_fields) if field >= parameters.min_applied_field]
+        filtered_data = [trend.data[i] for i in filtered_indices]
+        filtered_trend_axes = {
+            name: [trend.get_trend_values(name)[i] for i in filtered_indices]
+            if trend.is_manual_axis(name) else trend.trend_axes[name]
+            for name in trend.axis_names
+        }
+        filtered_trend = Trend(filtered_data, filtered_trend_axes)
 
         # Brute force check for something near the minimum
-        sweep_data = MuMagLib.sweep_exchange_A(parameters, filtered_inputs)
+        sweep_data = MuMagLib.sweep_exchange_A(parameters, filtered_trend, max_q_index)
 
         # Refine this result
         crude_A = sweep_data.optimal.exchange_A
-        refined = MuMagLib.refine_exchange_A(filtered_inputs, crude_A, geometry)
+        refined = MuMagLib.refine_exchange_A(filtered_trend, crude_A, geometry, max_q_index)
 
         # Get uncertainty estimate TODO: Check units
-        uncertainty = MuMagLib.uncertainty(filtered_inputs, refined.exchange_A, geometry) * 1e12
+        uncertainty = MuMagLib.uncertainty(filtered_trend, refined.exchange_A, geometry, max_q_index) * 1e12
 
         return FitResults(
             parameters=parameters,
-            input_data=filtered_inputs,
+            input_trend=filtered_trend,
             sweep_data=sweep_data,
             refined_fit_data=refined,
             optimal_exchange_A_uncertainty=uncertainty)
 
     @staticmethod
-    def sweep_exchange_A(parameters: FitParameters, data: list[ExperimentalData]) -> SweepOutput:
+    def sweep_exchange_A(parameters: FitParameters, trend: Trend, max_q_index: int) -> SweepOutput:
         """ Sweep over Exchange Stiffness A for perpendicular SANS geometry to
         get an initial estimate which can then be refined"""
 
@@ -141,10 +114,10 @@ class MuMagLib:
             parameters.exchange_A_n) * 1e-12  # From pJ/m to J/m
 
         if parameters.experiment_geometry == ExperimentGeometry.PERPENDICULAR:
-            least_squared_fits = [MuMagLib.least_squares_perpendicular(data, a) for a in a_values]
+            least_squared_fits = [MuMagLib.least_squares_perpendicular(trend, a, max_q_index) for a in a_values]
 
         elif parameters.experiment_geometry == ExperimentGeometry.PARALLEL:
-            least_squared_fits = [MuMagLib.least_squares_parallel(data, a) for a in a_values]
+            least_squared_fits = [MuMagLib.least_squares_parallel(trend, a, max_q_index) for a in a_values]
 
         else:
             raise ValueError(f"Unknown ExperimentGeometry value: {parameters.experiment_geometry}")
@@ -159,7 +132,7 @@ class MuMagLib:
             optimal=optimal_fit)
 
     @staticmethod
-    def least_squares_perpendicular(data: list[ExperimentalData], A) -> LeastSquaresOutputPerpendicular:
+    def least_squares_perpendicular(trend: Trend, A, max_q_index: int) -> LeastSquaresOutputPerpendicular:
         """ Least squares fitting for a given exchange stiffness, A, perpendicular case
 
             We are fitting the equation:
@@ -174,12 +147,12 @@ class MuMagLib:
         """
 
         # Get matrices from the input data
-        n_data = len(data)
+        n_data = len(trend.data)
 
         #  Factor of (1e-3 / mu_0) converts from mT to A/m
-        applied_field = np.array([datum.applied_field for datum in data]) * (1e-3 / MuMagLib.mu_0)
-        demagnetising_field = np.array([datum.demagnetising_field for datum in data]) * (1e-3 / MuMagLib.mu_0)
-        saturation_magnetisation = np.array([datum.saturation_magnetisation for datum in data]) * (1e-3 / MuMagLib.mu_0)
+        applied_field = np.array(trend.get_trend_values("applied_field")) * (1e-3 / MuMagLib.mu_0)
+        demagnetising_field = np.array(trend.get_trend_values("demagnetising_field")) * (1e-3 / MuMagLib.mu_0)
+        saturation_magnetisation = np.array(trend.get_trend_values("saturation_magnetisation")) * (1e-3 / MuMagLib.mu_0)
 
         # TODO: The following is how things should be done in the future, rather than hard-coding
         #  a scaling factor...
@@ -191,9 +164,13 @@ class MuMagLib:
         #
         # q = np.array([data_nanometers(datum.scattering_curve) for datum in data])
 
-        q = np.array([datum.scattering_curve.x for datum in data]) * 1e9
-        I = np.array([datum.scattering_curve.y for datum in data])
-        I_stdev = np.array([datum.scattering_curve.dy for datum in data])
+        q = np.array([datum.abscissae.value[:max_q_index] for datum in trend.data]) * 1e9
+        I = np.array([datum.ordinate.value[:max_q_index] for datum in trend.data])
+        # Try to get errors, use unit errors if not available
+        try:
+            I_stdev = np.array([datum["dI"].value[:max_q_index] for datum in trend.data])
+        except KeyError:
+            I_stdev = np.ones_like(I)
 
         n_q = q.shape[1]
 
@@ -278,7 +255,7 @@ class MuMagLib:
 
 
     @staticmethod
-    def least_squares_parallel(data: list[ExperimentalData], A):
+    def least_squares_parallel(trend: Trend, A, max_q_index: int):
 
         """ Least squares fitting for a given exchange stiffness, A, parallel case
 
@@ -294,12 +271,12 @@ class MuMagLib:
             """
 
         # Get matrices from the input data
-        n_data = len(data)
+        n_data = len(trend.data)
 
         #  Factor of (1e-3 / mu_0) converts from mT to A/m
-        applied_field = np.array([datum.applied_field for datum in data]) * (1e-3 / MuMagLib.mu_0)
-        demagnetising_field = np.array([datum.demagnetising_field for datum in data]) * (1e-3 / MuMagLib.mu_0)
-        saturation_magnetisation = np.array([datum.saturation_magnetisation for datum in data]) * (1e-3 / MuMagLib.mu_0)
+        applied_field = np.array(trend.get_trend_values("applied_field")) * (1e-3 / MuMagLib.mu_0)
+        demagnetising_field = np.array(trend.get_trend_values("demagnetising_field")) * (1e-3 / MuMagLib.mu_0)
+        saturation_magnetisation = np.array(trend.get_trend_values("saturation_magnetisation")) * (1e-3 / MuMagLib.mu_0)
 
         # TODO: The following is how things should be done in the future, rather than hard-coding
         #  a scaling factor...
@@ -311,9 +288,13 @@ class MuMagLib:
         #
         # q = np.array([data_nanometers(datum.scattering_curve) for datum in data])
 
-        q = np.array([datum.scattering_curve.x for datum in data]) * 1e9
-        I = np.array([datum.scattering_curve.y for datum in data])
-        I_stdev = np.array([datum.scattering_curve.dy for datum in data])
+        q = np.array([datum.abscissae.value[:max_q_index] for datum in trend.data]) * 1e9
+        I = np.array([datum.ordinate.value[:max_q_index] for datum in trend.data])
+        # Try to get errors, use unit errors if not available
+        try:
+            I_stdev = np.array([datum["dI"].value[:max_q_index] for datum in trend.data])
+        except KeyError:
+            I_stdev = np.ones_like(I)
 
         n_q = q.shape[1]
 
@@ -386,9 +367,10 @@ class MuMagLib:
 
     @staticmethod
     def refine_exchange_A(
-            data: list[ExperimentalData],
+            trend: Trend,
             exchange_A_initial: float,
             geometry: ExperimentGeometry,
+            max_q_index: int,
             epsilon: float = 0.0001) -> LeastSquaresOutputPerpendicular | LeastSquaresOutputParallel:
 
         """ Refines the A parameter using Jarratt's method of successive parabolic interpolation"""
@@ -408,10 +390,10 @@ class MuMagLib:
         x_3 = exchange_A_initial + delta
 
         # We want all the least squares fitting data around the final value, so keep that in a variable
-        refined_least_squared_data = least_squares_function(data, x_3)
+        refined_least_squared_data = least_squares_function(trend, x_3, max_q_index)
 
-        y_1 = least_squares_function(data, x_1).exchange_A_chi_sq
-        y_2 = least_squares_function(data, x_2).exchange_A_chi_sq
+        y_1 = least_squares_function(trend, x_1, max_q_index).exchange_A_chi_sq
+        y_2 = least_squares_function(trend, x_2, max_q_index).exchange_A_chi_sq
         y_3 = refined_least_squared_data.exchange_A_chi_sq
 
         x_4 = x_3 + 0.5 * ((x_2 - x_3) ** 2 * (y_3 - y_1) + (x_1 - x_3) ** 2 * (y_2 - y_3)) \
@@ -421,7 +403,7 @@ class MuMagLib:
             if np.abs(2 * (x_4 - x_3) / (x_4 + x_3)) < epsilon:
                 break
 
-            refined_least_squared_data = least_squares_function(data, x_3)
+            refined_least_squared_data = least_squares_function(trend, x_3, max_q_index)
 
             x_1, x_2, x_3 = x_2, x_3, x_4
             y_1, y_2, y_3 = y_2, y_3, refined_least_squared_data.exchange_A_chi_sq
@@ -433,9 +415,10 @@ class MuMagLib:
 
     @staticmethod
     def uncertainty(
-            data: list[ExperimentalData],
+            trend: Trend,
             A_opt: float,
-            geometry: ExperimentGeometry) -> float:
+            geometry: ExperimentGeometry,
+            max_q_index: int) -> float:
         """Calculate the uncertainty for the optimal exchange stiffness A"""
 
         # Estimate variance from second order derivative of chi-square function via Finite Differences
@@ -456,26 +439,30 @@ class MuMagLib:
         A4 = A_opt + 1 * dA
         A5 = A_opt + 2 * dA
 
-        chi1 = least_squares_function(data, A1).exchange_A_chi_sq
-        chi2 = least_squares_function(data, A2).exchange_A_chi_sq
-        chi3 = least_squares_function(data, A3).exchange_A_chi_sq
-        chi4 = least_squares_function(data, A4).exchange_A_chi_sq
-        chi5 = least_squares_function(data, A5).exchange_A_chi_sq
+        chi1 = least_squares_function(trend, A1, max_q_index).exchange_A_chi_sq
+        chi2 = least_squares_function(trend, A2, max_q_index).exchange_A_chi_sq
+        chi3 = least_squares_function(trend, A3, max_q_index).exchange_A_chi_sq
+        chi4 = least_squares_function(trend, A4, max_q_index).exchange_A_chi_sq
+        chi5 = least_squares_function(trend, A5, max_q_index).exchange_A_chi_sq
 
         d2chi_dA2 = (-chi1 + 16 * chi2 - 30 * chi3 + 16 * chi4 - chi5) / (12 * dA ** 2)
 
         # Scale variance by number of samples and return reciprocal square root
 
-        n_field_strengths = len(data)  # Number of fields
-        n_q = len(data[0].scattering_curve.x)  # Number of q points
+        n_field_strengths = len(trend.data)  # Number of fields
+        n_q = max_q_index  # Number of q points
 
         return np.sqrt(2 / (n_field_strengths * n_q * d2chi_dA2))
 
     @staticmethod
-    def _filename_string(datum: ExperimentalData):
+    def _filename_string(trend: Trend, index: int):
         """ Get the filename string associated with a bit of experimental data """
 
-        return f"{datum.applied_field}_{datum.saturation_magnetisation}_{datum.demagnetising_field}"
+        applied_field = trend.get_trend_values("applied_field")[index]
+        saturation_magnetisation = trend.get_trend_values("saturation_magnetisation")[index]
+        demagnetising_field = trend.get_trend_values("demagnetising_field")[index]
+
+        return f"{applied_field}_{saturation_magnetisation}_{demagnetising_field}"
 
     @staticmethod
     def save_data(data: FitResults, directory: str):
@@ -489,12 +476,14 @@ class MuMagLib:
         if not os.path.exists(path):
             os.mkdir(path)
 
+        applied_fields = data.input_trend.get_trend_values("applied_field")
+
         with open(os.path.join(path, "fit_info.txt"), "w") as fid:
             fid.write("FitMagneticSANS Toolbox - SimpleFit Results Info File \n\n")
             fid.write(f"Timestamp: {timestamp}\n")
             fid.write(f"SANS geometry: {data.parameters.experiment_geometry.name}\n\n")
             fid.write(f"Maximal Scattering Vector:  q_max = {np.max(data.refined_fit_data.q)} /nm\n")
-            fid.write(f"Minimal Applied Field: mu_0*H_min = {data.input_data[0].applied_field}\n mT \n")
+            fid.write(f"Minimal Applied Field: mu_0*H_min = {applied_fields[0]}\n mT \n")
             fid.write(f"Result for the exchange stiffness constant: "
                       f"A = {data.refined_fit_data.exchange_A} +- {data.optimal_exchange_A_uncertainty} pJ/m \n")
 
@@ -507,9 +496,9 @@ class MuMagLib:
         if not os.path.exists(subpath):
             os.mkdir(subpath)
 
-        for k, datum in enumerate(data.input_data):
+        for k in range(len(data.input_trend.data)):
 
-            filename = f"{k}_" + MuMagLib._filename_string(datum) + ".csv"
+            filename = f"{k}_" + MuMagLib._filename_string(data.input_trend, k) + ".csv"
 
             q = data.refined_fit_data.q
             I = data.refined_fit_data.I_simulated[k, :]
@@ -525,12 +514,16 @@ class MuMagLib:
         if not os.path.exists(subpath):
             os.mkdir(subpath)
 
-        for k, datum in enumerate(data.input_data):
-            filename = f"{k}_" + MuMagLib._filename_string(datum) + ".csv"
+        for k in range(len(data.input_trend.data)):
+            filename = f"{k}_" + MuMagLib._filename_string(data.input_trend, k) + ".csv"
 
-            q = datum.scattering_curve.x
-            I = datum.scattering_curve.y
-            dI = datum.scattering_curve.dy
+            q = data.input_trend.data[k].abscissae.value
+            I = data.input_trend.data[k].ordinate.value
+            # Try to get errors, use unit errors if not available
+            try:
+                dI = data.input_trend.data[k]["dI"].value
+            except KeyError:
+                dI = np.ones_like(I)
 
             np.savetxt(os.path.join(subpath, filename), np.array([q, I, dI]).T, delimiter=",")
 
