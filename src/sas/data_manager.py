@@ -106,6 +106,8 @@ class NewDataManager(QObject):
         # We shouldn't have duplicate associations.
         if any([assoc == proposed_assoc for assoc in self.associations]):
             raise ValueError('An assocation of these types already exists.')
+        if isinstance_fix(data_1, Perspective):
+            self.check_perspective_can_accept_data(data_1, data_2)
         self.associations.append(proposed_assoc)
         self.new_association.emit(data_1, data_2)
 
