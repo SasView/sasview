@@ -84,7 +84,7 @@ class MuMag(Perspective, Ui_MuMagTool):
 
     @property
     def trend(self) -> Trend | None:
-        return cast(Trend, self.associatedData)
+        return cast(Trend, self.associatedData[0])
 
     @property
     @override
