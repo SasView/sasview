@@ -1,6 +1,6 @@
 from sasdata.data import SasData
 from abc import abstractmethod
-from typing import override
+from typing import override, cast
 
 from PySide6.QtWidgets import QListWidget, QVBoxLayout, QWidget
 from qtpy.QtWidgets import QLabel
@@ -38,5 +38,5 @@ class DummyPerspective(Perspective):
     @override
     def newAssocation(self):
         self.data_list.clear()
-        for datum in self.associatedData:
+        for datum in cast(list[SasData], self.associatedData):
             self.data_list.addItem(datum.name)
