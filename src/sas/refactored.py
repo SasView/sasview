@@ -1,4 +1,3 @@
-from sas.data_manager import TrackedData
 from sasdata.trend import Trend
 import logging
 from abc import abstractmethod
@@ -12,6 +11,7 @@ from sasdata.data import SasData
 
 if TYPE_CHECKING:
     from sas.data_manager import NewDataManager as DataManager
+    from sas.data_manager import TrackedData
 
 # TODO: None of these classes belong in here. This is a temporary location of
 # them so I can sketch out what they should look like.
@@ -37,7 +37,7 @@ class Perspective(QDialog):
 
     @property
     @abstractmethod
-    def supported_data(self) -> set[type[TrackedData]]:
+    def supported_data(self) -> set[type["TrackedData"]]:
         """The types of data that can be sent to the perspective"""
 
     @property
