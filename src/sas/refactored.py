@@ -1,3 +1,5 @@
+from sas.data_manager import TrackedData
+from sasdata.trend import Trend
 import logging
 from abc import abstractmethod
 
@@ -26,12 +28,23 @@ class Perspective(QDialog):
     @property
     @abstractmethod
     def name(self) -> str:
-        """ Name of the perspective"""
+        """Name of the perspective"""
 
     @property
     @abstractmethod
     def title(self) -> str:
-        """ Window title"""
+        """Window title"""
+
+    @property
+    @abstractmethod
+    def supported_data(self) -> list[type[TrackedData]]:
+        """The types of data that can be sent to the perspective"""
+
+    @property
+    @abstractmethod
+    def supports_multiple_data(self) -> bool:
+        """Whether multiple data can be sent to the perspective. If not, data
+        needs to be removed before it can be sent."""
 
     @property
     def formatName(self) -> str:
