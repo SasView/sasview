@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from PySide6 import QtWidgets
-from PySide6.QtWidgets import QVBoxLayout
+from PySide6.QtWidgets import QVBoxLayout, QWidget
 
 from sas.qtgui.Utilities.MuMag.datastructures import (
     ExperimentalData,
@@ -18,14 +18,16 @@ from sas.qtgui.Utilities.MuMag.datastructures import (
 )
 from sas.qtgui.Utilities.MuMag.MuMagLib import MuMagLib
 from sas.qtgui.Utilities.MuMag.UI.MuMagUI import Ui_MuMagTool
+from sas.refactored import Perspective
+from sas.data_manager import NewDataManager as DataManager
 
 log = getLogger("MuMag")
 
-class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
+class MuMag(Perspective, Ui_MuMagTool):
     """ Main widget for the MuMag tool """
 
-    def __init__(self, parent=None):
-        super().__init__()
+    def __init__(self, data_manager: DataManager, parent: QWidget | None=None):
+        super().__init__(data_manager, parent)
 
         self.parent = parent
         self.setupUi(self)
