@@ -83,8 +83,8 @@ class Perspective(QDialog):
         pass
 
     @property
-    def associatedData(self) -> list[SasData]:
-        return cast(list[SasData], self._data_manager.get_all_associations(self))
+    def associatedData(self) -> list[TrackedData]:
+        return self._data_manager.get_all_associations(self)
 
 class Theory:
     # TODO: Need to put stuff here that is unique to Theory. Right now, looking
