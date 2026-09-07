@@ -10,13 +10,11 @@ from PySide6 import QtWidgets
 from PySide6.QtWidgets import QVBoxLayout, QWidget
 
 from sas.qtgui.Utilities.MuMag.datastructures import (
-    ExperimentalData,
     ExperimentGeometry,
     FitFailure,
     FitParameters,
     FitResults,
     LeastSquaresOutputPerpendicular,
-    LoadFailure,
 )
 from sas.qtgui.Utilities.MuMag.MuMagLib import MuMagLib
 from sas.qtgui.Utilities.MuMag.UI.MuMagUI import Ui_MuMagTool
@@ -103,28 +101,6 @@ class MuMag(Perspective, Ui_MuMagTool):
     def supports_multiple_data(self) -> bool:
         return False
 
-    def importData(self):
-        """ Callback for the import data button """
-
-        # Get the directory from the user
-        directory = MuMagLib.directory_popup()
-
-        if directory is None:
-            log.info("No directory selected")
-            return
-
-        try:
-            self.data = MuMagLib.import_data(directory)
-        except LoadFailure as lf:
-            log.error(repr(lf))
-            return
-
-        log.info(f"Loaded {len(self.data)} datasets")
-
-        self.hide_everything()
-        self.plot_tabs.setTabEnabled(0, True)
-        self.show_input_data()
-
     def hide_everything(self):
         """ Hide all plots, disable tabs"""
 
@@ -143,22 +119,26 @@ class MuMag(Perspective, Ui_MuMagTool):
     def show_input_data(self):
         """ Plot Experimental Data: Generate Figure """
 
-        colors = pl.cm.jet(np.linspace(0, 1, len(self.data)))
+        if self.trend is None:
+            return
 
-        for i, datum in enumerate(self.data):
+        applied_fields = self.trend.get_trend_values("applied_field")
+        colors = pl.cm.jet(np.linspace(0, 1, len(self.trend.data)))
 
-            self.data_axes.loglog(datum.scattering_curve.x,
-                      datum.scattering_curve.y,
+        for i, datum in enumerate(self.trend.data):
+
+            self.data_axes.loglog(datum.abscissae.value,
+                      datum.ordinate.value,
                       linestyle='-', color=colors[i], linewidth=0.5,
-                      label=r'$B_0 = ' + str(datum.applied_field) + '$ T')
+                      label=r'$B_0 = ' + str(applied_fields[i]) + '$ T')
 
-            self.data_axes.loglog(datum.scattering_curve.x,
-                      datum.scattering_curve.y, '.',
+            self.data_axes.loglog(datum.abscissae.value,
+                      datum.ordinate.value, '.',
                       color=colors[i], linewidth=0.3, markersize=1)
 
         # Plot limits
-        qlim = MuMagLib.nice_log_plot_bounds([datum.scattering_curve.x for datum in self.data])
-        ilim = MuMagLib.nice_log_plot_bounds([datum.scattering_curve.y for datum in self.data])
+        qlim = MuMagLib.nice_log_plot_bounds([datum.abscissae.value for datum in self.trend.data])
+        ilim = MuMagLib.nice_log_plot_bounds([datum.ordinate.value for datum in self.trend.data])
 
         self.data_axes.set_xlabel(r'$q$ [1/nm]')
         self.data_axes.set_ylabel(r'$I_{\mathrm{exp}}$')
@@ -197,7 +177,7 @@ class MuMag(Perspective, Ui_MuMagTool):
 
     def onFit(self):
 
-        if self.data is None:
+        if self.trend is None:
             log.error("No data loaded")
             return None
 
@@ -212,7 +192,7 @@ class MuMag(Perspective, Ui_MuMagTool):
                 raise log.error(f"Unknown geometry: {parameters.experiment_geometry}")
 
         try:
-            self.fit_data = MuMagLib.simple_fit(self.data, parameters)
+            self.fit_data = MuMagLib.simple_fit(self.trend, parameters)
 
         except FitFailure as ff:
             log.error("Fitting failed - are the parameters correct? "+repr(ff))
@@ -294,26 +274,27 @@ class MuMag(Perspective, Ui_MuMagTool):
         #
 
         # Plot limits
-        qlim = MuMagLib.nice_log_plot_bounds([datum.scattering_curve.x for datum in self.data])
-        ilim = MuMagLib.nice_log_plot_bounds([datum.scattering_curve.y for datum in self.data])
+        qlim = MuMagLib.nice_log_plot_bounds([datum.abscissae.value for datum in self.fit_data.input_trend.data])
+        ilim = MuMagLib.nice_log_plot_bounds([datum.ordinate.value for datum in self.fit_data.input_trend.data])
 
         # Show the experimental data
-        colors = pl.cm.jet(np.linspace(0, 1, len(self.fit_data.input_data)))
-        for k, datum in enumerate(self.fit_data.input_data):
+        colors = pl.cm.jet(np.linspace(0, 1, len(self.fit_data.input_trend.data)))
+        for k, datum in enumerate(self.fit_data.input_trend.data):
             self.comparison_axes.loglog(
-                datum.scattering_curve.x,
-                datum.scattering_curve.y,
+                datum.abscissae.value,
+                datum.ordinate.value,
                 linestyle='None', color=colors[k], marker='x')
 
         # Show the fitted curves
         n_sim = self.fit_data.refined_fit_data.I_simulated.shape[0]
+        applied_fields = self.fit_data.input_trend.get_trend_values("applied_field")
         colors = pl.cm.jet(np.linspace(0, 1, n_sim))
         for k in range(n_sim):
             self.comparison_axes.loglog(
                 self.fit_data.refined_fit_data.q * 1e-9,
                 self.fit_data.refined_fit_data.I_simulated[k, :],
                 linestyle='solid', color=colors[k],
-                label='B_0 = ' + str(self.fit_data.input_data[k].applied_field) + ' T')
+                label='B_0 = ' + str(applied_fields[k]) + ' T')
 
         self.comparison_axes.set_xlabel(r'$q$ [1/nm]')
         self.comparison_axes.set_ylabel(r'$I_{\mathrm{exp}}$')
