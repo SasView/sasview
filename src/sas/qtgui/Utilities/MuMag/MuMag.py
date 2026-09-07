@@ -1,3 +1,4 @@
+from typing import override
 from logging import getLogger
 
 import matplotlib.pylab as pl
@@ -82,6 +83,11 @@ class MuMag(Perspective, Ui_MuMagTool):
 
         # Set visibility
         self.hide_everything()
+
+    @property
+    @override
+    def title(self) -> str:
+        return "MuMag Perspective"
 
     def importData(self):
         """ Callback for the import data button """
