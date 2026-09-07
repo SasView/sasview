@@ -122,7 +122,7 @@ class MuMag(Perspective, Ui_MuMagTool):
         if self.trend is None:
             return
 
-        applied_fields = self.trend.get_trend_values("applied_field")
+        applied_fields = self.trend.get_trend_values("applied_magnetic_field")
         colors = pl.cm.jet(np.linspace(0, 1, len(self.trend.data)))
 
         for i, datum in enumerate(self.trend.data):
@@ -287,7 +287,7 @@ class MuMag(Perspective, Ui_MuMagTool):
 
         # Show the fitted curves
         n_sim = self.fit_data.refined_fit_data.I_simulated.shape[0]
-        applied_fields = self.fit_data.input_trend.get_trend_values("applied_field")
+        applied_fields = self.fit_data.input_trend.get_trend_values("applied_magnetic_field")
         colors = pl.cm.jet(np.linspace(0, 1, n_sim))
         for k in range(n_sim):
             self.comparison_axes.loglog(
