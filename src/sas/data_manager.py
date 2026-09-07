@@ -12,6 +12,7 @@ TrackedData = SasData | Perspective | Trend
 # TODO: Probably want to handle order, if that is even relevant.
 valid_associations: list[tuple[str | type, str | type]] = [
     ('Perspective', SasData),
+    ('Perspective', Trend),
     (Trend, SasData)
     # TODO: Include plots
 ]
