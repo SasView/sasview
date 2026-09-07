@@ -93,9 +93,9 @@ class NewDataManager(QObject):
     def check_perspective_can_accept_data(self, perspective: Perspective, datum: TrackedData):
         existing_associations = self.get_all_associations(perspective)
         if not perspective.supports_multiple_data and len(existing_associations) > 0:
-            raise ValueError(f"{perspective.name} doesn't support multiple data being sent to it.")
+            raise ValueError(f"{perspective.title} doesn't support multiple data being sent to it.")
         if type(datum) not in perspective.supported_data:
-            raise ValueError(f"{perspective.name} does not support this data.")
+            raise ValueError(f"{perspective.title} does not support this data.")
 
     # TODO: May want more rules to prevent associations being made twice.
     def make_association(self, data_1: TrackedData, data_2: TrackedData):
