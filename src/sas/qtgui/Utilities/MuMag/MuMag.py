@@ -43,7 +43,6 @@ class MuMag(Perspective, Ui_MuMagTool):
         # Data
         #
 
-        self.data: list[ExperimentalData] | None = None
         self.fit_data: FitResults | None = None
 
         #
@@ -84,6 +83,10 @@ class MuMag(Perspective, Ui_MuMagTool):
 
         # Set visibility
         self.hide_everything()
+
+    @property
+    def trend(self) -> Trend | None:
+        return cast(Trend, self.associatedData)
 
     @property
     @override
