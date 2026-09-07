@@ -1,3 +1,4 @@
+from sasdata.trend import Trend
 from typing import override
 from logging import getLogger
 
@@ -20,7 +21,7 @@ from sas.qtgui.Utilities.MuMag.datastructures import (
 from sas.qtgui.Utilities.MuMag.MuMagLib import MuMagLib
 from sas.qtgui.Utilities.MuMag.UI.MuMagUI import Ui_MuMagTool
 from sas.refactored import Perspective
-from sas.data_manager import NewDataManager as DataManager
+from sas.data_manager import NewDataManager as DataManager, TrackedData
 
 log = getLogger("MuMag")
 
@@ -88,6 +89,16 @@ class MuMag(Perspective, Ui_MuMagTool):
     @override
     def title(self) -> str:
         return "MuMag Perspective"
+
+    @property
+    @override
+    def supported_data(self) -> set[type[TrackedData]]:
+        return {Trend}
+
+    @property
+    @override
+    def supports_multiple_data(self) -> bool:
+        return False
 
     def importData(self):
         """ Callback for the import data button """
