@@ -1,5 +1,5 @@
 from sasdata.trend import Trend
-from typing import override
+from typing import override, cast
 from logging import getLogger
 
 import matplotlib.pylab as pl
