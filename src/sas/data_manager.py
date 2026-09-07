@@ -89,15 +89,12 @@ class NewDataManager(QObject):
     # data at the same time. So it doesn't matter that the perspective is
     # associated with the data becuase they will both be removed.
 
-    def check_perspective_can_accept_data(self, perspective: Perspective, data_being_sent: list[TrackedData]):
-        total_new_data_length = len(data_being_sent) + len(self.get_all_associations(perspective))
-        if not perspective.supports_multiple_data and total_new_data_length:
+    def check_perspective_can_accept_data(self, perspective: Perspective, datum: TrackedData):
+        existing_associations = self.get_all_associations(perspective)
+        if not perspective.supports_multiple_data and len(existing_associations) > 0:
             raise ValueError(f"{perspective.name} doesn't support multiple data being sent to it.")
-        data_types = [type(datum) for datum in data_being_sent]
-        for t in data_types:
-            if t not in perspective.supported_data:
-                raise ValueError(f"{perspective.name} does not support this data.")
-        
+        if type(datum) not in perspective.supported_data:
+            raise ValueError(f"{perspective.name} does not support this data.")
 
     # TODO: May want more rules to prevent associations being made twice.
     def make_association(self, data_1: TrackedData, data_2: TrackedData):
