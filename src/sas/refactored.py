@@ -83,7 +83,7 @@ class Perspective(QDialog):
         pass
 
     @property
-    def associatedData(self) -> list[TrackedData]:
+    def associatedData(self) -> list["TrackedData"]:
         return self._data_manager.get_all_associations(self)
 
 class Theory:
