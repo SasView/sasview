@@ -72,7 +72,7 @@ class MuMagLib:
         # Use an index for data upto qmax based on first data set
         # Not ideal, would be preferable make sure the data was
         # compatible, using something like interpolation TODO
-        q_values = trend.data[0].abscissae.value
+        q_values = trend.data[0].abscissae.axes[0]
         square_distance_from_qmax = (q_values - parameters.q_max) ** 2
         max_q_index = int(np.argmin(square_distance_from_qmax))
 
@@ -164,11 +164,11 @@ class MuMagLib:
         #
         # q = np.array([data_nanometers(datum.scattering_curve) for datum in data])
 
-        q = np.array([datum.abscissae.value[:max_q_index] for datum in trend.data]) * 1e9
-        I = np.array([datum.ordinate.value[:max_q_index] for datum in trend.data])
+        q = np.array([datum.abscissae.axes[0][:max_q_index] for datum in trend.data]) * 1e9
+        I = np.array([datum.ordinate.axes[0][:max_q_index] for datum in trend.data])
         # Try to get errors, use unit errors if not available
         try:
-            I_stdev = np.array([datum["dI"].value[:max_q_index] for datum in trend.data])
+            I_stdev = np.array([datum["dI"].axes[0][:max_q_index] for datum in trend.data])
         except KeyError:
             I_stdev = np.ones_like(I)
 
@@ -288,11 +288,11 @@ class MuMagLib:
         #
         # q = np.array([data_nanometers(datum.scattering_curve) for datum in data])
 
-        q = np.array([datum.abscissae.value[:max_q_index] for datum in trend.data]) * 1e9
-        I = np.array([datum.ordinate.value[:max_q_index] for datum in trend.data])
+        q = np.array([datum.abscissae.axes[0][:max_q_index] for datum in trend.data]) * 1e9
+        I = np.array([datum.ordinate.axes[0][:max_q_index] for datum in trend.data])
         # Try to get errors, use unit errors if not available
         try:
-            I_stdev = np.array([datum["dI"].value[:max_q_index] for datum in trend.data])
+            I_stdev = np.array([datum["dI"].axes[0][:max_q_index] for datum in trend.data])
         except KeyError:
             I_stdev = np.ones_like(I)
 
@@ -517,8 +517,8 @@ class MuMagLib:
         for k in range(len(data.input_trend.data)):
             filename = f"{k}_" + MuMagLib._filename_string(data.input_trend, k) + ".csv"
 
-            q = data.input_trend.data[k].abscissae.value
-            I = data.input_trend.data[k].ordinate.value
+            q = data.input_trend.data[k].abscissae.axes[0]
+            I = data.input_trend.data[k].ordinate.axes[0]
             # Try to get errors, use unit errors if not available
             try:
                 dI = data.input_trend.data[k]["dI"].value
