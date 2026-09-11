@@ -127,18 +127,18 @@ class MuMag(Perspective, Ui_MuMagTool):
 
         for i, datum in enumerate(self.trend.data):
 
-            self.data_axes.loglog(datum.abscissae.value,
-                      datum.ordinate.value,
+            self.data_axes.loglog(datum.abscissae.axes[0],
+                      datum.ordinate.axes[0],
                       linestyle='-', color=colors[i], linewidth=0.5,
                       label=r'$B_0 = ' + str(applied_fields[i]) + '$ T')
 
-            self.data_axes.loglog(datum.abscissae.value,
-                      datum.ordinate.value, '.',
+            self.data_axes.loglog(datum.abscissae.axes[0],
+                      datum.ordinate.axes[0], '.',
                       color=colors[i], linewidth=0.3, markersize=1)
 
         # Plot limits
-        qlim = MuMagLib.nice_log_plot_bounds([datum.abscissae.value for datum in self.trend.data])
-        ilim = MuMagLib.nice_log_plot_bounds([datum.ordinate.value for datum in self.trend.data])
+        qlim = MuMagLib.nice_log_plot_bounds([datum.abscissae.axes[0] for datum in self.trend.data])
+        ilim = MuMagLib.nice_log_plot_bounds([datum.ordinate.axes[0] for datum in self.trend.data])
 
         self.data_axes.set_xlabel(r'$q$ [1/nm]')
         self.data_axes.set_ylabel(r'$I_{\mathrm{exp}}$')
@@ -274,15 +274,15 @@ class MuMag(Perspective, Ui_MuMagTool):
         #
 
         # Plot limits
-        qlim = MuMagLib.nice_log_plot_bounds([datum.abscissae.value for datum in self.fit_data.input_trend.data])
-        ilim = MuMagLib.nice_log_plot_bounds([datum.ordinate.value for datum in self.fit_data.input_trend.data])
+        qlim = MuMagLib.nice_log_plot_bounds([datum.abscissae.axes[0] for datum in self.fit_data.input_trend.data])
+        ilim = MuMagLib.nice_log_plot_bounds([datum.ordinate.axes[0] for datum in self.fit_data.input_trend.data])
 
         # Show the experimental data
         colors = pl.cm.jet(np.linspace(0, 1, len(self.fit_data.input_trend.data)))
         for k, datum in enumerate(self.fit_data.input_trend.data):
             self.comparison_axes.loglog(
-                datum.abscissae.value,
-                datum.ordinate.value,
+                datum.abscissae.axes[0],
+                datum.ordinate.axes[0],
                 linestyle='None', color=colors[k], marker='x')
 
         # Show the fitted curves
