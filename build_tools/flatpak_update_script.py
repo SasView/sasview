@@ -200,6 +200,17 @@ def check_pip_generator_on_path() -> bool:
     return True
 
 
+def check_flatpak_available() -> bool:
+    try:
+        subprocess.call(["flatpak"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except FileNotFoundError:
+        print(
+            "ERROR: Flatpak is not installed. Go to https://flathub.org/en/setup to find setup instructions on Flatpak for your distro."
+        )
+        return False
+    return True
+
+
 def check_requirements(files: Files) -> bool:
     return check_platform() and check_pip_generator_on_path() and files.verify()
 
@@ -223,7 +234,7 @@ def main(output_dir: Path, sasview_version: str):
     match the pins which are specified in the requirements files, and update the
     version of QT."""
     files = Files.generate()
-    if not check_requirements(files):
+    if not check_requirements(files) or not check_flatpak_available() or not check_pip_generator_on_path():
         exit(1)
     files.process(output_dir)
     qt_version, qt_version_with_patch = get_qt_version(files.requirements_file)
