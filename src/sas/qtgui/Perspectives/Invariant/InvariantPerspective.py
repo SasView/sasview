@@ -704,10 +704,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         if widget_id not in [WIDGETS.W_LOWQ_POWER_VALUE_EX, WIDGETS.W_HIGHQ_POWER_VALUE_EX]:
             self.mapper.toLast()
 
-        # Update progress bars if updating Q* values
-        if widget_id in [WIDGETS.D_DATA_QSTAR, WIDGETS.D_LOW_QSTAR, WIDGETS.D_HIGH_QSTAR]:
-            self.update_progress_bars()
-
     def onStatus(self):
         """Display Invariant Details panel when clicking on Status button."""
         self.detailsDialog.setModel(self.model)
