@@ -16,7 +16,7 @@ from PySide6.QtWidgets import (
 from sasdata.data import SasData
 
 from sas.qtgui.MainWindow.MetadataExplorer import MetadataExplorer
-from sas.refactored import NamedTrend
+from sasdata.trend import NamedTrend
 
 
 @dataclass
