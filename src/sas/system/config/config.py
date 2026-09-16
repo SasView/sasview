@@ -208,7 +208,7 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         # Undo/Redo stack depth per fitting tab
         self.UNDO_STACK_MAX_DEPTH = 200
 
-        # What's New variables
+        # Last version that the "What's New" menu was dismissed for
         self.LAST_WHATS_NEW_HIDDEN_VERSION = "0.0.0"
 
         # Last version that the update prompt was dismissed for
@@ -217,9 +217,6 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         # Stack plots when using slicers
         # If true, plots generated when using slicers will be on the same canvas
         self.STACK_PLOTS = True
-
-        # Developer menu
-        self.DEV_MENU = False
 
         #
         # Lock the class down, this is necessary both for

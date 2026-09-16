@@ -10,8 +10,6 @@ from PySide6.QtGui import QStandardItem, QTextCursor
 from PySide6.QtWidgets import QDockWidget, QLabel, QMessageBox, QProgressBar, QTextBrowser
 from twisted.internet import reactor
 
-from sasdata.temp_ascii_reader import load_data
-
 import sas
 
 # Perspectives
@@ -761,11 +759,6 @@ class GuiManager:
         self._workspace.actionWelcomeWidget.triggered.connect(self.actionWelcome)
         self._workspace.actionCheck_for_update.triggered.connect(self.actionCheck_for_update)
         self._workspace.actionWhat_s_New.triggered.connect(self.actionWhatsNew)
-        # Dev
-        self._workspace.menuDev.menuAction().setVisible(config.DEV_MENU)
-        self._workspace.actionParticle_Editor.triggered.connect(self.particleEditor)
-        self._workspace.actionAscii_Loader.triggered.connect(self.asciiLoader)
-
 
         self.communicator.sendDataToGridSignal.connect(self.showBatchOutput)
         self.communicator.resultPlotUpdateSignal.connect(self.showFitResults)
@@ -1512,22 +1505,3 @@ class GuiManager:
                 per.reset()
         # file manager
         self.filesWidget.reset()
-
-
-    # ============= DEV =================
-
-    def particleEditor(self):
-        from sas.qtgui.Perspectives.ParticleEditor.DesignWindow import show_particle_editor
-        show_particle_editor()
-
-
-    def asciiLoader(self):
-        from ascii_dialog.dialog import AsciiDialog
-        dialog = AsciiDialog()
-        status = dialog.exec()
-        if status == 1:
-            loaded = load_data(dialog.params)
-            for datum in loaded:
-                logger.info(datum.summary())
-        else:
-            logger.error('ASCII Reader Closed')
