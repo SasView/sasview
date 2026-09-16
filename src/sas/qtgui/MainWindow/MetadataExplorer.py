@@ -1,6 +1,5 @@
-from typing import cast
-from sasdata.data import SasData
 from sys import argv
+from typing import cast
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
@@ -14,6 +13,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
 )
 
+from sasdata.data import SasData
 from sasdata.metadata import Metadata, MetaNode
 from sasdata.quantities.quantity import Quantity
 from sasdata.temp_xml_reader import load_data
@@ -59,7 +59,7 @@ class MetadataExplorer(QDialog):
             all_metadata_dicts = [metadata_as_dict(data.metadata) for data in to_explore]
             self.metadata_dict = get_common_metadata(all_metadata_dicts)
 
-            
+
 
         filename_known = filename if filename is not None else "Unknown"
         self.filenameLabel = QLabel(f"Filename: {filename_known}")
