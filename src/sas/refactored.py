@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING, cast
 from PySide6.QtWidgets import QDialog, QWidget
 
 from sasdata.data import SasData
-from sasdata.trend import Trend
 
 if TYPE_CHECKING:
     from sas.data_manager import NewDataManager as DataManager

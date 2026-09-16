@@ -6,7 +6,7 @@ from PySide6.QtGui import QCursor
 from PySide6.QtWidgets import QAbstractItemView, QDialog, QTreeWidget, QTreeWidgetItem, QWidget
 
 from sasdata.data import SasData
-from sasdata.trend import Trend, NamedTrend
+from sasdata.trend import NamedTrend, Trend
 
 from sas.data_explorer_error_message import DataExplorerErrorMessage
 from sas.data_explorer_menu import DataExplorerMenu, DataExplorerMenuAction
