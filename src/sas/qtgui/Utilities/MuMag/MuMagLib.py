@@ -74,8 +74,7 @@ class MuMagLib:
         # Not ideal, would be preferable make sure the data was
         # compatible, using something like interpolation TODO
         q_quantity = trend.data[0].abscissae.axes[0]
-        q_max_in_same_units = parameters.q_max.in_units_of(q_quantity.units)
-        square_distance_from_qmax = (q_quantity - q_max_in_same_units) ** 2
+        square_distance_from_qmax = (q_quantity - parameters.q_max) ** 2
         max_q_index = int(np.argmin(square_distance_from_qmax.value))
 
         applied_fields = trend.get_trend_values("applied_magnetic_field")
