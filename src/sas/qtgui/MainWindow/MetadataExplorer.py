@@ -40,7 +40,7 @@ def get_common_metadata(all_metadata_dicts: list[dict[str, object]]) -> dict[str
         if isinstance(reference_dict[key], dict):
             # TODO: This will break if its a branch in one dict, and not in another. Probably check, and exclude if this is the case.
             return_value[key] = get_common_metadata([cast(dict[str, object], d[key]) for d in all_metadata_dicts])
-        else:
+        elif not (reference_dict[key] == [] or reference_dict[key] is None):
             return_value[key] = 'placeholder'
     return return_value
 
