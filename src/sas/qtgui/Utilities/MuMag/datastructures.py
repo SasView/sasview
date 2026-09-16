@@ -4,6 +4,7 @@ from typing import Generic, TypeVar
 
 import numpy as np
 
+from sasdata.quantities.quantity import Quantity
 from sasdata.trend import Trend
 
 """ Data structures used in MuMag"""
@@ -40,10 +41,10 @@ class ExperimentGeometry(Enum):
 @dataclass
 class FitParameters:
     """ Input parameters for the fit"""
-    q_max: float
-    min_applied_field: float
-    exchange_A_min: float
-    exchange_A_max: float
+    q_max: Quantity
+    min_applied_field: Quantity
+    exchange_A_min: Quantity
+    exchange_A_max: Quantity
     exchange_A_n: int
     experiment_geometry: ExperimentGeometry
 

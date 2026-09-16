@@ -1,4 +1,6 @@
 from sasdata.trend import Trend
+from sasdata.quantities.quantity import Quantity
+from sasdata.quantities.unit_parser import parse_unit
 from typing import override, cast
 from logging import getLogger
 
@@ -168,11 +170,11 @@ class MuMag(Perspective, Ui_MuMagTool):
                 raise ValueError(f"Unknown experiment geometry: {self.ScatteringGeometrySelect.currentText()}")
 
         return FitParameters(
-            q_max=self.qMaxSpinBox.value(),
-            min_applied_field=self.hMinSpinBox.value(),
+            q_max=Quantity(self.qMaxSpinBox.value(), parse_unit("1/nm")),
+            min_applied_field=Quantity(self.hMinSpinBox.value(), parse_unit("mT")),
             exchange_A_n=self.aSamplesSpinBox.value(),
-            exchange_A_min=a_min,
-            exchange_A_max=a_max,
+            exchange_A_min=Quantity(a_min, parse_unit("pJ/m")),
+            exchange_A_max=Quantity(a_max, parse_unit("pJ/m")),
             experiment_geometry=geometry)
 
     def onFit(self):
