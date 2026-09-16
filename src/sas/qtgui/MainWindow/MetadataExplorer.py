@@ -1,3 +1,5 @@
+from typing import cast
+from sasdata.data import SasData
 from sys import argv
 
 from PySide6.QtCore import Qt
@@ -29,6 +31,18 @@ def convert_raw_to_dict(to_convert: MetaNode) -> dict:
         value = value | convert_raw_to_dict(content)
     return {to_convert.name: value}
 
+def get_common_metadata(all_metadata_dicts: list[dict[str, object]]) -> dict[str, object]:
+    return_value: dict[str, object] = {}
+    all_keys = [set(m.keys()) for m in all_metadata_dicts]
+    common_keys = set.intersection(*all_keys)
+    reference_dict = all_metadata_dicts[0]
+    for key in common_keys:
+        if isinstance(reference_dict[key], dict):
+            # TODO: This will break if its a branch in one dict, and not in another. Probably check, and exclude if this is the case.
+            return_value[key] = get_common_metadata([cast(dict[str, object], d[key]) for d in all_metadata_dicts])
+        else:
+            return_value[key] = 'placeholder'
+    return return_value
 
 def metadata_as_dict(to_convert: object):
     converted = to_convert.__dict__.copy()
@@ -37,9 +51,15 @@ def metadata_as_dict(to_convert: object):
 
 
 class MetadataExplorer(QDialog):
-    def __init__(self, metadata: Metadata, filename: str | None, selection_mode: bool = False):
+    def __init__(self, to_explore: Metadata | list[SasData], filename: str | None, selection_mode: bool = False):
         super().__init__()
-        self.metadata_dict = metadata_as_dict(metadata)
+        if isinstance(to_explore, Metadata):
+            self.metadata_dict = metadata_as_dict(to_explore)
+        elif isinstance(to_explore, list):
+            all_metadata_dicts = [metadata_as_dict(data) for data in to_explore]
+            self.metadata_dict = get_common_metadata(all_metadata_dicts)
+
+            
 
         filename_known = filename if filename is not None else "Unknown"
         self.filenameLabel = QLabel(f"Filename: {filename_known}")
