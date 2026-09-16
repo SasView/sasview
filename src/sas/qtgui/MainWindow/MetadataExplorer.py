@@ -56,7 +56,7 @@ class MetadataExplorer(QDialog):
         if isinstance(to_explore, Metadata):
             self.metadata_dict = metadata_as_dict(to_explore)
         elif isinstance(to_explore, list):
-            all_metadata_dicts = [metadata_as_dict(data) for data in to_explore]
+            all_metadata_dicts = [metadata_as_dict(data.metadata) for data in to_explore]
             self.metadata_dict = get_common_metadata(all_metadata_dicts)
 
             
