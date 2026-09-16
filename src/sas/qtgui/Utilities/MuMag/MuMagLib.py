@@ -8,6 +8,7 @@ import scipy.optimize
 from PySide6.QtWidgets import QFileDialog
 
 from sasdata.dataloader.loader import Loader
+from sasdata.quantities.unit_parser import parse_unit
 from sasdata.trend import Trend
 
 from sas.qtgui.Utilities.MuMag.datastructures import (
@@ -72,12 +73,14 @@ class MuMagLib:
         # Use an index for data upto qmax based on first data set
         # Not ideal, would be preferable make sure the data was
         # compatible, using something like interpolation TODO
-        q_values = trend.data[0].abscissae.axes[0]
-        square_distance_from_qmax = (q_values - parameters.q_max) ** 2
-        max_q_index = int(np.argmin(square_distance_from_qmax))
+        q_quantity = trend.data[0].abscissae.axes[0]
+        q_max_in_same_units = parameters.q_max.in_units_of(q_quantity.units)
+        square_distance_from_qmax = (q_quantity - q_max_in_same_units) ** 2
+        max_q_index = int(np.argmin(square_distance_from_qmax.value))
 
         applied_fields = trend.get_trend_values("applied_magnetic_field")
-        filtered_indices = [i for i, field in enumerate(applied_fields) if field >= parameters.min_applied_field]
+        min_applied_field_value = parameters.min_applied_field.value
+        filtered_indices = [i for i, field in enumerate(applied_fields) if field >= min_applied_field_value]
         filtered_data = [trend.data[i] for i in filtered_indices]
         filtered_trend_axes = {
             name: [trend.get_trend_values(name)[i] for i in filtered_indices]
@@ -108,9 +111,13 @@ class MuMagLib:
         """ Sweep over Exchange Stiffness A for perpendicular SANS geometry to
         get an initial estimate which can then be refined"""
 
+        # Convert to pJ/m for linspace, then back to Quantity
+        a_min_pj = parameters.exchange_A_min.in_units_of(parse_unit("pJ/m")).value
+        a_max_pj = parameters.exchange_A_max.in_units_of(parse_unit("pJ/m")).value
+
         a_values = np.linspace(
-            parameters.exchange_A_min,
-            parameters.exchange_A_max,
+            a_min_pj,
+            a_max_pj,
             parameters.exchange_A_n) * 1e-12  # From pJ/m to J/m
 
         if parameters.experiment_geometry == ExperimentGeometry.PERPENDICULAR:
