@@ -2,15 +2,17 @@ from PySide6.QtCore import QObject, Signal
 from PySide6.QtWidgets import QDialog
 
 from sasdata.data import SasData
+from sasdata.trend import Trend
 
 from sas.refactored import Perspective
 
 # TODO: Add plots to this type.
-TrackedData = SasData | Perspective
+TrackedData = SasData | Perspective | Trend
 
 # TODO: Probably want to handle order, if that is even relevant.
 valid_associations: list[tuple[str | type, str | type]] = [
-    ('Perspective', SasData)
+    ('Perspective', SasData),
+    (Trend, SasData)
     # TODO: Include plots
 ]
 
@@ -100,14 +102,31 @@ class NewDataManager(QObject):
         self.associations.append(proposed_assoc)
         self.new_association.emit(data_1, data_2)
 
-    def get_association(self, data: TrackedData) -> TrackedData:
+    def get_association_or_none(self, data: TrackedData) -> TrackedData | None:
         for assoc in self.associations:
             if data in assoc:
                 return assoc[0] if assoc[0] != data else assoc[1]
-        raise ValueError('Association not found.')
+        return None
+
+    def get_association(self, data: TrackedData) -> TrackedData:
+        association = self.get_association_or_none(data)
+        if association:
+            return association
+        else:
+            raise ValueError("Association not found")
 
     def get_all_associations(self, data: TrackedData) -> list[TrackedData]:
         return [assoc[0] if assoc[0] != data else assoc[1] for assoc in self.associations if data in assoc]
+
+    def register_trend(self, trend: Trend):
+        self.add_data(trend)
+        for datum in trend.data:
+            self.make_association(trend, datum)
+
+    @property
+    def default_new_trend_name(self) -> str:
+        trend_number = sum(isinstance_fix(obj, Trend) for obj in self._all_data_entries) + 1
+        return f"Trend #{trend_number}"
 
     @property
     def all_data(self) -> list[TrackedData]:

@@ -77,3 +77,4 @@ class Theory:
     # at the current SasView codebase, it seems they are all just Data1Ds with
     # nothing else special.
     pass
+
