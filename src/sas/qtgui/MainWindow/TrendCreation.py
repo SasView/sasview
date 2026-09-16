@@ -96,7 +96,7 @@ class TrendCreation(QDialog):
         # 2. Only show metadata in the explorer which the data objects share.
         # This is probably trickier to implement but would also be the most
         # flexible.
-        metadata_dialog = MetadataExplorer(self.target_data[0].metadata, "New Trend", True)
+        metadata_dialog = MetadataExplorer(self.target_data, "New Trend", True)
         result = metadata_dialog.exec()
         if result == QDialog.DialogCode.Accepted:
             for axis_path in metadata_dialog.getSelectedPaths:
