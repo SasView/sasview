@@ -1,17 +1,21 @@
-# Generate the matrix of jobs to run tests, build docs, build installers
-#
-# run `python .github/workflows/matrix.py --json` to see the output
-#
-# Philosophy:
-# - test everything
-# - get unittest results back as fast as possible, burning extra CPU time
-#   to do that if necessary
-# - sphinx is slow, build documentation separately to running the unittests
-# - pyinstaller is slow, run it separately to running the unittests
+#!/usr/bin/env python
+"""
+Generate the matrix of jobs to run tests, build docs, build installers
+
+ run `python .github/workflows/matrix.py --json` to see the output
+
+Philosophy:
+ - test everything
+ - get unittest results back as fast as possible, burning extra CPU time
+   to do that if necessary
+ - sphinx is slow, build documentation separately to running the unittests
+ - pyinstaller is slow, run it separately to running the unittests
+"""
 
 import json
 import os
 import sys
+from typing import Any
 
 pretty = "--pretty" in sys.argv
 is_push_event = os.environ.get("GITHUB_EVENT_NAME", "") == "push"
@@ -55,58 +59,74 @@ python_test_list = python_release_list + [
 # On push events, only test the latest Python version to avoid duplicating
 # work when a pull_request event fires for the same commit.
 if is_push_event:
-    python_test_list = [max(python_test_list, key=lambda v: tuple(int(x) for x in v.split(".")))]
+    python_test_list = [
+        max(python_test_list, key=lambda v: tuple(int(x) for x in v.split(".")))
+    ]
 
 
-def truthy(val):
-    # the json importer in the github actions doesn't cope with true, false,
-    # or none particularly nicely; making this output only 0/1 as integers
-    # simplifies all the conditionals in the yml file.
+def truthy(val: Any) -> int:
+    """Convert various truthy values to integer for the json exporter
+
+    The json importer in the github actions doesn't cope with true, false,
+    or none particularly nicely; making this output only 0/1 as integers
+    simplifies all the conditionals in the yml file.
+    """
     return int(bool(val))
 
 
-def entry(job_name="Job", os=None, pyver=None, tests=None, docs=None, installer=None):
-    # Stuff the values into a dict that will appear in the json;
-    # make sure all entries have all keys even if not specified for that
-    # job so that validating the matrix or fallbacks for missing keys are
-    # not needed in the yml file.
+def entry(
+    job_name: str = "Job",
+    os_name: str | None = None,
+    pyver: str | None = None,
+    tests: bool = False,
+    installer: bool = False,
+) -> dict[str, str | int]:
+    """Construct a dict of the job requirements for json export
+
+    Stuff the values into a dict that will appear in the json;
+    make sure all entries have all keys even if not specified for that
+    job so that validating the matrix or fallbacks for missing keys are
+    not needed in the yml file.
+    """
     return {
         "job_name": job_name,
-        "os": os or os_release_list[0],
+        "os": os_name or os_release_list[0],
         "python-version": pyver or python_release_list[0],
         "tests": truthy(tests),
         "installer": truthy(installer),
     }
 
 
-## Construct the list of jobs for build+test
+# Construct the list of jobs for build+test
+#
 # Test all the OS/pyver combinations as quickly as possible to get unittest
 # results back to the author; docs and installer are much slower, so
 # leave them for a separate build.
-for os in os_test_list:
-    for pyver in python_test_list:
+for os_test_name in os_test_list:
+    for pyver_name in python_test_list:
         test_jobs.append(
             entry(
-                job_name=f"Test ({os}, {pyver})",
-                os=os,
-                pyver=pyver,
+                job_name=f"Test ({os_test_name}, {pyver_name})",
+                os_name=os_test_name,
+                pyver=pyver_name,
                 tests=True,
                 installer=False,
             )
         )
 
 
-## Construct the list of jobs for the installer
+# Construct the list of jobs for the installer
+#
 # Building the installer needs the docs but not the tests; this is a simple
 # time optimisation to get the installer built faster, since the tests
 # take a bit of time to run and are already run in the 'test' jobs.
-for os in os_release_list:
-    for pyver in python_release_list:
+for os_release_name in os_release_list:
+    for pyver_name in python_release_list:
         installer_jobs.append(
             entry(
-                job_name=f"Installer ({os}, {pyver})",
-                os=os,
-                pyver=pyver,
+                job_name=f"Installer ({os_release_name}, {pyver_name})",
+                os_name=os_release_name,
+                pyver=pyver_name,
                 tests=False,
                 installer=True,
             )
