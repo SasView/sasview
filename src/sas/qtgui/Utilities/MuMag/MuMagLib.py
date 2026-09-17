@@ -180,11 +180,11 @@ class MuMagLib:
         #
         # q = np.array([data_nanometers(datum.scattering_curve) for datum in data])
 
-        q = np.array([datum.abscissae.axes[0][:max_q_index] for datum in trend.data]) * 1e9
-        I = np.array([datum.ordinate.axes[0][:max_q_index] for datum in trend.data])
+        q = np.array([datum.abscissae.axes[0].value[:max_q_index] for datum in trend.data]) * 1e9
+        I = np.array([datum.ordinate.axes[0].value[:max_q_index] for datum in trend.data])
         # Try to get errors, use unit errors if not available
         try:
-            I_stdev = np.array([datum["dI"].axes[0][:max_q_index] for datum in trend.data])
+            I_stdev = np.array([datum["dI"].axes[0].value[:max_q_index] for datum in trend.data])
         except KeyError:
             I_stdev = np.ones_like(I)
 
