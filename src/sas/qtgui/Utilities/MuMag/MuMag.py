@@ -133,13 +133,13 @@ class MuMag(Perspective, Ui_MuMagTool):
         for i, datum in enumerate(self.trend.data):
 
             self.data_axes.loglog(datum.abscissae.axes[0],
-                      datum.ordinate.axes[0],
-                      linestyle='-', color=colors[i], linewidth=0.5,
-                      label=r'$B_0 = ' + applied_fields[i].explicitly_formatted("T") + '$')
+                       datum.ordinate.axes[0],
+                       linestyle='-', color=colors[i], linewidth=0.5,
+                       label=r'$B_0 = ' + applied_fields[i].explicitly_formatted("T") + '$')
 
             self.data_axes.loglog(datum.abscissae.axes[0],
-                      datum.ordinate.axes[0], '.',
-                      color=colors[i], linewidth=0.3, markersize=1)
+                       datum.ordinate.axes[0], '.',
+                       color=colors[i], linewidth=0.3, markersize=1)
 
         # Plot limits
         qlim = MuMagLib.nice_log_plot_bounds([datum.abscissae.axes[0] for datum in self.trend.data])
@@ -219,7 +219,7 @@ class MuMag(Perspective, Ui_MuMagTool):
         refined = self.fit_data.refined_fit_data
         sweep_data = self.fit_data.sweep_data
 
-        q = refined.q * 1e-9
+        q = (refined.q * 1e-9).value
 
         # Update text boxes
 
@@ -240,15 +240,15 @@ class MuMag(Perspective, Ui_MuMagTool):
         self.longitudinal_scattering_axes.cla()
 
         # Plot A search data
-        self.chi_squared_axes.plot(sweep_data.exchange_A_checked * 1e12, sweep_data.exchange_A_chi_sq)
-        self.chi_squared_axes.plot(sweep_data.optimal.exchange_A * 1e12, sweep_data.optimal.exchange_A_chi_sq, 'o')
+        self.chi_squared_axes.plot((sweep_data.exchange_A_checked * 1e12).value, sweep_data.exchange_A_chi_sq)
+        self.chi_squared_axes.plot((sweep_data.optimal.exchange_A * 1e12).value, sweep_data.optimal.exchange_A_chi_sq, 'o')
 
-        self.chi_squared_axes.set_xlim([min(sweep_data.exchange_A_checked * 1e12), max(sweep_data.exchange_A_checked * 1e12)])
+        self.chi_squared_axes.set_xlim([min((sweep_data.exchange_A_checked * 1e12).value), max((sweep_data.exchange_A_checked * 1e12).value)])
         self.chi_squared_axes.set_xlabel('$A$ [pJ/m]')
         self.chi_squared_axes.set_ylabel(r'$\chi^2$')
 
         # Residual intensity plot
-        self.residual_axes.plot(q, refined.I_residual, label='fit')
+        self.residual_axes.plot(q, refined.I_residual.value, label='fit')
         self.residual_axes.set_yscale('log')
         self.residual_axes.set_xscale('log')
         self.residual_axes.set_xlim([min(q), max(q)])
@@ -256,7 +256,7 @@ class MuMag(Perspective, Ui_MuMagTool):
         self.residual_axes.set_ylabel(r'$I_{\mathrm{res}}$')
 
         # S_H parameter
-        self.s_h_axes.plot(q, refined.S_H, label='fit')
+        self.s_h_axes.plot(q, refined.S_H.value, label='fit')
         self.s_h_axes.set_yscale('log')
         self.s_h_axes.set_xscale('log')
         self.s_h_axes.set_xlim([min(q), max(q)])
@@ -265,7 +265,7 @@ class MuMag(Perspective, Ui_MuMagTool):
 
         # S_M parameter
         if isinstance(refined, LeastSquaresOutputPerpendicular):
-            self.longitudinal_scattering_axes.plot(q, refined.S_M, label='fit')
+            self.longitudinal_scattering_axes.plot(q, refined.S_M.value, label='fit')
             self.longitudinal_scattering_axes.set_yscale('log')
             self.longitudinal_scattering_axes.set_xscale('log')
             self.longitudinal_scattering_axes.set_xlim([min(q), max(q)])
@@ -284,19 +284,19 @@ class MuMag(Perspective, Ui_MuMagTool):
         #
 
         # Plot limits
-        qlim = MuMagLib.nice_log_plot_bounds([datum.abscissae.axes[0] for datum in self.fit_data.input_trend.data])
-        ilim = MuMagLib.nice_log_plot_bounds([datum.ordinate.axes[0] for datum in self.fit_data.input_trend.data])
+        qlim = MuMagLib.nice_log_plot_bounds([datum.abscissae.axes[0].value for datum in self.fit_data.input_trend.data])
+        ilim = MuMagLib.nice_log_plot_bounds([datum.ordinate.value for datum in self.fit_data.input_trend.data])
 
         # Show the experimental data
         colors = pl.cm.jet(np.linspace(0, 1, len(self.fit_data.input_trend.data)))
         for k, datum in enumerate(self.fit_data.input_trend.data):
             self.comparison_axes.loglog(
-                datum.abscissae.axes[0],
-                datum.ordinate.axes[0],
+                datum.abscissae.axes[0].value,
+                datum.ordinate.value,
                 linestyle='None', color=colors[k], marker='x')
 
         # Show the fitted curves
-        n_sim = self.fit_data.refined_fit_data.I_simulated.shape[0]
+        n_sim = self.fit_data.refined_fit_data.I_simulated.value.shape[0]
         applied_fields = [
             Quantity(float(value), parse_unit("mT"))
             for value in self.fit_data.input_trend.get_trend_values("applied_magnetic_field")
@@ -304,8 +304,8 @@ class MuMag(Perspective, Ui_MuMagTool):
         colors = pl.cm.jet(np.linspace(0, 1, n_sim))
         for k in range(n_sim):
             self.comparison_axes.loglog(
-                self.fit_data.refined_fit_data.q * 1e-9,
-                self.fit_data.refined_fit_data.I_simulated[k, :],
+                (self.fit_data.refined_fit_data.q * 1e-9).value,
+                self.fit_data.refined_fit_data.I_simulated.value[k, :],
                 linestyle='solid', color=colors[k],
                 label='B_0 = ' + applied_fields[k].explicitly_formatted("T"))
 
