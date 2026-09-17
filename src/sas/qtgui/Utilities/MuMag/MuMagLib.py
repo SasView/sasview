@@ -192,14 +192,14 @@ class MuMagLib:
 
         # Micromagnetic Model
         internal_field = (applied_field - demagnetising_field).reshape(-1, 1)
-        magnetic_scattering_length = np.sqrt(
-            (2 * A) / (MuMagLib.mu_0 * saturation_magnetisation.reshape(-1, 1) * internal_field))
+        magnetic_scattering_length = (
+            (2 * A) / (MuMagLib.mu_0 * saturation_magnetisation.reshape(-1, 1) * internal_field)) ** 0.5
         effective_field = internal_field * (1 + (magnetic_scattering_length ** 2) * (q ** 2))
 
         # Calculate the response functions
         p = saturation_magnetisation.reshape(-1, 1) / effective_field
-        response_H = (p ** 2) / 4 * (2 + 1 / np.sqrt(1 + p))
-        response_M = (np.sqrt(1 + p) - 1) / 2
+        response_H = (p ** 2) / 4 * (2 + 1 / (1 + p) ** 0.5)
+        response_M = ((1 + p) ** 0.5 - 1) / 2
 
         # print("Input", q.shape, q[0,10])
         # sys.exit()
@@ -249,9 +249,9 @@ class MuMagLib:
 
         s_q = np.mean(((I - I_sim) / I_stdev) ** 2, axis=0)
 
-        sigma_I_res = np.sqrt(np.abs(np.array(I_residual_error_weight) * s_q))
-        sigma_S_H = np.sqrt(np.abs(np.array(S_H_error_weight) * s_q))
-        sigma_S_M = np.sqrt(np.abs(np.array(S_M_error_weight) * s_q))
+        sigma_I_res = (np.abs(np.array(I_residual_error_weight) * s_q)) ** 0.5
+        sigma_S_H = (np.abs(np.array(S_H_error_weight) * s_q)) ** 0.5
+        sigma_S_M = (np.abs(np.array(S_M_error_weight) * s_q)) ** 0.5
 
         chi_sq = float(np.mean(s_q))
 
@@ -316,8 +316,8 @@ class MuMagLib:
 
         # Micromagnetic Model
         internal_field = (applied_field - demagnetising_field).reshape(-1, 1)
-        magnetic_scattering_length = np.sqrt(
-            (2 * A) / (MuMagLib.mu_0 * saturation_magnetisation.reshape(-1, 1) * internal_field))
+        magnetic_scattering_length = (
+            (2 * A) / (MuMagLib.mu_0 * saturation_magnetisation.reshape(-1, 1) * internal_field)) ** 0.5
         effective_field = internal_field * (1 + (magnetic_scattering_length ** 2) * (q ** 2))
 
         # Calculate the response functions
@@ -364,8 +364,8 @@ class MuMagLib:
 
         s_q = np.mean(((I - I_sim) / I_stdev) ** 2, axis=0)
 
-        sigma_I_res = np.sqrt(np.abs(np.array(I_residual_error_weight) * s_q))
-        sigma_S_H = np.sqrt(np.abs(np.array(S_H_error_weight) * s_q))
+        sigma_I_res = (np.abs(np.array(I_residual_error_weight) * s_q)) ** 0.5
+        sigma_S_H = (np.abs(np.array(S_H_error_weight) * s_q)) ** 0.5
 
         chi_sq = float(np.mean(s_q))
 
@@ -468,7 +468,7 @@ class MuMagLib:
         n_field_strengths = len(trend.data)  # Number of fields
         n_q = max_q_index  # Number of q points
 
-        return np.sqrt(2 / (n_field_strengths * n_q * d2chi_dA2))
+        return (2 / (n_field_strengths * n_q * d2chi_dA2)) ** 0.5
 
     @staticmethod
     def _filename_string(trend: Trend, index: int):
