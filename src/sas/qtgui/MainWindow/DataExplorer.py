@@ -22,6 +22,7 @@ from sas import config
 from sas.qtgui.MainWindow.DataManager import DataManager
 from sas.qtgui.MainWindow.DroppableDataLoadWidget import DroppableDataLoadWidget
 from sas.qtgui.MainWindow.NameChanger import ChangeName
+from sas.qtgui.MainWindow.WorkspaceManager import workspace_manager_for
 from sas.qtgui.Plotting.MaskEditor import MaskEditor
 
 # DO NOT REMOVE THE IMPORT BELOW - used in dynamic plotter creation
@@ -62,7 +63,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Be careful with twisted threads.
         self.mutex = QtCore.QMutex()
 
-        # Plot widgets {name:widget}, required to keep track of plots shown as MDI subwindows
+        # Plot widgets {plot id: plot widget}, for plots hosted by the workspace manager
         self.plot_widgets = {}
 
         # Active plots {id:Plotter1D/2D}, required to keep track of currently displayed plots
@@ -1071,6 +1072,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         if not self.active_plots:
             return
+        # Forget plots that are no longer registered, however they were closed
+        for plot_id in list(self.plot_widgets.keys()):
+            if plot_id not in graph_list:
+                self.plot_widgets.pop(plot_id, None)
+
         new_plots = [PlotHelper.plotById(plot) for plot in graph_list]
         active_plots_copy = list(self.active_plots.keys())
         for plot in active_plots_copy:
@@ -1189,7 +1195,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if main_data is not None:
             if isinstance(main_data, Data2D):
                 if self.isPlotShown(main_data):
-                    self.active_plots[main_data.name].showNormal()
+                    self.activatePlot(self.active_plots[main_data.name])
                 else:
                     self.plotData([(plot_item, main_data)])
 
@@ -1345,19 +1351,21 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Set the object name to satisfy the Squish object picker
         new_plot.setObjectName(title)
 
-        # Add the plot to the workspace
-        plot_widget = self.parent.workspace().addSubWindow(new_plot)
-        if sys.platform == 'darwin':
-            workspace_height = int(float(self.parent.workspace().sizeHint().height()) / 2)
-            workspace_width = int(float(self.parent.workspace().sizeHint().width()) / 2)
-            plot_widget.resize(workspace_width, workspace_height)
-
-        # Show the plot
-        new_plot.show()
+        # Add the plot to the workspace, or to its own window if the user prefers
+        workspace_manager = self.workspaceManager()
+        if workspace_manager is not None:
+            detached = bool(config.OPEN_PLOTS_DETACHED)
+            container = workspace_manager.add(new_plot, detached=detached)
+            if sys.platform == 'darwin' and not detached:
+                workspace_height = int(float(workspace_manager.mdi().sizeHint().height()) / 2)
+                workspace_width = int(float(workspace_manager.mdi().sizeHint().width()) / 2)
+                container.resize(workspace_width, workspace_height)
+        else:
+            new_plot.show()
         new_plot.canvas.draw()
 
         # Update the plot widgets dict
-        self.plot_widgets[title] = plot_widget
+        self.plot_widgets[title] = new_plot
 
         # Update the active chart list
         self.active_plots[new_plot.data[0].name] = new_plot
@@ -1416,7 +1424,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             if data.plot_role != DataRole.ROLE_DATA:
                 self.active_plots[data_id].replacePlot(data_id, data)
                 # restore minimized window, if applicable
-                self.active_plots[data_id].showNormal()
+                self.activatePlot(self.active_plots[data_id])
             return True
         #elif data_id in ids_vals:
         #    if data.plot_role != DataRole.ROLE_DATA:
@@ -1971,25 +1979,58 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Close all currently displayed plots
         """
+        workspace_manager = self.workspaceManager()
         # results panel
-        self.parent.results_frame.setVisible(False)
+        if workspace_manager is not None:
+            workspace_manager.set_visible(self.parent.results_panel, False)
         # plots
         for plot_id in PlotHelper.currentPlotIds():
             try:
-                plotter = PlotHelper.plotById(plot_id)
-                plotter.close()
-                self.plot_widgets[plot_id].close()
-                self.plot_widgets.pop(plot_id, None)
-            except AttributeError as ex:
+                self.closePlot(PlotHelper.plotById(plot_id))
+            except (AttributeError, RuntimeError) as ex:
                 logger.error("Closing of %s failed:\n %s" % (plot_id, str(ex)))
 
     def minimizeAllPlots(self):
         """
         Minimize all currently displayed plots
         """
+        workspace_manager = self.workspaceManager()
         for plot_id in PlotHelper.currentPlotIds():
             plotter = PlotHelper.plotById(plot_id)
-            plotter.showMinimized()
+            if plotter is None:
+                continue
+            if workspace_manager is not None:
+                workspace_manager.minimize(plotter)
+            else:
+                plotter.showMinimized()
+
+    def workspaceManager(self):
+        """
+        The application's WorkspaceManager, or None when running without a main window
+        """
+        return workspace_manager_for(self.parent)
+
+    def closePlot(self, plotter):
+        """
+        Close a plot through its window, so the window is disposed of as well.
+        Plot bookkeeping is updated by the plot's close notification.
+        """
+        if plotter is None:
+            return False
+        workspace_manager = self.workspaceManager()
+        if workspace_manager is not None:
+            return workspace_manager.close(plotter)
+        return plotter.close()
+
+    def activatePlot(self, plotter):
+        """
+        Restore, raise and focus a plot, whether attached or detached
+        """
+        workspace_manager = self.workspaceManager()
+        if workspace_manager is not None and workspace_manager.is_hosted(plotter):
+            workspace_manager.activate(plotter)
+        else:
+            plotter.showNormal()
 
     def closePlotsForItem(self, item):
         """
@@ -2021,10 +2062,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     plotter = PlotHelper.plotById(plot_name)
                     # try to delete the plot
                     try:
-                        plotter.close()
-                        self.plot_widgets[plot_name].close()
-                        self.plot_widgets.pop(plot_name, None)
-                    except AttributeError as ex:
+                        self.closePlot(plotter)
+                    except (AttributeError, RuntimeError) as ex:
                         logger.error("Closing of %s failed:\n %s" % (plot_name, str(ex)))
 
         pass  # debugger anchor

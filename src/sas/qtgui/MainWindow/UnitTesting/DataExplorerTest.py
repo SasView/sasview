@@ -6,7 +6,16 @@ import pytest
 from PySide6.QtCore import QItemSelectionModel, QPoint, QSize, QSortFilterProxyModel, Qt
 from PySide6.QtGui import QIcon, QStandardItem, QStandardItemModel
 from PySide6.QtTest import QTest
-from PySide6.QtWidgets import QApplication, QFileDialog, QMessageBox, QTabWidget, QTreeView, QWidget
+from PySide6.QtWidgets import (
+    QApplication,
+    QFileDialog,
+    QMainWindow,
+    QMdiArea,
+    QMessageBox,
+    QTabWidget,
+    QTreeView,
+    QWidget,
+)
 
 from sasdata.dataloader.loader import Loader
 
@@ -14,8 +23,10 @@ import sas.qtgui.Plotting.PlotHelper as PlotHelper
 
 # Local
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas import config
 from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
 from sas.qtgui.MainWindow.DataManager import DataManager
+from sas.qtgui.MainWindow.WorkspaceManager import FloatingWindow, WorkspaceManager
 from sas.qtgui.Plotting.Plotter import Plotter
 from sas.qtgui.Plotting.Plotter2D import Plotter2D
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
@@ -79,6 +90,20 @@ class DataExplorerTest:
         f = DataExplorerWindow(None, dummy_manager())
         yield f
         f.close()
+
+    @pytest.fixture
+    def workspace(self, form):
+        '''Give the dummy GUI manager a real workspace, so plots are hosted as in the application'''
+        window = QMainWindow()
+        mdi = QMdiArea()
+        window.setCentralWidget(mdi)
+        window.show()
+        manager = WorkspaceManager(mdi, window)
+        form.parent.workspace_manager = manager
+        yield manager
+        window.close()
+        window.deleteLater()
+        QApplication.processEvents()
 
     def testDefaults(self, form):
         '''Test the GUI in its default state'''
@@ -574,7 +599,7 @@ class DataExplorerTest:
         # Assure add_data on data_manager was called (last call)
         form.manager.add_data.assert_called()
 
-    def testNewPlot1D(self, form, mocker):
+    def testNewPlot1D(self, form, workspace, mocker):
         """
         Creating new plots from Data1D/2D
         """
@@ -598,8 +623,7 @@ class DataExplorerTest:
         # Mask retrieval of the data
         mocker.patch.object(GuiUtils, 'plotsFromCheckedItems', return_value=new_data)
 
-        # Mask plotting
-        mocker.patch.object(form.parent, 'workspace')
+        # Plots are hosted by the workspace fixture
 
         # Call the plotting method
         form.newPlot()
@@ -613,7 +637,7 @@ class DataExplorerTest:
         assert form.cbgraph.isEnabled()
         assert form.cmdAppend.isEnabled()
 
-    def testNewPlot2D(self, form, mocker):
+    def testNewPlot2D(self, form, workspace, mocker):
         """
         Creating new plots from Data1D/2D
         """
@@ -634,8 +658,7 @@ class DataExplorerTest:
         # Mask retrieval of the data
         mocker.patch.object(GuiUtils, 'plotsFromCheckedItems', return_value=new_data)
 
-        # Mask plotting
-        mocker.patch.object(form.parent, 'workspace')
+        # Plots are hosted by the workspace fixture
 
         # Call the plotting method
         #form.newPlot()
@@ -647,7 +670,7 @@ class DataExplorerTest:
         #assert form.cbgraph.isEnabled()
         #assert form.cmdAppend.isEnabled()
 
-    def testAppendPlot(self, form, mocker):
+    def testAppendPlot(self, form, workspace, mocker):
         """
         Creating new plots from Data1D/2D
         """
@@ -667,8 +690,7 @@ class DataExplorerTest:
         output_item = QStandardItem()
         new_data = [(output_item, manager.create_gui_data(output_object[0], p_file))]
 
-        # Mask plotting
-        mocker.patch.object(form.parent, 'workspace')
+        # Plots are hosted by the workspace fixture
 
         # Mask the plot show call
         mocker.patch.object(Plotter, 'show')
@@ -1081,7 +1103,7 @@ class DataExplorerTest:
         # Assure the model contains no items
         assert form.model.rowCount() == 0
 
-    def testClosePlotsForItem(self, form, mocker):
+    def testClosePlotsForItem(self, form, workspace, mocker):
         """
         Delete selected item from data explorer should also delete corresponding plots
         """
@@ -1101,8 +1123,7 @@ class DataExplorerTest:
         filename = [str(base_path / "cyl_400_20.txt")]
         form.readData(filename)
 
-        # Mask plotting
-        mocker.patch.object(form.parent, 'workspace')
+        # Plots are hosted by the workspace fixture
 
         # Call the plotting method
         form.newPlot()
@@ -1126,6 +1147,33 @@ class DataExplorerTest:
         # See that no plot remained
         assert len(PlotHelper.currentPlotIds()) == 0
         assert len(form.plot_widgets) == 0
+        assert workspace.hosted_widgets(include_hidden=True) == []
+
+    def testNewPlotOpensDetachedWhenPreferred(self, form, workspace, mocker):
+        '''New plots open in their own window when the preference is set'''
+        loader = Loader()
+        manager = DataManager()
+        PlotHelper.clear()
+        p_file = str(base_path / "cyl_400_20.txt")
+        output_object = loader.load([p_file])
+        new_data = [(QStandardItem(), manager.create_gui_data(output_object[0], p_file))]
+        mocker.patch.object(GuiUtils, 'plotsFromCheckedItems', return_value=new_data)
+        mocker.patch.object(config, 'OPEN_PLOTS_DETACHED', True)
+
+        form.newPlot()
+        QApplication.processEvents()
+
+        assert len(form.plot_widgets) == 1
+        plot = list(form.plot_widgets.values())[0]
+        assert workspace.is_detached(plot)
+        assert isinstance(workspace.container_of(plot), FloatingWindow)
+
+        # Closing the floating window closes the plot and updates every registry
+        workspace.container_of(plot).close()
+        QApplication.processEvents()
+        assert len(PlotHelper.currentPlotIds()) == 0
+        assert len(form.plot_widgets) == 0
+        assert not workspace.is_hosted(plot)
 
     def testPlotsFromMultipleData1D(self, form):
         """

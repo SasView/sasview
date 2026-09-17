@@ -659,17 +659,15 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         """
         Overwrite QDialog close method to allow for custom widget close
         """
+        # The window hosting the perspective (attached or detached) is owned by the
+        # WorkspaceManager, which disposes of it on an accepted close and minimises
+        # it when the close is refused.
         if self._allow_close:
             # reset the closability flag
             self.setClosable(value=False)
-            # Tell the MdiArea to close the container if it is visible
-            if self.parentWidget():
-                self.parentWidget().close()
             event.accept()
         else:
             event.ignore()
-            # Maybe we should just minimize
-            self.setWindowState(QtCore.Qt.WindowMinimized)
 
     def on_extrapolation_text_editing(self):
         """Handle when user edits any of the extrapolation text boxes"""

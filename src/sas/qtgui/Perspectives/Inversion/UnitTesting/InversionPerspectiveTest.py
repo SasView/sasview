@@ -8,6 +8,7 @@ from PySide6 import QtGui, QtWidgets
 mpl.use("Qt5Agg")
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.MainWindow.WorkspaceManager import WorkspaceManager
 from sas.qtgui.Perspectives.Inversion.InversionPerspective import InversionWindow
 from sas.qtgui.Perspectives.Inversion.InversionUtils import WIDGETS
 from sas.qtgui.Plotting.PlotterData import Data1D
@@ -15,6 +16,17 @@ from sas.qtgui.Utilities.GuiUtils import Communicate
 
 logger = logging.getLogger(__name__)
 
+
+
+def host_in_workspace(widget):
+    """Host a perspective in a workspace window, as the application does"""
+    window = QtWidgets.QMainWindow()
+    mdi = QtWidgets.QMdiArea()
+    window.setCentralWidget(mdi)
+    window.show()
+    manager = WorkspaceManager(mdi, window)
+    manager.add(widget)
+    return window, manager
 
 class InversionTest:
     """ Test the Inversion Perspective GUI """
@@ -201,14 +213,20 @@ class InversionTest:
     @pytest.mark.skip(reason="2026-02: Freezing on launch")
     def testClose(self, widget):
         """ Test methods related to closing the window """
+        window, manager = host_in_workspace(widget)
+        container = manager.container_of(widget)
+        # A perspective that is not closable refuses; its window is minimised instead
         assert not widget.isClosable()
-        widget.close()
-        assert widget.isMinimized()
+        assert not manager.close(widget)
+        assert container.isMinimized()
         assert widget.currentTab.dmaxWindow is None
+        manager.activate(widget)
         widget.setClosable(False)
         assert not widget.isClosable()
-        widget.close()
-        assert widget.isMinimized()
+        assert not manager.close(widget)
+        assert container.isMinimized()
+        manager.remove(widget)
+        window.close()
         widget.setClosable(True)
         assert widget.isClosable()
         widget.setClosable()

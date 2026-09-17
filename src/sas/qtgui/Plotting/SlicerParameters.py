@@ -3,7 +3,6 @@
 Allows users to modify the box slicer parameters.
 """
 
-import functools
 import logging
 import os
 from enum import Enum
@@ -15,7 +14,7 @@ from sasdata.file_converter.nxcansas_writer import NXcanSASWriter
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas import config
-from sas.qtgui.Plotting import PlotHelper
+from sas.qtgui.MainWindow.WorkspaceManager import workspace_manager_for
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.Slicers.AnnulusSlicer import AnnulusInteractor
 from sas.qtgui.Plotting.Slicers.BoxSlicer import BoxInteractorX, BoxInteractorY
@@ -311,7 +310,8 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         self.cmdHelp.clicked.connect(self.onHelp)
 
         # Close doesn't trigger closeEvent automatically, so force it
-        self.cmdClose.clicked.connect(functools.partial(self.closeEvent, None))
+        # Start a real close, so the owner is notified once and the window is disposed of
+        self.cmdClose.clicked.connect(self.close)
 
         # Apply slicer to selected plots
         self.cmdApply.clicked.connect(self.onApply)
@@ -521,16 +521,15 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
                 plot_name = item.text()
                 plot_widget = item.data(QtCore.Qt.UserRole)
 
-                # Get the plot ID for PlotHelper cleanup
-                plot_id = PlotHelper.idOfPlot(plot_widget)
-
-                # Close the plot window if it exists
+                # Close the plot together with its window, attached or detached.
+                # The plot's own close handler removes it from PlotHelper, and the
+                # Data Explorer then drops it from its plot registries.
                 if hasattr(plot_widget, 'close'):
-                    plot_widget.close()
-
-                # Remove from PlotHelper
-                if plot_id:
-                    PlotHelper.deletePlot(plot_id)
+                    workspace_manager = workspace_manager_for(self.parent)
+                    if workspace_manager is not None:
+                        workspace_manager.close(plot_widget)
+                    else:
+                        plot_widget.close()
 
                 # Remove from parent's slicer_plots_dict
                 if plot_name in self.parent.slicer_plots_dict:
@@ -539,14 +538,6 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
                 # Remove from active plots if present
                 if plot_name in self.active_plots:
                     del self.active_plots[plot_name]
-
-                # Remove from the manager's plot_widgets if it exists
-                if hasattr(self.parent.manager, 'plot_widgets') and plot_id in self.parent.manager.plot_widgets:
-                    subwindow = self.parent.manager.plot_widgets[plot_id]
-                    # Remove from workspace
-                    if hasattr(self.parent.manager.parent, 'workspace'):
-                        self.parent.manager.parent.workspace().removeSubWindow(subwindow)
-                    del self.parent.manager.plot_widgets[plot_id]
 
                 # Remove from the list widget
                 self.lstSlicerPlots.takeItem(row)
@@ -691,7 +682,8 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         """
         key = event.key()
         if key == QtCore.Qt.Key_Escape:
-            self.closeWidgetSignal.emit()
+            # Close properly, so the window is disposed of and the owner notified once
+            self.close()
 
     def closeEvent(self, event):
         """
@@ -699,8 +691,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         signal to the parent.
         """
         self.closeWidgetSignal.emit()
-        if event:
-            event.accept()
+        event.accept()
 
     def onHelp(self):
         """

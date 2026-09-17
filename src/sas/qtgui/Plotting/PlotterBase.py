@@ -10,6 +10,7 @@ from PySide6 import QtCore, QtGui, QtPrintSupport, QtWidgets
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas import config
+from sas.qtgui.MainWindow.WorkspaceManager import ATTACH_TEXT, DETACH_TEXT, workspace_manager_for
 from sas.qtgui.Plotting.Binder import BindArtist
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
@@ -275,6 +276,28 @@ class PlotterBase(QtWidgets.QWidget):
         self.actionHelp = self.contextMenu.addAction("Help")
         self.actionHelp.triggered.connect(self.onHelp)
 
+    def addWorkspaceActionsToContextMenu(self):
+        """
+        Offer detaching from / attaching to the workspace, for plots hosted by the workspace manager.
+        Embedded plots and quick plots that are not hosted keep their menu unchanged.
+        """
+        workspace_manager = workspace_manager_for(self)
+        if workspace_manager is None or not workspace_manager.is_hosted(self):
+            return
+        text = ATTACH_TEXT if workspace_manager.is_detached(self) else DETACH_TEXT
+        self.actionToggleDetach = QtGui.QAction(text, self.contextMenu)
+        # Defer the move until the context menu has finished executing
+        self.actionToggleDetach.triggered.connect(
+            lambda: QtCore.QTimer.singleShot(0, workspace_manager, lambda: workspace_manager.toggle(self)))
+        help_action = getattr(self, "actionHelp", None)
+        actions = self.contextMenu.actions()
+        if help_action is not None and help_action in actions:
+            self.contextMenu.insertAction(help_action, self.actionToggleDetach)
+            self.contextMenu.insertSeparator(help_action)
+        else:
+            self.contextMenu.addSeparator()
+            self.contextMenu.addAction(self.actionToggleDetach)
+
     def createContextMenu(self):
         """
         Define common context menu and associated actions for the MPL widget
@@ -298,6 +321,7 @@ class PlotterBase(QtWidgets.QWidget):
             self.createContextMenu()
         else:
             self.createContextMenuQuick()
+        self.addWorkspaceActionsToContextMenu()
         # show the context menu at the specified point
         self.contextMenu.exec_(self.mapToGlobal(point))
 
@@ -354,7 +378,10 @@ class PlotterBase(QtWidgets.QWidget):
         PlotHelper.deletePlot(PlotHelper.idOfPlot(self))
 
         # Notify the listeners
-        self.manager.communicator.activeGraphsSignal.emit([self, True])
+        communicator = getattr(self.manager, "communicator", None)
+        signal = getattr(communicator, "activeGraphsSignal", None)
+        if signal is not None:
+            signal.emit([self, True])
 
         event.accept()
 
