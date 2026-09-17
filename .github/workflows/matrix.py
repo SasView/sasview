@@ -54,14 +54,17 @@ python_test_list = python_release_list + [
     # Additional test versions - add more to this list as needed
     "3.12",
     "3.14",
+    "3.15-dev",
 ]
 
 # On push events, only test the latest Python version to avoid duplicating
 # work when a pull_request event fires for the same commit.
 if is_push_event:
     python_test_list = [
-        max(python_test_list, key=lambda v: tuple(int(x) for x in v.split(".")))
+        max(python_test_list, key=lambda v: tuple(int(x) for x in v.partition("-")[0].split(".")))
     ]
+    # TODO: this really should be the following... but also, this prevents running the test matrix without a PR which is painful
+    # python_test_list = python_release_list
 
 
 def truthy(val: Any) -> int:
@@ -74,12 +77,17 @@ def truthy(val: Any) -> int:
     return int(bool(val))
 
 
+def is_experimental(val: str) -> bool:
+    """Mark '-dev' Python versions as experimental for special handling in CI"""
+    return "dev" in val
+
+
 def entry(
-    job_name: str = "Job",
-    os_name: str | None = None,
-    pyver: str | None = None,
-    tests: bool = False,
-    installer: bool = False,
+    job_name: str,
+    os_name: str,
+    pyver: str,
+    tests: bool,
+    installer: bool,
 ) -> dict[str, str | int]:
     """Construct a dict of the job requirements for json export
 
@@ -94,6 +102,7 @@ def entry(
         "python-version": pyver or python_release_list[0],
         "tests": truthy(tests),
         "installer": truthy(installer),
+        "experimental": truthy(is_experimental(pyver)),
     }
 
 
