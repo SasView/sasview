@@ -251,9 +251,9 @@ class MuMagLib:
         # its going to have to change.
         s_q = np.mean(((I - I_sim) / I_stdev) ** 2)
 
-        sigma_I_res = (np.abs(Quantity(np.array(I_residual_error_weight), units.none) * s_q)) ** 0.5
-        sigma_S_H = (np.abs(Quantity(np.array(S_H_error_weight), units.none) * s_q)) ** 0.5
-        sigma_S_M = (np.abs(Quantity(np.array(S_M_error_weight), units.none) * s_q)) ** 0.5
+        sigma_I_res = (Quantity(np.abs(np.array(I_residual_error_weight)), units.none) * s_q) ** 0.5
+        sigma_S_H = (Quantity(np.abs(np.array(S_H_error_weight)), units.none) * s_q) ** 0.5
+        sigma_S_M = (Quantity(np.abs(np.array(S_M_error_weight)), units.none) * s_q) ** 0.5
 
         chi_sq = float(np.mean(s_q.value))
 
@@ -370,8 +370,8 @@ class MuMagLib:
 
         s_q = np.mean(((I - I_sim) / I_stdev) ** 2, axis=0)
 
-        sigma_I_res = (np.abs(Quantity(np.array(I_residual_error_weight), units.none) * s_q)) ** 0.5
-        sigma_S_H = (np.abs(Quantity(np.array(S_H_error_weight), units.none) * s_q)) ** 0.5
+        sigma_I_res = (Quantity(np.abs(np.array(I_residual_error_weight)), units.none) * s_q) ** 0.5
+        sigma_S_H = (Quantity(np.abs(np.array(S_H_error_weight)), units.none) * s_q) ** 0.5
 
         chi_sq = float(np.mean(s_q.value))
 
@@ -422,13 +422,9 @@ class MuMagLib:
               / ((x_2 - x_3) * (y_3 - y_1) + (x_1 - x_3) * (y_2 - y_3))
 
         for i in range(200):
-            convergence = np.abs(2 * (x_4 - x_3) / (x_4 + x_3))
-            if isinstance(convergence, Quantity):
-                if convergence.value < epsilon:
-                    break
-            else:
-                if convergence < epsilon:
-                    break
+            convergence = np.abs((2 * (x_4 - x_3) / (x_4 + x_3)).value)
+            if convergence < epsilon:
+                break
 
             refined_least_squared_data = least_squares_function(trend, x_3, max_q_index)
 
