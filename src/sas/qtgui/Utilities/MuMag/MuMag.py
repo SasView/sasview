@@ -124,7 +124,10 @@ class MuMag(Perspective, Ui_MuMagTool):
         if self.trend is None:
             return
 
-        applied_fields = self.trend.get_trend_values("applied_magnetic_field")
+        applied_fields = [
+            Quantity(float(value), parse_unit("mT"))
+            for value in self.trend.get_trend_values("applied_magnetic_field")
+        ]
         colors = pl.cm.jet(np.linspace(0, 1, len(self.trend.data)))
 
         for i, datum in enumerate(self.trend.data):
@@ -132,7 +135,7 @@ class MuMag(Perspective, Ui_MuMagTool):
             self.data_axes.loglog(datum.abscissae.axes[0],
                       datum.ordinate.axes[0],
                       linestyle='-', color=colors[i], linewidth=0.5,
-                      label=r'$B_0 = ' + str(applied_fields[i]) + '$ T')
+                      label=r'$B_0 = ' + applied_fields[i].explicitly_formatted("T") + '$')
 
             self.data_axes.loglog(datum.abscissae.axes[0],
                       datum.ordinate.axes[0], '.',
@@ -289,14 +292,17 @@ class MuMag(Perspective, Ui_MuMagTool):
 
         # Show the fitted curves
         n_sim = self.fit_data.refined_fit_data.I_simulated.shape[0]
-        applied_fields = self.fit_data.input_trend.get_trend_values("applied_magnetic_field")
+        applied_fields = [
+            Quantity(float(value), parse_unit("mT"))
+            for value in self.fit_data.input_trend.get_trend_values("applied_magnetic_field")
+        ]
         colors = pl.cm.jet(np.linspace(0, 1, n_sim))
         for k in range(n_sim):
             self.comparison_axes.loglog(
                 self.fit_data.refined_fit_data.q * 1e-9,
                 self.fit_data.refined_fit_data.I_simulated[k, :],
                 linestyle='solid', color=colors[k],
-                label='B_0 = ' + str(applied_fields[k]) + ' T')
+                label='B_0 = ' + applied_fields[k].explicitly_formatted("T"))
 
         self.comparison_axes.set_xlabel(r'$q$ [1/nm]')
         self.comparison_axes.set_ylabel(r'$I_{\mathrm{exp}}$')

@@ -8,6 +8,7 @@ import scipy.optimize
 from PySide6.QtWidgets import QFileDialog
 
 from sasdata.dataloader.loader import Loader
+from sasdata.quantities.quantity import Quantity
 from sasdata.quantities.unit_parser import parse_unit
 from sasdata.trend import Trend
 
@@ -77,9 +78,15 @@ class MuMagLib:
         square_distance_from_qmax = (q_quantity - parameters.q_max) ** 2
         max_q_index = int(np.argmin(square_distance_from_qmax.value))
 
-        applied_fields = trend.get_trend_values("applied_magnetic_field")
-        min_applied_field_value = parameters.min_applied_field.value
-        filtered_indices = [i for i, field in enumerate(applied_fields) if field >= min_applied_field_value]
+        applied_fields = [
+            Quantity(float(value), parse_unit("mT"))
+            for value in trend.get_trend_values("applied_magnetic_field")
+        ]
+        min_applied_field = parameters.min_applied_field
+        filtered_indices = [
+            i for i, field in enumerate(applied_fields)
+            if (field - min_applied_field).value >= 0
+        ]
         filtered_data = [trend.data[i] for i in filtered_indices]
         filtered_trend_axes = {
             name: [trend.get_trend_values(name)[i] for i in filtered_indices]
@@ -110,14 +117,12 @@ class MuMagLib:
         """ Sweep over Exchange Stiffness A for perpendicular SANS geometry to
         get an initial estimate which can then be refined"""
 
-        # Convert to pJ/m for linspace, then back to Quantity
-        a_min_pj = parameters.exchange_A_min.in_units_of(parse_unit("pJ/m")).value
-        a_max_pj = parameters.exchange_A_max.in_units_of(parse_unit("pJ/m")).value
+        # The model works in J/m, so convert the pJ/m bounds to J/m (as quantities)
+        # and take the numeric values for linspace.
+        a_min = parameters.exchange_A_min.to_units_of(parse_unit("J/m")).value
+        a_max = parameters.exchange_A_max.to_units_of(parse_unit("J/m")).value
 
-        a_values = np.linspace(
-            a_min_pj,
-            a_max_pj,
-            parameters.exchange_A_n) * 1e-12  # From pJ/m to J/m
+        a_values = np.linspace(a_min, a_max, parameters.exchange_A_n)
 
         if parameters.experiment_geometry == ExperimentGeometry.PERPENDICULAR:
             least_squared_fits = [MuMagLib.least_squares_perpendicular(trend, a, max_q_index) for a in a_values]
@@ -464,11 +469,16 @@ class MuMagLib:
     def _filename_string(trend: Trend, index: int):
         """ Get the filename string associated with a bit of experimental data """
 
-        applied_field = trend.get_trend_values("applied_magnetic_field")[index]
-        saturation_magnetisation = trend.get_trend_values("saturation_magnetization")[index]
-        demagnetising_field = trend.get_trend_values("demagnetizing_field")[index]
+        millitesla = parse_unit("mT")
+        applied_field = Quantity(float(trend.get_trend_values("applied_magnetic_field")[index]), millitesla)
+        saturation_magnetisation = Quantity(float(trend.get_trend_values("saturation_magnetization")[index]), millitesla)
+        demagnetising_field = Quantity(float(trend.get_trend_values("demagnetizing_field")[index]), millitesla)
 
-        return f"{applied_field}_{saturation_magnetisation}_{demagnetising_field}"
+        return (
+            f"{applied_field.in_units_of(millitesla)}"
+            f"_{saturation_magnetisation.in_units_of(millitesla)}"
+            f"_{demagnetising_field.in_units_of(millitesla)}"
+        )
 
     @staticmethod
     def save_data(data: FitResults, directory: str):
@@ -482,14 +492,17 @@ class MuMagLib:
         if not os.path.exists(path):
             os.mkdir(path)
 
-        applied_fields = data.input_trend.get_trend_values("applied_magnetic_field")
+        applied_fields = [
+            Quantity(float(value), parse_unit("mT"))
+            for value in data.input_trend.get_trend_values("applied_magnetic_field")
+        ]
 
         with open(os.path.join(path, "fit_info.txt"), "w") as fid:
             fid.write("FitMagneticSANS Toolbox - SimpleFit Results Info File \n\n")
             fid.write(f"Timestamp: {timestamp}\n")
             fid.write(f"SANS geometry: {data.parameters.experiment_geometry.name}\n\n")
             fid.write(f"Maximal Scattering Vector:  q_max = {np.max(data.refined_fit_data.q)} /nm\n")
-            fid.write(f"Minimal Applied Field: mu_0*H_min = {applied_fields[0]}\n mT \n")
+            fid.write(f"Minimal Applied Field: mu_0*H_min = {applied_fields[0].explicitly_formatted('mT')}\n")
             fid.write(f"Result for the exchange stiffness constant: "
                       f"A = {data.refined_fit_data.exchange_A} +- {data.optimal_exchange_A_uncertainty} pJ/m \n")
 
