@@ -181,7 +181,7 @@ class MuMagLib:
         # q = np.array([data_nanometers(datum.scattering_curve) for datum in data])
 
         q = np.array([datum.abscissae.axes[0].value[:max_q_index] for datum in trend.data]) * 1e9
-        I = np.array([datum.ordinate.axes[0].value[:max_q_index] for datum in trend.data])
+        I = np.array([datum.ordinate.value[:max_q_index] for datum in trend.data])
         # Try to get errors, use unit errors if not available
         try:
             I_stdev = np.array([datum["dI"].axes[0].value[:max_q_index] for datum in trend.data])
@@ -305,7 +305,7 @@ class MuMagLib:
         # q = np.array([data_nanometers(datum.scattering_curve) for datum in data])
 
         q = np.array([datum.abscissae.axes[0][:max_q_index] for datum in trend.data]) * 1e9
-        I = np.array([datum.ordinate.axes[0][:max_q_index] for datum in trend.data])
+        I = np.array([datum.ordinate.value[:max_q_index] for datum in trend.data])
         # Try to get errors, use unit errors if not available
         try:
             I_stdev = np.array([datum["dI"].axes[0][:max_q_index] for datum in trend.data])
@@ -542,7 +542,7 @@ class MuMagLib:
             filename = f"{k}_" + MuMagLib._filename_string(data.input_trend, k) + ".csv"
 
             q = data.input_trend.data[k].abscissae.axes[0]
-            I = data.input_trend.data[k].ordinate.axes[0]
+            I = data.input_trend.data[k].ordinate
             # Try to get errors, use unit errors if not available
             try:
                 dI = data.input_trend.data[k]["dI"].value
