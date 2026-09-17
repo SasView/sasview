@@ -305,6 +305,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           os: ${{ matrix.os }}
+          experimental: ${{ matrix.experimental == 1 }}
 
       ### Run tests
 
