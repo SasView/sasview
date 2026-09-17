@@ -8,6 +8,7 @@ import scipy.optimize
 from PySide6.QtWidgets import QFileDialog
 
 from sasdata.dataloader.loader import Loader
+from sasdata.quantities import units
 from sasdata.quantities.quantity import Quantity
 from sasdata.quantities.unit_parser import parse_unit
 from sasdata.trend import Trend
@@ -24,11 +25,11 @@ from sas.qtgui.Utilities.MuMag.datastructures import (
 
 
 class MuMagLib:
-    """ Library for methods supporting MuMag"""
+    """Library for methods supporting MuMag"""
 
     logger = logging.getLogger("MuMag")
 
-    mu_0 = 4 * np.pi * 1e-7
+    mu_0 = Quantity(4 * np.pi * 1e-7, parse_unit("H/m"))
 
     @staticmethod
     def directory_popup():
@@ -102,8 +103,8 @@ class MuMagLib:
         crude_A = sweep_data.optimal.exchange_A
         refined = MuMagLib.refine_exchange_A(filtered_trend, crude_A, geometry, max_q_index)
 
-        # Get uncertainty estimate TODO: Check units
-        uncertainty = MuMagLib.uncertainty(filtered_trend, refined.exchange_A, geometry, max_q_index) * 1e12
+        # Get uncertainty estimate
+        uncertainty = MuMagLib.uncertainty(filtered_trend, refined.exchange_A, geometry, max_q_index).to_units_of(parse_unit("pJ/m"))
 
         return FitResults(
             parameters=parameters,
@@ -117,18 +118,18 @@ class MuMagLib:
         """ Sweep over Exchange Stiffness A for perpendicular SANS geometry to
         get an initial estimate which can then be refined"""
 
-        # The model works in J/m, so convert the pJ/m bounds to J/m (as quantities)
-        # and take the numeric values for linspace.
-        a_min = parameters.exchange_A_min.to_units_of(parse_unit("J/m")).value
-        a_max = parameters.exchange_A_max.to_units_of(parse_unit("J/m")).value
+        # The model works in J/m, so convert the pJ/m bounds to J/m
+        a_min_q = parameters.exchange_A_min.to_units_of(parse_unit("J/m"))
+        a_max_q = parameters.exchange_A_max.to_units_of(parse_unit("J/m"))
 
-        a_values = np.linspace(a_min, a_max, parameters.exchange_A_n)
+        a_values = Quantity(np.linspace(a_min_q.value, a_max_q.value, parameters.exchange_A_n),
+                            parse_unit("J/m"))
 
         if parameters.experiment_geometry == ExperimentGeometry.PERPENDICULAR:
-            least_squared_fits = [MuMagLib.least_squares_perpendicular(trend, a, max_q_index) for a in a_values]
+            least_squared_fits = [MuMagLib.least_squares_perpendicular(trend, Quantity(a, parse_unit("J/m")), max_q_index) for a in a_values.value]
 
         elif parameters.experiment_geometry == ExperimentGeometry.PARALLEL:
-            least_squared_fits = [MuMagLib.least_squares_parallel(trend, a, max_q_index) for a in a_values]
+            least_squared_fits = [MuMagLib.least_squares_parallel(trend, Quantity(a, parse_unit("J/m")), max_q_index) for a in a_values.value]
 
         else:
             raise ValueError(f"Unknown ExperimentGeometry value: {parameters.experiment_geometry}")
@@ -160,46 +161,45 @@ class MuMagLib:
         # Get matrices from the input data
         n_data = len(trend.data)
 
-        # TODO: This is a placeholder, because we should get Quantity objects
-        # straight from the trend object
-        def convert_trend_values(trend: Trend, axis_name: str) -> list[Quantity[float]]:
-            return [Quantity(float(value), parse_unit("mT")) for value in trend.get_trend_values(axis_name)]
+        def convert_trend_values(trend: Trend, axis_name: str) -> Quantity:
+            values = np.array([float(v) for v in trend.get_trend_values(axis_name)])
+            return Quantity(values, parse_unit("mT"))
 
-        #  Factor of (1e-3 / mu_0) converts from mT to A/m
-        applied_field = np.array(convert_trend_values(trend, "applied_magnetic_field")) * (1e-3 / MuMagLib.mu_0)
-        demagnetising_field = np.array(convert_trend_values(trend, "demagnetizing_field")) * (1e-3 / MuMagLib.mu_0)
-        saturation_magnetisation = np.array(convert_trend_values(trend, "saturation_magnetization")) * (1e-3 / MuMagLib.mu_0)
+        applied_field = convert_trend_values(trend, "applied_magnetic_field") / MuMagLib.mu_0
+        demagnetising_field = convert_trend_values(trend, "demagnetizing_field") / MuMagLib.mu_0
+        saturation_magnetisation = convert_trend_values(trend, "saturation_magnetization") / MuMagLib.mu_0
 
-        # TODO: The following is how things should be done in the future, rather than hard-coding
-        #  a scaling factor...
-        # def data_nanometers(data: Data1D):
-        #     raw_data = data.x
-        #     units = data.x_unit
-        #     converter = Converter(units)
-        #     return converter.scale("1/m", raw_data)
-        #
-        # q = np.array([data_nanometers(datum.scattering_curve) for datum in data])
+        q = Quantity(
+            np.array([datum.abscissae.axes[0].in_units_of(parse_unit("1/m"))[:max_q_index]
+                      for datum in trend.data]),
+            parse_unit("1/m"))
 
-        q = np.array([datum.abscissae.axes[0].value[:max_q_index] for datum in trend.data]) * 1e9
-        I = np.array([datum.ordinate.value[:max_q_index] for datum in trend.data])
-        # Try to get errors, use unit errors if not available
+        I_units = trend.data[0].ordinate.units
+        I = Quantity(
+            np.array([datum.ordinate.value[:max_q_index] for datum in trend.data]),
+            I_units)
+
         try:
-            I_stdev = np.array([datum["dI"].axes[0].value[:max_q_index] for datum in trend.data])
+            I_stdev = Quantity(
+                np.array([datum["dI"].axes[0].value[:max_q_index] for datum in trend.data]),
+                trend.data[0]["dI"].axes[0].units)
         except KeyError:
-            I_stdev = np.ones_like(I)
+            I_stdev = Quantity(np.ones_like(I.value), I.units)
 
-        n_q = q.shape[1]
+        n_q = q.value.shape[1]
 
         # Micromagnetic Model
-        internal_field = (applied_field - demagnetising_field).reshape(-1, 1)
+        internal_field = Quantity(
+            (applied_field - demagnetising_field).value.reshape(-1, 1),
+            applied_field.units)
         magnetic_scattering_length = (
-            (2 * A) / (MuMagLib.mu_0 * saturation_magnetisation.reshape(-1, 1) * internal_field)) ** 0.5
-        effective_field = internal_field * (1 + (magnetic_scattering_length ** 2) * (q ** 2))
+            (2 * A) / (MuMagLib.mu_0 * Quantity(saturation_magnetisation.value.reshape(-1, 1), saturation_magnetisation.units) * internal_field)) ** 0.5
+        effective_field = internal_field * (Quantity(1, units.none) + (magnetic_scattering_length ** 2) * (q ** 2))
 
         # Calculate the response functions
-        p = saturation_magnetisation.reshape(-1, 1) / effective_field
-        response_H = (p ** 2) / 4 * (2 + 1 / (1 + p) ** 0.5)
-        response_M = ((1 + p) ** 0.5 - 1) / 2
+        p = Quantity(saturation_magnetisation.value.reshape(-1, 1), saturation_magnetisation.units) / effective_field
+        response_H = (p ** 2) / 4 * (Quantity(2, units.none) + Quantity(1, units.none) / (Quantity(1, units.none) + p) ** 0.5)
+        response_M = ((Quantity(1, units.none) + p) ** 0.5 - Quantity(1, units.none)) / 2
 
         # print("Input", q.shape, q[0,10])
         # sys.exit()
@@ -216,23 +216,23 @@ class MuMagLib:
         for nu in range(n_q):
 
             # non-negative linear least squares
-            least_squares_x = (np.array([np.ones((n_data,)), response_H[:, nu], response_M[:, nu]]) / I_stdev[:, nu]).T
-            least_squares_y = I[:, nu] / I_stdev[:, nu]
+            least_squares_x_val = (np.array([np.ones((n_data,)), response_H.value[:, nu], response_M.value[:, nu]]) / I_stdev.value[:, nu]).T
+            least_squares_y_val = I.value[:, nu] / I_stdev.value[:, nu]
 
-            least_squares_x_squared = np.dot(least_squares_x.T, least_squares_x)
+            least_squares_x_squared = np.dot(least_squares_x_val.T, least_squares_x_val)
 
             # Non-negative least squares
             try:
                 fit_result = scipy.optimize.nnls(
                     least_squares_x_squared,
-                    np.matmul(least_squares_x.T, least_squares_y))
+                    np.matmul(least_squares_x_val.T, least_squares_y_val))
 
             except ValueError as ve:
                 raise FitFailure(f"A = {A} ({repr(ve)})")
 
-            I_residual.append(fit_result[0][0])
-            S_H.append(fit_result[0][1])
-            S_M.append(fit_result[0][2])
+            I_residual.append(Quantity(fit_result[0][0], I.units))
+            S_H.append(Quantity(fit_result[0][1], I.units))
+            S_M.append(Quantity(fit_result[0][2], I.units))
 
             errors = np.linalg.inv(np.dot(least_squares_x_squared.T, least_squares_x_squared))
 
@@ -241,21 +241,23 @@ class MuMagLib:
             S_M_error_weight.append(errors[2, 2])
 
         # Arrayise
-        S_H = np.array(S_H)
-        S_M = np.array(S_M)
-        I_residual = np.array(I_residual)
+        S_H = Quantity(np.array([s.value for s in S_H]), I.units)
+        S_M = Quantity(np.array([s.value for s in S_M]), I.units)
+        I_residual = Quantity(np.array([s.value for s in I_residual]), I.units)
 
         I_sim = I_residual + response_H * S_H + response_M * S_M
 
-        s_q = np.mean(((I - I_sim) / I_stdev) ** 2, axis=0)
+        # TODO: This is probably broken. Removing the axis to fix it for now but
+        # its going to have to change.
+        s_q = np.mean(((I - I_sim) / I_stdev) ** 2)
 
-        sigma_I_res = (np.abs(np.array(I_residual_error_weight) * s_q)) ** 0.5
-        sigma_S_H = (np.abs(np.array(S_H_error_weight) * s_q)) ** 0.5
-        sigma_S_M = (np.abs(np.array(S_M_error_weight) * s_q)) ** 0.5
+        sigma_I_res = (np.abs(Quantity(np.array(I_residual_error_weight), units.none) * s_q)) ** 0.5
+        sigma_S_H = (np.abs(Quantity(np.array(S_H_error_weight), units.none) * s_q)) ** 0.5
+        sigma_S_M = (np.abs(Quantity(np.array(S_M_error_weight), units.none) * s_q)) ** 0.5
 
-        chi_sq = float(np.mean(s_q))
+        chi_sq = float(np.mean(s_q.value))
 
-        output_q_values = np.mean(q, axis=0)
+        output_q_values = Quantity(np.mean(q.value, axis=0), q.units)
 
         return LeastSquaresOutputPerpendicular(
             exchange_A=A,
@@ -289,39 +291,43 @@ class MuMagLib:
         # Get matrices from the input data
         n_data = len(trend.data)
 
-        #  Factor of (1e-3 / mu_0) converts from mT to A/m
-        applied_field = np.array(trend.get_trend_values("applied_magnetic_field")) * (1e-3 / MuMagLib.mu_0)
-        demagnetising_field = np.array(trend.get_trend_values("demagnetizing_field")) * (1e-3 / MuMagLib.mu_0)
-        saturation_magnetisation = np.array(trend.get_trend_values("saturation_magnetization")) * (1e-3 / MuMagLib.mu_0)
+        def convert_trend_values(trend: Trend, axis_name: str) -> Quantity:
+            values = np.array([float(v) for v in trend.get_trend_values(axis_name)])
+            return Quantity(values, parse_unit("mT"))
 
-        # TODO: The following is how things should be done in the future, rather than hard-coding
-        #  a scaling factor...
-        # def data_nanometers(data: Data1D):
-        #     raw_data = data.x
-        #     units = data.x_unit
-        #     converter = Converter(units)
-        #     return converter.scale("1/m", raw_data)
-        #
-        # q = np.array([data_nanometers(datum.scattering_curve) for datum in data])
+        applied_field = convert_trend_values(trend, "applied_magnetic_field") / MuMagLib.mu_0
+        demagnetising_field = convert_trend_values(trend, "demagnetizing_field") / MuMagLib.mu_0
+        saturation_magnetisation = convert_trend_values(trend, "saturation_magnetization") / MuMagLib.mu_0
 
-        q = np.array([datum.abscissae.axes[0][:max_q_index] for datum in trend.data]) * 1e9
-        I = np.array([datum.ordinate.value[:max_q_index] for datum in trend.data])
-        # Try to get errors, use unit errors if not available
+        q = Quantity(
+            np.array([datum.abscissae.axes[0].in_units_of(parse_unit("1/m"))[:max_q_index]
+                      for datum in trend.data]),
+            parse_unit("1/m"))
+
+        I_units = trend.data[0].ordinate.units
+        I = Quantity(
+            np.array([datum.ordinate.value[:max_q_index] for datum in trend.data]),
+            I_units)
+
         try:
-            I_stdev = np.array([datum["dI"].axes[0][:max_q_index] for datum in trend.data])
+            I_stdev = Quantity(
+                np.array([datum["dI"].axes[0].value[:max_q_index] for datum in trend.data]),
+                trend.data[0]["dI"].axes[0].units)
         except KeyError:
-            I_stdev = np.ones_like(I)
+            I_stdev = Quantity(np.ones_like(I.value), I.units)
 
-        n_q = q.shape[1]
+        n_q = q.value.shape[1]
 
         # Micromagnetic Model
-        internal_field = (applied_field - demagnetising_field).reshape(-1, 1)
+        internal_field = Quantity(
+            (applied_field - demagnetising_field).value.reshape(-1, 1),
+            applied_field.units)
         magnetic_scattering_length = (
-            (2 * A) / (MuMagLib.mu_0 * saturation_magnetisation.reshape(-1, 1) * internal_field)) ** 0.5
-        effective_field = internal_field * (1 + (magnetic_scattering_length ** 2) * (q ** 2))
+            (2 * A) / (MuMagLib.mu_0 * Quantity(saturation_magnetisation.value.reshape(-1, 1), saturation_magnetisation.units) * internal_field)) ** 0.5
+        effective_field = internal_field * (Quantity(1, units.none) + (magnetic_scattering_length ** 2) * (q ** 2))
 
         # Calculate the response functions
-        p = saturation_magnetisation.reshape(-1, 1) / effective_field
+        p = Quantity(saturation_magnetisation.value.reshape(-1, 1), saturation_magnetisation.units) / effective_field
         response_H = (p ** 2) / 2
 
         # Lists for output of calculation
@@ -334,22 +340,22 @@ class MuMagLib:
         for nu in range(n_q):
 
             # non-negative linear least squares
-            least_squares_x = (np.array([np.ones((n_data,)), response_H[:, nu]]) / I_stdev[:, nu]).T
-            least_squares_y = I[:, nu] / I_stdev[:, nu]
+            least_squares_x_val = (np.array([np.ones((n_data,)), response_H.value[:, nu]]) / I_stdev.value[:, nu]).T
+            least_squares_y_val = I.value[:, nu] / I_stdev.value[:, nu]
 
-            least_squares_x_squared = np.dot(least_squares_x.T, least_squares_x)
+            least_squares_x_squared = np.dot(least_squares_x_val.T, least_squares_x_val)
 
             # Non-negative least squares
             try:
                 fit_result = scipy.optimize.nnls(
                     least_squares_x_squared,
-                    np.matmul(least_squares_x.T, least_squares_y))
+                    np.matmul(least_squares_x_val.T, least_squares_y_val))
 
             except ValueError as ve:
                 raise FitFailure(f"A = {A} ({repr(ve)})")
 
-            I_residual.append(fit_result[0][0])
-            S_H.append(fit_result[0][1])
+            I_residual.append(Quantity(fit_result[0][0], I.units))
+            S_H.append(Quantity(fit_result[0][1], I.units))
 
             errors = np.linalg.inv(np.dot(least_squares_x_squared.T, least_squares_x_squared))
 
@@ -357,19 +363,19 @@ class MuMagLib:
             S_H_error_weight.append(errors[1, 1])
 
         # Arrayise
-        S_H = np.array(S_H)
-        I_residual = np.array(I_residual)
+        S_H = Quantity(np.array([s.value for s in S_H]), I.units)
+        I_residual = Quantity(np.array([s.value for s in I_residual]), I.units)
 
         I_sim = I_residual + response_H * S_H
 
         s_q = np.mean(((I - I_sim) / I_stdev) ** 2, axis=0)
 
-        sigma_I_res = (np.abs(np.array(I_residual_error_weight) * s_q)) ** 0.5
-        sigma_S_H = (np.abs(np.array(S_H_error_weight) * s_q)) ** 0.5
+        sigma_I_res = (np.abs(Quantity(np.array(I_residual_error_weight), units.none) * s_q)) ** 0.5
+        sigma_S_H = (np.abs(Quantity(np.array(S_H_error_weight), units.none) * s_q)) ** 0.5
 
-        chi_sq = float(np.mean(s_q))
+        chi_sq = float(np.mean(s_q.value))
 
-        output_q_values = np.mean(q, axis=0)
+        output_q_values = Quantity(np.mean(q.value, axis=0), q.units)
 
         return LeastSquaresOutputParallel(
             exchange_A=A,
@@ -384,7 +390,7 @@ class MuMagLib:
     @staticmethod
     def refine_exchange_A(
             trend: Trend,
-            exchange_A_initial: float,
+            exchange_A_initial: Quantity,
             geometry: ExperimentGeometry,
             max_q_index: int,
             epsilon: float = 0.0001) -> LeastSquaresOutputPerpendicular | LeastSquaresOutputParallel:
@@ -416,8 +422,13 @@ class MuMagLib:
               / ((x_2 - x_3) * (y_3 - y_1) + (x_1 - x_3) * (y_2 - y_3))
 
         for i in range(200):
-            if np.abs(2 * (x_4 - x_3) / (x_4 + x_3)) < epsilon:
-                break
+            convergence = np.abs(2 * (x_4 - x_3) / (x_4 + x_3))
+            if isinstance(convergence, Quantity):
+                if convergence.value < epsilon:
+                    break
+            else:
+                if convergence < epsilon:
+                    break
 
             refined_least_squared_data = least_squares_function(trend, x_3, max_q_index)
 
@@ -432,9 +443,9 @@ class MuMagLib:
     @staticmethod
     def uncertainty(
             trend: Trend,
-            A_opt: float,
+            A_opt: Quantity,
             geometry: ExperimentGeometry,
-            max_q_index: int) -> float:
+            max_q_index: int) -> Quantity:
         """Calculate the uncertainty for the optimal exchange stiffness A"""
 
         # Estimate variance from second order derivative of chi-square function via Finite Differences

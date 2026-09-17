@@ -52,14 +52,14 @@ class FitParameters:
 @dataclass
 class LeastSquaresOutput:
     """ Output from least squares method"""
-    exchange_A: float
+    exchange_A: Quantity
     exchange_A_chi_sq: float
-    q: np.ndarray
-    I_simulated: np.ndarray
-    I_residual: np.ndarray
-    S_H: np.ndarray
-    I_residual_stdev: np.ndarray
-    S_H_stdev: np.ndarray
+    q: Quantity
+    I_simulated: Quantity
+    I_residual: Quantity
+    S_H: Quantity
+    I_residual_stdev: Quantity
+    S_H_stdev: Quantity
 
 
 @dataclass
@@ -71,8 +71,8 @@ class LeastSquaresOutputParallel(LeastSquaresOutput):
 @dataclass
 class LeastSquaresOutputPerpendicular(LeastSquaresOutput):
     """ Output from least squares method for perpendicular case"""
-    S_M: np.ndarray
-    S_M_stdev: np.ndarray
+    S_M: Quantity
+    S_M_stdev: Quantity
 
 
 T = TypeVar("T", bound=LeastSquaresOutput)
@@ -84,7 +84,7 @@ class SweepOutput(Generic[T]):
     Results from brute force optimisiation of the chi squared for the exchange A parameter
     """
 
-    exchange_A_checked: np.ndarray
+    exchange_A_checked: Quantity
     exchange_A_chi_sq: np.ndarray
     optimal: T
 
@@ -96,4 +96,4 @@ class FitResults:
     input_trend: Trend
     sweep_data: SweepOutput
     refined_fit_data: LeastSquaresOutputParallel | LeastSquaresOutputPerpendicular
-    optimal_exchange_A_uncertainty: float
+    optimal_exchange_A_uncertainty: Quantity
