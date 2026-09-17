@@ -6,11 +6,23 @@ mpl.use("Qt5Agg")
 from PySide6 import QtWidgets
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.MainWindow.WorkspaceManager import WorkspaceManager
 from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionPerspective import (
     SizeDistributionWindow,
 )
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Utilities.GuiUtils import Communicate
+
+
+def host_in_workspace(widget):
+    """Host a perspective in a workspace window, as the application does"""
+    window = QtWidgets.QMainWindow()
+    mdi = QtWidgets.QMdiArea()
+    window.setCentralWidget(mdi)
+    window.show()
+    manager = WorkspaceManager(mdi, window)
+    manager.add(widget)
+    return window, manager
 
 
 class SizeDistributionTest:
@@ -71,13 +83,20 @@ class SizeDistributionTest:
 
     def testClose(self, widget):
         """Test methods related to closing the window"""
+        window, manager = host_in_workspace(widget)
+        container = manager.container_of(widget)
+        # A perspective that is not closable refuses; its window is minimised instead
         assert not widget.isClosable()
-        widget.close()
-        assert widget.isMinimized()
+        assert not manager.close(widget)
+        assert container.isMinimized()
+        manager.activate(widget)
         widget.setClosable(False)
         assert not widget.isClosable()
-        widget.close()
-        assert widget.isMinimized()
+        assert not manager.close(widget)
+        assert container.isMinimized()
+        assert manager.is_hosted(widget)
+        manager.remove(widget)
+        window.close()
         widget.setClosable(True)
         assert widget.isClosable()
         widget.setClosable()

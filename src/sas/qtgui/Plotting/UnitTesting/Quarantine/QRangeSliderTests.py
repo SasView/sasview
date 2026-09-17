@@ -7,6 +7,7 @@ from PySide6.QtWidgets import QMdiArea
 import sas.qtgui.Plotting.Plotter as Plotter
 from sas.qtgui.MainWindow.GuiManager import GuiManager
 from sas.qtgui.MainWindow.MainWindow import MainSasViewWindow
+from sas.qtgui.MainWindow.WorkspaceManager import WorkspaceManager
 from sas.qtgui.Plotting.LinearFit import LinearFit
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.QRangeSlider import QRangeSlider
@@ -30,6 +31,7 @@ class QRangeSlidersTest:
                 # define workspace for dialogs.
                 self.workspace = QMdiArea(self)
                 self.setCentralWidget(self.workspace)
+                self.workspace_manager = WorkspaceManager(self.workspace, self)
 
         self.manager = GuiManager(MainWindow(None))
         self.plotter = Plotter.Plotter(self.manager.filesWidget, quickplot=True)

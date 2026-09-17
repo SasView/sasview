@@ -10,6 +10,7 @@ from sasdata.data_util.manipulations import CircularAverage
 
 import sas.qtgui.Plotting.PlotUtilities as PlotUtilities
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.MainWindow.WorkspaceManager import workspace_manager_for
 from sas.qtgui.Plotting.BoxSum import BoxSum
 from sas.qtgui.Plotting.ColorMap import ColorMap
 from sas.qtgui.Plotting.PlotterBase import PlotterBase
@@ -287,14 +288,10 @@ class Plotter2DWidget(PlotterBase):
             slicer.clear()
         self.slicers = {}
 
-        # Clear box sum which is not stored in the dict
+        # Clear box sum which is not stored in the dict.
+        # Clearing a BoxSumCalculator also asks its parameter widget to close.
         if self.slicer is not None:
             self.slicer.clear()
-            if self.slicer is BoxSumCalculator:
-                self.boxwidget.close()
-                self.boxwidget_subwindow.close()
-                self.boxwidget = None
-                self.boxwidget_subwindow = None
 
         self.slicer = None
         # Reset color index when all slicers are cleared
@@ -303,14 +300,44 @@ class Plotter2DWidget(PlotterBase):
 
         self.canvas.draw()
 
+        # Closing a helper panel resets its reference through the panel's close notice
         if self.slicer_widget:
-            self.slicer_widget.close()
-            self.slicer_widget = None
+            self.closeHelperWidget(self.slicer_widget)
 
         # Close the box sum widget if it exists
-        if hasattr(self, 'boxwidget') and self.boxwidget is not None:
-            self.boxwidget.close()
-            self.boxwidget = None
+        if getattr(self, 'boxwidget', None) is not None:
+            self.closeHelperWidget(self.boxwidget)
+
+    def showHelperWidget(self, widget):
+        """
+        Show a helper panel (slicer parameters, box sum) in the workspace,
+        or as a standalone window when there is no workspace manager.
+        """
+        workspace_manager = workspace_manager_for(self)
+        if workspace_manager is not None:
+            workspace_manager.add(widget)
+        else:
+            widget.show()
+
+    def closeHelperWidget(self, widget):
+        """
+        Close a helper panel together with its window, attached or detached.
+        """
+        workspace_manager = workspace_manager_for(self)
+        if workspace_manager is not None:
+            workspace_manager.close(widget)
+        else:
+            widget.close()
+
+    def closeEvent(self, event):
+        """
+        Close helper panels owned by this plot, wherever they live, then clean up the plot.
+        """
+        if self.slicer_widget is not None:
+            self.closeHelperWidget(self.slicer_widget)
+        if getattr(self, 'boxwidget', None) is not None:
+            self.closeHelperWidget(self.boxwidget)
+        super().closeEvent(event)
 
     def getActivePlots(self):
         ''' utility method for manager query of active plots '''
@@ -359,11 +386,10 @@ class Plotter2DWidget(PlotterBase):
             return
 
         def slicer_closed():
-            # Need to disconnect the signal!!
-            self.slicer_widget.closeWidgetSignal.disconnect()
-            self.manager.parent.workspace().removeSubWindow(self.slicer_subwindow)
-            # reset slicer_widget on "Edit Slicer Parameters" window close
-            self.slicer_widget = None
+            # Completion notice: the panel has closed, its window follows.
+            # Reset slicer_widget on "Edit Slicer Parameters" window close.
+            if self.slicer_widget is widget:
+                self.slicer_widget = None
 
         self.param_model = None
         validator = None
@@ -375,11 +401,10 @@ class Plotter2DWidget(PlotterBase):
                                               active_plots=self.getActivePlots(),
                                               validate_method=validator,
                                               communicator=self.manager.communicator)
+        widget = self.slicer_widget
         self.slicer_widget.closeWidgetSignal.connect(slicer_closed)
-        # Add the plot to the workspace
-        self.slicer_subwindow = self.manager.parent.workspace().addSubWindow(self.slicer_widget)
-
-        self.slicer_widget.show()
+        # Add the panel to the workspace
+        self.showHelperWidget(self.slicer_widget)
 
     def circularAverage(self):
         """
@@ -641,27 +666,25 @@ class Plotter2DWidget(PlotterBase):
         self.slicer.update()
 
         def boxWidgetClosed():
-            # Need to disconnect the signal!!
-            self.boxwidget.closeWidgetSignal.disconnect()
-            # reset box on "Edit Slicer Parameters" window close
-            self.manager.parent.workspace().removeSubWindow(self.boxwidget_subwindow)
-            self.boxwidget = None
+            # Completion notice: the panel has closed, its window follows.
+            if self.boxwidget is widget:
+                self.boxwidget = None
             # Clear the reference in the slicer
-            if self.slicer is not None:
+            if self.slicer is not None and getattr(self.slicer, 'widget', None) is widget:
                 self.slicer.widget = None
 
         # Get the BoxSumCalculator model.
         self.box_sum_model = self.slicer.model()
         # Pass the BoxSumCalculator model to the BoxSum widget
         self.boxwidget = BoxSum(self, model=self.box_sum_model)
-        # Add the plot to the workspace
-        self.boxwidget_subwindow = self.manager.parent.workspace().addSubWindow(self.boxwidget)
+        widget = self.boxwidget
         self.boxwidget.closeWidgetSignal.connect(boxWidgetClosed)
 
         # Store widget reference in the slicer so it can close it when cleared
         self.slicer.widget = self.boxwidget
 
-        self.boxwidget.show()
+        # Add the panel to the workspace
+        self.showHelperWidget(self.boxwidget)
 
     def onBoxAveragingX(self):
         """
@@ -892,3 +915,10 @@ class Plotter2D(QtWidgets.QDialog, Plotter2DWidget):
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/res/ball.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.setWindowIcon(icon)
+
+    def closeEvent(self, event):
+        """
+        QDialog precedes Plotter2DWidget in the base classes, so without this override
+        Qt would call QDialog.closeEvent and skip the plot's own clean-up.
+        """
+        Plotter2DWidget.closeEvent(self, event)

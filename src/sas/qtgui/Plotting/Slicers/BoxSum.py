@@ -178,9 +178,9 @@ class BoxSumCalculator(BaseInteractor):
         self.horizontal_lines.clear()
         self.vertical_lines.clear()
         self.center.clear()
-        # Close the associated widget if it exists
+        # Close the associated widget if it exists. Closing it notifies its owner.
         if self.widget is not None:
-            self.widget.closeWidgetSignal.emit()
+            self.widget.close()
             self.widget = None
 
     def update(self):
