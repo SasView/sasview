@@ -544,9 +544,9 @@ class MuMagLib:
             q = data.input_trend.data[k].abscissae.axes[0]
             I = data.input_trend.data[k].ordinate
             # Try to get errors, use unit errors if not available
-            try:
-                dI = data.input_trend.data[k]["dI"].value
-            except KeyError:
+            if data.input_trend.data[k].abscissae.axes[0].has_error:
+                dI = data.input_trend.data[k].abscissae.axes[0].standard_error
+            else:
                 dI = np.ones_like(I)
 
             np.savetxt(os.path.join(subpath, filename), np.array([q, I, dI]).T, delimiter=",")
