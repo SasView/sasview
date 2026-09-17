@@ -10,6 +10,7 @@ inputs:
     required: true
   experimental:
     required: false
+    type: boolean
     default: false
 
 runs:
@@ -57,7 +58,7 @@ runs:
         merge-multiple: true
 
     - name: Allow use of scientific-python nightly wheels for experimental builds
-      if: ${{ inputs.experimental }}
+      if: ${{ inputs.experimental == 'true' }}
       shell: bash
       run: |
         # Enable the scientific-python-nightly wheels as primary source with a fallback to regular pypi (since most wheels will not be there)
