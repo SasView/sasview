@@ -163,6 +163,19 @@ class FittingWidgetTest:
         #Test what is current text in the combobox
         assert fittingWindow.cbCategory.currentText() == FittingWidget.CATEGORY_DEFAULT
 
+    def testNonExistantModels(self, widget):
+        """
+        Test for models listed in categories.json that do not exist in sasmodels.
+        """
+        default_cat = "Cylinder"
+        test_model = "capped_anything"
+        widget.master_category_dict[default_cat].append([test_model, True])
+        widget.regenerateModelDict()
+        new_index = widget.cbCategory.findText(default_cat)
+        if new_index != -1:
+            widget.cbCategory.setCurrentIndex(new_index)
+        assert widget.cbModel.findText(test_model) < 0
+
     def testWidgetWithData(self, widget, mocker):
         """
         Test the instantiation of the widget with initial data
