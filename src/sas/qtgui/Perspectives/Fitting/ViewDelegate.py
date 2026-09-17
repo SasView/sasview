@@ -27,7 +27,6 @@ class ModelViewDelegate(QtWidgets.QStyledItemDelegate):
     def addErrorColumn(self):
         """
         Modify local column pointers
-        Note: the reverse is never required!
         """
         self.param_property=0
         self.param_value=1
@@ -35,6 +34,18 @@ class ModelViewDelegate(QtWidgets.QStyledItemDelegate):
         self.param_min=3
         self.param_max=4
         self.param_unit=5
+
+    def removeErrorColumn(self):
+        """
+        Restore column pointers to the no-error layout (reverse of addErrorColumn).
+        Used when a fit is undone and the error column is removed.
+        """
+        self.param_error=-1
+        self.param_property=0
+        self.param_value=1
+        self.param_min=2
+        self.param_max=3
+        self.param_unit=4
 
     def paint(self, painter, option, index):
         """
@@ -152,7 +163,6 @@ class PolyViewDelegate(QtWidgets.QStyledItemDelegate):
     def addErrorColumn(self):
         """
         Modify local column pointers
-        Note: the reverse is never required!
         """
         self.poly_parameter = 0
         self.poly_pd = 1
@@ -163,6 +173,21 @@ class PolyViewDelegate(QtWidgets.QStyledItemDelegate):
         self.poly_nsigs = 6
         self.poly_function = 7
         self.poly_filename = 8
+
+    def removeErrorColumn(self):
+        """
+        Restore column pointers to the no-error layout (reverse of addErrorColumn).
+        Used when a fit is undone and the error column is removed.
+        """
+        self.poly_parameter = 0
+        self.poly_pd = 1
+        self.poly_error = None
+        self.poly_min = 2
+        self.poly_max = 3
+        self.poly_npts = 4
+        self.poly_nsigs = 5
+        self.poly_function = 6
+        self.poly_filename = 7
 
     def createEditor(self, widget, option, index):
         # Remember the current choice
@@ -243,7 +268,6 @@ class MagnetismViewDelegate(QtWidgets.QStyledItemDelegate):
     def addErrorColumn(self):
         """
         Modify local column pointers
-        Note: the reverse is never required!
         """
         self.mag_parameter = 0
         self.mag_value = 1
@@ -251,6 +275,18 @@ class MagnetismViewDelegate(QtWidgets.QStyledItemDelegate):
         self.mag_min = 3
         self.mag_max = 4
         self.mag_unit = 5
+
+    def removeErrorColumn(self):
+        """
+        Restore column pointers to the no-error layout (reverse of addErrorColumn).
+        Used when a fit is undone and the error column is removed.
+        """
+        self.mag_parameter = 0
+        self.mag_value = 1
+        self.mag_min = 2
+        self.mag_max = 3
+        self.mag_unit = 4
+        self.mag_error = -1
 
     def createEditor(self, widget, option, index):
         # Remember the current choice
