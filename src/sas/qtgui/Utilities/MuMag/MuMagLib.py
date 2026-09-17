@@ -160,10 +160,15 @@ class MuMagLib:
         # Get matrices from the input data
         n_data = len(trend.data)
 
+        # TODO: This is a placeholder, because we should get Quantity objects
+        # straight from the trend object
+        def convert_trend_values(trend: Trend, axis_name: str) -> list[Quantity[float]]:
+            return [Quantity(float(value), parse_unit("mT")) for value in trend.get_trend_values(axis_name)]
+
         #  Factor of (1e-3 / mu_0) converts from mT to A/m
-        applied_field = np.array(trend.get_trend_values("applied_magnetic_field")) * (1e-3 / MuMagLib.mu_0)
-        demagnetising_field = np.array(trend.get_trend_values("demagnetizing_field")) * (1e-3 / MuMagLib.mu_0)
-        saturation_magnetisation = np.array(trend.get_trend_values("saturation_magnetization")) * (1e-3 / MuMagLib.mu_0)
+        applied_field = np.array(convert_trend_values(trend, "applied_magnetic_field")) * (1e-3 / MuMagLib.mu_0)
+        demagnetising_field = np.array(convert_trend_values(trend, "demagnetizing_field")) * (1e-3 / MuMagLib.mu_0)
+        saturation_magnetisation = np.array(convert_trend_values(trend, "saturation_magnetization")) * (1e-3 / MuMagLib.mu_0)
 
         # TODO: The following is how things should be done in the future, rather than hard-coding
         #  a scaling factor...
