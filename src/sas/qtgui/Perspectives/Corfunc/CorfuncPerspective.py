@@ -162,10 +162,6 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         """
         return True
 
-    # ------------------------------------------------------------------
-    # Undo/redo contract methods
-    # ------------------------------------------------------------------
-
     def _get_parameter_dict(self) -> dict:
         """Capture current input-only state (excludes computed outputs).
 

@@ -154,10 +154,6 @@ class InversionWidget(QWidget, Ui_PrInversion):
         for input_box in self.input_boxes:
             input_box.editingFinished.connect(self.startEstimateParameters)
 
-    # ------------------------------------------------------------------
-    # Undo/redo contract methods
-    # ------------------------------------------------------------------
-
     def _get_parameter_dict(self) -> dict:
         """Capture current input state from the UI widgets.
 

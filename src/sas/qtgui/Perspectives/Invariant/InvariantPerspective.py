@@ -123,10 +123,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         """
         return self._undo_stack_obj
 
-    # ------------------------------------------------------------------
-    # Undo/redo contract methods
-    # ------------------------------------------------------------------
-
     def _get_parameter_dict(self) -> dict:
         """Capture current input-only state (excludes computed outputs).
 

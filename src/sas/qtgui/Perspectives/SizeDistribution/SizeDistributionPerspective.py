@@ -163,10 +163,6 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             # Maybe we should just minimize
             self.setWindowState(QtCore.Qt.WindowMinimized)
 
-    # ------------------------------------------------------------------
-    # Undo/redo contract methods
-    # ------------------------------------------------------------------
-
     def _get_parameter_dict(self) -> dict:
         """Capture current input-only state from widgets.
 
