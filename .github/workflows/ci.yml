@@ -294,6 +294,8 @@ jobs:
 
     runs-on: ${{ matrix.os }}
 
+    continue-on-error: ${{ matrix.experimental == 1 }}
+
     steps:
       - name: Obtain SasView source from git
         uses: actions/checkout@v7
