@@ -8,6 +8,10 @@ inputs:
     required: true
   os:
     required: true
+  experimental:
+    required: false
+    type: boolean
+    default: false
 
 runs:
   using: "composite"
@@ -18,6 +22,7 @@ runs:
       run: |
         echo 'python-version = ${{ inputs.python-version }}'
         echo 'os = ${{ inputs.os }}'
+        echo 'experimental = ${{ inputs.experimental }}'
 
     - name: Set up Python
       uses: actions/setup-python@v6
@@ -51,6 +56,16 @@ runs:
         path: dist/
         pattern: build-dependency-*-wheel
         merge-multiple: true
+
+    - name: Allow use of scientific-python nightly wheels for experimental builds
+      if: ${{ inputs.experimental == 'true' }}
+      shell: bash
+      run: |
+        # Enable the scientific-python-nightly wheels as primary source with a fallback to regular pypi (since most wheels will not be there)
+        echo "UV_INDEX=https://pypi.anaconda.org/scientific-python-nightly-wheels/simple https://pypi.org/simple" >> $GITHUB_ENV
+        # and we will need to permit prereleases for the nightly wheels
+        echo "UV_PRERELEASE=allow" >> $GITHUB_ENV
+        echo "UV_INDEX_STRATEGY=unsafe-best-match" >> $GITHUB_ENV
 
     - name: Install correct versions of sibling projects
       shell: bash
