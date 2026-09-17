@@ -87,4 +87,4 @@ runs:
     - name: Python package version list
       shell: bash
       run: |
-        python -m pip freeze
+        uv pip freeze
