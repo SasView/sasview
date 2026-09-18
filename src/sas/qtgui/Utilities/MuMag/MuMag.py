@@ -106,6 +106,7 @@ class MuMag(Perspective, Ui_MuMagTool):
     @override
     def newAssocation(self):
         self.show_input_data()
+        self.plot_tabs.setTabEnabled(0, True)
 
     def hide_everything(self):
         """ Hide all plots, disable tabs"""
