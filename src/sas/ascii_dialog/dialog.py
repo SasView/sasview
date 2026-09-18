@@ -83,7 +83,7 @@ class AsciiDialog(QDialog):
         self.dataset_label = QLabel("Dataset Type")
         self.dataset_combobox = QComboBox()
         # TODO: Temporarily exclude SESANS until that's been fixed.
-        self.dataset_combobox.addItems([option for option in dataset_types if option != 'SESANS'])
+        self.dataset_combobox.addItems(list(dataset_types))
         self.dataset_layout.addWidget(self.dataset_label)
         self.dataset_layout.addWidget(self.dataset_combobox)
 
