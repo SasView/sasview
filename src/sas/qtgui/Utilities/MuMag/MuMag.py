@@ -230,9 +230,6 @@ class MuMag(Perspective, Ui_MuMagTool):
 
         # Update text boxes
 
-        # TODO: I have had to remove the formats because Quantity does not
-        # currently support this. This is a temporary workaround, and must be
-        # reversed as soon as possible.
         self.exchange_a_display.setText(f"{(self.fit_data.refined_fit_data.exchange_A).value * 1e12 : .5g} pJ/m")
         self.exchange_a_std_display.setText(f"{(self.fit_data.optimal_exchange_A_uncertainty).value : .5g} pJ/m")
 
