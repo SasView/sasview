@@ -23,7 +23,7 @@ from PySide6.QtWidgets import (
 )
 
 from sasdata.ascii_reader_metadata import AsciiReaderMetadata
-from sasdata.dataset_types import DatasetType, dataset_types, one_dim, sesans, two_dim, angle_dim
+from sasdata.dataset_types import DatasetType, angle_dim, dataset_types, one_dim, sesans, two_dim
 from sasdata.guess import guess_column_count, guess_columns, guess_starting_position
 from sasdata.temp_ascii_reader import AsciiReaderParams, load_data, split_line
 
