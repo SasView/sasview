@@ -1,9 +1,8 @@
-from sasdata.trend import Trend
 import logging
 from abc import abstractmethod
 
 # This is ugly but necessary to avoid a cyclic dependency
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from PySide6.QtWidgets import QDialog, QWidget
 
