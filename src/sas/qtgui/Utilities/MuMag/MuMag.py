@@ -334,6 +334,8 @@ class MuMag(Perspective, Ui_MuMagTool):
     def onSave(self):
         """ Save button pressed """
 
+        raise NotImplementedError("The Mumag save result functionality has not been reimplemented for data exporters yet.")
+
         if self.fit_data is None:
             log.error("Nothing to save!")
             return
