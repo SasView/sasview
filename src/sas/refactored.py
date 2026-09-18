@@ -2,7 +2,7 @@ import logging
 from abc import abstractmethod
 
 # This is ugly but necessary to avoid a cyclic dependency
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from PySide6.QtWidgets import QDialog, QWidget
 
@@ -10,6 +10,7 @@ from sasdata.data import SasData
 
 if TYPE_CHECKING:
     from sas.data_manager import NewDataManager as DataManager
+    from sas.data_manager import TrackedData
 
 # TODO: None of these classes belong in here. This is a temporary location of
 # them so I can sketch out what they should look like.
@@ -26,12 +27,23 @@ class Perspective(QDialog):
     @property
     @abstractmethod
     def name(self) -> str:
-        """ Name of the perspective"""
+        """Name of the perspective"""
 
     @property
     @abstractmethod
     def title(self) -> str:
-        """ Window title"""
+        """Window title"""
+
+    @property
+    @abstractmethod
+    def supported_data(self) -> set[type["TrackedData"]]:
+        """The types of data that can be sent to the perspective"""
+
+    @property
+    @abstractmethod
+    def supports_multiple_data(self) -> bool:
+        """Whether multiple data can be sent to the perspective. If not, data
+        needs to be removed before it can be sent."""
 
     @property
     def formatName(self) -> str:
@@ -69,8 +81,8 @@ class Perspective(QDialog):
         pass
 
     @property
-    def associatedData(self) -> list[SasData]:
-        return cast(list[SasData], self._data_manager.get_all_associations(self))
+    def associatedData(self) -> list["TrackedData"]:
+        return self._data_manager.get_all_associations(self)
 
 class Theory:
     # TODO: Need to put stuff here that is unique to Theory. Right now, looking
