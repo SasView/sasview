@@ -41,15 +41,6 @@ class MuMagLib:
             return directory
 
 
-    # TODO: Remove this method - MuMag now uses Trends directly
-    @staticmethod
-    def import_data(directory):
-        """Import experimental data and get information from filenames
-
-        DEPRECATED: This method is no longer used. MuMag now accepts Trend objects directly.
-        """
-        raise NotImplementedError("MuMag now uses Trends directly. This method is deprecated.")
-
     @staticmethod
     def nice_log_plot_bounds(data: list[np.ndarray]):
         """ Get nice bounds for the loglog plots
