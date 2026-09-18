@@ -136,18 +136,18 @@ class MuMag(Perspective, Ui_MuMagTool):
 
         for i, datum in enumerate(self.trend.data):
 
-            self.data_axes.loglog(datum.abscissae.axes[0],
-                       datum.ordinate.axes[0],
+            self.data_axes.loglog(datum.abscissae.axes[0].value,
+                       datum.ordinate.value,
                        linestyle='-', color=colors[i], linewidth=0.5,
                        label=r'$B_0 = ' + applied_fields[i].explicitly_formatted("T") + '$')
 
             self.data_axes.loglog(datum.abscissae.axes[0],
-                       datum.ordinate.axes[0], '.',
+                       datum.ordinate.value, '.',
                        color=colors[i], linewidth=0.3, markersize=1)
 
         # Plot limits
-        qlim = MuMagLib.nice_log_plot_bounds([datum.abscissae.axes[0] for datum in self.trend.data])
-        ilim = MuMagLib.nice_log_plot_bounds([datum.ordinate.axes[0] for datum in self.trend.data])
+        qlim = MuMagLib.nice_log_plot_bounds([datum.abscissae.axes[0].value for datum in self.trend.data])
+        ilim = MuMagLib.nice_log_plot_bounds([datum.ordinate.value for datum in self.trend.data])
 
         self.data_axes.set_xlabel(r'$q$ [1/nm]')
         self.data_axes.set_ylabel(r'$I_{\mathrm{exp}}$')
