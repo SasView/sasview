@@ -172,8 +172,8 @@ class MuMagLib:
 
         try:
             I_stdev = Quantity(
-                np.array([datum["dI"].axes[0].value[:max_q_index] for datum in trend.data]),
-                trend.data[0]["dI"].axes[0].units)
+                np.array([datum.ordinate.standard_error.value[:max_q_index] for datum in trend.data]),
+                trend.data[0].ordinate.standard_error.units)
         except KeyError:
             I_stdev = Quantity(np.ones_like(I.value), I.units)
 
