@@ -1,4 +1,3 @@
-from sas.qtgui.Utilities.MuMag.MuMag import MuMag
 import logging
 from os.path import basename
 
@@ -24,6 +23,7 @@ from sas.data_explorer_error_message import DataExplorerErrorMessage
 from sas.data_explorer_tree import DataExplorerTree
 from sas.data_manager import NewDataManager as DataManager
 from sas.dummy_perspective import DummyPerspective
+from sas.qtgui.Utilities.MuMag.MuMag import MuMag
 from sas.refactored import Perspective
 
 # TODO: Eventually, the values (should) never be None.

@@ -1,11 +1,12 @@
-from sasdata.data import SasData
-from abc import abstractmethod
-from typing import override, cast
+from typing import cast, override
 
 from PySide6.QtWidgets import QListWidget, QVBoxLayout, QWidget
 from qtpy.QtWidgets import QLabel
 
-from sas.data_manager import NewDataManager as DataManager, TrackedData
+from sasdata.data import SasData
+
+from sas.data_manager import NewDataManager as DataManager
+from sas.data_manager import TrackedData
 from sas.refactored import Perspective
 
 
