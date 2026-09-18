@@ -103,6 +103,10 @@ class MuMag(Perspective, Ui_MuMagTool):
     def supports_multiple_data(self) -> bool:
         return False
 
+    @override
+    def newAssocation(self):
+        self.show_input_data()
+
     def hide_everything(self):
         """ Hide all plots, disable tabs"""
 
