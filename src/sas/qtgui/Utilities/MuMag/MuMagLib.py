@@ -7,7 +7,6 @@ import numpy as np
 import scipy.optimize
 from PySide6.QtWidgets import QFileDialog
 
-from sasdata.dataloader.loader import Loader
 from sasdata.quantities import units
 from sasdata.quantities.quantity import Quantity
 from sasdata.quantities.unit_parser import parse_unit

@@ -1,8 +1,5 @@
-from sasdata.trend import Trend
-from sasdata.quantities.quantity import Quantity
-from sasdata.quantities.unit_parser import parse_unit
-from typing import override, cast
 from logging import getLogger
+from typing import cast, override
 
 import matplotlib.pylab as pl
 import matplotlib.pyplot as plt
@@ -11,6 +8,12 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from PySide6 import QtWidgets
 from PySide6.QtWidgets import QVBoxLayout, QWidget
 
+from sasdata.quantities.quantity import Quantity
+from sasdata.quantities.unit_parser import parse_unit
+from sasdata.trend import Trend
+
+from sas.data_manager import NewDataManager as DataManager
+from sas.data_manager import TrackedData
 from sas.qtgui.Utilities.MuMag.datastructures import (
     ExperimentGeometry,
     FitFailure,
@@ -21,7 +24,6 @@ from sas.qtgui.Utilities.MuMag.datastructures import (
 from sas.qtgui.Utilities.MuMag.MuMagLib import MuMagLib
 from sas.qtgui.Utilities.MuMag.UI.MuMagUI import Ui_MuMagTool
 from sas.refactored import Perspective
-from sas.data_manager import NewDataManager as DataManager, TrackedData
 
 log = getLogger("MuMag")
 
