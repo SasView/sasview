@@ -141,7 +141,7 @@ class MuMag(Perspective, Ui_MuMagTool):
                        linestyle='-', color=colors[i], linewidth=0.5,
                        label=r'$B_0 = ' + applied_fields[i].explicitly_formatted("T") + '$')
 
-            self.data_axes.loglog(datum.abscissae.axes[0],
+            self.data_axes.loglog(datum.abscissae.axes[0].value,
                        datum.ordinate.value, '.',
                        color=colors[i], linewidth=0.3, markersize=1)
 
