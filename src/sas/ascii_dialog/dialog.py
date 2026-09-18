@@ -23,7 +23,7 @@ from PySide6.QtWidgets import (
 )
 
 from sasdata.ascii_reader_metadata import AsciiReaderMetadata
-from sasdata.dataset_types import DatasetType, dataset_types, one_dim, sesans, two_dim
+from sasdata.dataset_types import DatasetType, dataset_types, one_dim, sesans, two_dim, angle_dim
 from sasdata.guess import guess_column_count, guess_columns, guess_starting_position
 from sasdata.temp_ascii_reader import AsciiReaderParams, load_data, split_line
 
@@ -34,7 +34,7 @@ from sas.ascii_dialog.selection_menu import SelectionMenu
 from sas.ascii_dialog.warning_label import WarningLabel
 from sas.metadata_filename_gui.metadata_filename_dialog import MetadataFilenameDialog
 
-dataset_dictionary = dict([(dataset.name, dataset) for dataset in [one_dim, two_dim, sesans]])
+dataset_dictionary = dict([(dataset.name, dataset) for dataset in [one_dim, two_dim, angle_dim, sesans]])
 
 class AsciiDialog(QDialog):
     """A dialog window allowing the user to adjust various properties regarding
