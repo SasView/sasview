@@ -206,25 +206,26 @@ class TestInvariantCalculateThread(UIHelpersMixin):
         mocker.patch.object(self.window, "update_model_from_thread")
 
         npts = 10
+        end_index = len(self.window._data.x) - 1
         if extrapolation == "low":
             mock_compute_low.return_value = (0.1, 0.01, True)
             mock_compute_high.return_value = (0.0, 0.0, False)
-            self.window._low_points = npts
+            self.low_indices = [0, npts]
             self.set_extra_low(mock_calculator, mocker)
             get_methods = ["get_extra_data_low"]
             expected_titles = [f"Low-Q extrapolation [{self.window._data.name}]"]
         elif extrapolation == "high":
             mock_compute_low.return_value = (0.0, 0.0, False)
             mock_compute_high.return_value = (0.2, 0.02, True)
-            self.window._high_points = npts
+            self.high_indices = [end_index - npts, end_index]
             self.set_extra_high(mock_calculator, mocker)
             get_methods = ["get_extra_data_high"]
             expected_titles = [f"High-Q extrapolation [{self.window._data.name}]"]
         else:
             mock_compute_low.return_value = (0.1, 0.01, True)
             mock_compute_high.return_value = (0.2, 0.02, True)
-            self.window._low_points = npts
-            self.window._high_points = npts
+            self.low_indices = [0, npts]
+            self.high_indices = [end_index - npts, end_index]
             self.set_extra_low(mock_calculator, mocker)
             self.set_extra_high(mock_calculator, mocker)
             get_methods = ["get_extra_data_low", "get_extra_data_high"]
@@ -499,20 +500,21 @@ class TestInvariantCalculateHelpers(UIHelpersMixin):
         self.window._low_fit = low_fit
         self.window._low_fix = low_fix
 
+        q_start_val = 0.0  # TODO - implement ability to set this value
+        q_end_val = float(self.window.txtGuinierEnd_ex.text())
+        indices = self.window.get_extrapolation_indices(q_start_val, q_end_val)
+
         if low_fix:
             power = 4.0
             self.window.txtLowQPower_ex.setText(str(power))
 
-        # mock_setter = mocker.patch.object(self.window, "set_low_q_extrapolation_upper_limit")
         mock_calculator = mocker.patch.object(self.window, "_calculator", autospec=True)
         mock_calculator.get_qstar_low.return_value = (1.0, 0.1)
 
         qstar, qstar_err, success = self.window.compute_low()
 
-        # self.window.set_low_q_extrapolation_upper_limit.assert_called_once()
-
         mock_calculator.set_extrapolation.assert_called_once_with(
-            range="low", npts=self.window._low_points, function=expected_function, power=power if low_fix else None
+            range="low", indices=indices, function=expected_function, power=power if low_fix else None
         )
 
         assert (qstar, qstar_err, success) == (1.0, 0.1, True)
@@ -547,18 +549,21 @@ class TestInvariantCalculateHelpers(UIHelpersMixin):
         self.window._high_fit = high_fit
         self.window._high_fix = high_fix
 
+        q_start_val = float(self.window.txtPorodStart_ex.text())
+        q_end_val = float(self.window.txtPorodEnd_ex.text())
+        indices = self.window.get_extrapolation_indices(q_start_val, q_end_val)
+
         if high_fix:
             power = 4.0
             self.window.txtHighQPower_ex.setText(str(power))
 
-        # mock_setter = mocker.patch.object(self.window, "set_high_q_extrapolation_upper_limit")
         mock_calculator = mocker.patch.object(self.window, "_calculator", autospec=True)
         mock_calculator.get_qstar_high.return_value = (1.0, 0.1)
 
         qstar, qstar_err, success = self.window.compute_high()
 
         mock_calculator.set_extrapolation.assert_called_once_with(
-            range="high", npts=self.window._high_points, function="power_law", power=power if high_fix else None
+            range="high", indices=indices, function="power_law", power=power if high_fix else None
         )
         assert (qstar, qstar_err, success) == (1.0, 0.1, True)
 
