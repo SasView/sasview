@@ -13,7 +13,7 @@ requires = [
     "periodictable",
     "pyopengl",
     "pyside6",
-    "sasdata @ git+https://github.com/SasView/sasdata.git@refactor_24_trend_improvements",
+    "sasdata @ git+https://github.com/SasView/sasdata.git@refactor_24",
     "sasmodels",
     "twisted",
     "uncertainties",
