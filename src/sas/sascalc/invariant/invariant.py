@@ -873,8 +873,9 @@ class InvariantCalculator:
         self.get_qstar(extrapolation)
 
         if self._qstar <= 0:
-            msg = "Invalid invariant: Invariant Q* must be greater than zero\n"
-            msg += "Please check if scale and background values are correct"
+            msg = "Invalid invariant:"
+            msg += " Q is being computed as negative which suggests that the background subtracted from the data"
+            msg += " is too high causing too many negative points at high Q. Try adjusting the background."
             raise RuntimeError(msg)
 
         # Compute intermediate constant
@@ -884,10 +885,12 @@ class InvariantCalculator:
 
         # Compute volume fraction
         if discrim < 0:
-            msg = "Could not compute the volume fraction: negative discriminant"
+            msg = "Could not compute the volume fraction:"
+            msg += " the contrast specified is too small for the Q* computed for this data."
+            msg += " The minimum value of the contrast must be sqrt(Q*/(0.5*pi^2))."
             raise RuntimeError(msg)
         elif discrim == 0:
-            return 1 / 2
+            return 0.5
         else:
             volume1 = 0.5 * (1 - math.sqrt(discrim))
             volume2 = 0.5 * (1 + math.sqrt(discrim))
@@ -931,8 +934,9 @@ class InvariantCalculator:
         self.get_qstar(extrapolation)
 
         if self._qstar <= 0:
-            msg = "Invalid invariant: Invariant Q* must be greater than zero\n"
-            msg += "Please check if scale and background values are correct"
+            msg = "Invalid invariant:"
+            msg += " Q is being computed as negative which suggests that the background subtracted from the data"
+            msg += " is too high causing too many negative points at high Q. Try adjusting the background."
             raise RuntimeError(msg)
 
         try:
