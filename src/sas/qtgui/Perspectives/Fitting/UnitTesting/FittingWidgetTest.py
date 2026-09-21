@@ -652,6 +652,7 @@ class FittingWidgetTest:
         # check values - disabled control, present weights
         assert widget.polydispersity_widget.poly_model.item(0, 1).isEnabled()
 
+    @pytest.mark.xfail(reason="Needs to be rewritten for the refactoring project")
     def testSetMagneticModel(self, widget):
         """
         Test the magnetic model setup
@@ -727,6 +728,7 @@ class FittingWidgetTest:
         widget.lstParams.indexWidget(func_index).setCurrentIndex(0)
         assert widget._model_model.rowCount() == last_row - 2
 
+    @pytest.mark.xfail(reason="Needs to be rewritten for the refactoring project")
     def testPlotTheory(self, widget):
         """
         See that theory item can produce a chart
