@@ -12,6 +12,7 @@ from PySide6.QtWidgets import (
     QTreeWidgetItem,
     QVBoxLayout,
 )
+import numpy as np
 
 from sasdata.data import SasData
 from sasdata.metadata import Metadata, MetaNode
@@ -21,6 +22,9 @@ from sasdata.temp_xml_reader import load_data
 
 def convert_raw_to_dict(to_convert: MetaNode) -> dict:
     # converted = {to_convert.name: to_convert.contents}
+    # TODO: This is a temporary fix, and should be removed later once the relevant part in sasdata has been fixed.
+    if isinstance(to_convert.contents, np.ndarray):
+        return {to_convert.name: "Placeholder. ndarrays shouldn't be here."}
     if isinstance(to_convert.contents, str) or isinstance(
         to_convert.contents, Quantity
     ):
