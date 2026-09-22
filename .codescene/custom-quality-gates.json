@@ -1,0 +1,15 @@
+{
+  "rule_sets": [
+    {
+      "quality_gates": {
+        "hotspot_decline": true,
+        "critical_health_rules": true,
+        "refactoring_goals": false,
+        "supervise_goals": false,
+        "new_code_health": true,
+        "advisory_health_rules": true,
+        "codeowners_for_critical_code": false
+      }
+    }
+  ]
+}
