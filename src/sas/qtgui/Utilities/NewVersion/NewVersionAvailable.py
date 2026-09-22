@@ -24,12 +24,20 @@ from sas.system.version import __version__ as current_version_string
 
 logger = logging.getLogger("NewVersionAvailable")
 
+
 class NewVersionAvailable(QDialog):
     """
     Dialog to say that a new version is available
 
     """
-    def __init__(self, current_version: str, latest_version: str, url: str = 'http://www.sasview.org/#downloadsection', parent=None):
+
+    def __init__(
+        self,
+        current_version: str,
+        latest_version: str,
+        url: str = "http://www.sasview.org/#downloadsection",
+        parent=None,
+    ):
         super().__init__(parent)
 
         self.latest_version = latest_version
@@ -45,9 +53,9 @@ class NewVersionAvailable(QDialog):
 
         self.setLayout(vertical_layout)
 
-        text = QLabel("<p>A new version of sasview is available.</p>"
-                       ""
-                       "<p><center>Visit the download page?</centre></p><p/>")
+        text = QLabel(
+            "<p>A new version of sasview is available.</p><p><center>Visit the download page?</centre></p><p/>"
+        )
 
         vertical_layout.addWidget(text)
 
@@ -71,7 +79,7 @@ class NewVersionAvailable(QDialog):
 
         button_layout.addWidget(cancel)
         button_layout.addWidget(self.dont_show)
-        button_layout.addSpacerItem(QSpacerItem(50,10))
+        button_layout.addSpacerItem(QSpacerItem(50, 10))
         button_layout.addWidget(accept)
 
     def go(self):
@@ -84,7 +92,7 @@ class NewVersionAvailable(QDialog):
 
 
 def get_current_release_version() -> tuple[str, str, Version] | None:
-    """ Get the current version from the server """
+    """Get the current version from the server"""
     try:
         response = requests.get(web.update_url, timeout=config.UPDATE_TIMEOUT)
         # Will throw Exception if the HTTP status code returned isn't success
@@ -103,12 +111,10 @@ def get_current_release_version() -> tuple[str, str, Version] | None:
         return None
 
 
-
 def maybe_prompt_new_version_download() -> QDialog | None:
-    """ If a new version is available, and Show a dialog prompting the user to download """
+    """If a new version is available, and Show a dialog prompting the user to download"""
 
     try:
-
         # Check the config to see if we should show
         # The last dismissed version needs to be at least as old as this version
         last_dismissed_string = config.LAST_UPDATE_DISMISSED_VERSION
@@ -140,24 +146,20 @@ def maybe_prompt_new_version_download() -> QDialog | None:
         latest_string, url, latest = latest_string_and_tuple
 
         if latest > comparison:
-
             app = QApplication([])
             new_version = NewVersionAvailable(current_version_string, latest_string, url)
             new_version.show()
 
             app.exec()
-            app.shutdown() # Of course!
-
-
-
-
+            app.shutdown()  # Of course!
 
     except Exception as ex:
         logger.info("Error getting latest sasview version %s", ex)
         return None
 
+
 def main():
-    """ Demo/testing window"""
+    """Demo/testing window"""
 
     maybe_prompt_new_version_download()
 

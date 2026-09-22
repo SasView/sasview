@@ -14,7 +14,7 @@ The collector is designed to minimize manual data entry by automatically
 populating fields from available sources in the SasView session.
 """
 import logging
-from datetime import datetime
+import re
 
 import numpy as np
 
@@ -45,9 +45,15 @@ NANOMETRE_UNITS = frozenset({'nm', 'nanometer', 'nanometre',
                              'nanometers', 'nanometres'})
 KELVIN_UNITS = frozenset({'k', 'kelvin'})
 CELSIUS_UNITS = frozenset({'c', 'degc', 'degreec', 'celsius', '\u00b0c'})
+METRE_UNITS = frozenset({'m', 'meter', 'metre', 'meters', 'metres'})
+MILLIMETRE_UNITS = frozenset({
+    'mm', 'millimeter', 'millimetre', 'millimeters', 'millimetres'})
+CENTIMETRE_UNITS = frozenset({
+    'cm', 'centimeter', 'centimetre', 'centimeters', 'centimetres'})
 
 ANGSTROM_PER_NM = 10.0
 KELVIN_OFFSET = 273.15
+_BUFFER_PH = re.compile(r'\(pH\s*([0-9]*\.?[0-9]+)\)\s*$', re.IGNORECASE)
 # Thresholds for the magnitude heuristics used when no unit is declared.
 WAVELENGTH_ANGSTROM_THRESHOLD_NM = 1.0
 TEMPERATURE_KELVIN_THRESHOLD_C = 100.0
@@ -118,6 +124,29 @@ def _temperature_in_celsius(temperature: float, unit: str | None) -> float:
     return temperature
 
 
+def _distance_in_m(distance: float, unit: str | None) -> float:
+    """
+    Convert a sample-to-detector distance to metres.
+
+    A declared unit is used when it is recognised. sasdata stores this
+    distance in millimetres unless ``distance_unit`` says otherwise, so a
+    missing or unrecognised unit is treated as millimetres.
+
+    :param distance: Distance value as stored on the detector
+    :param unit: Normalised unit string, or None if unknown
+    :return: Distance in metres
+    """
+    if unit in METRE_UNITS:
+        return distance
+    if unit in CENTIMETRE_UNITS:
+        return distance / 100.0
+    if unit in MILLIMETRE_UNITS:
+        return distance / 1000.0
+    if unit is not None:
+        logger.debug("Unrecognised distance unit '%s'; assuming mm", unit)
+    return distance / 1000.0
+
+
 def _meta_str(meta: dict, *keys: str) -> str | None:
     for key in keys:
         if key in meta and meta[key] not in (None, ""):
@@ -156,13 +185,99 @@ def _x_axis_label_is_inverse_angstrom(text: str) -> bool:
     markers = (
         "A^{-1}",
         "A^-1",
+        "1/A",
+        "1/a",
         "\u00c5^{-1}",  # Å^{-1} (Latin-1 capital A with ring)
         "\u00c5^-1",
         "\u00c5-1",
         "\u212b^{-1}",  # ANGSTROM SIGN U+212B
         "1/\u00c5",
+        "1/\u212b",
     )
     return any(m in text for m in markers)
+
+
+def _angular_units_from_label(text: str | None) -> str:
+    """
+    Map an x-axis label or unit string to a SASBDB angular-unit token.
+
+    Recognises the same inverse-Angstrom spellings as Guinier scaling,
+    including Unicode Å. A bare letter ``A`` is not enough: ``Arbitrary``
+    must stay arbitrary.
+
+    :param text: Axis label, unit string, or both
+    :return: ``1/A``, ``1/nm``, or ``arbitrary``
+    """
+    if not text:
+        return 'arbitrary'
+    if _x_axis_label_is_inverse_angstrom(text):
+        return '1/A'
+    compact = text.lower().replace(' ', '')
+    if 'angstrom' in compact or 'ångström' in text.lower():
+        return '1/A'
+    if 'nm' in compact or 'nanomet' in compact:
+        return '1/nm'
+    return 'arbitrary'
+
+
+def _detail_map(sample_obj: object) -> dict[str, str]:
+    """
+    Parse ``sample.details`` lines written by the SASBDB loader.
+
+    Each line is ``Label: value``. Non-list details (for example a mock)
+    are ignored.
+
+    :param sample_obj: Data sample, or None
+    :return: Lower-case label to value
+    """
+    details = getattr(sample_obj, 'details', None)
+    if not isinstance(details, (list, tuple)):
+        return {}
+    parsed: dict[str, str] = {}
+    for line in details:
+        if not isinstance(line, str) or ':' not in line:
+            continue
+        label, value = line.split(':', 1)
+        value = value.strip()
+        if value:
+            parsed[label.strip().lower()] = value
+    return parsed
+
+
+def _concentration_from_detail(text: str | None) -> float | None:
+    """Return the leading number in a ``Concentration:`` detail line."""
+    if not text:
+        return None
+    token = text.split()[0]
+    try:
+        return float(token)
+    except ValueError:
+        return None
+
+
+def _split_molecule_detail(text: str) -> tuple[str, str | None]:
+    """Split ``Lysozyme (Protein)`` into name and optional type."""
+    if text.endswith(')') and ' (' in text:
+        name, _, rest = text.rpartition(' (')
+        mol_type = rest[:-1].strip() or None
+        return name.strip(), mol_type
+    return text.strip(), None
+
+
+def _original_curve_point(valid_indices, q, filtered_index: int):
+    """
+    Map a FreeSAS index in the filtered curve back to the original curve.
+
+    :param valid_indices: Indices of points passed to FreeSAS
+    :param q: Original q array
+    :param filtered_index: Index into the filtered array
+    :return: ``(original_index, q_value)`` or None when the index is outside
+        the filtered curve
+    """
+    if filtered_index < 0 or filtered_index >= len(valid_indices):
+        return None
+    original = int(valid_indices[filtered_index])
+    return original, float(q[original])
 
 
 class SASBDBDataCollector:
@@ -201,17 +316,11 @@ class SASBDBDataCollector:
         sample.sample_title = getattr(data, 'name', None) or getattr(data, 'title', None) or getattr(data, 'filename', 'Untitled')
         sample.experimental_curve = getattr(data, 'filename', None)
 
-        # Angular and intensity units
-        if hasattr(data, '_xunit'):
-            xunit = data._xunit
-            if 'A' in xunit or 'angstrom' in xunit.lower():
-                sample.angular_units = '1/A'
-            elif 'nm' in xunit.lower():
-                sample.angular_units = '1/nm'
-            else:
-                sample.angular_units = 'arbitrary'
-        else:
-            sample.angular_units = 'arbitrary'
+        # Angular and intensity units. Share the Guinier axis check so
+        # Unicode Å^{-1} is 1/A, while a bare "A" in "Arbitrary" is not.
+        xunit = getattr(data, '_xunit', None)
+        sample.angular_units = _angular_units_from_label(
+            xunit if isinstance(xunit, str) else None)
 
         if hasattr(data, '_yunit'):
             yunit = data._yunit
@@ -233,9 +342,11 @@ class SASBDBDataCollector:
 
         if hasattr(data, 'detector') and data.detector and len(data.detector) > 0:
             detector = data.detector[0]
-            if hasattr(detector, 'distance') and detector.distance:
-                # Convert from mm to m
-                sample.sample_detector_distance = detector.distance / 1000.0
+            distance = getattr(detector, 'distance', None)
+            if isinstance(distance, (int, float)) and distance:
+                sample.sample_detector_distance = _distance_in_m(
+                    float(distance),
+                    _declared_unit(detector, 'distance_unit'))
 
         if hasattr(data, 'sample') and data.sample:
             if hasattr(data.sample, 'temperature') and data.sample.temperature:
@@ -243,9 +354,11 @@ class SASBDBDataCollector:
                     data.sample.temperature,
                     _declared_unit(data.sample, 'temperature_unit'))
 
-        # Extract metadata dictionary if available
-        if hasattr(data, 'meta_data') and data.meta_data:
-            meta = data.meta_data
+        # Extract metadata dictionary if available. Leave experiment_date
+        # empty when the file does not declare one.
+        raw_meta = getattr(data, 'meta_data', None)
+        meta = raw_meta if isinstance(raw_meta, dict) else {}
+        if meta:
             sample.experiment_date = _meta_str(meta, 'experiment_date', 'date')
             beamline = _meta_str(meta, 'beamline', 'instrument')
             if beamline:
@@ -256,13 +369,11 @@ class SASBDBDataCollector:
             sample.exposure_time = _meta_float(meta, 'exposure_time')
             sample.number_of_frames = _meta_int(meta, 'number_of_frames', 'frames')
 
+        self._apply_downloaded_sasbdb(sample, meta, getattr(data, 'sample', None))
+
         # Also check data.instrument attribute (shown in info panel)
         if hasattr(data, 'instrument') and data.instrument and not sample.beamline_instrument:
             sample.beamline_instrument = str(data.instrument)
-
-        # Set default experiment date if not found
-        if not sample.experiment_date:
-            sample.experiment_date = datetime.now().strftime("%Y-%m-%d")
 
         # Curve type - default to "Single concentration" if we can't determine
         sample.curve_type = "Single concentration"
@@ -294,23 +405,26 @@ class SASBDBDataCollector:
         # Extract from source object
         if hasattr(data, 'source') and data.source:
             source = data.source
-            # Try to determine source type from source attributes
-            if hasattr(source, 'radiation'):
-                radiation = str(source.radiation).lower()
-                if 'x-ray' in radiation or 'xray' in radiation:
-                    if 'synchrotron' in radiation or hasattr(source, 'name'):
+            # Source type comes from the radiation string. Every sasdata
+            # Source has a name attribute, so that must not imply synchrotron.
+            radiation = getattr(source, 'radiation', None)
+            if isinstance(radiation, str) and radiation.strip():
+                radiation_l = radiation.lower()
+                if 'neutron' in radiation_l:
+                    instrument.source_type = "Neutron source"
+                elif 'x-ray' in radiation_l or 'xray' in radiation_l:
+                    if 'synchrotron' in radiation_l:
                         instrument.source_type = "X-ray synchrotron"
                     else:
                         instrument.source_type = "X-ray in house"
-                elif 'neutron' in radiation:
-                    instrument.source_type = "Neutron source"
                 else:
                     instrument.source_type = "Other"
                 has_instrument_data = True
 
             # Source name might contain synchrotron/facility info
-            if hasattr(source, 'name') and source.name:
-                source_name = str(source.name).strip()
+            source_name = getattr(source, 'name', None)
+            if isinstance(source_name, str) and source_name.strip():
+                source_name = source_name.strip()
                 if source_name:
                     # Check if it looks like a synchrotron/facility name
                     if not instrument.synchrotron_name:
@@ -607,6 +721,7 @@ class SASBDBDataCollector:
         if not np.any(valid_mask):
             return None
 
+        valid_indices = np.flatnonzero(valid_mask)
         q_valid = q[valid_mask]
         I_valid = I[valid_mask]
         err_valid = err[valid_mask]
@@ -643,32 +758,138 @@ class SASBDBDataCollector:
             if hasattr(result, 'I0') and result.I0 is not None:
                 guinier.i0 = float(result.I0)
 
-            # Range start and end (indices converted back to q values in original units)
+            # FreeSAS indices refer to the filtered array passed in.
+            # Store the matching index on the original curve.
             if hasattr(result, 'start_point') and result.start_point is not None:
-                start_idx = int(result.start_point)
-                guinier.start_point = start_idx
-                if 0 <= start_idx < len(q_valid):
-                    # Return q in original units
-                    guinier.range_start = float(q_valid[start_idx])
+                mapped = _original_curve_point(valid_indices, q, int(result.start_point))
+                if mapped is not None:
+                    guinier.start_point, guinier.range_start = mapped
 
             if hasattr(result, 'end_point') and result.end_point is not None:
-                end_idx = int(result.end_point)
-                guinier.end_point = end_idx
-                if 0 <= end_idx < len(q_valid):
-                    # Return q in original units
-                    guinier.range_end = float(q_valid[end_idx])
+                mapped = _original_curve_point(valid_indices, q, int(result.end_point))
+                if mapped is not None:
+                    guinier.end_point, guinier.range_end = mapped
 
             # Only return if we got at least Rg
             if guinier.rg is not None:
                 return guinier
 
-        except Exception as e:
-            logger.warning(f"FreeSAS auto_guinier failed: {e}")
-            import traceback
-            logger.debug(traceback.format_exc())
+        except Exception as exc:
+            logger.warning("FreeSAS auto_guinier failed: %s", exc)
+            logger.debug("FreeSAS auto_guinier traceback", exc_info=True)
             return None
 
         return None
+
+    def _apply_downloaded_sasbdb(self, sample: SASBDBSample, meta: dict,
+                                 sample_obj: object) -> None:
+        """
+        Fill fields written by the SASBDB download loader.
+
+        The loader stores molecular weight, Guinier results, and publication
+        ids under ``SASBDB_*`` metadata keys, and writes concentration,
+        buffer, and sequence into ``sample.details``. SASBDB reports Guinier
+        Rg in nm, which is the unit ``SASBDBGuinier.rg`` uses.
+
+        :param sample: Sample being filled
+        :param meta: Data metadata dictionary; may be empty
+        :param sample_obj: Underlying data sample, used for detail lines
+        """
+        details = _detail_map(sample_obj)
+        if sample.experimental_molecular_weight is None:
+            sample.experimental_molecular_weight = _meta_float(meta, 'SASBDB_MW')
+        if sample.concentration is None:
+            sample.concentration = _concentration_from_detail(
+                details.get('concentration'))
+        self._apply_downloaded_molecule(sample, meta, details)
+        self._apply_downloaded_buffer(sample, details)
+        self._apply_downloaded_guinier(sample, meta)
+        self._apply_downloaded_publication(meta)
+
+    def _apply_downloaded_molecule(self, sample: SASBDBSample, meta: dict,
+                                   details: dict[str, str]) -> None:
+        """Copy molecule fields from SASBDB metadata and detail lines."""
+        long_name = _meta_str(meta, 'SASBDB_molecule')
+        mol_type = _meta_str(meta, 'SASBDB_molecule_type')
+        molecule_line = details.get('molecule')
+        if molecule_line and not long_name:
+            long_name, detail_type = _split_molecule_detail(molecule_line)
+            mol_type = mol_type or detail_type
+        sequence = details.get('sequence')
+        uniprot = details.get('uniprot')
+        organism = details.get('source organism')
+        oligomer = _meta_str(meta, 'SASBDB_oligomeric_state') or details.get(
+            'oligomerization')
+        n_molecules = details.get('number of molecules')
+        if not any((long_name, mol_type, sequence, uniprot, organism,
+                    oligomer, n_molecules)):
+            return
+        molecule = sample.molecule or SASBDBMolecule()
+        molecule.long_name = molecule.long_name or long_name
+        molecule.type = molecule.type or mol_type
+        molecule.fasta_sequence = molecule.fasta_sequence or sequence
+        molecule.uniprot_accession = molecule.uniprot_accession or uniprot
+        molecule.source_organism = molecule.source_organism or organism
+        molecule.oligomeric_state = molecule.oligomeric_state or oligomer
+        if molecule.number_of_molecules is None and n_molecules:
+            try:
+                molecule.number_of_molecules = int(float(n_molecules))
+            except ValueError:
+                logger.debug("Could not parse number of molecules '%s'",
+                             n_molecules)
+        sample.molecule = molecule
+
+    def _apply_downloaded_buffer(self, sample: SASBDBSample,
+                                 details: dict[str, str]) -> None:
+        """Copy buffer description and pH from a loader detail line."""
+        buffer_line = details.get('buffer')
+        if not buffer_line:
+            return
+        description = buffer_line
+        ph = None
+        match = _BUFFER_PH.search(buffer_line)
+        if match:
+            description = buffer_line[:match.start()].strip()
+            try:
+                ph = float(match.group(1))
+            except ValueError:
+                ph = None
+        buffer = sample.buffer or SASBDBBuffer()
+        buffer.description = buffer.description or description or None
+        if buffer.ph is None:
+            buffer.ph = ph
+        sample.buffer = buffer
+
+    def _apply_downloaded_guinier(self, sample: SASBDBSample, meta: dict) -> None:
+        """Copy Guinier Rg (nm) and I(0) stored by the SASBDB loader."""
+        rg = _meta_float(meta, 'SASBDB_Rg')
+        i0 = _meta_float(meta, 'SASBDB_I0')
+        if rg is None and i0 is None:
+            return
+        guinier = sample.guinier or SASBDBGuinier()
+        if guinier.rg is None:
+            guinier.rg = rg
+        if guinier.rg_error is None:
+            guinier.rg_error = _meta_float(meta, 'SASBDB_Rg_error')
+        if guinier.i0 is None:
+            guinier.i0 = i0
+        sample.guinier = guinier
+
+    def _apply_downloaded_publication(self, meta: dict) -> None:
+        """Copy DOI and PubMed id onto the export project."""
+        doi = _meta_str(meta, 'SASBDB_DOI')
+        pmid = _meta_str(meta, 'SASBDB_PMID')
+        if not doi and not pmid:
+            return
+        if self.export_data.project is None:
+            self.export_data.project = SASBDBProject(published=True)
+        project = self.export_data.project
+        if doi and not project.doi:
+            project.doi = doi
+        if pmid and not project.pubmed_pmid:
+            project.pubmed_pmid = pmid
+        if project.doi or project.pubmed_pmid:
+            project.published = True
 
     def create_default_project(self) -> SASBDBProject:
         """
