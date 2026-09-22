@@ -201,5 +201,13 @@ class Perspective(metaclass=PerspectiveMeta):
         """ Save parameters to a file"""
         pass
 
+    @property
+    def undo_stack(self):
+        """Optional undo stack for this perspective.
+
+        Perspectives without undo support should leave this as ``None``.
+        """
+        return None
+
 
 
