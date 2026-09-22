@@ -27,12 +27,12 @@ from sasdata.dataset_types import DatasetType, dataset_types, one_dim, sesans, t
 from sasdata.guess import guess_column_count, guess_columns, guess_starting_position
 from sasdata.temp_ascii_reader import AsciiReaderParams, load_data, split_line
 
-from ascii_dialog.col_editor import ColEditor
-from ascii_dialog.constants import TABLE_MAX_ROWS
-from ascii_dialog.row_status_widget import RowStatusWidget
-from ascii_dialog.selection_menu import SelectionMenu
-from ascii_dialog.warning_label import WarningLabel
-from metadata_filename_gui.metadata_filename_dialog import MetadataFilenameDialog
+from sas.ascii_dialog.col_editor import ColEditor
+from sas.ascii_dialog.constants import TABLE_MAX_ROWS
+from sas.ascii_dialog.row_status_widget import RowStatusWidget
+from sas.ascii_dialog.selection_menu import SelectionMenu
+from sas.ascii_dialog.warning_label import WarningLabel
+from sas.metadata_filename_gui.metadata_filename_dialog import MetadataFilenameDialog
 
 dataset_dictionary = dict([(dataset.name, dataset) for dataset in [one_dim, two_dim, sesans]])
 
@@ -82,8 +82,8 @@ class AsciiDialog(QDialog):
         self.dataset_layout = QHBoxLayout()
         self.dataset_label = QLabel("Dataset Type")
         self.dataset_combobox = QComboBox()
-        for name in dataset_types:
-            self.dataset_combobox.addItem(name)
+        # TODO: Temporarily exclude SESANS until that's been fixed.
+        self.dataset_combobox.addItems([option for option in dataset_types if option != 'SESANS'])
         self.dataset_layout.addWidget(self.dataset_label)
         self.dataset_layout.addWidget(self.dataset_combobox)
 
@@ -186,7 +186,7 @@ class AsciiDialog(QDialog):
     @property
     def rowsIsIncluded(self) -> list[bool] | None:
         if self.current_filename is None:
-            return None
+            return []
         return self.files_is_included[self.current_filename]
 
     @property
@@ -239,6 +239,7 @@ class AsciiDialog(QDialog):
 
         # Now fill the table with data
         for i, row in enumerate(self.rawCsv):
+            row_split = self.splitLine(row)
             if i == TABLE_MAX_ROWS:
                 #  Fill with elipsis to indicate there is more data.
                 for j in range(len(row_split)):
@@ -256,7 +257,6 @@ class AsciiDialog(QDialog):
                 row_status = RowStatusWidget(initial_state, i)
                 row_status.status_changed.connect(self.updateRowStatus)
                 self.table.setCellWidget(i, 0, row_status)
-            row_split = self.splitLine(row)
             for j, col_value in enumerate(row_split):
                 if j >= col_count:
                     continue # Ignore rows that have extra columns.

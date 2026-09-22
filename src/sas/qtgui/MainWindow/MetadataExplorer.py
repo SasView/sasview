@@ -1,0 +1,111 @@
+from sys import argv
+
+from PySide6.QtWidgets import (
+    QApplication,
+    QDialog,
+    QLabel,
+    QPushButton,
+    QTreeWidget,
+    QTreeWidgetItem,
+    QVBoxLayout,
+)
+
+from sasdata.metadata import Metadata, MetaNode
+from sasdata.quantities.quantity import Quantity
+from sasdata.temp_xml_reader import load_data
+
+
+def convert_raw_to_dict(to_convert: MetaNode) -> dict:
+    # converted = {to_convert.name: to_convert.contents}
+    if isinstance(to_convert.contents, str) or isinstance(
+        to_convert.contents, Quantity
+    ):
+        return {to_convert.name: to_convert.contents}
+    value = {}
+    # We can now assume that every content is a MetaNode as per the typing.
+    for content in to_convert.contents:
+        value = value | convert_raw_to_dict(content)
+    return {to_convert.name: value}
+
+
+def metadata_as_dict(to_convert: object):
+    converted = to_convert.__dict__.copy()
+    converted["raw"] = convert_raw_to_dict(converted["raw"])
+    return converted
+
+
+class MetadataExplorer(QDialog):
+    def __init__(self, metadata: Metadata, filename: str | None):
+        super().__init__()
+        self.metadata_dict = metadata_as_dict(metadata)
+
+        filename_known = filename if filename is not None else "Unknown"
+        self.filenameLabel = QLabel(f"Filename: {filename_known}")
+
+        self.metadataTreeWidget = QTreeWidget()
+        self.buildTree()
+        self.metadataTreeWidget.header().setDefaultSectionSize(350)
+
+        self.closeButton = QPushButton("Close")
+        self.closeButton.clicked.connect(self.closeEvent)
+
+        self.layout = QVBoxLayout(self)
+        self.layout.addWidget(self.filenameLabel)
+        self.layout.addWidget(self.metadataTreeWidget)
+        self.layout.addWidget(self.closeButton)
+
+        self.setWindowTitle("Metadata Explorer")
+        self.setMinimumSize(800, 430)
+
+    def closeEvent(self, event):
+        self.close()
+
+    def buildTree(
+        self,
+        table_root: QTreeWidgetItem | None = None,
+        current_item: dict[str, object] | list[dict[str, object]] | None = None,
+    ):
+        tree = self.metadataTreeWidget
+        tree.setColumnCount(2)
+        if current_item is None:
+            current_item = self.metadata_dict
+        if table_root is None:
+            table_root = QTreeWidgetItem(["Metadata"])
+            tree.addTopLevelItem(table_root)
+        if isinstance(current_item, list):
+            dicts = current_item
+        else:
+            dicts = [current_item]
+        for single_dict in dicts:
+            for key, value in single_dict.items():
+                if isinstance(value, dict) or (
+                    isinstance(value, list)
+                    and any([isinstance(member, dict) for member in value])
+                ):
+                    dict_root = QTreeWidgetItem([key])
+                    table_root.addChild(dict_root)
+                    self.buildTree(dict_root, value)
+                elif isinstance(value, list):
+                    node_item = QTreeWidgetItem([key, str(value)])
+                    table_root.addChild(node_item)
+                if isinstance(value, str):
+                    node_item = QTreeWidgetItem([key, value])
+                    table_root.addChild(node_item)
+                if isinstance(value, MetaNode):
+                    # TODO: Implement. Just show the contents for now.
+                    node_item = QTreeWidgetItem([key, str(value.contents)])
+                    table_root.addChild(node_item)
+
+
+if __name__ == "__main__":
+    app = QApplication([])
+
+    filename = argv[1]
+    data_dict = load_data(filename)
+    data = list(data_dict.items())[0][1]
+    # This is only going to work on XML files for now.
+
+    dialog = MetadataExplorer(data.metadata, data.name)
+    status = dialog.exec()
+
+    exit()

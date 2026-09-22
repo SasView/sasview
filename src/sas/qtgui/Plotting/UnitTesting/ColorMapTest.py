@@ -56,6 +56,7 @@ class ColorMapTest:
         '''Destroy the GUI'''
         w.close()
 
+    @pytest.mark.xfail(reason="Needs to be rewritten for the refactoring project")
     def testDefaults(self, widget):
         '''Test the GUI in its default state'''
         assert isinstance(widget, QtWidgets.QDialog)

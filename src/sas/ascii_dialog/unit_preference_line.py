@@ -5,7 +5,7 @@ from PySide6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QWidget
 
 from sasdata.quantities.units import NamedUnit, UnitGroup
 
-from ascii_dialog.unit_selector import UnitSelector
+from sas.ascii_dialog.unit_selector import UnitSelector
 
 
 class UnitPreferenceLine(QWidget):
