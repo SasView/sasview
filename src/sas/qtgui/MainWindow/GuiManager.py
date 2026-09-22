@@ -55,10 +55,10 @@ from sas.qtgui.Utilities.PluginManager import PluginManager
 from sas.qtgui.Utilities.Preferences.PreferencesPanel import PreferencesPanel
 from sas.qtgui.Utilities.Reports.ReportDialog import ReportDialog
 from sas.qtgui.Utilities.ResultPanel import ResultPanel
-from sas.qtgui.Utilities.SASBDB.SASBDBDialog import SASBDBDialog
-from sas.qtgui.Utilities.SASBDB.SASBDBDownloadDialog import SASBDBDownloadDialog
 from sas.qtgui.Utilities.SASBDB.sasbdb_data_collector import SASBDBDataCollector
 from sas.qtgui.Utilities.SASBDB.sasbdb_loader import load_downloaded_dataset
+from sas.qtgui.Utilities.SASBDB.SASBDBDialog import SASBDBDialog
+from sas.qtgui.Utilities.SASBDB.SASBDBDownloadDialog import SASBDBDownloadDialog
 
 # General SAS imports
 from sas.qtgui.Utilities.SasviewLogger import setup_qt_logging
