@@ -30,7 +30,8 @@ class NewDataManager(QObject):
     # Don't mutate these directly, or scary bad stuff will happen.
     _all_data_entries: list[TrackedData]
     associations: list[tuple[TrackedData, TrackedData]]
-    # These all take in 'object' because PySide6 can't handle handle having
+    # These all take in 'object' because PySide6 can't handle handle taking in
+    # objects that are not based on QObject.
     new_data: Signal = Signal(object)
     data_removed: Signal = Signal(object)
     new_association: Signal = Signal(object, object)
