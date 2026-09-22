@@ -1,3 +1,4 @@
+import logging
 from sys import argv
 from typing import cast
 
@@ -23,16 +24,19 @@ from sasdata.temp_xml_reader import load_data
 def convert_raw_to_dict(to_convert: MetaNode) -> dict:
     # converted = {to_convert.name: to_convert.contents}
     # TODO: This is a temporary fix, and should be removed later once the relevant part in sasdata has been fixed.
-    if isinstance(to_convert.contents, np.ndarray):
-        return {to_convert.name: "Placeholder. ndarrays shouldn't be here."}
     if isinstance(to_convert.contents, str) or isinstance(
         to_convert.contents, Quantity
     ):
         return {to_convert.name: to_convert.contents}
+    elif not isinstance(to_convert.contents, list):
+        logging.error("The metadata viewer encountered unexpected data which it can't display.")
+        return {to_convert.name: "???"}
     value = {}
-    # We can now assume that every content is a MetaNode as per the typing.
     for content in to_convert.contents:
-        value = value | convert_raw_to_dict(content)
+        if isinstance(content, MetaNode):
+            value = value | convert_raw_to_dict(content)
+        else:
+            logging.error("A node in the metadata is unexpectedly not a MetaNode object. The viewer doesn't know what to do with it.")
     return {to_convert.name: value}
 
 def get_common_metadata(all_metadata_dicts: list[dict[str, object]]) -> dict[str, object]:
