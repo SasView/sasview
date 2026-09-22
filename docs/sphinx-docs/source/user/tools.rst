@@ -34,3 +34,4 @@ Tools & Utilities
 
    SASBDB Download <qtgui/Utilities/SASBDB/sasbdb_download_help>
 
+   SASBDB Export <qtgui/Utilities/SASBDB/sasbdb_help>
