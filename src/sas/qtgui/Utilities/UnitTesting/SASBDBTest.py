@@ -202,7 +202,7 @@ class TestSASBDBDataCollector:
         assert sample.angular_units == "1/A"
         assert sample.intensity_units == "1/cm"
         assert sample.curve_type == "Single concentration"
-        assert sample.experiment_date is not None
+        assert sample.experiment_date is None
 
     def test_collect_from_data_with_metadata(self, collector):
         """Test collecting data with metadata"""
@@ -307,6 +307,18 @@ class TestSASBDBDataCollector:
         assert instrument.city == "Grenoble"
         assert instrument.country == "France"
 
+    def test_collect_instrument_lab_xray_is_not_synchrotron(self, collector):
+        """A source name must not turn an in-house X-ray into a synchrotron."""
+        data = Data1D(x=[0.01, 0.02], y=[100, 50])
+        source = SimpleNamespace(radiation="X-ray", name="Lab tube")
+        data.source = source
+
+        instrument = collector.collect_instrument_from_data(data)
+
+        assert instrument is not None
+        assert instrument.source_type == "X-ray in house"
+        assert instrument.synchrotron_name == "Lab tube"
+
     def test_collect_instrument_from_data_no_data(self, collector):
         """Test collecting instrument information when no data available"""
         # PlotterData Data1D inherits a default ``source`` from sasdata; that
@@ -386,6 +398,18 @@ class TestSASBDBDataCollector:
         sample4, _ = collector.collect_from_data(data4)
         assert sample4.angular_units == "arbitrary"
 
+        # Unicode angstrom, the form Guinier scaling already accepts
+        data5 = Data1D(x=[0.01, 0.02], y=[100, 50])
+        data5._xunit = "\u00c5^{-1}"
+        sample5, _ = collector.collect_from_data(data5)
+        assert sample5.angular_units == "1/A"
+
+        # A bare capital A must not be read as inverse angstrom
+        data6 = Data1D(x=[0.01, 0.02], y=[100, 50])
+        data6._xunit = "Arbitrary"
+        sample6, _ = collector.collect_from_data(data6)
+        assert sample6.angular_units == "arbitrary"
+
     def test_collect_from_data_intensity_units_detection(self, collector):
         """Test detection of intensity units"""
         # Test 1/cm format
@@ -455,6 +479,63 @@ class TestSASBDBDataCollector:
 
         # Should convert from mm to m
         assert sample.sample_detector_distance == 2.0
+
+    def test_collect_from_data_detector_distance_declared_metres(self, collector):
+        """A declared metre unit must not be divided by 1000."""
+        data = Data1D(x=[0.01, 0.02], y=[100, 50])
+        detector = SimpleNamespace(distance=2.0, distance_unit="m")
+        data.detector = [detector]
+
+        sample, _ = collector.collect_from_data(data)
+
+        assert sample.sample_detector_distance == 2.0
+
+    def test_collect_from_data_sasbdb_download_metadata(self, collector):
+        """Metadata written by the SASBDB loader is copied into the export."""
+        data = Data1D(x=[0.01, 0.02], y=[100, 50])
+        data.meta_data = {
+            'SASBDB_MW': 14.3,
+            'SASBDB_Rg': 1.42,
+            'SASBDB_Rg_error': 0.02,
+            'SASBDB_I0': 0.05,
+            'SASBDB_molecule': 'Lysozyme',
+            'SASBDB_molecule_type': 'Protein',
+            'SASBDB_oligomeric_state': 'monomer',
+            'SASBDB_DOI': '10.1234/example',
+            'SASBDB_PMID': '12345678',
+        }
+        data.sample = SimpleNamespace(details=[
+            'Sequence: MKTAYIAK',
+            'UniProt: P00698',
+            'Concentration: 5.0 mg/mL',
+            'Buffer: PBS (pH 7.4)',
+            'Number of molecules: 1',
+            'Source organism: Gallus gallus',
+        ])
+
+        sample, _ = collector.collect_from_data(data)
+
+        assert sample.experimental_molecular_weight == 14.3
+        assert sample.concentration == 5.0
+        assert sample.guinier is not None
+        assert sample.guinier.rg == 1.42
+        assert sample.guinier.rg_error == 0.02
+        assert sample.guinier.i0 == 0.05
+        assert sample.molecule is not None
+        assert sample.molecule.long_name == 'Lysozyme'
+        assert sample.molecule.type == 'Protein'
+        assert sample.molecule.fasta_sequence == 'MKTAYIAK'
+        assert sample.molecule.uniprot_accession == 'P00698'
+        assert sample.molecule.oligomeric_state == 'monomer'
+        assert sample.molecule.number_of_molecules == 1
+        assert sample.molecule.source_organism == 'Gallus gallus'
+        assert sample.buffer is not None
+        assert sample.buffer.description == 'PBS'
+        assert sample.buffer.ph == 7.4
+        assert collector.export_data.project is not None
+        assert collector.export_data.project.published is True
+        assert collector.export_data.project.doi == '10.1234/example'
+        assert collector.export_data.project.pubmed_pmid == '12345678'
 
     def test_collect_from_data_wavelength_declared_unit(self, collector):
         """Declared wavelength unit wins over the magnitude heuristic"""
@@ -600,7 +681,50 @@ class TestSASBDBDataCollector:
             assert guinier.rg == 2.5
             assert guinier.rg_error == 0.1
             assert guinier.i0 == 100.0
+            assert guinier.start_point == 5
+            assert guinier.end_point == 15
             mock_auto_guinier.assert_called_once()
+        finally:
+            for key, val in saved.items():
+                if val is not None:
+                    sys.modules[key] = val
+                else:
+                    sys.modules.pop(key, None)
+
+    def test_collect_guinier_from_freesas_maps_filtered_index(self, collector):
+        """FreeSAS indices are into the filtered curve, not the original one."""
+        mock_result = MagicMock()
+        mock_result.Rg = 2.5
+        mock_result.sigma_Rg = 0.1
+        mock_result.I0 = 100.0
+        mock_result.start_point = 0
+        mock_result.end_point = 1
+        mock_auto_guinier = MagicMock(return_value=mock_result)
+
+        autorg_mod = types.ModuleType('freesas.autorg')
+        autorg_mod.auto_guinier = mock_auto_guinier
+        freesas_mod = types.ModuleType('freesas')
+        freesas_mod.autorg = autorg_mod
+
+        saved = {}
+        for key in ('freesas', 'freesas.autorg'):
+            saved[key] = sys.modules.pop(key, None)
+        sys.modules['freesas'] = freesas_mod
+        sys.modules['freesas.autorg'] = autorg_mod
+        try:
+            q = np.array([0.01, 0.02, 0.03])
+            intensity = np.array([np.nan, 100.0, 90.0])
+            data = Data1D(x=q, y=intensity)
+            data.dy = np.ones(3)
+            data._xunit = "1/A"
+
+            guinier = collector.collect_guinier_from_freesas(data)
+
+            assert guinier is not None
+            assert guinier.start_point == 1
+            assert guinier.end_point == 2
+            assert guinier.range_start == pytest.approx(0.02)
+            assert guinier.range_end == pytest.approx(0.03)
         finally:
             for key, val in saved.items():
                 if val is not None:
@@ -786,6 +910,13 @@ class TestSASBDBExporter:
         finally:
             if os.path.exists(filepath):
                 os.unlink(filepath)
+
+    def test_export_to_json_raises_when_path_missing(self, export_data):
+        """A missing directory is reported as an exception, not False."""
+        exporter = SASBDBExporter(export_data)
+        missing = os.path.join(tempfile.gettempdir(), 'sasbdb-missing-dir', 'out.json')
+        with pytest.raises(OSError):
+            exporter.export_to_json(missing)
 
     def test_export_to_json_removes_none_values(self, export_data):
         """Test that None values are removed from JSON export"""

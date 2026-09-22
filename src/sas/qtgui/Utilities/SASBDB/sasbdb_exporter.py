@@ -56,26 +56,24 @@ class SASBDBExporter:
 
     def export_to_json(self, filepath: str) -> bool:
         """
-        Export data to JSON file
-        
+        Export data to JSON file.
+
+        Failures such as a missing directory or unserialisable values are
+        raised to the caller. The method does not turn them into ``False``.
+
         :param filepath: Path to save JSON file
-        :return: True if successful, False otherwise
+        :return: True when the file has been written
+        :raises OSError: when the file cannot be created
+        :raises TypeError: when the export data cannot be serialised
         """
-        try:
-            data_dict = self.to_dict()
+        data_dict = self.to_dict()
+        cleaned_dict = self._remove_none_values(data_dict)
 
-            # Remove None values for cleaner JSON
-            cleaned_dict = self._remove_none_values(data_dict)
+        with open(filepath, 'w', encoding='utf-8') as handle:
+            json.dump(cleaned_dict, handle, indent=2, ensure_ascii=False)
 
-            with open(filepath, 'w', encoding='utf-8') as f:
-                json.dump(cleaned_dict, f, indent=2, ensure_ascii=False)
-
-            logger.info(f"SASBDB data exported to {filepath}")
-            return True
-
-        except Exception as e:
-            logger.error(f"Failed to export SASBDB data: {e}")
-            return False
+        logger.info("SASBDB data exported to %s", filepath)
+        return True
 
     def _remove_none_values(self, d: dict) -> dict:
         """
