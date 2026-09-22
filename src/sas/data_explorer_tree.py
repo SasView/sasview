@@ -109,7 +109,7 @@ class DataExplorerTree(QTreeWidget):
             root.removeChild(item)
 
     def showContextMenu(self):
-        send_to = all([isinstance(datum, SasData) for datum in self.currentTrackedData])
+        send_to = all([isinstance(datum, SasData) or isinstance(datum, Trend) for datum in self.currentTrackedData])
         view_data = len(self.currentTrackedData) == 1 and isinstance(self.currentTrackedData[0], SasData)
         make_trend = len(self.currentTrackedData) > 1 and all([isinstance_fix(datum, SasData) for datum in self.currentTrackedData])
         menu = DataExplorerMenu(self, self._data_manager, send_to, view_data, make_trend)

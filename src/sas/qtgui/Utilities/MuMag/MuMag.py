@@ -1,37 +1,42 @@
 from logging import getLogger
+from typing import cast, override
 
 import matplotlib.pylab as pl
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from PySide6 import QtWidgets
-from PySide6.QtWidgets import QVBoxLayout
+from PySide6.QtWidgets import QVBoxLayout, QWidget
 
+from sasdata.quantities.quantity import Quantity
+from sasdata.quantities.unit_parser import parse_unit
+from sasdata.trend import Trend
+
+from sas.data_manager import NewDataManager as DataManager
+from sas.data_manager import TrackedData
 from sas.qtgui.Utilities.MuMag.datastructures import (
-    ExperimentalData,
     ExperimentGeometry,
     FitFailure,
     FitParameters,
     FitResults,
     LeastSquaresOutputPerpendicular,
-    LoadFailure,
 )
 from sas.qtgui.Utilities.MuMag.MuMagLib import MuMagLib
 from sas.qtgui.Utilities.MuMag.UI.MuMagUI import Ui_MuMagTool
+from sas.refactored import Perspective
 
 log = getLogger("MuMag")
 
-class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
+class MuMag(Perspective, Ui_MuMagTool):
     """ Main widget for the MuMag tool """
 
-    def __init__(self, parent=None):
-        super().__init__()
+    def __init__(self, data_manager: DataManager, parent: QWidget | None=None):
+        super().__init__(data_manager, parent)
 
         self.parent = parent
         self.setupUi(self)
 
         # Callbacks
-        self.ImportDataButton.clicked.connect(self.importData)
         self.SimpleFitButton.clicked.connect(self.onFit)
         self.SaveResultsButton.clicked.connect(self.onSave)
         self.helpButton.clicked.connect(self.onHelp)
@@ -40,7 +45,6 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
         # Data
         #
 
-        self.data: list[ExperimentalData] | None = None
         self.fit_data: FitResults | None = None
 
         #
@@ -82,27 +86,31 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
         # Set visibility
         self.hide_everything()
 
-    def importData(self):
-        """ Callback for the import data button """
+    @property
+    def trend(self) -> Trend | None:
+        if len(self.associatedData) == 0:
+            return None
+        return cast(Trend, self.associatedData[0])
 
-        # Get the directory from the user
-        directory = MuMagLib.directory_popup()
+    @property
+    @override
+    def title(self) -> str:
+        return "MuMag Perspective"
 
-        if directory is None:
-            log.info("No directory selected")
-            return
+    @property
+    @override
+    def supported_data(self) -> set[type[TrackedData]]:
+        return {Trend}
 
-        try:
-            self.data = MuMagLib.import_data(directory)
-        except LoadFailure as lf:
-            log.error(repr(lf))
-            return
+    @property
+    @override
+    def supports_multiple_data(self) -> bool:
+        return False
 
-        log.info(f"Loaded {len(self.data)} datasets")
-
-        self.hide_everything()
-        self.plot_tabs.setTabEnabled(0, True)
+    @override
+    def newAssocation(self):
         self.show_input_data()
+        self.plot_tabs.setTabEnabled(0, True)
 
     def hide_everything(self):
         """ Hide all plots, disable tabs"""
@@ -122,22 +130,29 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
     def show_input_data(self):
         """ Plot Experimental Data: Generate Figure """
 
-        colors = pl.cm.jet(np.linspace(0, 1, len(self.data)))
+        if self.trend is None:
+            return
 
-        for i, datum in enumerate(self.data):
+        applied_fields = [
+            Quantity(float(value), parse_unit("mT"))
+            for value in self.trend.get_trend_values("applied_magnetic_field")
+        ]
+        colors = pl.cm.jet(np.linspace(0, 1, len(self.trend.data)))
 
-            self.data_axes.loglog(datum.scattering_curve.x,
-                      datum.scattering_curve.y,
-                      linestyle='-', color=colors[i], linewidth=0.5,
-                      label=r'$B_0 = ' + str(datum.applied_field) + '$ T')
+        for i, datum in enumerate(self.trend.data):
 
-            self.data_axes.loglog(datum.scattering_curve.x,
-                      datum.scattering_curve.y, '.',
-                      color=colors[i], linewidth=0.3, markersize=1)
+            self.data_axes.loglog(datum.abscissae.axes[0].value,
+                       datum.ordinate.value,
+                       linestyle='-', color=colors[i], linewidth=0.5,
+                       label=r'$B_0 = ' + applied_fields[i].explicitly_formatted("T") + '$')
+
+            self.data_axes.loglog(datum.abscissae.axes[0].value,
+                       datum.ordinate.value, '.',
+                       color=colors[i], linewidth=0.3, markersize=1)
 
         # Plot limits
-        qlim = MuMagLib.nice_log_plot_bounds([datum.scattering_curve.x for datum in self.data])
-        ilim = MuMagLib.nice_log_plot_bounds([datum.scattering_curve.y for datum in self.data])
+        qlim = MuMagLib.nice_log_plot_bounds([datum.abscissae.axes[0].value for datum in self.trend.data])
+        ilim = MuMagLib.nice_log_plot_bounds([datum.ordinate.value for datum in self.trend.data])
 
         self.data_axes.set_xlabel(r'$q$ [1/nm]')
         self.data_axes.set_ylabel(r'$I_{\mathrm{exp}}$')
@@ -167,16 +182,16 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
                 raise ValueError(f"Unknown experiment geometry: {self.ScatteringGeometrySelect.currentText()}")
 
         return FitParameters(
-            q_max=self.qMaxSpinBox.value(),
-            min_applied_field=self.hMinSpinBox.value(),
+            q_max=Quantity(self.qMaxSpinBox.value(), parse_unit("1/nm")),
+            min_applied_field=Quantity(self.hMinSpinBox.value(), parse_unit("mT")),
             exchange_A_n=self.aSamplesSpinBox.value(),
-            exchange_A_min=a_min,
-            exchange_A_max=a_max,
+            exchange_A_min=Quantity(a_min, parse_unit("pJ/m")),
+            exchange_A_max=Quantity(a_max, parse_unit("pJ/m")),
             experiment_geometry=geometry)
 
     def onFit(self):
 
-        if self.data is None:
+        if self.trend is None:
             log.error("No data loaded")
             return None
 
@@ -191,7 +206,7 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
                 raise log.error(f"Unknown geometry: {parameters.experiment_geometry}")
 
         try:
-            self.fit_data = MuMagLib.simple_fit(self.data, parameters)
+            self.fit_data = MuMagLib.simple_fit(self.trend, parameters)
 
         except FitFailure as ff:
             log.error("Fitting failed - are the parameters correct? "+repr(ff))
@@ -213,12 +228,12 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
         refined = self.fit_data.refined_fit_data
         sweep_data = self.fit_data.sweep_data
 
-        q = refined.q * 1e-9
+        q = (refined.q * 1e-9).value
 
         # Update text boxes
 
-        self.exchange_a_display.setText(f"{self.fit_data.refined_fit_data.exchange_A * 1e12 : .5g} pJ/m")
-        self.exchange_a_std_display.setText(f"{self.fit_data.optimal_exchange_A_uncertainty : .5g} pJ/m")
+        self.exchange_a_display.setText(f"{(self.fit_data.refined_fit_data.exchange_A).value * 1e12 : .5g} pJ/m")
+        self.exchange_a_std_display.setText(f"{(self.fit_data.optimal_exchange_A_uncertainty).value : .5g} pJ/m")
 
 
 
@@ -229,15 +244,15 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
         self.longitudinal_scattering_axes.cla()
 
         # Plot A search data
-        self.chi_squared_axes.plot(sweep_data.exchange_A_checked * 1e12, sweep_data.exchange_A_chi_sq)
-        self.chi_squared_axes.plot(sweep_data.optimal.exchange_A * 1e12, sweep_data.optimal.exchange_A_chi_sq, 'o')
+        self.chi_squared_axes.plot((sweep_data.exchange_A_checked * 1e12).value, sweep_data.exchange_A_chi_sq)
+        self.chi_squared_axes.plot((sweep_data.optimal.exchange_A * 1e12).value, sweep_data.optimal.exchange_A_chi_sq, 'o')
 
-        self.chi_squared_axes.set_xlim([min(sweep_data.exchange_A_checked * 1e12), max(sweep_data.exchange_A_checked * 1e12)])
+        self.chi_squared_axes.set_xlim([min((sweep_data.exchange_A_checked * 1e12).value), max((sweep_data.exchange_A_checked * 1e12).value)])
         self.chi_squared_axes.set_xlabel('$A$ [pJ/m]')
         self.chi_squared_axes.set_ylabel(r'$\chi^2$')
 
         # Residual intensity plot
-        self.residual_axes.plot(q, refined.I_residual, label='fit')
+        self.residual_axes.plot(q, refined.I_residual.value, label='fit')
         self.residual_axes.set_yscale('log')
         self.residual_axes.set_xscale('log')
         self.residual_axes.set_xlim([min(q), max(q)])
@@ -245,7 +260,7 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
         self.residual_axes.set_ylabel(r'$I_{\mathrm{res}}$')
 
         # S_H parameter
-        self.s_h_axes.plot(q, refined.S_H, label='fit')
+        self.s_h_axes.plot(q, refined.S_H.value, label='fit')
         self.s_h_axes.set_yscale('log')
         self.s_h_axes.set_xscale('log')
         self.s_h_axes.set_xlim([min(q), max(q)])
@@ -254,7 +269,7 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
 
         # S_M parameter
         if isinstance(refined, LeastSquaresOutputPerpendicular):
-            self.longitudinal_scattering_axes.plot(q, refined.S_M, label='fit')
+            self.longitudinal_scattering_axes.plot(q, refined.S_M.value, label='fit')
             self.longitudinal_scattering_axes.set_yscale('log')
             self.longitudinal_scattering_axes.set_xscale('log')
             self.longitudinal_scattering_axes.set_xlim([min(q), max(q)])
@@ -273,26 +288,30 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
         #
 
         # Plot limits
-        qlim = MuMagLib.nice_log_plot_bounds([datum.scattering_curve.x for datum in self.data])
-        ilim = MuMagLib.nice_log_plot_bounds([datum.scattering_curve.y for datum in self.data])
+        qlim = MuMagLib.nice_log_plot_bounds([datum.abscissae.axes[0].value for datum in self.fit_data.input_trend.data])
+        ilim = MuMagLib.nice_log_plot_bounds([datum.ordinate.value for datum in self.fit_data.input_trend.data])
 
         # Show the experimental data
-        colors = pl.cm.jet(np.linspace(0, 1, len(self.fit_data.input_data)))
-        for k, datum in enumerate(self.fit_data.input_data):
+        colors = pl.cm.jet(np.linspace(0, 1, len(self.fit_data.input_trend.data)))
+        for k, datum in enumerate(self.fit_data.input_trend.data):
             self.comparison_axes.loglog(
-                datum.scattering_curve.x,
-                datum.scattering_curve.y,
+                datum.abscissae.axes[0].value,
+                datum.ordinate.value,
                 linestyle='None', color=colors[k], marker='x')
 
         # Show the fitted curves
-        n_sim = self.fit_data.refined_fit_data.I_simulated.shape[0]
+        n_sim = self.fit_data.refined_fit_data.I_simulated.value.shape[0]
+        applied_fields = [
+            Quantity(float(value), parse_unit("mT"))
+            for value in self.fit_data.input_trend.get_trend_values("applied_magnetic_field")
+        ]
         colors = pl.cm.jet(np.linspace(0, 1, n_sim))
         for k in range(n_sim):
             self.comparison_axes.loglog(
-                self.fit_data.refined_fit_data.q * 1e-9,
-                self.fit_data.refined_fit_data.I_simulated[k, :],
+                (self.fit_data.refined_fit_data.q * 1e-9).value,
+                self.fit_data.refined_fit_data.I_simulated.value[k, :],
                 linestyle='solid', color=colors[k],
-                label='B_0 = ' + str(self.fit_data.input_data[k].applied_field) + ' T')
+                label='B_0 = ' + applied_fields[k].explicitly_formatted("T"))
 
         self.comparison_axes.set_xlabel(r'$q$ [1/nm]')
         self.comparison_axes.set_ylabel(r'$I_{\mathrm{exp}}$')
@@ -313,6 +332,8 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
 
     def onSave(self):
         """ Save button pressed """
+
+        raise NotImplementedError("The Mumag save result functionality has not been reimplemented for data exporters yet.")
 
         if self.fit_data is None:
             log.error("Nothing to save!")
