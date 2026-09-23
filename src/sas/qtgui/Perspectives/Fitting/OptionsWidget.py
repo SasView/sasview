@@ -239,14 +239,24 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         """
         Update the local model based on calculated values
         """
-        qmax = str(q_range_max)
-        qmin = str(q_range_min)
-        self.model.item(self.MODEL.index('MIN_RANGE')).setText(qmin)
-        self.model.item(self.MODEL.index('MAX_RANGE')).setText(qmax)
-        self.model.item(self.MODEL.index('NPTS')).setText(str(npts))
-        self.qmin, self.qmax, self.npts = q_range_min, q_range_max, npts
-        npts_fit = self.npts2fit(self.logic.data, self.qmin, self.qmax, self.npts)
-        self.model.item(self.MODEL.index('NPTS_FIT')).setText(str(npts_fit))
+        # Block signals to prevent intermediate dataChanged→onModelChange→
+        # plot_signal firing for each individual setText.  Without this,
+        # onOptionsUpdate receives partially-updated state and can push
+        # multiple spurious FitOptionsCommand entries onto the undo stack.
+        self.model.blockSignals(True)
+        try:
+            qmax = str(q_range_max)
+            qmin = str(q_range_min)
+            self.model.item(self.MODEL.index('MIN_RANGE')).setText(qmin)
+            self.model.item(self.MODEL.index('MAX_RANGE')).setText(qmax)
+            self.model.item(self.MODEL.index('NPTS')).setText(str(npts))
+            self.qmin, self.qmax, self.npts = q_range_min, q_range_max, npts
+            npts_fit = self.npts2fit(self.logic.data, self.qmin, self.qmax, self.npts)
+            self.model.item(self.MODEL.index('NPTS_FIT')).setText(str(npts_fit))
+        finally:
+            self.model.blockSignals(False)
+        # Single signal after all values are consistent
+        self.plot_signal.emit()
 
     def state(self):
         """
@@ -258,6 +268,26 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         npts_fit = int(self.model.item(self.MODEL.index('NPTS_FIT')).text())
         log_points = self.chkLogData.isChecked()
         return (q_range_min, q_range_max, npts, log_points, self.weighting)
+
+    def setState(self, q_range_min, q_range_max, npts, log_points, weighting):
+        """
+        Set the state of controls from provided values.
+        Used by undo/redo to restore fit options.
+        """
+        self.model.blockSignals(True)
+        self.updateQRange(q_range_min, q_range_max, npts)
+        self.chkLogData.setChecked(log_points)
+        self.weighting = weighting
+        # Update the weighting radio buttons to match
+        buttons = self.weightingGroup.buttons()
+        for btn in buttons:
+            btn_id = abs(self.weightingGroup.id(btn) + 2)
+            if btn_id == weighting:
+                btn.setChecked(True)
+                break
+        self.model.blockSignals(False)
+        # Refresh the QDataWidgetMapper so text fields reflect the model
+        self.mapper.toFirst()
 
     def npts2fit(self, data=None, qmin=None, qmax=None, npts=None):
         """

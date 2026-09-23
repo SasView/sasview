@@ -205,6 +205,9 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         # Default fitting optimizer
         self.FITTING_DEFAULT_OPTIMIZER = 'lm'
 
+        # Undo/Redo stack depth per fitting tab
+        self.UNDO_STACK_MAX_DEPTH = 200
+
         # What's New variables
         self.LAST_WHATS_NEW_HIDDEN_VERSION = "6.0.1"
 
