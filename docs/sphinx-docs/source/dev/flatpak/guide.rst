@@ -1,5 +1,5 @@
-Flatpak maintenance
-===================
+Flatpak Update Script Guide
+===========================
 
 The ``flatpak_update_script.py`` generates the manifest files required
 to package SasView as a Flatpak. It ensures all the Python dependencies
