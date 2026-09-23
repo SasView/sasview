@@ -9,8 +9,21 @@ from types import SimpleNamespace
 from unittest import mock
 
 import pytest
-from PySide6.QtCore import QCoreApplication, QEvent, QEventLoop, QRect, QTimer
-from PySide6.QtGui import QAction, QColor, QIcon, QPixmap, QStandardItemModel
+from PySide6.QtCore import QCoreApplication, QEvent, QEventLoop, QMimeData, QPoint, QPointF, QRect, Qt, QTimer
+from PySide6.QtGui import (
+    QAction,
+    QColor,
+    QCursor,
+    QDrag,
+    QDragEnterEvent,
+    QDragLeaveEvent,
+    QDragMoveEvent,
+    QDropEvent,
+    QIcon,
+    QMouseEvent,
+    QPixmap,
+    QStandardItemModel,
+)
 from PySide6.QtWidgets import (
     QApplication,
     QDialog,
@@ -19,6 +32,7 @@ from PySide6.QtWidgets import (
     QMainWindow,
     QMdiArea,
     QMenu,
+    QTableWidget,
     QVBoxLayout,
     QWidget,
 )
@@ -28,6 +42,7 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.MainWindow.WorkspaceManager import (
     ATTACH_TEXT,
     DETACH_TEXT,
+    WORKSPACE_MIME,
     DetachableSubWindow,
     FloatingWindow,
     WorkspaceManager,
@@ -93,6 +108,31 @@ class HostedDialog(QDialog):
 MODES = [pytest.param(False, id="attached"), pytest.param(True, id="detached")]
 
 
+def mouse(widget, event_type, local, buttons=Qt.LeftButton):
+    """Send a synthetic left-button mouse event to ``widget`` at ``local`` coordinates."""
+    local = QPoint(local)
+    event = QMouseEvent(event_type, QPointF(local), QPointF(widget.mapToGlobal(local)),
+                        Qt.LeftButton, buttons, Qt.NoModifier)
+    QApplication.sendEvent(widget, event)
+    return event
+
+
+def workspace_mime():
+    mime = QMimeData()
+    mime.setData(WORKSPACE_MIME, b"1")
+    return mime
+
+
+def deliver_drop(viewport, pos, mime=None):
+    """Deliver a drag-enter followed by a drop at ``pos`` (viewport coordinates); returns the drop event."""
+    mime = mime or workspace_mime()
+    enter = QDragEnterEvent(pos, Qt.MoveAction, mime, Qt.LeftButton, Qt.NoModifier)
+    QApplication.sendEvent(viewport, enter)
+    drop = QDropEvent(QPointF(pos), Qt.MoveAction, mime, Qt.LeftButton, Qt.NoModifier)
+    QApplication.sendEvent(viewport, drop)
+    return drop
+
+
 class WorkspaceManagerTest:
 
     @pytest.fixture(autouse=True)
@@ -149,6 +189,65 @@ class WorkspaceManagerTest:
         hosted = env.manager.add(Hosted())
         assert red_title_bar_pixels(hosted) == expected
 
+    @staticmethod
+    def table_widget():
+        widget = QWidget()
+        QVBoxLayout(widget).addWidget(QTableWidget(20, 6))
+        return widget
+
+    @pytest.fixture
+    def stylesheet(self, qapp):
+        '''SasView applies an application-wide stylesheet, which changes when subwindows are polished'''
+        qapp.setStyleSheet("* {font-size: 11pt;}")
+        yield
+        qapp.setStyleSheet("")
+
+    def testNewSubWindowTakesQtInitialSizeUnderStylesheet(self, env, stylesheet):
+        '''A new attached window gets the size QMdiArea.addSubWindow would give it'''
+        reference = env.mdi.addSubWindow(self.table_widget())
+        reference.show()
+        flush()
+        assert reference.width() > 200 and reference.height() > 150
+
+        hosted = env.manager.add(self.table_widget())
+        flush()
+        assert hosted.size() == reference.size()
+
+    def testWindowsAddedBeforeWorkspaceIsShownAreSizedOnShow(self, qapp, stylesheet):
+        '''Perspectives and panels are added at start-up, before the main window is visible'''
+        window = QMainWindow()
+        mdi = QMdiArea()
+        window.setCentralWidget(mdi)
+        window.resize(1000, 800)
+        manager = WorkspaceManager(mdi, window)
+        try:
+            hosted = manager.add(self.table_widget())
+            hidden = manager.add(self.table_widget(), visible=False)
+            window.show()
+            flush()
+            reference = mdi.addSubWindow(self.table_widget())
+            reference.show()
+            flush()
+            assert hosted.size() == reference.size()
+
+            # A panel kept hidden at start-up is sized when it is first shown
+            manager.set_visible(hidden.hostedWidget(), True)
+            flush()
+            assert hidden.size() == reference.size()
+        finally:
+            window.close()
+            window.deleteLater()
+            flush()
+
+    def testNewSubWindowStaysMaximisedWhenWorkspaceIsMaximised(self, env, stylesheet):
+        first = env.manager.add(self.table_widget())
+        first.showMaximized()
+        flush()
+        second = env.manager.add(self.table_widget())
+        flush()
+        assert second.isMaximized()
+        assert second.size() == env.mdi.viewport().size()
+
     def testAddDetachedCreatesFloatingWindow(self, env):
         widget = Hosted()
         container = env.manager.add(widget, detached=True)
@@ -164,6 +263,185 @@ class WorkspaceManagerTest:
         container = env.manager.add(widget)
         assert env.manager.add(widget, detached=True) is container
         assert not env.manager.is_detached(widget)
+
+    # ------------------------------------------------------------------
+    # Drag and drop
+    # ------------------------------------------------------------------
+    @staticmethod
+    def title_label_point(sub):
+        return QPoint(sub.width() // 2, 10)
+
+    def testTitleBarHitTestExcludesButtonsAndBody(self, env):
+        sub = env.manager.add(Hosted())
+        sub.setGeometry(QRect(20, 20, 400, 300))
+        flush()
+        assert sub.isOnTitleBarLabel(self.title_label_point(sub))
+        assert not sub.isOnTitleBarLabel(QPoint(sub.width() - 10, 10))   # close button
+        assert not sub.isOnTitleBarLabel(QPoint(8, 10))                   # system menu
+        assert not sub.isOnTitleBarLabel(QPoint(100, 150))                # body
+
+    def testTitleBarDragOutsideWorkspaceDetachesAtCursor(self, env, monkeypatch):
+        # Keep the workspace small so a point below it is still on the (offscreen) screen
+        env.window.resize(400, 300)
+        widget = Hosted()
+        sub = env.manager.add(widget)
+        sub.setGeometry(QRect(20, 20, 200, 150))
+        flush()
+        outside = env.manager.viewportGlobalRect().bottomLeft() + QPoint(150, 30)
+        drags = []
+        monkeypatch.setattr(QDrag, "exec", lambda self, *args: drags.append(self.mimeData().formats()) or Qt.IgnoreAction)
+        monkeypatch.setattr(QCursor, "pos", staticmethod(lambda: outside))
+
+        grab = self.title_label_point(sub)
+        mouse(sub, QEvent.MouseButtonPress, grab)
+        # Still inside the workspace: no drag yet
+        mouse(sub, QEvent.MouseMove, grab + QPoint(30, 30))
+        assert drags == []
+        # Beyond the workspace edge: drag starts and ends outside
+        mouse(sub, QEvent.MouseMove, QPoint(-60, 10))
+        flush()
+
+        assert drags == [[WORKSPACE_MIME]]
+        assert env.manager.is_detached(widget)
+        host = env.manager.container_of(widget)
+        assert host.isVisible()
+        assert host.geometry().topLeft() == outside - grab
+        # The pre-drag position is remembered for re-attaching
+        assert env.manager.last_placement(widget).mdi_geometry == QRect(20, 20, 200, 150)
+
+    def testTitleBarDragDroppedInWorkspaceMovesWindow(self, env, monkeypatch):
+        widget = Hosted()
+        sub = env.manager.add(widget)
+        sub.setGeometry(QRect(20, 20, 400, 300))
+        flush()
+        grab = self.title_label_point(sub)
+        drop_at = QPoint(300, 200)
+
+        def fake_exec(drag, *args):
+            deliver_drop(env.mdi.viewport(), drop_at)
+            return Qt.MoveAction
+
+        monkeypatch.setattr(QDrag, "exec", fake_exec)
+        mouse(sub, QEvent.MouseButtonPress, grab)
+        mouse(sub, QEvent.MouseMove, QPoint(-60, 10))
+        flush()
+
+        assert not env.manager.is_detached(widget)
+        assert env.manager.container_of(widget) is sub
+        assert sub.pos() == drop_at - grab
+        assert not env.manager._drop_indicator.isVisible()
+
+    def testDragCancelledInsideWorkspaceChangesNothing(self, env, monkeypatch):
+        widget = Hosted()
+        sub = env.manager.add(widget)
+        sub.setGeometry(QRect(20, 20, 400, 300))
+        flush()
+        monkeypatch.setattr(QDrag, "exec", lambda self, *args: Qt.IgnoreAction)
+        inside = env.manager.viewportGlobalRect().center()
+        monkeypatch.setattr(QCursor, "pos", staticmethod(lambda: inside))
+
+        mouse(sub, QEvent.MouseButtonPress, self.title_label_point(sub))
+        mouse(sub, QEvent.MouseMove, QPoint(-60, 10))
+        flush()
+        assert env.manager.container_of(widget) is sub
+        assert sub.geometry() == QRect(20, 20, 400, 300)
+
+    def testPressOnCloseButtonNeverStartsDrag(self, env, monkeypatch):
+        widget = Hosted()
+        sub = env.manager.add(widget)
+        sub.setGeometry(QRect(20, 20, 400, 300))
+        flush()
+        drags = []
+        monkeypatch.setattr(QDrag, "exec", lambda self, *args: drags.append(1) or Qt.IgnoreAction)
+        mouse(sub, QEvent.MouseButtonPress, QPoint(sub.width() - 10, 10))
+        mouse(sub, QEvent.MouseMove, QPoint(-60, 10))
+        flush()
+        assert drags == []
+
+    def testHeaderDragDroppedInWorkspaceAttachesAtDropPoint(self, env, monkeypatch):
+        widget = Hosted()
+        host = env.manager.add(widget, detached=True)
+        flush()
+        header = host.header
+        grab = QPoint(header.width() // 2, header.height() // 2)
+        hotspot = header.mapTo(host, grab)
+        drop_at = QPoint(250, 180)
+
+        def fake_exec(drag, *args):
+            assert drag.mimeData().hasFormat(WORKSPACE_MIME)
+            deliver_drop(env.mdi.viewport(), drop_at)
+            return Qt.MoveAction
+
+        monkeypatch.setattr(QDrag, "exec", fake_exec)
+        mouse(header, QEvent.MouseButtonPress, grab)
+        mouse(header, QEvent.MouseMove, grab + QPoint(40, 40))
+        flush()
+
+        assert not env.manager.is_detached(widget)
+        sub = env.manager.container_of(widget)
+        assert isinstance(sub, DetachableSubWindow)
+        assert sub.pos() == drop_at - hotspot
+        assert not isValid(host)
+
+    def testHeaderDragCancelledKeepsFloatingWindow(self, env, monkeypatch):
+        widget = Hosted()
+        host = env.manager.add(widget, detached=True)
+        host.setGeometry(QRect(100, 100, 400, 300))
+        flush()
+        monkeypatch.setattr(QDrag, "exec", lambda self, *args: Qt.IgnoreAction)
+        outside = env.manager.viewportGlobalRect().topLeft() + QPoint(-150, 100)
+        monkeypatch.setattr(QCursor, "pos", staticmethod(lambda: outside))
+
+        grab = QPoint(host.header.width() // 2, host.header.height() // 2)
+        mouse(host.header, QEvent.MouseButtonPress, grab)
+        mouse(host.header, QEvent.MouseMove, grab + QPoint(40, 40))
+        flush()
+        assert env.manager.container_of(widget) is host
+        assert host.geometry() == QRect(100, 100, 400, 300)
+
+    def testHeaderDoubleClickAttaches(self, env):
+        widget = Hosted()
+        host = env.manager.add(widget, detached=True)
+        flush()
+        mouse(host.header, QEvent.MouseButtonDblClick, QPoint(10, 5))
+        flush()
+        assert not env.manager.is_detached(widget)
+        assert isinstance(env.manager.container_of(widget), DetachableSubWindow)
+
+    def testDropIndicatorFollowsWorkspaceDragOnly(self, env):
+        widget = Hosted()
+        host = env.manager.add(widget, detached=True)
+        flush()
+        viewport = env.mdi.viewport()
+        indicator = env.manager._drop_indicator
+        hotspot = QPoint(30, 8)
+
+        # A drag from elsewhere (for example a file) is left alone
+        env.manager._drag = None
+        foreign = QMimeData()
+        foreign.setText("not a window")
+        enter = QDragEnterEvent(QPoint(50, 50), Qt.CopyAction, foreign, Qt.LeftButton, Qt.NoModifier)
+        QApplication.sendEvent(viewport, enter)
+        assert not indicator.isVisible()
+
+        # A workspace window drag shows where the window will land
+        from sas.qtgui.MainWindow.WorkspaceManager import _DragState
+        env.manager._drag = _DragState(widget, host, hotspot, host.size())
+        # Drag events do not own their mime data; keep it alive for their lifetime
+        mime = workspace_mime()
+        try:
+            enter = QDragEnterEvent(QPoint(100, 100), Qt.MoveAction, mime, Qt.LeftButton, Qt.NoModifier)
+            QApplication.sendEvent(viewport, enter)
+            assert enter.isAccepted()
+            move = QDragMoveEvent(QPoint(140, 120), Qt.MoveAction, mime, Qt.LeftButton, Qt.NoModifier)
+            QApplication.sendEvent(viewport, move)
+            assert indicator.isVisible()
+            assert indicator.geometry() == QRect(QPoint(140, 120) - hotspot, host.size())
+            QApplication.sendEvent(viewport, QDragLeaveEvent())
+            assert not indicator.isVisible()
+        finally:
+            env.manager._drag = None
+            env.manager._pending_drop = None
 
     def testRepeatedDetachAttachRoundTrip(self, env):
         widget = Hosted()

@@ -88,6 +88,8 @@ content and settings, and can be attached back to the workspace at any time.
 
 To detach a window, do one of the following:
 
+- drag the window by its title bar out of the workspace and release it; a thumbnail of the
+  window follows the mouse and the window opens where you release it;
 - click the icon at the top-left corner of the window and select *Detach from Workspace*;
 - make the window active and select *Window > Detach Window from Workspace*, or press
   [Ctrl]-[Shift]-[D];
@@ -95,10 +97,17 @@ To detach a window, do one of the following:
 
 To attach a detached window back to the workspace, do one of the following:
 
+- drag the strip at the top of the detached window (the one holding its title and the
+  *Attach to Workspace* button) onto the workspace and release it where you want the window;
+  an outline shows where it will land;
+- double-click that strip;
 - click *Attach to Workspace* at the top-right of the detached window;
 - make the window active and select *Window > Attach Window to Workspace*, or press
   [Ctrl]-[Shift]-[D];
 - for a plot, right-click on the plot and select *Attach to Workspace*.
+
+The strip at the top of a detached window is only for attaching. To move a detached window
+around the desktop, drag its normal title bar.
 
 When SasView opens, all perspectives are attached or detached, as selected in the general preferences,
 and switching from one perspective to another may result in some perspectives being attached
