@@ -84,20 +84,20 @@ jobs:
           SASDATA_REF="${{ inputs.sasdata_ref || 'master' }}"
           echo "Using sasmodels ref: $SASMODELS_REF"
           echo "Using sasdata ref: $SASDATA_REF"
-          
+
           # Generate dependency matrix as JSON using Python for proper escaping
           python3 << 'PYTHON_SCRIPT'
           import json
           import os
-          
+
           sasmodels_ref = os.environ.get('SASMODELS_REF', 'master')
           sasdata_ref = os.environ.get('SASDATA_REF', 'master')
-          
+
           dependency_matrix = [
               {"name": "sasdata", "url": "https://github.com/SasView/sasdata.git", "ref": sasdata_ref},
               {"name": "sasmodels", "url": "https://github.com/SasView/sasmodels.git", "ref": sasmodels_ref}
           ]
-          
+
           with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
               f.write(f"dependency_matrix={json.dumps(dependency_matrix)}\n")
           PYTHON_SCRIPT
@@ -109,7 +109,7 @@ jobs:
     needs: [ruff]
     name: Generate test matrix
 
-    #if: false    # uncomment to prevent the rest of the workflow running
+    # if: false    # uncomment to prevent the rest of the workflow running
 
     runs-on: ubuntu-latest
 
@@ -294,6 +294,8 @@ jobs:
 
     runs-on: ${{ matrix.os }}
 
+    continue-on-error: ${{ matrix.experimental == 1 }}
+
     steps:
       - name: Obtain SasView source from git
         uses: actions/checkout@v7
@@ -303,6 +305,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           os: ${{ matrix.os }}
+          experimental: ${{ matrix.experimental == 1 }}
 
       ### Run tests
 
@@ -482,15 +485,15 @@ jobs:
         if: ${{ startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
         uses: digicert/code-signing-software-trust-action@v1
         with:
-              simple-signing-mode: true
-              # If the below 2 parameters are supplied, then smctl executable is invoked to attempt the signing.
-              input: installers/dist/setupSasView.exe
-              keypair-alias: ${{ secrets.KEYLOCKER_KEYPAIR_ALIAS }}
+          simple-signing-mode: true
+          # If the below 2 parameters are supplied, then smctl executable is invoked to attempt the signing.
+          input: installers/dist/setupSasView.exe
+          keypair-alias: ${{ secrets.KEYLOCKER_KEYPAIR_ALIAS }}
         env:
-              SM_HOST: ${{ secrets.KEYLOCKER_HOST }}
-              SM_API_KEY: ${{ secrets.KEYLOCKER_API_KEY }}
-              SM_CLIENT_CERT_FILE: D:\\Certificate_pkcs12.p12
-              SM_CLIENT_CERT_PASSWORD: ${{ secrets.WINDOZE_CERT_PASSWORD }}
+          SM_HOST: ${{ secrets.KEYLOCKER_HOST }}
+          SM_API_KEY: ${{ secrets.KEYLOCKER_API_KEY }}
+          SM_CLIENT_CERT_FILE: D:\\Certificate_pkcs12.p12
+          SM_CLIENT_CERT_PASSWORD: ${{ secrets.WINDOZE_CERT_PASSWORD }}
 
       - name: Publish installer package
         uses: actions/upload-artifact@v7
@@ -505,7 +508,7 @@ jobs:
 
 
   test-installer:
-    needs: [ matrix, installer-matrix ]
+    needs: [matrix, installer-matrix]
     if: github.event_name != 'push' || github.ref_name == 'main'
 
     strategy:
