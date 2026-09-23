@@ -498,18 +498,14 @@ class GuiManager:
             detached = placement.detached
             first_geometry = (placement.floating_geometry if detached else placement.mdi_geometry) is None
 
-        workspace_height = self._workspace.workspace.sizeHint().height()
-        perspective_width = new_perspective.sizeHint().width()
         if detached and first_geometry:
-            # Size the content before the floating window is built around it
-            new_perspective.resize(perspective_width, workspace_height-10)
+            # Size the content before the floating window is built around it.
+            # In the workspace, the window takes the perspective's size hint.
+            workspace_height = self._workspace.workspace.sizeHint().height()
+            new_perspective.resize(new_perspective.sizeHint().width(), workspace_height-10)
 
         self._current_perspective = new_perspective
         self.workspace_manager.add(new_perspective, detached=detached)
-
-        if not detached and first_geometry:
-            # Resize to the workspace height
-            new_perspective.resize(perspective_width, workspace_height-10)
 
     def updatePerspective(self, data):
         """
@@ -1331,7 +1327,7 @@ class GuiManager:
         Detach the active window from the workspace, or attach it back
         """
         workspace_manager = self.workspace_manager
-        if widget := workspace_manager.active_widget() is None:
+        if (widget := workspace_manager.active_widget()) is None:
             return
         workspace_manager.toggle(widget)
         self.updateDetachWindowAction()

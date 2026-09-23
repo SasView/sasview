@@ -37,6 +37,8 @@ class GuiManagerTest:
                 # define workspace for dialogs.
                 self.workspace = QMdiArea(self)
                 self.setCentralWidget(self.workspace)
+                self.workspace_manager = WorkspaceManager(self.workspace, self)
+
         m = GuiManager(MainWindow(None))
         config.override_with_defaults()  # Disable saving of test file
         config.LAST_WHATS_NEW_HIDDEN_VERSION = "999.999.999"  # Give a very large version number

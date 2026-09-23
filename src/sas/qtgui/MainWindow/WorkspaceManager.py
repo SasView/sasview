@@ -30,6 +30,16 @@ Lifecycle rules
   are completion notices. Their receivers should clear references, not ask the
   manager to close the widget again.
 
+Drag and drop
+-------------
+Dragging a subwindow's title bar out of the workspace starts a Qt drag showing a
+thumbnail of the window; releasing it outside the workspace detaches the widget
+at the cursor. Dragging the header strip of a floating window onto the workspace
+attaches it where it is dropped; double-clicking the header attaches it too. The
+drag itself never moves widgets between containers. The container that started
+the drag applies the outcome once ``QDrag.exec`` has returned, so no container is
+destroyed while its own event handler is running.
+
 Geometry
 --------
 Each placement remembers its own normal (not minimised or maximised) geometry.
@@ -41,8 +51,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from functools import partial
 
-from PySide6.QtCore import QEvent, QObject, QPoint, QRect, QSize, Qt, QTimer, Signal
-from PySide6.QtGui import QAction, QGuiApplication
+from PySide6.QtCore import QEvent, QMimeData, QObject, QPoint, QRect, QSize, Qt, QTimer, Signal
+from PySide6.QtGui import QAction, QCursor, QDrag, QGuiApplication, QMouseEvent
 from PySide6.QtWidgets import (
     QApplication,
     QFrame,
@@ -52,6 +62,9 @@ from PySide6.QtWidgets import (
     QMdiSubWindow,
     QMenu,
     QMenuBar,
+    QRubberBand,
+    QStyle,
+    QStyleOptionTitleBar,
     QToolButton,
     QVBoxLayout,
     QWidget,
@@ -60,6 +73,10 @@ from shiboken6 import isValid
 
 DETACH_TEXT = "Detach from Workspace"
 ATTACH_TEXT = "Attach to Workspace"
+# Mime type of a workspace window being dragged between the workspace and the desktop
+WORKSPACE_MIME = "application/x-sasview-workspace-window"
+# Largest thumbnail shown while dragging
+_DRAG_PIXMAP_MAX = QSize(320, 240)
 
 _MIN_MAX = Qt.WindowMinimized | Qt.WindowMaximized
 
@@ -70,6 +87,15 @@ class Placement:
     detached: bool = False
     mdi_geometry: QRect | None = None
     floating_geometry: QRect | None = None
+
+
+@dataclass
+class _DragState:
+    """The workspace window currently being dragged."""
+    widget: QWidget
+    container: QWidget
+    hotspot: QPoint      # grab point, in container coordinates
+    size: QSize          # container size, for the drop indicator
 
 
 class _HostedWidgetWatcher(QObject):
@@ -237,6 +263,49 @@ class DetachableSubWindow(QMdiSubWindow, _HostMixin):
     def hostedWidget(self):
         return self.widget()
 
+    # --- tear-off by dragging the title bar out of the workspace ---------
+    def isOnTitleBarLabel(self, pos: QPoint) -> bool:
+        """True if ``pos`` (in subwindow coordinates) is on the title bar, but not on one of its buttons."""
+        option = QStyleOptionTitleBar()
+        option.initFrom(self)
+        height = self.style().pixelMetric(QStyle.PM_TitleBarHeight, option, self)
+        option.rect = QRect(0, 0, self.width(), height)
+        option.titleBarFlags = self.windowFlags()
+        if not option.rect.contains(pos):
+            return False
+        control = self.style().hitTestComplexControl(QStyle.CC_TitleBar, option, pos, self)
+        return control == QStyle.SC_TitleBarLabel
+
+    def mousePressEvent(self, event):
+        self._tear_off_origin = None
+        if event.button() == Qt.LeftButton and self.isOnTitleBarLabel(event.position().toPoint()):
+            self._tear_off_origin = (event.position().toPoint(), event.globalPosition().toPoint())
+            self._geometry_at_press = QRect(self.geometry())
+        super().mousePressEvent(event)
+
+    def mouseMoveEvent(self, event):
+        origin = getattr(self, "_tear_off_origin", None)
+        if origin is not None and event.buttons() & Qt.LeftButton:
+            local, pressed_at = origin
+            now = event.globalPosition().toPoint()
+            far_enough = (now - pressed_at).manhattanLength() >= QApplication.startDragDistance()
+            if far_enough and not self._manager.viewportGlobalRect().contains(now):
+                self._tear_off_origin = None
+                # End the built-in move before handing the gesture over to drag and drop
+                release = QMouseEvent(QEvent.MouseButtonRelease, event.position(), event.globalPosition(),
+                                      Qt.LeftButton, Qt.NoButton, event.modifiers())
+                super().mouseReleaseEvent(release)
+                # Remember the pre-drag position as the workspace placement
+                self.setGeometry(self._geometry_at_press)
+                # May dispose of this subwindow; nothing may touch self afterwards
+                self._manager.dragContainer(self, local)
+                return
+        super().mouseMoveEvent(event)
+
+    def mouseReleaseEvent(self, event):
+        self._tear_off_origin = None
+        super().mouseReleaseEvent(event)
+
     def _takeHostedWidget(self):
         widget = self.widget()
         self.setWidget(None)
@@ -269,14 +338,55 @@ class DetachableSubWindow(QMdiSubWindow, _HostMixin):
         self._finishClose(event)
 
 
+class _FloatingHeader(QFrame):
+    """
+    Header strip of a floating window: shows the title, offers an Attach button,
+    and is the handle for dragging the window back onto the workspace.
+    """
+
+    def __init__(self, host: FloatingWindow):
+        super().__init__(host)
+        self._host = host
+        self._press: tuple[QPoint, QPoint] | None = None
+        self.setCursor(Qt.OpenHandCursor)
+        self.setToolTip("Drag onto the workspace, or double-click, to attach this window")
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self._press = (event.position().toPoint(), event.globalPosition().toPoint())
+        super().mousePressEvent(event)
+
+    def mouseMoveEvent(self, event):
+        if self._press is not None and event.buttons() & Qt.LeftButton:
+            local, pressed_at = self._press
+            if (event.globalPosition().toPoint() - pressed_at).manhattanLength() >= QApplication.startDragDistance():
+                self._press = None
+                # May dispose of the host; nothing may touch it afterwards
+                self._host._manager.dragContainer(self._host, self.mapTo(self._host, local))
+                return
+        super().mouseMoveEvent(event)
+
+    def mouseReleaseEvent(self, event):
+        self._press = None
+        super().mouseReleaseEvent(event)
+
+    def mouseDoubleClickEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self._press = None
+            self._host._requestAttach()
+            return
+        super().mouseDoubleClickEvent(event)
+
+
 class FloatingWindow(QWidget, _HostMixin):
     """
     Top-level host for a detached widget.
 
     A slim header strip carries the window title and an attach button, so every
-    detached window can be put back with the mouse. The host registers no
-    keyboard shortcut of its own; the application-wide shortcut lives on the
-    main window's Window menu.
+    detached window can be put back with the mouse, by button, by double-click
+    or by dragging the header onto the workspace. The host registers no keyboard
+    shortcut of its own; the application-wide shortcut lives on the main
+    window's Window menu.
     """
 
     def __init__(self, manager: WorkspaceManager, parent=None):
@@ -288,7 +398,7 @@ class FloatingWindow(QWidget, _HostMixin):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
-        self.header = QFrame(self)
+        self.header = _FloatingHeader(self)
         self.header.setObjectName("floatingWindowHeader")
         self.header.setFrameShape(QFrame.StyledPanel)
         header_layout = QHBoxLayout(self.header)
@@ -389,6 +499,17 @@ class WorkspaceManager(QObject):
         self._active: QWidget | None = None
         self._notified_active: QWidget | None = None
 
+        # Drag and drop of workspace windows
+        self._drag: _DragState | None = None
+        self._pending_drop: QPoint | None = None
+        self._viewport = mdi.viewport()
+        self._drop_indicator = QRubberBand(QRubberBand.Rectangle, self._viewport)
+        mdi.setAcceptDrops(True)
+        self._viewport.setAcceptDrops(True)
+        self._viewport.installEventFilter(self)
+        # New subwindows are sized once the workspace is visible (see _applyInitialSize)
+        mdi.installEventFilter(self)
+
         mdi.subWindowActivated.connect(self._onSubWindowActivated)
         app = QApplication.instance()
         if app is not None:
@@ -421,8 +542,12 @@ class WorkspaceManager(QObject):
         self._notifyActive()
         return container
 
-    def detach(self, widget: QWidget) -> FloatingWindow:
-        """Move a hosted widget from the MDI area into a floating window."""
+    def detach(self, widget: QWidget, *, position: QPoint | None = None) -> FloatingWindow:
+        """
+        Move a hosted widget from the MDI area into a floating window.
+        ``position`` is a global top-left for the floating window; by default it
+        appears where the widget was last floating, or over its workspace position.
+        """
         container = self._hosts[widget]
         if isinstance(container, FloatingWindow):
             return container
@@ -433,7 +558,10 @@ class WorkspaceManager(QObject):
         normal = container.lastNormalGeometry()
         content_size = self._contentSize(widget) if state == Qt.WindowNoState else normal.size()
         placement.mdi_geometry = normal
-        position = self._mdi.viewport().mapToGlobal(normal.topLeft())
+        if position is None:
+            position = self._mdi.viewport().mapToGlobal(normal.topLeft())
+        elif placement.floating_geometry is not None:
+            placement.floating_geometry.moveTopLeft(position)
 
         self._dispose(widget, container)
         host = self._createFloating(widget, placement, content_size=content_size, position=position)
@@ -452,8 +580,12 @@ class WorkspaceManager(QObject):
         self.widgetDetached.emit(widget)
         return host
 
-    def attach(self, widget: QWidget) -> DetachableSubWindow:
-        """Move a floating widget back into the MDI area."""
+    def attach(self, widget: QWidget, *, position: QPoint | None = None) -> DetachableSubWindow:
+        """
+        Move a floating widget back into the MDI area.
+        ``position`` is a top-left in workspace coordinates; by default the widget
+        returns to where it was last attached.
+        """
         container = self._hosts[widget]
         if isinstance(container, DetachableSubWindow):
             return container
@@ -467,7 +599,7 @@ class WorkspaceManager(QObject):
         placement.floating_geometry = normal
 
         self._dispose(widget, container)
-        sub = self._createSubWindow(widget, placement)
+        sub = self._createSubWindow(widget, placement, position=position)
         placement.detached = False
         self._register(widget, sub)
 
@@ -615,6 +747,101 @@ class WorkspaceManager(QObject):
     def mdi(self) -> QMdiArea:
         return self._mdi
 
+    def viewportGlobalRect(self) -> QRect:
+        """The workspace viewport in global coordinates."""
+        viewport = self._mdi.viewport()
+        return QRect(viewport.mapToGlobal(QPoint(0, 0)), viewport.size())
+
+    # ------------------------------------------------------------------
+    # Drag and drop
+    # ------------------------------------------------------------------
+    def dragContainer(self, container: QWidget, hotspot: QPoint):
+        """
+        Run a drag of a hosted window, then apply its outcome.
+
+        Called by a container from its own mouse handler once the user has
+        dragged far enough. Dropping onto the workspace attaches a floating
+        window, or moves an attached one. Releasing a subwindow outside the
+        workspace detaches it at the cursor. The container may be disposed of
+        by the time this returns.
+        """
+        widget = container.hostedWidget()
+        if widget is None or self._hosts.get(widget) is not container:
+            return
+        self._drag = _DragState(widget, container, QPoint(hotspot), QSize(container.size()))
+        self._pending_drop = None
+        try:
+            self._runDrag(container, hotspot)
+        finally:
+            self._finishDrag()
+
+    def _runDrag(self, container: QWidget, hotspot: QPoint):
+        drag = QDrag(container)
+        mime = QMimeData()
+        mime.setData(WORKSPACE_MIME, b"1")
+        drag.setMimeData(mime)
+        pixmap = container.grab()
+        if not pixmap.isNull():
+            scale = min(1.0, _DRAG_PIXMAP_MAX.width() / max(1, pixmap.width()),
+                        _DRAG_PIXMAP_MAX.height() / max(1, pixmap.height()))
+            if scale < 1.0:
+                pixmap = pixmap.scaled(pixmap.size() * scale, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            drag.setPixmap(pixmap)
+            drag.setHotSpot(QPoint(int(hotspot.x() * scale), int(hotspot.y() * scale)))
+        drag.exec(Qt.MoveAction)
+
+    def _finishDrag(self):
+        state, drop = self._drag, self._pending_drop
+        self._drag = None
+        self._pending_drop = None
+        self._drop_indicator.hide()
+        if state is None or not isValid(state.widget) or self._hosts.get(state.widget) is not state.container:
+            return
+        widget, container = state.widget, state.container
+        if drop is not None:
+            if isinstance(container, FloatingWindow):
+                self.attach(widget, position=drop)
+            else:
+                container.move(drop)
+                self._mdi.setActiveSubWindow(container)
+            return
+        if isinstance(container, DetachableSubWindow):
+            cursor = QCursor.pos()
+            if not self.viewportGlobalRect().contains(cursor):
+                self.detach(widget, position=cursor - state.hotspot)
+
+    def eventFilter(self, obj, event):
+        # Comparisons here must not call into Qt objects, which may be gone during shutdown
+        if obj is self._mdi and event.type() == QEvent.Show:
+            # Runs before QMdiArea.showEvent, which then places (but no longer sizes) them
+            self._applyPendingInitialSizes()
+            return False
+        # Drag events over the workspace viewport
+        if self._drag is not None and obj is self._viewport:
+            event_type = event.type()
+            if event_type in (QEvent.DragEnter, QEvent.DragMove):
+                if event.mimeData().hasFormat(WORKSPACE_MIME):
+                    event.setDropAction(Qt.MoveAction)
+                    event.accept()
+                    self._showDropIndicator(event.position().toPoint())
+                    return True
+            elif event_type == QEvent.DragLeave:
+                self._drop_indicator.hide()
+            elif event_type == QEvent.Drop:
+                if event.mimeData().hasFormat(WORKSPACE_MIME):
+                    self._drop_indicator.hide()
+                    # Applied by the drag source once QDrag.exec has returned
+                    self._pending_drop = event.position().toPoint() - self._drag.hotspot
+                    event.setDropAction(Qt.MoveAction)
+                    event.accept()
+                    return True
+        return super().eventFilter(obj, event)
+
+    def _showDropIndicator(self, pos: QPoint):
+        self._drop_indicator.setGeometry(QRect(pos - self._drag.hotspot, self._drag.size))
+        self._drop_indicator.show()
+        self._drop_indicator.raise_()
+
     # ------------------------------------------------------------------
     # Internals
     # ------------------------------------------------------------------
@@ -630,7 +857,8 @@ class WorkspaceManager(QObject):
         self._hosts[widget] = container
         container.destroyed.connect(partial(self._onContainerDestroyed, id(widget), id(container)))
 
-    def _createSubWindow(self, widget: QWidget, placement: Placement) -> DetachableSubWindow:
+    def _createSubWindow(self, widget: QWidget, placement: Placement,
+                         position: QPoint | None = None) -> DetachableSubWindow:
         # Parent to the viewport at construction, as QMdiArea.addSubWindow does.
         # QMdiSubWindow picks its title-bar icon in its constructor: without a parent
         # it finds no window icon and falls back to the style's default Qt icon.
@@ -639,6 +867,11 @@ class WorkspaceManager(QObject):
         self._mdi.addSubWindow(sub)
         if placement.mdi_geometry is not None:
             sub.setGeometry(placement.mdi_geometry)
+        else:
+            # Never shown in the workspace before: size it like QMdiArea would, once visible
+            sub._initial_size_pending = True
+        if position is not None:
+            sub.move(position)
         return sub
 
     def _createFloating(self, widget: QWidget, placement: Placement,
@@ -678,11 +911,38 @@ class WorkspaceManager(QObject):
         if dw or dh:
             sub.resize(sub.width() + dw, sub.height() + dh)
 
-    @staticmethod
-    def _show(container: QWidget, widget: QWidget):
+    def _show(self, container: QWidget, widget: QWidget):
         if widget.isHidden():
             widget.show()
         container.show()
+        self._applyInitialSize(container)
+
+    def _applyInitialSize(self, container: QWidget):
+        """
+        Give a new subwindow the size QMdiArea.addSubWindow would give it.
+
+        QMdiArea sizes a new subwindow to its size hint when it is added, but with
+        an application stylesheet the polish that follows resizes the subwindow to
+        its minimum before it is shown, which is what the user would see. Applying
+        the rule again here, once the subwindow and the workspace are visible,
+        makes the outcome independent of that ordering. Windows added while the
+        workspace is still hidden are sized when the workspace is first shown.
+        """
+        if not getattr(container, "_initial_size_pending", False):
+            return
+        if not isinstance(container, DetachableSubWindow) or container.isHidden():
+            return
+        if not self._mdi.isVisible():
+            return
+        container._initial_size_pending = False
+        if container.isMaximized() or container.isMinimized():
+            return
+        hint = container.sizeHint().boundedTo(self._viewport.size())
+        container.resize(hint.expandedTo(container.minimumSizeHint()))
+
+    def _applyPendingInitialSizes(self):
+        for container in list(self._hosts.values()):
+            self._applyInitialSize(container)
 
     def _dispose(self, widget: QWidget, container: _HostMixin):
         """Take the widget out of an old container and delete the empty container."""
