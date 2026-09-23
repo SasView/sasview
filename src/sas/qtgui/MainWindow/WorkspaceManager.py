@@ -631,7 +631,10 @@ class WorkspaceManager(QObject):
         container.destroyed.connect(partial(self._onContainerDestroyed, id(widget), id(container)))
 
     def _createSubWindow(self, widget: QWidget, placement: Placement) -> DetachableSubWindow:
-        sub = DetachableSubWindow(self)
+        # Parent to the viewport at construction, as QMdiArea.addSubWindow does.
+        # QMdiSubWindow picks its title-bar icon in its constructor: without a parent
+        # it finds no window icon and falls back to the style's default Qt icon.
+        sub = DetachableSubWindow(self, self._mdi.viewport())
         sub.hostWidget(widget)
         self._mdi.addSubWindow(sub)
         if placement.mdi_geometry is not None:

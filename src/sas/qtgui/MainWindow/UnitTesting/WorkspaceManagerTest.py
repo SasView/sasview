@@ -10,7 +10,7 @@ from unittest import mock
 
 import pytest
 from PySide6.QtCore import QCoreApplication, QEvent, QEventLoop, QRect, QTimer
-from PySide6.QtGui import QAction, QStandardItemModel
+from PySide6.QtGui import QAction, QColor, QIcon, QPixmap, QStandardItemModel
 from PySide6.QtWidgets import (
     QApplication,
     QDialog,
@@ -126,6 +126,27 @@ class WorkspaceManagerTest:
         assert env.manager.hosted_widgets() == [widget]
         assert env.mdi.subWindowList() == [container]
         assert widget.isVisible()
+
+    def testSubWindowShowsMainWindowIconLikeQMdiArea(self, env):
+        '''Attached windows draw the application icon, as subwindows created by Qt do'''
+        red = QPixmap(32, 32)
+        red.fill(QColor("red"))
+        env.window.setWindowIcon(QIcon(red))
+
+        def red_title_bar_pixels(sub):
+            sub.setGeometry(QRect(10, 10, 300, 200))
+            flush()
+            image = sub.grab().toImage()
+            return sum(1 for x in range(40) for y in range(30)
+                       if (c := image.pixelColor(x, y)).red() > 200 and c.green() < 60 and c.blue() < 60)
+
+        reference = env.mdi.addSubWindow(QWidget())
+        reference.show()
+        expected = red_title_bar_pixels(reference)
+        assert expected > 0
+
+        hosted = env.manager.add(Hosted())
+        assert red_title_bar_pixels(hosted) == expected
 
     def testAddDetachedCreatesFloatingWindow(self, env):
         widget = Hosted()
