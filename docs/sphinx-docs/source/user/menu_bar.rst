@@ -100,13 +100,13 @@ To attach a detached window back to the workspace, do one of the following:
   [Ctrl]-[Shift]-[D];
 - for a plot, right-click on the plot and select *Attach to Workspace*.
 
-A window remembers its size and position separately inside the workspace and as a detached window,
-and returns to the ones it last had in each. The first time a window is detached, it keeps its
-current size. A window that is maximised or minimised when you detach or attach it returns to its
-previous normal size when restored. Closing a detached analysis perspective minimises it, as in the
-workspace. When you switch to another perspective and
-back, the perspective reappears where you left it, attached or detached. Detached windows are closed
-when *SasView* exits; their placement is not saved in project files.
+When SasView opens, all perspectives are attached or detached, as selected in the general preferences,
+and switching from one perspective to another may result in some perspectives being attached
+and others detached.
+Closing a detached analysis perspective minimises it, as in the workspace.
+When you switch to another perspective and back, the perspective reappears where you left it,
+attached or detached. Detached windows are closed when *SasView* exits; their placement is
+not saved in project files.
 
 New plots and perspectives can also be opened detached automatically. See :ref:`General_Preferences`.
 
