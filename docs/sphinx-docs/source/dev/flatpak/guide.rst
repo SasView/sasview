@@ -112,10 +112,10 @@ repo <https://github.com/flathub/org.sasview.sasview>`__ with the files
 the script has generated, and try to build the Flatpak.
 
 Troubleshooting
-===============
+---------------
 
 During the Flatpak build, a package fails to build from source
---------------------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This is probably because a new dependency got added to SasView, and that
 package can’t be easily built from source. To resolve this issue, you
