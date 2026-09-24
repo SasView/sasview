@@ -1390,7 +1390,7 @@ class GuiManager:
         Detach the active window from the workspace, or attach it back
         """
         workspace_manager = self.workspace_manager
-        if widget := workspace_manager.active_widget() is None:
+        if (widget := workspace_manager.active_widget()) is None:
             return
         workspace_manager.toggle(widget)
         self.updateDetachWindowAction()
