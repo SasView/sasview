@@ -13,7 +13,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from twisted.internet import threads
 
 from sasmodels import generate, modelinfo
-from sasmodels.sasview_model import MultiplicationModel, SasviewModel, load_standard_models
+from sasmodels.sasview_model import MODELS, MultiplicationModel, SasviewModel, load_standard_models
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas import config
@@ -2017,8 +2017,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         along with the enabled mapping
         """
         self.by_model_dict = defaultdict(list)
-        for category in self.master_category_dict:
-            for (model, enabled) in self.master_category_dict[category]:
+        master_category_list_iterator = self.master_category_dict.copy()
+        for category in master_category_list_iterator:
+            for (model, enabled) in master_category_list_iterator[category]:
+                if model not in MODELS:
+                    logging.warning(f"The model {model} is no longer available in sasmodels. It will be ignored.")
+                    self.master_category_dict[category].remove([model, enabled])
+                    continue
                 self.by_model_dict[model].append(category)
                 self.model_enabled_dict[model] = enabled
 
