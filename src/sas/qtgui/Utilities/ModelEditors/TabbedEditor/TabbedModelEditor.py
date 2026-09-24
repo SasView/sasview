@@ -142,6 +142,9 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         """
         if self.is_modified and self.saveClose():
             return
+        app = QtWidgets.QApplication.instance()
+        if app is not None:
+            app.removeEventFilter(self)
         event.accept()
 
     def eventFilter(self, obj: QtCore.QObject, event: QtCore.QEvent) -> bool:
@@ -150,11 +153,13 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         """
         if event.type() != QtCore.QEvent.KeyPress:
             return super(TabbedModelEditor, self).eventFilter(obj, event)
-        if event.key() == QtCore.Qt.Key_Escape:
-            if isinstance(obj, QtWidgets.QDialog) and (obj == self or self.isAncestorOf(obj)):
-                return True
-            else:
-                return False
+        if event.key() != QtCore.Qt.Key_Escape:
+            return super(TabbedModelEditor, self).eventFilter(obj, event)
+        # The filter is application-wide, so only swallow Escape for widgets
+        # belonging to this editor.
+        if isinstance(obj, QtWidgets.QDialog) and (obj is self or self.isAncestorOf(obj)):
+            return True
+        return super(TabbedModelEditor, self).eventFilter(obj, event)
 
     def onLoad(self, at_launch: bool = False):
         """
