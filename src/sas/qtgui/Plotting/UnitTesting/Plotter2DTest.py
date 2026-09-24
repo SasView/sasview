@@ -9,6 +9,8 @@ mpl.use("Qt5Agg")
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from mpl_toolkits.mplot3d import Axes3D
 from PySide6 import QtCore, QtGui, QtPrintSupport, QtWidgets
+from PySide6.QtTest import QTest
+from shiboken6 import isValid
 
 # Tested module
 import sas.qtgui.Plotting.Plotter2D as Plotter2D
@@ -60,7 +62,9 @@ class Plotter2DTest:
         yield p
 
         '''destroy'''
-        p.figure.clf()
+        # Some tests close the plot through its window, which deletes it
+        if isValid(p):
+            p.figure.clf()
 
     def testDataProperty(self, plotter):
         """ Adding data """
@@ -186,6 +190,116 @@ class Plotter2DTest:
         assert plotter.slicers == {}
         assert plotter.slicer is None
         assert plotter.slicer_plots_dict == {}
+
+    @pytest.fixture
+    def workspace(self, plotter):
+        '''Host the plotter in a real workspace, as in the application'''
+        from types import SimpleNamespace
+
+        from sas.qtgui.MainWindow.WorkspaceManager import WorkspaceManager
+        window = QtWidgets.QMainWindow()
+        mdi = QtWidgets.QMdiArea()
+        window.setCentralWidget(mdi)
+        window.show()
+        manager = WorkspaceManager(mdi, window)
+        plotter.manager.parent = SimpleNamespace(workspace_manager=manager)
+        manager.add(plotter)
+        yield manager
+        window.close()
+        window.deleteLater()
+        QtWidgets.QApplication.processEvents()
+
+    @staticmethod
+    def _prepareBoxSum(plotter):
+        data = plotter.data0
+        data.detector = [1]
+        data.err_data = numpy.array([[1.0, 2.0, 3.0, 4.0]]*4)
+        plotter.data = data
+
+    @staticmethod
+    def _flush():
+        for _ in range(3):
+            QtWidgets.QApplication.processEvents()
+            QtCore.QCoreApplication.sendPostedEvents(None, QtCore.QEvent.DeferredDelete)
+
+    @pytest.mark.parametrize("detached", [False, True], ids=["attached", "detached"])
+    @pytest.mark.parametrize("route", ["container", "button", "escape"])
+    def testBoxSumWindowClosedByEveryRoute(self, plotter, workspace, detached, route):
+        '''The box sum panel can be closed any way, attached or detached, and reopened'''
+        self._prepareBoxSum(plotter)
+        plotter.onBoxSum()
+        box = plotter.boxwidget
+        assert workspace.is_hosted(box)
+        if detached:
+            workspace.detach(box)
+            self._flush()
+
+        if route == "container":
+            workspace.container_of(box).close()
+        elif route == "button":
+            box.buttonBox.button(QtWidgets.QDialogButtonBox.Close).click()
+        else:
+            box.reject()
+        self._flush()
+
+        assert plotter.boxwidget is None
+        # Closing the panel also removes its box sum slicer
+        assert plotter.slicer is None
+        assert not workspace.is_hosted(box)
+
+        # It can be opened again
+        plotter.onClearSlicer()
+        plotter.onBoxSum()
+        assert workspace.is_hosted(plotter.boxwidget)
+
+    @pytest.mark.parametrize("detached", [False, True], ids=["attached", "detached"])
+    @pytest.mark.parametrize("route", ["container", "button", "escape"])
+    def testSlicerParametersClosedByEveryRoute(self, plotter, workspace, detached, route):
+        '''The slicer parameter panel notifies its owner exactly once, however it is closed'''
+        # The panel is parented to the plot's manager and uses what the Data Explorer provides
+        from types import SimpleNamespace
+        explorer = QtWidgets.QWidget()
+        explorer.active_plots = {}
+        explorer.communicator = communicator
+        explorer.parent = SimpleNamespace(workspace_manager=workspace)
+        plotter.manager = explorer
+        plotter.onEditSlicer()
+        panel = plotter.slicer_widget
+        notifications = []
+        panel.closeWidgetSignal.connect(lambda: notifications.append(1))
+        assert workspace.is_hosted(panel)
+        if detached:
+            workspace.detach(panel)
+            self._flush()
+
+        if route == "container":
+            workspace.container_of(panel).close()
+        elif route == "button":
+            panel.cmdClose.click()
+        else:
+            QTest.keyClick(panel, QtCore.Qt.Key_Escape)
+        self._flush()
+
+        assert notifications == [1]
+        assert plotter.slicer_widget is None
+        assert not workspace.is_hosted(panel)
+
+        # It can be opened again
+        plotter.onEditSlicer()
+        assert workspace.is_hosted(plotter.slicer_widget)
+
+    def testClosingPlotClosesDetachedHelper(self, plotter, workspace):
+        '''Closing a 2D plot closes its helper panel, wherever the helper lives'''
+        self._prepareBoxSum(plotter)
+        plotter.onBoxSum()
+        box = plotter.boxwidget
+        workspace.detach(box)
+        self._flush()
+
+        assert workspace.close(plotter)
+        self._flush()
+        assert not workspace.is_hosted(box)
+        assert not workspace.is_hosted(plotter)
 
     def testContextMenuQuickPlot(self, plotter, mocker):
         """ Test the right click menu """

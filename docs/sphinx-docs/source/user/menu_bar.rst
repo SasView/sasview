@@ -70,11 +70,45 @@ Window
 ------
 The Window option allows you to select which *SasView* windows are visible;
 
-- enable window cascading/tiling;
-- move focus between windows both forward and backward;
+- enable window cascading/tiling (windows detached from the workspace are not affected);
+- move focus between windows both forward and backward, including detached windows;
+- detach the active window from the workspace, or attach it back (see :ref:`detaching_windows`);
 - minimize all plot windows;
 - close all plot windows;
 - access plots by name;
+
+.. _detaching_windows:
+
+Detaching windows from the workspace
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Analysis perspectives, plots and panels such as the Batch Fitting Results normally open inside the
+*SasView* workspace. Any of them can be detached into its own window, which can then be moved
+anywhere on the desktop, for example onto a second monitor. A detached window keeps all of its
+content and settings, and can be attached back to the workspace at any time.
+
+To detach a window, do one of the following:
+
+- click the icon at the top-left corner of the window and select *Detach from Workspace*;
+- make the window active and select *Window > Detach Window from Workspace*, or press
+  [Ctrl]-[Shift]-[D];
+- for a plot, right-click on the plot and select *Detach from Workspace*.
+
+To attach a detached window back to the workspace, do one of the following:
+
+- click *Attach to Workspace* at the top-right of the detached window;
+- make the window active and select *Window > Attach Window to Workspace*, or press
+  [Ctrl]-[Shift]-[D];
+- for a plot, right-click on the plot and select *Attach to Workspace*.
+
+A window remembers its size and position separately inside the workspace and as a detached window,
+and returns to the ones it last had in each. The first time a window is detached, it keeps its
+current size. A window that is maximised or minimised when you detach or attach it returns to its
+previous normal size when restored. Closing a detached analysis perspective minimises it, as in the
+workspace. When you switch to another perspective and
+back, the perspective reappears where you left it, attached or detached. Detached windows are closed
+when *SasView* exits; their placement is not saved in project files.
+
+New plots and perspectives can also be opened detached automatically. See :ref:`General_Preferences`.
 
 Analysis
 --------
@@ -115,4 +149,4 @@ The Help option provides access to:
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Piotr Rozyczko, 10 May 2019
+.. note::  This help document was last changed by Piotr Rozyczko, 16 September 2026

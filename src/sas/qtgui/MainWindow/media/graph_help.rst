@@ -41,6 +41,13 @@ minimised window.
 To delete a plot, click the *Close* (x) icon in the top-right corner of the
 plot window.
 
+To move a plot out of the *SasView* workspace, for example onto a second
+monitor, right-click on the plot and select *Detach from Workspace*. To put it
+back, right-click on the plot and select *Attach to Workspace*, or click
+*Attach to Workspace* at the top-right of the detached window. See
+:ref:`detaching_windows` for other ways to do this, and :ref:`General_Preferences`
+to open all new plots in their own windows.
+
 .. note:: *If a residuals graph (when fitting data) is hidden, it will not show up
     after computation.*
 

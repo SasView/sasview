@@ -32,8 +32,9 @@ class PlotHelperTest:
         plot2 = PlotProxy("I am also a plot.")
         PlotHelper.addPlot(plot2)
         plot_id_2 = PlotHelper.idOfPlot(plot2)
-        id1 = int(plot_id[-1])
-        id2 = int(plot_id_2[-1])
+        # Compare the full numbers; the last digit alone wraps from 9 to 0
+        id1 = int(plot_id.removeprefix("Graph"))
+        id2 = int(plot_id_2.removeprefix("Graph"))
         assert id2 - id1 == 1
 
         # Other properties
