@@ -141,7 +141,7 @@ class TestInvNoResolution:
         # A different background could cause negative intensities. Leave scale as defaults.
         inv = invariant.InvariantCalculator(data=self.data, background=0)
 
-        inv.set_extrapolation(range="low", npts=10, function="guinier")
+        inv.set_extrapolation(range="low", indices=[0, 9], function="guinier")
 
         qstar1 = inv.get_qstar(extrapolation="low")
         qstar, _ = inv.get_qstar_with_error(extrapolation="low")
@@ -161,7 +161,7 @@ class TestInvNoResolution:
         # A different background could cause negative intensities. Leave scale as defaults.
         inv = invariant.InvariantCalculator(data=self.data, background=0)
 
-        inv.set_extrapolation(range="high", npts=10, function="power_law", power=4)
+        inv.set_extrapolation(range="high", indices=[-10, -1], function="power_law", power=4)
 
         qstar1 = inv.get_qstar(extrapolation="high")
         qstar, _ = inv.get_qstar_with_error(extrapolation="high")
@@ -182,8 +182,8 @@ class TestInvNoResolution:
         # A different background could cause negative intensities. Leave scale as defaults.
         inv = invariant.InvariantCalculator(data=self.data, background=0)
 
-        inv.set_extrapolation(range="low", npts=10, function="guinier")
-        inv.set_extrapolation(range="high", npts=10, function="power_law", power=4)
+        inv.set_extrapolation(range="low", indices=[0, 9], function="guinier")
+        inv.set_extrapolation(range="high", indices=[-10, -1], function="power_law", power=4)
 
         qstar1 = inv.get_qstar(extrapolation="both")
         qstar, _ = inv.get_qstar_with_error(extrapolation="both")
@@ -260,7 +260,7 @@ class TestInvPinholeSmeared:
         """Test the Invariant with the low-Q Guinier extrapolation."""
         inv = invariant.InvariantCalculator(data=self.data, background=0)
 
-        inv.set_extrapolation(range="low", npts=10, function="guinier")
+        inv.set_extrapolation(range="low", indices=[0, 9], function="guinier")
 
         qstar1 = inv.get_qstar(extrapolation="low")
 
@@ -278,7 +278,7 @@ class TestInvPinholeSmeared:
         """Test the Invariant with a Q^-4 high-Q extrapolation."""
         inv = invariant.InvariantCalculator(data=self.data, background=0)
 
-        inv.set_extrapolation(range="high", npts=10, function="power_law", power=4)
+        inv.set_extrapolation(range="high", indices=[-10, -1], function="power_law", power=4)
 
         qstar1 = inv.get_qstar(extrapolation="high")
         qstar, _ = inv.get_qstar_with_error(extrapolation="high")
@@ -295,8 +295,8 @@ class TestInvPinholeSmeared:
         """Test the Invariant with both a high- and low-Q extrapolation."""
         inv = invariant.InvariantCalculator(data=self.data, background=0)
 
-        inv.set_extrapolation(range="low", npts=10, function="guinier")
-        inv.set_extrapolation(range="high", npts=10, function="power_law", power=4)
+        inv.set_extrapolation(range="low", indices=[0, 9], function="guinier")
+        inv.set_extrapolation(range="high", indices=[-10, -1], function="power_law", power=4)
 
         qstar1 = inv.get_qstar(extrapolation="both")
         qstar, _ = inv.get_qstar_with_error(extrapolation="both")
@@ -386,7 +386,7 @@ class TestInvSlitSmear:
         """
         inv = invariant.InvariantCalculator(data=self.data_q_smear, background=0)
 
-        inv.set_extrapolation(range="low", npts=10, function="guinier")
+        inv.set_extrapolation(range="low", indices=[0, 9], function="guinier")
 
         qstar1 = inv.get_qstar(extrapolation="low")
         qstar, _ = inv.get_qstar_with_error(extrapolation="low")
@@ -410,7 +410,7 @@ class TestInvSlitSmear:
         """
         inv = invariant.InvariantCalculator(data=self.data_q_smear, background=0)
 
-        inv.set_extrapolation(range="high", npts=10, function="power_law", power=4)
+        inv.set_extrapolation(range="high", indices=[-10, -1], function="power_law", power=4)
 
         qstar1 = inv.get_qstar(extrapolation="high")
         qstar, _ = inv.get_qstar_with_error(extrapolation="high")
@@ -432,8 +432,8 @@ class TestInvSlitSmear:
         """
         inv = invariant.InvariantCalculator(data=self.data_q_smear, background=0)
 
-        inv.set_extrapolation(range="low", npts=10, function="guinier")
-        inv.set_extrapolation(range="high", npts=10, function="power_law", power=4)
+        inv.set_extrapolation(range="low", indices=[0, 9], function="guinier")
+        inv.set_extrapolation(range="high", indices=[-10, -1], function="power_law", power=4)
 
         qstar1 = inv.get_qstar(extrapolation="low")
         qstar, _ = inv.get_qstar_with_error(extrapolation="low")
