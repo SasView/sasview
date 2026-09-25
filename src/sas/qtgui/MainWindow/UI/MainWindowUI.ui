@@ -137,6 +137,8 @@
     <addaction name="actionNext"/>
     <addaction name="actionPrevious"/>
     <addaction name="separator"/>
+    <addaction name="actionDetachWindow"/>
+    <addaction name="separator"/>
     <addaction name="actionMinimizePlots"/>
     <addaction name="actionClosePlots"/>
    </widget>
@@ -452,10 +454,30 @@
    <property name="text">
     <string>Cascade</string>
    </property>
+   <property name="toolTip">
+    <string>Cascade workspace windows. Detached windows are not affected.</string>
+   </property>
   </action>
   <action name="actionTile">
    <property name="text">
     <string>Tile</string>
+   </property>
+   <property name="toolTip">
+    <string>Tile workspace windows. Detached windows are not affected.</string>
+   </property>
+  </action>
+  <action name="actionDetachWindow">
+   <property name="text">
+    <string>Detach Window from Workspace</string>
+   </property>
+   <property name="toolTip">
+    <string>Move the active window out of the workspace into its own window, or put it back</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+D</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionTile_Vertically">

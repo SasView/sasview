@@ -427,16 +427,15 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
     def closeEvent(self, event) -> None:
         """Overwrite QDialog close method to allow for custom widget close."""
+        # The window hosting the perspective (attached or detached) is owned by the
+        # WorkspaceManager, which disposes of it on an accepted close and minimises
+        # it when the close is refused.
         if self._allow_close:
             # reset the closability flag
             self.setClosable(value=False)
-            # Tell the MdiArea to close the container if it is visible
-            if self.parentWidget():
-                self.parentWidget().close()
             event.accept()
         else:
             event.ignore()
-            self.setWindowState(QtCore.Qt.WindowMinimized)
 
     def update_from_model(self) -> None:
         """Update the globals based on the data in the model."""
