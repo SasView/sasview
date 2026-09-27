@@ -19,12 +19,18 @@ class QLineNumberArea(QWidget):
 class QCodeEditor(QPlainTextEdit):
     def __init__(self, parent=None):
         super().__init__(parent)
+        self._bracket_selections = []
         self.lineNumberArea = QLineNumberArea(self)
         self.setLineWrapMode(QPlainTextEdit.NoWrap)
         self.blockCountChanged.connect(self.updateLineNumberAreaWidth)
         self.updateRequest.connect(self.updateLineNumberArea)
         self.cursorPositionChanged.connect(self.highlightCurrentLine)
         self.updateLineNumberAreaWidth()
+
+    def setBracketSelections(self, selections: list):
+        """Set extra full-width selections (e.g. matched bracket pairs) to show alongside the current-line highlight."""
+        self._bracket_selections = selections
+        self.highlightCurrentLine()
 
     def lineNumberAreaWidth(self):
         digits = 1
@@ -54,7 +60,7 @@ class QCodeEditor(QPlainTextEdit):
         self.lineNumberArea.setGeometry(QRect(cr.left(), cr.top(), self.lineNumberAreaWidth(), cr.height()))
 
     def highlightCurrentLine(self):
-        extraSelections = []
+        extraSelections = list(self._bracket_selections)
         if not self.isReadOnly():
             selection = QTextEdit.ExtraSelection()
             lineColor = QColor(Qt.yellow).lighter(160)
