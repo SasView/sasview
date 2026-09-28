@@ -111,10 +111,9 @@ class Perspective(metaclass=PerspectiveMeta):
         """ A string containing the HTML to be shown in the report"""
         raise NotImplementedError(f"Report not implemented for {self.name}")
 
-    def getSASBDBData(self) -> 'SASBDBExportData | None':
-        """ Get SASBDB export data from this perspective (optional)"""
-        # Import here to avoid circular dependencies
-        return None  # Default implementation returns None
+    def getSASBDBData(self):
+        """SASBDB export data for this perspective, if it provides any."""
+        return None
 
 
     #

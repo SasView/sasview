@@ -2159,9 +2159,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.logic.model_parameters = kernel_module.model_info.parameters
 
         elif hasattr(kernel_module, 'parameters'):
-            # Built-in and custom models. Use make_model_info so the UI
-            # parameter table matches the kernel (e.g. sasmodels >= 1.1
-            # omits magnetism for pure-Python models).
+            # built-in and custom models
             info = modelinfo.make_model_info(kernel_module)
             self.logic.model_parameters = info.parameters
 
@@ -3510,156 +3508,102 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def getSASBDBData(self):
         """
-        Create and return SASBDB export data from fitting results
-        Similar to getReport() but returns SASBDBExportData instead
+        Build SASBDB export data from the current fit tab.
+
+        CorMap uses the last calculated 1D theory curve, so it follows the
+        fit q-range and smearing. A new Guinier fit is not run here.
+
+        :return: Export data, or None when no data or model is loaded
         """
+        if self.data is None or self.logic.kernel_module is None:
+            return None
+
         from sas.qtgui.Utilities.SASBDB.sasbdb_data_collector import SASBDBDataCollector
 
         collector = SASBDBDataCollector()
         export_data = collector.export_data
-
-        # Check if we have data and a model
-        if self.data is None or self.logic.kernel_module is None:
-            return None
-
-        # Collect sample data and instrument information from the data object
         sample, instrument = collector.collect_from_data(self.data)
-
-        # Add instrument to export data if available
         if instrument:
             export_data.instruments.append(instrument)
 
-        # Collect fit information
         fit_data = {}
-        model_name = None
-        optimizer_name = None
-
-        # Extract chi2 from fit results (same way as ReportPageLogic does)
-        if hasattr(self, 'chi2') and self.chi2 is not None:
+        if self.chi2 is not None:
             fit_data['chi2'] = self.chi2
+        cormap = self._cormap_pvalue()
+        if cormap is not None:
+            fit_data['cormap_pvalue'] = cormap
 
-        # Get model name (same way as ReportPageLogic does)
-        if self.logic.kernel_module:
-            model_name = getattr(self.logic.kernel_module, 'id', None)
-            if not model_name:
-                model_name = getattr(self.logic.kernel_module, 'name', None)
-
-        # Get optimizer name (same way as ReportPageLogic does)
+        kernel = self.logic.kernel_module
+        model_name = getattr(kernel, 'id', None) or getattr(kernel, 'name', None)
         try:
             from bumps import options
-            if hasattr(options, 'FIT_CONFIG') and hasattr(options.FIT_CONFIG, 'selected_fitter'):
-                optimizer_name = options.FIT_CONFIG.selected_fitter.name
+            optimizer_name = options.FIT_CONFIG.selected_fitter.name
         except (ImportError, AttributeError):
-            pass
+            optimizer_name = None
 
-        # Get model parameters (same way as ReportPageLogic does)
-        model_parameters = []
-        if self.logic.kernel_module:
-            from sas.qtgui.Perspectives.Fitting import FittingUtilities
+        if fit_data or model_name or optimizer_name:
             params = FittingUtilities.getStandardParam(self._model_model)
-            poly_params = []
-            magnet_params = []
-            if self.chkPolydispersity.isChecked() and self.polydispersity_widget.poly_model.rowCount() > 0:
-                poly_params = FittingUtilities.getStandardParam(self.polydispersity_widget.poly_model)
-            if self.chkMagnetism.isChecked() and self.canHaveMagnetism() and self.magnetism_widget._magnet_model.rowCount() > 0:
-                magnet_params = FittingUtilities.getStandardParam(self.magnetism_widget._magnet_model)
-            model_parameters = params + poly_params + magnet_params
-
-        # Calculate CorMap p-value if we have both data and model
-        if (self.data is not None and
-            self.logic.kernel_module is not None and
-            hasattr(self.data, '__class__') and
-            self.data.__class__.__name__ == 'Data1D'):
-            try:
-                import numpy as np
-                from freesas.cormap import gof
-
-                # Get experimental data
-                exp_q = np.array(self.data.x)
-                exp_I = np.array(self.data.y)
-
-                # Filter valid data points
-                valid_mask = np.isfinite(exp_q) & np.isfinite(exp_I) & (exp_I > 0) & (exp_q > 0)
-                if np.any(valid_mask):
-                    exp_q_valid = exp_q[valid_mask]
-                    exp_I_valid = exp_I[valid_mask]
-
-                    # Calculate model curve at experimental q values
-                    # Use the kernel_module to calculate model intensity
-                    try:
-                        model_I_result = self.logic.kernel_module.calculate_Iq(exp_q_valid)
-                        # Handle tuple return (some models return (Iq, intermediate_results))
-                        if isinstance(model_I_result, tuple):
-                            model_I = model_I_result[0]
-                        else:
-                            model_I = model_I_result
-
-                        # Ensure model_I is a numpy array
-                        model_I = np.array(model_I)
-
-                        # Ensure both arrays have the same length
-                        min_len = min(len(exp_I_valid), len(model_I))
-                        if min_len > 10:  # Need at least 10 points for meaningful CorMap
-                            exp_I_final = exp_I_valid[:min_len]
-                            model_I_final = model_I[:min_len]
-
-                            # Filter out any remaining invalid values
-                            final_mask = (np.isfinite(exp_I_final) &
-                                         np.isfinite(model_I_final) &
-                                         (exp_I_final > 0) &
-                                         (model_I_final > 0))
-
-                            if np.sum(final_mask) > 10:
-                                exp_I_final = exp_I_final[final_mask]
-                                model_I_final = model_I_final[final_mask]
-
-                                # Prepare data for FreeSAS gof function
-                                # gof expects numpy arrays, can be 2D with shape (n, 1) or 1D
-                                exp_data = exp_I_final.reshape(-1, 1) if exp_I_final.ndim == 1 else exp_I_final
-                                model_data = model_I_final.reshape(-1, 1) if model_I_final.ndim == 1 else model_I_final
-
-                                # Calculate CorMap
-                                gof_result = gof(exp_data, model_data)
-
-                                # Extract p-value (P attribute from GOF object)
-                                if hasattr(gof_result, 'P') and gof_result.P is not None:
-                                    fit_data['cormap_pvalue'] = float(gof_result.P)
-                    except Exception as calc_error:
-                        logger.debug(f"Model calculation failed for CorMap: {calc_error}")
-
-            except ImportError:
-                logger.warning("FreeSAS not available, skipping CorMap calculation")
-            except Exception as e:
-                logger.warning(f"CorMap calculation failed: {e}")
-                import traceback
-                logger.debug(traceback.format_exc())
-
-        # Create fit entry if we have fit information
-        if fit_data.get('chi2') is not None or model_name or optimizer_name or fit_data.get('cormap_pvalue') is not None:
-            fit = collector.collect_from_fit(fit_data, model_name, optimizer_name, model_parameters)
-            # Update angular units from sample
+            if (self.chkPolydispersity.isChecked()
+                    and self.polydispersity_widget.poly_model.rowCount() > 0):
+                params += FittingUtilities.getStandardParam(
+                    self.polydispersity_widget.poly_model)
+            if (self.chkMagnetism.isChecked() and self.canHaveMagnetism()
+                    and self.magnetism_widget._magnet_model.rowCount() > 0):
+                params += FittingUtilities.getStandardParam(
+                    self.magnetism_widget._magnet_model)
+            fit = collector.collect_from_fit(
+                fit_data, model_name, optimizer_name, params)
             if sample.angular_units:
                 fit.angular_units = sample.angular_units
-
             sample.fits.append(fit)
 
-        # A new Guinier fit is not run here. collect_from_data copies Rg and
-        # I(0) when the dataset was loaded from SASBDB. Otherwise the user
-        # runs Guinier from the SASBDB dialog.
-
-        # Add default molecule and buffer if not present
         if sample.molecule is None:
             sample.molecule = collector.create_default_molecule()
         if sample.buffer is None:
             sample.buffer = collector.create_default_buffer()
-
         export_data.samples.append(sample)
-
-        # Create default project if not set
         if export_data.project is None:
             export_data.project = collector.create_default_project()
-
         return export_data
+
+    def _cormap_pvalue(self):
+        """
+        CorMap p-value of the loaded 1D data against the last theory curve.
+
+        :return: p-value, or None when it cannot be computed
+        """
+        model = self.model_data
+        data = self.data
+        if model is None or not isinstance(data, Data1D):
+            return None
+        if getattr(data, 'isSesans', False):
+            return None
+        try:
+            from freesas.cormap import gof
+        except ImportError:
+            logger.warning(
+                "FreeSAS not available, skipping CorMap calculation")
+            return None
+
+        q = np.asarray(data.x, dtype=float)
+        exp_i = np.asarray(data.y, dtype=float)
+        mod_i = np.asarray(model.y, dtype=float)
+        in_fit = (self.q_range_min <= q) & (q <= self.q_range_max)
+        exp_i = exp_i[in_fit]
+        if exp_i.size != mod_i.size or exp_i.size <= 10:
+            return None
+        mask = (np.isfinite(exp_i) & np.isfinite(mod_i)
+                & (exp_i > 0) & (mod_i > 0))
+        if int(np.count_nonzero(mask)) <= 10:
+            return None
+        try:
+            result = gof(exp_i[mask].reshape(-1, 1),
+                         mod_i[mask].reshape(-1, 1))
+        except Exception:
+            logger.warning("CorMap calculation failed", exc_info=True)
+            return None
+        p_value = getattr(result, 'P', None)
+        return None if p_value is None else float(p_value)
 
     def loadPageStateCallback(self, state: Any | None = None, datainfo: Any | None = None, format: Any | None = None) -> None:
         """
