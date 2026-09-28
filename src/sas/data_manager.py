@@ -16,8 +16,8 @@ T = TypeVar('T')
 # TODO: Probably want to handle order, if that is even relevant.
 valid_associations: list[tuple[str | type, str | type]] = [
     ('Perspective', SasData),
-    (Trend, SasData)
-    # TODO: Include plots
+    (Trend, SasData),
+    (TrackedPlot, SasData)
 ]
 
 # This is needed because the normal 'isinstance' builtin function annoyingly
