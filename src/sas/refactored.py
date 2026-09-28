@@ -87,10 +87,10 @@ class TrackedFit:
     pass
 
 class TrackedPlot:
-    _data_manager: DataManager
+    _data_manager: "DataManager"
     _plot_widget: PlotWidget
 
-    def __init__(self, data_manager: DataManager):
+    def __init__(self, data_manager: "DataManager"):
         self._data_manager = data_manager
         # TODO: Init the plot widget.
         
