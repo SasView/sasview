@@ -6,10 +6,10 @@ from PySide6.QtWidgets import QDialog, QTabWidget
 from sasdata.data import SasData
 from sasdata.trend import Trend
 
-from sas.refactored import Perspective
+from sas.refactored import Perspective, TrackedFit, TrackedPlot
 
 # TODO: Add plots to this type.
-TrackedData = SasData | Perspective | Trend
+TrackedData = SasData | Perspective | Trend | TrackedFit | TrackedPlot
 
 T = TypeVar('T')
 
