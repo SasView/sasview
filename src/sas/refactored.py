@@ -1,3 +1,4 @@
+from sas.refactored_plotting.SubTabs import SubTabs
 from sas.refactored_plotting.PlotWidget import PlotWidget
 import logging
 from abc import abstractmethod
@@ -88,7 +89,7 @@ class TrackedFit:
 
 class TrackedPlot:
     _data_manager: "DataManager"
-    _plot_widget: PlotWidget
+    plot_widget: SubTabs | None
 
     def __init__(self, data_manager: "DataManager"):
         self._data_manager = data_manager
@@ -102,5 +103,11 @@ class TrackedPlot:
     @property
     def fit(self) -> TrackedFit | None:
         return self._data_manager.get_association_of_type(self, TrackedFit)
+
+    def update_plot(self):
+        # TODO: Check the old window, and remove it if necessary.
+        if self.to_plot:
+            self.plot_widget = SubTabs(self)
+            self._data_manager.new_plot.emit(self.plot_widget)
         
 

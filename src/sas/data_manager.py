@@ -1,7 +1,7 @@
 from typing import TypeVar
 
 from PySide6.QtCore import QObject, Signal
-from PySide6.QtWidgets import QDialog
+from PySide6.QtWidgets import QDialog, QTabWidget
 
 from sasdata.data import SasData
 from sasdata.trend import Trend
@@ -41,6 +41,7 @@ class NewDataManager(QObject):
     new_data: Signal = Signal(object)
     data_removed: Signal = Signal(object)
     new_association: Signal = Signal(object, object)
+    new_plot: Signal = Signal(QTabWidget)
     new_perspective: Signal = Signal(QDialog)
     removed_perspective: Signal = Signal(QDialog)
 
