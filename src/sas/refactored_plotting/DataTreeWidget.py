@@ -1,4 +1,4 @@
-from DataTreeItems import DataItem
+from sas.refactored_plotting.DataTreeItems import DataItem
 from PySide6.QtCore import QByteArray, QMimeData, QRect, Qt
 from PySide6.QtGui import QDrag
 from PySide6.QtWidgets import QTreeWidget
