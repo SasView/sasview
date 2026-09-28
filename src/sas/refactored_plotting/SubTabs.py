@@ -1,4 +1,5 @@
-from sasdata.data import SasData
+from sasdata.dataset_types import dataset_types, two_dim
+from sasdata.data import SasData, SasMeasurement
 from sas.data_manager import TrackedData
 from sas.refactored import TrackedPlot, TrackedFit
 
@@ -66,7 +67,7 @@ class SubTabs(QTabWidget):
         self.plot_object = plot_object
         self.figures: list[matplotlib.figure] = []
         # iterate through subtabs
-        for i in range(tabitem.childCount()):
+        for i, to_plot in enumerate(self.toPlot):
             # add subplots
             layout = QVBoxLayout()
             figure = matplotlib.figure.Figure(figsize=(5, 5))
@@ -74,8 +75,10 @@ class SubTabs(QTabWidget):
             layout.addWidget(canvas)
             layout.addWidget(NavigationToolbar2QT(canvas))
 
+            # TODO: At the moment, assume there's only one plot.
             # decide whether there is only one plot needs to be plotted. then, only one central plot is needed
-            subplot_count = tabitem.child(i).childCount()
+            # subplot_count = tabitem.child(i).childCount()
+            subplot_count = 1
             if subplot_count == 1:
                 ax = figure.subplots(subplot_count)
                 # putting the axes object in a list so that the access can be generic for both cases with multiple
@@ -95,22 +98,28 @@ class SubTabs(QTabWidget):
 
             # after the subplots are created, the axes objects need to be filled with actual lines/2d plots
             # iterate through subplots
-            for j in range(tabitem.child(i).childCount()):
+            for j in range(subplot_count):
                 # set the title of the plot with the subplot name of the PlotTreeWidget item
-                ax[j].set_title(str(tabitem.child(i).child(j).text(0)))
+                ax[j].set_title("Placeholder text")
 
                 # iterate through plottables and plot modifiers (PlotTreeWidget items)
-                for k in range(tabitem.child(i).child(j).childCount()):
+                plot_data = [self.toPlot]
+                for k in range(len(self.toPlot)):
+                    # TODO: This for loop needs to change a lot (shouldn't be
+                    # range len for a start) but I'm trying to preserve the
+                    # original structure, and get that working before I mess
+                    # with it.
 
-                    plottable_or_modifier_item = tabitem.child(i).child(j).child(k).data(0, 1)
+                    # plottable_or_modifier_item = tabitem.child(i).child(j).child(k).data(0, 1)
+                    plottable_or_modifier_item = self.toPlot[k]
                     # check if the plottable or modifier item is a PlottableItem (actual data to be displayed)
-                    if isinstance(plottable_or_modifier_item, PlottableItem):
+                    if isinstance(plottable_or_modifier_item, SasMeasurement):
                         plottable = plottable_or_modifier_item
-                        dataset = self.datacollector.get_data_by_id(plottable.data_id)
+                        dataset = plottable
 
                         # if the dataset is 2d, plotting will be done with a heatmap plot
-                        if dataset.is_data_2d:
-
+                        if dataset.dataset_type == two_dim:
+                            raise NotImplementedError("2D data is not currently supported in plitting.")
                             # collect a possible existing colormap plot modifier (child item)
                             # and save it, so that it can be used during plot creation
                             colormap_modifier = ""
@@ -146,14 +155,14 @@ class SubTabs(QTabWidget):
                         # if it is not a 2d plot, it must be a 1d plot (line plot)
                         else:
                             # select again for data plot (1), fit plot (2) and residual plot (3)
-                            if plottable.type_num == 1:  # data plot: log-log plot, show only data
-                                ax[j].plot(dataset.x_data, dataset.y_data)
+                            if True:  # data plot: log-log plot, show only data
+                                ax[j].plot(dataset.abscissae.axes[0].value, dataset.ordinate.value)
                                 ax[j].set_yscale('log')
-                            elif plottable.type_num == 2:  # fit plot: log-log plot, show fit and data curve
-                                ax[j].plot(dataset.x_data, dataset.y_fit)
-                                ax[j].set_yscale('log')
-                            elif plottable.type_num == 3:  # residual plot lin-log plot, show calc and show res only
-                                ax[j].plot(dataset.x_data, np.subtract(dataset.y_fit, dataset.y_data))
+                            # elif plottable.type_num == 2:  # fit plot: log-log plot, show fit and data curve
+                            #     ax[j].plot(dataset.x_data, dataset.y_fit)
+                            #     ax[j].set_yscale('log')
+                            # elif plottable.type_num == 3:  # residual plot lin-log plot, show calc and show res only
+                            #     ax[j].plot(dataset.x_data, np.subtract(dataset.y_fit, dataset.y_data))
 
                             # iterate through plottable modifier, e.g. linecolor, linestyle
                             for l in range(plottable.childCount()):
@@ -184,7 +193,7 @@ class SubTabs(QTabWidget):
             # set the object name for later, so that the style sheet changes for graying out only affects the dock
             # container itself and not the child widgets of the dock container. fitpage_index is used as an identifier
             # here
-            dock_container.setObjectName("DockContainer" + str(tabitem.data(0, 1).fitpage_index))
+            dock_container.setObjectName("DockContainer" + str("Placeholder"))
             dock_widget = QDockWidget()
 
             dock_widget.topLevelChanged.connect(lambda x: self.grayOutOnDock(dock_container, dock_widget))
@@ -192,7 +201,7 @@ class SubTabs(QTabWidget):
             dock_widget.setWidget(canvas_widget)
             dock_container.addDockWidget(Qt.DockWidgetArea.TopDockWidgetArea, dock_widget)
 
-            self.addTab(dock_container, tabitem.child(i).text(0))
+            self.addTab(dock_container, "Placeholer")
             self.figures.append(figure)
 
 
