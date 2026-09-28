@@ -1,4 +1,4 @@
-from sas.data_manager import NewDataManager
+from sas.refactored_plotting.PlotWidget import PlotWidget
 import logging
 from abc import abstractmethod
 
@@ -87,9 +87,10 @@ class TrackedFit:
     pass
 
 class TrackedPlot:
-    _data_manager: NewDataManager
+    _data_manager: DataManager
+    _plot_widget: PlotWidget
 
-    def __init__(self, data_manager: NewDataManager):
+    def __init__(self, data_manager: DataManager):
         self._data_manager = data_manager
         # TODO: Init the plot widget.
         
