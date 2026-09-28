@@ -1,3 +1,4 @@
+from sas.data_manager import NewDataManager
 import logging
 from abc import abstractmethod
 
@@ -77,4 +78,29 @@ class Theory:
     # at the current SasView codebase, it seems they are all just Data1Ds with
     # nothing else special.
     pass
+
+
+class TrackedFit:
+    # TODO: This class is a placeholder for a fit which can be associated with a
+    # SasData object. Its a separate object in the data explorer which can be
+    # associated with a plot, and some data (it should be associated with both.)
+    pass
+
+class TrackedPlot:
+    _to_plot: SasData
+    _data_manager: NewDataManager
+
+    def __init__(self, to_plot: SasData, data_manager: NewDataManager):
+        self._to_plot = to_plot
+        self._data_manager = data_manager
+        # TODO: Init the plot widget.
+
+    @property
+    def to_plot(self):
+        return self._to_plot
+
+    @property
+    def fit(self):
+        return self._data_manager.get_association_of_type(self, TrackedFit)
+        
 
