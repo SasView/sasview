@@ -1,5 +1,5 @@
-import RandomDatasetCreator
-from Dataset import Dataset
+from sas.refactored_plotting import RandomDatasetCreator
+from sas.refactored_plotting.Dataset import Dataset
 from PySide6 import QtWidgets
 
 
