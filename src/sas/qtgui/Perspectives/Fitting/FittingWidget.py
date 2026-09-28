@@ -3506,6 +3506,105 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         return report_logic.reportList()
 
+    def getSASBDBData(self):
+        """
+        Build SASBDB export data from the current fit tab.
+
+        CorMap uses the last calculated 1D theory curve, so it follows the
+        fit q-range and smearing. A new Guinier fit is not run here.
+
+        :return: Export data, or None when no data or model is loaded
+        """
+        if self.data is None or self.logic.kernel_module is None:
+            return None
+
+        from sas.qtgui.Utilities.SASBDB.sasbdb_data_collector import SASBDBDataCollector
+
+        collector = SASBDBDataCollector()
+        export_data = collector.export_data
+        sample, instrument = collector.collect_from_data(self.data)
+        if instrument:
+            export_data.instruments.append(instrument)
+
+        fit_data = {}
+        if self.chi2 is not None:
+            fit_data['chi2'] = self.chi2
+        cormap = self._cormap_pvalue()
+        if cormap is not None:
+            fit_data['cormap_pvalue'] = cormap
+
+        kernel = self.logic.kernel_module
+        model_name = getattr(kernel, 'id', None) or getattr(kernel, 'name', None)
+        try:
+            from bumps import options
+            optimizer_name = options.FIT_CONFIG.selected_fitter.name
+        except (ImportError, AttributeError):
+            optimizer_name = None
+
+        if fit_data or model_name or optimizer_name:
+            params = FittingUtilities.getStandardParam(self._model_model)
+            if (self.chkPolydispersity.isChecked()
+                    and self.polydispersity_widget.poly_model.rowCount() > 0):
+                params += FittingUtilities.getStandardParam(
+                    self.polydispersity_widget.poly_model)
+            if (self.chkMagnetism.isChecked() and self.canHaveMagnetism()
+                    and self.magnetism_widget._magnet_model.rowCount() > 0):
+                params += FittingUtilities.getStandardParam(
+                    self.magnetism_widget._magnet_model)
+            fit = collector.collect_from_fit(
+                fit_data, model_name, optimizer_name, params)
+            if sample.angular_units:
+                fit.angular_units = sample.angular_units
+            sample.fits.append(fit)
+
+        if sample.molecule is None:
+            sample.molecule = collector.create_default_molecule()
+        if sample.buffer is None:
+            sample.buffer = collector.create_default_buffer()
+        export_data.samples.append(sample)
+        if export_data.project is None:
+            export_data.project = collector.create_default_project()
+        return export_data
+
+    def _cormap_pvalue(self):
+        """
+        CorMap p-value of the loaded 1D data against the last theory curve.
+
+        :return: p-value, or None when it cannot be computed
+        """
+        model = self.model_data
+        data = self.data
+        if model is None or not isinstance(data, Data1D):
+            return None
+        if getattr(data, 'isSesans', False):
+            return None
+        try:
+            from freesas.cormap import gof
+        except ImportError:
+            logger.warning(
+                "FreeSAS not available, skipping CorMap calculation")
+            return None
+
+        q = np.asarray(data.x, dtype=float)
+        exp_i = np.asarray(data.y, dtype=float)
+        mod_i = np.asarray(model.y, dtype=float)
+        in_fit = (self.q_range_min <= q) & (q <= self.q_range_max)
+        exp_i = exp_i[in_fit]
+        if exp_i.size != mod_i.size or exp_i.size <= 10:
+            return None
+        mask = (np.isfinite(exp_i) & np.isfinite(mod_i)
+                & (exp_i > 0) & (mod_i > 0))
+        if int(np.count_nonzero(mask)) <= 10:
+            return None
+        try:
+            result = gof(exp_i[mask].reshape(-1, 1),
+                         mod_i[mask].reshape(-1, 1))
+        except Exception:
+            logger.warning("CorMap calculation failed", exc_info=True)
+            return None
+        p_value = getattr(result, 'P', None)
+        return None if p_value is None else float(p_value)
+
     def loadPageStateCallback(self, state: Any | None = None, datainfo: Any | None = None, format: Any | None = None) -> None:
         """
         This is a callback method called from the CANSAS reader.
