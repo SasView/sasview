@@ -1,12 +1,12 @@
-from DataCollector import DataCollector
-from DataTreeItems import DataItem, PlotPageItem
-from DataTreeWidget import DataTreeWidget
-from PlotModifiers import ModifierColormap, ModifierLinecolor, ModifierLinestyle
-from PlotTreeItems import PlotItem, PlottableItem, SubTabItem, TabItem
-from PlotTreeWidget import PlotTreeWidget
-from PlotWidget import PlotWidget
+from sas.refactored_plotting.DataCollector import DataCollector
+from sas.refactored_plotting.DataTreeItems import DataItem, PlotPageItem
+from sas.refactored_plotting.DataTreeWidget import DataTreeWidget
+from sas.refactored_plotting.PlotModifiers import ModifierColormap, ModifierLinecolor, ModifierLinestyle
+from sas.refactored_plotting.PlotTreeItems import PlotItem, PlottableItem, SubTabItem, TabItem
+from sas.refactored_plotting.PlotTreeWidget import PlotTreeWidget
+from sas.refactored_plotting.PlotWidget import PlotWidget
 from PySide6 import QtWidgets
-from UI.DataViewerUI import Ui_DataViewer
+from sas.refactored_plotting.UI.DataViewerUI import Ui_DataViewer
 
 
 class DataViewer(QtWidgets.QWidget, Ui_DataViewer):

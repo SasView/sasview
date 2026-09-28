@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QTabWidget
-from SubTabs import SubTabs
+from sas.refactored_plotting.SubTabs import SubTabs
 
 
 class PlotWidget(QTabWidget):

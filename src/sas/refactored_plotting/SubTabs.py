@@ -2,8 +2,8 @@
 import matplotlib.figure
 import numpy as np
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg, NavigationToolbar2QT
-from PlotModifiers import ModifierColormap, ModifierLinecolor, ModifierLinestyle, PlotModifier
-from PlotTreeItems import PlottableItem
+from sas.refactored_plotting.PlotModifiers import ModifierColormap, ModifierLinecolor, ModifierLinestyle, PlotModifier
+from sas.refactored_plotting.PlotTreeItems import PlottableItem
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QDockWidget, QMainWindow, QTabWidget, QVBoxLayout, QWidget
 
