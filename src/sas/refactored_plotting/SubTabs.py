@@ -1,3 +1,6 @@
+from sasdata.data import SasData
+from sas.data_manager import TrackedData
+from sas.refactored import TrackedPlot, TrackedFit
 
 import matplotlib.figure
 import numpy as np
@@ -53,10 +56,14 @@ class SubTabs(QTabWidget):
             print("white")
             dock_container.setStyleSheet("QMainWindow#" + name + " { background-color: white }")
 
-    def __init__(self, datacollector, tabitem):
+    @property
+    def toPlot(self) -> list[SasData | TrackedFit]:
+        return [item for item in [self.plot_object.to_plot, self.plot_object.fit] if item is not None]
+
+    def __init__(self, plot_object: TrackedPlot):
         super().__init__()
 
-        self.datacollector = datacollector
+        self.plot_object = plot_object
         self.figures: list[matplotlib.figure] = []
         # iterate through subtabs
         for i in range(tabitem.childCount()):
