@@ -119,6 +119,13 @@ class NewDataManager(QObject):
     def get_all_associations(self, data: TrackedData) -> list[TrackedData]:
         return [assoc[0] if assoc[0] != data else assoc[1] for assoc in self.associations if data in assoc]
 
+    def get_association_of_type(self, data: TrackedData, type):
+        associations = self.get_all_associations(data)
+        for assoc in associations:
+            if isinstance_fix(data, type):
+                return assoc
+        return None
+
     def register_trend(self, trend: Trend):
         self.add_data(trend)
         for datum in trend.data:
