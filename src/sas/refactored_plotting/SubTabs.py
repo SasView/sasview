@@ -1,7 +1,5 @@
 from sasdata.dataset_types import dataset_types, two_dim
 from sasdata.data import SasData, SasMeasurement
-from sas.data_manager import TrackedData
-from sas.refactored import TrackedPlot, TrackedFit
 
 import matplotlib.figure
 import numpy as np
@@ -10,6 +8,11 @@ from sas.refactored_plotting.PlotModifiers import ModifierColormap, ModifierLine
 from sas.refactored_plotting.PlotTreeItems import PlottableItem
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QDockWidget, QMainWindow, QTabWidget, QVBoxLayout, QWidget
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from sas.refactored import TrackedPlot, TrackedFit
 
 
 class ClickableCanvas(FigureCanvasQTAgg):
@@ -58,10 +61,10 @@ class SubTabs(QTabWidget):
             dock_container.setStyleSheet("QMainWindow#" + name + " { background-color: white }")
 
     @property
-    def toPlot(self) -> list[SasData | TrackedFit]:
+    def toPlot(self) -> list["SasData | TrackedFit"]:
         return [item for item in [self.plot_object.to_plot, self.plot_object.fit] if item is not None]
 
-    def __init__(self, plot_object: TrackedPlot):
+    def __init__(self, plot_object: "TrackedPlot"):
         super().__init__()
 
         self.plot_object = plot_object
