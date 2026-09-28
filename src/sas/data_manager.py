@@ -1,3 +1,5 @@
+from typing import TypeVar
+
 from PySide6.QtCore import QObject, Signal
 from PySide6.QtWidgets import QDialog
 
@@ -8,6 +10,8 @@ from sas.refactored import Perspective
 
 # TODO: Add plots to this type.
 TrackedData = SasData | Perspective | Trend
+
+T = TypeVar('T')
 
 # TODO: Probably want to handle order, if that is even relevant.
 valid_associations: list[tuple[str | type, str | type]] = [
@@ -119,10 +123,10 @@ class NewDataManager(QObject):
     def get_all_associations(self, data: TrackedData) -> list[TrackedData]:
         return [assoc[0] if assoc[0] != data else assoc[1] for assoc in self.associations if data in assoc]
 
-    def get_association_of_type(self, data: TrackedData, type):
+    def get_association_of_type(self, data: TrackedData, type: type[T]) -> T | None:
         associations = self.get_all_associations(data)
         for assoc in associations:
-            if isinstance_fix(data, type):
+            if isinstance_fix(assoc, type):
                 return assoc
         return None
 
