@@ -87,20 +87,19 @@ class TrackedFit:
     pass
 
 class TrackedPlot:
-    _to_plot: SasData
     _data_manager: NewDataManager
 
-    def __init__(self, to_plot: SasData, data_manager: NewDataManager):
-        self._to_plot = to_plot
+    def __init__(self, data_manager: NewDataManager):
         self._data_manager = data_manager
         # TODO: Init the plot widget.
+        
 
     @property
-    def to_plot(self):
-        return self._to_plot
+    def to_plot(self) -> SasData | None:
+        return self._data_manager.get_association_of_type(self, SasData)
 
     @property
-    def fit(self):
+    def fit(self) -> TrackedFit | None:
         return self._data_manager.get_association_of_type(self, TrackedFit)
         
 
