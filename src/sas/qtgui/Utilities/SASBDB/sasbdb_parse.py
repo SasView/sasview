@@ -117,15 +117,19 @@ def parseMetadata(metadata: dict) -> SASBDBDatasetInfo:
     info.raw_metadata = metadata
     logger.debug("SASBDB API response keys: %s", list(metadata.keys()))
 
+    # One depth-first pass feeds every field lookup. Shallow aliases are still
+    # tried first so a declared top-level or known nested key keeps priority.
+    entries, sequence = _index_metadata(metadata)
     for attr, keys in _STR_FIELDS.items():
-        setattr(info, attr, _get_str(metadata, *keys))
+        setattr(info, attr, _get_str(metadata, entries, keys))
     for attr, keys in _FLOAT_FIELDS.items():
-        setattr(info, attr, _get_float(metadata, *keys))
+        setattr(info, attr, _get_float(metadata, entries, keys))
 
-    info.sequence = _get_sequence(metadata)
+    info.sequence = sequence
     info.concentration_unit = info.concentration_unit or "mg/mL"
     info.oligomeric_state = info.oligomerization or _get_str(
-        metadata, "oligomeric_state", "oligomer_state", "oligomerization"
+        metadata, entries,
+        ("oligomeric_state", "oligomer_state", "oligomerization"),
     )
 
     authors = metadata.get("authors") or metadata.get("author_list") or []
@@ -137,14 +141,75 @@ def parseMetadata(metadata: dict) -> SASBDBDatasetInfo:
     return info
 
 
-def _get_str(data: dict, *keys: str) -> str:
+def _index_metadata(data: dict) -> tuple[list[tuple[str, object]], str]:
+    """
+    Walk metadata once, in the same order as a deep field search.
+
+    Each key is recorded before its value is descended into. Sequence text is
+    the first non-empty sequence field, with the fixed sequence keys at a node
+    checked before that node's children.
+
+    :param data: SASBDB metadata object
+    :return: ``(entries, sequence)`` where entries are ``(key, value)`` pairs
+        in deep-search order
+    """
+    entries: list[tuple[str, object]] = []
+    sequence = ""
+
+    def walk(obj) -> None:
+        nonlocal sequence
+        if isinstance(obj, dict):
+            if not sequence:
+                sequence = _sequence_at(obj)
+            for key, value in obj.items():
+                entries.append((key, value))
+            for value in obj.values():
+                walk(value)
+        elif isinstance(obj, list):
+            for item in obj:
+                walk(item)
+
+    walk(data)
+    return entries, sequence
+
+
+def _sequence_at(obj: dict) -> str:
+    """Return the first non-empty sequence string on this object."""
+    for key in _SEQUENCE_KEYS:
+        value = obj.get(key)
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+    return ""
+
+
+def _get_str(data: dict, entries: list[tuple[str, object]],
+             keys: tuple[str, ...]) -> str:
     value = _find_shallow(data, keys, as_float=False)
-    return value if isinstance(value, str) else _find_deep(data, keys, as_float=False) or ""
+    if isinstance(value, str):
+        return value
+    found = _find_indexed(entries, keys, as_float=False)
+    return found or ""
 
 
-def _get_float(data: dict, *keys: str) -> float | None:
+def _get_float(data: dict, entries: list[tuple[str, object]],
+               keys: tuple[str, ...]) -> float | None:
     value = _find_shallow(data, keys, as_float=True)
-    return value if isinstance(value, float) else _find_deep(data, keys, as_float=True)
+    if isinstance(value, float):
+        return value
+    return _find_indexed(entries, keys, as_float=True)
+
+
+def _find_indexed(entries: list[tuple[str, object]], keys: tuple[str, ...],
+                  *, as_float: bool):
+    """Return the first indexed value that matches a key and converts."""
+    key_set = set(keys)
+    for key, value in entries:
+        if key not in key_set:
+            continue
+        converted = _convert_value(value, as_float=as_float)
+        if _is_present(converted, as_float):
+            return converted
+    return None
 
 
 def _find_shallow(data: dict, keys: tuple[str, ...], *, as_float: bool):
@@ -163,30 +228,6 @@ def _find_shallow(data: dict, keys: tuple[str, ...], *, as_float: bool):
                     if _is_present(converted, as_float):
                         return converted
     return None
-
-
-def _find_deep(data, keys: tuple[str, ...], *, as_float: bool):
-    key_set = set(keys)
-
-    def walk(obj):
-        if isinstance(obj, dict):
-            for key, value in obj.items():
-                if key in key_set:
-                    converted = _convert_value(value, as_float=as_float)
-                    if _is_present(converted, as_float):
-                        return converted
-            for value in obj.values():
-                found = walk(value)
-                if found is not None:
-                    return found
-        elif isinstance(obj, list):
-            for item in obj:
-                found = walk(item)
-                if found is not None:
-                    return found
-        return None
-
-    return walk(data)
 
 
 def _convert_value(value, *, as_float: bool):
@@ -208,23 +249,3 @@ def _is_present(value, as_float: bool) -> bool:
     if as_float:
         return value is not None
     return bool(value)
-
-
-def _get_sequence(data: dict) -> str:
-    def walk(obj) -> str:
-        if isinstance(obj, dict):
-            for key in _SEQUENCE_KEYS:
-                if key in obj and isinstance(obj[key], str) and obj[key].strip():
-                    return obj[key].strip()
-            for value in obj.values():
-                found = walk(value)
-                if found:
-                    return found
-        elif isinstance(obj, list):
-            for item in obj:
-                found = walk(item)
-                if found:
-                    return found
-        return ""
-
-    return walk(data) if isinstance(data, dict) else ""

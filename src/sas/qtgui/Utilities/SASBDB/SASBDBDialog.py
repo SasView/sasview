@@ -40,6 +40,22 @@ _GUINIER_FIELD_NAMES = _GUINIER_DERIVED_FIELD_NAMES + (
     "txtGuinierStartPoint",
     "txtGuinierEndPoint",
 )
+
+
+def _curve_has_points(data) -> bool:
+    """True when data has non-empty x and y arrays."""
+    if data is None:
+        return False
+    x = getattr(data, "x", None)
+    y = getattr(data, "y", None)
+    if x is None or y is None:
+        return False
+    try:
+        return len(x) > 0 and len(y) > 0
+    except TypeError:
+        return False
+
+
 _PDF_CSS = (
     "body{font-size:11pt}"
     "table.sasbdb-table{font-size:11pt;width:100%;margin:10px 0}"
@@ -224,6 +240,7 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
         guinier: SASBDBGuinier,
         clear_first: bool = False,
         fit_info: dict | None = None,
+        refresh_plot: bool = True,
     ) -> None:
         self._guinier_suppress_range_signals = True
         try:
@@ -250,7 +267,8 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
                 self._guinier_plot_a = self._guinier_plot_b = None
         finally:
             self._guinier_suppress_range_signals = False
-        self._refresh_guinier_plot()
+        if refresh_plot:
+            self._refresh_guinier_plot()
 
     def _refresh_guinier_plot(self) -> None:
         if self._guinier_plot_panel is None:
@@ -455,7 +473,9 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
             self._set_plain(self.txtBufferComment, buf.comment)
 
         if sample.guinier:
-            self._apply_guinier_to_fields(sample.guinier, clear_first=False)
+            # __init__ draws the Guinier plot once after the fields are filled.
+            self._apply_guinier_to_fields(
+                sample.guinier, clear_first=False, refresh_plot=False)
 
         if sample.fits:
             fit = sample.fits[0]
@@ -1043,28 +1063,51 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
             logger.warning(f"Error getting plot figure with model: {e}")
             return None
 
+    def _pdf_plot_curve(self, sample: SASBDBSample | None):
+        """
+        Return the curve to draw when the fitting plot is unavailable.
+
+        Uses the 1D data already held by the dialog. The experimental curve
+        file is loaded only when that in-memory curve is missing.
+
+        :param sample: First export sample, or None
+        :return: Object with ``x`` and ``y``, or None
+        """
+        source = self._guinier_source_data
+        if _curve_has_points(source):
+            return source
+        if sample is None:
+            return None
+        path = sample.experimental_curve
+        if not (path and os.path.exists(path)):
+            return None
+        from sasdata.dataloader.loader import Loader
+
+        data_list = Loader().load(path)
+        if not data_list:
+            return None
+        return data_list[0]
+
     def _getPlotFigure(self):
         fig = None
         try:
-            if not self.export_data.samples:
-                return None
-            sample = self.export_data.samples[0]
-            if not (sample.experimental_curve
-                    and os.path.exists(sample.experimental_curve)):
+            sample = (self.export_data.samples[0]
+                      if self.export_data.samples else None)
+            data = self._pdf_plot_curve(sample)
+            if data is None:
                 return None
             import matplotlib.pyplot as plt
 
-            from sasdata.dataloader.loader import Loader
-
-            data_list = Loader().load(sample.experimental_curve)
-            if not data_list:
-                return None
-            data = data_list[0]
             fig, ax = plt.subplots(figsize=(8, 6))
-            ax.errorbar(data.x, data.y, yerr=data.dy, fmt='o', markersize=3, capsize=2)
-            ax.set_xlabel(f"Q ({sample.angular_units or '1/nm'})")
-            ax.set_ylabel(f"I ({sample.intensity_units or 'arbitrary'})")
-            ax.set_title(sample.sample_title or "SAS Data")
+            ax.errorbar(
+                data.x, data.y, yerr=getattr(data, "dy", None),
+                fmt='o', markersize=3, capsize=2)
+            angular = sample.angular_units if sample is not None else None
+            intensity = sample.intensity_units if sample is not None else None
+            title = sample.sample_title if sample is not None else None
+            ax.set_xlabel(f"Q ({angular or '1/nm'})")
+            ax.set_ylabel(f"I ({intensity or 'arbitrary'})")
+            ax.set_title(title or "SAS Data")
             ax.set_yscale('log')
             ax.set_xscale('log')
             ax.grid(True, alpha=0.3)
@@ -1107,6 +1150,8 @@ class SASBDBDialog(QtWidgets.QDialog, Ui_SASBDBDialogUI):
                             modelname=modelname, data_name=data_name)
                         if score > best_score:
                             best_score, best_figure = score, plotter.figure
+                            if best_score == 100:
+                                return best_figure
                 except Exception as e:
                     logger.warning(f"Error checking plot {name}: {e}")
             return best_figure

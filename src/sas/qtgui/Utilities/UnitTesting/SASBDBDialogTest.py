@@ -8,9 +8,11 @@ from unittest.mock import MagicMock
 import pytest
 from PySide6 import QtWidgets
 
+from sas.qtgui.Utilities.SASBDB.guinier_plot_panel import GuinierPlotPanel
 from sas.qtgui.Utilities.SASBDB.sasbdb_data import (
     SASBDBBuffer,
     SASBDBExportData,
+    SASBDBGuinier,
     SASBDBInstrument,
     SASBDBMolecule,
     SASBDBProject,
@@ -461,4 +463,96 @@ class TestSASBDBDialog:
 
         # Verify save_location was updated
         assert dialog.save_location == "/tmp/new_location"
+
+    def test_opening_dialog_draws_guinier_plot_once(self, qtbot, mocker):
+        """Filled Guinier results should redraw the plot a single time."""
+        update = mocker.patch.object(GuinierPlotPanel, "update_plot")
+        export_data = SASBDBExportData(
+            project=SASBDBProject(project_title="Test Project"),
+            samples=[SASBDBSample(
+                sample_title="Test Sample",
+                guinier=SASBDBGuinier(
+                    rg=2.0, i0=1.0, range_start=0.01, range_end=0.1),
+            )],
+        )
+        opened = SASBDBDialog(export_data=export_data, parent=None)
+        qtbot.addWidget(opened)
+        assert update.call_count == 1
+        opened.close()
+
+    def test_pdf_plot_uses_in_memory_curve(self, dialog, mocker):
+        """PDF fallback should plot the loaded curve without reading the file."""
+        import matplotlib.pyplot as plt
+
+        source = MagicMock()
+        source.x = [0.01, 0.02]
+        source.y = [1.0, 0.5]
+        source.dy = [0.1, 0.1]
+        dialog._guinier_source_data = source
+        dialog.export_data.samples[0].experimental_curve = "/no/such/curve.dat"
+        loader = mocker.patch("sasdata.dataloader.loader.Loader")
+
+        fig = dialog._getPlotFigure()
+
+        assert fig is not None
+        loader.assert_not_called()
+        plt.close(fig)
+
+    def test_pdf_plot_loads_file_when_memory_curve_missing(
+            self, dialog, mocker, tmp_path):
+        """Without an in-memory curve, the PDF still loads the data file."""
+        import matplotlib.pyplot as plt
+
+        curve = tmp_path / "curve.dat"
+        curve.write_text("q i\n")
+        dialog._guinier_source_data = None
+        dialog.export_data.samples[0].experimental_curve = str(curve)
+        loaded = MagicMock()
+        loaded.x = [0.01, 0.02]
+        loaded.y = [1.0, 0.5]
+        loaded.dy = [0.1, 0.1]
+        loader = mocker.patch("sasdata.dataloader.loader.Loader")
+        loader.return_value.load.return_value = [loaded]
+
+        fig = dialog._getPlotFigure()
+
+        assert fig is not None
+        loader.return_value.load.assert_called_once_with(str(curve))
+        plt.close(fig)
+
+    def test_residual_search_stops_on_exact_id(self, dialog, mocker):
+        """An exact residual id is enough; later plots are not inspected."""
+        from sas.qtgui.Plotting.PlotterData import DataRole
+
+        fitting = MagicMock()
+        fitting.logic.kernel_module.name = "sphere"
+        fitting.data.id = "D1"
+        fitting.data.name = "curve"
+        mocker.patch.object(
+            dialog, "_current_fitting_widget", return_value=fitting)
+
+        exact = MagicMock()
+        exact.plot_role = DataRole.ROLE_RESIDUAL
+        exact.id = "Residual resD1"
+        exact.name = "Residual"
+        first = MagicMock()
+        first.data = [exact]
+        first.figure = "exact-figure"
+        seen = []
+
+        def plot_by_id(name):
+            seen.append(name)
+            return first
+
+        mocker.patch(
+            "sas.qtgui.Plotting.PlotHelper.currentPlotIds",
+            return_value=["exact", "later"],
+        )
+        mocker.patch(
+            "sas.qtgui.Plotting.PlotHelper.plotById",
+            side_effect=plot_by_id,
+        )
+
+        assert dialog._getResidualPlotFigure() == "exact-figure"
+        assert seen == ["exact"]
 

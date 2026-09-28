@@ -8,7 +8,10 @@ from sas.qtgui.Utilities.SASBDB.sasbdb_api import (
     validateDatasetId,
 )
 from sas.qtgui.Utilities.SASBDB.sasbdb_display import metadata_summary
-from sas.qtgui.Utilities.SASBDB.sasbdb_parse import SASBDBDatasetInfo
+from sas.qtgui.Utilities.SASBDB.sasbdb_parse import (
+    SASBDBDatasetInfo,
+    parseMetadata,
+)
 
 
 class TestSASBDBApi:
@@ -53,6 +56,46 @@ class TestSASBDBApi:
         assert sasbdb_api._guessFileExtension(
             "https://example.com/file", {}
         ) == ".dat"
+
+
+class TestParseMetadata:
+    """Field lookup order for SASBDB metadata."""
+
+    def test_shallow_value_wins_over_a_deeper_alias(self):
+        info = parseMetadata({
+            "rg": 1.0,
+            "experiment": {"guinier_rg": 9.0},
+        })
+        assert info.rg == 1.0
+
+    def test_nested_alias_used_when_top_level_does_not_convert(self):
+        info = parseMetadata({
+            "rg": "bad",
+            "experiment": {"radius_of_gyration": 4.0},
+        })
+        assert info.rg == 4.0
+
+    def test_deep_value_and_sequence_found_outside_known_paths(self):
+        info = parseMetadata({
+            "title": "Top title",
+            "sample": {"name": "Nested sample", "rg": "bad"},
+            "analysis": {"guinier_rg": 12.5, "fasta": "ACDE"},
+            "measurements": [{"buffer_ph": 7.2}],
+            "molecules": [{"fasta_sequence": "SHOULD_NOT_WIN"}],
+            "authors": ["A", "B"],
+            "i0": 0.0,
+        })
+        assert info.title == "Top title"
+        assert info.sample_name == "Nested sample"
+        assert info.rg == 12.5
+        assert info.ph == 7.2
+        assert info.i0 == 0.0
+        assert info.sequence == "ACDE"
+        assert info.authors == ["A", "B"]
+
+    def test_non_dict_metadata_is_empty(self):
+        assert parseMetadata(None).title == ""
+        assert parseMetadata([]).entry_id == ""
 
 
 class TestSASBDBDisplay:
