@@ -9,7 +9,7 @@ from typing import cast
 from packaging.version import Version
 from PySide6.QtCore import QLocale, Qt, Slot
 from PySide6.QtGui import QStandardItem
-from PySide6.QtWidgets import QDialog, QDockWidget, QLabel, QMdiSubWindow, QMessageBox, QProgressBar, QTextBrowser
+from PySide6.QtWidgets import QDialog, QDockWidget, QLabel, QMdiSubWindow, QMessageBox, QProgressBar, QTextBrowser, QTabWidget
 from twisted.internet import reactor
 
 from sasdata.temp_ascii_reader import load_data
@@ -268,6 +268,10 @@ class GuiManager:
         self._workspace.workspace.addSubWindow(new_perspective)
         new_perspective.show()
         # TODO: There is inevitably other stuff to put here.
+
+    @Slot(QTabWidget)
+    def new_plot_window(self, plot_window: QTabWidget):
+        self._workspace.workspace.addSubWindow(plot_window)
 
 
     @Slot(QDialog)
