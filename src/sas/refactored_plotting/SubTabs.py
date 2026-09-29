@@ -159,7 +159,7 @@ class SubTabs(QTabWidget):
                         else:
                             # select again for data plot (1), fit plot (2) and residual plot (3)
                             if True:  # data plot: log-log plot, show only data
-                                ax[j].plot(dataset.abscissae.axes[0].value, dataset.ordinate.value)
+                                ax[j].plot(dataset.abscissae.axes[0].value, dataset.ordinate.value, marker='o', linestyle='')
                                 ax[j].set_yscale('log')
                             # elif plottable.type_num == 2:  # fit plot: log-log plot, show fit and data curve
                             #     ax[j].plot(dataset.x_data, dataset.y_fit)
