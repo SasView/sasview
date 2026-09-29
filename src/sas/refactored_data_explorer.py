@@ -139,7 +139,7 @@ class NewDataExplorer(QWidget):
         if isinstance(to_plot, SasData):
             plot_object = TrackedPlot(self._data_manager)
             self._data_manager.add_data(plot_object)
-            self._data_manager.make_association(to_plot, plot_object)
+            self._data_manager.make_association(plot_object, to_plot)
             plot_object.update_plot()
             
         else:
