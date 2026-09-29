@@ -168,12 +168,12 @@ class SubTabs(QTabWidget):
                             #     ax[j].plot(dataset.x_data, np.subtract(dataset.y_fit, dataset.y_data))
 
                             # iterate through plottable modifier, e.g. linecolor, linestyle
-                            for l in range(plottable.childCount()):
-                                plottable_modifier = plottable.child(l)
-                                if isinstance(plottable_modifier.data(0, 1), ModifierLinecolor):
-                                    ax[j].get_lines()[-1].set_color(plottable_modifier.text(0).split('=')[1])
-                                elif isinstance(plottable_modifier.data(0, 1), ModifierLinestyle):
-                                    ax[j].get_lines()[-1].set_linestyle(plottable_modifier.text(0).split('=')[1])
+                            # for l in range(plottable.childCount()):
+                            #     plottable_modifier = plottable.child(l)
+                            #     if isinstance(plottable_modifier.data(0, 1), ModifierLinecolor):
+                            #         ax[j].get_lines()[-1].set_color(plottable_modifier.text(0).split('=')[1])
+                            #     elif isinstance(plottable_modifier.data(0, 1), ModifierLinestyle):
+                            #         ax[j].get_lines()[-1].set_linestyle(plottable_modifier.text(0).split('=')[1])
 
                     # applying a colormap to a set of lines and setting the respective color to lines that are
                     # returned by the axes object
