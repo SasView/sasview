@@ -24,8 +24,6 @@ class DataExplorerMenu(QMenu):
         remove_action.setData(DataExplorerMenuAction("remove"))
         self.addAction(remove_action)
 
-        # TODO: There will be loads more
-
         if send_to:
             send_to_menu = self.addMenu("Send To")
 
