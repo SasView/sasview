@@ -288,7 +288,7 @@ class GuiManager:
     @Slot(QTabWidget)
     def removed_plot(self, to_remove: QTabWidget):
         # TODO: This repeats the function before. Probably try to merge them together.
-        for sub_window self._workspace.workspace.subWindowList():
+        for sub_window in self._workspace.workspace.subWindowList():
             if sub_window.widget() == to_remove:
                 self._workspace.workspace.removeSubWindow(sub_window)
 
