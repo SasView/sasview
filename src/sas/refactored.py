@@ -104,6 +104,10 @@ class TrackedPlot:
     def fit(self) -> TrackedFit | None:
         return self._data_manager.get_association_of_type(self, TrackedFit)
 
+    @property
+    def formatName(self) -> str:
+        return "Placeholder Plot"
+
     def update_plot(self):
         # TODO: Check the old window, and remove it if necessary.
         if self.to_plot:
