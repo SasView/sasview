@@ -1,5 +1,5 @@
 import logging
-from typing import cast
+from typing import cast, TYPE_CHECKING
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QCursor
@@ -15,6 +15,9 @@ from sas.data_manager import TrackedData, isinstance_fix
 from sas.qtgui.MainWindow.DataViewer import DataViewer
 from sas.qtgui.MainWindow.TrendCreation import TrendCreation
 from sas.refactored import Perspective
+
+if TYPE_CHECKING:
+    from sas.refactored_data_explorer import NewDataExplorer
 
 
 # TODO: Is this the right place for this?
@@ -50,6 +53,10 @@ class DataExplorerTree(QTreeWidget):
         self.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
         _ = self.customContextMenuRequested.connect(self.showContextMenu)
         self.headerItem().setHidden(True)
+
+    @property
+    def _data_explorer(self) -> "NewDataExplorer":
+        return cast( "NewDataExplorer", self.parent())
 
     def initTable(self):
         self.clear()
