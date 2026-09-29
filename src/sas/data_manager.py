@@ -42,6 +42,7 @@ class NewDataManager(QObject):
     data_removed: Signal = Signal(object)
     new_association: Signal = Signal(object, object)
     new_plot: Signal = Signal(QTabWidget)
+    removed_plot: Signal = Signal(QTabWidget)
     new_perspective: Signal = Signal(QDialog)
     removed_perspective: Signal = Signal(QDialog)
 
@@ -90,6 +91,8 @@ class NewDataManager(QObject):
         self.data_removed.emit(data)
         if hasattr(data, 'title'):
             self.removed_perspective.emit(data)
+        if isinstance_fix(data, TrackedPlot):
+            self.removed_plot.emit(data.plot_widget)
     # TODO: Remove data on a list. So that we could remove a perspective, and
     # data at the same time. So it doesn't matter that the perspective is
     # associated with the data becuase they will both be removed.

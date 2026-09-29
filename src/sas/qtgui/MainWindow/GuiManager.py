@@ -107,6 +107,7 @@ class GuiManager:
         self._data_manager.removed_perspective.connect(self.removed_perspective)
         self._data_manager.new_perspective.connect(self.new_perspective)
         self._data_manager.new_plot.connect(self.new_plot_window)
+        self._data_manager.removed_plot.connect(self.removed_plot)
 
         # Create action triggers
         self.addTriggers()
@@ -283,6 +284,13 @@ class GuiManager:
             if sub_window.widget() == to_remove:
                 self._workspace.workspace.removeSubWindow(sub_window)
                 break
+
+    @Slot(QTabWidget)
+    def removed_plot(self, to_remove: QTabWidget):
+        # TODO: This repeats the function before. Probably try to merge them together.
+        for sub_window self._workspace.workspace.subWindowList():
+            if sub_window.widget() == to_remove:
+                self._workspace.workspace.removeSubWindow(sub_window)
 
 
     @Slot(QMdiSubWindow)
