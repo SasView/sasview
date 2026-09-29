@@ -273,6 +273,7 @@ class GuiManager:
     @Slot(QTabWidget)
     def new_plot_window(self, plot_window: QTabWidget):
         self._workspace.workspace.addSubWindow(plot_window)
+        plot_window.show()
 
 
     @Slot(QDialog)
