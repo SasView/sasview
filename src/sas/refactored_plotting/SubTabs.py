@@ -161,6 +161,7 @@ class SubTabs(QTabWidget):
                             if True:  # data plot: log-log plot, show only data
                                 ax[j].plot(dataset.abscissae.axes[0].value, dataset.ordinate.value, marker='o', linestyle='')
                                 ax[j].set_yscale('log')
+                                ax[j].set_xscale('log')
                             # elif plottable.type_num == 2:  # fit plot: log-log plot, show fit and data curve
                             #     ax[j].plot(dataset.x_data, dataset.y_fit)
                             #     ax[j].set_yscale('log')
