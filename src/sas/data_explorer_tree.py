@@ -112,7 +112,8 @@ class DataExplorerTree(QTreeWidget):
         send_to = all([isinstance(datum, SasData) for datum in self.currentTrackedData])
         view_data = len(self.currentTrackedData) == 1 and isinstance(self.currentTrackedData[0], SasData)
         make_trend = len(self.currentTrackedData) > 1 and all([isinstance_fix(datum, SasData) for datum in self.currentTrackedData])
-        menu = DataExplorerMenu(self, self._data_manager, send_to, view_data, make_trend)
+        plot = len(self.currentTrackedData) == 1 and isinstance_fix(self.currentTrackedDatum, SasData)
+        menu = DataExplorerMenu(self, self._data_manager, send_to, view_data, make_trend, plot)
         action = menu.exec(QCursor.pos())
         # Result will be None if the user exited the menu without selecting anything.
         if action is None:
