@@ -17,9 +17,9 @@ class PlotModifier(ABC):
     def explorer_item_name(self) -> str:
         pass
 
-    @property
+    @staticmethod
     @abstractmethod
-    def options(self) -> list:
+    def options() -> list:
         pass
 
 
@@ -35,8 +35,8 @@ class ModifierLinestyle(PlotModifier):
     def explorer_item_name(self) -> str:
         return f"Line Style: {self.line_style}"
 
-    @property
-    def options(self) -> list[str]:
+    @staticmethod
+    def options() -> list[str]:
         return get_args(LineStyleType)
         
 
@@ -53,8 +53,8 @@ class ModifierLinecolor(PlotModifier):
     def explorer_item_name(self) -> str:
         return f"Line Colour: {self.line_colour}"
 
-    @property
-    def options(self) -> list[str]:
+    @staticmethod
+    def options() -> list[str]:
         return get_args(ColourType)
         
 
@@ -71,6 +71,7 @@ class ModifierColormap(PlotModifier):
     def explorer_item_name(self) -> str:
         return f"Plot Colour: {self.colour}"
 
-    @property
-    def options(self) -> list[str]:
+    @staticmethod
+    def options() -> list[str]:
         return get_args(ColourType)
+        
