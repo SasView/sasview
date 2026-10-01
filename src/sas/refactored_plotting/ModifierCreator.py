@@ -1,4 +1,4 @@
-from sas.refactored_plotting.PlotModifiers import ModifierLinestyle, ModifierLinecolor, ModifierColormap
+from sas.refactored_plotting.PlotModifiers import ModifierLinestyle, ModifierLinecolor, ModifierColormap, PlotModifier
 from PySide6.QtWidgets import QDialog, QComboBox, QLabel, QFormLayout, QPushButton
 
 class ModifierCreator(QDialog):
@@ -41,6 +41,10 @@ class ModifierCreator(QDialog):
 
     def onCreate(self):
         self.done(QDialog.DialogCode.Accepted)
+
+    def proposed_modifier(self) -> PlotModifier:
+        cls = self.candidate_modifiers[self.modifierComboBox.currentText()]
+        return cls(self.modifierValueComboBox.currentText())
         
     
 
