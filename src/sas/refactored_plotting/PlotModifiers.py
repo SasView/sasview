@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, get_args
 from PySide6.QtWidgets import QTreeWidgetItem
 from abc import ABC, abstractmethod
 
@@ -17,6 +17,11 @@ class PlotModifier(ABC):
     def explorer_item_name(self) -> str:
         pass
 
+    @property
+    @abstractmethod
+    def options(self) -> list:
+        pass
+
 
 class ModifierLinestyle(PlotModifier):
     def __init__(self, line_style: LineStyleType):
@@ -29,6 +34,10 @@ class ModifierLinestyle(PlotModifier):
     @property
     def explorer_item_name(self) -> str:
         return f"Line Style: {self.line_style}"
+
+    @property
+    def options(self) -> list[str]:
+        return get_args(LineStyleType)
         
 
 
@@ -43,6 +52,10 @@ class ModifierLinecolor(PlotModifier):
     @property
     def explorer_item_name(self) -> str:
         return f"Line Colour: {self.line_colour}"
+
+    @property
+    def options(self) -> list[str]:
+        return get_args(ColourType)
         
 
 
@@ -57,3 +70,7 @@ class ModifierColormap(PlotModifier):
     @property
     def explorer_item_name(self) -> str:
         return f"Plot Colour: {self.colour}"
+
+    @property
+    def options(self) -> list[str]:
+        return get_args(ColourType)
