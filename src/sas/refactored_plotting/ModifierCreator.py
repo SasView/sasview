@@ -21,6 +21,7 @@ class ModifierCreator(QDialog):
 
         self.modifierValueLabel = QLabel("Select the value for that modifier.")
         self.modifierValueComboBox = QComboBox()
+        self.modifierValueComboBox.currentTextChanged.connect(self.onChangeModifier)
 
         self.createButton = QPushButton("Create")
         self.createButton.clicked.connect(self.done)
@@ -30,7 +31,12 @@ class ModifierCreator(QDialog):
         self.layout.addRow(self.modifierValueLabel, self.modifierValueComboBox)
         self.layout.addRow(self.createButton)
         # TODO: Add items
-        
+
+    def onChangeModifier(self):
+        self.modifierValueComboBox.clear()
+        modifier_options = self.candidate_modifiers[self.modifierValueComboBox.currentText()].options
+        for option in modifier_options:
+            self.modifierValueComboBox.addItem(option)
         
     
 
