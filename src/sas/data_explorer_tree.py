@@ -163,7 +163,7 @@ class DataExplorerTree(QTreeWidget):
                     modifier = dialog.proposed_modifier
                     self._data_manager.add_data(modifier)
                     plot = cast(TrackedPlot, self.currentTrackedDatum)
-                    self._data_manager.make_association(modifier, plot)
+                    self._data_manager.make_association(plot, modifier)
         if len(errors):
             box = DataExplorerErrorMessage(self, errors)
             box.show()
