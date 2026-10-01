@@ -26,7 +26,7 @@ class ModifierCreator(QDialog):
             self.modifierComboBox.addItem(key)
 
         self.createButton = QPushButton("Create")
-        self.createButton.clicked.connect(self.done)
+        self.createButton.clicked.connect(self.onCreate)
 
         self.layout = QFormLayout(self)
         self.layout.addRow(self.modifierLabel, self.modifierComboBox)
@@ -38,6 +38,9 @@ class ModifierCreator(QDialog):
         modifier_options = self.candidate_modifiers[self.modifierComboBox.currentText()].options()
         for option in modifier_options:
             self.modifierValueComboBox.addItem(option)
+
+    def onCreate(self):
+        self.done(QDialog.DialogCode.Accepted)
         
     
 
