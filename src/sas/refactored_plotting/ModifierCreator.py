@@ -30,7 +30,6 @@ class ModifierCreator(QDialog):
         self.layout.addRow(self.modifierLabel, self.modifierComboBox)
         self.layout.addRow(self.modifierValueLabel, self.modifierValueComboBox)
         self.layout.addRow(self.createButton)
-        # TODO: Add items
 
     def onChangeModifier(self):
         self.modifierValueComboBox.clear()
