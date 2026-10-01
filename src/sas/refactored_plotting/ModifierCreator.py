@@ -28,6 +28,7 @@ class ModifierCreator(QDialog):
         self.layout = QFormLayout(self)
         self.layout.addRow(self.modifierLabel, self.modifierComboBox)
         self.layout.addRow(self.modifierValueLabel, self.modifierValueComboBox)
+        self.layout.addRow(self.createButton)
         # TODO: Add items
         
         
