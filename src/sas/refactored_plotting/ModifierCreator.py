@@ -35,7 +35,7 @@ class ModifierCreator(QDialog):
 
     def onChangeModifier(self):
         self.modifierValueComboBox.clear()
-        modifier_options = self.candidate_modifiers[self.modifierComboBox.currentText()].options
+        modifier_options = self.candidate_modifiers[self.modifierComboBox.currentText()].options()
         for option in modifier_options:
             self.modifierValueComboBox.addItem(option)
         
