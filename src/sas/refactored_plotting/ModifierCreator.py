@@ -42,6 +42,7 @@ class ModifierCreator(QDialog):
     def onCreate(self):
         self.done(QDialog.DialogCode.Accepted)
 
+    @property
     def proposed_modifier(self) -> PlotModifier:
         cls = self.candidate_modifiers[self.modifierComboBox.currentText()]
         return cls(self.modifierValueComboBox.currentText())
