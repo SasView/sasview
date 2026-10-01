@@ -1,9 +1,12 @@
-from typing import override
+from typing import cast, override
 
 from PySide6.QtWidgets import QListWidget, QVBoxLayout, QWidget
 from qtpy.QtWidgets import QLabel
 
+from sasdata.data import SasData
+
 from sas.data_manager import NewDataManager as DataManager
+from sas.data_manager import TrackedData
 from sas.refactored import Perspective
 
 
@@ -23,8 +26,18 @@ class DummyPerspective(Perspective):
     def title(self) -> str:
         return "Dummy Perspective"
 
+    @property
+    @override
+    def supported_data(self) -> set[type[TrackedData]]:
+        return {SasData}
+
+    @property
+    @override
+    def supports_multiple_data(self) -> bool:
+        return True
+
     @override
     def newAssocation(self):
         self.data_list.clear()
-        for datum in self.associatedData:
+        for datum in cast(list[SasData], self.associatedData):
             self.data_list.addItem(datum.name)
