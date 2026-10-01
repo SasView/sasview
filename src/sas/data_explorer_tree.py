@@ -1,4 +1,5 @@
 from sas.refactored_plotting.PlotModifiers import PlotModifier
+from sas.refactored_plotting.ModifierCreator import ModifierCreator
 import logging
 from typing import cast, TYPE_CHECKING
 
@@ -154,6 +155,9 @@ class DataExplorerTree(QTreeWidget):
                     self._data_manager.register_trend(trend_creation_dialog.proposed_trend)
             case "plot":
                 self._data_explorer.onPlot()
+            case "create_modifier":
+                dialog = ModifierCreator()
+                dialog.exec()
         if len(errors):
             box = DataExplorerErrorMessage(self, errors)
             box.show()
