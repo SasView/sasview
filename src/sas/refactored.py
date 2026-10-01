@@ -1,3 +1,4 @@
+from sas.refactored_plotting.PlotModifiers import PlotModifier
 from sas.refactored_plotting.SubTabs import SubTabs
 from sas.refactored_plotting.PlotWidget import PlotWidget
 import logging
@@ -104,6 +105,10 @@ class TrackedPlot:
     def fit(self) -> TrackedFit | None:
         return self._data_manager.get_association_of_type(self, TrackedFit)
 
+    @property
+    def modifiers(self) -> list[PlotModifier]:
+        return [assoc for assoc in self._data_manager.get_all_associations(self) if isinstance(assoc, PlotModifier)]
+    
     @property
     def formatName(self) -> str:
         return "Placeholder Plot"
