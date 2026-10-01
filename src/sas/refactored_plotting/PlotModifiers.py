@@ -12,6 +12,11 @@ class PlotModifier(ABC):
     def modifier_value(self):
         pass
 
+    @abstractmethod
+    @property
+    def explorer_item_name(self) -> str:
+        pass
+
 
 class ModifierLinestyle(PlotModifier):
     def __init__(self, line_style: LineStyleType):
@@ -20,6 +25,10 @@ class ModifierLinestyle(PlotModifier):
     @property
     def modifier_value(self) -> LineStyleType:
         return self.line_style
+
+    @property
+    def explorer_item_name(self) -> str:
+        return f"Line Style: {self.line_style}"
         
 
 
@@ -30,6 +39,10 @@ class ModifierLinecolor(PlotModifier):
     @property
     def modifier_value(self) -> ColourType:
         return self.line_colour
+
+    @property
+    def explorer_item_name(self) -> str:
+        return f"Line Colour: {self.line_colour}"
         
 
 
@@ -40,3 +53,7 @@ class ModifierColormap(PlotModifier):
     @property
     def modifier_value(self) -> ColourType:
         return self.colour
+
+    @property
+    def explorer_item_name(self) -> str:
+        return f"Plot Colour: {self.colour}"
