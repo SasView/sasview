@@ -12,12 +12,12 @@ from sas.refactored import Perspective
 # should not be None?
 @dataclass
 class DataExplorerMenuAction:
-    action: Literal["remove", "send_to", "view_data", "plot", "make_trend"]
+    action: Literal["remove", "send_to", "view_data", "plot", "make_trend", "create_modifier"]
     action_data: Perspective | None = None
 
 
 class DataExplorerMenu(QMenu):
-    def __init__(self, parent: QWidget, data_manager: NewDataManager, send_to: bool, view_data: bool, make_trend: bool, plot: bool):
+    def __init__(self, parent: QWidget, data_manager: NewDataManager, send_to: bool, view_data: bool, make_trend: bool, plot: bool, create_modifier: bool):
         super().__init__(parent)
 
         remove_action = QAction("Remove", parent)
@@ -46,3 +46,8 @@ class DataExplorerMenu(QMenu):
             plot_action = QAction("Plot", parent)
             plot_action.setData(DataExplorerMenuAction("plot"))
             self.addAction(plot_action)
+
+        if create_modifier:
+            modifier_action = QAction("Add a plot modifier", parent)
+            modifier_action.setData(DataExplorerMenuAction("create_modifier"))
+            self.addAction(modifier_action)
