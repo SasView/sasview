@@ -70,7 +70,7 @@ class SubTabs(QTabWidget):
         self.plot_object = plot_object
         self.figures: list[matplotlib.figure] = []
         # iterate through subtabs
-        for i, to_plot in enumerate(self.toPlot):
+        for i, _ in enumerate(self.toPlot):
             # add subplots
             layout = QVBoxLayout()
             figure = matplotlib.figure.Figure(figsize=(5, 5))
@@ -81,7 +81,7 @@ class SubTabs(QTabWidget):
             # TODO: At the moment, assume there's only one plot.
             # decide whether there is only one plot needs to be plotted. then, only one central plot is needed
             # subplot_count = tabitem.child(i).childCount()
-            subplot_count = 1
+            subplot_count = i
             if subplot_count == 1:
                 ax = figure.subplots(subplot_count)
                 # putting the axes object in a list so that the access can be generic for both cases with multiple
