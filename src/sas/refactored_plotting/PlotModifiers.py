@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 
 LineStyleType = Literal['solid', 'dotted', 'dashed', 'dashdot']
 # TODO: This should probably be an RGB value. The current value is just a placeholder.
-LineColourType = Literal['red', 'green', 'blue'] 
+ColourType = Literal['red', 'green', 'blue'] 
 
 class PlotModifier(ABC):
     @abstractmethod
@@ -24,14 +24,19 @@ class ModifierLinestyle(PlotModifier):
 
 
 class ModifierLinecolor(PlotModifier):
-    def __init__(self, parent, name):
+    def __init__(self, line_colour: ColourType):
+        self.line_colour = line_colour
+
+    @property
+    def modifier_value(self) -> ColourType:
+        return self.line_colour
         
 
 
 class ModifierColormap(PlotModifier):
-    def __init__(self, parent, name):
-        super().__init__(parent, name)
+    def __init__(self, colour: ColourType):
+        self.colour = colour
 
-    def clone(self):
-        copy = super().clone()
-        return ModifierColormap(copy.parent(), [copy.text(0)])
+    @property
+    def modifier_value(self) -> ColourType:
+        return self.colour
