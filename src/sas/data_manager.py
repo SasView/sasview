@@ -21,7 +21,7 @@ valid_associations: list[tuple[str | type, str | type]] = [
     (Trend, SasData),
     (Trend, SasData),
     (TrackedPlot, SasData),
-    (PlotModifier, TrackedPlot)
+    (TrackedPlot, PlotModifier)
 ]
 
 # This is needed because the normal 'isinstance' builtin function annoyingly
