@@ -1,3 +1,4 @@
+from sas.refactored_plotting.PlotModifiers import PlotModifier
 import logging
 from typing import cast, TYPE_CHECKING
 
@@ -32,6 +33,8 @@ def tracked_data_name(data: TrackedData) -> str:
         # instead log a warning.
         logging.warning("Trend doesn't have a name. This shouldn't be happening.")
         return 'Unnamed Trend'
+    elif isinstance(data, PlotModifier):
+        return data.explorer_item_name
     else:
         return data.formatName
 
