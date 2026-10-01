@@ -122,7 +122,7 @@ class SubTabs(QTabWidget):
 
                         # if the dataset is 2d, plotting will be done with a heatmap plot
                         if dataset.dataset_type == two_dim:
-                            raise NotImplementedError("2D data is not currently supported in plitting.")
+                            raise NotImplementedError("2D data is not currently supported in plotting.")
                             # collect a possible existing colormap plot modifier (child item)
                             # and save it, so that it can be used during plot creation
                             colormap_modifier = ""
