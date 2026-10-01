@@ -7,13 +7,13 @@ LineStyleType = Literal['solid', 'dotted', 'dashed', 'dashdot']
 ColourType = Literal['red', 'green', 'blue'] 
 
 class PlotModifier(ABC):
-    @abstractmethod
     @property
+    @abstractmethod
     def modifier_value(self):
         pass
 
-    @abstractmethod
     @property
+    @abstractmethod
     def explorer_item_name(self) -> str:
         pass
 
