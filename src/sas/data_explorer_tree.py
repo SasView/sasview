@@ -158,7 +158,12 @@ class DataExplorerTree(QTreeWidget):
                 self._data_explorer.onPlot()
             case "create_modifier":
                 dialog = ModifierCreator()
-                dialog.exec()
+                modifier_result = dialog.exec()
+                if modifier_result == QDialog.DialogCode.Accepted:
+                    modifier = dialog.proposed_modifier
+                    self._data_manager.add_data(modifier)
+                    plot = cast(TrackedPlot, self.currentTrackedDatum)
+                    self._data_manager.make_association(modifier, plot)
         if len(errors):
             box = DataExplorerErrorMessage(self, errors)
             box.show()
