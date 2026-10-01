@@ -7,6 +7,10 @@ LineStyleType = Literal['solid', 'dotted', 'dashed', 'dashdot']
 ColourType = Literal['red', 'green', 'blue'] 
 
 class PlotModifier(ABC):
+    @abstractmethod
+    def __init__(self, value):
+        pass
+
     @property
     @abstractmethod
     def modifier_value(self):
