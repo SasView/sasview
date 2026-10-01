@@ -16,7 +16,7 @@ from sas.data_manager import NewDataManager as DataManager
 from sas.data_manager import TrackedData, isinstance_fix
 from sas.qtgui.MainWindow.DataViewer import DataViewer
 from sas.qtgui.MainWindow.TrendCreation import TrendCreation
-from sas.refactored import Perspective
+from sas.refactored import Perspective, TrackedPlot
 
 if TYPE_CHECKING:
     from sas.refactored_data_explorer import NewDataExplorer
@@ -124,7 +124,7 @@ class DataExplorerTree(QTreeWidget):
         view_data = len(self.currentTrackedData) == 1 and isinstance(self.currentTrackedData[0], SasData)
         make_trend = len(self.currentTrackedData) > 1 and all([isinstance_fix(datum, SasData) for datum in self.currentTrackedData])
         plot = len(self.currentTrackedData) == 1 and isinstance_fix(self.currentTrackedDatum, SasData)
-        create_modifier = len(self.currentTrackedData) == 1 and isinstance(self.currentTrackedDatum, PlotModifier)
+        create_modifier = len(self.currentTrackedData) == 1 and isinstance(self.currentTrackedDatum, TrackedPlot)
         menu = DataExplorerMenu(self, self._data_manager, send_to, view_data, make_trend, plot, create_modifier)
         action = menu.exec(QCursor.pos())
         # Result will be None if the user exited the menu without selecting anything.
