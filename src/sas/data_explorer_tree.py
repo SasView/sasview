@@ -83,6 +83,8 @@ class DataExplorerTree(QTreeWidget):
                 item.addChild(new_assoc_item)
                 # By breaking here, we are assuming there are no more top level datum1 items in the tree.
                 break
+        # The new association may have changed some names, so update those.
+        self.updateNames()
 
     def removeAssociation(self, datum1: TrackedData, datum2: TrackedData):
         # TODO: Again, order.
