@@ -94,7 +94,7 @@ class TrackedPlot:
 
     def __init__(self, data_manager: "DataManager"):
         self._data_manager = data_manager
-        # TODO: Init the plot widget.
+        self.plot_widget = None
         
 
     @property
