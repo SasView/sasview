@@ -100,6 +100,7 @@ class DataExplorerTree(QTreeWidget):
         while item := iter.value():
             data = item.data(0, Qt.ItemDataRole.UserRole)
             item.setText(0, tracked_data_name(data))
+            iter += 1
 
     def removeFromTable(
         self,
