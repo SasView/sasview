@@ -111,7 +111,10 @@ class TrackedPlot:
     
     @property
     def formatName(self) -> str:
-        return "Placeholder Plot"
+        if self.to_plot:
+            return f"Plot of {self.to_plot.name}"
+        else:
+            return "Empty Plot"
 
     def update_plot(self):
         # TODO: Check the old window, and remove it if necessary.
