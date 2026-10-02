@@ -116,6 +116,8 @@ class TrackedPlot:
     def update_plot(self):
         # TODO: Check the old window, and remove it if necessary.
         if self.to_plot:
+            if self.plot_widget:
+                self.plot_widget.close()
             self.plot_widget = SubTabs(self)
             self._data_manager.new_plot.emit(self.plot_widget)
         
