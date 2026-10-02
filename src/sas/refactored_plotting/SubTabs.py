@@ -106,19 +106,10 @@ class SubTabs(QTabWidget):
                 ax[j].set_title("Placeholder text")
 
                 # iterate through plottables and plot modifiers (PlotTreeWidget items)
-                plot_data = [self.toPlot]
-                for k in range(len(self.toPlot)):
-                    # TODO: This for loop needs to change a lot (shouldn't be
-                    # range len for a start) but I'm trying to preserve the
-                    # original structure, and get that working before I mess
-                    # with it.
-
-                    # plottable_or_modifier_item = tabitem.child(i).child(j).child(k).data(0, 1)
-                    plottable_or_modifier_item = self.toPlot[k]
+                for plottable_or_modifier_item in self.toPlot:
                     # check if the plottable or modifier item is a PlottableItem (actual data to be displayed)
                     if isinstance(plottable_or_modifier_item, SasMeasurement):
-                        plottable = plottable_or_modifier_item
-                        dataset = plottable
+                        dataset = plottable_or_modifier_item
 
                         # if the dataset is 2d, plotting will be done with a heatmap plot
                         if dataset.dataset_type == two_dim:
@@ -169,12 +160,12 @@ class SubTabs(QTabWidget):
                             #     ax[j].plot(dataset.x_data, np.subtract(dataset.y_fit, dataset.y_data))
 
                             # iterate through plottable modifier, e.g. linecolor, linestyle
-                            # for l in range(plottable.childCount()):
-                            #     plottable_modifier = plottable.child(l)
-                            #     if isinstance(plottable_modifier.data(0, 1), ModifierLinecolor):
-                            #         ax[j].get_lines()[-1].set_color(plottable_modifier.text(0).split('=')[1])
-                            #     elif isinstance(plottable_modifier.data(0, 1), ModifierLinestyle):
-                            #         ax[j].get_lines()[-1].set_linestyle(plottable_modifier.text(0).split('=')[1])
+                            plot = ""
+                            for plottable_modifier in self.plot_object.modifiers:
+                                if isinstance(plottable_modifier, ModifierLinecolor):
+                                    ax[j].get_lines()[-1].set_color(plottable_modifier.modifier_value)
+                                elif isinstance(plottable_modifier, ModifierLinestyle):
+                                    ax[j].get_lines()[-1].set_linestyle(plottable_modifier.modifier_value)
 
                     # applying a colormap to a set of lines and setting the respective color to lines that are
                     # returned by the axes object
