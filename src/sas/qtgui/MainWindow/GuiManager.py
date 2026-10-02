@@ -108,6 +108,7 @@ class GuiManager:
         self._data_manager.new_perspective.connect(self.new_perspective)
         self._data_manager.new_plot.connect(self.new_plot_window)
         self._data_manager.removed_plot.connect(self.removed_plot)
+        self._data_manager.replace_plot.connect(self.replace_plot)
 
         # Create action triggers
         self.addTriggers()
@@ -291,6 +292,14 @@ class GuiManager:
         for sub_window in self._workspace.workspace.subWindowList():
             if sub_window.widget() == to_remove:
                 self._workspace.workspace.removeSubWindow(sub_window)
+
+    @Slot(QTabWidget, QTabWidget)
+    def replace_plot(self, old: QTabWidget, new: QTabWidget):
+        for sub_window in self._workspace.workspace.subWindowList():
+            if sub_window.widget() is old:
+                sub_window.setWidget(new)
+                old.deleteLater()
+                new.show()
 
 
     @Slot(QMdiSubWindow)
