@@ -151,9 +151,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         """Intercept Escape key press.
         Escape is captured to prevent closing the dialog.
         """
-        if event.type() != QtCore.QEvent.KeyPress:
-            return super(TabbedModelEditor, self).eventFilter(obj, event)
-        if event.key() != QtCore.Qt.Key_Escape:
+        if event.type() != QtCore.QEvent.KeyPress or event.key() != QtCore.Qt.Key_Escape:
             return super(TabbedModelEditor, self).eventFilter(obj, event)
         # The filter is application-wide, so only swallow Escape for widgets
         # belonging to this editor.
