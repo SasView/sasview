@@ -1,9 +1,10 @@
 import sys
 import traceback
 
+from PySide6 import QtWidgets
+
 from sas.refactored_plotting.DataViewer import DataViewer
 from sas.refactored_plotting.FitPage import FitPage
-from PySide6 import QtWidgets
 from sas.refactored_plotting.UI.MainWindowUI import Ui_MainWindow
 
 

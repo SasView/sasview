@@ -1,4 +1,5 @@
 from PySide6.QtWidgets import QTabWidget
+
 from sas.refactored_plotting.SubTabs import SubTabs
 
 

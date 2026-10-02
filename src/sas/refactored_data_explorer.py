@@ -1,4 +1,3 @@
-from sasdata.data import SasData
 import logging
 from os.path import basename
 
@@ -14,6 +13,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from sasdata.data import SasData
 from sasdata.temp_ascii_reader import load_data as load_advanced_ascii_data
 from sasdata.temp_ascii_reader import load_data_default_params as load_ascii_data
 from sasdata.temp_hdf5_reader import load_data as load_hdf5_data
@@ -141,7 +141,7 @@ class NewDataExplorer(QWidget):
             self._data_manager.add_data(plot_object)
             self._data_manager.make_association(plot_object, to_plot)
             plot_object.update_plot()
-            
+
         else:
             QMessageBox.critical(self, "Plotting Error", "The selected item is not a data object. Only data objects can be plotted.")
 

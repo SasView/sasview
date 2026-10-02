@@ -1,10 +1,9 @@
-from typing import Literal, get_args
-from PySide6.QtWidgets import QTreeWidgetItem
 from abc import ABC, abstractmethod
+from typing import Literal, get_args
 
 LineStyleType = Literal['solid', 'dotted', 'dashed', 'dashdot']
 # TODO: This should probably be an RGB value. The current value is just a placeholder.
-ColourType = Literal['red', 'green', 'blue'] 
+ColourType = Literal['red', 'green', 'blue']
 
 class PlotModifier(ABC):
     @abstractmethod
@@ -42,7 +41,7 @@ class ModifierLinestyle(PlotModifier):
     @staticmethod
     def options() -> list[str]:
         return get_args(LineStyleType)
-        
+
 
 
 class ModifierLinecolor(PlotModifier):
@@ -60,7 +59,7 @@ class ModifierLinecolor(PlotModifier):
     @staticmethod
     def options() -> list[str]:
         return get_args(ColourType)
-        
+
 
 
 class ModifierColormap(PlotModifier):
@@ -78,4 +77,4 @@ class ModifierColormap(PlotModifier):
     @staticmethod
     def options() -> list[str]:
         return get_args(ColourType)
-        
+
