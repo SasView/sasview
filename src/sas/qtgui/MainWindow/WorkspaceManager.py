@@ -410,6 +410,8 @@ class FloatingWindow(QWidget, _HostMixin):
         self.attachButton.setText(ATTACH_TEXT)
         self.attachButton.setToolTip("Put this window back into the SasView workspace")
         self.attachButton.setAutoRaise(True)
+        # The header's open hand marks the drag handle; the button is a plain click target
+        self.attachButton.setCursor(Qt.ArrowCursor)
         self.attachButton.clicked.connect(self._requestAttach)
         header_layout.addWidget(self.attachButton)
         layout.addWidget(self.header)
@@ -810,7 +812,20 @@ class WorkspaceManager(QObject):
             if not self.viewportGlobalRect().contains(cursor):
                 self.detach(widget, position=cursor - state.hotspot)
 
+    def _isTornDown(self) -> bool:
+        """
+        True once the Python side of the manager has been cleared.
+
+        When the garbage collector breaks a reference cycle holding the manager
+        and its main window, it may clear the manager's attributes before the
+        C++ objects are deleted. Qt can still deliver events and signals while
+        the workspace is destroyed, and those must be ignored.
+        """
+        return "_mdi" not in self.__dict__
+
     def eventFilter(self, obj, event):
+        if self._isTornDown():
+            return False
         # Comparisons here must not call into Qt objects, which may be gone during shutdown
         if obj is self._mdi and event.type() == QEvent.Show:
             # Runs before QMdiArea.showEvent, which then places (but no longer sizes) them
@@ -1024,6 +1039,8 @@ class WorkspaceManager(QObject):
     def _onFocusChanged(self, old, new):
         # Focus outside hosted windows (menus, the Data Explorer, dialogs) keeps
         # the last active window as the target of Window menu actions
+        if self._isTornDown():
+            return
         hosted = self._hostedWidgetContaining(new)
         if hosted is not None:
             self._setActive(hosted)

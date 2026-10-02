@@ -318,12 +318,13 @@ class Plotter2DWidget(PlotterBase):
 
     def showHelperWidget(self, widget):
         """
-        Show a helper panel (slicer parameters, box sum) in the workspace,
+        Show a helper panel (slicer parameters, box sum) next to this plot:
+        in the workspace if the plot is attached, detached if the plot is detached,
         or as a standalone window when there is no workspace manager.
         """
         workspace_manager = workspace_manager_for(self)
         if workspace_manager is not None:
-            workspace_manager.add(widget)
+            workspace_manager.add(widget, detached=workspace_manager.is_detached(self))
         else:
             widget.show()
 

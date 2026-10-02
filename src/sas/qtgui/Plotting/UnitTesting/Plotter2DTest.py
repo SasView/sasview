@@ -288,6 +288,26 @@ class Plotter2DTest:
         plotter.onEditSlicer()
         assert workspace.is_hosted(plotter.slicer_widget)
 
+    @pytest.mark.parametrize("detached", [False, True], ids=["attached", "detached"])
+    def testHelperPanelsFollowPlotPlacement(self, plotter, workspace, detached):
+        '''Helper panels open attached or detached, matching their plot'''
+        from types import SimpleNamespace
+        if detached:
+            workspace.detach(plotter)
+            self._flush()
+
+        self._prepareBoxSum(plotter)
+        plotter.onBoxSum()
+        assert workspace.is_detached(plotter.boxwidget) == detached
+
+        explorer = QtWidgets.QWidget()
+        explorer.active_plots = {}
+        explorer.communicator = communicator
+        explorer.parent = SimpleNamespace(workspace_manager=workspace)
+        plotter.manager = explorer
+        plotter.onEditSlicer()
+        assert workspace.is_detached(plotter.slicer_widget) == detached
+
     def testClosingPlotClosesDetachedHelper(self, plotter, workspace):
         '''Closing a 2D plot closes its helper panel, wherever the helper lives'''
         self._prepareBoxSum(plotter)

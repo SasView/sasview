@@ -570,6 +570,22 @@ class WorkspaceManagerTest:
         flush()
         assert isinstance(env.manager.container_of(widget), DetachableSubWindow)
 
+    def testEventsAfterTeardownAreIgnored(self, env):
+        '''Qt may deliver events after the garbage collector has cleared the manager'''
+        saved = dict(env.manager.__dict__)
+        env.manager.__dict__.clear()
+        try:
+            assert env.manager.eventFilter(env.mdi, QEvent(QEvent.Show)) is False
+            env.manager._onFocusChanged(None, env.mdi)
+        finally:
+            env.manager.__dict__.update(saved)
+
+    def testAttachButtonDoesNotShowDragCursor(self, env):
+        '''The open hand marks the draggable header, not the button inside it'''
+        host = env.manager.add(Hosted(), detached=True)
+        assert host.header.cursor().shape() == Qt.OpenHandCursor
+        assert host.attachButton.cursor().shape() == Qt.ArrowCursor
+
     def testFloatingWindowRegistersNoShortcut(self, env):
         host = env.manager.add(Hosted(), detached=True)
         shortcuts = [a for a in host.findChildren(QAction) if not a.shortcut().isEmpty()]
