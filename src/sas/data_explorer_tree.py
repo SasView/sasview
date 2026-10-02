@@ -5,7 +5,7 @@ from typing import cast, TYPE_CHECKING
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QCursor
-from PySide6.QtWidgets import QAbstractItemView, QDialog, QTreeWidget, QTreeWidgetItem, QWidget
+from PySide6.QtWidgets import QAbstractItemView, QDialog, QTreeWidget, QTreeWidgetItem, QWidget, QTreeWidgetItemIterator
 
 from sasdata.data import SasData
 from sasdata.trend import NamedTrend, Trend
@@ -92,6 +92,12 @@ class DataExplorerTree(QTreeWidget):
         item = QTreeWidgetItem([tracked_data_name(datum)])
         item.setData(0, Qt.ItemDataRole.UserRole, datum)
         self.addTopLevelItem(item)
+
+    def updateNames(self):
+        iter = QTreeWidgetItemIterator(self)
+        while item := iter.value():
+            data = item.data(0, Qt.ItemDataRole.UserRole)
+            item.setText(0, tracked_data_name(data))
 
     def removeFromTable(
         self,
