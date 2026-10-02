@@ -119,6 +119,8 @@ class TrackedPlot:
             new_plot_widget = SubTabs(self)
             if self.plot_widget:
                 self._data_manager.replace_plot.emit(self.plot_widget, new_plot_widget)
+            else:
+                self._data_manager.new_plot.emit(new_plot_widget)
             self.plot_widget = new_plot_widget
             
         
