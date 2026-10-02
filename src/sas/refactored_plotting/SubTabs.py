@@ -103,7 +103,7 @@ class SubTabs(QTabWidget):
             # iterate through subplots
             for j in range(subplot_count):
                 # set the title of the plot with the subplot name of the PlotTreeWidget item
-                ax[j].set_title("Placeholder text")
+                ax[j].set_title(plot_object.to_plot.name)
 
                 # iterate through plottables and plot modifiers (PlotTreeWidget items)
                 for plottable_or_modifier_item in self.toPlot:
