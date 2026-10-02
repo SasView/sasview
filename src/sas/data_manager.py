@@ -45,7 +45,7 @@ class NewDataManager(QObject):
     new_association: Signal = Signal(object, object)
     new_plot: Signal = Signal(QTabWidget)
     removed_plot: Signal = Signal(QTabWidget)
-    replace_plot: Signal = Signal(QTabWidget)
+    replace_plot: Signal = Signal(QTabWidget, QTabWidget)
     new_perspective: Signal = Signal(QDialog)
     removed_perspective: Signal = Signal(QDialog)
 
