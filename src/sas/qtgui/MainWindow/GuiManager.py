@@ -9,7 +9,16 @@ from typing import cast
 from packaging.version import Version
 from PySide6.QtCore import QLocale, Qt, Slot
 from PySide6.QtGui import QStandardItem
-from PySide6.QtWidgets import QDialog, QDockWidget, QLabel, QMdiSubWindow, QMessageBox, QProgressBar, QTextBrowser
+from PySide6.QtWidgets import (
+    QDialog,
+    QDockWidget,
+    QLabel,
+    QMdiSubWindow,
+    QMessageBox,
+    QProgressBar,
+    QTabWidget,
+    QTextBrowser,
+)
 from twisted.internet import reactor
 
 from sasdata.temp_ascii_reader import load_data
@@ -106,6 +115,9 @@ class GuiManager:
         self._data_manager.new_association.connect(self.handleNewAssociation)
         self._data_manager.removed_perspective.connect(self.removed_perspective)
         self._data_manager.new_perspective.connect(self.new_perspective)
+        self._data_manager.new_plot.connect(self.new_plot_window)
+        self._data_manager.removed_plot.connect(self.removed_plot)
+        self._data_manager.replace_plot.connect(self.replace_plot)
 
         # Create action triggers
         self.addTriggers()
@@ -269,6 +281,11 @@ class GuiManager:
         new_perspective.show()
         # TODO: There is inevitably other stuff to put here.
 
+    @Slot(QTabWidget)
+    def new_plot_window(self, plot_window: QTabWidget):
+        self._workspace.workspace.addSubWindow(plot_window)
+        plot_window.show()
+
 
     @Slot(QDialog)
     def removed_perspective(self, to_remove: QDialog):
@@ -277,6 +294,21 @@ class GuiManager:
             if sub_window.widget() == to_remove:
                 self._workspace.workspace.removeSubWindow(sub_window)
                 break
+
+    @Slot(QTabWidget)
+    def removed_plot(self, to_remove: QTabWidget):
+        # TODO: This repeats the function before. Probably try to merge them together.
+        for sub_window in self._workspace.workspace.subWindowList():
+            if sub_window.widget() == to_remove:
+                self._workspace.workspace.removeSubWindow(sub_window)
+
+    @Slot(QTabWidget, QTabWidget)
+    def replace_plot(self, old: QTabWidget, new: QTabWidget):
+        for sub_window in self._workspace.workspace.subWindowList():
+            if sub_window.widget() is old:
+                sub_window.setWidget(new)
+                old.deleteLater()
+                new.show()
 
 
     @Slot(QMdiSubWindow)

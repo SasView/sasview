@@ -13,6 +13,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from sasdata.data import SasData
 from sasdata.temp_ascii_reader import load_data as load_advanced_ascii_data
 from sasdata.temp_ascii_reader import load_data_default_params as load_ascii_data
 from sasdata.temp_hdf5_reader import load_data as load_hdf5_data
@@ -23,7 +24,7 @@ from sas.data_explorer_error_message import DataExplorerErrorMessage
 from sas.data_explorer_tree import DataExplorerTree
 from sas.data_manager import NewDataManager as DataManager
 from sas.dummy_perspective import DummyPerspective
-from sas.refactored import Perspective
+from sas.refactored import Perspective, TrackedPlot
 
 # TODO: Eventually, the values (should) never be None.
 # FIXME: Linter is complaining about DummyPew
@@ -88,6 +89,8 @@ class NewDataExplorer(QWidget):
         self.remove_button.setToolTip("Remove the selected data from SasView")
         self.remove_button.clicked.connect(self.onRemove)
         self.plot_button = QPushButton("Plot", self)
+        self.plot_button.setToolTip("Plot the selected data.")
+        self.plot_button.clicked.connect(self.onPlot)
 
         self.final_row.addWidget(self.remove_button)
         self.final_row.addWidget(self.plot_button)
@@ -129,6 +132,18 @@ class NewDataExplorer(QWidget):
         if len(errors) > 0:
             box = DataExplorerErrorMessage(self, errors)
             box.show()
+
+    @Slot()
+    def onPlot(self):
+        to_plot = self.tree_view.currentTrackedDatum
+        if isinstance(to_plot, SasData):
+            plot_object = TrackedPlot(self._data_manager)
+            self._data_manager.add_data(plot_object)
+            self._data_manager.make_association(plot_object, to_plot)
+            plot_object.update_plot()
+
+        else:
+            QMessageBox.critical(self, "Plotting Error", "The selected item is not a data object. Only data objects can be plotted.")
 
     @Slot()
     def onLoadFile(self):
