@@ -188,7 +188,7 @@ class SubTabs(QTabWidget):
             # set the object name for later, so that the style sheet changes for graying out only affects the dock
             # container itself and not the child widgets of the dock container. fitpage_index is used as an identifier
             # here
-            dock_container.setObjectName("DockContainer" + str("Placeholder"))
+            dock_container.setObjectName("DockContainer" + self.plot_object.to_plot.name)
             dock_widget = QDockWidget()
 
             dock_widget.topLevelChanged.connect(lambda x: self.grayOutOnDock(dock_container, dock_widget))
@@ -196,7 +196,7 @@ class SubTabs(QTabWidget):
             dock_widget.setWidget(canvas_widget)
             dock_container.addDockWidget(Qt.DockWidgetArea.TopDockWidgetArea, dock_widget)
 
-            self.addTab(dock_container, "Placeholer")
+            self.addTab(dock_container, self.plot_object.to_plot.name)
             self.figures.append(figure)
 
 
