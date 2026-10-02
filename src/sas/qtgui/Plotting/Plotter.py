@@ -1173,3 +1173,10 @@ class Plotter(QtWidgets.QDialog, PlotterWidget):
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/res/ball.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.setWindowIcon(icon)
+
+    def closeEvent(self, event):
+        """
+        QDialog precedes PlotterWidget in the base classes, so without this override
+        Qt would call QDialog.closeEvent and skip the plot's own clean-up.
+        """
+        PlotterWidget.closeEvent(self, event)

@@ -11,6 +11,7 @@ from PySide6.QtWidgets import QDockWidget, QFileDialog, QMdiArea, QMessageBox, Q
 from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
 from sas.qtgui.MainWindow.GuiManager import Acknowledgements, GuiManager
 from sas.qtgui.MainWindow.MainWindow import MainSasViewWindow
+from sas.qtgui.MainWindow.WorkspaceManager import WorkspaceManager
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 from sas.qtgui.Utilities.HidableDialog import HidableDialog
 from sas.qtgui.Utilities.IPythonWidget import IPythonWidget
@@ -36,6 +37,7 @@ class GuiManagerTest:
                 # define workspace for dialogs.
                 self.workspace = QMdiArea(self)
                 self.setCentralWidget(self.workspace)
+                self.workspace_manager = WorkspaceManager(self.workspace, self)
 
         m = GuiManager(MainWindow(None))
         config.override_with_defaults()  # Disable saving of test file
