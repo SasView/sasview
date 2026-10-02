@@ -196,7 +196,7 @@ class SubTabs(QTabWidget):
             dock_widget.setWidget(canvas_widget)
             dock_container.addDockWidget(Qt.DockWidgetArea.TopDockWidgetArea, dock_widget)
 
-            self.addTab(dock_container, self.plot_object.to_plot.name)
+            self.addTab(dock_container, "Data")
             self.figures.append(figure)
 
 
