@@ -1,9 +1,11 @@
 import glob
 import logging
 import os
+import sys
 import time
 from unittest.mock import MagicMock
 
+import numpy as np
 import pytest
 from PySide6 import QtCore, QtGui, QtTest, QtWidgets
 from twisted.internet import threads
@@ -22,6 +24,11 @@ from sas.qtgui.Utilities import GuiUtils
 from sas.sascalc.fit.models import ModelManager, ModelManagerBase
 
 logger = logging.getLogger(__name__)
+
+
+def _cormap_n():
+    """One more point than the CorMap minimum, plus room to drop one."""
+    return FittingWidget._CORMAP_MIN_POINTS + 2
 
 
 class dummy_manager:
@@ -1793,6 +1800,90 @@ class FittingWidgetTest:
         assert widget_with_data.options_widget.qmin == min(data.x)
         assert widget_with_data.options_widget.qmax == max(data.x)
         assert widget_with_data.options_widget.npts == len(data.x)
+
+    def testGetSASBDBDataTheoryMode(self, widget):
+        """A theory tab has placeholder data, not a measurement."""
+        q = np.linspace(0.01, 0.2, _cormap_n())
+        widget.logic.kernel_module = object()
+        widget.logic._data = Data1D(x=q)
+        widget.model_data = Data1D(x=q, y=np.ones(q.shape))
+        assert not widget.data_is_loaded
+        assert widget.getSASBDBData() is None
+        assert widget._cormap_pvalue() is None
+
+    def _cormap_curves(self, widget, q, y, model_q=None, model_y=None):
+        """Point the widget at a 1D dataset and a matching theory curve."""
+        widget.logic.data = Data1D(x=q, y=y)
+        widget.data_is_loaded = True
+        widget.model_data = Data1D(
+            x=q if model_q is None else model_q,
+            y=y if model_y is None else model_y)
+        widget.q_range_min = float(np.min(q))
+        widget.q_range_max = float(np.max(q))
+
+    def testCormapPvalue(self, widget, mocker):
+        """CorMap uses finite 1D intensities, including non-positive ones."""
+        q = np.linspace(0.01, 0.2, _cormap_n())
+        y = np.full(q.shape, 1.0)
+        y[1] = -0.2
+        y[2] = np.nan
+        self._cormap_curves(widget, q, y, model_y=np.full(q.shape, 1.1))
+        gof = mocker.Mock()
+        gof.return_value.P = 0.42
+        cormap = mocker.Mock(gof=gof)
+        mocker.patch.dict(sys.modules, {
+            "freesas": mocker.Mock(cormap=cormap),
+            "freesas.cormap": cormap,
+        })
+
+        assert widget._cormap_pvalue() == 0.42
+        exp_i, mod_i = gof.call_args[0]
+        assert exp_i.ndim == 1
+        assert mod_i.ndim == 1
+        assert exp_i.size == q.size - 1
+        assert np.any(exp_i < 0)
+        assert not np.any(~np.isfinite(exp_i))
+
+    def testCormapPvalueMismatch(self, widget, mocker):
+        """A q-range or batch change with the same length is not a match."""
+        q = np.linspace(0.01, 0.2, _cormap_n())
+        shifted = q + 0.001
+        self._cormap_curves(widget, q, np.ones(q.shape),
+                            model_q=shifted, model_y=np.ones(shifted.shape))
+        gof = mocker.Mock()
+        cormap = mocker.Mock(gof=gof)
+        mocker.patch.dict(sys.modules, {
+            "freesas": mocker.Mock(cormap=cormap),
+            "freesas.cormap": cormap,
+        })
+
+        assert widget._cormap_pvalue() is None
+        gof.assert_not_called()
+
+    def testCormapPvalueSesans(self, widget):
+        """SESANS curves are not compared with CorMap."""
+        q = np.linspace(0.01, 0.2, _cormap_n())
+        self._cormap_curves(widget, q, np.ones(q.shape))
+        widget.data.isSesans = True
+        assert widget._cormap_pvalue() is None
+
+    def testCormapPvalueNot1D(self, widget):
+        """Data that is not 1D has no CorMap p-value."""
+        widget.data_is_loaded = True
+        widget.logic._data = object()
+        widget.model_data = object()
+        assert widget._cormap_pvalue() is None
+
+    def testCormapPvalueWithoutFreesas(self, widget, mocker, caplog):
+        """A missing FreeSAS install is not a warning on every export."""
+        q = np.linspace(0.01, 0.2, _cormap_n())
+        self._cormap_curves(widget, q, np.ones(q.shape))
+        mocker.patch.dict(sys.modules, {"freesas": None, "freesas.cormap": None})
+        with caplog.at_level(logging.DEBUG):
+            assert widget._cormap_pvalue() is None
+        assert "FreeSAS" in caplog.text
+        assert not any(record.levelno >= logging.WARNING
+                       for record in caplog.records)
 
 
 class FittingWidgetUndoRedoTest:

@@ -803,21 +803,30 @@ def updateKernelWithResults(kernel, results):
 
     return local_kernel
 
-def getStandardParam(model=None):
+def getStandardParam(model=None, has_error=None):
     """
-    Returns a list with standard parameters for the current model
+    Returns a list with standard parameters for the current model.
+
+    :param model: Qt item model of parameter rows
+    :param has_error: Whether column 2 is the fitted uncertainty.
+        ``None`` keeps the historical check: a 5-column table has no
+        error column. Polydispersity tables have more columns either
+        way, so callers that know the layout should pass this flag.
     """
     param = []
     num_rows = model.rowCount()
     if num_rows < 1:
         return param
 
+    if has_error is None:
+        has_error = model.columnCount() != 5
+
     for row in range(num_rows):
         param_name = model.item(row, 0).text()
         checkbox_state = model.item(row, 0).checkState() == QtCore.Qt.Checked
         value = model.item(row, 1).text()
         column_shift = 0
-        if model.columnCount() == 5: # no error column
+        if not has_error:
             error_state = False
             error_value = 0.0
         else:
