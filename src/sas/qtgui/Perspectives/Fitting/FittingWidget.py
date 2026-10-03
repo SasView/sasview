@@ -67,6 +67,10 @@ STRUCTURE_DEFAULT = "None"
 
 DEFAULT_POLYDISP_FUNCTION = 'gaussian'
 
+# CorMap scores the longest run of same-sign residuals. Below this
+# many points that run is too short to give a useful p-value.
+_CORMAP_MIN_POINTS = 11
+
 # A list of models that are known to not work with how the GUI handles models from sasmodels
 #   NOTE: These models are correct when used directly through the sasmodels package, but how qtgui handles them is wrong
 SUPPRESSED_MODELS = ['rpa']
@@ -3491,20 +3495,138 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             index = self.all_data[self.data_index]
         else:
             index = self.theory_item
-        params = FittingUtilities.getStandardParam(self._model_model)
-        poly_params = []
-        magnet_params = []
-        if self.chkPolydispersity.isChecked() and self.polydispersity_widget.poly_model.rowCount() > 0:
-            poly_params = FittingUtilities.getStandardParam(self.polydispersity_widget.poly_model)
-        if self.chkMagnetism.isChecked() and self.canHaveMagnetism() and self.magnetism_widget._magnet_model.rowCount() > 0:
-            magnet_params = FittingUtilities.getStandardParam(self.magnetism_widget._magnet_model)
         report_logic = ReportPageLogic(self,
                                        kernel_module=self.logic.kernel_module,
                                        data=self.data,
                                        index=index,
-                                       params=params+poly_params+magnet_params)
+                                       params=self._model_parameter_rows())
 
         return report_logic.reportList()
+
+    def _model_parameter_rows(self):
+        """
+        Parameter rows shared by the fit report and SASBDB export.
+
+        Error columns are taken from the table flags. Polydispersity has
+        more than five columns even before a fit, so a column count cannot
+        tell a minimum from an uncertainty.
+        """
+        params = FittingUtilities.getStandardParam(
+            self._model_model, has_error=self.has_error_column)
+        if (self.chkPolydispersity.isChecked()
+                and self.polydispersity_widget.poly_model.rowCount() > 0):
+            params += FittingUtilities.getStandardParam(
+                self.polydispersity_widget.poly_model,
+                has_error=self.polydispersity_widget.has_poly_error_column)
+        if (self.chkMagnetism.isChecked() and self.canHaveMagnetism()
+                and self.magnetism_widget._magnet_model.rowCount() > 0):
+            params += FittingUtilities.getStandardParam(
+                self.magnetism_widget._magnet_model,
+                has_error=self.magnetism_widget.has_magnet_error_column)
+        return params
+
+    def getSASBDBData(self):
+        """
+        Build SASBDB export data from the current fit tab.
+
+        CorMap uses the last calculated 1D theory curve, so it follows the
+        fit q-range and smearing. A new Guinier fit is not run here.
+        Theory-only tabs are skipped: they hold a placeholder curve, not
+        measured data.
+
+        :return: Export data, or None when no measured data or model is loaded
+        """
+        if not self.data_is_loaded or self.logic.kernel_module is None:
+            return None
+
+        from sas.qtgui.Utilities.SASBDB.sasbdb_data_collector import SASBDBDataCollector
+
+        collector = SASBDBDataCollector()
+        export_data = collector.export_data
+        sample, instrument = collector.collect_from_data(self.data)
+        if instrument:
+            export_data.instruments.append(instrument)
+
+        fit_data = {}
+        if self.chi2 is not None:
+            fit_data['chi2'] = self.chi2
+        cormap = self._cormap_pvalue()
+        if cormap is not None:
+            fit_data['cormap_pvalue'] = cormap
+
+        kernel = self.logic.kernel_module
+        model_name = getattr(kernel, 'id', None) or getattr(kernel, 'name', None)
+        try:
+            from bumps import options
+            optimizer_name = options.FIT_CONFIG.selected_fitter.name
+        except (ImportError, AttributeError):
+            optimizer_name = None
+
+        if fit_data or model_name or optimizer_name:
+            params = self._model_parameter_rows()
+            fit = collector.collect_from_fit(
+                fit_data, model_name, optimizer_name, params)
+            if sample.angular_units:
+                fit.angular_units = sample.angular_units
+            sample.fits.append(fit)
+
+        if sample.molecule is None:
+            sample.molecule = collector.create_default_molecule()
+        if sample.buffer is None:
+            sample.buffer = collector.create_default_buffer()
+        export_data.samples.append(sample)
+        if export_data.project is None:
+            export_data.project = collector.create_default_project()
+        return export_data
+
+    def _cormap_pvalue(self):
+        """
+        CorMap p-value of the loaded 1D data against the last theory curve.
+
+        Points are aligned on the theory curve's q values. Non-finite
+        intensities are dropped. Non-positive intensities are kept:
+        CorMap uses only the sign of data minus model, and dropping a
+        point would join the runs on either side of the gap.
+
+        :return: p-value, or None when it cannot be computed
+        """
+        model = self.model_data
+        data = self.data
+        if (not self.data_is_loaded or model is None
+                or not isinstance(data, Data1D)):
+            return None
+        if getattr(data, 'isSesans', False):
+            return None
+        try:
+            from freesas.cormap import gof
+        except ImportError:
+            logger.debug(
+                "FreeSAS not available, skipping CorMap calculation")
+            return None
+
+        q = np.asarray(data.x, dtype=float)
+        exp_i = np.asarray(data.y, dtype=float)
+        mod_q = np.asarray(model.x, dtype=float)
+        mod_i = np.asarray(model.y, dtype=float)
+        if exp_i.shape != q.shape or mod_i.shape != mod_q.shape:
+            return None
+        in_fit = (self.q_range_min <= q) & (q <= self.q_range_max)
+        exp_q = q[in_fit]
+        # Same length is not enough: a later q-range or batch dataset can
+        # still line up with the wrong points.
+        if exp_q.shape != mod_q.shape or not np.allclose(exp_q, mod_q):
+            return None
+        exp_i = exp_i[in_fit]
+        finite = np.isfinite(exp_i) & np.isfinite(mod_i)
+        if int(np.count_nonzero(finite)) < _CORMAP_MIN_POINTS:
+            return None
+        try:
+            result = gof(exp_i[finite], mod_i[finite])
+        except Exception:
+            logger.warning("CorMap calculation failed", exc_info=True)
+            return None
+        p_value = getattr(result, 'P', None)
+        return None if p_value is None else float(p_value)
 
     def loadPageStateCallback(self, state: Any | None = None, datainfo: Any | None = None, format: Any | None = None) -> None:
         """

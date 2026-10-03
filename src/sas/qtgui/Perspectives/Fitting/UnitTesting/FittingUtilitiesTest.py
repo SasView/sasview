@@ -275,6 +275,36 @@ class FittingUtilitiesTest:
         names_from_model2 = [model2.headerData(i, QtCore.Qt.Horizontal) for i in range(len(names))]
         assert names == names_from_model2
 
+    def testGetStandardParamPolydispersityWithoutError(self):
+        """
+        A polydispersity minimum must not be reported as an uncertainty.
+
+        The table has eight columns before a fit, so the old
+        ``columnCount() == 5`` check treated the Min column as the error.
+        """
+        model = QtGui.QStandardItemModel()
+        name = QtGui.QStandardItem("Distribution of radius")
+        name.setCheckable(True)
+        name.setCheckState(QtCore.Qt.Checked)
+        row = [name,
+               QtGui.QStandardItem("0.1"),
+               QtGui.QStandardItem("0"),
+               QtGui.QStandardItem("1"),
+               QtGui.QStandardItem("35"),
+               QtGui.QStandardItem("3"),
+               QtGui.QStandardItem("gaussian"),
+               QtGui.QStandardItem("")]
+        model.appendRow(row)
+
+        guessed = FittingUtilities.getStandardParam(model)
+        assert guessed[0][4][0] is True
+        assert guessed[0][4][1] == "0"
+
+        explicit = FittingUtilities.getStandardParam(model, has_error=False)
+        assert explicit[0][4] == [False, 0.0]
+        assert explicit[0][5][1] == "0"
+        assert explicit[0][6][1] == "1"
+
     def testCheckConstraints(self):
         ''' Test the constraints checks'''
         # Send a valid constraint

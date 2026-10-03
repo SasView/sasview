@@ -651,6 +651,11 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         fitting_widget = self.currentFittingWidget
         return None if fitting_widget is None else fitting_widget.getReport()
 
+    def getSASBDBData(self):
+        """Get SASBDB export data from the current tab."""
+        fitting_widget = self.currentFittingWidget
+        return None if fitting_widget is None else fitting_widget.getSASBDBData()
+
     @property
     def supports_fitting_menu(self) -> bool:
         return True
