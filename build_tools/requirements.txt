@@ -3,6 +3,7 @@ bumps
 cffi
 docutils
 dominate
+ffsi
 h5py
 html2text
 html5lib
