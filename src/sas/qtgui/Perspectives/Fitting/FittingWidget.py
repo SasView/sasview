@@ -54,6 +54,7 @@ from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
 from sas.sascalc.fit import models
 from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
 from sas.sascalc.fit.FreeFormFitting import SUPPORTED_MODELS as FREE_FORM_MODELS
+from sas.sascalc.fit.FreeFormFitting import FreeFormResult
 from sas.system import HELP_SYSTEM
 from sas.system.user import find_plugins_dir
 
@@ -599,8 +600,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.cmdFit.setEnabled(self.haveParamsToFit())
 
     def toggleFreeForm(self, isChecked: bool) -> None:
-        self.chkPolydispersity.setEnabled(not isChecked)
-        self.chkPolydispersity.setChecked(isChecked)
+        # Polydispersity is forced on and locked in free-form mode. Capturing
+        # that programmatic toggle would push a CheckboxToggleCommand whose undo
+        # unchecks polydispersity while free_form stays True, leaving the now
+        # disabled checkbox unrecoverable.
+        with self.undo_stack.suppressed():
+            self.chkPolydispersity.setEnabled(not isChecked)
+            self.chkPolydispersity.setChecked(isChecked)
 
         # Switch the polydispersity tab into/out of free-form mode
         self.polydispersity_widget.setFreeForm(isChecked)
@@ -1771,8 +1777,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Free-form (ffsi) results carry their own theory/distributions and
         # cannot be recomputed by the kernel, so they complete separately.
-        if hasattr(res, "freeform"):
-            self.fitCompleteFreeForm(res, result[1])
+        # isinstance rather than hasattr: a bumps FResult never carries a
+        # FreeFormResult, and hasattr() is True for any mock or proxy object.
+        if isinstance(getattr(res, "freeform", None), FreeFormResult):
+            self.fitCompleteFreeForm(res, result[1], old_snapshot)
             return
 
         self.chi2 = res.fitness
@@ -1841,7 +1849,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         for plot in poly_plots:
             plot.plot_role = DataRole.ROLE_DELETABLE
 
-    def fitCompleteFreeForm(self, res: Any, elapsed: float) -> None:
+    def fitCompleteFreeForm(self, res: Any, elapsed: float, old_snapshot: dict | None = None) -> None:
         """
         Display results of a free-form (ffsi) inversion.
 
@@ -1859,7 +1867,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         param_dict = self.fitting_controller.paramDictFromResults(res)
         if param_dict is None:
             return
-        self.fitting_controller.updateModelFromList(param_dict)
+        # Capturing these writes would push one ParameterValueCommand per
+        # fitted parameter; the fit is undone as a single FitResultCommand below.
+        with self.undo_stack.suppressed():
+            self.fitting_controller.updateModelFromList(param_dict)
 
         # Hand the backend result to complete1D/complete2D: the 1D/2D dispatch,
         # Q-range sliders, residuals, weighting and plot bookkeeping are shared.
@@ -1872,6 +1883,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         chi2_repr = GuiUtils.formatNumber(self.chi2, high=True)
         self.lblChi2Value.setText(chi2_repr)
+
+        # Push a single FitResultCommand for the whole inversion, as fitComplete does
+        if old_snapshot is not None:
+            new_snapshot = self._get_fit_result_snapshot()
+            if old_snapshot != new_snapshot:
+                self.undo_stack.push(FitResultCommand(old_snapshot, new_snapshot))
+            self.communicator.undoRedoUpdateSignal.emit()
 
     def prepareFitters(self, fitter: Fit | None = None, fit_id: int = 0, weight_increase: int = 1) -> tuple[list[Fit], int]:
         """
@@ -3564,6 +3582,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.polydispersity_widget.lstPoly.itemDelegate().removeErrorColumn()
             FittingUtilities.addPolyHeadersToModel(self.polydispersity_widget.poly_model)
             self.polydispersity_widget.has_poly_error_column = False
+            # the header reset above drops the free-form "N bins" relabel
+            self.polydispersity_widget.updateFreeFormColumns()
 
         # --- magnetism model ---
         if self.magnetism_widget.has_magnet_error_column:

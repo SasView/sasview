@@ -243,9 +243,10 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
             old_val = current_details[pos]
             current_details[pos] = value
             bound = "min" if pos == 1 else "max"
-            self._fitting_widget.undo_stack.push(
-                ParameterMinMaxCommand(parameter_name_w, bound, old_val, value)
-            )
+            if not self.free_form:
+                # in free-form mode these are the discretisation range, read
+                # off the table by freeFormBins(), not polydispersity bounds
+                self._fitting_widget.undo_stack.push(ParameterMinMaxCommand(parameter_name_w, bound, old_val, value))
 
         elif model_column == delegate.poly_function:
             # name of the function - just pass
@@ -273,10 +274,11 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
                 p_name = f"{parameter_name}.{associations.get(model_column, 'width')}"
                 old_val = self.logic.kernel_module.getParam(p_name)
                 self.poly_params[p_name] = value
-                self.logic.kernel_module.setParam(p_name, value)
-                self._fitting_widget.undo_stack.push(
-                    ParameterValueCommand(p_name, old_val, value)
-                )
+                if not self.free_form:
+                    # in free-form mode the Npts column is "N bins", consumed by
+                    # freeFormBins(); it is not the kernel's polydispersity npts
+                    self.logic.kernel_module.setParam(p_name, value)
+                    self._fitting_widget.undo_stack.push(ParameterValueCommand(p_name, old_val, value))
 
                 # Update plot
                 self.updateDataSignal.emit()
