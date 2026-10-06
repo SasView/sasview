@@ -28,6 +28,7 @@ Once you have instantiated an object which you needs to be tracked in the Data M
   data_manager.add_data(data)
 
 To create an association between two data, you can use the ``make_association`` method::
+
   data_manager.make_association(data1, data2)
 
-Both `data1`, and `data2` must be tracked in the data manager before you can make an association between them. Additionally, the ``data_manager`` module contains ``valid_associations`` which is a list of pairs. If there is no pair for `data1`, and `data2`, `make_association` will fail with a `ValueError`.
+Both ``data1``, and ```data2`` must be tracked in the data manager before you can make an association between them. Additionally, the ``data_manager`` module contains ``valid_associations`` which is a list of pairs. If there is no pair for ``data1``, and ``data2``, ``make_association`` will fail with a ``ValueError``.
