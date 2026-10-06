@@ -353,11 +353,12 @@ class PluginDefinition(QtWidgets.QDialog, Ui_PluginDefinition):
         :param widget: The widget to search from
         :return: The parent table widget if found, None otherwise
         """
-        parent = widget
-        while parent is not None:
-            if parent is self.tblParams or parent is self.tblParamsPD:
-                return parent  # type: ignore[return-value]
-            parent = parent.parent()
+        # Note: use isAncestorOf() rather than walking widget.parent(), since
+        # unrelated widgets in the application may shadow QObject.parent with
+        # an attribute of their own.
+        for table in (self.tblParams, self.tblParamsPD):
+            if widget is table or table.isAncestorOf(widget):
+                return table
         return None
 
     def _commitEditorData(self, table: QtWidgets.QTableWidget, editor_widget: QtWidgets.QWidget):
@@ -418,6 +419,11 @@ class PluginDefinition(QtWidgets.QDialog, Ui_PluginDefinition):
         if event.type() != QtCore.QEvent.KeyPress:
             return super(PluginDefinition, self).eventFilter(obj, event)
 
+        # The filter is application-wide, so ignore everything unless this
+        # editor is actually on screen.
+        if not self.isVisible():
+            return super(PluginDefinition, self).eventFilter(obj, event)
+
         # Handle Enter/Return key press
         if event.key() not in (QtCore.Qt.Key_Return, QtCore.Qt.Key_Enter):
             return super(PluginDefinition, self).eventFilter(obj, event)
@@ -440,6 +446,15 @@ class PluginDefinition(QtWidgets.QDialog, Ui_PluginDefinition):
 
         # Swallow the event so default handling doesn't also run
         return True
+
+    def closeEvent(self, event: QtCore.QEvent):
+        """
+        Stop filtering application events once the editor is closed
+        """
+        app = QtWidgets.QApplication.instance()
+        if app is not None:
+            app.removeEventFilter(self)
+        super(PluginDefinition, self).closeEvent(event)
 
     def getModel(self) -> dict:
         """
