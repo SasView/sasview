@@ -1015,7 +1015,7 @@ class Plotter2DWidget(PlotterBase):
         coord_str = f"x: {x_str}, y: {y_str}"
         GuiUtils.communicator.statusBarUpdateSignal.emit(coord_str)
 
-class Plotter2D(QtWidgets.QDialog, Plotter2DWidget):
+class Plotter2D(Plotter2DWidget):
     """
     Plotter widget implementation
     """
@@ -1024,10 +1024,3 @@ class Plotter2D(QtWidgets.QDialog, Plotter2DWidget):
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/res/ball.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.setWindowIcon(icon)
-
-    def closeEvent(self, event):
-        """
-        QDialog precedes Plotter2DWidget in the base classes, so without this override
-        Qt would call QDialog.closeEvent and skip the plot's own clean-up.
-        """
-        Plotter2DWidget.closeEvent(self, event)

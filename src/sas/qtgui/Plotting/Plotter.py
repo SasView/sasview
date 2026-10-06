@@ -1166,17 +1166,10 @@ class PlotterWidget(PlotterBase):
         self.canvas.draw_idle()
 
 
-class Plotter(QtWidgets.QDialog, PlotterWidget):
+class Plotter(PlotterWidget):
     def __init__(self, parent=None, quickplot=False):
 
         PlotterWidget.__init__(self, parent=None, manager=parent, quickplot=quickplot)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/res/ball.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.setWindowIcon(icon)
-
-    def closeEvent(self, event):
-        """
-        QDialog precedes PlotterWidget in the base classes, so without this override
-        Qt would call QDialog.closeEvent and skip the plot's own clean-up.
-        """
-        PlotterWidget.closeEvent(self, event)
