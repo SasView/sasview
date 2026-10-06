@@ -292,12 +292,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         """
         # Stop if we're running
         if self.is_running:
-            self.is_running = False
-            #re-enable the Fit button
-            self.cmdFit.setStyleSheet(BG_DEFAULT)
-            self.cmdFit.setText("Fit")
-            # stop the fitpages
-            self.calc_fit.stop()
+            self.stopFit()
             return
 
         # Find out all tabs to fit
@@ -391,6 +386,24 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         self.cmdFit.setText('Stop fit')
         self.parent.communicator.statusBarUpdateSignal.emit('Fitting started...')
         self.is_running = True
+
+    def stopFit(self):
+        """
+        Attempt to stop the running constrained/simultaneous fit
+        """
+        if not self.is_running:
+            return
+        # stop the fit thread
+        self.calc_fit.stop()
+
+        #re-enable the Fit button
+        self.cmdFit.setStyleSheet(BG_DEFAULT)
+        self.cmdFit.setText("Fit")
+
+        self.is_running = False
+        # re-enable the fit pages participating in the fit
+        self.parent.fittingStoppedSignal.emit(self.getTabsForFit())
+        self.parent.communicator.statusBarUpdateSignal.emit("Fitting cancelled.")
 
     def onHelp(self):
         """
