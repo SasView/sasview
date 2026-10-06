@@ -9,7 +9,7 @@ The Data Manager in SasView is responsible for tracking all data, and its intera
 + Theory items
 + Plots
 
-  The data manager can keep track of associations between data. This means that data can access other data that is associated with. Examples include:
+The data manager can keep track of associations between data. This means that data can access other data that is associated with. Examples include:
 
 + SasData objects associated with plots. In this sense, a plot needs to access a particular SasData object so it can plot it, so an associated is created.
 + Fits can be associated with SasData so that it is clear which data the Fit is fitting.
