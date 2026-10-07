@@ -29,11 +29,21 @@ We firstly need to create the Perspective class::
     def title(self) -> str:
         return "Statistics Perspective"
 
-    # TODO: There are other overrides to set.
+    @property
+    @override
+    def supported_data(self) -> set[type[TrackedData]]:
+        return {SasData}
+
+    @property
+    @override
+    def supports_multiple_data(self) -> bool:
+        return True
 
 For the constructor, we need to take in both the data manager, and the parent widget. These values are then provided when the perspective is created. We don't need to do anything with the parent other than pass it up to the super constructor, as this is just passed to QT for use internally.
 
 The snippet overrides the ``title`` property. This is shown on the data explorer, so its important that you set this to something recognisable.
+
+We also need to specify the data the perspective can accept. Since the perspective will only show statistics for only one ``SasData`` object at a time, we want ``supports_multiple_data`` to be False. And we don't want to accept any other item like a trend, so we keep ``supported_data`` to a set of just the ``SasData`` type.
 
 Remember that the ``Perspective`` class is based on ``QDialog``, so we can now start to add GUI controls to our constructor.::
     def __init__(self, data_manager: NewDataManager, parent: QWidget | None = None):
@@ -49,4 +59,13 @@ Remember that the ``Perspective`` class is based on ``QDialog``, so we can now s
 
 For this example, we've just gone for a simple vertical layout with some labels we're going to set later once we've got some data.
 
-The ```newAssociation`` method is called whenever data (or other objects) are sent to the perspective. Usually, you won't want to perform any calculations at this stage because the user might want to tweak parameters before running them. Instead, this method should be used to update the display of the perspective to reflect the data that just got sent to it.
+The ```newAssociation`` method is called whenever data (or other objects) are sent to the perspective. Usually, you won't want to perform any calculations at this stage because the user might want to tweak parameters before running them. Instead, this method should be used to update the display of the perspective to reflect the data that just got sent to it. So in this example, we just want to make sure the ``self.data_loaded_label`` reflects the name of the data we've just loaded.::
+
+    @override
+    def newAssocation(self):
+        datum = cast(SasData, self.associatedData[0])
+        self.data_loaded_label.setText(datum.name)
+
+ Notice in particular how we're accessing the data. As discussed in the data manager documentation, the data manager has to be the single source of truth for all data in SasView. As such, we shouldn't be keeping a copy of the data internally. Instead, we use the handy `associatedData` property which is defined in the `Perspective` base class. To keep type checkers happy, we also cast it to `SasData`, because we know through the `supported_data` property we defined earlier that `associatedData` will only contain a `SasData` object.
+
+
