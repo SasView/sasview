@@ -43,9 +43,9 @@ For the constructor, we need to take in both the data manager, and the parent wi
 
 The snippet overrides the ``title`` property. This is shown on the data explorer, so its important that you set this to something recognisable.
 
-We also need to specify the data the perspective can accept. Since the perspective will only show statistics for only one ``SasData`` object at a time, we want ``supports_multiple_data`` to be False. And we don't want to accept any other item like a trend, so we keep ``supported_data`` to a set of just the ``SasData`` type.
+We also need to specify the data the perspective can accept. Since the perspective will show statistics for only one ``SasData`` object at a time, we want ``supports_multiple_data`` to be ``False``. And we don't want to accept any other item like a ``Trend``, so we keep ``supported_data`` to a set of just the ``SasData`` type.
 
-Remember that the ``Perspective`` class is based on ``QDialog``, so we can now start to add GUI controls to our constructor.::
+Remember that the ``Perspective`` class is based on ``QDialog``, so we can now start to add our layout alongside other GUI controls to our constructor.::
     def __init__(self, data_manager: NewDataManager, parent: QWidget | None = None):
         super().__init__(data_manager, parent)
 
