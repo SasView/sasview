@@ -74,4 +74,6 @@ Now, for the perspective to appear in the data explorer, we need to add it to th
 
   "Statistics Tutorial Perspective": StatisticsPerspective
 
+The name on the left hand side will be seen when the user creates the new perspective. 
+
 
