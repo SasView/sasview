@@ -24,6 +24,7 @@ from sas.data_explorer_tree import DataExplorerTree
 from sas.data_manager import NewDataManager as DataManager
 from sas.dummy_perspective import DummyPerspective
 from sas.qtgui.Utilities.MuMag.MuMag import MuMag
+from sas.tutorial_perspectives.statistics_perspective import StatisticsPerspective
 from sas.refactored import Perspective
 
 # TODO: Eventually, the values (should) never be None.
@@ -35,6 +36,7 @@ perspectives: dict[str, None | Perspective] = {
     "Inversion": None,
     "Dummy": DummyPerspective,
     "Mumag": MuMag,
+    "Statistics Tutorial Perspective": StatisticsPerspective,
 }
 
 
@@ -70,9 +72,7 @@ class NewDataExplorer(QWidget):
 
         self.filter_row = QHBoxLayout()
         filter_names = ["Data", "Perspective", "Theory", "Plot"]
-        self.filter_buttons: dict[str, QPushButton] = {
-            name: QPushButton(name, self) for name in filter_names
-        }
+        self.filter_buttons: dict[str, QPushButton] = {name: QPushButton(name, self) for name in filter_names}
         for widget in self.filter_buttons.values():
             widget.setCheckable(True)
             self.filter_row.addWidget(widget)
