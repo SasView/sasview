@@ -3,6 +3,7 @@ from typing import override, cast
 from PySide6.QtWidgets import QWidget, QLabel, QPushButton, QVBoxLayout
 from sas.data_manager import NewDataManager, TrackedData
 from sas.refactored import Perspective
+import numpy as np
 
 
 # This perspective was made as a worked example for the perspective creation
@@ -20,6 +21,7 @@ class StatisticsPerspective(Perspective):
         self.data_loaded_label = QLabel("No data loaded.")
         self.std_label = QLabel("")
         self.calculate_button = QPushButton("Calculate")
+        self.calculate_button.clicked.connect(self.calculate)
         self.layout = QVBoxLayout(self)
         self.layout.addWidget(self.data_loaded_label)
         self.layout.addWidget(self.std_label)
@@ -44,3 +46,8 @@ class StatisticsPerspective(Perspective):
     def newAssocation(self):
         datum = cast(SasData, self.associatedData[0])
         self.data_loaded_label.setText(datum.name)
+
+    def calculate(self):
+        datum = cast(SasData, self.associatedData[0])
+        self.calculation_value = np.std(datum.ordinate.value)
+        self.std_label.setText(f"std: {str(self.calculation_value)}")
