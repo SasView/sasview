@@ -1,3 +1,5 @@
+from sas import config
+from functools import cached_property
 import logging
 from os.path import basename
 
@@ -49,6 +51,13 @@ perspectives: dict[str, None | type[Perspective]] = {
 class NewDataExplorer(QWidget):
     new_perspective = Signal(object)
 
+    @cached_property
+    def perspectives(self) -> dict[str, None | type[Perspective]]:
+        if config.DEV_MENU:
+            return perspectives | dev_perspectives
+        else:
+            return perspectives
+
     def __init__(self, data_manager: DataManager, parent: QWidget | None = ...) -> None:
         super().__init__(parent)
         self._data_manager = data_manager
@@ -65,7 +74,7 @@ class NewDataExplorer(QWidget):
         # registered somewhere so its easy to add a new one.
         self.add_perspective_button = QComboBox(self)
         self.add_perspective_button.addItem("+ New Perspectives")
-        for p in perspectives:
+        for p in self.perspectives:
             self.add_perspective_button.addItem(p)
         self.add_perspective_button.currentTextChanged.connect(self.add_perspective)
 
@@ -111,10 +120,10 @@ class NewDataExplorer(QWidget):
             return
         to_add = self.add_perspective_button.currentText()
         # TODO: temporary fix for errors until perspectives are re-enabled
-        if not perspectives[to_add]:
+        if not self.perspectives[to_add]:
             return
         # TODO: Placeholder
-        new_perspective_dialog = perspectives[to_add](self._data_manager)
+        new_perspective_dialog = self.perspectives[to_add](self._data_manager)
         self._data_manager.add_data(new_perspective_dialog)
         logging.info(to_add)
         self.add_perspective_button.setCurrentIndex(0)
