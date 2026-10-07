@@ -1,6 +1,7 @@
-from PySide6.QtWidgets import QWidget
-from sas.qtgui.MainWindow.DataManager import DataManager
-from sas.qtgui.Perspectives.perspective import Perspective
+from typing import override
+from PySide6.QtWidgets import QWidget, QLabel, QPushButton, QVBoxLayout
+from sas.data_manager import NewDataManager
+from sas.refactored import Perspective
 
 
 # This perspective was made as a worked example for the perspective creation
@@ -12,8 +13,16 @@ from sas.qtgui.Perspectives.perspective import Perspective
 # tutorial. After making changes, you should check the tutorial to make sure it
 # matches what is here.
 class StatisticsPerspective(Perspective):
-    def __init__(self, data_manager: DataManager, parent: QWidget | None = None):
+    def __init__(self, data_manager: NewDataManager, parent: QWidget | None = None):
         super().__init__(data_manager, parent)
+
+        self.data_loaded_label = QLabel("No data loaded.")
+        self.std_label = QLabel("")
+        self.calculate_button = QPushButton("Calculate")
+        self.layout = QVBoxLayout(self)
+        self.layout.addWidget(self.data_loaded_label)
+        self.layout.addWidget(self.std_label)
+        self.layout.addWidget(self.calculate_button)
 
     @property
     @override
