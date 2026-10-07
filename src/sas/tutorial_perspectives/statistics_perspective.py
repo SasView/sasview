@@ -1,6 +1,7 @@
-from typing import override
+from sasdata.data import SasData
+from typing import override, cast
 from PySide6.QtWidgets import QWidget, QLabel, QPushButton, QVBoxLayout
-from sas.data_manager import NewDataManager
+from sas.data_manager import NewDataManager, TrackedData
 from sas.refactored import Perspective
 
 
@@ -28,3 +29,18 @@ class StatisticsPerspective(Perspective):
     @override
     def title(self) -> str:
         return "Statistics Perspective"
+
+    @property
+    @override
+    def supported_data(self) -> set[type[TrackedData]]:
+        return {SasData}
+
+    @property
+    @override
+    def supports_multiple_data(self) -> bool:
+        return False
+
+    @override
+    def newAssocation(self):
+        datum = cast(SasData, self.associatedData[0])
+        self.data_loaded_label.setText(datum.name)
