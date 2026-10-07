@@ -68,6 +68,6 @@ The ```newAssociation`` method is called whenever data (or other objects) are se
         datum = cast(SasData, self.associatedData[0])
         self.data_loaded_label.setText(datum.name)
 
- Notice in particular how we're accessing the data. As discussed in the data manager documentation, the data manager has to be the single source of truth for all data in SasView. As such, we shouldn't be keeping a copy of the data internally. Instead, we use the handy ``associatedData`` property which is defined in the ``Perspective`` base class. To keep type checkers happy, we also cast it to ``SasData``, because we know through the ``supported_data`` property we defined earlier that ``associatedData`` will only contain a ``SasData`` object.
+Notice in particular how we're accessing the data. As discussed in the data manager documentation, the data manager has to be the single source of truth for all data in SasView. As such, we shouldn't be keeping a copy of the data internally. Instead, we use the handy ``associatedData`` property which is defined in the ``Perspective`` base class. To keep type checkers happy, we also cast it to ``SasData``, because we know through the ``supported_data`` property we defined earlier that ``associatedData`` will only contain a ``SasData`` object.
 
 
