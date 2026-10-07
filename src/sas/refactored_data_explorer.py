@@ -25,6 +25,7 @@ from sas.data_manager import NewDataManager as DataManager
 from sas.dummy_perspective import DummyPerspective
 from sas.qtgui.Perspectives.Inversion.InversionWidget import InversionWidget
 from sas.qtgui.Utilities.MuMag.MuMag import MuMag
+from sas.tutorial_perspectives.statistics_perspective import StatisticsPerspective
 from sas.refactored import Perspective, TrackedPlot
 
 # TODO: Eventually, the values (should) never be None.
@@ -36,6 +37,7 @@ perspectives: dict[str, None | Perspective] = {
     "Inversion": InversionWidget,
     "Dummy": DummyPerspective,
     "Mumag": MuMag,
+    "Statistics Tutorial Perspective": StatisticsPerspective,
 }
 
 
