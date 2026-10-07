@@ -27,16 +27,20 @@ from sas.qtgui.Utilities.MuMag.MuMag import MuMag
 from sas.tutorial_perspectives.statistics_perspective import StatisticsPerspective
 from sas.refactored import Perspective
 
+# This list is for perspectives that are just used for testing purposes. The
+# user will only see them if they've enabled DEVMENU in the config.
+dev_perspectives: dict[str, type[Perspective]] = {
+    "Dummy": DummyPerspective,
+    "Statistics Tutorial Perspective": StatisticsPerspective,
+}
+
 # TODO: Eventually, the values (should) never be None.
-# FIXME: Linter is complaining about DummyPew
-perspectives: dict[str, None | Perspective] = {
+perspectives: dict[str, None | type[Perspective]] = {
     "Corfunc": None,
     "Fitting": None,
     "Invariant": None,
     "Inversion": None,
-    "Dummy": DummyPerspective,
     "Mumag": MuMag,
-    "Statistics Tutorial Perspective": StatisticsPerspective,
 }
 
 
