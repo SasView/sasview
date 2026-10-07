@@ -35,6 +35,18 @@ For the constructor, we need to take in both the data manager, and the parent wi
 
 The snippet overrides the ``title`` property. This is shown on the data explorer, so its important that you set this to something recognisable.
 
-Remember that the ``Perspective`` class is based on ``QDialog``, so we can now start to add GUI controls to our constructor.
+Remember that the ``Perspective`` class is based on ``QDialog``, so we can now start to add GUI controls to our constructor.::
+    def __init__(self, data_manager: NewDataManager, parent: QWidget | None = None):
+        super().__init__(data_manager, parent)
+
+        self.data_loaded_label = QLabel("No data loaded.")
+        self.std_label = QLabel("")
+        self.calculate_button = QPushButton("Calculate")
+        self.layout = QVBoxLayout(self)
+        self.layout.addWidget(self.data_loaded_label)
+        self.layout.addWidget(self.std_label)
+        self.layout.addWidget(self.calculate_button)
+
+For this example, we've just gone for a simple vertical layout with some labels we're going to set later once we've got some data.
 
 The ```newAssociation`` method is called whenever data (or other objects) are sent to the perspective. Usually, you won't want to perform any calculations at this stage because the user might want to tweak parameters before running them. Instead, this method should be used to update the display of the perspective to reflect the data that just got sent to it.
