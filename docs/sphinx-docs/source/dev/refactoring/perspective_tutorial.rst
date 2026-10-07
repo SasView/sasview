@@ -19,6 +19,7 @@ Worked example
 In this example, we will create a perspective which will take in one SasData object, and display some data metrics about it. The metrics won't be that interesting for small angle scattering data, but this is mostly just to give an example of how we would turn this into a perspective.
 
 We firstly need to create the Perspective class::
+
     class StatisticsPerspective(Perspective):
         def __init__(self, data_manager: DataManager, parent: QWidget | None = None) -> None:
             super().__init__(data_manager, parent)
@@ -46,6 +47,7 @@ The snippet overrides the ``title`` property. This is shown on the data explorer
 We also need to specify the data the perspective can accept. Since the perspective will show statistics for only one ``SasData`` object at a time, we want ``supports_multiple_data`` to be ``False``. And we don't want to accept any other item like a ``Trend``, so we keep ``supported_data`` to a set of just the ``SasData`` type.
 
 Remember that the ``Perspective`` class is based on ``QDialog``, so we can now start to add our layout alongside other GUI controls to our constructor.::
+
     def __init__(self, data_manager: NewDataManager, parent: QWidget | None = None):
         super().__init__(data_manager, parent)
 
