@@ -303,9 +303,6 @@ class InversionWidget(Perspective, Ui_PrInversion):
         self.noOfTermsSuggestionButton.setText(str(nterms))
         self.regConstantSuggestionButton.setText(str(alpha))
 
-    def acceptsData(self) -> bool:
-        return self.currentData is None
-
     def threadError(self, error: str):
         logger.error(error)
         # TODO: No function to stop calculation yet.
