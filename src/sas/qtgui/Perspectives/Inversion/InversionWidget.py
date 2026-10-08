@@ -123,6 +123,10 @@ class InversionWidget(Perspective, Ui_PrInversion):
         self.updateGuiValues()
         self.events()
 
+    @property
+    def title(self) -> str:
+        return "Inversion"
+
     def initResult(self) -> InversionResult:
         logic = InversionLogic(self)
         return InversionResult(
