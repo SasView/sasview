@@ -1,3 +1,4 @@
+from sas.qtgui.Perspectives.Inversion.InversionWidget import InversionWidget
 from sasdata.data import SasData
 import logging
 from os.path import basename
@@ -33,7 +34,7 @@ perspectives: dict[str, None | Perspective] = {
     "Corfunc": None,
     "Fitting": None,
     "Invariant": None,
-    "Inversion": None,
+    "Inversion": InversionWidget,
     "Dummy": DummyPerspective,
     "Mumag": MuMag,
 }
