@@ -124,7 +124,7 @@ class InversionWidget(Perspective, Ui_PrInversion):
         self.events()
 
     def initResult(self) -> InversionResult:
-        logic = InversionLogic()
+        logic = InversionLogic(self)
         return InversionResult(
             logic=logic,
             calculator=Invertor(logic),

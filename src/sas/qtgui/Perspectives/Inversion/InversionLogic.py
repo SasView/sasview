@@ -1,3 +1,6 @@
+from typing import cast
+from sasdata.data import SasData
+from sas.qtgui.Perspectives.Inversion.InversionWidget import InversionWidget
 import logging
 
 import numpy as np
@@ -23,29 +26,23 @@ class InversionLogic:
     All the data-related logic. This class deals exclusively with Data1D/2D
     No QStandardModelIndex here.
     """
-    _data_item: QStandardItem | None
+    parent: InversionWidget
 
-    def __init__(self, data_item=None):
-        self._data_item = data_item
-        self.data_is_loaded = False
-        if data_item is not None:
-            self.data_is_loaded = True
+    def __init__(self, parent: InversionWidget):
+        self.parent = parent
         self.qmin = 0.0
         self.qmax = np.inf
 
-    @property
-    def data_item(self) -> QStandardItem | None:
-        return self._data_item
 
     @property
-    def data(self) -> Data1D:
-        return dataFromItem(self._data_item)
+    def data_is_loaded(self) -> bool:
+        return self.parent.associatedSasData is not None
 
-    @data.setter
-    def data(self, value: QStandardItem):
-        """ data setter """
-        self._data_item = value
-        self.data_is_loaded = (self._data_item is not None)
+    @property
+    def data(self) -> SasData:
+        if not self.data_is_loaded:
+            raise ValueError("No data has been loaded into Inversion.")
+        return cast(SasData, self.parent.associatedSasData)
 
     def isLoadedData(self):
         """ accessor """
