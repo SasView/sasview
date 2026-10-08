@@ -797,7 +797,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                     _safe_update_model(WIDGETS.W_LOWQ_POWER_VALUE_EX, power_low)
 
             if high_success:
-                qmax_plot = float(self.extrapolation_parameters.point_3)
+                qmax_plot = float(self.extrapolation_parameters.ex_q_max)
                 power_high = self._calculator.get_extrapolation_power(range="high")
                 high_out_data = self._calculator.get_extra_data_high(q_end=qmax_plot, npts=500)
                 title = f"High-Q extrapolation [{self._data.name}]"
