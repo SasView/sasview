@@ -68,7 +68,9 @@ SASMODELS_DEV_TARGET = STAGING / "dev" / "sasmodels-dev"
 SASMODELS_GUIDE_SOURCE = SASMODELS_DOCS / "guide"
 SASMODELS_GUIDE_TARGET = PERSPECTIVES_TARGET / "Fitting"
 SASMODELS_GUIDE_EXCLUDE = [
-    "index.rst", "install.rst", "intro.rst",
+    "index.rst",
+    "install.rst",
+    "intro.rst",
 ]
 
 # sasdata paths
@@ -80,16 +82,14 @@ SASDATA_GUIDE_TARGET = STAGING / "user" / "data"
 
 
 def inplace_change(filename, old_string, new_string):
-
     with open(filename, encoding="UTF-8") as f:
         s = f.read()
 
     if old_string in s:
-
         print(f'Changing "{old_string}" to "{new_string}" in {filename}')
 
         s = s.replace(old_string, new_string)
-        with open(filename, 'w', encoding="UTF-8") as f:
+        with open(filename, "w", encoding="UTF-8") as f:
             f.write(s)
 
     else:
@@ -99,7 +99,7 @@ def inplace_change(filename, old_string, new_string):
 def _remove_dir(dir_path):
     """Removes the given directory."""
     if dir_path.is_dir():
-        print(f"Removing \"{dir_path}\"... ")
+        print(f'Removing "{dir_path}"... ')
         shutil.rmtree(dir_path)
 
 
@@ -149,12 +149,12 @@ def retrieve_user_docs():
     # Copy documentation files from sas/.../media to the sphinx directory
     for root, dirs, _ in os.walk(SASVIEW_MEDIA_SOURCE):
         # CRUFT: from 3.12, use SASVIEW_MEDIA_SOURCE.walk()
-        if 'media' in dirs:
+        if "media" in dirs:
             source_dir = (Path(root) / "media").resolve()
             relative = source_dir.relative_to(SASVIEW_MEDIA_SOURCE).parent
             dest_dir = STAGING / "user" / relative
 
-            print(f"Found sasview docs folder at \"{relative}\".")
+            print(f'Found sasview docs folder at "{relative}".')
             shutil.copytree(source_dir, dest_dir, dirs_exist_ok=True)
 
     print("=== Sasmodels Docs ===")
