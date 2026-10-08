@@ -132,6 +132,10 @@ class InversionWidget(Perspective, Ui_PrInversion):
         self._rebaseline_undo_state()
         self.undo_stack.clear()
 
+    @property
+    def title(self) -> str:
+        return "Inversion"
+
     def initResult(self) -> InversionResult:
         logic = InversionLogic(self)
         return InversionResult(
