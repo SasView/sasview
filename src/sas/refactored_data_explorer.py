@@ -1,6 +1,5 @@
-from sas import config
-from functools import cached_property
 import logging
+from functools import cached_property
 from os.path import basename
 
 from PySide6.QtCore import Signal, Slot
@@ -20,14 +19,15 @@ from sasdata.temp_ascii_reader import load_data_default_params as load_ascii_dat
 from sasdata.temp_hdf5_reader import load_data as load_hdf5_data
 from sasdata.temp_xml_reader import load_data as load_xml_data
 
+from sas import config
 from sas.ascii_dialog.dialog import AsciiDialog
 from sas.data_explorer_error_message import DataExplorerErrorMessage
 from sas.data_explorer_tree import DataExplorerTree
 from sas.data_manager import NewDataManager as DataManager
 from sas.dummy_perspective import DummyPerspective
 from sas.qtgui.Utilities.MuMag.MuMag import MuMag
-from sas.tutorial_perspectives.statistics_perspective import StatisticsPerspective
 from sas.refactored import Perspective
+from sas.tutorial_perspectives.statistics_perspective import StatisticsPerspective
 
 # This list is for perspectives that are just used for testing purposes. The
 # user will only see them if they've enabled DEVMENU in the config.

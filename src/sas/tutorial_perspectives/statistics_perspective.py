@@ -1,9 +1,12 @@
+from typing import cast, override
+
+import numpy as np
+from PySide6.QtWidgets import QLabel, QPushButton, QVBoxLayout, QWidget
+
 from sasdata.data import SasData
-from typing import override, cast
-from PySide6.QtWidgets import QWidget, QLabel, QPushButton, QVBoxLayout
+
 from sas.data_manager import NewDataManager, TrackedData
 from sas.refactored import Perspective
-import numpy as np
 
 
 # This perspective was made as a worked example for the perspective creation
