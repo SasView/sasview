@@ -1,9 +1,10 @@
+from sasdata.data import SasData
 from sas.data_manager import NewDataManager
-from sas.refactored import FitModelParameters, Perspective
+from sas.refactored import FitModelParameters, Perspective, TrackedData
 
 import logging
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, override, TYPE_CHECKING
 
 from PySide6.QtCore import Signal
 from PySide6.QtGui import QIntValidator, QStandardItem
@@ -124,8 +125,21 @@ class InversionWidget(Perspective, Ui_PrInversion):
         self.events()
 
     @property
+    @override
     def title(self) -> str:
         return "Inversion"
+
+    @property
+    @override
+    def supported_data(self) -> set[type[TrackedData]]:
+        return {SasData}
+
+    @property
+    @override
+    def supports_multiple_data(self) -> bool:
+        # TODO: Eventually we'll want this to be true for batch mode. At the
+        # moment, we're not going to support batch mode.
+        return False
 
     def initResult(self) -> InversionResult:
         logic = InversionLogic(self)
