@@ -1,4 +1,5 @@
 import logging
+from functools import cached_property
 from os.path import basename
 
 from PySide6.QtCore import Signal, Slot
@@ -18,6 +19,7 @@ from sasdata.temp_ascii_reader import load_data_default_params as load_ascii_dat
 from sasdata.temp_hdf5_reader import load_data as load_hdf5_data
 from sasdata.temp_xml_reader import load_data as load_xml_data
 
+from sas import config
 from sas.ascii_dialog.dialog import AsciiDialog
 from sas.data_explorer_error_message import DataExplorerErrorMessage
 from sas.data_explorer_tree import DataExplorerTree
@@ -25,15 +27,21 @@ from sas.data_manager import NewDataManager as DataManager
 from sas.dummy_perspective import DummyPerspective
 from sas.qtgui.Utilities.MuMag.MuMag import MuMag
 from sas.refactored import Perspective
+from sas.tutorial_perspectives.statistics_perspective import StatisticsPerspective
+
+# This list is for perspectives that are just used for testing purposes. The
+# user will only see them if they've enabled DEVMENU in the config.
+dev_perspectives: dict[str, type[Perspective]] = {
+    "Dummy": DummyPerspective,
+    "Statistics Tutorial Perspective": StatisticsPerspective,
+}
 
 # TODO: Eventually, the values (should) never be None.
-# FIXME: Linter is complaining about DummyPew
-perspectives: dict[str, None | Perspective] = {
+perspectives: dict[str, None | type[Perspective]] = {
     "Corfunc": None,
     "Fitting": None,
     "Invariant": None,
     "Inversion": None,
-    "Dummy": DummyPerspective,
     "Mumag": MuMag,
 }
 
@@ -42,6 +50,13 @@ perspectives: dict[str, None | Perspective] = {
 # shouldn't have that name.
 class NewDataExplorer(QWidget):
     new_perspective = Signal(object)
+
+    @cached_property
+    def visible_perspectives(self) -> dict[str, None | type[Perspective]]:
+        if config.DEV_MENU:
+            return perspectives | dev_perspectives
+        else:
+            return perspectives
 
     def __init__(self, data_manager: DataManager, parent: QWidget | None = ...) -> None:
         super().__init__(parent)
@@ -59,7 +74,7 @@ class NewDataExplorer(QWidget):
         # registered somewhere so its easy to add a new one.
         self.add_perspective_button = QComboBox(self)
         self.add_perspective_button.addItem("+ New Perspectives")
-        for p in perspectives:
+        for p in self.visible_perspectives:
             self.add_perspective_button.addItem(p)
         self.add_perspective_button.currentTextChanged.connect(self.add_perspective)
 
@@ -70,9 +85,7 @@ class NewDataExplorer(QWidget):
 
         self.filter_row = QHBoxLayout()
         filter_names = ["Data", "Perspective", "Theory", "Plot"]
-        self.filter_buttons: dict[str, QPushButton] = {
-            name: QPushButton(name, self) for name in filter_names
-        }
+        self.filter_buttons: dict[str, QPushButton] = {name: QPushButton(name, self) for name in filter_names}
         for widget in self.filter_buttons.values():
             widget.setCheckable(True)
             self.filter_row.addWidget(widget)
@@ -107,10 +120,10 @@ class NewDataExplorer(QWidget):
             return
         to_add = self.add_perspective_button.currentText()
         # TODO: temporary fix for errors until perspectives are re-enabled
-        if not perspectives[to_add]:
+        if not self.visible_perspectives[to_add]:
             return
         # TODO: Placeholder
-        new_perspective_dialog = perspectives[to_add](self._data_manager)
+        new_perspective_dialog = self.visible_perspectives[to_add](self._data_manager)
         self._data_manager.add_data(new_perspective_dialog)
         logging.info(to_add)
         self.add_perspective_button.setCurrentIndex(0)
