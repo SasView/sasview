@@ -1,6 +1,5 @@
-from typing import cast
+from typing import cast, TYPE_CHECKING
 from sasdata.data import SasData
-from sas.qtgui.Perspectives.Inversion.InversionWidget import InversionWidget
 import logging
 
 import numpy as np
@@ -8,6 +7,9 @@ from PySide6.QtGui import QStandardItem
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Utilities.GuiUtils import dataFromItem
+
+if TYPE_CHECKING:
+    from sas.qtgui.Perspectives.Inversion.InversionWidget import InversionWidget
 
 PR_FIT_LABEL = r"$P_{fit}(r)$"
 PR_LOADED_LABEL = r"$P_{loaded}(r)$"
@@ -26,9 +28,9 @@ class InversionLogic:
     All the data-related logic. This class deals exclusively with Data1D/2D
     No QStandardModelIndex here.
     """
-    parent: InversionWidget
+    parent: "InversionWidget"
 
-    def __init__(self, parent: InversionWidget):
+    def __init__(self, parent: "InversionWidget"):
         self.parent = parent
         self.qmin = 0.0
         self.qmax = np.inf
