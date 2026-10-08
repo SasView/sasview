@@ -177,27 +177,6 @@ class InversionWidget(Perspective, Ui_PrInversion):
             self.updateGuiValues()
             self.startEstimateParameters()
 
-    # TODO: Need to verify type hint for data.
-    def updateTab(self, data: HashableStandardItem | list[HashableStandardItem], tab_id: int):
-        self.tab_id = tab_id
-        if isinstance(data, list):
-            self.results = []
-            self.dataList.clear()
-            for datum_item in data:
-                new_result = self.initResult()
-                new_result.logic.data = datum_item
-                datum = dataFromItem(datum_item)
-                self.dataList.addItem(datum.name)
-                self.results.append(new_result)
-        else:
-            self.currentData = data
-            self.dataList.clear()
-            self.dataList.addItem(self.currentData.name)
-        self.dataList.setCurrentIndex(0)
-        self.updateGuiValues()
-        self.enableButtons()
-        self.startEstimateParameters()
-
     @property
     def is_batch(self) -> bool:
         return len(self.results) > 1
@@ -356,7 +335,7 @@ class InversionWidget(Perspective, Ui_PrInversion):
         result.pr_plot.plot_role = DataRole.ROLE_STAND_ALONE
 
         # Data Plot
-        data_plot = result.logic.new1DPlot(self.tab_id, out, pr)
+        # data_plot = result.logic.new1DPlot(self.tab_id, out, pr)
         data_plot.filename = result.logic.data.filename
 
         data_plot.show_q_range_sliders = True
@@ -424,7 +403,6 @@ class InversionWidget(Perspective, Ui_PrInversion):
             self.currentResult.calculator,
             # TODO: no of terms should be somewhere else
             self.currentResult.calculator.noOfTerms,
-            tab_id=[[self.tab_id]],
             error_func=self.threadError,
             completefn=self.calculationCompleted,
             updatefn=None
