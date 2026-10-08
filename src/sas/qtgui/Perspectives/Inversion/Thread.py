@@ -16,7 +16,6 @@ class CalcPr(CalcThread):
         """
         CalcThread.__init__(self, completefn, updatefn, yieldtime, worktime)
         self.pr = pr
-        self.tab_id = tab_id
         self.nfunc = nfunc
         self.error_func = error_func
         self.starttime = 0
