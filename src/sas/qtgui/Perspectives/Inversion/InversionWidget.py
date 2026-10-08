@@ -197,13 +197,6 @@ class InversionWidget(Perspective, Ui_PrInversion):
     def currentDataItem(self) -> QStandardItem | None:
         return self.currentResult.logic.data_item
 
-    @currentData.setter
-    def currentData(self, value: HashableStandardItem | None):
-        self.currentResult.logic.data = value
-        if value is not None:
-            self.onNewData()
-
-
     # TODO: I don't know if 'float' is the right type hint.
     @property
     def q_max(self) -> float:
@@ -213,7 +206,7 @@ class InversionWidget(Perspective, Ui_PrInversion):
     def q_min(self) -> float:
         return self.currentResult.calculator.q_min
 
-    def onNewData(self):
+    def newAssociation(self):
         # FIXME: This mutates the data even for other perspectives.
         self.currentResult.logic.add_errors()
         qmin, qmax = self.currentResult.logic.computeDataRange()
