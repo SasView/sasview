@@ -2,7 +2,7 @@ from sas.refactored_plotting.PlotModifiers import PlotModifier
 from sas.refactored_plotting.SubTabs import SubTabs
 from sas.refactored_plotting.PlotWidget import PlotWidget
 import logging
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 
 # This is ugly but necessary to avoid a cyclic dependency
 from typing import TYPE_CHECKING
@@ -94,11 +94,17 @@ class Theory:
     pass
 
 
-class TrackedFit:
-    # TODO: This class is a placeholder for a fit which can be associated with a
-    # SasData object. Its a separate object in the data explorer which can be
-    # associated with a plot, and some data (it should be associated with both.)
+class FitModelParameters(ABC):
     pass
+
+class TrackedFit:
+    _data_manager: "DataManager"
+    model_parameters: FitModelParameters
+
+    @property
+    def data_being_fitted(self) -> SasData | None:
+        return self._data_manager.get_association_of_type(self, SasData)
+    
 
 class TrackedPlot:
     _data_manager: "DataManager"
