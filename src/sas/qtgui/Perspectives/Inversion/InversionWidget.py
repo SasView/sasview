@@ -1,3 +1,4 @@
+from sas.refactored import FitModelParameters
 
 import logging
 from dataclasses import dataclass
@@ -6,6 +7,8 @@ from typing import Any
 from PySide6.QtCore import Signal
 from PySide6.QtGui import QIntValidator, QStandardItem
 from PySide6.QtWidgets import QWidget
+
+import numpy.typing as npt
 
 from sas.qtgui.Perspectives.Inversion.DMaxExplorerWidget import DmaxWindow
 from sas.qtgui.Perspectives.Inversion.InversionLogic import InversionLogic
@@ -21,6 +24,14 @@ from sas.qtgui.Utilities.GuiUtils import (
     updateModelItemWithPlot,
 )
 from sas.sascalc.pr.invertor import Invertor
+
+class InversionFitModelParameters(FitModelParameters):
+    c_parameters: npt.NDArray
+    # TODO: It would be nice to return something which says what these
+    # parameters actually are, but I can't find what each one means.
+
+    def __init__(self, params: npt.NDArray):
+        self.c_parameters = params
 
 
 @dataclass
