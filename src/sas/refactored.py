@@ -1,3 +1,6 @@
+from sas.refactored_plotting.PlotModifiers import PlotModifier
+from sas.refactored_plotting.SubTabs import SubTabs
+from sas.refactored_plotting.PlotWidget import PlotWidget
 import logging
 from abc import abstractmethod
 
@@ -89,4 +92,51 @@ class Theory:
     # at the current SasView codebase, it seems they are all just Data1Ds with
     # nothing else special.
     pass
+
+
+class TrackedFit:
+    # TODO: This class is a placeholder for a fit which can be associated with a
+    # SasData object. Its a separate object in the data explorer which can be
+    # associated with a plot, and some data (it should be associated with both.)
+    pass
+
+class TrackedPlot:
+    _data_manager: "DataManager"
+    plot_widget: SubTabs | None
+
+    def __init__(self, data_manager: "DataManager"):
+        self._data_manager = data_manager
+        self.plot_widget = None
+        
+
+    @property
+    def to_plot(self) -> SasData | None:
+        return self._data_manager.get_association_of_type(self, SasData)
+
+    @property
+    def fit(self) -> TrackedFit | None:
+        return self._data_manager.get_association_of_type(self, TrackedFit)
+
+    @property
+    def modifiers(self) -> list[PlotModifier]:
+        return [assoc for assoc in self._data_manager.get_all_associations(self) if isinstance(assoc, PlotModifier)]
+    
+    @property
+    def formatName(self) -> str:
+        if self.to_plot:
+            return f"Plot of {self.to_plot.name}"
+        else:
+            return "Empty Plot"
+
+    def update_plot(self):
+        # TODO: Check the old window, and remove it if necessary.
+        if self.to_plot:
+            new_plot_widget = SubTabs(self)
+            if self.plot_widget:
+                self._data_manager.replace_plot.emit(self.plot_widget, new_plot_widget)
+            else:
+                self._data_manager.new_plot.emit(new_plot_widget)
+            self.plot_widget = new_plot_widget
+            
+        
 
