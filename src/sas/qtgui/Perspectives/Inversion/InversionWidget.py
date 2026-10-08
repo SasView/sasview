@@ -1,4 +1,5 @@
-from sas.refactored import FitModelParameters
+from sas.data_manager import NewDataManager
+from sas.refactored import FitModelParameters, Perspective
 
 import logging
 from dataclasses import dataclass
@@ -90,21 +91,17 @@ MAX_DIST = 140.0
 
 logger = logging.getLogger(__name__)
 
-class InversionWidget(QWidget, Ui_PrInversion):
+class InversionWidget(Perspective, Ui_PrInversion):
     calculationComplete = Signal()
     batchCalculationOutput = Signal(object)
     estimationComplete = Signal()
     changeBackgroundMode = Signal()
 
-    def __init__(self, window, parent=None, data=None, tab_id=1, tab_name=''):
-        super(InversionWidget, self).__init__()
+    def __init__(self, data_manager: NewDataManager, parent: QWidget | None = None):
+        super().__init__(data_manager, parent)
 
-        self.parent = parent
-        self.window = window
-        self.tab_name = tab_name
-        self.tab_id = tab_id
-
-        self.communicator: Communicate  = self.parent.communicator()
+        # self.tab_name = tab_name
+        # self.tab_id = tab_id
 
         # We're going to use this structure even if we're just dealing with one specific datum. Just that this list
         # would then have one item in it.
@@ -571,4 +568,5 @@ class InversionWidget(QWidget, Ui_PrInversion):
         return self.serialiseResult(self.currentResult)
 
     def onHelp(self):
-        self.window.help()
+        # self.window.help()
+        raise NotImplementedError("Help button not implemented in refactor.")
