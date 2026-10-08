@@ -133,7 +133,7 @@ class InversionWidget(Perspective, Ui_PrInversion):
         self.undo_stack.clear()
 
     def initResult(self) -> InversionResult:
-        logic = InversionLogic()
+        logic = InversionLogic(self)
         return InversionResult(
             logic=logic,
             calculator=Invertor(logic),
