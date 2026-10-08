@@ -772,28 +772,39 @@ class InvariantCalculator:
             properly apply to the data
 
         """
-        self._qstar = self._get_qstar(self._data)
-        self._qstar_err = self._get_qstar_uncertainty(self._data)
-
         if extrapolation is None:
-            return self._qstar
+            self._qstar = self._get_qstar(self._data)
+            self._qstar_err = self._get_qstar_uncertainty(self._data)
 
-        # Compute invariant plus invariant of extrapolated data
-        extrapolation = extrapolation.lower()
-        if extrapolation == "low":
-            qs_low, dqs_low = self.get_qstar_low()
-            qs_hi, dqs_hi = 0, 0
-        elif extrapolation == "high":
-            qs_low, dqs_low = 0, 0
-            qs_hi, dqs_hi = self.get_qstar_high()
-        elif extrapolation == "both":
-            qs_low, dqs_low = self.get_qstar_low()
-            qs_hi, dqs_hi = self.get_qstar_high()
         else:
-            raise ValueError("Extrapolation should be 'low', 'high' or 'both'")
+            # Define the data within the extrapolation limits
+            central_range = slice(self._low_extrapolation_indices[0], self._high_extrapolation_indices[1])
+            central_data = LoaderData1D(
+                x=self._data.x[central_range],
+                y=self._data.y[central_range],
+                dx=self._data.dx[central_range],
+                dy=self._data.dy[central_range]
+                )
 
-        self._qstar += qs_low + qs_hi
-        self._qstar_err = math.sqrt(self._qstar_err * self._qstar_err + dqs_low * dqs_low + dqs_hi * dqs_hi)
+            # Compute invariant plus invariant of extrapolated data
+            qs_central = self._get_qstar(central_data)
+            dqs_central = self._get_qstar_uncertainty(central_data)
+
+            extrapolation = extrapolation.lower()
+            if extrapolation == "low":
+                qs_low, dqs_low = self.get_qstar_low()
+                qs_hi, dqs_hi = 0, 0
+            elif extrapolation == "high":
+                qs_low, dqs_low = 0, 0
+                qs_hi, dqs_hi = self.get_qstar_high()
+            elif extrapolation == "both":
+                qs_low, dqs_low = self.get_qstar_low()
+                qs_hi, dqs_hi = self.get_qstar_high()
+            else:
+                raise ValueError("Extrapolation should be 'low', 'high' or 'both'")
+
+            self._qstar = qs_low + qs_central + qs_hi
+            self._qstar_err = math.sqrt(dqs_low * dqs_low + dqs_central * dqs_central + dqs_hi * dqs_hi)
 
         return self._qstar
 
