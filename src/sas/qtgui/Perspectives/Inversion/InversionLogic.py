@@ -1,11 +1,14 @@
 import logging
+from typing import TYPE_CHECKING, cast
 
 import numpy as np
-from PySide6.QtGui import QStandardItem
 
+from sasdata.data import SasData
 from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Utilities.GuiUtils import dataFromItem
 from sas.sascalc.pr.invertor import Invertor
+
+if TYPE_CHECKING:
+    from sas.qtgui.Perspectives.Inversion.InversionWidget import InversionWidget
 
 PR_FIT_LABEL = r"$P_{fit}(r)$"
 PR_LOADED_LABEL = r"$P_{loaded}(r)$"
@@ -22,29 +25,23 @@ logger = logging.getLogger(__name__)
 class InversionLogic:
     """All the data-related logic. This class deals exclusively with Data1D/2D. No QStandardModelIndex here."""
 
-    _data_item: QStandardItem | None
+    parent: "InversionWidget"
 
-    def __init__(self, data_item: QStandardItem | None = None):
-        self._data_item = data_item
-        self.data_is_loaded: bool = data_item is not None
+    def __init__(self, parent: "InversionWidget"):
+        self.parent = parent
         self.qmin: float = 0.0
         self.qmax: float = np.inf
 
     @property
-    def data_item(self) -> QStandardItem | None:
-        """Return the raw QStandardItem held by this logic instance."""
-        return self._data_item
+    def data_is_loaded(self) -> bool:
+        return self.parent.associatedSasData is not None
 
     @property
-    def data(self) -> Data1D:
-        """Return the Data1D object extracted from the current data item."""
-        return dataFromItem(self._data_item)
-
-    @data.setter
-    def data(self, value: QStandardItem) -> None:
-        """Set the data item and update the loaded flag accordingly."""
-        self._data_item = value
-        self.data_is_loaded = self._data_item is not None
+    def data(self) -> SasData:
+        """Return the SasData associated with the parent widget."""
+        if not self.data_is_loaded:
+            raise ValueError("No data has been loaded into Inversion.")
+        return cast(SasData, self.parent.associatedSasData)
 
     def isLoadedData(self) -> bool:
         """Return whether data has been loaded into this logic instance."""
