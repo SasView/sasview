@@ -177,8 +177,8 @@ def check_platform() -> bool:
             "ERROR: You appear to be running this script outside of Linux. "
             "This script needs to be run on Linux because it needs to check "
             "the contents of the SDK to determine which wheels to pull in, "
-            "and it can only do this on Linux. If you are not on Linux, "
-            "please consult the documentation for advice."
+            "and it can only do this on Linux. If you are using any other "
+            "operating system, please consult the documentation for advice."
         )
         return False
     return True
