@@ -61,18 +61,15 @@ class Invertor:
 
     @property
     def x(self) -> npt.NDArray[np.float64]:
-        """Returns the x values of the data to be inverted."""
-        return self.logic.data.x
+        return self.logic.data.abscissae.axes[0].value
 
     @property
     def y(self) -> npt.NDArray[np.float64]:
-        """Returns the y values of the data to be inverted."""
-        return self.logic.data.y
+        return self.logic.data.ordinate.value
 
     @property
     def err(self) -> npt.NDArray[np.float64]:
-        """Returns the error values of the data to be inverted."""
-        return self.logic.data.dy
+        return self.logic.data.ordinate.standard_error.value
 
     @property
     def npoints(self) -> int:
