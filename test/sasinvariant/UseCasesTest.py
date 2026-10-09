@@ -159,9 +159,10 @@ class TestInvNoResolution:
 
         # Background of zero as that is how the data was created.
         # A different background could cause negative intensities. Leave scale as defaults.
+        num_data_points = len(self.data.x)
         inv = invariant.InvariantCalculator(data=self.data, background=0)
 
-        inv.set_extrapolation(range="high", indices=[-10, -1], function="power_law", power=4)
+        inv.set_extrapolation(range="high", indices=[num_data_points - 10, num_data_points - 1], function="power_law", power=4)
 
         qstar1 = inv.get_qstar(extrapolation="high")
         qstar, _ = inv.get_qstar_with_error(extrapolation="high")
@@ -180,10 +181,11 @@ class TestInvNoResolution:
 
         # Background of zero as that is how the data was created.
         # A different background could cause negative intensities. Leave scale as defaults.
+        num_data_points = len(self.data.x)
         inv = invariant.InvariantCalculator(data=self.data, background=0)
 
         inv.set_extrapolation(range="low", indices=[0, 9], function="guinier")
-        inv.set_extrapolation(range="high", indices=[-10, -1], function="power_law", power=4)
+        inv.set_extrapolation(range="high", indices=[num_data_points - 10, num_data_points - 1], function="power_law", power=4)
 
         qstar1 = inv.get_qstar(extrapolation="both")
         qstar, _ = inv.get_qstar_with_error(extrapolation="both")
@@ -276,9 +278,10 @@ class TestInvPinholeSmeared:
 
     def test_high_q_power(self):
         """Test the Invariant with a Q^-4 high-Q extrapolation."""
+        num_data_points = len(self.data.x)
         inv = invariant.InvariantCalculator(data=self.data, background=0)
 
-        inv.set_extrapolation(range="high", indices=[-10, -1], function="power_law", power=4)
+        inv.set_extrapolation(range="high", indices=[num_data_points - 10, num_data_points - 1], function="power_law", power=4)
 
         qstar1 = inv.get_qstar(extrapolation="high")
         qstar, _ = inv.get_qstar_with_error(extrapolation="high")
@@ -293,10 +296,11 @@ class TestInvPinholeSmeared:
 
     def test_high_and_low_q_extrapolation(self):
         """Test the Invariant with both a high- and low-Q extrapolation."""
+        num_data_points = len(self.data.x)
         inv = invariant.InvariantCalculator(data=self.data, background=0)
 
         inv.set_extrapolation(range="low", indices=[0, 9], function="guinier")
-        inv.set_extrapolation(range="high", indices=[-10, -1], function="power_law", power=4)
+        inv.set_extrapolation(range="high", indices=[num_data_points - 10, num_data_points - 1], function="power_law", power=4)
 
         qstar1 = inv.get_qstar(extrapolation="both")
         qstar, _ = inv.get_qstar_with_error(extrapolation="both")
@@ -408,9 +412,10 @@ class TestInvSlitSmear:
         the true theoretical value. Thus here again we adjust the test
         value for the invariant down, this time by 5%.
         """
+        num_data_points = len(self.data_q_smear.x)
         inv = invariant.InvariantCalculator(data=self.data_q_smear, background=0)
 
-        inv.set_extrapolation(range="high", indices=[-10, -1], function="power_law", power=4)
+        inv.set_extrapolation(range="high", indices=[num_data_points - 10, num_data_points - 1], function="power_law", power=4)
 
         qstar1 = inv.get_qstar(extrapolation="high")
         qstar, _ = inv.get_qstar_with_error(extrapolation="high")
@@ -430,10 +435,11 @@ class TestInvSlitSmear:
         so we now again give the true theoretical invariant as the test
         value to compare agains.
         """
+        num_data_points = len(self.data_q_smear.x)
         inv = invariant.InvariantCalculator(data=self.data_q_smear, background=0)
 
         inv.set_extrapolation(range="low", indices=[0, 9], function="guinier")
-        inv.set_extrapolation(range="high", indices=[-10, -1], function="power_law", power=4)
+        inv.set_extrapolation(range="high", indices=[num_data_points - 10, num_data_points - 1], function="power_law", power=4)
 
         qstar1 = inv.get_qstar(extrapolation="low")
         qstar, _ = inv.get_qstar_with_error(extrapolation="low")

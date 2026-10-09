@@ -14,6 +14,7 @@ class TestInvariantCalculator:
     @pytest.fixture(autouse=True)
     def setup(self, real_data):
         self.data = real_data
+        self.num_data_points = len(real_data.x)
 
     def test_initial_data_processing(self):
         """
@@ -89,7 +90,7 @@ class TestInvariantCalculator:
         inv = invariant.InvariantCalculator(self.data)
         qstar, dqstar = inv.get_qstar_with_error()
 
-        inv.set_extrapolation("high", indices=[-95, -1], function="power_law")
+        inv.set_extrapolation("high", indices=[self.num_data_points - 95, self.num_data_points - 1], function="power_law")
         qs_extr, dqs_extr = inv.get_qstar_with_error("high")
         delta_qs_extr, delta_dqs_extr = inv.get_qstar_high()
 
@@ -104,7 +105,7 @@ class TestInvariantCalculator:
     def configured_inv(self):
         inv = invariant.InvariantCalculator(self.data)
         inv.set_extrapolation("low", indices=[0, 9], function="guinier")
-        inv.set_extrapolation("high", indices=[-21, -1], function="power_law")
+        inv.set_extrapolation("high", indices=[self.num_data_points - 21, self.num_data_points - 1], function="power_law")
         return inv
 
     def test_qstar_both_extrapolation(self, configured_inv):
@@ -268,7 +269,7 @@ class TestInvariantCalculator:
     def test_get_extra_data_high_invalid_range_returns_empty(self):
         """High-Q extra data returns empty arrays when q_end is before q_start."""
         inv = invariant.InvariantCalculator(self.data)
-        inv.set_extrapolation("high", indices=[-21, -1], function="power_law")
+        inv.set_extrapolation("high", indices=[self.num_data_points - 21, self.num_data_points - 1], function="power_law")
         q_start = inv._data.x[inv._high_extrapolation_indices[0]]
         x_out, y_out = inv.get_extra_data_high(q_end=q_start, npts=20)
 
@@ -307,7 +308,7 @@ class TestInvariantCalculator:
         """get_extrapolation_power should return stored fitted values for both ranges."""
         inv = invariant.InvariantCalculator(self.data)
         inv.set_extrapolation("low", indices=[0, 9], function="guinier")
-        inv.set_extrapolation("high", indices=[-21, -1], function="power_law")
+        inv.set_extrapolation("high", indices=[self.num_data_points - 21, self.num_data_points - 1], function="power_law")
         _ = inv.get_qstar_with_error("both")
 
         low_power = inv.get_extrapolation_power("low")
@@ -330,8 +331,7 @@ class TestInvariantCalculator:
     def test_qstar_high_with_valid_custom_limit_branch(self):
         """A valid high_q_limit should use the explicit branch in get_qstar_high."""
         inv = invariant.InvariantCalculator(self.data)
-        inv.set_extrapolation("high", indices=[-21, -1], function="power_law")
-        x_len = len(inv._data.x) - 1
+        inv.set_extrapolation("high", indices=[self.num_data_points - 21, self.num_data_points - 1], function="power_law")
         qmin = inv._data.x[inv._high_extrapolation_indices[0]]
         qmax = inv._data.x[inv._high_extrapolation_indices[1]]
         high_q_limit = qmax + (qmax - qmin)

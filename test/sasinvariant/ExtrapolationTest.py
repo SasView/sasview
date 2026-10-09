@@ -90,7 +90,8 @@ class TestDataExtraHighSlitPowerLaw:
     @pytest.fixture(autouse=True)
     def setup(self, power_law_data):
         self.data = power_law_data
-        self.indices = [-21, -1]
+        num_data_points = len(self.data.x)
+        self.indices = [num_data_points - 21, num_data_points - 1]
 
     def test_high_q(self):
         """Test that the power law fit parameters match the known synthetic data."""

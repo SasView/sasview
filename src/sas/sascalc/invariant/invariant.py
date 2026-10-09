@@ -417,7 +417,7 @@ class InvariantCalculator:
         self._low_extrapolation_power: float | None = None
         self._low_extrapolation_power_fitted: float | None = None
 
-        self._high_extrapolation_indices: [int, int] = [-5, -1]
+        self._high_extrapolation_indices: [int, int] = [len(self._data.x) - 5, len(self._data.x) - 1]
         self._high_extrapolation_function: Transform = PowerLaw()
         self._high_extrapolation_power: float | None = None
         self._high_extrapolation_power_fitted: float | None = None
@@ -778,13 +778,16 @@ class InvariantCalculator:
 
         else:
             # Define the data within the extrapolation limits
-            central_range = slice(self._low_extrapolation_indices[0], self._high_extrapolation_indices[1])
+            central_range = slice(self._low_extrapolation_indices[0], self._high_extrapolation_indices[1] + 1)
             central_data = LoaderData1D(
                 x=self._data.x[central_range],
                 y=self._data.y[central_range],
                 dx=self._data.dx[central_range],
                 dy=self._data.dy[central_range]
                 )
+
+            if self._smeared is not None:
+                central_data.dxl = self._data.dxl[central_range]
 
             # Compute invariant plus invariant of extrapolated data
             qs_central = self._get_qstar(central_data)
