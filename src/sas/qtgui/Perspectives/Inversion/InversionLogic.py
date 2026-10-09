@@ -44,7 +44,7 @@ class InversionLogic:
     def data(self) -> SasMeasurement:
         if not self.data_is_loaded:
             raise ValueError("No data has been loaded into Inversion.")
-        return cast(SasMeasurement, self.parent.associatedSasData)
+        return cast(SasMeasurement, self.parent.associatedSasMeasurement)
 
     def isLoadedData(self):
         """ accessor """
