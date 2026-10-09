@@ -115,6 +115,7 @@ class FitModelParameters(ABC):
 class TrackedFit:
     _data_manager: "DataManager"
     model_parameters: FitModelParameters
+    fit: SasMeasurement
 
     @property
     def data_being_fitted(self) -> SasData | None:
