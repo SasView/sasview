@@ -122,6 +122,7 @@ class InversionWidget(Perspective, Ui_PrInversion):
                              self.minQInput, self.maxQInput, self.slitHeightInput, self.slitHeightInput]
 
         self.updateGuiValues()
+        self.enableButtons()
         self.events()
 
     @property
