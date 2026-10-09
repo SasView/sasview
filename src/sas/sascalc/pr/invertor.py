@@ -107,15 +107,15 @@ class Invertor:
 
     @property
     def x(self) -> npt.NDArray[np.float64]:
-        return self.logic.data.x
+        return self.logic.data.abscissae.axes[0].value
 
     @property
     def y(self) -> npt.NDArray[np.float64]:
-        return self.logic.data.y
+        return self.logic.data.ordinate.value
 
     @property
     def err(self) -> npt.NDArray[np.float64]:
-        return self.logic.data.dy
+        return self.logic.data.ordinate.standard_error.value
 
     @property
     def npoints(self) -> int:
