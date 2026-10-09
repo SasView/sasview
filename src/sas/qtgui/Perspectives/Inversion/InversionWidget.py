@@ -128,6 +128,7 @@ class InversionWidget(Perspective, Ui_PrInversion):
         self._undo_baseline: dict | None = None
 
         self.updateGuiValues()
+        self.enableButtons()
         self.events()
         self._setupUndoConnections()
         self._rebaseline_undo_state()
