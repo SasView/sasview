@@ -1,5 +1,7 @@
 import pytest
-from PySide6.QtWidgets import QTableWidgetItem
+from PySide6.QtCore import QEvent, Qt
+from PySide6.QtGui import QKeyEvent
+from PySide6.QtWidgets import QApplication, QLineEdit, QTableWidgetItem, QWidget
 
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 
@@ -156,3 +158,28 @@ class PluginDefinitionTest:
 
         # model dict updated
         assert widget.model['func_text'] == new_model.rstrip()
+
+    def testFindParentTable(self, widget):
+        """The parameter tables must be recognized, and nothing else"""
+        # A widget inside one of the tables
+        assert widget._findParentTable(widget.tblParams) == widget.tblParams
+        assert widget._findParentTable(widget.tblParams.viewport()) == widget.tblParams
+        assert widget._findParentTable(widget.tblParamsPD.viewport()) == widget.tblParamsPD
+
+        # An unrelated widget, in a hierarchy where 'parent' is shadowed by a
+        # non-callable attribute, as done in e.g. the fitting perspective
+        outsider = QWidget()
+        outsider.parent = "not callable"
+        inner = QLineEdit(outsider)
+        assert widget._findParentTable(inner) is None
+
+    def testEventFilterOnForeignWidget(self, widget, mocker):
+        """Enter presses outside the plugin editor must be passed through"""
+        outsider = QWidget()
+        outsider.parent = "not callable"
+        inner = QLineEdit(outsider)
+        mocker.patch.object(QApplication, 'focusWidget', return_value=inner)
+        widget.show()
+
+        event = QKeyEvent(QEvent.KeyPress, Qt.Key_Return, Qt.NoModifier)
+        assert not widget.eventFilter(inner, event)
