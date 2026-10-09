@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, cast
 
 import numpy as np
 
-from sasdata.data import SasData
+from sasdata.data import SasMeasurement
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.sascalc.pr.invertor import Invertor
 
@@ -37,11 +37,11 @@ class InversionLogic:
         return self.parent.associatedSasData is not None
 
     @property
-    def data(self) -> SasData:
-        """Return the SasData associated with the parent widget."""
+    def data(self) -> SasMeasurement:
+        """Return the SasMeasurement associated with the parent widget."""
         if not self.data_is_loaded:
             raise ValueError("No data has been loaded into Inversion.")
-        return cast(SasData, self.parent.associatedSasData)
+        return cast(SasMeasurement, self.parent.associatedSasData)
 
     def isLoadedData(self) -> bool:
         """Return whether data has been loaded into this logic instance."""
