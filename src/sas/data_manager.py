@@ -3,14 +3,14 @@ from typing import TypeVar
 from PySide6.QtCore import QObject, Signal
 from PySide6.QtWidgets import QDialog, QTabWidget
 
-from sasdata.data import SasData
+from sasdata.data import SasData, SasMeasurement
 from sasdata.trend import Trend
 
 from sas.refactored import Perspective, TrackedFit, TrackedPlot
 from sas.refactored_plotting.PlotModifiers import PlotModifier
 
 # TODO: Add plots to this type.
-TrackedData = SasData | Perspective | Trend | TrackedFit | TrackedPlot | PlotModifier
+TrackedData = SasData | SasMeasurement | Perspective | Trend | TrackedFit | TrackedPlot | PlotModifier
 
 T = TypeVar('T')
 
