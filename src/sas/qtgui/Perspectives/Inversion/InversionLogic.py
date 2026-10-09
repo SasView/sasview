@@ -41,7 +41,7 @@ class InversionLogic:
         """Return the SasMeasurement associated with the parent widget."""
         if not self.data_is_loaded:
             raise ValueError("No data has been loaded into Inversion.")
-        return cast(SasMeasurement, self.parent.associatedSasData)
+        return cast(SasMeasurement, self.parent.associatedSasMeasurement)
 
     def isLoadedData(self) -> bool:
         """Return whether data has been loaded into this logic instance."""
