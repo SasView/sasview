@@ -38,7 +38,7 @@ class InversionLogic:
 
     @property
     def data_is_loaded(self) -> bool:
-        return self.parent.associatedSasData is not None
+        return self.parent.associatedSasMeasurement is not None
 
     @property
     def data(self) -> SasMeasurement:
