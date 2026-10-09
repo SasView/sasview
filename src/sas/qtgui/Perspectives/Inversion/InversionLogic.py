@@ -137,8 +137,14 @@ class InversionLogic:
 
         return new_plot
 
-    def add_errors(self, sigma: float = 0.05) -> np.ndarray:
-        """Add errors to the data set if they are not available."""
+    def add_errors(self, sigma=0.05):
+        """
+        Adds errors to data set is they are not available.
+        """
+        if not self.data.ordinate.has_error:
+            raise NotImplementedError("The method for adding errors has not been reimplemented. It previously mutated the data class but this shouldn't be done now.")
+        else:
+            return 
         if self.data.dy is None or self.data.dy.size == 0.0:
             self.data.dy = np.sqrt(np.fabs(self.data.y)) * sigma
 
