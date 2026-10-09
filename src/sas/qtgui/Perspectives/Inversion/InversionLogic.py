@@ -175,21 +175,24 @@ class InversionLogic:
         return the npts contains in data
         """
         qmin, qmax = None, None
-        if isinstance(data, Data1D):
+        if len(self.data.abscissae.axes) == 1:
             try:
-                qmax = max(data.x)
+                qmax = max(self.data.abscissae.axes[0].value)
                 #set q values where Intensity is zero,
                 #to qmax and exclude from minimum accepted q
                 #to avoid dodgy points around beam stop
-                usable_qrange=np.where(data.y <= 0, qmax, data.x)
+                usable_qrange=np.where(self.data.ordinate.value <= 0, qmax, self.data.abscissae.axes[0].value)
                 qmin = min(usable_qrange)
 
             except (ValueError, TypeError):
                 msg = "Unable to find min/max/length of \n data named %s" % \
-                            self.data.filename
+                            self.data.name
                 raise ValueError(msg)
 
         else:
+            # TODO I'm not sure where this was actually being used as Inversion
+            # doesn't support 2D data. We may be able to remove it.
+            raise NotImplementedError("Inversion only supports 1D data.")
             qmin = 0
             try:
                 x = max(np.fabs(data.xmin), np.fabs(data.xmax))
