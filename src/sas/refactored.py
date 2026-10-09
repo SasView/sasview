@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, cast
 
 from PySide6.QtWidgets import QDialog, QWidget
 
-from sasdata.data import SasData
+from sasdata.data import SasData, SasMeasurement
 
 if TYPE_CHECKING:
     from sas.data_manager import NewDataManager as DataManager
@@ -87,14 +87,21 @@ class Perspective(QDialog):
     def associatedData(self) -> list["TrackedData"]:
         return self._data_manager.get_all_associations(self)
 
-    @property
-    def associatedSasData(self) -> SasData | None:
-        if self.supported_data != {SasData} or self.supports_multiple_data:
-            raise ValueError("This property can only be used if the perspective only accepts one SasData object.")
+    def _singleAssociatedItemOfType(self, expected_type: type) -> "TrackedData | None":
+        if self.supported_data != {expected_type} or self.supports_multiple_data:
+            raise ValueError(f"This property can only be used if the perspective only accepts one {expected_type.__name__} object.")
         if len(self.associatedData) == 0:
             return None
-        return cast(SasData, self.associatedData[0])
-    
+        return self.associatedData[0]
+
+    @property
+    def associatedSasData(self) -> SasData | None:
+        return cast(SasData | None, self._singleAssociatedItemOfType(SasData))
+
+    @property
+    def associatedSasMeasurement(self) -> SasMeasurement | None:
+        return cast(SasMeasurement | None, self._singleAssociatedItemOfType(SasMeasurement))
+
 class Theory:
     # TODO: Need to put stuff here that is unique to Theory. Right now, looking
     # at the current SasView codebase, it seems they are all just Data1Ds with
