@@ -1,6 +1,6 @@
 from sasdata.data import SasData
-from sas.data_manager import NewDataManager
-from sas.refactored import FitModelParameters, Perspective, TrackedData
+from sas.data_manager import NewDataManager, TrackedData
+from sas.refactored import FitModelParameters, Perspective
 
 import logging
 from dataclasses import dataclass
