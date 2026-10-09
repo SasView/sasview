@@ -1,4 +1,4 @@
-from sasdata.data import SasData
+from sasdata.data import SasData, SasMeasurement
 from sas.data_manager import NewDataManager, TrackedData
 from sas.refactored import FitModelParameters, Perspective
 
@@ -133,7 +133,7 @@ class InversionWidget(Perspective, Ui_PrInversion):
     @property
     @override
     def supported_data(self) -> set[type[TrackedData]]:
-        return {SasData}
+        return {SasMeasurement}
 
     @property
     @override

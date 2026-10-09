@@ -1,5 +1,5 @@
 from typing import cast, TYPE_CHECKING
-from sasdata.data import SasData
+from sasdata.data import SasData, SasMeasurement
 import logging
 
 import numpy as np
@@ -41,10 +41,10 @@ class InversionLogic:
         return self.parent.associatedSasData is not None
 
     @property
-    def data(self) -> SasData:
+    def data(self) -> SasMeasurement:
         if not self.data_is_loaded:
             raise ValueError("No data has been loaded into Inversion.")
-        return cast(SasData, self.parent.associatedSasData)
+        return cast(SasMeasurement, self.parent.associatedSasData)
 
     def isLoadedData(self):
         """ accessor """
