@@ -14,8 +14,8 @@ Features
 ========
 
 Jump to:
-:ref:`release_6_2_0`
-:ref:`release_6_1_3` | :ref:`release_6_1_2` | :ref:`release_6_1_1` | :ref:`release_6_1_0`
+ | :ref:`release_6_2_1  | :ref:`release_6_2_0`
+ | :ref:`release_6_1_3` | :ref:`release_6_1_2` | :ref:`release_6_1_1` | :ref:`release_6_1_0`
  | :ref:`release_6_0_1` | :ref:`release_6_0_0`
  | :ref:`release_5_0_6` | :ref:`release_5_0_5` | :ref:`release_5_0_4` | :ref:`release_5_0_3` | :ref:`release_5_0_2`
  | :ref:`release_5_0_1` | :ref:`release_5_0_0`
@@ -23,6 +23,44 @@ Jump to:
  | :ref:`release_4_0_1` | :ref:`release_4_0_0`
  | :ref:`release_3_1_2` | :ref:`release_3_1_1` | :ref:`release_3_1_0` | :ref:`release_3_0_0`
  | :ref:`release_2_2_1` | :ref:`release_2_2_0`
+
+.. _release_6_2_1:
+New in Version 6.2.1
+--------------------
+
+This is a minor bug fix release of SasView. It is built with Sasmodels v1.1.0, Sasdata v0.12.2, and Bumps v1.0.5.
+
+Bug fixes
+^^^^^^^^^
+* Metadata tweaks by @jamescrake-merani in https://github.com/SasView/sasview/pull/4075
+* Invariant Perspective Fixes (#4135) by Paul Sharp
+* Merge pull request #4087 from SasView/flatpak-automated-update-script by James Crake-Merani
+* Merge pull request #4110 from SasView/4105-ghost-comboboxes by Paul Butler
+* attempt at fixing #4105 by Piotr Rozyczko
+* Merge pull request #4118 from SasView/3993-categories by Paul Butler
+* Fix typo existant -> existent by Jeff Krzywon
+* Add unit test to ensure random models in the categories file aren't available in the model combobox if they aren't also available in sasmodels by Jeff Krzywon
+* Ensure models listed in categories.json that are not available in sasmodels are not listed in the fitting widget combo boxes. by Jeff Krzywon
+* Merge pull request #4111 from SasView/4109-plugin-model-error by Paul Butler
+* PR fixes from Paul S by Piotr Rozyczko
+* be very careful with app-wide event filters. #4109 by Piotr Rozyczko
+* Merge pull request #4072 from SasView/4071-magnetism-toggle by Jeff Krzywon
+* also clear polydispersity and magnetism when switching categories by Paul Kienzle
+* Add change notice to code saying M0 defaults are now zero by Paul Kienzle
+* Don't calculate magnetic models in magnetism is not toggled. Fixes #4071 by Paul Kienzle
+* Merge pull request #4098 from SasView/3977-varstats-label by Jeff Krzywon
+* VarStats.name -> VarStats.label by Jeff Krzywon
+* Merge pull request #4082 from SasView/4074-composite-model-failure by Jeff Krzywon
+* added unit test by Piotr Rozyczko
+* Refactor What's New widget to avoid manually updating the config (#4086) by Paul Sharp
+* attempting to fix #4047 by rozyczko
+* Updates navigation icons for the What's new window (#4035) by Sujaya Shrestha
+* Merge pull request #4075 from SasView/metadata-tweaks by James Crake-Merani
+* Missing semicolon at the end. by James Crake-Merani
+* Remove redundant info from name. by James Crake-Merani
+* Fix polydispersity plots (#4076) by Paul Sharp
+* Fixes Invariant plot sliders (#3996) by Sujaya Shrestha
+
 
 .. _release_6_2_0:
 New in Version 6.2.0

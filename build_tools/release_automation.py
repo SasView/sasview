@@ -34,9 +34,9 @@ zenodo_url = "https://zenodo.org"
 # Should import release notes from git repo, for now will need to cut and paste
 sasview_data = {
 'metadata': {
-    'title': 'SasView version ',
-    'description': ' release',
-    'related_identifiers': [{'identifier': 'https://github.com/SasView/sasview/releases/tag/v',
+    'title': 'SasView version 6.2.1',
+    'description': '6.2.1 release',
+    'related_identifiers': [{'identifier': 'https://github.com/SasView/sasview/releases/tag/v6.2.1',
                         'relation': 'isAlternateIdentifier', 'scheme': 'url'}],
     'contributors': [],
     'creators': [],
@@ -50,9 +50,9 @@ sasview_data = {
 }
 sasmodels_data = {
 'metadata': {
-    'title': 'SasModels version ',
-    'description': ' release',
-    'related_identifiers': [{'identifier': 'https://github.com/SasView/sasmodels/releases/tag/v',
+    'title': 'SasModels version 1.1.0',
+    'description': '1.1.0 release',
+    'related_identifiers': [{'identifier': 'https://github.com/SasView/sasmodels/releases/tag/v1.1.0',
                         'relation': 'isAlternateIdentifier', 'scheme': 'url'}],
     'contributors': [],
     'creators': [],
@@ -65,9 +65,9 @@ sasmodels_data = {
 }
 sasdata_data = {
 'metadata': {
-    'title': 'SasData version ',
-    'description': ' release',
-    'related_identifiers': [{'identifier': 'https://github.com/SasView/sasdata/releases/tag/v',
+    'title': 'SasData version 0.12.2',
+    'description': '0.12.2 release',
+    'related_identifiers': [{'identifier': 'https://github.com/SasView/sasdata/releases/tag/v0.12.2',
                         'relation': 'isAlternateIdentifier', 'scheme': 'url'}],
     'contributors': [],
     'creators': [],
