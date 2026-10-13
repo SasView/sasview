@@ -1,3 +1,9 @@
+from sasdata.dataset_types import one_dim
+from sasdata.fair_database.data.models import Quantity
+from sasdata.metadata import Metadata
+from sas.sascalc.pr.invertor import Invertor
+from typing import cast, TYPE_CHECKING
+from sasdata.data import SasData, SasMeasurement
 import logging
 from typing import TYPE_CHECKING, cast
 
@@ -47,10 +53,26 @@ class InversionLogic:
         """Return whether data has been loaded into this logic instance."""
         return self.data_is_loaded
 
-    def new1DPlot(
-        self, tab_id: int = 1, out: np.ndarray | None = None, pr: Invertor | None = None, q: np.ndarray | None = None
-    ) -> Data1D:
-        """Create a new 1D data instance based on fitting results."""
+    def generateFitData(self, pr: Invertor) -> SasMeasurement:
+        maxq = cast(float, max(pr.x))
+        minq = cast(float, min(pr.x))
+
+        x = np.arange(minq, maxq, maxq / 301.0)
+        y = pr.iq(pr.out, x)
+
+        fit = SasMeasurement(
+            f"Fit of {self.data.name}",
+            {"Q": Quantity(x, self.data.abscissae.axes[0].units), "I": Quantity(y, self.data.ordinate.units)},
+            one_dim,
+        )
+        return fit
+
+        
+
+    def new1DPlot(self, tab_id=1, out=None, pr=None, q=None):
+        """
+        Create a new 1D data instance based on fitting results
+        """
         qtemp = pr.x
         if q is not None:
             qtemp = q
