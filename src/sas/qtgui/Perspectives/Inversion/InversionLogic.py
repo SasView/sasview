@@ -1,3 +1,7 @@
+from sasdata.dataset_types import one_dim
+from sasdata.fair_database.data.models import Quantity
+from sasdata.metadata import Metadata
+from sas.sascalc.pr.invertor import Invertor
 from typing import cast, TYPE_CHECKING
 from sasdata.data import SasData, SasMeasurement
 import logging
@@ -49,6 +53,22 @@ class InversionLogic:
     def isLoadedData(self):
         """ accessor """
         return self.data_is_loaded
+
+    def generateFitData(self, pr: Invertor) -> SasMeasurement:
+        maxq = cast(float, max(pr.x))
+        minq = cast(float, min(pr.x))
+
+        x = np.arange(minq, maxq, maxq / 301.0)
+        y = pr.iq(pr.out, x)
+
+        fit = SasMeasurement(
+            f"Fit of {self.data.name}",
+            {"Q": Quantity(x, self.data.abscissae.axes[0].units), "I": Quantity(y, self.data.ordinate.units)},
+            one_dim,
+        )
+        return fit
+
+        
 
     def new1DPlot(self, tab_id=1, out=None, pr=None, q=None):
         """
