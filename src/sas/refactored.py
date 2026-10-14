@@ -120,6 +120,10 @@ class TrackedFit:
     @property
     def data_being_fitted(self) -> SasData | None:
         return self._data_manager.get_association_of_type(self, SasData)
+
+    def __init__(self, model_parameters: FitModelParameters, fit_data: SasMeasurement):
+        self.model_parameters = model_parameters
+        self.fit = fit_data
     
 
 class TrackedPlot:
