@@ -119,7 +119,16 @@ class TrackedFit:
 
     @property
     def data_being_fitted(self) -> SasData | None:
-        return self._data_manager.get_association_of_type(self, SasData)
+        return self._data_manager.get_association_of_type(self, SasData)#
+
+    @property
+    def formatName(self) -> str:
+        if self.data_being_fitted:
+            return f"Fit of {self.data_being_fitted.name}"
+        else:
+            # TODO: Could potentially return a more elaborate name of what the
+            # theory object is about.
+            return "Theory"
 
     def __init__(self, data_manager: "DataManager", model_parameters: FitModelParameters, fit_data: SasMeasurement):
         self._data_manager = data_manager
