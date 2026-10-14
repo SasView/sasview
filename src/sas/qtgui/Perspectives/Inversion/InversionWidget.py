@@ -459,8 +459,6 @@ class InversionWidget(Perspective, Ui_PrInversion):
         self.showCurrentPlots()
 
     def makePlots(self, fit_data: SasMeasurement, pr):
-        result = self.currentResult
-        # PR Plot
         fit_parameters = InversionFitModelParameters(pr.out)
         tracked_fit = TrackedFit(self._data_manager, fit_parameters, fit_data)
         self._data_manager.add_data(tracked_fit)
