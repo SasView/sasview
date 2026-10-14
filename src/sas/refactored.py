@@ -121,7 +121,8 @@ class TrackedFit:
     def data_being_fitted(self) -> SasData | None:
         return self._data_manager.get_association_of_type(self, SasData)
 
-    def __init__(self, model_parameters: FitModelParameters, fit_data: SasMeasurement):
+    def __init__(self, data_manager: DataManager, model_parameters: FitModelParameters, fit_data: SasMeasurement):
+        self._data_manager = data_manager
         self.model_parameters = model_parameters
         self.fit = fit_data
     
