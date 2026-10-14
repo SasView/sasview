@@ -466,6 +466,7 @@ class InversionWidget(Perspective, Ui_PrInversion):
         self._data_manager.add_data(plot)
         self._data_manager.make_association(plot, self.associatedSasMeasurement)
         self._data_manager.make_association(plot, tracked_fit)
+        plot.update_plot()
         
 
     def showPlots(self, result: InversionResult):
