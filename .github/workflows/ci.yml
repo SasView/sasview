@@ -479,7 +479,9 @@ jobs:
 
 
       - name: Setup Software Trust Manager
-        if: ${{ startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
+        # if: ${{ startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
+        # Temporarily switch off signing #4160
+        if: false
         uses: digicert/code-signing-software-trust-action@v1
         with:
               simple-signing-mode: true
