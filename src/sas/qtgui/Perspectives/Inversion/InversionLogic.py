@@ -1,5 +1,5 @@
 from sasdata.dataset_types import one_dim
-from sasdata.fair_database.data.models import Quantity
+from sasdata.data import Quantity
 from sasdata.metadata import Metadata
 from sas.sascalc.pr.invertor import Invertor
 from typing import cast, TYPE_CHECKING
