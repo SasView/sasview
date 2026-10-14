@@ -464,7 +464,7 @@ class InversionWidget(Perspective, Ui_PrInversion):
         self._data_manager.add_data(tracked_fit)
         plot = TrackedPlot(self._data_manager)
         self._data_manager.add_data(plot)
-        self._data_manager.make_association(plot, self.associatedSasData)
+        self._data_manager.make_association(plot, self.associatedSasMeasurement)
         self._data_manager.make_association(plot, tracked_fit)
         
 
