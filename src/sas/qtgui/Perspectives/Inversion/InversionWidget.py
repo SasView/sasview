@@ -1,6 +1,6 @@
 from sasdata.data import SasData, SasMeasurement
 from sas.data_manager import NewDataManager, TrackedData
-from sas.refactored import FitModelParameters, Perspective
+from sas.refactored import FitModelParameters, Perspective, TrackedFit, TrackedPlot
 
 import logging
 from dataclasses import dataclass
@@ -334,34 +334,20 @@ class InversionWidget(Perspective, Ui_PrInversion):
         # Previously called these events directly without a signal but it led to
         # QT segfaulting.
         self.calculationComplete.emit()
-        self.makePlots(out, cov, pr, elapsed)
+        self.makePlots(self.currentResult.logic.generateFitData(pr), pr)
         self.showCurrentPlots()
 
-    def makePlots(self, out, cov, pr, elapsed, result=None):
-        if result is None:
-            result = self.currentResult
+    def makePlots(self, fit_data: SasMeasurement, pr):
+        result = self.currentResult
         # PR Plot
-        result.pr_plot = result.logic.newPRPlot(out, pr, cov)
-        result.pr_plot.show_yzero = True
-        result.pr_plot.filename = result.logic.data.filename
-        result.pr_plot.plot_role = DataRole.ROLE_STAND_ALONE
-
-        # Data Plot
-        # data_plot = result.logic.new1DPlot(self.tab_id, out, pr)
-        data_plot.filename = result.logic.data.filename
-
-        data_plot.show_q_range_sliders = True
-        data_plot.slider_update_on_move = False
-        data_plot.slider_perspective_name = "Inversion"
-        data_plot.slider_tab_name = self.tab_name
-        data_plot.slider_low_q_input = ['currentTab', 'minQInput']
-        data_plot.slider_low_q_setter = ['currentTab', 'updateMinQ']
-        data_plot.slider_high_q_input = ['currentTab', 'maxQInput']
-        data_plot.slider_high_q_setter = ['currentTab', 'updateMaxQ']
-        data_plot.symbol = 'Line'
-        data_plot.show_errors = False
-        data_plot.plot_role = DataRole.ROLE_DEFAULT
-        result.data_plot = data_plot
+        fit_parameters = InversionFitModelParameters(pr.out)
+        tracked_fit = TrackedFit(self._data_manager, fit_parameters, fit_data)
+        self._data_manager.add_data(tracked_fit)
+        plot = TrackedPlot(self._data_manager)
+        self._data_manager.add_data(plot)
+        self._data_manager.make_association(plot, self.associatedSasData)
+        self._data_manager.make_association(plot, tracked_fit)
+        
 
     def showPlots(self, result: InversionResult):
         plots = [result.pr_plot, result.data_plot]
