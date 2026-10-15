@@ -115,7 +115,7 @@ class SubTabs(QTabWidget):
                     # The casting here assumes a certain order. Things will
                     # break without that order.
                     dataset = cast(SasMeasurement, plottables[0])
-                    fit = cast(TrackedFit, plottables[1]) if i == 1 else None
+                    fit = cast("TrackedFit", plottables[1]) if i == 1 else None
 
                     # if the dataset is 2d, plotting will be done with a heatmap plot
                     if dataset.dataset_type == two_dim:
