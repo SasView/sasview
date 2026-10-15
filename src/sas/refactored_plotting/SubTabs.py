@@ -156,14 +156,14 @@ class SubTabs(QTabWidget):
                     # if it is not a 2d plot, it must be a 1d plot (line plot)
                     else:
                         # select again for data plot (1), fit plot (2) and residual plot (3)
-                        if i == 0:  # data plot: log-log plot, show only data
-                            ax[j].plot(dataset.abscissae.axes[0].value, dataset.ordinate.value, marker='o', linestyle='')
-                            ax[j].set_yscale('log')
-                            ax[j].set_xscale('log')
-                        elif i == 1:  # fit plot: log-log plot, show fit and data curve
-                            ax[j].plot(dataset.abscissae.axes[0].value, fit.fit.ordinate.value)
-                            ax[j].set_yscale('log')
-                            ax[j].set_xscale('log')
+                        # if i == 0:  # data plot: log-log plot, show only data
+                        ax[j].plot(dataset.abscissae.axes[0].value, dataset.ordinate.value, marker='o', linestyle='')
+                        ax[j].set_yscale('log')
+                        ax[j].set_xscale('log')
+                        if i == 1:  # fit plot: log-log plot, show fit and data curve
+                            ax[j].plot(fit.fit.abscissae.axes[0].value, fit.fit.ordinate.value)
+                            # ax[j].set_yscale('log')
+                            # ax[j].set_xscale('log')
                         # elif plottable.type_num == 3:  # residual plot lin-log plot, show calc and show res only
                         #     ax[j].plot(dataset.x_data, np.subtract(dataset.y_fit, dataset.y_data))
 
