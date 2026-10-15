@@ -106,7 +106,8 @@ class Perspective(QDialog):
 
     @property
     def associatedPlots(self) -> list["TrackedPlot"]:
-        return [data for data in self.associatedData if isinstance(data, TrackedPlot)]
+        return [data for data in self._data_manager.get_all_associations(self)
+                if isinstance(data, TrackedPlot)]
 
 class Theory:
     # TODO: Need to put stuff here that is unique to Theory. Right now, looking
