@@ -104,8 +104,7 @@ class NewDataManager(QObject):
     # associated with the data becuase they will both be removed.
 
     def check_perspective_can_accept_data(self, perspective: Perspective, datum: TrackedData):
-        existing_associations = self.get_all_associations(perspective)
-        if not perspective.supports_multiple_data and len(existing_associations) > 0:
+        if not perspective.supports_multiple_data and len(perspective.associatedData) > 0:
             raise ValueError(f"{perspective.title} doesn't support multiple data being sent to it.")
         supported = False
         for supported_type in perspective.supported_data:
