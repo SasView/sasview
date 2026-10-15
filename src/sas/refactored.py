@@ -85,7 +85,9 @@ class Perspective(QDialog):
 
     @property
     def associatedData(self) -> list["TrackedData"]:
-        return self._data_manager.get_all_associations(self)
+        """Only returns data which is specified in `supported_data`."""
+        return [data for data in self._data_manager.get_all_associations(self)
+                if any(isinstance(data, t) for t in self.supported_data)]
 
     def _singleAssociatedItemOfType(self, expected_type: type) -> "TrackedData | None":
         if self.supported_data != {expected_type} or self.supports_multiple_data:
