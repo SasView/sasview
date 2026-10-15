@@ -347,6 +347,7 @@ class InversionWidget(Perspective, Ui_PrInversion):
         self._data_manager.make_association(plot, self.associatedSasMeasurement)
         self._data_manager.make_association(plot, tracked_fit)
         self._data_manager.make_association(self, plot)
+        self._data_manager.make_association(tracked_fit, self)
         self.showPlotsEvent.emit()
         
 
