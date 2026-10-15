@@ -18,6 +18,7 @@ T = TypeVar('T')
 valid_associations: list[tuple[str | type, str | type]] = [
     ('Perspective', SasData),
     ('Perspective', Trend),
+    ('Perspective', TrackedPlot),
     (Trend, SasData),
     (TrackedPlot, SasData),
     (TrackedPlot, TrackedFit),
