@@ -97,6 +97,7 @@ class InversionWidget(Perspective, Ui_PrInversion):
     batchCalculationOutput = Signal(object)
     estimationComplete = Signal()
     changeBackgroundMode = Signal()
+    showPlotsEvent = Signal()
 
     def __init__(self, data_manager: NewDataManager, parent: QWidget | None = None):
         super().__init__(data_manager, parent)
@@ -168,6 +169,7 @@ class InversionWidget(Perspective, Ui_PrInversion):
         self.helpButton.clicked.connect(self.onHelp)
         self.removeButton.clicked.connect(self.handleRemove)
         self.showResultsButton.clicked.connect(self.handleShowResults)
+        self.showPlotsEvent.connect(self.showPlots)
 
         for input_box in self.input_boxes:
             input_box.editingFinished.connect(self.startEstimateParameters)
@@ -335,7 +337,6 @@ class InversionWidget(Perspective, Ui_PrInversion):
         # QT segfaulting.
         self.calculationComplete.emit()
         self.makePlots(self.currentResult.logic.generateFitData(pr), pr)
-        self.showCurrentPlots()
 
     def makePlots(self, fit_data: SasMeasurement, pr):
         fit_parameters = InversionFitModelParameters(pr.out)
@@ -345,18 +346,14 @@ class InversionWidget(Perspective, Ui_PrInversion):
         self._data_manager.add_data(plot)
         self._data_manager.make_association(plot, self.associatedSasMeasurement)
         self._data_manager.make_association(plot, tracked_fit)
-        plot.update_plot()
+        self.showPlotsEvent.emit()
         
 
-    def showPlots(self, result: InversionResult):
-        plots = [result.pr_plot, result.data_plot]
-        for plot in plots:
-            if plot is not None:
-                updateModelItemWithPlot(result.logic._data_item, plot, plot.name)
-                self.communicator.plotRequestedSignal.emit([result.logic._data_item, plot])
-
-    def showCurrentPlots(self):
-        self.showPlots(self.currentResult)
+    def showPlots(self):
+        print("Showing plots")
+        print(self.associatedPlots)
+        for plot in self.associatedPlots:
+            plot.update_plot()
 
     def updateMinQ(self, new_q_min: float):
         calculator = self.currentResult.calculator
