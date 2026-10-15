@@ -13,7 +13,7 @@ from sas.refactored_plotting.SubTabs import SubTabs
 
 if TYPE_CHECKING:
     from sas.data_manager import NewDataManager as DataManager
-    from sas.data_manager import TrackedData
+    from sas.data_manager import TrackedData, TrackedPlot
 
 # TODO: None of these classes belong in here. This is a temporary location of
 # them so I can sketch out what they should look like.
@@ -101,6 +101,10 @@ class Perspective(QDialog):
     @property
     def associatedSasMeasurement(self) -> SasMeasurement | None:
         return cast(SasMeasurement | None, self._singleAssociatedItemOfType(SasMeasurement))
+
+    @property
+    def associatedPlots(self) -> list["TrackedPlot"]:
+        return [data for data in self.associatedData if isinstance(data, TrackedPlot)]
 
 class Theory:
     # TODO: Need to put stuff here that is unique to Theory. Right now, looking
