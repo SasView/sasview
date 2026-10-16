@@ -15,6 +15,7 @@ from sas.system.version import __version__
 
 from ..Utilities.NewVersion.NewVersionAvailable import maybe_prompt_new_version_download
 from .UI.MainWindowUI import Ui_SasView
+from .WorkspaceManager import WorkspaceManager
 
 logger = logging.getLogger(__name__)
 def log_uncaught_exception(type, value, tb):
@@ -37,6 +38,8 @@ class MainSasViewWindow(QMainWindow, Ui_SasView):
         self.workspace.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.workspace.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.setCentralWidget(self.workspace)
+        # Owner of all workspace windows, attached to the MDI area or detached
+        self.workspace_manager = WorkspaceManager(self.workspace, self)
         QTimer.singleShot(100, self.showMaximized)
         # Temporary solution for problem with menubar on Mac
         if sys.platform == "darwin":  # Mac

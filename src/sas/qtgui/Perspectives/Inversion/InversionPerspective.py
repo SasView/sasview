@@ -206,17 +206,15 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         # Close report widgets before closing/minimizing main widget
         self.closeDMax()
         self.closeBatchResults()
+        # The window hosting the perspective (attached or detached) is owned by the
+        # WorkspaceManager, which disposes of it on an accepted close and minimises
+        # it when the close is refused.
         if self._allowClose:
             # reset the closability flag
             self.setClosable(value=False)
-            # Tell the MdiArea to close the container if it is visible
-            if self.parentWidget():
-                self.parentWidget().close()
             event.accept()
         else:
             event.ignore()
-            # Maybe we should just minimize
-            self.setWindowState(QtCore.Qt.WindowMinimized)
 
     def closeDMax(self) -> None:
         if self.currentTab.dmaxWindow is not None:
