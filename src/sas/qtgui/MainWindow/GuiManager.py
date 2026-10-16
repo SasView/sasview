@@ -1,3 +1,4 @@
+from sasdata.data import SasData
 import logging
 import os
 import sys
@@ -153,7 +154,10 @@ class GuiManager:
         new_association_tuple = (datum1, datum2)
         for perspective in self._data_manager.all_perspectives:
             if perspective in new_association_tuple:
-                perspective.newAssocation()
+                if isinstance(datum2, SasData):
+                    perspective.newData()
+                else:
+                    perspective.newAssocation()
 
         self.filesWidget.tree_view.addAssociation(datum1, datum2)
 

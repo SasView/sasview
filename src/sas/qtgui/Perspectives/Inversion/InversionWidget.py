@@ -212,7 +212,7 @@ class InversionWidget(Perspective, Ui_PrInversion):
         return self.currentResult.calculator.q_min
 
     @override
-    def newAssocation(self):
+    def newData(self):
         # FIXME: This mutates the data even for other perspectives.
         self.currentResult.logic.add_errors()
         qmin, qmax = self.currentResult.logic.computeDataRange()
