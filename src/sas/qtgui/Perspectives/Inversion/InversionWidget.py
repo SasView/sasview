@@ -352,8 +352,6 @@ class InversionWidget(Perspective, Ui_PrInversion):
         
 
     def showPlots(self):
-        print("Showing plots")
-        print(self.associatedPlots)
         for plot in self.associatedPlots:
             plot.update_plot()
 
