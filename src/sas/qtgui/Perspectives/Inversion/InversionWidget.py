@@ -281,8 +281,8 @@ class InversionWidget(Perspective, Ui_PrInversion):
             self.posFractionValue.setText(format_float(out.pos_frac))
             self.sigmaPosFractionValue.setText(format_float(out.pos_err))
 
-        if self.associatedSasData:
-            self.dataNameLabel.setText(self.associatedSasData.name)
+        if self.associatedSasMeasurement:
+            self.dataNameLabel.setText(self.associatedSasMeasurement.name)
 
     def clearGuiValues(self):
 
