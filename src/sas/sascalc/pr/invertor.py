@@ -288,6 +288,8 @@ class Invertor:
         # Reset the background value before proceeding
         # self.background = 0.0
         if not self.est_bck:
+            raise NotImplementedError("Setting background manually is not supported because it mutates the SasData object which we are trying to avoid. This will be implemented later.")
+        if not self.est_bck:
             self.logic.data.y -= self.background
         out, cov = self.lstsq(nfunc, nr=nr)
         if not self.est_bck:
