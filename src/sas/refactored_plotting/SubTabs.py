@@ -109,7 +109,7 @@ class SubTabs(QTabWidget):
                 ax[j].set_title(plot_object.to_plot.name)
 
                 # iterate through plottables and plot modifiers (PlotTreeWidget items)
-                for plot_no in range(len(self.toPlot)):
+                for plot_no in range(i + 1):
                     # check if the plottable or modifier item is a PlottableItem (actual data to be displayed)
                     plottables = self.toPlot[:plot_no+1]
                     # The casting here assumes a certain order. Things will
