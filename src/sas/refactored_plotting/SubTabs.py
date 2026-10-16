@@ -109,80 +109,79 @@ class SubTabs(QTabWidget):
                 ax[j].set_title(plot_object.to_plot.name)
 
                 # iterate through plottables and plot modifiers (PlotTreeWidget items)
-                for plot_no in range(i + 1):
-                    # check if the plottable or modifier item is a PlottableItem (actual data to be displayed)
-                    plottables = self.toPlot[:plot_no+1]
-                    # The casting here assumes a certain order. Things will
-                    # break without that order.
-                    dataset = cast(SasMeasurement, plottables[0])
-                    fit = cast("TrackedFit", plottables[1]) if plot_no == 1 else None
+                # check if the plottable or modifier item is a PlottableItem (actual data to be displayed)
+                plottables = self.toPlot[:i+1]
+                # The casting here assumes a certain order. Things will
+                # break without that order.
+                dataset = cast(SasMeasurement, plottables[0])
+                fit = cast("TrackedFit", plottables[1]) if i == 1 else None
 
-                    # if the dataset is 2d, plotting will be done with a heatmap plot
-                    if dataset.dataset_type == two_dim:
-                        raise NotImplementedError("2D data is not currently supported in plotting.")
-                        # collect a possible existing colormap plot modifier (child item)
-                        # and save it, so that it can be used during plot creation
-                        colormap_modifier = ""
-                        for ii in range(plottable.childCount()):
-                            if isinstance(plottable.child(ii), ModifierColormap):
-                                colormap_modifier = plottable.child(ii).text(0).split('=')[1]
-                        if colormap_modifier == "":
-                            colormap_modifier = "jet"
+                # if the dataset is 2d, plotting will be done with a heatmap plot
+                if dataset.dataset_type == two_dim:
+                    raise NotImplementedError("2D data is not currently supported in plotting.")
+                    # collect a possible existing colormap plot modifier (child item)
+                    # and save it, so that it can be used during plot creation
+                    colormap_modifier = ""
+                    for ii in range(plottable.childCount()):
+                        if isinstance(plottable.child(ii), ModifierColormap):
+                            colormap_modifier = plottable.child(ii).text(0).split('=')[1]
+                    if colormap_modifier == "":
+                        colormap_modifier = "jet"
 
-                        # get the data from the dataset for the plot
-                        x = dataset.x_data
-                        y = dataset.y_data
-                        y_fit = dataset.y_fit
+                    # get the data from the dataset for the plot
+                    x = dataset.x_data
+                    y = dataset.y_data
+                    y_fit = dataset.y_fit
 
-                        # check if the plot is a data plot (4), fit plot (5) or residual plot (6)
-                        if plottable.type_num == 4:
-                            ax[j].pcolor(x[0], x[1], y,
-                                            norm=matplotlib.colors.LogNorm(vmin=np.min(y),
-                                                                        vmax=np.max(y)),
-                                            cmap=colormap_modifier)
-                        elif plottable.type_num == 5:
-                            ax[j].pcolor(x[0], x[1], y_fit,
-                                            norm=matplotlib.colors.LogNorm(vmin=np.min(y_fit),
-                                                                        vmax=np.max(y_fit)),
-                                            cmap=colormap_modifier)
-                        elif plottable.type_num == 6:
-                            y_res = np.absolute(np.subtract(y_fit, y))
-                            ax[j].pcolor(x[0], x[1], y_res,
-                                            norm=matplotlib.colors.LogNorm(vmin=np.min(y_res),
-                                                                        vmax=np.max(y_res)),
-                                            cmap=colormap_modifier)
+                    # check if the plot is a data plot (4), fit plot (5) or residual plot (6)
+                    if plottable.type_num == 4:
+                        ax[j].pcolor(x[0], x[1], y,
+                                        norm=matplotlib.colors.LogNorm(vmin=np.min(y),
+                                                                    vmax=np.max(y)),
+                                        cmap=colormap_modifier)
+                    elif plottable.type_num == 5:
+                        ax[j].pcolor(x[0], x[1], y_fit,
+                                        norm=matplotlib.colors.LogNorm(vmin=np.min(y_fit),
+                                                                    vmax=np.max(y_fit)),
+                                        cmap=colormap_modifier)
+                    elif plottable.type_num == 6:
+                        y_res = np.absolute(np.subtract(y_fit, y))
+                        ax[j].pcolor(x[0], x[1], y_res,
+                                        norm=matplotlib.colors.LogNorm(vmin=np.min(y_res),
+                                                                    vmax=np.max(y_res)),
+                                        cmap=colormap_modifier)
 
-                    # if it is not a 2d plot, it must be a 1d plot (line plot)
-                    else:
-                        # select again for data plot (1), fit plot (2) and residual plot (3)
-                        # if plot_no == 0:  # data plot: log-log plot, show only data
-                        ax[j].plot(dataset.abscissae.axes[0].value, dataset.ordinate.value, marker='o', linestyle='')
-                        ax[j].set_yscale('log')
-                        ax[j].set_xscale('log')
-                        if plot_no == 1:  # fit plot: log-log plot, show fit and data curve
-                            ax[j].plot(fit.fit.abscissae.axes[0].value, fit.fit.ordinate.value)
-                            # ax[j].set_yscale('log')
-                            # ax[j].set_xscale('log')
-                        # elif plottable.type_num == 3:  # residual plot lin-log plot, show calc and show res only
-                        #     ax[j].plot(dataset.x_data, np.subtract(dataset.y_fit, dataset.y_data))
+                # if it is not a 2d plot, it must be a 1d plot (line plot)
+                else:
+                    # select again for data plot (1), fit plot (2) and residual plot (3)
+                    # if i == 0:  # data plot: log-log plot, show only data
+                    ax[j].plot(dataset.abscissae.axes[0].value, dataset.ordinate.value, marker='o', linestyle='')
+                    ax[j].set_yscale('log')
+                    ax[j].set_xscale('log')
+                    if i == 1:  # fit plot: log-log plot, show fit and data curve
+                        ax[j].plot(fit.fit.abscissae.axes[0].value, fit.fit.ordinate.value)
+                        # ax[j].set_yscale('log')
+                        # ax[j].set_xscale('log')
+                    # elif plottable.type_num == 3:  # residual plot lin-log plot, show calc and show res only
+                    #     ax[j].plot(dataset.x_data, np.subtract(dataset.y_fit, dataset.y_data))
 
-                        # iterate through plottable modifier, e.g. linecolor, linestyle
-                        plot = ""
-                        for plottable_modifier in self.plot_object.modifiers:
-                            if isinstance(plottable_modifier, ModifierLinecolor):
-                                ax[j].get_lines()[-1].set_color(plottable_modifier.modifier_value)
-                            elif isinstance(plottable_modifier, ModifierLinestyle):
-                                ax[j].get_lines()[-1].set_linestyle(plottable_modifier.modifier_value)
+                    # iterate through plottable modifier, e.g. linecolor, linestyle
+                    plot = ""
+                    for plottable_modifier in self.plot_object.modifiers:
+                        if isinstance(plottable_modifier, ModifierLinecolor):
+                            ax[j].get_lines()[-1].set_color(plottable_modifier.modifier_value)
+                        elif isinstance(plottable_modifier, ModifierLinestyle):
+                            ax[j].get_lines()[-1].set_linestyle(plottable_modifier.modifier_value)
 
-                    # applying a colormap to a set of lines and setting the respective color to lines that are
-                    # returned by the axes object
-                    # elif isinstance(plottable_or_modifier_item, PlotModifier):
-                    #     plot_modifier = plottable_or_modifier_item
-                    #     if isinstance(plot_modifier, ModifierColormap):
-                    #         cmap = matplotlib.colormaps[plot_modifier.text(0).split('=')[1]]
-                    #         n = len(ax[j].get_lines())
-                    #         for m in range(n):
-                    #             ax[j].get_lines()[m].set_color(cmap(m/(n-1)))
+                # applying a colormap to a set of lines and setting the respective color to lines that are
+                # returned by the axes object
+                # elif isinstance(plottable_or_modifier_item, PlotModifier):
+                #     plot_modifier = plottable_or_modifier_item
+                #     if isinstance(plot_modifier, ModifierColormap):
+                #         cmap = matplotlib.colormaps[plot_modifier.text(0).split('=')[1]]
+                #         n = len(ax[j].get_lines())
+                #         for m in range(n):
+                #             ax[j].get_lines()[m].set_color(cmap(m/(n-1)))
 
             # create the widget that will be inside the dock widget
             figure.tight_layout()
