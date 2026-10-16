@@ -64,6 +64,16 @@ class SubTabs(QTabWidget):
     def toPlot(self) -> list["SasData | TrackedFit"]:
         return [item for item in [self.plot_object.to_plot, self.plot_object.fit] if item is not None]
 
+    def tabName(self, i: int) -> str:
+        match i:
+            case 0:
+                return "Data"
+            case 1:
+                return "Fit"
+            case _:
+                return "Unknown"
+            
+
     def __init__(self, plot_object: "TrackedPlot"):
         super().__init__()
 
@@ -201,7 +211,7 @@ class SubTabs(QTabWidget):
             dock_widget.setWidget(canvas_widget)
             dock_container.addDockWidget(Qt.DockWidgetArea.TopDockWidgetArea, dock_widget)
 
-            self.addTab(dock_container, "Data")
+            self.addTab(dock_container, self.tabName(i))
             self.figures.append(figure)
 
 
