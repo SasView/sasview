@@ -78,7 +78,6 @@ class SubTabs(QTabWidget):
             layout.addWidget(canvas)
             layout.addWidget(NavigationToolbar2QT(canvas))
 
-            # TODO: At the moment, assume there's only one plot.
             # decide whether there is only one plot needs to be plotted. then, only one central plot is needed
             # subplot_count = tabitem.child(i).childCount()
             if i == 0 or i == 1:
