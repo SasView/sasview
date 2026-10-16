@@ -14,6 +14,7 @@ Contents
    sasmodels API <sasmodels-api/index>
    sasdata overview <sasdata-dev/dev>
    OpenGL subsystem <gl/opengl.rst>
+   Refactoring Project <refactoring/index>
 
 Indices and Search
 ------------------
