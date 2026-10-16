@@ -165,9 +165,7 @@ class InversionWidget(Perspective, Ui_PrInversion):
         self.explorerButton.clicked.connect(self.openExplorerWindow)
         self.estimateBgd.pressed.connect(self.handleBackgroundModeChange)
         self.manualBgd.pressed.connect(self.handleBackgroundModeChange)
-        self.dataList.currentIndexChanged.connect(self.handleCurrentDataChanged)
         self.helpButton.clicked.connect(self.onHelp)
-        self.removeButton.clicked.connect(self.handleRemove)
         self.showResultsButton.clicked.connect(self.handleShowResults)
         self.showPlotsEvent.connect(self.showPlots)
 
@@ -181,9 +179,6 @@ class InversionWidget(Perspective, Ui_PrInversion):
             self.currentResult.data_plot.slider_high_q_input = []
             self.currentResult.data_plot.slider_high_q_setter = []
 
-        to_remove = self.dataList.currentIndex()
-        self.dataList.removeItem(to_remove)
-        _ = self.results.pop(to_remove)
         # If there's no results left, we need an empty one.
         if len(self.results) == 0:
             self.results.append(self.initResult())
@@ -203,20 +198,9 @@ class InversionWidget(Perspective, Ui_PrInversion):
         return len(self.results) > 1
 
     @property
-    def currentDataIndex(self) -> int:
-        return self.dataList.currentIndex()
-
-    @property
     def currentResult(self) -> InversionResult:
-        return self.results[self.currentDataIndex]
-
-    @property
-    def currentData(self) -> Data1D | None:
-        return self.currentResult.logic.data
-
-    @property
-    def currentDataItem(self) -> QStandardItem | None:
-        return self.currentResult.logic.data_item
+        # TODO: This is temporary. The current result was because of batch.
+        return self.results[0]
 
     # TODO: I don't know if 'float' is the right type hint.
     @property
@@ -414,7 +398,6 @@ class InversionWidget(Perspective, Ui_PrInversion):
         self.isCalculating = True
         self.enableButtons()
 
-        self.dataList.setCurrentIndex(0)
         self.calcThread = CalcBatchPr(
             prs=[result.calculator for result in self.results],
             nfuncs=[result.calculator.noOfTerms for result in self.results],
