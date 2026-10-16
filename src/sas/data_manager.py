@@ -12,6 +12,7 @@ TrackedData = SasData | Perspective | Trend
 # TODO: Probably want to handle order, if that is even relevant.
 valid_associations: list[tuple[str | type, str | type]] = [
     ('Perspective', SasData),
+    ('Perspective', Trend),
     (Trend, SasData)
     # TODO: Include plots
 ]
@@ -89,6 +90,18 @@ class NewDataManager(QObject):
     # data at the same time. So it doesn't matter that the perspective is
     # associated with the data becuase they will both be removed.
 
+    def check_perspective_can_accept_data(self, perspective: Perspective, datum: TrackedData):
+        existing_associations = self.get_all_associations(perspective)
+        if not perspective.supports_multiple_data and len(existing_associations) > 0:
+            raise ValueError(f"{perspective.title} doesn't support multiple data being sent to it.")
+        supported = False
+        for supported_type in perspective.supported_data:
+            if isinstance(datum, supported_type):
+                supported = True
+                break
+        if not supported:
+            raise ValueError(f"{perspective.title} does not support this data.")
+
     # TODO: May want more rules to prevent associations being made twice.
     def make_association(self, data_1: TrackedData, data_2: TrackedData):
         if not (data_1 in self._all_data_entries or data_2 in self._all_data_entries):
@@ -100,6 +113,8 @@ class NewDataManager(QObject):
         # We shouldn't have duplicate associations.
         if any([assoc == proposed_assoc for assoc in self.associations]):
             raise ValueError('An assocation of these types already exists.')
+        if isinstance_fix(data_1, Perspective):
+            self.check_perspective_can_accept_data(data_1, data_2)
         self.associations.append(proposed_assoc)
         self.new_association.emit(data_1, data_2)
 
