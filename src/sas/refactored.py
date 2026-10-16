@@ -83,6 +83,10 @@ class Perspective(QDialog):
     def newAssocation(self):
         pass
 
+    @abstractmethod
+    def newData(self):
+        pass
+
     @property
     def associatedData(self) -> list["TrackedData"]:
         """Only returns data which is specified in `supported_data`."""
