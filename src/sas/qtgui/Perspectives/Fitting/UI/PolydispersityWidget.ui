@@ -36,6 +36,40 @@
         </property>
        </widget>
       </item>
+      <item row="1" column="0">
+       <layout class="QHBoxLayout" name="freeFormSigmaLayout">
+        <item>
+         <widget class="QLabel" name="lblFreeFormSigma">
+          <property name="toolTip">
+           <string>Smoothness regularization weight for free-form inversion (higher = smoother distribution).</string>
+          </property>
+          <property name="text">
+           <string>Sigma (smoothness):</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="txtFreeFormSigma">
+          <property name="toolTip">
+           <string>Smoothness regularization weight for free-form inversion (higher = smoother distribution).</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="freeFormSigmaSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
      </layout>
     </widget>
    </item>

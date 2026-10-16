@@ -16,6 +16,8 @@ Fitting Documentation
 
    Polydispersity Distributions <pd/polydispersity>
 
+   Free-Form Polydispersity Inversion <pd/free_form_pd>
+
    Oriented Particles <orientation/orientation>
 
    Smearing Functions <resolution>

@@ -227,6 +227,57 @@ class FittingLogic:
                          component=name))
         return plots
 
+    def freeFormReturnData(self, result, tab_id):
+        """
+        Package a free-form (ffsi) inversion result the way complete1D/complete2D
+        expect it, so the standard completion path can draw it.
+
+        The backend supplies the intensity directly - the kernel cannot recompute
+        it - but everything downstream of here is shared with a bumps fit.
+        """
+        return_data = {"model": self.kernel_module, "data": self._data, "intermediate_results": {}, "freeform": result}
+        if isinstance(self._data, Data2D):
+            return_data["image"] = result.theory
+            return_data["page_id"] = tab_id
+        else:
+            return_data["x"] = result.q
+            return_data["y"] = result.theory
+        return return_data
+
+    def newDistributionPlots(self, result, tab_id):
+        """
+        Create the free-form weight distribution plot(s), one per inverted
+        parameter (radius, length, ...).
+        New function because a completely new kind of plot that sasview doesn't support.
+
+        Names and ids are placeholders, completed by _appendPlotsPolyDisp() in the
+        same way as the plots from FittingUtilities.plotPolydispersities().
+        """
+        plots = []
+        for dist in result.distributions:
+            name = dist.param
+            # show the volume-weighted distribution as a percentage where
+            # it is defined (single-parameter models), else the plain
+            # weight distribution.
+            weights = dist.volume_weights if dist.volume_weights is not None else dist.weights
+            y = weights / np.sum(weights) * 100
+            new_plot = Data1D(x=dist.grid, y=y)
+            new_plot.is_data = False
+            new_plot.dy = np.zeros(len(y))
+            new_plot.xtransform = "x"
+            new_plot.ytransform = "y"
+            new_plot.xaxis(rf"\rm{{{name}}}", self.kernel_module.details[name][0])
+            new_plot.yaxis(r"\rm{weight}", r"\%")
+            new_plot.scale = "linear"
+            new_plot.symbol = "Line"
+            new_plot.name = "%s distribution" % name
+            new_plot.id = new_plot.name
+            # stand-alone: own window on linear axes, and not culled by
+            # deleteRedundantPlots(), which only removes ROLE_DELETABLE items
+            new_plot.plot_role = DataRole.ROLE_STAND_ALONE
+            plots.append(new_plot)
+        return plots
+
     def getScalarIntermediateResults(self, return_data):
         """
         Returns a dict of scalar-only intermediate results from the return data.

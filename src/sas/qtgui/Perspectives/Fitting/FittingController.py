@@ -78,6 +78,11 @@ class FittingController:
         ValueError
             If no parameters are selected for fitting or if model setup fails
         """
+        # Free-form inversion bypasses bumps and uses GALAHAD
+        # so build FreeFormFit instead of bumps fitters.
+        if self.widget.polydispersity_widget.free_form and self.widget.chkPolydispersity.isChecked():
+            return self._prepareFreeFormFitters(fitter, fit_id)
+
         # Data going in
         data = self.logic.data
         model = self.logic.kernel_module
@@ -148,6 +153,51 @@ class FittingController:
             if fitter is None:
                 # Assign id to the new fitter only
                 fitter_single.fitter_id = [self.widget.page_id]
+            fit_id += 1
+            fitters.append(fitter_single)
+
+        return fitters, fit_id
+
+    def _prepareFreeFormFitters(self, fitter, fit_id: int) -> tuple[list, int]:
+        """
+        Prepare FreeFormFit engine(s) for free-form.
+
+        Mirrors the bumps branch of prepareFitters
+        """
+        from sas.sascalc.fit.FreeFormFitting import (
+            FFSI_AVAILABLE,
+            FREE_FORM_FIT_PARAMS,
+            SUPPORTED_MODELS,
+            FreeFormFit,
+            is_supported,
+        )
+
+        if not FFSI_AVAILABLE:
+            raise ValueError("Free-form inversion requires the ffsi package to be installed.")
+
+        model = self.logic.kernel_module
+        if not is_supported(model):
+            raise ValueError(
+                "Free-form SAS inversion supports only the following models: %s." % ", ".join(sorted(SUPPORTED_MODELS))
+            )
+
+        bins = self.widget.polydispersity_widget.freeFormBins()
+        qmin = self.widget.q_range_min
+        qmax = self.widget.q_range_max
+        smearer = self.widget.smearing_widget.smearer()
+
+        fitters = []
+        for fit_index in self.widget.all_data:
+            fitter_single = FreeFormFit(bins=bins, sigma=self.widget.polydispersity_widget.freeFormSigma())
+            data = GuiUtils.dataFromItem(fit_index)
+            weighted_data = self.widget.addWeightingToData(data)
+            try:
+                fitter_single.set_model(model, fit_id, list(FREE_FORM_FIT_PARAMS), data=weighted_data, constraints=[])
+            except ValueError as ex:
+                raise ValueError("Setting model parameters failed with: %s" % ex)
+            fitter_single.set_data(data=weighted_data, id=fit_id, smearer=smearer, qmin=qmin, qmax=qmax)
+            fitter_single.select_problem_for_fit(id=fit_id, value=1)
+            fitter_single.fitter_id = [self.widget.page_id]
             fit_id += 1
             fitters.append(fitter_single)
 
