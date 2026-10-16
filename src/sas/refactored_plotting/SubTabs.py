@@ -109,13 +109,13 @@ class SubTabs(QTabWidget):
                 ax[j].set_title(plot_object.to_plot.name)
 
                 # iterate through plottables and plot modifiers (PlotTreeWidget items)
-                for i in range(len(self.toPlot)):
+                for plot_no in range(len(self.toPlot)):
                     # check if the plottable or modifier item is a PlottableItem (actual data to be displayed)
-                    plottables = self.toPlot[:i+1]
+                    plottables = self.toPlot[:plot_no+1]
                     # The casting here assumes a certain order. Things will
                     # break without that order.
                     dataset = cast(SasMeasurement, plottables[0])
-                    fit = cast("TrackedFit", plottables[1]) if i == 1 else None
+                    fit = cast("TrackedFit", plottables[1]) if plot_no == 1 else None
 
                     # if the dataset is 2d, plotting will be done with a heatmap plot
                     if dataset.dataset_type == two_dim:
@@ -155,11 +155,11 @@ class SubTabs(QTabWidget):
                     # if it is not a 2d plot, it must be a 1d plot (line plot)
                     else:
                         # select again for data plot (1), fit plot (2) and residual plot (3)
-                        # if i == 0:  # data plot: log-log plot, show only data
+                        # if plot_no == 0:  # data plot: log-log plot, show only data
                         ax[j].plot(dataset.abscissae.axes[0].value, dataset.ordinate.value, marker='o', linestyle='')
                         ax[j].set_yscale('log')
                         ax[j].set_xscale('log')
-                        if i == 1:  # fit plot: log-log plot, show fit and data curve
+                        if plot_no == 1:  # fit plot: log-log plot, show fit and data curve
                             ax[j].plot(fit.fit.abscissae.axes[0].value, fit.fit.ordinate.value)
                             # ax[j].set_yscale('log')
                             # ax[j].set_xscale('log')
