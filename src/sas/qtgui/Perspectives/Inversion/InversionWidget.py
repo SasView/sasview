@@ -236,7 +236,6 @@ class InversionWidget(Perspective, Ui_PrInversion):
         self.showResultsButton.setEnabled(self.currentResult.logic.data_is_loaded
                                           and self.is_batch
                                           and not self.isCalculating and self.batchResultsWindow is not None)
-        self.removeButton.setEnabled(self.currentResult.logic.data_is_loaded and not self.isCalculating)
         self.explorerButton.setEnabled(self.currentResult.logic.data_is_loaded and not self.isCalculating)
         self.stopButton.setVisible(self.isCalculating)
         self.regConstantSuggestionButton.setEnabled(self.currentResult.logic.data_is_loaded and not self.isCalculating)
