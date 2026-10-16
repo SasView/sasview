@@ -13,7 +13,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from twisted.internet import threads
 
 from sasmodels import generate, modelinfo
-from sasmodels.sasview_model import MultiplicationModel, SasviewModel, load_standard_models
+from sasmodels.sasview_model import MODELS, MultiplicationModel, SasviewModel, load_standard_models
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas import config
@@ -1593,6 +1593,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.stopFit()
             return
 
+        # If this page takes part in a running constrained/simultaneous fit,
+        # the button reads 'Stop fit', so stop that fit instead of starting a new one
+        if self.stopConstrainedFit():
+            return
+
         # initialize fitter constants
         handler = None
         batch_inputs = {}
@@ -1647,6 +1652,22 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.disableInteractiveElements()
         # The undo stack stays enabled during the fit; intermediate parameter
         # updates are blocked via the suppressed() context manager instead.
+
+    def stopConstrainedFit(self) -> bool:
+        """
+        Stop the constrained/simultaneous fit this page takes part in, if any.
+        Returns True if a running constrained fit was stopped.
+        """
+        if self.parent is None:
+            return False
+        constraint_tab = self.parent.perspective().getConstraintTab()
+        if constraint_tab is None or not constraint_tab.is_running:
+            return False
+        page_name = "Page%s" % self.tab_id
+        if not any(page_name in tab for tab in constraint_tab.getTabsForFit()):
+            return False
+        constraint_tab.stopFit()
+        return True
 
     def stopFit(self) -> None:
         """
@@ -2127,8 +2148,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         along with the enabled mapping
         """
         self.by_model_dict = defaultdict(list)
-        for category in self.master_category_dict:
-            for (model, enabled) in self.master_category_dict[category]:
+        master_category_list_iterator = self.master_category_dict.copy()
+        for category in master_category_list_iterator:
+            for (model, enabled) in master_category_list_iterator[category]:
+                if model not in MODELS:
+                    logging.warning(f"The model {model} is no longer available in sasmodels. It will be ignored.")
+                    self.master_category_dict[category].remove([model, enabled])
+                    continue
                 self.by_model_dict[model].append(category)
                 self.model_enabled_dict[model] = enabled
 

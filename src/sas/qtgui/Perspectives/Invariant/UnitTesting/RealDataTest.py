@@ -299,59 +299,18 @@ class TestInvariantExtrapolation(UIHelpersMixin):
 @pytest.mark.parametrize("window_class", ["real_data"], indirect=True)
 @pytest.mark.usefixtures("window_class")
 class TestInvariantMethods(UIHelpersMixin):
-    def test_low_q_extrapolation_getter(self, real_data):
-        """Test that the low q extrapolation getter works correctly."""
+    def test_extrapolation_setter(self, real_data):
+        """Test that the extrapolation setter works correctly."""
 
         self.setup_contrast()
         self.window.chkLowQ_ex.setChecked(True)
 
-        num_points = 10
-        value = self.window._data.x[num_points - 1]
+        test_indices = [0, 15]
+        low_q_value = self.window._data.x[test_indices[0]]
+        high_q_value = self.window._data.x[test_indices[1]]
+        indices = self.window.get_extrapolation_indices(low_q_value, high_q_value)
 
-        self.window._low_points = 10
-        upper_limit = self.window.get_low_q_extrapolation_upper_limit()
-
-        assert upper_limit == value
-
-    def test_low_q_extrapolation_setter(self, real_data):
-        """Test that the low q extrapolation setter works correctly."""
-
-        self.setup_contrast()
-        self.window.chkLowQ_ex.setChecked(True)
-
-        index = 15
-        value = self.window._data.x[index - 1]
-
-        self.window.set_low_q_extrapolation_upper_limit(value)
-
-        assert self.window._low_points == index
-
-    def test_high_q_extrapolation_getter(self, real_data):
-        """Test that the high q extrapolation getter works correctly."""
-
-        self.setup_contrast()
-        self.window.chkHighQ_ex.setChecked(True)
-
-        num_points = 10
-        value = self.window._data.x[-num_points - 1]
-
-        self.window._high_points = 10
-        lower_limit = self.window.get_high_q_extrapolation_lower_limit()
-
-        assert lower_limit == value
-
-    def test_high_q_extrapolation_setter(self, real_data):
-        """Test that the high q extrapolation setter works correctly."""
-
-        self.setup_contrast()
-        self.window.chkHighQ_ex.setChecked(True)
-
-        index = 15
-        value = self.window._data.x[-index + 1]
-
-        self.window.set_high_q_extrapolation_lower_limit(value)
-
-        assert self.window._high_points == index
+        assert indices == test_indices
 
     def test_updateGuiFromFile_1D(self, real_data):
         """Passing a real Data1D should set _data without raising."""

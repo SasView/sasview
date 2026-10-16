@@ -14,6 +14,7 @@ Contents
    sasmodels API <sasmodels-api/index>
    sasdata overview <sasdata-dev/dev>
    OpenGL subsystem <gl/opengl.rst>
+   Flatpak Update Script Guide <flatpak/guide.rst>
 
 Indices and Search
 ------------------
