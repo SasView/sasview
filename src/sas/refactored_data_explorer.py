@@ -1,7 +1,6 @@
-from sasdata.data import SasData
+
 import logging
 from os.path import basename
-
 from PySide6.QtCore import Signal, Slot
 from PySide6.QtWidgets import (
     QComboBox,
@@ -17,7 +16,6 @@ from sasdata.data_io.importers.import_ascii import load_data as load_advanced_as
 from sasdata.data_io.importers.import_ascii import load_data_default_params as load_ascii_data
 from sasdata.data_io.importers.import_hdf5 import load_data as load_hdf5_data
 from sasdata.data_io.importers.import_xml import load_data as load_xml_data
-
 from sas.ascii_dialog.dialog import AsciiDialog
 from sas.data_explorer_error_message import DataExplorerErrorMessage
 from sas.data_explorer_tree import DataExplorerTree
