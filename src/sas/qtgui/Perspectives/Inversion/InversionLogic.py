@@ -1,15 +1,11 @@
-from sasdata.dataset_types import one_dim
-from sasdata.data import Quantity
-from sasdata.metadata import Metadata
-from sas.sascalc.pr.invertor import Invertor
-from typing import cast, TYPE_CHECKING
-from sasdata.data import SasData, SasMeasurement
 import logging
 from typing import TYPE_CHECKING, cast
 
 import numpy as np
 
-from sasdata.data import SasMeasurement
+from sasdata.data import Quantity, SasMeasurement
+from sasdata.dataset_types import one_dim
+
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.sascalc.pr.invertor import Invertor
 
@@ -66,8 +62,6 @@ class InversionLogic:
             one_dim,
         )
         return fit
-
-        
 
     def new1DPlot(self, tab_id=1, out=None, pr=None, q=None):
         """
@@ -164,9 +158,11 @@ class InversionLogic:
         Adds errors to data set is they are not available.
         """
         if not self.data.ordinate.has_error:
-            raise NotImplementedError("The method for adding errors has not been reimplemented. It previously mutated the data class but this shouldn't be done now.")
+            raise NotImplementedError(
+                "The method for adding errors has not been reimplemented. It previously mutated the data class but this shouldn't be done now."
+            )
         else:
-            return 
+            return
         if self.data.dy is None or self.data.dy.size == 0.0:
             self.data.dy = np.sqrt(np.fabs(self.data.y)) * sigma
 
@@ -185,14 +181,13 @@ class InversionLogic:
         if len(self.data.abscissae.axes) == 1:
             try:
                 qmax = max(self.data.abscissae.axes[0].value)
-                #set q values where Intensity is zero,
-                #to qmax and exclude from minimum accepted q
-                #to avoid dodgy points around beam stop
-                usable_qrange=np.where(self.data.ordinate.value <= 0, qmax, self.data.abscissae.axes[0].value)
+                # set q values where Intensity is zero,
+                # to qmax and exclude from minimum accepted q
+                # to avoid dodgy points around beam stop
+                usable_qrange = np.where(self.data.ordinate.value <= 0, qmax, self.data.abscissae.axes[0].value)
                 qmin = min(usable_qrange)
             except (ValueError, TypeError):
-                msg = "Unable to find min/max/length of \n data named %s" % \
-                            self.data.name
+                msg = "Unable to find min/max/length of \n data named %s" % self.data.name
                 raise ValueError(msg)
         else:
             # TODO I'm not sure where this was actually being used as Inversion

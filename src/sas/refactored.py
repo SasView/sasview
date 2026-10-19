@@ -1,5 +1,5 @@
 import logging
-from abc import abstractmethod, ABC
+from abc import ABC, abstractmethod
 
 # This is ugly but necessary to avoid a cyclic dependency
 from typing import TYPE_CHECKING, cast
@@ -145,7 +145,7 @@ class TrackedFit:
         self._data_manager = data_manager
         self.model_parameters = model_parameters
         self.fit = fit_data
-    
+
 
 class TrackedPlot:
     _data_manager: "DataManager"
