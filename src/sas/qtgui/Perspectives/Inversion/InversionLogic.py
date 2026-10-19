@@ -1,16 +1,13 @@
-from sasdata.dataset_types import one_dim
-from sasdata.data import Quantity
-from sasdata.metadata import Metadata
-from sas.sascalc.pr.invertor import Invertor
-from typing import cast, TYPE_CHECKING
-from sasdata.data import SasData, SasMeasurement
 import logging
+from typing import TYPE_CHECKING, cast
 
 import numpy as np
-from PySide6.QtGui import QStandardItem
+
+from sasdata.data import Quantity, SasMeasurement
+from sasdata.dataset_types import one_dim
 
 from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Utilities.GuiUtils import dataFromItem
+from sas.sascalc.pr.invertor import Invertor
 
 if TYPE_CHECKING:
     from sas.qtgui.Perspectives.Inversion.InversionWidget import InversionWidget
@@ -68,7 +65,7 @@ class InversionLogic:
         )
         return fit
 
-        
+
 
     def new1DPlot(self, tab_id=1, out=None, pr=None, q=None):
         """
@@ -174,7 +171,7 @@ class InversionLogic:
         if not self.data.ordinate.has_error:
             raise NotImplementedError("The method for adding errors has not been reimplemented. It previously mutated the data class but this shouldn't be done now.")
         else:
-            return 
+            return
         if self.data.dy is None or self.data.dy.size == 0.0:
             self.data.dy = np.sqrt(np.fabs(self.data.y))*sigma
 

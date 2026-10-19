@@ -1,31 +1,27 @@
-from sasdata.data import SasData, SasMeasurement
-from sas.data_manager import NewDataManager, TrackedData
-from sas.refactored import FitModelParameters, Perspective, TrackedFit, TrackedPlot
-
 import logging
 from dataclasses import dataclass
-from typing import Any, override, TYPE_CHECKING
-
-from PySide6.QtCore import Signal
-from PySide6.QtGui import QIntValidator, QStandardItem
-from PySide6.QtWidgets import QWidget
+from typing import Any, override
 
 import numpy.typing as npt
+from PySide6.QtCore import Signal
+from PySide6.QtGui import QIntValidator
+from PySide6.QtWidgets import QWidget
 
+from sasdata.data import SasMeasurement
+
+from sas.data_manager import NewDataManager, TrackedData
 from sas.qtgui.Perspectives.Inversion.DMaxExplorerWidget import DmaxWindow
 from sas.qtgui.Perspectives.Inversion.InversionLogic import InversionLogic
 from sas.qtgui.Perspectives.Inversion.Thread import CalcBatchPr, CalcPr, EstimateNT
 from sas.qtgui.Perspectives.Inversion.UI.TabbedInversionUI import Ui_PrInversion
-from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
+from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Utilities.GridPanel import BatchInversionOutputPanel
 from sas.qtgui.Utilities.GuiUtils import (
-    Communicate,
     DoubleValidator,
-    HashableStandardItem,
-    dataFromItem,
-    updateModelItemWithPlot,
 )
+from sas.refactored import FitModelParameters, Perspective, TrackedFit, TrackedPlot
 from sas.sascalc.pr.invertor import Invertor
+
 
 class InversionFitModelParameters(FitModelParameters):
     c_parameters: npt.NDArray
@@ -335,7 +331,7 @@ class InversionWidget(Perspective, Ui_PrInversion):
         self._data_manager.make_association(self, plot)
         self._data_manager.make_association(tracked_fit, self.associatedSasMeasurement)
         self.showPlotsEvent.emit()
-        
+
 
     def showPlots(self):
         for plot in self.associatedPlots:

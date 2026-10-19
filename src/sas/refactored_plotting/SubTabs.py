@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import matplotlib.figure
 import numpy as np
@@ -73,7 +73,7 @@ class SubTabs(QTabWidget):
                 return "Fit"
             case _:
                 return "Unknown"
-            
+
 
     def __init__(self, plot_object: "TrackedPlot"):
         super().__init__()
