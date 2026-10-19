@@ -124,7 +124,6 @@ roman==5.2
 rpds-py==2026.9.1
 sasdata==0.12.2
 sasmodels==1.1.0
--e file:///Users/james.crake-merani/repos/sasview-for-pinnings
 scipy==1.18.1
 setuptools==84.0.0
 shiboken6==6.12.0
