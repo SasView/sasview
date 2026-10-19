@@ -1,11 +1,9 @@
-from sas.refactored_plotting.PlotModifiers import PlotModifier
-from sas.refactored_plotting.ModifierCreator import ModifierCreator
 import logging
-from typing import cast, TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QCursor
-from PySide6.QtWidgets import QAbstractItemView, QDialog, QTreeWidget, QTreeWidgetItem, QWidget, QTreeWidgetItemIterator
+from PySide6.QtWidgets import QAbstractItemView, QDialog, QTreeWidget, QTreeWidgetItem, QTreeWidgetItemIterator, QWidget
 
 from sasdata.data import SasData
 from sasdata.trend import NamedTrend, Trend
@@ -17,6 +15,8 @@ from sas.data_manager import TrackedData, isinstance_fix
 from sas.qtgui.MainWindow.DataViewer import DataViewer
 from sas.qtgui.MainWindow.TrendCreation import TrendCreation
 from sas.refactored import Perspective, TrackedPlot
+from sas.refactored_plotting.ModifierCreator import ModifierCreator
+from sas.refactored_plotting.PlotModifiers import PlotModifier
 
 if TYPE_CHECKING:
     from sas.refactored_data_explorer import NewDataExplorer

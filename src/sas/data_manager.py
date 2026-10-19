@@ -1,4 +1,3 @@
-from sas.refactored_plotting.PlotModifiers import PlotModifier
 from typing import TypeVar
 
 from PySide6.QtCore import QObject, Signal
@@ -8,6 +7,7 @@ from sasdata.data import SasData
 from sasdata.trend import Trend
 
 from sas.refactored import Perspective, TrackedFit, TrackedPlot
+from sas.refactored_plotting.PlotModifiers import PlotModifier
 
 # TODO: Add plots to this type.
 TrackedData = SasData | Perspective | Trend | TrackedFit | TrackedPlot | PlotModifier
