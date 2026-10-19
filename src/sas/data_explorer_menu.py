@@ -12,19 +12,17 @@ from sas.refactored import Perspective
 # should not be None?
 @dataclass
 class DataExplorerMenuAction:
-    action: Literal["remove", "send_to", "view_data", "make_trend"]
+    action: Literal["remove", "send_to", "view_data", "plot", "make_trend", "create_modifier"]
     action_data: Perspective | None = None
 
 
 class DataExplorerMenu(QMenu):
-    def __init__(self, parent: QWidget, data_manager: NewDataManager, send_to: bool, view_data: bool, make_trend: bool):
+    def __init__(self, parent: QWidget, data_manager: NewDataManager, send_to: bool, view_data: bool, make_trend: bool, plot: bool, create_modifier: bool):
         super().__init__(parent)
 
         remove_action = QAction("Remove", parent)
         remove_action.setData(DataExplorerMenuAction("remove"))
         self.addAction(remove_action)
-
-        # TODO: There will be loads more
 
         if send_to:
             send_to_menu = self.addMenu("Send To")
@@ -43,3 +41,13 @@ class DataExplorerMenu(QMenu):
             make_trend_action = QAction("Make Trend", parent)
             make_trend_action.setData(DataExplorerMenuAction("make_trend"))
             self.addAction(make_trend_action)
+
+        if plot:
+            plot_action = QAction("Plot", parent)
+            plot_action.setData(DataExplorerMenuAction("plot"))
+            self.addAction(plot_action)
+
+        if create_modifier:
+            modifier_action = QAction("Add a plot modifier", parent)
+            modifier_action.setData(DataExplorerMenuAction("create_modifier"))
+            self.addAction(modifier_action)
