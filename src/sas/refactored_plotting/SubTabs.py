@@ -1,18 +1,18 @@
-from sasdata.dataset_types import dataset_types, two_dim
-from sasdata.data import SasData, SasMeasurement
+from typing import TYPE_CHECKING
 
 import matplotlib.figure
 import numpy as np
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg, NavigationToolbar2QT
-from sas.refactored_plotting.PlotModifiers import ModifierColormap, ModifierLinecolor, ModifierLinestyle, PlotModifier
-from sas.refactored_plotting.PlotTreeItems import PlottableItem
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QDockWidget, QMainWindow, QTabWidget, QVBoxLayout, QWidget
 
-from typing import TYPE_CHECKING
+from sasdata.data import SasData, SasMeasurement
+from sasdata.dataset_types import two_dim
+
+from sas.refactored_plotting.PlotModifiers import ModifierColormap, ModifierLinecolor, ModifierLinestyle, PlotModifier
 
 if TYPE_CHECKING:
-    from sas.refactored import TrackedPlot, TrackedFit
+    from sas.refactored import TrackedFit, TrackedPlot
 
 
 class ClickableCanvas(FigureCanvasQTAgg):

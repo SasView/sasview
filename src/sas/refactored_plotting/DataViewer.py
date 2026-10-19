@@ -1,3 +1,5 @@
+from PySide6 import QtWidgets
+
 from sas.refactored_plotting.DataCollector import DataCollector
 from sas.refactored_plotting.DataTreeItems import DataItem, PlotPageItem
 from sas.refactored_plotting.DataTreeWidget import DataTreeWidget
@@ -5,7 +7,6 @@ from sas.refactored_plotting.PlotModifiers import ModifierColormap, ModifierLine
 from sas.refactored_plotting.PlotTreeItems import PlotItem, PlottableItem, SubTabItem, TabItem
 from sas.refactored_plotting.PlotTreeWidget import PlotTreeWidget
 from sas.refactored_plotting.PlotWidget import PlotWidget
-from PySide6 import QtWidgets
 from sas.refactored_plotting.UI.DataViewerUI import Ui_DataViewer
 
 
