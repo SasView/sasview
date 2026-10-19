@@ -1,4 +1,3 @@
-from sasdata.data import SasData
 import logging
 import os
 import sys
@@ -22,6 +21,7 @@ from PySide6.QtWidgets import (
 from shiboken6 import isValid
 from twisted.internet import reactor
 
+from sasdata.data import SasData
 from sasdata.data_io.importers.import_ascii import load_data
 
 import sas

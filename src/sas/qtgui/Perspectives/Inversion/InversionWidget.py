@@ -1,17 +1,15 @@
-from sasdata.data import SasMeasurement
-from sas.data_manager import NewDataManager, TrackedData
-from sas.refactored import FitModelParameters, Perspective, TrackedFit, TrackedPlot
-
 import logging
 from dataclasses import dataclass
 from typing import Any, override
 
+import numpy.typing as npt
 from PySide6.QtCore import Signal
 from PySide6.QtGui import QIntValidator
 from PySide6.QtWidgets import QWidget
 
-import numpy.typing as npt
+from sasdata.data import SasMeasurement
 
+from sas.data_manager import NewDataManager, TrackedData
 from sas.qtgui.Perspectives.Inversion.DMaxExplorerWidget import DmaxWindow
 from sas.qtgui.Perspectives.Inversion.InversionLogic import InversionLogic
 from sas.qtgui.Perspectives.Inversion.Thread import CalcBatchPr, CalcPr, EstimateNT
@@ -21,7 +19,9 @@ from sas.qtgui.Utilities.GridPanel import BatchInversionOutputPanel
 from sas.qtgui.Utilities.GuiUtils import (
     DoubleValidator,
 )
+from sas.refactored import FitModelParameters, Perspective, TrackedFit, TrackedPlot
 from sas.sascalc.pr.invertor import Invertor
+
 
 class InversionFitModelParameters(FitModelParameters):
     c_parameters: npt.NDArray
@@ -43,6 +43,7 @@ class CalculatedOutputs:
     pos_frac: float
     pos_err: float
 
+
 def get_outputs(invertor: Invertor, elapsed: float):
     return CalculatedOutputs(
         invertor.rg(invertor.out),
@@ -52,13 +53,15 @@ def get_outputs(invertor: Invertor, elapsed: float):
         invertor.chi2,
         invertor.oscillations(invertor.out),
         invertor.get_positive(invertor.out),
-        invertor.get_pos_err(invertor.out, invertor.cov)
+        invertor.get_pos_err(invertor.out, invertor.cov),
     )
+
 
 @dataclass
 class EstimatedParameters:
     reg_constant: float
     nterms: int
+
 
 @dataclass
 class InversionResult:
@@ -69,14 +72,17 @@ class InversionResult:
     outputs: CalculatedOutputs | None
     estimated_parameters: EstimatedParameters | None
 
+
 def format_float(f: float):
-    return f'{f:.3f}'
+    return f"{f:.3f}"
+
 
 def format_float_scientific(f: float):
     """
     Formats a float in scientific notation with 3 significant figures.
     """
-    return f'{f:.3g}' if f != 0 else '0.0'  # Avoids showing '0e+00' for zero values
+    return f"{f:.3g}" if f != 0 else "0.0"  # Avoids showing '0e+00' for zero values
+
 
 # Default Values for inputs
 NUMBER_OF_TERMS = 10
@@ -87,6 +93,7 @@ Q_MAX_INPUT = 0.0
 MAX_DIST = 140.0
 
 logger = logging.getLogger(__name__)
+
 
 class InversionWidget(Perspective, Ui_PrInversion):
     calculationComplete = Signal()
@@ -115,8 +122,15 @@ class InversionWidget(Perspective, Ui_PrInversion):
         self.batchResultsWindow: BatchInversionOutputPanel | None = None
         self.batch_dict: dict[str, Any] | None = None
 
-        self.input_boxes = [self.noOfTermsInput, self.regularizationConstantInput, self.maxDistanceInput,
-                             self.minQInput, self.maxQInput, self.slitHeightInput, self.slitWidthInput]
+        self.input_boxes = [
+            self.noOfTermsInput,
+            self.regularizationConstantInput,
+            self.maxDistanceInput,
+            self.minQInput,
+            self.maxQInput,
+            self.slitHeightInput,
+            self.slitWidthInput,
+        ]
 
         self.updateGuiValues()
         self.enableButtons()
@@ -147,7 +161,7 @@ class InversionWidget(Perspective, Ui_PrInversion):
             pr_plot=None,
             data_plot=None,
             outputs=None,
-            estimated_parameters=None
+            estimated_parameters=None,
         )
 
     def events(self):
@@ -222,16 +236,21 @@ class InversionWidget(Perspective, Ui_PrInversion):
         """
         Enable buttons when data is present, else disable them
         """
-        self.calculateAllButton.setEnabled(not self.isCalculating
-                                           and self.currentResult.logic.data_is_loaded and self.is_batch)
-        self.calculateThisButton.setEnabled(self.currentResult.logic.data_is_loaded
-                                            and not self.isCalculating and not self.is_batch)
+        self.calculateAllButton.setEnabled(
+            not self.isCalculating and self.currentResult.logic.data_is_loaded and self.is_batch
+        )
+        self.calculateThisButton.setEnabled(
+            self.currentResult.logic.data_is_loaded and not self.isCalculating and not self.is_batch
+        )
         self.calculateThisButton.setVisible(not self.is_batch and not self.isCalculating)
         self.calculateAllButton.setVisible(self.is_batch and not self.isCalculating)
 
-        self.showResultsButton.setEnabled(self.currentResult.logic.data_is_loaded
-                                          and self.is_batch
-                                          and not self.isCalculating and self.batchResultsWindow is not None)
+        self.showResultsButton.setEnabled(
+            self.currentResult.logic.data_is_loaded
+            and self.is_batch
+            and not self.isCalculating
+            and self.batchResultsWindow is not None
+        )
         self.explorerButton.setEnabled(self.currentResult.logic.data_is_loaded and not self.isCalculating)
         self.stopButton.setVisible(self.isCalculating)
         self.regConstantSuggestionButton.setEnabled(self.currentResult.logic.data_is_loaded and not self.isCalculating)
@@ -280,9 +299,18 @@ class InversionWidget(Perspective, Ui_PrInversion):
             self.dataNameLabel.setText(self.associatedSasMeasurement.name)
 
     def clearGuiValues(self):
-        value_text_boxes = [*self.input_boxes, self.rgValue, self.iQ0Value, self.backgroundValue, self.backgroundInput,
-                            self.computationTimeValue, self.chiDofValue, self.oscillationValue, self.posFractionValue,
-                            self.sigmaPosFractionValue]
+        value_text_boxes = [
+            *self.input_boxes,
+            self.rgValue,
+            self.iQ0Value,
+            self.backgroundValue,
+            self.backgroundInput,
+            self.computationTimeValue,
+            self.chiDofValue,
+            self.oscillationValue,
+            self.posFractionValue,
+            self.sigmaPosFractionValue,
+        ]
 
         for text_box in value_text_boxes:
             text_box.setText("")
@@ -328,7 +356,6 @@ class InversionWidget(Perspective, Ui_PrInversion):
         self._data_manager.make_association(self, plot)
         self._data_manager.make_association(tracked_fit, self.associatedSasMeasurement)
         self.showPlotsEvent.emit()
-        
 
     def showPlots(self):
         for plot in self.associatedPlots:
@@ -365,7 +392,6 @@ class InversionWidget(Perspective, Ui_PrInversion):
         current_calculator.slit_height = float(self.slitHeightInput.text())
         current_calculator.slit_width = float(self.slitWidthInput.text())
 
-
     def startThread(self):
         self.updateParams()
         self.isCalculating = True
@@ -378,7 +404,7 @@ class InversionWidget(Perspective, Ui_PrInversion):
             self.currentResult.calculator.noOfTerms,
             error_func=self.threadError,
             completefn=self.calculationCompleted,
-            updatefn=None
+            updatefn=None,
         )
 
         self.calcThread.queue()
@@ -394,7 +420,7 @@ class InversionWidget(Perspective, Ui_PrInversion):
             prs=[result.calculator for result in self.results],
             nfuncs=[result.calculator.noOfTerms for result in self.results],
             error_func=self.threadError,
-            completefn=self.batchCalculationComplete
+            completefn=self.batchCalculationComplete,
         )
         self.calcThread.queue()
         self.calcThread.ready(2.5)
@@ -410,18 +436,15 @@ class InversionWidget(Perspective, Ui_PrInversion):
             result.outputs = get_outputs(result.calculator, totalElapsed)
             self.makePlots(result.calculator.out, result.calculator.cov, result.calculator, totalElapsed, result)
             self.batch_dict[result.logic.data.filename] = {
-                'Calculator': result.calculator,
-                'PrPlot': result.pr_plot,
-                'DataPlot': result.data_plot,
-                'Result': result
+                "Calculator": result.calculator,
+                "PrPlot": result.pr_plot,
+                "DataPlot": result.data_plot,
+                "Result": result,
             }
         self.batchCalculationOutput.emit(self.batch_dict)
 
     def showBatchCalculationWindow(self, batch_dict):
-        self.batchResultsWindow = BatchInversionOutputPanel(
-            parent=self,
-            output_data=batch_dict
-        )
+        self.batchResultsWindow = BatchInversionOutputPanel(parent=self, output_data=batch_dict)
         self.batchResultsWindow.show()
         self.enableButtons()
 
@@ -453,16 +476,14 @@ class InversionWidget(Perspective, Ui_PrInversion):
             self.currentResult.calculator,
             self.currentResult.calculator.nfunc,
             error_func=self.threadError,
-            completefn=self.endEstimateParameters
+            completefn=self.endEstimateParameters,
         )
         estimation_thread.queue()
         estimation_thread.ready(2.5)
 
     def openExplorerWindow(self):
         self.dmaxWindow = DmaxWindow(
-            pr_state=self.currentResult.calculator,
-            nfunc=self.currentResult.calculator.nfunc,
-            parent=self
+            pr_state=self.currentResult.calculator, nfunc=self.currentResult.calculator.nfunc, parent=self
         )
         self.dmaxWindow.show()
 
@@ -474,46 +495,46 @@ class InversionWidget(Perspective, Ui_PrInversion):
 
     def serialiseResult(self, result: InversionResult) -> dict[str, Any]:
         return {
-            'data_id': result.logic.data.id,
-            'alpha': result.calculator.alpha,
-            'background': result.calculator.background,
-            'chi2': result.calculator.chi2,
-            'cov': result.calculator.cov,
-            'd_max': result.calculator.dmax,
-            'elapsed': result.calculator.elapsed,
-            'err': result.calculator.err,
-            'est_bck': result.calculator.est_bck,
-            'iq0': result.calculator.iq0(result.calculator.out),
-            'out': result.calculator.out,
-            'oscillations': result.calculator.oscillations(result.calculator.out),
-            'pos_frac': result.calculator.get_positive(result.calculator.out),
-            'pos_err': result.outputs.pos_err if result.outputs is not None else None,
-            'q_max': result.calculator.q_max,
-            'q_min': result.calculator.q_min,
-            'rg': result.calculator.rg(result.calculator.out),
-            'slit_height': result.calculator.slit_height,
-            'slit_width': result.calculator.slit_width,
-            'suggested_alpha': result.calculator.suggested_alpha,
-            'x': result.calculator.x,
-            'y': result.calculator.y
+            "data_id": result.logic.data.id,
+            "alpha": result.calculator.alpha,
+            "background": result.calculator.background,
+            "chi2": result.calculator.chi2,
+            "cov": result.calculator.cov,
+            "d_max": result.calculator.dmax,
+            "elapsed": result.calculator.elapsed,
+            "err": result.calculator.err,
+            "est_bck": result.calculator.est_bck,
+            "iq0": result.calculator.iq0(result.calculator.out),
+            "out": result.calculator.out,
+            "oscillations": result.calculator.oscillations(result.calculator.out),
+            "pos_frac": result.calculator.get_positive(result.calculator.out),
+            "pos_err": result.outputs.pos_err if result.outputs is not None else None,
+            "q_max": result.calculator.q_max,
+            "q_min": result.calculator.q_min,
+            "rg": result.calculator.rg(result.calculator.out),
+            "slit_height": result.calculator.slit_height,
+            "slit_width": result.calculator.slit_width,
+            "suggested_alpha": result.calculator.suggested_alpha,
+            "x": result.calculator.x,
+            "y": result.calculator.y,
         }
 
     def updateFromParameters(self, params: dict[str, Any]):
         result = self.currentResult
-        result.calculator.alpha = params['alpha']
-        result.calculator.background = params['background']
-        result.calculator.chi2 = params['chi2']
-        result.calculator.cov = params['cov']
-        result.calculator.dmax = params['d_max']
-        result.calculator.elapsed = params['elapsed']
-        result.calculator.est_bck = params['est_bck']
-        result.calculator.out = params['out']
-        result.calculator.q_max = params['q_max']
-        result.calculator.q_min = params['q_min']
-        result.calculator.slit_height = params['slit_height']
-        result.calculator.slit_width = params['slit_width']
-        result.calculator.suggested_alpha = params['suggested_alpha']
-        result.outputs = get_outputs(result.calculator, params['elapsed'])
+        result.calculator.alpha = params["alpha"]
+        result.calculator.background = params["background"]
+        result.calculator.chi2 = params["chi2"]
+        result.calculator.cov = params["cov"]
+        result.calculator.dmax = params["d_max"]
+        result.calculator.elapsed = params["elapsed"]
+        result.calculator.est_bck = params["est_bck"]
+        result.calculator.out = params["out"]
+        result.calculator.q_max = params["q_max"]
+        result.calculator.q_min = params["q_min"]
+        result.calculator.slit_height = params["slit_height"]
+        result.calculator.slit_width = params["slit_width"]
+        result.calculator.suggested_alpha = params["suggested_alpha"]
+        result.outputs = get_outputs(result.calculator, params["elapsed"])
         self.updateGuiValues()
 
     def getPage(self) -> dict[str, Any]:
