@@ -1,10 +1,11 @@
 import ctypes
 
-from sas.refactored_plotting.PlotModifiers import PlotModifier
-from sas.refactored_plotting.PlotTreeItems import PlotItem, PlottableItem
 from PySide6.QtCore import QByteArray, QMimeData, QRect, Signal
 from PySide6.QtGui import QDrag
 from PySide6.QtWidgets import QTreeWidget
+
+from sas.refactored_plotting.PlotModifiers import PlotModifier
+from sas.refactored_plotting.PlotTreeItems import PlotItem, PlottableItem
 
 
 class PlotTreeWidget(QTreeWidget):

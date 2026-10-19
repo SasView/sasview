@@ -1,6 +1,3 @@
-from sas.refactored_plotting.PlotModifiers import PlotModifier
-from sas.refactored_plotting.SubTabs import SubTabs
-from sas.refactored_plotting.PlotWidget import PlotWidget
 import logging
 from abc import abstractmethod
 
@@ -10,6 +7,9 @@ from typing import TYPE_CHECKING
 from PySide6.QtWidgets import QDialog, QWidget
 
 from sasdata.data import SasData
+
+from sas.refactored_plotting.PlotModifiers import PlotModifier
+from sas.refactored_plotting.SubTabs import SubTabs
 
 if TYPE_CHECKING:
     from sas.data_manager import NewDataManager as DataManager
@@ -107,7 +107,7 @@ class TrackedPlot:
     def __init__(self, data_manager: "DataManager"):
         self._data_manager = data_manager
         self.plot_widget = None
-        
+
 
     @property
     def to_plot(self) -> SasData | None:
@@ -120,7 +120,7 @@ class TrackedPlot:
     @property
     def modifiers(self) -> list[PlotModifier]:
         return [assoc for assoc in self._data_manager.get_all_associations(self) if isinstance(assoc, PlotModifier)]
-    
+
     @property
     def formatName(self) -> str:
         if self.to_plot:
@@ -137,6 +137,6 @@ class TrackedPlot:
             else:
                 self._data_manager.new_plot.emit(new_plot_widget)
             self.plot_widget = new_plot_widget
-            
-        
+
+
 
