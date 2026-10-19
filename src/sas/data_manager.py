@@ -18,8 +18,10 @@ T = TypeVar('T')
 valid_associations: list[tuple[str | type, str | type]] = [
     ('Perspective', SasData),
     ('Perspective', Trend),
-    (Trend, SasData)
-    (TrackedPlot, SasData)
+    (Trend, SasData),
+    (Trend, SasData),
+    (TrackedPlot, SasData),
+    (PlotModifier, TrackedPlot)
 ]
 
 # This is needed because the normal 'isinstance' builtin function annoyingly
