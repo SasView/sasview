@@ -86,7 +86,7 @@ class SubTabs(QTabWidget):
         # TODO: Modifiers.
 
     def drawTab(self, cansas: FigureCanvasQTAgg, plottables: list[Plottable], figure: Figure):
-        if len(plottables) == 1:
+        if len(plottables) <= 2:
             axis = figure.subplots()
             # putting the axes object in a list so that the access can be
             # generic for both cases with multiple subplots and without
