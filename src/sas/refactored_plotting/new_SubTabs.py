@@ -1,7 +1,9 @@
+from matplotlib.backends.backend_qt import NavigationToolbar2QT
+from matplotlib.figure import Figure
 from functools import cached_property
 from sasdata.data import SasData, SasMeasurement
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
-from PySide6.QtWidgets import QTabWidget, QMainWindow, QDockWidget, QWidget
+from PySide6.QtWidgets import QTabWidget, QMainWindow, QDockWidget, QWidget, QVBoxLayout
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -65,8 +67,13 @@ class SubTabs(QTabWidget):
 
     def draw(self):
         for i in range(self.tabCount):
-            tabs = self.tabsForPlottable(i)
-            raise NotImplementedError()
+            plottables = self.tabsForPlottable(i)
+            layout = QVBoxLayout()
+            figure = Figure(figsize=(5, 5))
+            tab_canvas = FigureCanvasQTAgg(figure)
+            layout.addWidget(tab_canvas)
+            layout.addWidget(NavigationToolbar2QT(tab_canvas))
+            self.drawTab(tab_canvas, plottables)
 
     def drawTab(self, cansas: FigureCanvasQTAgg, plottables: list[Plottable]):
         raise NotImplementedError()
