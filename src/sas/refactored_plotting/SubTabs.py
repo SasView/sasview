@@ -1,42 +1,34 @@
+from sas.refactored_plotting.PlotModifiers import PlotModifier
+from matplotlib.backends.backend_qt import NavigationToolbar2QT
+from matplotlib.figure import Figure
+from matplotlib.axes import Axes
+from functools import cached_property
+from sasdata.data import SasData, SasMeasurement
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
+from PySide6.QtWidgets import QTabWidget, QMainWindow, QDockWidget, QWidget, QVBoxLayout
 from typing import TYPE_CHECKING, cast
 
-import matplotlib.figure
-import numpy as np
-from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg, NavigationToolbar2QT
-from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QDockWidget, QMainWindow, QTabWidget, QVBoxLayout, QWidget
-
-from sasdata.data import SasData, SasMeasurement
-from sasdata.dataset_types import two_dim
-
-from sas.refactored_plotting.PlotModifiers import ModifierColormap, ModifierLinecolor, ModifierLinestyle
-
 if TYPE_CHECKING:
-    from sas.refactored import TrackedFit, TrackedPlot
+    from sas.refactored import TrackedPlot, TrackedFit
+
+type Plottable = "SasMeasurement | TrackedFit"
+
+tab_name_dict = {0: "Data", 1: "Fit"}
 
 
-class ClickableCanvas(FigureCanvasQTAgg):
-    """
-    This class provides an extension of the normal Qt Figure Canvas, so that clicks on subplots of a figure can be
-    processed to switch the plot position. Example: if there are 3 plots in a figure 1,2,3 and plot 3 is clicked,
-    the clicked plot will always change its position with the plot 1.
-    """
-    def __init__(self, figure):
-        super().__init__(figure)
-        self.mpl_connect("button_press_event", self.onclick)
-        self.big = 0
+def tab_name(i: int) -> str:
+    return tab_name_dict.get(i, "Unknown")
 
-    def onclick(self, event):
-        big = self.big
-        if event.inaxes:
-            axs = self.figure.get_axes()
-            for index, ax in enumerate(axs):
-                if (index != big) and (ax == event.inaxes):
-                    temp = axs[big].get_position()
-                    axs[big].set_position(axs[index].get_position())
-                    axs[index].set_position(temp)
-                    self.big = index
-                self.draw()
+
+def tabName(i: int) -> str:
+    match i:
+        case 0:
+            return "Data"
+        case 1:
+            return "Fit"
+        case _:
+            return "Unknown"
+
 
 class SubTabs(QTabWidget):
     """
@@ -46,6 +38,11 @@ class SubTabs(QTabWidget):
     will be generated.
     The application of modifiers onto plots is also managed in this class constructor.
     """
+
+    plot_object: "TrackedPlot"
+    tabs: list[FigureCanvasQTAgg]
+    figures: list[Figure]
+
     def grayOutOnDock(self, dock_container: QMainWindow, dock_widget: QDockWidget):
         """
         Function that is connected to the topLevelChanged slot of the dock widget for the plot widget. When the
@@ -60,159 +57,82 @@ class SubTabs(QTabWidget):
             print("white")
             dock_container.setStyleSheet("QMainWindow#" + name + " { background-color: white }")
 
-    @property
-    def toPlot(self) -> list["SasData | TrackedFit"]:
-        return [item for item in [self.plot_object.to_plot, self.plot_object.fit] if item is not None]
-
-    def tabName(self, i: int) -> str:
-        match i:
-            case 0:
-                return "Data"
-            case 1:
-                return "Fit"
-            case _:
-                return "Unknown"
-
-
-    def __init__(self, plot_object: "TrackedPlot"):
-        super().__init__()
-
+    def __init__(self, plot_object: "TrackedPlot", parent: QWidget | None = None):
+        super().__init__(parent)
         self.plot_object = plot_object
-        self.figures: list[matplotlib.figure] = []
-        # iterate through subtabs
-        for i, _ in enumerate(self.toPlot):
-            # add subplots
+        self.tabs = []
+        self.draw()
+
+    @cached_property
+    def tabCount(self) -> int:
+        if self.plot_object.to_plot and self.plot_object.fit:
+            # This may become 3 later if residuals are involved.
+            return 2
+        elif self.plot_object.to_plot:
+            return 1
+        else:
+            raise ValueError("There is nothing to plot!")
+
+    def tabsForPlottable(self, tab: int) -> list[Plottable]:
+        assert self.plot_object.to_plot is not None
+        match tab:
+            case 0:
+                return [self.plot_object.to_plot]
+            case 1:
+                assert self.plot_object.fit is not None
+                return [self.plot_object.to_plot, self.plot_object.fit]
+            case _:
+                raise ValueError(f"The objects to be drawn in tab {tab} are not defined.")
+
+    def draw(self):
+        for i in range(self.tabCount):
+            plottables = self.tabsForPlottable(i)
             layout = QVBoxLayout()
-            figure = matplotlib.figure.Figure(figsize=(5, 5))
-            canvas = ClickableCanvas(figure)
-            layout.addWidget(canvas)
-            layout.addWidget(NavigationToolbar2QT(canvas))
-
-            # decide whether there is only one plot needs to be plotted. then, only one central plot is needed
-            # subplot_count = tabitem.child(i).childCount()
-            if i == 0 or i == 1:
-                subplot_count = 1
-            else:
-                subplot_count = 2
-            if subplot_count == 1:
-                ax = figure.subplots(subplot_count)
-                # putting the axes object in a list so that the access can be generic for both cases with multiple
-                # subplots and without
-                ax = [ax]
-            else:
-                # for multiple subplots: decide on the ratios for the bigger, central plot and the smaller, side plots
-                # region for the big central plot in gridspec
-                gridspec = figure.add_gridspec(ncols=2, width_ratios=[3, 1])
-                # region for the small side plots in sub_gridspec
-                sub_gridspec = gridspec[1].subgridspec(ncols=1, nrows=subplot_count - 1)
-
-                ax = [figure.add_subplot(gridspec[0])]
-                # add small plots to axes list, so it can be accessed that way
-                for idx in range(subplot_count-1):
-                    ax.append(figure.add_subplot(sub_gridspec[idx]))
-
-            # after the subplots are created, the axes objects need to be filled with actual lines/2d plots
-            # iterate through subplots
-            for j in range(subplot_count):
-                # set the title of the plot with the subplot name of the PlotTreeWidget item
-                ax[j].set_title(plot_object.to_plot.name)
-
-                # iterate through plottables and plot modifiers (PlotTreeWidget items)
-                for i in range(len(self.toPlot)):
-                    # check if the plottable or modifier item is a PlottableItem (actual data to be displayed)
-                    plottables = self.toPlot[:i+1]
-                    # The casting here assumes a certain order. Things will
-                    # break without that order.
-                    dataset = cast(SasMeasurement, plottables[0])
-                    fit = cast(TrackedFit, plottables[1]) if i == 1 else None
-
-                    # if the dataset is 2d, plotting will be done with a heatmap plot
-                    if dataset.dataset_type == two_dim:
-                        raise NotImplementedError("2D data is not currently supported in plotting.")
-                        # collect a possible existing colormap plot modifier (child item)
-                        # and save it, so that it can be used during plot creation
-                        colormap_modifier = ""
-                        for ii in range(plottable.childCount()):
-                            if isinstance(plottable.child(ii), ModifierColormap):
-                                colormap_modifier = plottable.child(ii).text(0).split('=')[1]
-                        if colormap_modifier == "":
-                            colormap_modifier = "jet"
-
-                        # get the data from the dataset for the plot
-                        x = dataset.x_data
-                        y = dataset.y_data
-                        y_fit = dataset.y_fit
-
-                        # check if the plot is a data plot (4), fit plot (5) or residual plot (6)
-                        if plottable.type_num == 4:
-                            ax[j].pcolor(x[0], x[1], y,
-                                            norm=matplotlib.colors.LogNorm(vmin=np.min(y),
-                                                                        vmax=np.max(y)),
-                                            cmap=colormap_modifier)
-                        elif plottable.type_num == 5:
-                            ax[j].pcolor(x[0], x[1], y_fit,
-                                            norm=matplotlib.colors.LogNorm(vmin=np.min(y_fit),
-                                                                        vmax=np.max(y_fit)),
-                                            cmap=colormap_modifier)
-                        elif plottable.type_num == 6:
-                            y_res = np.absolute(np.subtract(y_fit, y))
-                            ax[j].pcolor(x[0], x[1], y_res,
-                                            norm=matplotlib.colors.LogNorm(vmin=np.min(y_res),
-                                                                        vmax=np.max(y_res)),
-                                            cmap=colormap_modifier)
-
-                    # if it is not a 2d plot, it must be a 1d plot (line plot)
-                    else:
-                        # select again for data plot (1), fit plot (2) and residual plot (3)
-                        if i == 0:  # data plot: log-log plot, show only data
-                            ax[j].plot(dataset.abscissae.axes[0].value, dataset.ordinate.value, marker='o', linestyle='')
-                            ax[j].set_yscale('log')
-                            ax[j].set_xscale('log')
-                        elif i == 1:  # fit plot: log-log plot, show fit and data curve
-                            ax[j].plot(dataset.abscissae.axes[0].value, fit.fit.ordinate.value)
-                            ax[j].set_yscale('log')
-                            ax[j].set_xscale('log')
-                        # elif plottable.type_num == 3:  # residual plot lin-log plot, show calc and show res only
-                        #     ax[j].plot(dataset.x_data, np.subtract(dataset.y_fit, dataset.y_data))
-
-                        # iterate through plottable modifier, e.g. linecolor, linestyle
-                        plot = ""
-                        for plottable_modifier in self.plot_object.modifiers:
-                            if isinstance(plottable_modifier, ModifierLinecolor):
-                                ax[j].get_lines()[-1].set_color(plottable_modifier.modifier_value)
-                            elif isinstance(plottable_modifier, ModifierLinestyle):
-                                ax[j].get_lines()[-1].set_linestyle(plottable_modifier.modifier_value)
-
-                    # applying a colormap to a set of lines and setting the respective color to lines that are
-                    # returned by the axes object
-                    # elif isinstance(plottable_or_modifier_item, PlotModifier):
-                    #     plot_modifier = plottable_or_modifier_item
-                    #     if isinstance(plot_modifier, ModifierColormap):
-                    #         cmap = matplotlib.colormaps[plot_modifier.text(0).split('=')[1]]
-                    #         n = len(ax[j].get_lines())
-                    #         for m in range(n):
-                    #             ax[j].get_lines()[m].set_color(cmap(m/(n-1)))
-
-            # create the widget that will be inside the dock widget
+            figure = Figure(figsize=(5, 5))
+            tab_canvas = FigureCanvasQTAgg(figure)
+            layout.addWidget(tab_canvas)
+            layout.addWidget(NavigationToolbar2QT(tab_canvas))
+            self.drawTab(plottables, figure)
             figure.tight_layout()
             canvas_widget = QWidget()
             canvas_widget.setLayout(layout)
-
-            # create the main window, which is the container for the dock widget, so that it can be dragged out and
-            # put in again
-            dock_container = QMainWindow()
-            # set the object name for later, so that the style sheet changes for graying out only affects the dock
-            # container itself and not the child widgets of the dock container. fitpage_index is used as an identifier
-            # here
-            dock_container.setObjectName("DockContainer" + self.plot_object.to_plot.name)
-            dock_widget = QDockWidget()
-
-            dock_widget.topLevelChanged.connect(lambda x: self.grayOutOnDock(dock_container, dock_widget))
-
-            dock_widget.setWidget(canvas_widget)
-            dock_container.addDockWidget(Qt.DockWidgetArea.TopDockWidgetArea, dock_widget)
-
-            self.addTab(dock_container, self.tabName(i))
+            self.addTab(canvas_widget, tab_name(i))
             self.figures.append(figure)
 
+    def plot1d(self, data: SasMeasurement, axis: Axes, fit: TrackedFit | None = None):
+        axis.set_title(data.name)
+        axis.plot(data.abscissae.axes[0].value, data.ordinate.value, marker="o", linestyle="")
+        axis.set_yscale("log")
+        axis.set_xscale("log")
+        if fit:
+            axis.plot(fit.fit.abscissae.axes[0].value, fit.fit.ordinate.value)
+        for modifier in self.plot_object.modifiers:
+            modifier.modify_axes(axis)
 
+    def drawTab(self, plottables: list[Plottable], figure: Figure):
+        if len(plottables) <= 2:
+            axis = figure.subplots()
+            # putting the axes object in a list so that the access can be
+            # generic for both cases with multiple subplots and without
+            axes = [axis]
+        else:
+            # for multiple subplots: decide on the ratios for the bigger, central plot and the smaller, side plots
+            # region for the big central plot in gridspec
+            gridspec = figure.add_gridspec(ncols=2, width_rations=[3, 1])
+            # region for the small side plots in sub_gridspec
+            sub_gridspec = gridspec[1].subgridspec(ncols=1, nrows=len(plottables) - 1)
+
+            axes = [figure.add_subplot(gridspec[0])]
+            # add small plots to axes list, so it can be accessed that way
+            for axis_no in range(len(plottables) - 1):
+                axes.append(figure.add_subplot(sub_gridspec[axis_no]))
+        for i, axis in enumerate(axes):
+            match i:
+                case 0:
+                    data = cast(SasMeasurement, plottables[0])
+                    fit = cast("TrackedFit", plottables[1]) if len(plottables) > 1 else None
+                    self.plot1d(data, axis, fit)
+                case 1:
+                    raise NotImplementedError("Residuals plot is not implemented yet.")
+                case _:
+                    raise ValueError("There are more axes than what the plotter knows what to do with.")
