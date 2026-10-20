@@ -5,7 +5,7 @@ from functools import cached_property
 from sasdata.data import SasData, SasMeasurement
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 from PySide6.QtWidgets import QTabWidget, QMainWindow, QDockWidget, QWidget, QVBoxLayout
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
     from sas.refactored import TrackedPlot, TrackedFit
@@ -102,5 +102,13 @@ class SubTabs(QTabWidget):
             # add small plots to axes list, so it can be accessed that way
             for axis_no in range(len(plottables) - 1):
                 axes.append(figure.add_subplot(sub_gridspec[axis_no]))
-        for axis in axes:
-            raise NotImplementedError()
+        for i, axis in enumerate(axes):
+            match i:
+                case 0:
+                    data = cast(SasMeasurement, plottables[0])
+                    fit = cast("TrackedFit", plottables[1]) if len(plottables) > 1 else None
+                    self.plot1d(data, axis, fit)
+                case 1:
+                    raise NotImplementedError("Residuals plot is not implemented yet.")
+                case _:
+                    raise ValueError("There are more axes than what the plotter knows what to do with.")
