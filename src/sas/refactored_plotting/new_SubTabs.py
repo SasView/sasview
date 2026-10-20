@@ -1,3 +1,4 @@
+from functools import cached_property
 from sasdata.data import SasData, SasMeasurement
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 from PySide6.QtWidgets import QTabWidget, QMainWindow, QDockWidget, QWidget
@@ -41,8 +42,31 @@ class SubTabs(QTabWidget):
         self.tabs = []
         self.draw()
 
+    @cached_property
+    def tabCount(self) -> int:
+        if self.plot_object.to_plot and self.plot_object.fit:
+            # This may become 3 later if residuals are involved.
+            return 2
+        elif self.plot_object.to_plot:
+            return 1
+        else:
+            raise ValueError("There is nothing to plot!")
+
+    def tabsForPlottable(self, tab: int) -> list[Plottable]:
+        assert self.plot_object.to_plot is not None
+        match tab:
+            case 0:
+                return [self.plot_object.to_plot]
+            case 1:
+                assert self.plot_object.fit is not None
+                return [self.plot_object.to_plot, self.plot_object.fit]
+            case _:
+                raise ValueError(f"The objects to be drawn in tab {tab} are not defined.")
+
     def draw(self):
-        raise NotImplementedError()
+        for i in range(self.tabCount):
+            tabs = self.tabsForPlottable(i)
+            raise NotImplementedError()
 
     def drawTab(self, cansas: FigureCanvasQTAgg, plottables: list[Plottable]):
         raise NotImplementedError()
