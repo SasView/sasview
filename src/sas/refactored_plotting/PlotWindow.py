@@ -1,15 +1,16 @@
-from sas.refactored_plotting.PlotModifiers import PlotModifier
-from matplotlib.backends.backend_qt import NavigationToolbar2QT
-from matplotlib.figure import Figure
-from matplotlib.axes import Axes
 from functools import cached_property
-from sasdata.data import SasData, SasMeasurement
-from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
-from PySide6.QtWidgets import QTabWidget, QMainWindow, QDockWidget, QWidget, QVBoxLayout
 from typing import TYPE_CHECKING, cast
 
+from matplotlib.axes import Axes
+from matplotlib.backends.backend_qt import NavigationToolbar2QT
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
+from matplotlib.figure import Figure
+from PySide6.QtWidgets import QDockWidget, QMainWindow, QTabWidget, QVBoxLayout, QWidget
+
+from sasdata.data import SasMeasurement
+
 if TYPE_CHECKING:
-    from sas.refactored import TrackedPlot, TrackedFit
+    from sas.refactored import TrackedFit, TrackedPlot
 
 type Plottable = "SasMeasurement | TrackedFit"
 

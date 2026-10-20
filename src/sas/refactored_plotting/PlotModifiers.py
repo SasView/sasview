@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Literal, get_args
+
 from matplotlib.axes import Axes
 
 LineStyleType = Literal['solid', 'dotted', 'dashed', 'dashdot']
