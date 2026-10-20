@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QTabWidget
 
-from sas.refactored_plotting.SubTabs import SubTabs
+from sas.refactored_plotting.SubTabs import PlotWindow
 
 
 class PlotWidget(QTabWidget):
@@ -24,7 +24,7 @@ class PlotWidget(QTabWidget):
 
         self.dataviewer.remove_plottree_item(index)
 
-    def widget(self, index) -> SubTabs:
+    def widget(self, index) -> PlotWindow:
         return super().widget(index)
 
     def redrawTab(self, tabitem):
@@ -34,11 +34,11 @@ class PlotWidget(QTabWidget):
         plot_index = self.datacollector.get_data_by_fp(fitpage_index).plotpage_index
         if plot_index == -1:
             self.datacollector.set_plot_index(fitpage_index, self.count())
-            self.addTab(SubTabs(self.datacollector, tabitem),
+            self.addTab(PlotWindow(self.datacollector, tabitem),
                         "Plot for FitPage " + str(fitpage_index))
         else:
             self.removeTab(plot_index)
-            self.insertTab(plot_index, SubTabs(self.datacollector, tabitem),
+            self.insertTab(plot_index, PlotWindow(self.datacollector, tabitem),
                            "Plot for FitPage " + str(fitpage_index))
 
     def get_subtabs(self, fitpage_index):

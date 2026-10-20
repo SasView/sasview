@@ -9,7 +9,7 @@ from PySide6.QtWidgets import QDialog, QWidget
 from sasdata.data import SasData, SasMeasurement
 
 from sas.refactored_plotting.PlotModifiers import PlotModifier
-from sas.refactored_plotting.SubTabs import SubTabs
+from sas.refactored_plotting.SubTabs import PlotWindow
 
 if TYPE_CHECKING:
     from sas.data_manager import NewDataManager as DataManager
@@ -149,7 +149,7 @@ class TrackedFit:
 
 class TrackedPlot:
     _data_manager: "DataManager"
-    plot_widget: SubTabs | None
+    plot_widget: PlotWindow | None
 
     def __init__(self, data_manager: "DataManager"):
         self._data_manager = data_manager
@@ -178,7 +178,7 @@ class TrackedPlot:
     def update_plot(self):
         # TODO: Check the old window, and remove it if necessary.
         if self.to_plot:
-            new_plot_widget = SubTabs(self)
+            new_plot_widget = PlotWindow(self)
             if self.plot_widget:
                 self._data_manager.replace_plot.emit(self.plot_widget, new_plot_widget)
             else:
