@@ -75,5 +75,22 @@ class SubTabs(QTabWidget):
             layout.addWidget(NavigationToolbar2QT(tab_canvas))
             self.drawTab(tab_canvas, plottables)
 
-    def drawTab(self, cansas: FigureCanvasQTAgg, plottables: list[Plottable]):
-        raise NotImplementedError()
+    def drawTab(self, cansas: FigureCanvasQTAgg, plottables: list[Plottable], figure: Figure):
+        if len(plottables) == 1:
+            axis = figure.subplots()
+            # putting the axes object in a list so that the access can be
+            # generic for both cases with multiple subplots and without
+            axes = [axis]
+        else:
+            # for multiple subplots: decide on the ratios for the bigger, central plot and the smaller, side plots
+            # region for the big central plot in gridspec
+            gridspec = figure.add_gridspec(ncols=2, width_rations=[3, 1])
+            # region for the small side plots in sub_gridspec
+            sub_gridspec = gridspec[1].subgridspec(ncols=1, nrows=len(plottables) - 1)
+
+            axes = [figure.add_subplot(gridspec[0])]
+            # add small plots to axes list, so it can be accessed that way
+            for axis_no in range(len(plottables) - 1):
+                axes.append(figure.add_subplot(sub_gridspec[axis_no]))
+        for axis in axes:
+            raise NotImplementedError()
