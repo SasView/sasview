@@ -40,6 +40,7 @@ class SubTabs(QTabWidget):
 
     plot_object: "TrackedPlot"
     tabs: list[FigureCanvasQTAgg]
+    figures: list[Figure]
 
     def grayOutOnDock(self, dock_container: QMainWindow, dock_widget: QDockWidget):
         """
@@ -91,6 +92,11 @@ class SubTabs(QTabWidget):
             layout.addWidget(tab_canvas)
             layout.addWidget(NavigationToolbar2QT(tab_canvas))
             self.drawTab(tab_canvas, plottables, figure)
+            figure.tight_layout()
+            canvas_widget = QWidget()
+            canvas_widget.setLayout(layout)
+            self.addTab(canvas_widget, tab_name(i))
+            self.figures.append(figure)
 
     def plot1d(self, data: SasMeasurement, axis: Axes, fit: TrackedFit | None = None):
         axis.set_title(data.name)
