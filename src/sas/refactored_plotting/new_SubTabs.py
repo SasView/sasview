@@ -1,3 +1,4 @@
+from sas.refactored_plotting.PlotModifiers import PlotModifier
 from matplotlib.backends.backend_qt import NavigationToolbar2QT
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
@@ -105,7 +106,8 @@ class SubTabs(QTabWidget):
         axis.set_xscale("log")
         if fit:
             axis.plot(fit.fit.abscissae.axes[0].value, fit.fit.ordinate.value)
-        # TODO: Modifiers.
+        for modifier in self.plot_object.modifiers:
+            modifier.modify_axes(axis)
 
     def drawTab(self, cansas: FigureCanvasQTAgg, plottables: list[Plottable], figure: Figure):
         if len(plottables) <= 2:
