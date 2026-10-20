@@ -61,6 +61,7 @@ class SubTabs(QTabWidget):
         super().__init__(parent)
         self.plot_object = plot_object
         self.tabs = []
+        self.figures = []
         self.draw()
 
     @cached_property
