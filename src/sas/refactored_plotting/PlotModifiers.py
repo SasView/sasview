@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Literal, get_args
+from matplotlib.axes import Axes
 
 LineStyleType = Literal['solid', 'dotted', 'dashed', 'dashdot']
 # TODO: This should probably be an RGB value. The current value is just a placeholder.
@@ -20,6 +21,10 @@ class PlotModifier(ABC):
     def explorer_item_name(self) -> str:
         pass
 
+    @abstractmethod
+    def modify_axes(self, axes: Axes):
+        pass
+
     @staticmethod
     @abstractmethod
     def options() -> list:
@@ -37,6 +42,9 @@ class ModifierLinestyle(PlotModifier):
     @property
     def explorer_item_name(self) -> str:
         return f"Line Style: {self.line_style}"
+
+    def modify_axes(self, axes: Axes):
+        axes.get_lines()[-1].set_linestyle(self.modifier_value)
 
     @staticmethod
     def options() -> list[str]:
@@ -56,6 +64,9 @@ class ModifierLinecolor(PlotModifier):
     def explorer_item_name(self) -> str:
         return f"Line Colour: {self.line_colour}"
 
+    def modify_axes(self, axes: Axes):
+        axes.get_lines()[-1].set_color(self.modifier_value)
+
     @staticmethod
     def options() -> list[str]:
         return get_args(ColourType)
@@ -73,6 +84,9 @@ class ModifierColormap(PlotModifier):
     @property
     def explorer_item_name(self) -> str:
         return f"Plot Colour: {self.colour}"
+
+    def modify_axes(self, axes: Axes):
+        raise NotImplementedError("Color map is not implemented for plots.")
 
     @staticmethod
     def options() -> list[str]:
