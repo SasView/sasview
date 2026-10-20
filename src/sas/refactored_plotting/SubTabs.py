@@ -99,7 +99,7 @@ class SubTabs(QTabWidget):
             self.addTab(canvas_widget, tab_name(i))
             self.figures.append(figure)
 
-    def plot1d(self, data: SasMeasurement, axis: Axes, fit: TrackedFit | None = None):
+    def plot1d(self, data: SasMeasurement, axis: Axes, fit: "TrackedFit | None" = None):
         axis.set_title(data.name)
         axis.plot(data.abscissae.axes[0].value, data.ordinate.value, marker="o", linestyle="")
         axis.set_yscale("log")
