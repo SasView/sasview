@@ -22,7 +22,7 @@ def write_plugin_model(structure_path: str):
 
     path = Path(find_plugins_dir()) / "ausaxs_saxs_plugin.py"
     text = get_model_text(structure_path)
-    with open(path, 'w') as f:
+    with open(path, 'w', encoding="utf-8") as f:
         f.write(text)
 
 def get_model_text(structure_path: str) -> str:
