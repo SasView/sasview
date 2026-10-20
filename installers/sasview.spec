@@ -6,6 +6,8 @@ import warnings
 import platform
 import sysconfig
 
+from PyInstaller.utils.hooks import collect_submodules
+
 block_cipher = None
 PYTHON_PACKAGES = sysconfig.get_path('platlib')
 
@@ -55,6 +57,14 @@ hiddenimports = [
     'debugpy._vendored',
     'tccbox',
 ]
+
+# import free-form if available
+# won't be included in the build if unavailable
+try:
+    import ffsi  # noqa: F401
+    hiddenimports += collect_submodules('ffsi')
+except ImportError:
+    warnings.warn("ffsi not available; free-form inversion will not be included")
 
 hooksconfig = {
     "matplotlib": {
