@@ -157,8 +157,8 @@ class TrackedPlot:
 
 
     @property
-    def to_plot(self) -> SasData | None:
-        return self._data_manager.get_association_of_type(self, SasData)
+    def to_plot(self) -> SasMeasurement | None:
+        return self._data_manager.get_association_of_type(self, SasMeasurement)
 
     @property
     def fit(self) -> TrackedFit | None:
