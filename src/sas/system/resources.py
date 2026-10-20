@@ -43,6 +43,8 @@ import importlib.resources
 import itertools
 import logging
 import re
+import shutil
+import site
 import tempfile
 from collections.abc import Generator
 from pathlib import Path, PurePath
@@ -136,7 +138,7 @@ class ModuleResources:
             yield tmp_path
 
     def path_to_resource(self, src: str | PurePath) -> Path:
-        """Provide the filesystem path to a file resource
+        """Provide the filesystem path to a file resource (not a directory)
 
         If the resource is already available on the filesystem, then provide
         the path to it directly; if it is not available, then a FileNotFoundError
@@ -283,24 +285,28 @@ class ModuleResources:
 
     def _path_to_resource_adjacent(self, src: str, accept: _ResType = _ResType.FILE) -> Path | None:
         """calculate the filesystem path to the recorded resource if it exists"""
-        resource = importlib.resources.files(self.module) / src
-
         # importlib.resources will always return something... but it might
-        # not exist, so the is_file() check is needed.
+        # not exist, so the is_file() check is needed. There is no node.exists() method.
         # If the resource is on disk, then importlib.resources.readers.FileReader
         # will return a pathlib.Path object directly to the resource which is
-        # all that is needed here
+        # all that is needed here.
+        def check_node(node):
+            return (node.is_file() and accept == _ResType.FILE) or (node.is_dir() and accept == _ResType.DIR)
 
-        result = None
-
-        if isinstance(resource, Path):
-            if (resource.is_file() and _ResType.FILE in accept) or (resource.is_dir() and _ResType.DIR in accept):
-                result = resource
-
-        if result:
+        resource = importlib.resources.files(self.module) / src
+        if check_node(resource):
             logger.debug("Found adjacent: %s", resource)
+            return resource
 
-        return result
+        # For editable distributions, the docs and example data are compiled into
+        # subdirectories of site-packages/sas, so check for resources there as well.
+        for path in site.getsitepackages():
+            resource = Path(path) / self.module / src
+            if check_node(resource):
+                logger.debug("Found adjacent: %s", resource)
+                return resource
+
+        return None
 
     def _extract_resource_adjacent(self, src: str, dest: Path) -> bool:
         """extract the adjacent resource (if it exists) to the destination filename
@@ -309,8 +315,8 @@ class ModuleResources:
 
         This method should should transparently access resources in zip bundles
         """
-        resource_path = importlib.resources.files(self.module) / src
-        if not resource_path.is_file():
+        resource_path = self._path_to_resource_adjacent(src)
+        if not resource_path:
             return False
 
         if not dest.parent.exists():
@@ -326,37 +332,16 @@ class ModuleResources:
 
         dest must be a directory
         """
-        # normalise the representation
-        spth = Path(src)
-        src = str(spth)
-
-        dpth = Path(dest)
-        dpth.mkdir(exist_ok=True, parents=True)
-
-        found = False
-        try:
-            for resource in importlib.resources.files(self.module).joinpath(src).iterdir():
-                f_name = dpth / resource.name
-                s_name = spth / resource.name
-                if "__pycache__" in resource.name:
-                    continue
-
-                if resource.is_dir():
-                    # recurse into the directory
-                    found |= self._extract_resource_tree_adjacent(s_name, f_name)
-                elif resource.is_file():
-                    if not f_name.exists():
-                        logger.debug("Found adjacent: %s", s_name)
-                        with open(f_name, "wb") as dh:
-                            dh.write(resource.read_bytes())
-                    found = True
-                else:
-                    logger.warning("Skipping %s (unknown type)", str(s_name))
-        except FileNotFoundError:
-            # specified path does not exist or is not a directory
+        resource = self._path_to_resource_adjacent(src, accept=_ResType.DIR)
+        if not resource:
             return False
 
-        return found
+        with importlib.resources.as_file(resource) as source_path:
+            destination_path = Path(dest)
+            destination_path.mkdir(exist_ok=True, parents=True)
+            shutil.copytree(source_path, destination_path, dirs_exist_ok=True)
+
+        return True
 
 
 def _clean_path(src: str | PurePath) -> str:
