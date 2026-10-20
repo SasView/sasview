@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QTabWidget
 
-from sas.refactored_plotting.SubTabs import PlotWindow
+from sas.refactored_plotting.PlotWindow import PlotWindow
 
 
 class PlotWidget(QTabWidget):
