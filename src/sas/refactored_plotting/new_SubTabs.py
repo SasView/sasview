@@ -73,7 +73,7 @@ class SubTabs(QTabWidget):
             tab_canvas = FigureCanvasQTAgg(figure)
             layout.addWidget(tab_canvas)
             layout.addWidget(NavigationToolbar2QT(tab_canvas))
-            self.drawTab(tab_canvas, plottables)
+            self.drawTab(tab_canvas, plottables, figure)
 
     def drawTab(self, cansas: FigureCanvasQTAgg, plottables: list[Plottable], figure: Figure):
         if len(plottables) == 1:
