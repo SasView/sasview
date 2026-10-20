@@ -9,7 +9,7 @@ from PySide6.QtWidgets import QDialog, QWidget
 from sasdata.data import SasData, SasMeasurement
 
 from sas.refactored_plotting.PlotModifiers import PlotModifier
-from sas.refactored_plotting.SubTabs import PlotWindow
+from sas.refactored_plotting.PlotWindow import PlotWindow
 
 if TYPE_CHECKING:
     from sas.data_manager import NewDataManager as DataManager
