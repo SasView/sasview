@@ -92,7 +92,7 @@ class SubTabs(QTabWidget):
             tab_canvas = FigureCanvasQTAgg(figure)
             layout.addWidget(tab_canvas)
             layout.addWidget(NavigationToolbar2QT(tab_canvas))
-            self.drawTab(tab_canvas, plottables, figure)
+            self.drawTab(plottables, figure)
             figure.tight_layout()
             canvas_widget = QWidget()
             canvas_widget.setLayout(layout)
@@ -109,7 +109,7 @@ class SubTabs(QTabWidget):
         for modifier in self.plot_object.modifiers:
             modifier.modify_axes(axis)
 
-    def drawTab(self, cansas: FigureCanvasQTAgg, plottables: list[Plottable], figure: Figure):
+    def drawTab(self, plottables: list[Plottable], figure: Figure):
         if len(plottables) <= 2:
             axis = figure.subplots()
             # putting the axes object in a list so that the access can be
