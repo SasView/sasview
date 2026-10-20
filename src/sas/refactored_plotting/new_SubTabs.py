@@ -12,6 +12,22 @@ if TYPE_CHECKING:
 
 type Plottable = "SasMeasurement | TrackedFit"
 
+tab_name_dict = {0: "Data", 1: "Fit"}
+
+
+def tab_name(i: int) -> str:
+    return tab_name_dict.get(i, "Unknown")
+
+
+def tabName(i: int) -> str:
+    match i:
+        case 0:
+            return "Data"
+        case 1:
+            return "Fit"
+        case _:
+            return "Unknown"
+
 
 class SubTabs(QTabWidget):
     """
