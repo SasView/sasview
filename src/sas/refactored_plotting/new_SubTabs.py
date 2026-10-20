@@ -1,8 +1,12 @@
+from sasdata.data import SasData, SasMeasurement
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 from PySide6.QtWidgets import QTabWidget, QMainWindow, QDockWidget, QWidget
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from sas.refactored import TrackedPlot
+    from sas.refactored import TrackedPlot, TrackedFit
+
+type Plottable = "SasMeasurement | TrackedFit"
 
 
 class SubTabs(QTabWidget):
@@ -15,6 +19,7 @@ class SubTabs(QTabWidget):
     """
 
     plot_object: "TrackedPlot"
+    tabs: list[FigureCanvasQTAgg]
 
     def grayOutOnDock(self, dock_container: QMainWindow, dock_widget: QDockWidget):
         """
@@ -33,7 +38,11 @@ class SubTabs(QTabWidget):
     def __init__(self, plot_object: "TrackedPlot", parent: QWidget | None = None):
         super().__init__(parent)
         self.plot_object = plot_object
+        self.tabs = []
         self.draw()
 
     def draw(self):
+        raise NotImplementedError()
+
+    def drawTab(self, cansas: FigureCanvasQTAgg, plottables: list[Plottable]):
         raise NotImplementedError()
