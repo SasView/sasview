@@ -20,7 +20,7 @@ valid_associations: list[tuple[str | type, str | type]] = [
     ('Perspective', Trend),
     ('Perspective', TrackedPlot),
     (Trend, SasData),
-    (TrackedPlot, SasData),
+    (TrackedPlot, SasMeasurement),
     (TrackedPlot, TrackedFit),
     (TrackedPlot, PlotModifier),
     (TrackedFit, SasData)
