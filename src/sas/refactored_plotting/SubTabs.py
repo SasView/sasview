@@ -20,7 +20,7 @@ def tab_name(i: int) -> str:
     return tab_name_dict.get(i, "Unknown")
 
 
-class SubTabs(QTabWidget):
+class PlotWindow(QTabWidget):
     """
     Class for keeping subtabs and adding figures with subplots to them. It takes a tabitem to process and iterates
     over all the existing children of the given tabitem to plot their contents in the respective order. For example
