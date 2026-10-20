@@ -1,5 +1,6 @@
 from matplotlib.backends.backend_qt import NavigationToolbar2QT
 from matplotlib.figure import Figure
+from matplotlib.axes import Axes
 from functools import cached_property
 from sasdata.data import SasData, SasMeasurement
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
@@ -74,6 +75,15 @@ class SubTabs(QTabWidget):
             layout.addWidget(tab_canvas)
             layout.addWidget(NavigationToolbar2QT(tab_canvas))
             self.drawTab(tab_canvas, plottables, figure)
+
+    def plot1d(self, data: SasMeasurement, axis: Axes, fit: TrackedFit | None = None):
+        axis.set_title(data.name)
+        axis.plot(data.abscissae.axes[0].value, data.ordinate.value, marker="o", linestyle="")
+        axis.set_yscale("log")
+        axis.set_xscale("log")
+        if fit:
+            axis.plot(fit.fit.abscissae.axes[0].value, fit.fit.ordinate.value)
+        # TODO: Modifiers.
 
     def drawTab(self, cansas: FigureCanvasQTAgg, plottables: list[Plottable], figure: Figure):
         if len(plottables) == 1:
