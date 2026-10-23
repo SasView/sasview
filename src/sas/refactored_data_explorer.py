@@ -1,3 +1,4 @@
+from sasdata.data import SasData
 import logging
 from os.path import basename
 
@@ -12,8 +13,6 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-
-from sasdata.data import SasData
 from sasdata.data_io.importers.import_ascii import load_data as load_advanced_ascii_data
 from sasdata.data_io.importers.import_ascii import load_data_default_params as load_ascii_data
 from sasdata.data_io.importers.import_hdf5 import load_data as load_hdf5_data
@@ -71,9 +70,7 @@ class NewDataExplorer(QWidget):
 
         self.filter_row = QHBoxLayout()
         filter_names = ["Data", "Perspective", "Theory", "Plot"]
-        self.filter_buttons: dict[str, QPushButton] = {
-            name: QPushButton(name, self) for name in filter_names
-        }
+        self.filter_buttons: dict[str, QPushButton] = {name: QPushButton(name, self) for name in filter_names}
         for widget in self.filter_buttons.values():
             widget.setCheckable(True)
             self.filter_row.addWidget(widget)
@@ -142,9 +139,10 @@ class NewDataExplorer(QWidget):
             self._data_manager.add_data(plot_object)
             self._data_manager.make_association(plot_object, to_plot)
             plot_object.update_plot()
-
         else:
-            QMessageBox.critical(self, "Plotting Error", "The selected item is not a data object. Only data objects can be plotted.")
+            QMessageBox.critical(
+                self, "Plotting Error", "The selected item is not a data object. Only data objects can be plotted."
+            )
 
     @Slot()
     def onLoadFile(self):
