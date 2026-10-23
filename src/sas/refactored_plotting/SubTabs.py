@@ -9,8 +9,7 @@ from PySide6.QtWidgets import QDockWidget, QMainWindow, QTabWidget, QVBoxLayout,
 from sasdata.data import SasData, SasMeasurement
 from sasdata.dataset_types import two_dim
 
-from sas.refactored_plotting.PlotModifiers import ModifierColormap, ModifierLinecolor, ModifierLinestyle, PlotModifier
-from typing import TYPE_CHECKING, cast
+from sas.refactored_plotting.PlotModifiers import ModifierColormap, ModifierLinecolor, ModifierLinestyle
 
 if TYPE_CHECKING:
     from sas.refactored import TrackedFit, TrackedPlot
