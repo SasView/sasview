@@ -24,6 +24,7 @@ from sas.data_explorer_error_message import DataExplorerErrorMessage
 from sas.data_explorer_tree import DataExplorerTree
 from sas.data_manager import NewDataManager as DataManager
 from sas.dummy_perspective import DummyPerspective
+from sas.qtgui.Perspectives.Inversion.InversionWidget import InversionWidget
 from sas.qtgui.Utilities.MuMag.MuMag import MuMag
 from sas.refactored import Perspective, TrackedPlot
 
@@ -33,7 +34,7 @@ perspectives: dict[str, None | Perspective] = {
     "Corfunc": None,
     "Fitting": None,
     "Invariant": None,
-    "Inversion": None,
+    "Inversion": InversionWidget,
     "Dummy": DummyPerspective,
     "Mumag": MuMag,
 }
@@ -71,9 +72,7 @@ class NewDataExplorer(QWidget):
 
         self.filter_row = QHBoxLayout()
         filter_names = ["Data", "Perspective", "Theory", "Plot"]
-        self.filter_buttons: dict[str, QPushButton] = {
-            name: QPushButton(name, self) for name in filter_names
-        }
+        self.filter_buttons: dict[str, QPushButton] = {name: QPushButton(name, self) for name in filter_names}
         for widget in self.filter_buttons.values():
             widget.setCheckable(True)
             self.filter_row.addWidget(widget)
@@ -142,9 +141,10 @@ class NewDataExplorer(QWidget):
             self._data_manager.add_data(plot_object)
             self._data_manager.make_association(plot_object, to_plot)
             plot_object.update_plot()
-
         else:
-            QMessageBox.critical(self, "Plotting Error", "The selected item is not a data object. Only data objects can be plotted.")
+            QMessageBox.critical(
+                self, "Plotting Error", "The selected item is not a data object. Only data objects can be plotted."
+            )
 
     @Slot()
     def onLoadFile(self):

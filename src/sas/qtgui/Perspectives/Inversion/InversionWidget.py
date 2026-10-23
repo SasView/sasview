@@ -1,26 +1,35 @@
-
 import logging
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, override
 
+import numpy.typing as npt
 from PySide6.QtCore import Signal
-from PySide6.QtGui import QIntValidator, QStandardItem
+from PySide6.QtGui import QIntValidator
 from PySide6.QtWidgets import QWidget
 
+from sasdata.data import SasMeasurement
+
+from sas.data_manager import NewDataManager, TrackedData
 from sas.qtgui.Perspectives.Inversion.DMaxExplorerWidget import DmaxWindow
 from sas.qtgui.Perspectives.Inversion.InversionLogic import InversionLogic
 from sas.qtgui.Perspectives.Inversion.Thread import CalcBatchPr, CalcPr, EstimateNT
 from sas.qtgui.Perspectives.Inversion.UI.TabbedInversionUI import Ui_PrInversion
-from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
+from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Utilities.GridPanel import BatchInversionOutputPanel
 from sas.qtgui.Utilities.GuiUtils import (
-    Communicate,
     DoubleValidator,
-    HashableStandardItem,
-    dataFromItem,
-    updateModelItemWithPlot,
 )
+from sas.refactored import FitModelParameters, Perspective, TrackedFit, TrackedPlot
 from sas.sascalc.pr.invertor import Invertor
+
+
+class InversionFitModelParameters(FitModelParameters):
+    c_parameters: npt.NDArray
+    # TODO: It would be nice to return something which says what these
+    # parameters actually are, but I can't find what each one means.
+
+    def __init__(self, params: npt.NDArray):
+        self.c_parameters = params
 
 
 @dataclass
@@ -79,21 +88,18 @@ MAX_DIST = 140.0
 
 logger = logging.getLogger(__name__)
 
-class InversionWidget(QWidget, Ui_PrInversion):
+class InversionWidget(Perspective, Ui_PrInversion):
     calculationComplete = Signal()
     batchCalculationOutput = Signal(object)
     estimationComplete = Signal()
     changeBackgroundMode = Signal()
+    showPlotsEvent = Signal()
 
-    def __init__(self, window, parent=None, data=None, tab_id=1, tab_name=''):
-        super(InversionWidget, self).__init__()
+    def __init__(self, data_manager: NewDataManager, parent: QWidget | None = None):
+        super().__init__(data_manager, parent)
 
-        self.parent = parent
-        self.window = window
-        self.tab_name = tab_name
-        self.tab_id = tab_id
-
-        self.communicator: Communicate  = self.parent.communicator()
+        # self.tab_name = tab_name
+        # self.tab_id = tab_id
 
         # We're going to use this structure even if we're just dealing with one specific datum. Just that this list
         # would then have one item in it.
@@ -113,10 +119,28 @@ class InversionWidget(QWidget, Ui_PrInversion):
                              self.minQInput, self.maxQInput, self.slitHeightInput, self.slitHeightInput]
 
         self.updateGuiValues()
+        self.enableButtons()
         self.events()
 
+    @property
+    @override
+    def title(self) -> str:
+        return "Inversion"
+
+    @property
+    @override
+    def supported_data(self) -> set[type[TrackedData]]:
+        return {SasMeasurement}
+
+    @property
+    @override
+    def supports_multiple_data(self) -> bool:
+        # TODO: Eventually we'll want this to be true for batch mode. At the
+        # moment, we're not going to support batch mode.
+        return False
+
     def initResult(self) -> InversionResult:
-        logic = InversionLogic()
+        logic = InversionLogic(self)
         return InversionResult(
             logic=logic,
             calculator=Invertor(logic),
@@ -137,10 +161,9 @@ class InversionWidget(QWidget, Ui_PrInversion):
         self.explorerButton.clicked.connect(self.openExplorerWindow)
         self.estimateBgd.pressed.connect(self.handleBackgroundModeChange)
         self.manualBgd.pressed.connect(self.handleBackgroundModeChange)
-        self.dataList.currentIndexChanged.connect(self.handleCurrentDataChanged)
         self.helpButton.clicked.connect(self.onHelp)
-        self.removeButton.clicked.connect(self.handleRemove)
         self.showResultsButton.clicked.connect(self.handleShowResults)
+        self.showPlotsEvent.connect(self.showPlots)
 
         for input_box in self.input_boxes:
             input_box.editingFinished.connect(self.startEstimateParameters)
@@ -152,9 +175,6 @@ class InversionWidget(QWidget, Ui_PrInversion):
             self.currentResult.data_plot.slider_high_q_input = []
             self.currentResult.data_plot.slider_high_q_setter = []
 
-        to_remove = self.dataList.currentIndex()
-        self.dataList.removeItem(to_remove)
-        _ = self.results.pop(to_remove)
         # If there's no results left, we need an empty one.
         if len(self.results) == 0:
             self.results.append(self.initResult())
@@ -169,53 +189,14 @@ class InversionWidget(QWidget, Ui_PrInversion):
             self.updateGuiValues()
             self.startEstimateParameters()
 
-    # TODO: Need to verify type hint for data.
-    def updateTab(self, data: HashableStandardItem | list[HashableStandardItem], tab_id: int):
-        self.tab_id = tab_id
-        if isinstance(data, list):
-            self.results = []
-            self.dataList.clear()
-            for datum_item in data:
-                new_result = self.initResult()
-                new_result.logic.data = datum_item
-                datum = dataFromItem(datum_item)
-                self.dataList.addItem(datum.name)
-                self.results.append(new_result)
-        else:
-            self.currentData = data
-            self.dataList.clear()
-            self.dataList.addItem(self.currentData.name)
-        self.dataList.setCurrentIndex(0)
-        self.updateGuiValues()
-        self.enableButtons()
-        self.startEstimateParameters()
-
     @property
     def is_batch(self) -> bool:
         return len(self.results) > 1
 
     @property
-    def currentDataIndex(self) -> int:
-        return self.dataList.currentIndex()
-
-    @property
     def currentResult(self) -> InversionResult:
-        return self.results[self.currentDataIndex]
-
-    @property
-    def currentData(self) -> Data1D | None:
-        return self.currentResult.logic.data
-
-    @property
-    def currentDataItem(self) -> QStandardItem | None:
-        return self.currentResult.logic.data_item
-
-    @currentData.setter
-    def currentData(self, value: HashableStandardItem | None):
-        self.currentResult.logic.data = value
-        if value is not None:
-            self.onNewData()
-
+        # TODO: This is temporary. The current result was because of batch.
+        return self.results[0]
 
     # TODO: I don't know if 'float' is the right type hint.
     @property
@@ -226,12 +207,15 @@ class InversionWidget(QWidget, Ui_PrInversion):
     def q_min(self) -> float:
         return self.currentResult.calculator.q_min
 
-    def onNewData(self):
+    @override
+    def newData(self):
         # FIXME: This mutates the data even for other perspectives.
         self.currentResult.logic.add_errors()
         qmin, qmax = self.currentResult.logic.computeDataRange()
         self.currentResult.calculator.q_min = qmin
         self.currentResult.calculator.q_max = qmax
+        self.updateGuiValues()
+        self.enableButtons()
 
     # TODO: Probably change this name.
     def enableButtons(self):
@@ -248,7 +232,6 @@ class InversionWidget(QWidget, Ui_PrInversion):
         self.showResultsButton.setEnabled(self.currentResult.logic.data_is_loaded
                                           and self.is_batch
                                           and not self.isCalculating and self.batchResultsWindow is not None)
-        self.removeButton.setEnabled(self.currentResult.logic.data_is_loaded and not self.isCalculating)
         self.explorerButton.setEnabled(self.currentResult.logic.data_is_loaded and not self.isCalculating)
         self.stopButton.setVisible(self.isCalculating)
         self.regConstantSuggestionButton.setEnabled(self.currentResult.logic.data_is_loaded and not self.isCalculating)
@@ -293,6 +276,9 @@ class InversionWidget(QWidget, Ui_PrInversion):
             self.posFractionValue.setText(format_float(out.pos_frac))
             self.sigmaPosFractionValue.setText(format_float(out.pos_err))
 
+        if self.associatedSasMeasurement:
+            self.dataNameLabel.setText(self.associatedSasMeasurement.name)
+
     def clearGuiValues(self):
 
         value_text_boxes = [*self.input_boxes, self.rgValue, self.iQ0Value, self.backgroundValue, self.backgroundInput,
@@ -316,9 +302,6 @@ class InversionWidget(QWidget, Ui_PrInversion):
         self.noOfTermsSuggestionButton.setText(str(nterms))
         self.regConstantSuggestionButton.setText(str(alpha))
 
-    def acceptsData(self) -> bool:
-        return self.currentData is None
-
     def threadError(self, error: str):
         logger.error(error)
         # TODO: No function to stop calculation yet.
@@ -335,44 +318,24 @@ class InversionWidget(QWidget, Ui_PrInversion):
         # Previously called these events directly without a signal but it led to
         # QT segfaulting.
         self.calculationComplete.emit()
-        self.makePlots(out, cov, pr, elapsed)
-        self.showCurrentPlots()
+        self.makePlots(self.currentResult.logic.generateFitData(pr), pr)
 
-    def makePlots(self, out, cov, pr, elapsed, result=None):
-        if result is None:
-            result = self.currentResult
-        # PR Plot
-        result.pr_plot = result.logic.newPRPlot(out, pr, cov)
-        result.pr_plot.show_yzero = True
-        result.pr_plot.filename = result.logic.data.filename
-        result.pr_plot.plot_role = DataRole.ROLE_STAND_ALONE
+    def makePlots(self, fit_data: SasMeasurement, pr):
+        fit_parameters = InversionFitModelParameters(pr.out)
+        tracked_fit = TrackedFit(self._data_manager, fit_parameters, fit_data)
+        self._data_manager.add_data(tracked_fit)
+        plot = TrackedPlot(self._data_manager)
+        self._data_manager.add_data(plot)
+        self._data_manager.make_association(plot, self.associatedSasMeasurement)
+        self._data_manager.make_association(plot, tracked_fit)
+        self._data_manager.make_association(self, plot)
+        self._data_manager.make_association(tracked_fit, self.associatedSasMeasurement)
+        self.showPlotsEvent.emit()
 
-        # Data Plot
-        data_plot = result.logic.new1DPlot(self.tab_id, out, pr)
-        data_plot.filename = result.logic.data.filename
 
-        data_plot.show_q_range_sliders = True
-        data_plot.slider_update_on_move = False
-        data_plot.slider_perspective_name = "Inversion"
-        data_plot.slider_tab_name = self.tab_name
-        data_plot.slider_low_q_input = ['currentTab', 'minQInput']
-        data_plot.slider_low_q_setter = ['currentTab', 'updateMinQ']
-        data_plot.slider_high_q_input = ['currentTab', 'maxQInput']
-        data_plot.slider_high_q_setter = ['currentTab', 'updateMaxQ']
-        data_plot.symbol = 'Line'
-        data_plot.show_errors = False
-        data_plot.plot_role = DataRole.ROLE_DEFAULT
-        result.data_plot = data_plot
-
-    def showPlots(self, result: InversionResult):
-        plots = [result.pr_plot, result.data_plot]
-        for plot in plots:
-            if plot is not None:
-                updateModelItemWithPlot(result.logic._data_item, plot, plot.name)
-                self.communicator.plotRequestedSignal.emit([result.logic._data_item, plot])
-
-    def showCurrentPlots(self):
-        self.showPlots(self.currentResult)
+    def showPlots(self):
+        for plot in self.associatedPlots:
+            plot.update_plot()
 
     def updateMinQ(self, new_q_min: float):
         calculator = self.currentResult.calculator
@@ -416,7 +379,6 @@ class InversionWidget(QWidget, Ui_PrInversion):
             self.currentResult.calculator,
             # TODO: no of terms should be somewhere else
             self.currentResult.calculator.noOfTerms,
-            tab_id=[[self.tab_id]],
             error_func=self.threadError,
             completefn=self.calculationCompleted,
             updatefn=None
@@ -431,7 +393,6 @@ class InversionWidget(QWidget, Ui_PrInversion):
         self.isCalculating = True
         self.enableButtons()
 
-        self.dataList.setCurrentIndex(0)
         self.calcThread = CalcBatchPr(
             prs=[result.calculator for result in self.results],
             nfuncs=[result.calculator.noOfTerms for result in self.results],
@@ -560,4 +521,5 @@ class InversionWidget(QWidget, Ui_PrInversion):
         return self.serialiseResult(self.currentResult)
 
     def onHelp(self):
-        self.window.help()
+        # self.window.help()
+        raise NotImplementedError("Help button not implemented in refactor.")

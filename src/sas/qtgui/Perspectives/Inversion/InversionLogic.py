@@ -1,10 +1,16 @@
 import logging
+from typing import TYPE_CHECKING, cast
 
 import numpy as np
-from PySide6.QtGui import QStandardItem
+
+from sasdata.data import Quantity, SasMeasurement
+from sasdata.dataset_types import one_dim
 
 from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Utilities.GuiUtils import dataFromItem
+from sas.sascalc.pr.invertor import Invertor
+
+if TYPE_CHECKING:
+    from sas.qtgui.Perspectives.Inversion.InversionWidget import InversionWidget
 
 PR_FIT_LABEL = r"$P_{fit}(r)$"
 PR_LOADED_LABEL = r"$P_{loaded}(r)$"
@@ -23,33 +29,43 @@ class InversionLogic:
     All the data-related logic. This class deals exclusively with Data1D/2D
     No QStandardModelIndex here.
     """
-    _data_item: QStandardItem | None
+    parent: "InversionWidget"
 
-    def __init__(self, data_item=None):
-        self._data_item = data_item
-        self.data_is_loaded = False
-        if data_item is not None:
-            self.data_is_loaded = True
+    def __init__(self, parent: "InversionWidget"):
+        self.parent = parent
         self.qmin = 0.0
         self.qmax = np.inf
 
-    @property
-    def data_item(self) -> QStandardItem | None:
-        return self._data_item
 
     @property
-    def data(self) -> Data1D:
-        return dataFromItem(self._data_item)
+    def data_is_loaded(self) -> bool:
+        return self.parent.associatedSasMeasurement is not None
 
-    @data.setter
-    def data(self, value: QStandardItem):
-        """ data setter """
-        self._data_item = value
-        self.data_is_loaded = (self._data_item is not None)
+    @property
+    def data(self) -> SasMeasurement:
+        if not self.data_is_loaded:
+            raise ValueError("No data has been loaded into Inversion.")
+        return cast(SasMeasurement, self.parent.associatedSasMeasurement)
 
     def isLoadedData(self):
         """ accessor """
         return self.data_is_loaded
+
+    def generateFitData(self, pr: Invertor) -> SasMeasurement:
+        maxq = cast(float, max(pr.x))
+        minq = cast(float, min(pr.x))
+
+        x = np.arange(minq, maxq, maxq / 301.0)
+        y = pr.iq(pr.out, x)
+
+        fit = SasMeasurement(
+            f"Fit of {self.data.name}",
+            {"Q": Quantity(x, self.data.abscissae.axes[0].units), "I": Quantity(y, self.data.ordinate.units)},
+            one_dim,
+        )
+        return fit
+
+
 
     def new1DPlot(self, tab_id=1, out=None, pr=None, q=None):
         """
@@ -152,6 +168,10 @@ class InversionLogic:
         """
         Adds errors to data set is they are not available.
         """
+        if not self.data.ordinate.has_error:
+            raise NotImplementedError("The method for adding errors has not been reimplemented. It previously mutated the data class but this shouldn't be done now.")
+        else:
+            return
         if self.data.dy is None or self.data.dy.size == 0.0:
             self.data.dy = np.sqrt(np.fabs(self.data.y))*sigma
 
@@ -172,21 +192,24 @@ class InversionLogic:
         return the npts contains in data
         """
         qmin, qmax = None, None
-        if isinstance(data, Data1D):
+        if len(self.data.abscissae.axes) == 1:
             try:
-                qmax = max(data.x)
+                qmax = max(self.data.abscissae.axes[0].value)
                 #set q values where Intensity is zero,
                 #to qmax and exclude from minimum accepted q
                 #to avoid dodgy points around beam stop
-                usable_qrange=np.where(data.y <= 0, qmax, data.x)
+                usable_qrange=np.where(self.data.ordinate.value <= 0, qmax, self.data.abscissae.axes[0].value)
                 qmin = min(usable_qrange)
 
             except (ValueError, TypeError):
                 msg = "Unable to find min/max/length of \n data named %s" % \
-                            self.data.filename
+                            self.data.name
                 raise ValueError(msg)
 
         else:
+            # TODO I'm not sure where this was actually being used as Inversion
+            # doesn't support 2D data. We may be able to remove it.
+            raise NotImplementedError("Inversion only supports 1D data.")
             qmin = 0
             try:
                 x = max(np.fabs(data.xmin), np.fabs(data.xmax))
