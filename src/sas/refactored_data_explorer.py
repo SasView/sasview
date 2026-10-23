@@ -1,5 +1,5 @@
 
-from sasdata.data import SasData
+
 import logging
 from os.path import basename
 from PySide6.QtCore import Signal, Slot
