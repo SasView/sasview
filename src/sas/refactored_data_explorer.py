@@ -1,4 +1,3 @@
-from sasdata.data import SasData
 import logging
 from os.path import basename
 

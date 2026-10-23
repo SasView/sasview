@@ -10,7 +10,6 @@ from sasdata.data import SasData, SasMeasurement
 from sasdata.dataset_types import two_dim
 
 from sas.refactored_plotting.PlotModifiers import ModifierColormap, ModifierLinecolor, ModifierLinestyle
-from typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
     from sas.refactored import TrackedFit, TrackedPlot
