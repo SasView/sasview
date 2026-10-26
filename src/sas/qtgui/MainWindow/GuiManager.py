@@ -3,7 +3,6 @@ import os
 import sys
 import traceback
 import webbrowser
-
 from typing import cast
 
 from packaging.version import Version
@@ -11,10 +10,9 @@ from PySide6.QtCore import QLocale, Qt, Slot
 from PySide6.QtGui import QStandardItem, QTextCursor
 from PySide6.QtWidgets import QDialog, QDockWidget, QLabel, QMdiSubWindow, QMessageBox, QProgressBar, QTextBrowser
 from shiboken6 import isValid
+from twisted.internet import reactor
 
 from sasdata.temp_ascii_reader import load_data
-
-from twisted.internet import reactor
 
 import sas
 
