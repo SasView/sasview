@@ -61,18 +61,15 @@ class Invertor:
 
     @property
     def x(self) -> npt.NDArray[np.float64]:
-        """Returns the x values of the data to be inverted."""
-        return self.logic.data.x
+        return self.logic.data.abscissae.axes[0].value
 
     @property
     def y(self) -> npt.NDArray[np.float64]:
-        """Returns the y values of the data to be inverted."""
-        return self.logic.data.y
+        return self.logic.data.ordinate.value
 
     @property
     def err(self) -> npt.NDArray[np.float64]:
-        """Returns the error values of the data to be inverted."""
-        return self.logic.data.dy
+        return self.logic.data.ordinate.standard_error.value
 
     @property
     def npoints(self) -> int:
@@ -220,6 +217,8 @@ class Invertor:
 
         :return: c_out, c_cov - the coefficients with covariance matrix.
         """
+        if not self.est_bck:
+            raise NotImplementedError("Setting background manually is not supported because it mutates the SasData object which we are trying to avoid. This will be implemented later.")
         if not self.est_bck:
             self.logic.data.y -= self.background
         out, cov = self.lstsq(nfunc, nr=nr)
