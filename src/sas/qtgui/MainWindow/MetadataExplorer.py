@@ -1,0 +1,162 @@
+from sys import argv
+from typing import cast
+
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import (
+    QApplication,
+    QDialog,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QTreeWidget,
+    QTreeWidgetItem,
+    QVBoxLayout,
+)
+
+from sasdata.data import SasData
+from sasdata.metadata import Metadata, MetaNode
+from sasdata.quantities.quantity import Quantity
+from sasdata.temp_xml_reader import load_data
+
+
+def convert_raw_to_dict(to_convert: MetaNode) -> dict:
+    # converted = {to_convert.name: to_convert.contents}
+    if isinstance(to_convert.contents, str) or isinstance(
+        to_convert.contents, Quantity
+    ):
+        return {to_convert.name: to_convert.contents}
+    value = {}
+    # We can now assume that every content is a MetaNode as per the typing.
+    for content in to_convert.contents:
+        value = value | convert_raw_to_dict(content)
+    return {to_convert.name: value}
+
+def get_common_metadata(all_metadata_dicts: list[dict[str, object]]) -> dict[str, object]:
+    return_value: dict[str, object] = {}
+    all_keys = [set(m.keys()) for m in all_metadata_dicts]
+    common_keys = set.intersection(*all_keys)
+    reference_dict = all_metadata_dicts[0]
+    for key in common_keys:
+        if isinstance(reference_dict[key], dict):
+            # TODO: This will break if its a branch in one dict, and not in another. Probably check, and exclude if this is the case.
+            return_value[key] = get_common_metadata([cast(dict[str, object], d[key]) for d in all_metadata_dicts])
+        elif not (reference_dict[key] == [] or reference_dict[key] is None):
+            return_value[key] = 'placeholder'
+    return return_value
+
+def metadata_as_dict(to_convert: object):
+    converted = to_convert.__dict__.copy()
+    converted["raw"] = convert_raw_to_dict(converted["raw"])
+    return converted
+
+
+class MetadataExplorer(QDialog):
+    def __init__(self, to_explore: Metadata | list[SasData], filename: str | None, selection_mode: bool = False):
+        super().__init__()
+        if isinstance(to_explore, Metadata):
+            self.metadata_dict = metadata_as_dict(to_explore)
+        elif isinstance(to_explore, list):
+            all_metadata_dicts = [metadata_as_dict(data.metadata) for data in to_explore]
+            self.metadata_dict = get_common_metadata(all_metadata_dicts)
+
+
+
+        filename_known = filename if filename is not None else "Unknown"
+        self.filenameLabel = QLabel(f"Filename: {filename_known}")
+
+        self.metadataTreeWidget = QTreeWidget()
+        self.buildTree()
+        self.metadataTreeWidget.header().setDefaultSectionSize(350)
+
+        self.selection_mode = selection_mode
+        if self.selection_mode:
+            self.metadataTreeWidget.setSelectionMode(QTreeWidget.SelectionMode.MultiSelection)
+
+
+
+        self.layout = QVBoxLayout(self)
+        self.layout.addWidget(self.filenameLabel)
+        self.layout.addWidget(self.metadataTreeWidget)
+
+        self.button_row = QHBoxLayout()
+        if selection_mode:
+            self.closeButton = QPushButton("Cancel")
+            self.selectButton = QPushButton("Select")
+            self.selectButton.clicked.connect(self.accept)
+            self.button_row.addWidget(self.closeButton)
+            self.button_row.addWidget(self.selectButton)
+        else:
+            self.closeButton = QPushButton("Close")
+            self.button_row.addWidget(self.closeButton)
+        self.closeButton.clicked.connect(self.closeEvent)
+        self.layout.addLayout(self.button_row)
+
+        self.setWindowTitle("Metadata Explorer")
+        self.setMinimumSize(800, 430)
+
+    def closeEvent(self, event):
+        self.reject()
+
+    def buildTree(
+        self,
+        table_root: QTreeWidgetItem | None = None,
+        current_item: dict[str, object] | list[dict[str, object]] | None = None,
+    ):
+        tree = self.metadataTreeWidget
+        tree.setColumnCount(2)
+        if current_item is None:
+            current_item = self.metadata_dict
+        if table_root is None:
+            table_root = QTreeWidgetItem(["Metadata"])
+            tree.addTopLevelItem(table_root)
+        if isinstance(current_item, list):
+            dicts = current_item
+        else:
+            dicts = [current_item]
+        for single_dict in dicts:
+            for key, value in single_dict.items():
+                if isinstance(value, dict) or (
+                    isinstance(value, list)
+                    and any([isinstance(member, dict) for member in value])
+                ):
+                    dict_root = QTreeWidgetItem([key])
+                    table_root.addChild(dict_root)
+                    self.buildTree(dict_root, value)
+                elif isinstance(value, list):
+                    node_item = QTreeWidgetItem([key, str(value)])
+                    table_root.addChild(node_item)
+                if isinstance(value, str):
+                    node_item = QTreeWidgetItem([key, value])
+                    table_root.addChild(node_item)
+                if isinstance(value, MetaNode):
+                    # TODO: Implement. Just show the contents for now.
+                    node_item = QTreeWidgetItem([key, str(value.contents)])
+                    table_root.addChild(node_item)
+
+    @property
+    def getSelectedPaths(self) -> list[list[str]]:
+        def get_data(item: QTreeWidgetItem):
+            return item.data(0, Qt.ItemDataRole.DisplayRole)
+
+        return_value: list[list[str]] = []
+        for selected in self.metadataTreeWidget.selectedItems():
+            current_item = selected
+            current_path: list[str] = []
+            while current_item is not None and get_data(current_item) not in ["raw", "root", "Metadata"]:
+                current_path.append(get_data(current_item))
+                current_item = current_item.parent()
+            return_value.append(current_path[::-1])
+        return return_value
+
+if __name__ == "__main__":
+    app = QApplication([])
+
+    filename = argv[1]
+    data_dict = load_data(filename)
+    data = list(data_dict.items())[0][1]
+    # This is only going to work on XML files for now.
+
+    dialog = MetadataExplorer(data.metadata, data.name)
+    status = dialog.exec()
+
+    exit()

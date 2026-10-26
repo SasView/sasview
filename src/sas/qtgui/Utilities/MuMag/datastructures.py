@@ -4,7 +4,8 @@ from typing import Generic, TypeVar
 
 import numpy as np
 
-from sas.qtgui.Plotting.PlotterData import Data1D
+from sasdata.quantities.quantity import Quantity
+from sasdata.trend import Trend
 
 """ Data structures used in MuMag"""
 
@@ -38,36 +39,12 @@ class ExperimentGeometry(Enum):
 
 
 @dataclass
-class ExperimentalData:
-    """ Datapoint used as input for the MuMag tool"""
-
-    scattering_curve: Data1D
-
-    applied_field: float
-    saturation_magnetisation: float
-    demagnetising_field: float
-
-    def restrict_by_index(self, max_index: int):
-        """ Remove all points from data up to given index"""
-
-        x = self.scattering_curve.x[:max_index]
-        y = self.scattering_curve.y[:max_index]
-        dy = self.scattering_curve.dy[:max_index]
-
-        return ExperimentalData(
-            scattering_curve=Data1D(x=x, y=y, dy=dy),
-            applied_field=self.applied_field,
-            saturation_magnetisation=self.saturation_magnetisation,
-            demagnetising_field=self.demagnetising_field)
-
-
-@dataclass
 class FitParameters:
     """ Input parameters for the fit"""
-    q_max: float
-    min_applied_field: float
-    exchange_A_min: float
-    exchange_A_max: float
+    q_max: Quantity
+    min_applied_field: Quantity
+    exchange_A_min: Quantity
+    exchange_A_max: Quantity
     exchange_A_n: int
     experiment_geometry: ExperimentGeometry
 
@@ -75,14 +52,14 @@ class FitParameters:
 @dataclass
 class LeastSquaresOutput:
     """ Output from least squares method"""
-    exchange_A: float
+    exchange_A: Quantity
     exchange_A_chi_sq: float
-    q: np.ndarray
-    I_simulated: np.ndarray
-    I_residual: np.ndarray
-    S_H: np.ndarray
-    I_residual_stdev: np.ndarray
-    S_H_stdev: np.ndarray
+    q: Quantity
+    I_simulated: Quantity
+    I_residual: Quantity
+    S_H: Quantity
+    I_residual_stdev: Quantity
+    S_H_stdev: Quantity
 
 
 @dataclass
@@ -94,8 +71,8 @@ class LeastSquaresOutputParallel(LeastSquaresOutput):
 @dataclass
 class LeastSquaresOutputPerpendicular(LeastSquaresOutput):
     """ Output from least squares method for perpendicular case"""
-    S_M: np.ndarray
-    S_M_stdev: np.ndarray
+    S_M: Quantity
+    S_M_stdev: Quantity
 
 
 T = TypeVar("T", bound=LeastSquaresOutput)
@@ -107,7 +84,7 @@ class SweepOutput(Generic[T]):
     Results from brute force optimisiation of the chi squared for the exchange A parameter
     """
 
-    exchange_A_checked: np.ndarray
+    exchange_A_checked: Quantity
     exchange_A_chi_sq: np.ndarray
     optimal: T
 
@@ -116,7 +93,7 @@ class SweepOutput(Generic[T]):
 class FitResults:
     """ Output the MuMag fit """
     parameters: FitParameters
-    input_data: list[ExperimentalData]
+    input_trend: Trend
     sweep_data: SweepOutput
     refined_fit_data: LeastSquaresOutputParallel | LeastSquaresOutputPerpendicular
-    optimal_exchange_A_uncertainty: float
+    optimal_exchange_A_uncertainty: Quantity
