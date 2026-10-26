@@ -1,0 +1,29 @@
+What will the Window with all the tabs for plots be in terms of implementation?
+	Is the window permanent? Like a perspective for instance?
+	Is it belonging to the DataExplorerWindow?
+
+Same lifetime as SasView
+Showable and Hideable when opening other perspectives such as the invariant
+All the data should pass through the dataexplorer, plotwidget is owned by dataexplorer
+QStandardItemModels are used in the DataExplorer.py to keep the loaded data and the theory models
+QStandardItemModels can store data so that i can be directly accessed through qt (like a tree structure)
+Track the dictionary, as the dictionary changes, change the model as well
+
+Follow the model and the theory_model from DataExplorerWindow throughout 
+other parts of the code and keep track of what is happening to it, how it is accessed
+and how it is edited
+
+
+
+How does the checking for an existing tab with locals() work? l.1206 sas.qtgui.MainWindow.DataExplorer
+locals as keeping track of what has been declared in this method call
+
+Is the data manager really redundant and are all the functionalities moved to GuiManager?
+Qt is able to stream stuff without carrying a pointer to the Datamanager everywhere it is needed
+
+
+Does it work that create_gui_data creates a new Data1D or Data2D element and parses the data into these
+items? then the new_plot items can be worked with and it can also have an id
+
+Communicate class in GuiUtils can collect signals from parts of the codes 
+where signals are not processed in the same class but throughout different classes
