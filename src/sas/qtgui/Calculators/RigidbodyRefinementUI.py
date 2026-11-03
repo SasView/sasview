@@ -1,7 +1,17 @@
+"""The widgets of the rigid-body refinement calculator.
+
+Only layout and presentation live here; RigidbodyRefinement drives them, with the script handling, the refinement runner and the structure
+previews shared with pyAUSAXS's own GUI through pyausaxs.gui.core.
+"""
+
 import html
-import os
 import re
 
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
+from matplotlib.figure import Figure
+from pyausaxs.gui.core.files import is_saxs_file, is_structure_file
+from pyausaxs.gui.core.syntax import classify_line, scope_partner
 from PySide6 import QtCore, QtWidgets
 from PySide6.QtGui import QColor, QFont, QSyntaxHighlighter, QTextCharFormat, QTextCursor, QTextFormat
 
@@ -29,6 +39,13 @@ _ANSI_COLOR_MAP: dict[int, str] = {
     96: "#007799",  # bright cyan
 }
 
+# colours of messages written by the calculator itself, rather than streamed from the backend
+_MESSAGE_COLORS = {"error": "#cc0000", "warning": "#cc6600", "success": "#006600"}
+
+# file-field tints while a typed path does / doesn't point at a usable file
+_VALID_STYLE = "QLineEdit { background-color: #e8f4ec; }"
+_INVALID_STYLE = "QLineEdit { background-color: #fdeceb; }"
+
 
 def _ansi_to_html(text: str) -> str:
     """Convert ANSI SGR colour codes in *text* to HTML <span> tags."""
@@ -48,303 +65,325 @@ def _ansi_to_html(text: str) -> str:
 
 
 class RigidBodyHighlighter(QSyntaxHighlighter):
+    """Colours the first token of each script line — scope keywords by nesting depth, line operations, argument keywords, and unrecognised
+    tokens flagged as errors — plus trailing # comments. The classification itself is pyausaxs.gui.core.syntax; the nesting depth is carried
+    from block to block in Qt's per-block state."""
+
     # Colors assigned to successive nesting depths, cycling if deeper than 4
     _SCOPE_COLORS = ["blue", "#CC6600", "#990099", "#CC0000"]
 
-    def __init__(self, document, operations, keywords, scope_keywords):
+    def __init__(self, document, operations=(), keywords=()):
         super().__init__(document)
 
-        self._op_fmt = QTextCharFormat()
-        self._op_fmt.setForeground(QColor("blue"))
-        self._op_fmt.setFontWeight(QFont.Weight.Bold)
+        def fmt(color, bold=False):
+            f = QTextCharFormat()
+            f.setForeground(QColor(color))
+            if bold:
+                f.setFontWeight(QFont.Weight.Bold)
+            return f
 
-        self._kw_fmt = QTextCharFormat()
-        self._kw_fmt.setForeground(QColor("purple"))
+        self._formats = {
+            "operation": fmt("blue", bold=True),
+            "keyword": fmt("purple"),
+            "comment": fmt("green"),
+            "error": fmt("red"),
+        }
+        self._scope_formats = [fmt(color, bold=True) for color in self._SCOPE_COLORS]
+        self._operations, self._keywords = set(operations), set(keywords)
 
-        self._comment_fmt = QTextCharFormat()
-        self._comment_fmt.setForeground(QColor("green"))
-
-        self._error_fmt = QTextCharFormat()
-        self._error_fmt.setForeground(QColor("red"))
-
-        self._scope_fmts = []
-        for color in self._SCOPE_COLORS:
-            fmt = QTextCharFormat()
-            fmt.setForeground(QColor(color))
-            fmt.setFontWeight(QFont.Weight.Bold)
-            self._scope_fmts.append(fmt)
-
+    def set_vocabulary(self, operations, keywords):
+        """Replace the known operations/keywords (e.g. once the backend reports them) and re-highlight. Unknown tokens are only flagged
+        while a vocabulary is known."""
         self._operations = set(operations)
         self._keywords = set(keywords)
-        self._scope_openers = set(scope_keywords)
-        self._first_token_re = re.compile(r'\S+')
-        self._comment_re = re.compile(r'#.*')
-
-    def _fmt_for_depth(self, depth: int) -> QTextCharFormat:
-        return self._scope_fmts[depth % len(self._scope_fmts)]
+        self.rehighlight()
 
     def highlightBlock(self, text: str):
         prev = self.previousBlockState()
-        depth = prev if prev >= 0 else 0
+        spans, depth = classify_line(
+            text, prev if prev >= 0 else 0, self._operations, self._keywords,
+            flag_unknown=bool(self._operations or self._keywords),
+        )
+        for span in spans:
+            f = self._scope_formats[span.depth % len(self._scope_formats)] if span.kind == "scope" else self._formats[span.kind]
+            self.setFormat(span.start, span.end - span.start, f)
+        self.setCurrentBlockState(depth)
 
-        # Highlight comment suffix first (green wins over any keyword inside a comment)
-        comment_match = self._comment_re.search(text)
-        if comment_match:
-            self.setFormat(comment_match.start(), len(comment_match.group()), self._comment_fmt)
-            scannable = text[:comment_match.start()]
-        else:
-            scannable = text
 
-        # Highlight first non-whitespace token only
-        token_match = self._first_token_re.search(scannable)
-        new_depth = depth
-        if token_match:
-            token = token_match.group()
-            if token == "end":
-                # Decrease depth first so `end` shares its opener's color
-                new_depth = max(0, depth - 1)
-                self.setFormat(token_match.start(), len(token), self._fmt_for_depth(new_depth))
-            elif token in self._scope_openers:
-                self.setFormat(token_match.start(), len(token), self._fmt_for_depth(depth))
-                new_depth = depth + 1
-            elif token in self._operations:
-                self.setFormat(token_match.start(), len(token), self._op_fmt)
-            elif token in self._keywords:
-                self.setFormat(token_match.start(), len(token), self._kw_fmt)
-            elif token != "}":
-                self.setFormat(token_match.start(), len(token), self._error_fmt)
+class FileField(QtWidgets.QWidget):
+    """A labelled path entry with a Browse button, tinted while the typed path is (in)valid. `committed` fires with the path whenever the user
+    settles on one — by browsing, or by finishing an edit of the text."""
 
-        self.setCurrentBlockState(new_depth)
+    committed = QtCore.Signal(str)
+
+    def __init__(self, label: str, file_filter: str, validator, parent=None):
+        super().__init__(parent)
+        self._filter = file_filter
+        self._validator = validator
+        self._last_committed = ""
+        layout = QtWidgets.QHBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        title = QtWidgets.QLabel(label)
+        title.setMinimumWidth(70)
+        layout.addWidget(title)
+        self.edit = QtWidgets.QLineEdit()
+        self.edit.setPlaceholderText("No file selected")
+        layout.addWidget(self.edit, 1)
+        self.button = QtWidgets.QPushButton("Browse…")
+        layout.addWidget(self.button)
+        self.button.clicked.connect(self._browse)
+        self.edit.editingFinished.connect(lambda: self._commit(self.edit.text()))
+        self.edit.textChanged.connect(self._tint)
+
+    def text(self) -> str:
+        return self.edit.text().strip()
+
+    def set(self, path: str):
+        """Show `path` without committing it, e.g. when it was read back from the script."""
+        self._last_committed = path
+        self.edit.setText(path)
+
+    def valid(self) -> bool:
+        return bool(self.text()) and self._validator(self.text())
+
+    def _tint(self):
+        self.edit.setStyleSheet("" if not self.text() else _VALID_STYLE if self.valid() else _INVALID_STYLE)
+
+    def _browse(self):
+        path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Open file", self.text(), self._filter)
+        if path:
+            self.edit.setText(path)
+            self._commit(path)
+
+    def _commit(self, path: str):
+        # editingFinished also fires on a mere loss of focus, so only an actual change counts
+        path = path.strip()
+        if path == self._last_committed:
+            return
+        self._last_committed = path
+        self.committed.emit(path)
 
 
 class RigidBodyRefinementUI(QtWidgets.QDialog):
-    finished = QtCore.Signal(str)
-    validate_requested = QtCore.Signal(str)
+    """Three panes: inputs, run controls and output on the left; the refinement script in the middle; the structure preview and fit results
+    on the right."""
+
+    closing = QtCore.Signal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Rigid-body refinement")
-        self.resize(1200, 800)
-
-        self._operations = []
-        self._keywords   = []
-
+        self.resize(1400, 850)
         self._buildUI()
-        self._connectSignals()
 
-        self.on_load_pdb_hook = None
-        self.on_load_data_hook = None
+    def closeEvent(self, event):
+        self.closing.emit()
+        super().closeEvent(event)
 
+    # ----- layout -------------------------------------------------------------
     def _buildUI(self):
         layout = QtWidgets.QVBoxLayout(self)
         layout.setContentsMargins(8, 8, 8, 8)
-        layout.setSpacing(6)
+        self.splitter = QtWidgets.QSplitter(QtCore.Qt.Orientation.Horizontal)
+        layout.addWidget(self.splitter)
+        self.splitter.addWidget(self._buildControls())
+        self.splitter.addWidget(self._buildEditor())
+        self.splitter.addWidget(self._buildResults())
+        self.splitter.setStretchFactor(0, 0)
+        self.splitter.setStretchFactor(1, 2)
+        self.splitter.setStretchFactor(2, 3)
+        self.splitter.setSizes([340, 480, 580])
 
-        # PDB file row
-        pdb_layout = QtWidgets.QHBoxLayout()
-        pdb_layout.addWidget(QtWidgets.QLabel("PDB file:"))
-        self.txtPdbFile = QtWidgets.QLineEdit()
-        self.txtPdbFile.setReadOnly(True)
-        self.txtPdbFile.setPlaceholderText("No file loaded")
-        pdb_layout.addWidget(self.txtPdbFile)
-        self.btnLoadPdb = QtWidgets.QPushButton("Browse...")
-        pdb_layout.addWidget(self.btnLoadPdb)
-        layout.addLayout(pdb_layout)
+    def _buildControls(self) -> QtWidgets.QWidget:
+        controls = QtWidgets.QWidget()
+        layout = QtWidgets.QVBoxLayout(controls)
+        layout.setContentsMargins(0, 0, 4, 0)
 
-        # Data file row
-        data_layout = QtWidgets.QHBoxLayout()
-        data_layout.addWidget(QtWidgets.QLabel("Data file:"))
-        self.txtDataFile = QtWidgets.QLineEdit()
-        self.txtDataFile.setReadOnly(True)
-        self.txtDataFile.setPlaceholderText("No file loaded")
-        data_layout.addWidget(self.txtDataFile)
-        self.btnLoadData = QtWidgets.QPushButton("Browse...")
-        data_layout.addWidget(self.btnLoadData)
-        layout.addLayout(data_layout)
+        # the input fields are a shortcut for editing the script's load block: each one writes only its own directive, and the script itself
+        # is always the authority
+        inputs = QtWidgets.QGroupBox("Input")
+        form = QtWidgets.QVBoxLayout(inputs)
+        self.structureField = FileField("Structure", "Structure files (*.pdb *.ent *.cif *.xyz);;All files (*)", is_structure_file)
+        self.saxsField = FileField("SAXS data", "SAXS data (*.dat *.rsr *.xvg);;All files (*)", is_saxs_file)
+        form.addWidget(self.structureField)
+        form.addWidget(self.saxsField)
+        splits_row = QtWidgets.QHBoxLayout()
+        splits_label = QtWidgets.QLabel("Splits")
+        splits_label.setMinimumWidth(70)
+        splits_row.addWidget(splits_label)
+        self.txtSplits = QtWidgets.QLineEdit()
+        self.txtSplits.setPlaceholderText("residue ids, e.g. 50 100")
+        self.txtSplits.setToolTip("Residues at which the structure is split into rigid bodies")
+        splits_row.addWidget(self.txtSplits)
+        form.addLayout(splits_row)
+        layout.addWidget(inputs)
 
-        # Code editor
-        self.editor = QCodeEditor(self)
-        self.editor.setFont(GuiUtils.getMonospaceFont())
-        self._highlighter = RigidBodyHighlighter(
-            self.editor.document(),
-            self.get_valid_operations(),
-            self.get_valid_keywords(),
-            self.get_scope_keywords(),
-        )
-        self.editor.cursorPositionChanged.connect(self._updateBracketHighlight)
-        layout.addWidget(self.editor)
+        run_row = QtWidgets.QHBoxLayout()
+        self.btnValidate = QtWidgets.QPushButton("Validate")
+        self.btnRun = QtWidgets.QPushButton("Run refinement")
+        self.btnRun.setDefault(True)
+        self.btnStop = QtWidgets.QPushButton("Stop")
+        self.btnStop.setToolTip("End the refinement after its current iteration, keeping the best conformation found so far")
+        self.btnStop.hide()
+        run_row.addWidget(self.btnValidate)
+        run_row.addWidget(self.btnRun)
+        run_row.addWidget(self.btnStop)
+        layout.addLayout(run_row)
+        self.progress = QtWidgets.QProgressBar()
+        self.progress.setRange(0, 0)  # indeterminate
+        self.progress.setTextVisible(False)
+        self.progress.hide()
+        layout.addWidget(self.progress)
 
-        # Output pane
-        layout.addWidget(QtWidgets.QLabel("Output:"))
-        self.outputPane = QtWidgets.QPlainTextEdit(self)
+        output = QtWidgets.QGroupBox("Output")
+        output_layout = QtWidgets.QVBoxLayout(output)
+        self.outputPane = QtWidgets.QTextEdit()
         self.outputPane.setReadOnly(True)
         self.outputPane.setFont(GuiUtils.getMonospaceFont())
-        self.outputPane.setFixedHeight(150)
-        layout.addWidget(self.outputPane)
+        self.outputPane.setLineWrapMode(QtWidgets.QTextEdit.LineWrapMode.NoWrap)
+        output_layout.addWidget(self.outputPane)
+        layout.addWidget(output, 1)
+        return controls
 
-        # Bottom button row
-        button_layout = QtWidgets.QHBoxLayout()
-        button_layout.addStretch()
-        self.btnValidate = QtWidgets.QPushButton("Validate")
-        button_layout.addWidget(self.btnValidate)
-        self.btnFinish = QtWidgets.QPushButton("Finish")
-        self.btnFinish.setDefault(True)
-        button_layout.addWidget(self.btnFinish)
-        layout.addLayout(button_layout)
+    def _buildEditor(self) -> QtWidgets.QWidget:
+        pane = QtWidgets.QWidget()
+        layout = QtWidgets.QVBoxLayout(pane)
+        layout.setContentsMargins(4, 0, 4, 0)
+        header = QtWidgets.QHBoxLayout()
+        header.addWidget(QtWidgets.QLabel("<b>Refinement script</b>"))
+        header.addStretch()
+        self.btnLoadScript = QtWidgets.QToolButton()
+        self.btnLoadScript.setText("Load…")
+        self.btnLoadScript.setToolTip("Load a script from a file")
+        self.btnSaveScript = QtWidgets.QToolButton()
+        self.btnSaveScript.setText("Save…")
+        self.btnSaveScript.setToolTip("Save the script to a file")
+        self.btnResetScript = QtWidgets.QToolButton()
+        self.btnResetScript.setText("Reset")
+        self.btnResetScript.setToolTip("Reset to the default script, keeping the current load element")
+        for button in (self.btnLoadScript, self.btnSaveScript, self.btnResetScript):
+            header.addWidget(button)
+        layout.addLayout(header)
 
-    def _connectSignals(self):
-        self.btnLoadPdb.clicked.connect(self._onLoadPDB)
-        self.btnLoadData.clicked.connect(self._onLoadData)
-        self.btnValidate.clicked.connect(self._onValidate)
-        self.btnFinish.clicked.connect(self._onFinish)
+        self.editor = QCodeEditor(pane)
+        self.editor.setFont(GuiUtils.getMonospaceFont())
+        self.editor.setTabStopDistance(4 * self.editor.fontMetrics().horizontalAdvance(" "))
+        self.highlighter = RigidBodyHighlighter(self.editor.document())
+        self.editor.cursorPositionChanged.connect(self._updateBracketHighlight)
+        layout.addWidget(self.editor)
+        return pane
 
-    def _onLoadPDB(self):
-        path, _ = QtWidgets.QFileDialog.getOpenFileName(
-            self, "Open PDB file", "",
-            "PDB files (*.pdb *.PDB);;All files (*.*)"
-        )
-        if path:
-            self.txtPdbFile.setText(os.path.basename(path))
-            if self.on_load_pdb_hook: self.on_load_pdb_hook(path)
+    def _buildResults(self) -> QtWidgets.QWidget:
+        self.results = QtWidgets.QTabWidget()
 
-    def _onLoadData(self):
-        path, _ = QtWidgets.QFileDialog.getOpenFileName(
-            self, "Open data file", "",
-            "Data files (*.dat *.DAT *.txt *.csv);;All files (*.*)"
-        )
-        if path:
-            self.txtDataFile.setText(os.path.basename(path))
-            if self.on_load_data_hook: self.on_load_data_hook(path)
+        # a persistent structure tab: the Cα backbone per body with the split residues in red, kept across runs (fit tabs are added beside it)
+        structure = QtWidgets.QWidget()
+        layout = QtWidgets.QVBoxLayout(structure)
+        layout.setContentsMargins(0, 0, 0, 0)
+        toolbar = QtWidgets.QHBoxLayout()
+        self.btnHomeView = QtWidgets.QToolButton()
+        self.btnHomeView.setText("⌂")
+        self.btnHomeView.setToolTip("Reset to the default view")
+        toolbar.addWidget(self.btnHomeView)
+        self.lblHover = QtWidgets.QLabel("")
+        self.lblHover.setStyleSheet("color: #6b7785;")
+        toolbar.addWidget(self.lblHover, 1)
+        layout.addLayout(toolbar)
+        self.structureFigure = Figure()
+        self.structureAxes = self.structureFigure.add_subplot(111, projection="3d")
+        self.structureCanvas = FigureCanvas(self.structureFigure)
+        layout.addWidget(self.structureCanvas, 1)
+        self.structureTab = structure
+        self.results.addTab(structure, "Structure")
+        self._fitTabs: list[QtWidgets.QWidget] = []
+        return self.results
 
-    def _onFinish(self):
-        """Emit the current editor text; dialog stays open to show live output."""
-        self.finished.emit(self.editor.toPlainText())
+    # ----- results ------------------------------------------------------------
+    def setFitFigures(self, figures: list[tuple[Figure, str]]):
+        """Replace the fit tabs from a previous run with `figures`, given as (figure, title) pairs; the structure tab is kept."""
+        for tab in self._fitTabs:
+            self.results.removeTab(self.results.indexOf(tab))
+            tab.deleteLater()
+        self._fitTabs = []
+        for fig, title in figures:
+            tab = QtWidgets.QWidget()
+            layout = QtWidgets.QVBoxLayout(tab)
+            layout.setContentsMargins(0, 0, 0, 0)
+            canvas = FigureCanvas(fig)
+            layout.addWidget(canvas)
+            layout.addWidget(NavigationToolbar2QT(canvas, tab))
+            self.results.addTab(tab, title)
+            self._fitTabs.append(tab)
+        if self._fitTabs:
+            self.results.setCurrentWidget(self._fitTabs[0])
 
-    def _onValidate(self):
-        """Emit a validation request with the current editor text."""
-        self.validate_requested.emit(self.editor.toPlainText())
+    def showStructureTab(self):
+        self.results.setCurrentWidget(self.structureTab)
 
-    def appendOutput(self, text: str):
-        """Append one line of (optionally ANSI-coloured) text to the output pane."""
-        text = text.rstrip("\n")
+    # ----- output -------------------------------------------------------------
+    def appendOutput(self, text: str, kind: str | None = None):
+        """Append (optionally ANSI-coloured) backend output to the output pane, or a message of the calculator's own when `kind` is one of
+        "error", "warning" or "success". Partial lines are kept as they are, so streamed output reads as it was printed."""
+        if kind is not None:
+            body = f'<span style="color:{_MESSAGE_COLORS[kind]};">{html.escape(text)}</span>'
+        else:
+            body = _ansi_to_html(text)
         cursor = self.outputPane.textCursor()
         cursor.movePosition(QTextCursor.MoveOperation.End)
-        if self.outputPane.toPlainText():
-            cursor.insertBlock()
-        cursor.insertHtml(_ansi_to_html(text))
+        cursor.insertHtml(body.replace("\n", "<br>"))
+        self.outputPane.setTextCursor(cursor)
         self.outputPane.ensureCursorVisible()
 
     def clearOutput(self):
-        """Clear the output pane."""
         self.outputPane.clear()
 
-    def setRunning(self, running: bool):
-        """Disable interactive elements while a refinement run is in progress."""
-        self.btnFinish.setEnabled(not running)
+    def setRunning(self, running: bool, *, stoppable: bool = False):
+        """Toggle the running state. A refinement (unlike a validation) can be stopped early, so Run turns into Stop while it is in flight."""
         self.btnValidate.setEnabled(not running)
+        self.btnRun.setVisible(not (running and stoppable))
+        self.btnRun.setEnabled(not running)
+        self.btnStop.setVisible(running and stoppable)
+        self.btnStop.setEnabled(True)
+        self.btnStop.setText("Stop")
+        self.progress.setVisible(running)
 
+    def setStopping(self):
+        self.btnStop.setEnabled(False)
+        self.btnStop.setText("Stopping…")
+
+    # ----- editor -------------------------------------------------------------
     def getText(self) -> str:
-        """Return the current contents of the code editor."""
         return self.editor.toPlainText()
 
-    def get_valid_operations(self) -> list[str]:
-        """Return a list of valid operation keywords for syntax highlighting."""
-        return list(self._operations)
-
-    def get_valid_keywords(self) -> list[str]:
-        """Return a list of valid keywords for syntax highlighting."""
-        return list(self._keywords)
-
-    def get_scope_keywords(self) -> list[str]:
-        """Return a list of keywords that introduce new scopes."""
-        return ["loop", "optimize_once", "on_improvement"]
-
-    def setValidElements(self, elements_and_args: dict[str, list[str]]):
-        """Update operations and keywords from backend data and re-install the highlighter.
-
-        elements_and_args maps each valid element (first token of a line) to the list
-        of argument keywords it accepts.  Elements that only appear as arguments of
-        other elements (i.e. not themselves keys) are treated as keywords.
-        """
-        op_set = set(elements_and_args.keys())
-        kw_set = {arg for args in elements_and_args.values() for arg in args} - op_set
-        self._operations = list(op_set)
-        self._keywords = list(kw_set)
-        self._highlighter = RigidBodyHighlighter(
-            self.editor.document(),
-            self._operations,
-            self._keywords,
-            self.get_scope_keywords(),
-        )
+    def replaceText(self, text: str):
+        """Replace the whole script as one undoable edit, keeping the scroll position, so a rewrite of the load block from the input fields
+        doesn't throw away the user's undo history or their place in the script."""
+        if text == self.getText():
+            return
+        scroll = self.editor.verticalScrollBar().value()
+        cursor = QTextCursor(self.editor.document())
+        cursor.beginEditBlock()
+        cursor.select(QTextCursor.SelectionType.Document)
+        cursor.insertText(text)
+        cursor.endEditBlock()
+        self.editor.verticalScrollBar().setValue(scroll)
 
     def _updateBracketHighlight(self):
-        """Highlight the scope opener/end pair under the cursor."""
+        """Tint the scope opener/`end` line pair around the cursor's line."""
+        document = self.editor.document()
         block = self.editor.textCursor().block()
-        tokens = block.text().lstrip().split()
-        first_token = tokens[0] if tokens else ""
-
-        scope_openers = set(self.get_scope_keywords())
-        if first_token not in scope_openers and first_token != "end":
+        pair = scope_partner(self.editor.toPlainText().split("\n"), block.blockNumber())
+        if pair is None:
             self.editor.setBracketSelections([])
             return
-
-        pair_block = self._find_scope_pair(block, first_token, scope_openers)
-        if pair_block is None:
-            self.editor.setBracketSelections([])
-            return
-
         fmt = QTextCharFormat()
         fmt.setBackground(QColor("#D6EAF8"))
-        fmt.setProperty(QTextFormat.FullWidthSelection, True)
-
+        fmt.setProperty(QTextFormat.Property.FullWidthSelection, True)
         selections = []
-        for b in (block, pair_block):
+        for b in (block, document.findBlockByNumber(pair)):
             sel = QtWidgets.QTextEdit.ExtraSelection()
             sel.format = fmt
             sel.cursor = QTextCursor(b)
             sel.cursor.clearSelection()
             selections.append(sel)
-
         self.editor.setBracketSelections(selections)
-
-    def _find_scope_pair(self, block, first_token: str, scope_openers: set):
-        """Return the block that matches the scope opener or 'end' on the given block."""
-        if first_token in scope_openers:
-            block_iter = block.next()
-            stack = 0
-            while block_iter.isValid():
-                token = block_iter.text().lstrip().split()
-                token = token[0] if token else ""
-                if token in scope_openers:
-                    stack += 1
-                elif token == "end":
-                    if stack == 0:
-                        return block_iter
-                    stack -= 1
-                block_iter = block_iter.next()
-        else:  # first_token == "end"
-            block_iter = block.previous()
-            stack = 0
-            while block_iter.isValid():
-                token = block_iter.text().lstrip().split()
-                token = token[0] if token else ""
-                if token == "end":
-                    stack += 1
-                elif token in scope_openers:
-                    if stack == 0:
-                        return block_iter
-                    stack -= 1
-                block_iter = block_iter.previous()
-        return None
-
-    def setText(self, text: str):
-        """Replace the entire contents of the code editor."""
-        self.editor.setPlainText(text)
-
-    def set_load_pdb_hook(self, hook):
-        """Set a callback function to be called when a PDB file is loaded."""
-        self.on_load_pdb_hook = hook
-
-    def set_load_data_hook(self, hook):
-        """Set a callback function to be called when a data file is loaded."""
-        self.on_load_data_hook = hook
