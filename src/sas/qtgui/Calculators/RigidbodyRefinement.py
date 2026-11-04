@@ -2,7 +2,8 @@
 
 The script editor is the single source of truth: the input fields are shortcuts that each rewrite only their own line of the script's load
 block. The script handling, the refinement runner and the structure previews come from pyausaxs.gui.core, which pyAUSAXS's own GUI shares,
-so the two front-ends read and write scripts identically.
+so the two front-ends read and write scripts identically. The structure manager (RigidbodyStructure) opens in a tab of its own and writes
+the body changes the user confirms back into the script.
 """
 
 import logging
@@ -19,6 +20,7 @@ from PySide6 import QtCore, QtWidgets
 
 import sas.qtgui.Calculators.RigidbodyRefinementUI as RigidBodyRefinementUI
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Calculators.RigidbodyStructure import StructurePane
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.system.user import get_app_dir, get_cache_dir
 
@@ -42,6 +44,7 @@ class RigidBodyRefinement:
         self._last_valid_lims = None      # axis limits of the last drawn structure, kept across redraws
         self._pdb_changed_pending_fallback = False  # armed by a structure change: let the next failed preview retry it bare
         self._script_file_path = None     # last file the user saved the script to / loaded it from
+        self.structurePane = None         # the structure-manager tab, while it is open
 
         self._drainTimer = QtCore.QTimer(self.gui)
         self._drainTimer.setInterval(RefinementWorker.POLL_MS)
@@ -67,6 +70,9 @@ class RigidBodyRefinement:
         gui.btnSaveScript.clicked.connect(self.onSaveScript)
         gui.btnHomeView.clicked.connect(self._homePreview)
         gui.structureCanvas.mpl_connect("motion_notify_event", self._onStructureHover)
+        gui.structureField.viewRequested.connect(self.onViewStructure)
+        gui.tabs.currentChanged.connect(self._onTabChanged)
+        gui.tabs.tabCloseRequested.connect(self._onTabCloseRequested)
         gui.closing.connect(self._saveCachedScript)
 
         cached = self._loadCachedScript()
@@ -258,6 +264,64 @@ class RigidBodyRefinement:
         hit = nearest_ca_residue(self.gui.structureAxes, data, event)
         self.gui.lblHover.setText("" if hit is None else f"b{hit['body'] + 1} · residue {hit['residue']}")
 
+    # ----- structure manager --------------------------------------------------
+    def onViewStructure(self):
+        """Open (or switch to) the structure-manager tab for the current structure. It builds on the live script, and writes the changes
+        the user confirms back into it."""
+        path = self.gui.structureField.text() or self._loadValue("pdb") or ""
+        if not path or self.worker.running():
+            return
+        self._ensureBackend()
+        if self.structurePane is not None and self.structurePane.pdb_path != path:
+            self._closeStructurePane()
+        if self.structurePane is None:
+            self.structurePane = StructurePane(
+                path, splits=self._loadValue("split") or "", base_script=self.gui.getText, relaxed_loads=self._relaxed_loads)
+            self.structurePane.scriptApplied.connect(self._applyStructureScript)
+            self.gui.addTab(self.structurePane, self.structurePane.title)  # switching to it syncs the camera, see _onTabChanged
+        else:
+            self.gui.tabs.setCurrentWidget(self.structurePane)
+
+    def _closeStructurePane(self):
+        if self.structurePane is None:
+            return
+        self.gui.removeTab(self.structurePane)
+        self.structurePane.deleteLater()
+        self.structurePane = None
+
+    def _onTabCloseRequested(self, index: int):
+        if self.gui.tabs.widget(index) is not self.structurePane:
+            return
+        n = len(self.structurePane.model.elements)
+        if n:
+            answer = QtWidgets.QMessageBox.question(
+                self.gui, "Close structure", f"Discard {n} staged change{'' if n == 1 else 's'} that were not sent to the script?")
+            if answer != QtWidgets.QMessageBox.StandardButton.Yes:
+                return
+        self._closeStructurePane()
+
+    def _onTabChanged(self, index: int):
+        """Carry the camera angle between the preview and the structure manager as the user switches tabs, which reads as one shared
+        camera without keeping the two figures in lock-step; and flag the manager as stale if the script changed meanwhile."""
+        pane = self.structurePane
+        if pane is None:
+            return
+        current = self.gui.tabs.widget(index)
+        ax = self.gui.structureAxes
+        if current is pane:
+            pane.setCameraOrientation((ax.elev, ax.azim, getattr(ax, "roll", 0.0)))
+            pane.checkStale()
+        elif current is self.gui.refinementTab:
+            elev, azim, roll = pane.cameraOrientation()
+            ax.view_init(elev=elev, azim=azim, roll=roll)
+            self.gui.structureCanvas.draw_idle()
+
+    def _applyStructureScript(self, script: str):
+        """Take the script carrying the structure manager's confirmed changes, and switch back to it."""
+        self.gui.replaceText(script)
+        self._populateInputsFromScript()  # the manager can re-split the load block, which the Splits field has to show
+        self.gui.showRefinementTab()
+
     # ----- validate / run -----------------------------------------------------
     def _structureLoads(self) -> bool:
         """Whether the script's structure can be read, offering a relaxed load if the backend refuses it. Called before Validate/Run, where
@@ -324,6 +388,8 @@ class RigidBodyRefinement:
                 self.gui.showStructureTab()
                 self._liveTimer.start()
         self.gui.setRunning(True, stoppable=not validate_only)
+        if self.structurePane is not None:
+            self.structurePane.setBusy(True)
         self.worker.start(script, validate_only, structure_path=self._loadValue("pdb"), relaxed_loads=self._relaxed_loads)
         self._drainTimer.start()
 
@@ -366,6 +432,8 @@ class RigidBodyRefinement:
         if frame is not None:
             self._drawLiveFrame(frame)
         self.gui.setRunning(False)
+        if self.structurePane is not None:
+            self.structurePane.setBusy(False)
         self._preview_key = None  # the preview was skipped while running; let it catch up with any edits made meanwhile
         self._previewTimer.start()
 

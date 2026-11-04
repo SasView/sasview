@@ -92,18 +92,14 @@ class RigidBodyHighlighter(QSyntaxHighlighter):
         self._operations, self._keywords = set(operations), set(keywords)
 
     def set_vocabulary(self, operations, keywords):
-        """Replace the known operations/keywords (e.g. once the backend reports them) and re-highlight. Unknown tokens are only flagged
-        while a vocabulary is known."""
+        """Replace the known operations/keywords once the backend reports them, and re-highlight."""
         self._operations = set(operations)
         self._keywords = set(keywords)
         self.rehighlight()
 
     def highlightBlock(self, text: str):
         prev = self.previousBlockState()
-        spans, depth = classify_line(
-            text, prev if prev >= 0 else 0, self._operations, self._keywords,
-            flag_unknown=bool(self._operations or self._keywords),
-        )
+        spans, depth = classify_line(text, prev if prev >= 0 else 0, self._operations, self._keywords)
         for span in spans:
             f = self._scope_formats[span.depth % len(self._scope_formats)] if span.kind == "scope" else self._formats[span.kind]
             self.setFormat(span.start, span.end - span.start, f)
@@ -112,15 +108,18 @@ class RigidBodyHighlighter(QSyntaxHighlighter):
 
 class FileField(QtWidgets.QWidget):
     """A labelled path entry with a Browse button, tinted while the typed path is (in)valid. `committed` fires with the path whenever the user
-    settles on one — by browsing, or by finishing an edit of the text."""
+    settles on one — by browsing, or by finishing an edit of the text. With a `view_tooltip`, a View button beside it fires `viewRequested`;
+    it is enabled while the path is valid and the view isn't blocked (see setViewBlocked)."""
 
     committed = QtCore.Signal(str)
+    viewRequested = QtCore.Signal()
 
-    def __init__(self, label: str, file_filter: str, validator, parent=None):
+    def __init__(self, label: str, file_filter: str, validator, parent=None, *, view_tooltip: str | None = None):
         super().__init__(parent)
         self._filter = file_filter
         self._validator = validator
         self._last_committed = ""
+        self._view_blocked = False
         layout = QtWidgets.QHBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         title = QtWidgets.QLabel(label)
@@ -132,6 +131,13 @@ class FileField(QtWidgets.QWidget):
         self.button = QtWidgets.QPushButton("Browse…")
         layout.addWidget(self.button)
         self.button.clicked.connect(self._browse)
+        self.viewButton = None
+        if view_tooltip is not None:
+            self.viewButton = QtWidgets.QPushButton("View…")
+            self.viewButton.setToolTip(view_tooltip)
+            self.viewButton.setEnabled(False)
+            self.viewButton.clicked.connect(self.viewRequested.emit)
+            layout.addWidget(self.viewButton)
         self.edit.editingFinished.connect(lambda: self._commit(self.edit.text()))
         self.edit.textChanged.connect(self._tint)
 
@@ -146,8 +152,14 @@ class FileField(QtWidgets.QWidget):
     def valid(self) -> bool:
         return bool(self.text()) and self._validator(self.text())
 
+    def setViewBlocked(self, blocked: bool):
+        self._view_blocked = blocked
+        self._tint()
+
     def _tint(self):
         self.edit.setStyleSheet("" if not self.text() else _VALID_STYLE if self.valid() else _INVALID_STYLE)
+        if self.viewButton is not None:
+            self.viewButton.setEnabled(self.valid() and not self._view_blocked)
 
     def _browse(self):
         path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Open file", self.text(), self._filter)
@@ -165,8 +177,8 @@ class FileField(QtWidgets.QWidget):
 
 
 class RigidBodyRefinementUI(QtWidgets.QDialog):
-    """Three panes: inputs, run controls and output on the left; the refinement script in the middle; the structure preview and fit results
-    on the right."""
+    """A Refinement tab with three panes: inputs, run controls and output on the left; the refinement script in the middle; the structure
+    preview and fit results on the right. The structure manager opens beside it as a closable tab."""
 
     closing = QtCore.Signal()
 
@@ -184,8 +196,15 @@ class RigidBodyRefinementUI(QtWidgets.QDialog):
     def _buildUI(self):
         layout = QtWidgets.QVBoxLayout(self)
         layout.setContentsMargins(8, 8, 8, 8)
+        self.tabs = QtWidgets.QTabWidget()
+        self.tabs.setDocumentMode(True)
+        self.tabs.setTabsClosable(True)
+        layout.addWidget(self.tabs)
         self.splitter = QtWidgets.QSplitter(QtCore.Qt.Orientation.Horizontal)
-        layout.addWidget(self.splitter)
+        self.refinementTab = self.splitter
+        self.tabs.addTab(self.splitter, "Refinement")
+        for side in (QtWidgets.QTabBar.ButtonPosition.LeftSide, QtWidgets.QTabBar.ButtonPosition.RightSide):
+            self.tabs.tabBar().setTabButton(0, side, None)  # the refinement itself can't be closed
         self.splitter.addWidget(self._buildControls())
         self.splitter.addWidget(self._buildEditor())
         self.splitter.addWidget(self._buildResults())
@@ -203,7 +222,8 @@ class RigidBodyRefinementUI(QtWidgets.QDialog):
         # is always the authority
         inputs = QtWidgets.QGroupBox("Input")
         form = QtWidgets.QVBoxLayout(inputs)
-        self.structureField = FileField("Structure", "Structure files (*.pdb *.ent *.cif *.xyz);;All files (*)", is_structure_file)
+        self.structureField = FileField("Structure", "Structure files (*.pdb *.ent *.cif *.xyz);;All files (*)", is_structure_file,
+                                        view_tooltip="View the structure and manage its bodies, symmetries and constraints")
         self.saxsField = FileField("SAXS data", "SAXS data (*.dat *.rsr *.xvg);;All files (*)", is_saxs_file)
         form.addWidget(self.structureField)
         form.addWidget(self.saxsField)
@@ -320,6 +340,18 @@ class RigidBodyRefinementUI(QtWidgets.QDialog):
     def showStructureTab(self):
         self.results.setCurrentWidget(self.structureTab)
 
+    # ----- top-level tabs -----------------------------------------------------
+    def addTab(self, widget: QtWidgets.QWidget, title: str):
+        """Add a closable top-level tab beside the refinement and switch to it."""
+        self.tabs.addTab(widget, title)
+        self.tabs.setCurrentWidget(widget)
+
+    def removeTab(self, widget: QtWidgets.QWidget):
+        self.tabs.removeTab(self.tabs.indexOf(widget))
+
+    def showRefinementTab(self):
+        self.tabs.setCurrentWidget(self.refinementTab)
+
     # ----- output -------------------------------------------------------------
     def appendOutput(self, text: str, kind: str | None = None):
         """Append (optionally ANSI-coloured) backend output to the output pane, or a message of the calculator's own when `kind` is one of
@@ -346,6 +378,7 @@ class RigidBodyRefinementUI(QtWidgets.QDialog):
         self.btnStop.setEnabled(True)
         self.btnStop.setText("Stop")
         self.progress.setVisible(running)
+        self.structureField.setViewBlocked(running)  # the structure manager needs the backend, which the run owns
 
     def setStopping(self):
         self.btnStop.setEnabled(False)
