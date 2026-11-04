@@ -60,7 +60,7 @@ Name	Affiliation	Creator	Producer	RelatedPerson	ReleaseManager	ORCID	Notes
 "Liu, Yun"	National Institute of Standards and Technology	x					None
 "Lopes, Ruben"	ISIS Neutron and Muon Source	x					None
 "Lozano, Dorian"	Institut Laue-Langevin	x					None
-"Lytje, Kristian"	Saarland University	x					0000-0001-8743-7990
+"Lytje, Kristian"	Saarland University	x					0000-0001-8743-7990 None
 "Mannicke, David"	Australian National Science and Technology Organisation	x					None
 "Maranville, Brian"	National Institute of Standards and Technology	x				0000-0002-6105-8789	None
 "Markvardsen, Anders"	ISIS Neutron and Muon Source	x	x				None
@@ -77,9 +77,9 @@ Name	Affiliation	Creator	Producer	RelatedPerson	ReleaseManager	ORCID	Notes
 "Park, Helen"	National Institute of Standards and Technology	x					None
 "Parker, Peter"	ISIS Neutron and Muon Source	x					None
 "Parsons, Drew"	University of Cagliari			x			Or should he be listed as creator?
-"Patrou, Maria"	Oak Ridge National Laboratory   x					No commits yet but contributed 6 days at contributor camp on designs and path forwards
+"Patrou, Maria"	Oak Ridge National Laboratory	x					No commits yet but contributed 6 days at contributor camp on designs and path forwards
 "Pauw, Brian"	Federal Institute for Materials Research and Testing			x			None
-"Pedersen, Jan Skov" Aarhus University  x               0000-0002-7768-0206
+"Pedersen, Jan Skov" Aarhus University  x               0000-0002-7768-0206 None
 "Pellicelli, R"							Who is this person (and what it their affiliation?) How did the name show up here (could tell us who they are?)
 "Perring, Toby"	ISIS Neutron and Muon Source		x				None
 "Peterson, Pete"	Oak Ridge National Laboratory	x					None
