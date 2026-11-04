@@ -12,15 +12,24 @@ import os
 from collections.abc import Callable
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
 from matplotlib.figure import Figure
 from pyausaxs.gui.core.loads import RELAXED_LOADS
 from pyausaxs.gui.core.palette import PALETTE
 from pyausaxs.gui.core.plotting import PICK_CLICK_DRAG_TOLERANCE, draw_structure, nearest_ca_residue
+from pyausaxs.gui.core.script import norm_splits
 from pyausaxs.gui.core.structure import ActionResult, StructureModel, side_by_side_diff
 from PySide6 import QtCore, QtGui, QtWidgets
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Calculators.RigidbodyWidgets import (
+    MUTED_STYLE,
+    PRIMARY_STYLE,
+    ActionField,
+    CollapsibleSection,
+    GlyphButton,
+    ToggleChip,
+    add_action_row,
+)
 
 # display label -> draw_structure `color_by` mode; the first entry is the default
 COLOUR_BY_MODES = {"Body": "body", "Symmetry copy": "copy", "Residue": "residue"}
@@ -28,18 +37,12 @@ COLOUR_BY_MODES = {"Body": "body", "Symmetry copy": "copy", "Residue": "residue"
 # the status line holds a message legible, then fades it out (see StructurePane._setStatus)
 _STATUS_HOLD_MS, _STATUS_FADE_MS = 2500, 2500
 
-# an action button whose action has enough to go on: typed text, or a selection that stands in for it
-_READY_STYLE = (
-    f"QPushButton {{ background-color: {PALETTE['ready']}; color: white; border: none; border-radius: 3px; padding: 4px 10px; }}"
-    f"QPushButton:hover {{ background-color: {PALETTE['ready_hover']}; }}"
-)
 # the "script changed" bar: amber, so it stands apart from the section headers
 _REFRESH_STYLE = (
-    "QPushButton { background-color: #f0ad4e; color: #4a3208; font-weight: bold; border: none; border-radius: 3px;"
+    "QPushButton { background-color: #f0ad4e; color: #4a3208; font-weight: bold; border: none; border-radius: 4px;"
     " padding: 6px; text-align: left; }"
     "QPushButton:hover { background-color: #eca23a; }"
 )
-_MUTED_STYLE = f"color: {PALETTE['muted']};"
 _DIFF_REMOVED = (PALETTE["bad"], PALETTE["danger"])  # (background, foreground)
 _DIFF_ADDED = ("#e3f4e9", "#2f7d4f")
 
@@ -48,104 +51,9 @@ _BODY_ROLE = QtCore.Qt.ItemDataRole.UserRole
 _COPY_ROLE = QtCore.Qt.ItemDataRole.UserRole + 1
 
 
-class CollapsibleSection(QtWidgets.QWidget):
-    """A titled section whose body folds away behind its header. Sections are independent, so any number can be open at once."""
-
-    def __init__(self, title: str, *, expanded: bool, parent=None):
-        super().__init__(parent)
-        layout = QtWidgets.QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(2)
-        self.header = QtWidgets.QToolButton()
-        self.header.setText(title)
-        self.header.setCheckable(True)
-        self.header.setAutoRaise(True)
-        self.header.setToolButtonStyle(QtCore.Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
-        self.header.setSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Fixed)
-        font = self.header.font()
-        font.setBold(True)
-        self.header.setFont(font)
-        layout.addWidget(self.header)
-        self.body = QtWidgets.QWidget()
-        self.bodyLayout = QtWidgets.QVBoxLayout(self.body)
-        self.bodyLayout.setContentsMargins(14, 0, 0, 6)
-        layout.addWidget(self.body)
-        self.header.toggled.connect(self.setExpanded)
-        self.setExpanded(expanded)
-
-    def setExpanded(self, expanded: bool):
-        self.header.setChecked(expanded)
-        self.header.setArrowType(QtCore.Qt.ArrowType.DownArrow if expanded else QtCore.Qt.ArrowType.RightArrow)
-        self.body.setVisible(expanded)
-
-    def isExpanded(self) -> bool:
-        return self.header.isChecked()
-
-
-class ActionRow(QtWidgets.QWidget):
-    """A label, a field whose placeholder carries the format hint, and a button. `triggered` fires on the button and on Return.
-
-    `prefill` seeds the field with a real value rather than a hint, for a row whose one sensible answer can just be submitted; it is
-    restored whenever the row is cleared. `advanced`, if given, is the placeholder of an optional second field (e.g. a tolerance
-    override), folded away behind a chevron since the common case doesn't need it."""
-
-    triggered = QtCore.Signal()
-
-    def __init__(self, label: str, hint: str, button: str = "Apply", *, prefill: str = "", advanced: str | None = None, parent=None):
-        super().__init__(parent)
-        self._prefill = prefill
-        grid = QtWidgets.QGridLayout(self)
-        grid.setContentsMargins(0, 0, 0, 4)
-        grid.setHorizontalSpacing(4)
-        title = QtWidgets.QLabel(label)
-        title.setStyleSheet(_MUTED_STYLE)
-        grid.addWidget(title, 0, 0, 1, 3)
-        self.edit = QtWidgets.QLineEdit(prefill)
-        self.edit.setPlaceholderText(hint)
-        grid.addWidget(self.edit, 1, 0)
-        self.button = QtWidgets.QPushButton(button)
-        grid.addWidget(self.button, 1, 1)
-        grid.setColumnStretch(0, 1)
-        self.edit.returnPressed.connect(self.triggered.emit)
-        self.button.clicked.connect(lambda: self.triggered.emit())
-
-        self.advanced: QtWidgets.QLineEdit | None = None
-        if advanced is not None:
-            self.advanced = QtWidgets.QLineEdit()
-            self.advanced.setPlaceholderText(advanced)
-            self.advanced.hide()
-            self.advanced.returnPressed.connect(self.triggered.emit)
-            grid.addWidget(self.advanced, 2, 0, 1, 2)
-            self.chevron = QtWidgets.QToolButton()
-            self.chevron.setAutoRaise(True)
-            self.chevron.setArrowType(QtCore.Qt.ArrowType.RightArrow)
-            self.chevron.setToolTip("More options")
-            self.chevron.clicked.connect(self._toggleAdvanced)
-            grid.addWidget(self.chevron, 1, 2)
-
-    def _toggleAdvanced(self):
-        show = self.advanced.isHidden()
-        self.advanced.setVisible(show)
-        self.chevron.setArrowType(QtCore.Qt.ArrowType.DownArrow if show else QtCore.Qt.ArrowType.RightArrow)
-
-    def text(self) -> str:
-        return self.edit.text()
-
-    def advancedText(self) -> str:
-        return self.advanced.text() if self.advanced is not None else ""
-
-    def clear(self):
-        self.edit.setText(self._prefill)
-        if self.advanced is not None:
-            self.advanced.clear()
-
-    def setReady(self, ready: bool):
-        """Turn the button green while clicking it would actually do something."""
-        self.button.setStyleSheet(_READY_STYLE if ready else "")
-
-
 class StructurePane(QtWidgets.QWidget):
-    """Interactive structure-inspection and body-management view for a single structure file.
+    """Interactive structure-inspection and body-management view for a single structure file: the view and its display options on the
+    left, the bodies and the edits on the right.
 
     `base_script` returns the user's current script, which staged edits are composed onto; `scriptApplied` carries the new script once
     the user has confirmed sending the staged edits to it."""
@@ -162,9 +70,9 @@ class StructurePane(QtWidgets.QWidget):
                                     relaxed_loads=relaxed_loads if relaxed_loads is not None else RELAXED_LOADS)
         self._busy = False                # a refinement owns the backend; no action may rebuild the structure meanwhile
         self._preserveView = False        # keep the camera across redraws, once there is a first view to keep
-        self._pressXY = None              # where a left press on the preview landed, to tell a click from a rotation
+        self._pressXY = None              # where a left press on the view landed, to tell a click from a rotation
         self._renaming = None             # (item, body, copy, old name) of the Bodies-list row being renamed in place
-        self._readyChecks: list[tuple[ActionRow, Callable[[str], bool]]] = []
+        self._readyChecks: list[tuple[ActionField, Callable[[str], bool]]] = []
         self._bodyItems: dict[tuple[int, int | None], QtWidgets.QTreeWidgetItem] = {}
 
         self._redrawTimer = QtCore.QTimer(self)
@@ -176,11 +84,11 @@ class StructurePane(QtWidgets.QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         self.splitter = QtWidgets.QSplitter(QtCore.Qt.Orientation.Horizontal)
         layout.addWidget(self.splitter)
-        self.splitter.addWidget(self._buildPlot())
+        self.splitter.addWidget(self._buildView())
         self.splitter.addWidget(self._buildControls())
         self.splitter.setStretchFactor(0, 1)
         self.splitter.setStretchFactor(1, 0)
-        self.splitter.setSizes([1000, 360])
+        self.splitter.setSizes([1000, 340])
 
         ok, msg = self._rebuild()  # initial draw of the untouched structure
         if not ok:
@@ -188,32 +96,55 @@ class StructurePane(QtWidgets.QWidget):
             self._redraw()
 
     # ----- layout -------------------------------------------------------------
-    def _buildPlot(self) -> QtWidgets.QWidget:
+    def _buildView(self) -> QtWidgets.QWidget:
+        """The 3D view, with the options for how it is drawn in a slim bar above it and a readout of the residue under the cursor below."""
         pane = QtWidgets.QWidget()
         layout = QtWidgets.QVBoxLayout(pane)
         layout.setContentsMargins(0, 0, 0, 0)
-        # a thin readout above the canvas: the residue under the cursor, and a chip that clears everything selected in the plot. The chip is
-        # only shown while something is selected, see _refreshClearChip.
-        top = QtWidgets.QHBoxLayout()
-        top.setContentsMargins(6, 0, 0, 0)
-        self.lblHover = QtWidgets.QLabel("")
-        self.lblHover.setStyleSheet(_MUTED_STYLE)
-        top.addWidget(self.lblHover, 1)
-        self.btnClearSelection = QtWidgets.QToolButton()
-        self.btnClearSelection.setText("✕  Clear selection")
-        self.btnClearSelection.setToolTip("Deselect every body and residue")
-        self.btnClearSelection.clicked.connect(self._clearAllSelection)
-        self.btnClearSelection.hide()
-        top.addWidget(self.btnClearSelection)
-        layout.addLayout(top)
+        layout.setSpacing(2)
+
+        bar = QtWidgets.QHBoxLayout()
+        bar.setSpacing(4)
+        self.btnHome = GlyphButton("⌂", "Reset to the default view")
+        self.btnHome.clicked.connect(self._homeView)
+        bar.addWidget(self.btnHome)
+        bar.addSpacing(6)
+        self.chipAtoms = ToggleChip("Atoms", "Draw every atom, not just the Cα trace")
+        # hiding the trace only makes sense once the atom cloud is there to replace it
+        self.chipBackbone = ToggleChip("Backbone", "Draw the Cα trace of each body", checked=True)
+        self.chipBackbone.setEnabled(False)
+        self.chipCopies = ToggleChip("Copies", "Draw the symmetry copies", checked=True)
+        self.chipConstraints = ToggleChip("Constraints", "Draw the constraints between bodies", checked=True)
+        self.chipAtoms.toggled.connect(self.chipBackbone.setEnabled)
+        for chip in (self.chipAtoms, self.chipBackbone, self.chipCopies, self.chipConstraints):
+            chip.toggled.connect(self._scheduleRedraw)
+            bar.addWidget(chip)
+        bar.addStretch(1)
+        colour = QtWidgets.QLabel("Colour by")
+        colour.setStyleSheet(MUTED_STYLE)
+        bar.addWidget(colour)
+        self.cbColourBy = QtWidgets.QComboBox()
+        self.cbColourBy.addItems(list(COLOUR_BY_MODES))
+        self.cbColourBy.currentIndexChanged.connect(self._scheduleRedraw)
+        bar.addWidget(self.cbColourBy)
+        layout.addLayout(bar)
 
         self.figure = Figure()
         self.axes = self.figure.add_subplot(111, projection="3d")
         self.axes.set_axis_off()
         self.canvas = FigureCanvas(self.figure)
         layout.addWidget(self.canvas, 1)
-        self.toolbar = NavigationToolbar2QT(self.canvas, pane)
-        layout.addWidget(self.toolbar)
+
+        readout = QtWidgets.QHBoxLayout()
+        self.lblHover = QtWidgets.QLabel("Drag to rotate, scroll to zoom, click a residue to select it.")
+        self.lblHover.setStyleSheet(MUTED_STYLE)
+        readout.addWidget(self.lblHover, 1)
+        # shown only while something is selected, see _refreshClearChip
+        self.btnClearSelection = GlyphButton("✕  Clear selection", "Deselect every body and residue", size=12)
+        self.btnClearSelection.clicked.connect(self._clearAllSelection)
+        self.btnClearSelection.hide()
+        readout.addWidget(self.btnClearSelection)
+        layout.addLayout(readout)
 
         # hover to read the nearest residue, click to toggle it in the selection. A left press only counts as a click if the cursor barely
         # moved by its release; otherwise it was a rotation.
@@ -224,9 +155,9 @@ class StructurePane(QtWidgets.QWidget):
 
     def _buildControls(self) -> QtWidgets.QWidget:
         column = QtWidgets.QWidget()
-        column.setMinimumWidth(300)
+        column.setMinimumWidth(290)
         outer = QtWidgets.QVBoxLayout(column)
-        outer.setContentsMargins(4, 0, 0, 0)
+        outer.setContentsMargins(6, 0, 0, 0)
 
         # shown above the sections only while the script changed since the view was built, see _setStale
         self.btnRefresh = QtWidgets.QPushButton("↻  Script changed — refresh")
@@ -244,15 +175,13 @@ class StructurePane(QtWidgets.QWidget):
         sections = QtWidgets.QWidget()
         self._sectionsLayout = QtWidgets.QVBoxLayout(sections)
         self._sectionsLayout.setContentsMargins(0, 0, 4, 0)
+        self._sectionsLayout.setSpacing(4)
         scroll.setWidget(sections)
         outer.addWidget(scroll, 1)
 
-        self._buildDisplaySection()
         self._buildBodiesSection()
-        self._buildManageSection()
-        self._buildSymmetrySection()
-        self._buildConstraintsSection()
-        self._buildAppliedSection()
+        self._buildEditSection()
+        self._buildStagedSection()
         self._sectionsLayout.addStretch(1)
 
         self.lblStatus = QtWidgets.QLabel("")
@@ -272,94 +201,39 @@ class StructurePane(QtWidgets.QWidget):
 
         self.btnSend = QtWidgets.QPushButton("Send to script…")
         self.btnSend.setToolTip("Review the staged changes as a diff of the script, and apply them to it")
-        font = self.btnSend.font()
-        font.setBold(True)
-        self.btnSend.setFont(font)
+        self.btnSend.setStyleSheet(PRIMARY_STYLE)
+        self.btnSend.setEnabled(False)
         self.btnSend.clicked.connect(self._sendToScript)
         outer.addWidget(self.btnSend)
         self._controls = column
         return column
 
-    def _section(self, title: str, *, expanded: bool) -> QtWidgets.QVBoxLayout:
+    def _section(self, title: str, *, expanded: bool) -> CollapsibleSection:
         section = CollapsibleSection(title, expanded=expanded)
         self._sectionsLayout.addWidget(section)
-        return section.bodyLayout
+        return section
 
-    def _actionRow(self, layout, label: str, hint: str, command: Callable[[], None], button: str = "Apply", *,
-                   ready_check: Callable[[str], bool] | None = None, **kwargs) -> ActionRow:
-        """Add an ActionRow running `command`. `ready_check(text)`, if given, is re-evaluated on every keystroke and selection change, and
-        turns the button green while it holds (see _refreshActionReadiness)."""
-        row = ActionRow(label, hint, button, **kwargs)
-        row.triggered.connect(command)
+    def _actionRow(self, section: CollapsibleSection, label: str, hint: str, tooltip: str, command: Callable[[], None], *,
+                   ready_check: Callable[[str], bool] | None = None, prefill: str = "") -> ActionField:
+        """Add a one-line action. `ready_check(text)`, if given, is re-evaluated on every keystroke and selection change, and turns the
+        field's ⏎ green while it holds (see _refreshActionReadiness)."""
+        field = add_action_row(section, label, hint, tooltip, command, prefill=prefill)
         if ready_check is not None:
-            self._readyChecks.append((row, ready_check))
-            row.edit.textChanged.connect(self._refreshActionReadiness)
-        layout.addWidget(row)
-        return row
-
-    def _buildDisplaySection(self):
-        layout = self._section("Display", expanded=False)
-        self.chkAtoms = QtWidgets.QCheckBox("Atomic detail")
-        self.chkAtoms.setToolTip("Draw every atom, not just the Cα trace")
-        # hiding the trace only makes sense once the atom cloud is there to replace it, so it hangs off "Atomic detail"
-        self.chkBackbone = QtWidgets.QCheckBox("Backbone trace")
-        self.chkBackbone.setChecked(True)
-        self.chkBackbone.setEnabled(False)
-        self.chkCopies = QtWidgets.QCheckBox("Symmetry copies")
-        self.chkCopies.setChecked(True)
-        self.chkConstraints = QtWidgets.QCheckBox("Constraints")
-        self.chkConstraints.setChecked(True)
-        layout.addWidget(self.chkAtoms)
-        indented = QtWidgets.QHBoxLayout()
-        indented.setContentsMargins(20, 0, 0, 0)
-        indented.addWidget(self.chkBackbone)
-        layout.addLayout(indented)
-        layout.addWidget(self.chkCopies)
-        layout.addWidget(self.chkConstraints)
-        self.chkAtoms.toggled.connect(self.chkBackbone.setEnabled)
-        for box in (self.chkAtoms, self.chkBackbone, self.chkCopies, self.chkConstraints):
-            box.toggled.connect(self._scheduleRedraw)
-
-        colour_row = QtWidgets.QHBoxLayout()
-        label = QtWidgets.QLabel("Colour by")
-        label.setStyleSheet(_MUTED_STYLE)
-        colour_row.addWidget(label)
-        self.cbColourBy = QtWidgets.QComboBox()
-        self.cbColourBy.addItems(list(COLOUR_BY_MODES))
-        self.cbColourBy.currentIndexChanged.connect(self._scheduleRedraw)
-        colour_row.addWidget(self.cbColourBy, 1)
-        layout.addLayout(colour_row)
+            self._readyChecks.append((field, ready_check))
+            field.edit.textChanged.connect(self._refreshActionReadiness)
+        return field
 
     def _buildBodiesSection(self):
-        layout = self._section("Bodies", expanded=True)
-        title = QtWidgets.QLabel("Split at residues")
-        title.setStyleSheet(_MUTED_STYLE)
-        layout.addWidget(title)
-        splits_row = QtWidgets.QHBoxLayout()
-        splits_row.setSpacing(4)
-        self.txtSplits = QtWidgets.QLineEdit(self.model.splits)
-        self.txtSplits.setPlaceholderText("residue ids, or click residues")
-        self.txtSplits.setToolTip("Re-split the whole structure at these residues. Left empty, the residues selected in the view are used.")
-        self.txtSplits.returnPressed.connect(self._applySplits)
-        splits_row.addWidget(self.txtSplits, 1)
-        self.btnApplySplits = QtWidgets.QPushButton("Apply")
-        self.btnApplySplits.clicked.connect(self._applySplits)
-        splits_row.addWidget(self.btnApplySplits)
-        # A chevron reveals a second, distinct kind of split. The field above re-partitions the freshly-read structure and defines the whole
-        # body set. The per-body split below instead partitions a body already in the setup (e.g. one fitted to a symmetry), keeping its
-        # fragments tied together, and is staged like every other edit. Folded away, since re-splitting the whole structure is the common case.
-        self.btnBodySplitChevron = QtWidgets.QToolButton()
-        self.btnBodySplitChevron.setAutoRaise(True)
-        self.btnBodySplitChevron.setArrowType(QtCore.Qt.ArrowType.RightArrow)
-        self.btnBodySplitChevron.setToolTip("Split a single existing body")
-        self.btnBodySplitChevron.clicked.connect(lambda: self._toggleBodySplit())
-        splits_row.addWidget(self.btnBodySplitChevron)
-        layout.addLayout(splits_row)
+        section = self._section("Bodies", expanded=True)
+        # Two kinds of split. "Split all" re-partitions the freshly-read structure and defines the whole body set; "Split body" partitions a
+        # single body already in the setup (e.g. one fitted to a symmetry), keeping its fragments tied together. Both take the residues
+        # selected in the view when left empty.
+        self.rowSplits = self._actionRow(
+            section, "Split all", "residue ids", "Re-split the whole structure at these residues; left empty, at the residues selected in "
+            "the view", self._applySplits, ready_check=self._canResplit, prefill=self.model.splits)
         self.rowBodySplit = self._actionRow(
-            layout, "Additional splits (an existing body)", "body residues…", self._applyBodySplit, "Add",
-            ready_check=self.model.can_split_body,
-        )
-        self.rowBodySplit.hide()
+            section, "Split body", "body residues…", "Split one existing body at these residues, e.g. b2 50; the residues selected in the "
+            "view are enough on their own", self._applyBodySplit, ready_check=self.model.can_split_body)
 
         # base bodies, with their symmetry replicas folded beneath them. Selection is the model's own (plain, ctrl- and shift-clicks, see
         # StructureModel.toggle_highlight), so the tree's is switched off and the selected rows are tinted by hand.
@@ -369,7 +243,8 @@ class StructurePane(QtWidgets.QWidget):
         self.bodyTree.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.NoSelection)
         self.bodyTree.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers)
         self.bodyTree.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
-        self.bodyTree.setMinimumHeight(160)
+        self.bodyTree.setFrameShape(QtWidgets.QFrame.Shape.NoFrame)
+        self.bodyTree.setMinimumHeight(120)
         self.bodyTree.setToolTip("Click to select a body; ctrl- and shift-click select several. Double-click a name to rename it.")
         header = self.bodyTree.header()
         header.setStretchLastSection(False)
@@ -377,54 +252,68 @@ class StructurePane(QtWidgets.QWidget):
         header.setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeMode.ResizeToContents)
         self.bodyTree.itemClicked.connect(self._onBodyClicked)
         self.bodyTree.itemDoubleClicked.connect(self._onBodyDoubleClicked)
-        self.bodyTree.itemExpanded.connect(lambda item: self.model.expanded_bodies.add(item.data(0, _BODY_ROLE)))
-        self.bodyTree.itemCollapsed.connect(lambda item: self.model.expanded_bodies.discard(item.data(0, _BODY_ROLE)))
+        self.bodyTree.itemExpanded.connect(lambda item: self._onBodyFolded(item, True))
+        self.bodyTree.itemCollapsed.connect(lambda item: self._onBodyFolded(item, False))
         self.bodyTree.itemDelegate().closeEditor.connect(self._onRenameEditorClosed)
-        layout.addWidget(self.bodyTree)
+        section.form.addRow(self.bodyTree)
 
-    def _buildManageSection(self):
-        layout = self._section("Manage bodies", expanded=False)
-        # Rename takes its "old" half from the selection when exactly one row is selected; Merge and Delete take the selected bodies when
-        # their field is left empty. The buttons turn green whenever that would work, so the shortcut is discoverable.
-        self.rowRename = self._actionRow(layout, "Rename", "old new", self._applyRename, "Rename", ready_check=self.model.can_rename)
-        self.rowMerge = self._actionRow(layout, "Merge", "first others…", self._applyMerge, ready_check=self.model.can_merge)
-        self.rowDelete = self._actionRow(layout, "Delete", "body", self._applyDelete, ready_check=self.model.can_delete)
+    def _buildEditSection(self):
+        # Rename takes its "old" half from the selection when exactly one row is selected; Merge and Delete take the selected bodies, and the
+        # symmetry and constraint rows the selected bodies they need, when only the rest is typed. The ⏎ turns green whenever that would work.
+        section = self._section("Edit", expanded=True)
+        self.rowRename = self._actionRow(section, "Rename", "old new", "Rename a body, e.g. b1 core; with one body selected, just the new "
+                                         "name", self._applyRename, ready_check=self.model.can_rename)
+        self.rowMerge = self._actionRow(section, "Merge", "first others…", "Merge bodies into the first; left empty, the selected bodies",
+                                        self._applyMerge, ready_check=self.model.can_merge)
+        self.rowDelete = self._actionRow(section, "Delete", "bodies…", "Delete bodies; left empty, the selected bodies",
+                                         self._applyDelete, ready_check=self.model.can_delete)
 
-    def _buildSymmetrySection(self):
-        layout = self._section("Symmetry", expanded=False)
-        self.rowAddSymmetry = self._actionRow(layout, "Add symmetry to a body", "body type", self._applyAddSymmetry)
+        section.addHeading("Symmetry")
+        self.rowAddSymmetry = self._actionRow(section, "Add", "body type", "Add a symmetry to a body, e.g. b1 c4", self._applyAddSymmetry)
         self.rowConvertSymmetry = self._actionRow(
-            layout, "Decompose bodies into a symmetry", "body(s)… type", self._applyConvertSymmetry, "Convert",
-            advanced="tolerance (default 5.0 Å)",
-        )
+            section, "Fit", "bodies… type", "Decompose one or more bodies into a fitted symmetry, e.g. b1 b2 c2", self._applyConvertSymmetry)
+        # an optional tolerance for the fit, folded away since the default is usually right
+        self.btnTolerance = GlyphButton("⚙", "Set the fit's tolerance")
+        self.btnTolerance.setCheckable(True)
+        self.rowConvertSymmetry.addButton(self.btnTolerance)
+        self.txtTolerance = QtWidgets.QLineEdit()
+        self.txtTolerance.setPlaceholderText("default 5.0 Å")
+        self.txtTolerance.setToolTip("How far the bodies may deviate from the fitted symmetry, in Å")
+        self.txtTolerance.returnPressed.connect(self._applyConvertSymmetry)
+        tolerance = QtWidgets.QLabel("Tolerance")
+        tolerance.setStyleSheet(MUTED_STYLE)
+        section.form.addRow(tolerance, self.txtTolerance)
+        section.form.setRowVisible(self.txtTolerance, False)
+        self.btnTolerance.toggled.connect(lambda shown: section.form.setRowVisible(self.txtTolerance, shown))
 
-    def _buildConstraintsSection(self):
-        layout = self._section("Constraints", expanded=False)
+        section.addHeading("Constraints")
         # `backbone` is prefilled since it is the only generator available: the row is then a one-click affair
-        self.rowAutoconstrain = self._actionRow(layout, "Auto-generate constraints", "backbone", self._applyAutoconstrain, "Generate",
-                                                prefill="backbone")
-        self.rowConstraint = self._actionRow(layout, "Constrain two bodies", "body1 body2 type", self._applyAddConstraint, "Add")
+        self.rowAutoconstrain = self._actionRow(section, "Generate", "backbone", "Generate a set of constraints automatically",
+                                                self._applyAutoconstrain, prefill="backbone")
+        self.rowConstraint = self._actionRow(section, "Constrain", "body1 body2 type", "Constrain two bodies, e.g. b1 b2 cm, or "
+                                             "b1 b2 attract 30", self._applyAddConstraint)
 
-    def _buildAppliedSection(self):
-        layout = self._section("Applied elements", expanded=True)
-        self.lblNoChanges = QtWidgets.QLabel("No changes staged yet.")
-        self.lblNoChanges.setStyleSheet(_MUTED_STYLE)
-        layout.addWidget(self.lblNoChanges)
+    def _buildStagedSection(self):
+        self.stagedSection = self._section("Staged changes", expanded=True)
+        self.lblNoChanges = QtWidgets.QLabel("Nothing staged yet.")
+        self.lblNoChanges.setStyleSheet(MUTED_STYLE)
+        self.stagedSection.form.addRow(self.lblNoChanges)
         self.appliedTree = QtWidgets.QTreeWidget()
         self.appliedTree.setColumnCount(2)
         self.appliedTree.setHeaderHidden(True)
         self.appliedTree.setRootIsDecorated(False)
         self.appliedTree.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.NoSelection)
         self.appliedTree.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
+        self.appliedTree.setFrameShape(QtWidgets.QFrame.Shape.NoFrame)
         self.appliedTree.setMaximumHeight(150)
         self.appliedTree.setFont(GuiUtils.getMonospaceFont())
         header = self.appliedTree.header()
         header.setStretchLastSection(False)
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeMode.Stretch)
         header.setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeMode.Fixed)
-        header.resizeSection(1, 28)
+        header.resizeSection(1, 26)
         self.appliedTree.hide()
-        layout.addWidget(self.appliedTree)
+        self.stagedSection.form.addRow(self.appliedTree)
 
     # ----- refresh from the model ---------------------------------------------
     def _rebuild(self) -> tuple[bool, str]:
@@ -443,6 +332,7 @@ class StructurePane(QtWidgets.QWidget):
             self._refreshBodyNames()
         self._refreshActionReadiness()
         self._refreshSplitField()
+        self._refreshSendState()
         self._scheduleRedraw()
         self._setStale(False)  # the view now matches this base
 
@@ -455,19 +345,22 @@ class StructurePane(QtWidgets.QWidget):
             self._setStatus(result.message, ok=result.ok)
 
     def _refreshActionReadiness(self):
-        for row, check in self._readyChecks:
-            row.setReady(check(row.text()))
+        for field, check in self._readyChecks:
+            field.setReady(check(field.text()))
+
+    def _canResplit(self, text: str) -> bool:
+        """Whether "Split all" would change anything: a different split typed, or residues selected for an empty field to stand in."""
+        if not text.strip():
+            return bool(self.model.selected_residues) or bool(self.model.splits.strip())
+        return norm_splits(text) != norm_splits(self.model.splits)
 
     def _refreshSplitField(self):
-        """Dim the whole-structure splits field once applying it would override an existing split. It stays usable: this only stops it
-        reading as the obvious next step, since the per-body split is."""
-        self.txtSplits.setStyleSheet(f"QLineEdit {{ color: {PALETTE['muted']}; }}" if self.model.split_would_override() else "")
+        """Dim the whole-structure split once applying it would override an existing split. It stays usable: this only stops it reading as
+        the obvious next step, since the per-body split is."""
+        self.rowSplits.setDimmed(self.model.split_would_override())
 
-    def _toggleBodySplit(self, *, expand: bool | None = None):
-        """Fold the per-body split row in or out; `expand` forces a direction instead of toggling."""
-        expand = self.rowBodySplit.isHidden() if expand is None else expand
-        self.rowBodySplit.setVisible(expand)
-        self.btnBodySplitChevron.setArrowType(QtCore.Qt.ArrowType.DownArrow if expand else QtCore.Qt.ArrowType.RightArrow)
+    def _refreshSendState(self):
+        self.btnSend.setEnabled(not self._busy and self.model.send_script() is not None)
 
     # ----- staleness / refresh ------------------------------------------------
     def checkStale(self):
@@ -496,7 +389,7 @@ class StructurePane(QtWidgets.QWidget):
                 return
         ok, msg = self.model.refresh_from_base()
         self._rebuildAppliedList()
-        self.txtSplits.setText(self.model.splits)  # mirror the (possibly re-edited) script's splits again
+        self.rowSplits.edit.setText(self.model.splits)  # mirror the (possibly re-edited) script's splits again
         if ok:
             self._onRebuilt()
         self._setStatus("Reloaded from the current script." if ok else f"Could not reload from the script: {msg}", ok=ok)
@@ -507,6 +400,7 @@ class StructurePane(QtWidgets.QWidget):
         self._busy = busy
         self._controls.setEnabled(not busy)
         self._controls.setToolTip("Unavailable while a refinement runs." if busy else "")
+        self._refreshSendState()
 
     # ----- body list ----------------------------------------------------------
     def _rebuildBodyList(self):
@@ -517,23 +411,35 @@ class StructurePane(QtWidgets.QWidget):
         for b in self.model.bodies:
             replicas = b["copies"][1:]
             res = f"res {b['res'][0]}–{b['res'][1]}" if b["res"] else "no residues"
-            extra = f" · {len(replicas)} copies" if replicas else ""
-            item = QtWidgets.QTreeWidgetItem([b["name"], f"{b['atoms']} atoms · {res}{extra}"])
-            item.setIcon(0, self._swatch(b["colour"], 12))
+            extra = f" · ×{len(replicas) + 1}" if replicas else ""
+            item = QtWidgets.QTreeWidgetItem([b["name"], f"{res} · {b['atoms']} atoms{extra}"])
+            item.setIcon(0, self._swatch(b["colour"], 10))
             item.setForeground(1, muted)
             self._tagItem(item, b["index"], None)
             self.bodyTree.addTopLevelItem(item)
             for copy in replicas:
                 info = self.model.replica_info[(b["index"], copy)]
-                child = QtWidgets.QTreeWidgetItem([info["name"], f"[{info['type']}]"])
-                child.setIcon(0, self._swatch(b["colour"], 8))
+                child = QtWidgets.QTreeWidgetItem([info["name"], info["type"]])
+                child.setIcon(0, self._swatch(b["colour"], 7))
                 child.setForeground(0, muted)
                 child.setForeground(1, accent)
                 self._tagItem(child, b["index"], copy)
                 item.addChild(child)
             item.setExpanded(b["index"] in self.model.expanded_bodies)
         self.bodyTree.blockSignals(False)
+        # leave room for fold arrows only when some body has copies to fold
+        self.bodyTree.setRootIsDecorated(any(len(b["copies"]) > 1 for b in self.model.bodies))
+        _fitHeight(self.bodyTree, 260)
         self._refreshRowHighlight()
+
+    def _onBodyFolded(self, item: QtWidgets.QTreeWidgetItem, expanded: bool):
+        """Track which bodies show their copies: a shift-click range runs over the rows as shown."""
+        body = item.data(0, _BODY_ROLE)
+        if expanded:
+            self.model.expanded_bodies.add(body)
+        else:
+            self.model.expanded_bodies.discard(body)
+        _fitHeight(self.bodyTree, 260)
 
     def _tagItem(self, item: QtWidgets.QTreeWidgetItem, body: int, copy: int | None):
         item.setData(0, _BODY_ROLE, body)
@@ -574,8 +480,8 @@ class StructurePane(QtWidgets.QWidget):
     def _toggleHighlight(self, body: int, copy: int | None, *, shift: bool = False, ctrl: bool = False):
         """Select/deselect a row; see StructureModel.toggle_highlight for what plain, ctrl- and shift-clicks do."""
         # isolating a single replica is pointless while copies are hidden, so reveal them
-        if self.model.toggle_highlight(body, copy, shift=shift, ctrl=ctrl) and not self.chkCopies.isChecked():
-            self.chkCopies.setChecked(True)
+        if self.model.toggle_highlight(body, copy, shift=shift, ctrl=ctrl) and not self.chipCopies.isChecked():
+            self.chipCopies.setChecked(True)
         self._refreshRowHighlight()
         self._refreshActionReadiness()
         self._scheduleRedraw()
@@ -618,10 +524,10 @@ class StructurePane(QtWidgets.QWidget):
         else:
             draw_structure(
                 ax, self.model.data, self.model.split_residues(),
-                show_atoms=self.chkAtoms.isChecked(),
-                show_copies=self.chkCopies.isChecked(),
-                show_backbone=self.chkBackbone.isChecked() or not self.chkAtoms.isChecked(),
-                show_constraints=self.chkConstraints.isChecked(),
+                show_atoms=self.chipAtoms.isChecked(),
+                show_copies=self.chipCopies.isChecked(),
+                show_backbone=self.chipBackbone.isChecked() or not self.chipAtoms.isChecked(),
+                show_constraints=self.chipConstraints.isChecked(),
                 highlight=self.model.highlighted,
                 color_by=COLOUR_BY_MODES[self.cbColourBy.currentText()],
                 body_names={b["index"]: b["name"] for b in self.model.bodies},
@@ -638,18 +544,24 @@ class StructurePane(QtWidgets.QWidget):
         self.canvas.draw_idle()
         self._refreshClearChip()
 
+    def _homeView(self):
+        """Reset the view to the auto-fit default."""
+        self._preserveView = False
+        self.axes.view_init()
+        self._redraw()
+
     def _refreshClearChip(self):
         self.btnClearSelection.setVisible(bool(self.model.selected_residues or self.model.highlighted))
 
     def _clearAllSelection(self):
-        """Drop both selections at once, the click-selected residues and the selected bodies: in the plot they read as one."""
+        """Drop both selections at once, the click-selected residues and the selected bodies: in the view they read as one."""
         self.model.clear_all_selection()
         self._refreshRowHighlight()
         self._refreshActionReadiness()
         self._scheduleRedraw()
         self._setStatus("Selection cleared.", ok=True)
 
-    # ----- clickable preview --------------------------------------------------
+    # ----- clickable view -----------------------------------------------------
     def _onPreviewHover(self, event):
         hit = nearest_ca_residue(self.axes, self.model.data, event)
         if hit is None:
@@ -664,9 +576,9 @@ class StructurePane(QtWidgets.QWidget):
 
     def _onPreviewRelease(self, event):
         """A left release that barely moved from its press is a click: toggle the nearest residue in the selection. A release after a drag
-        (a rotation), or while a toolbar pan/zoom mode is active, is ignored."""
+        (a rotation) is ignored."""
         press, self._pressXY = self._pressXY, None
-        if event.button != 1 or press is None or event.x is None or event.y is None or self.toolbar.mode:
+        if event.button != 1 or press is None or event.x is None or event.y is None:
             return
         if abs(event.x - press[0]) + abs(event.y - press[1]) > PICK_CLICK_DRAG_TOLERANCE:
             return
@@ -675,14 +587,9 @@ class StructurePane(QtWidgets.QWidget):
             self._toggleSelectedResidue(hit["body"], hit["residue"])
 
     def _toggleSelectedResidue(self, body: int, resid: int):
-        message = self.model.toggle_selected_residue(body, resid)
+        self._setStatus(self.model.toggle_selected_residue(body, resid), ok=True)
         self._scheduleRedraw()
-        self._refreshActionReadiness()  # the residue selection stands in for an empty field, so it changes what is clickable
-        # once re-splitting the whole structure would override the existing split, the per-body split is the only thing a click can usefully
-        # feed, so reveal it rather than leave it behind a chevron
-        if self.model.selected_residues and self.model.split_would_override():
-            self._toggleBodySplit(expand=True)
-        self._setStatus(message, ok=True)
+        self._refreshActionReadiness()  # the residue selection stands in for an empty field, so it changes what is ready
 
     # ----- camera -------------------------------------------------------------
     # The calculator's own preview and this view show the same structure in two figures. Rather than truly sync them, each adopts the other's
@@ -706,23 +613,24 @@ class StructurePane(QtWidgets.QWidget):
 
     # ----- setup actions ------------------------------------------------------
     def _applySplits(self):
-        """Re-split the whole structure at the residues in the splits field, or at the selected residues if it is left empty."""
-        result, shown = self.model.apply_splits(self.txtSplits.text())
-        self.txtSplits.setText(shown)
+        """Re-split the whole structure at the residues in the field, or at the selected residues if it is left empty."""
+        result, shown = self.model.apply_splits(self.rowSplits.text())
+        self.rowSplits.edit.setText(shown)
         if result.rebuilt:
             self._onRebuilt()
-        elif result.ok:  # nothing to re-split, but a consumed residue selection still has to disappear from the plot
+        elif result.ok:  # nothing to re-split, but a consumed residue selection still has to disappear from the view
             self._scheduleRedraw()
             self._refreshActionReadiness()
         if result.message:
             self._setStatus(result.message, ok=result.ok)
 
-    def _runAction(self, row: ActionRow, action: Callable[..., ActionResult], *args):
+    def _runAction(self, field: ActionField, action: Callable[..., ActionResult], *args):
         result = action(*args)
         self._showResult(result)
         if result.ok:
-            row.clear()
+            field.clear()
         self._refreshActionReadiness()
+        return result
 
     def _applyBodySplit(self):
         self._runAction(self.rowBodySplit, self.model.apply_body_split, self.rowBodySplit.text())
@@ -740,8 +648,9 @@ class StructurePane(QtWidgets.QWidget):
         self._runAction(self.rowAddSymmetry, self.model.apply_add_symmetry, self.rowAddSymmetry.text())
 
     def _applyConvertSymmetry(self):
-        self._runAction(self.rowConvertSymmetry, self.model.apply_convert_symmetry, self.rowConvertSymmetry.text(),
-                        self.rowConvertSymmetry.advancedText())
+        if self._runAction(self.rowConvertSymmetry, self.model.apply_convert_symmetry, self.rowConvertSymmetry.text(),
+                           self.txtTolerance.text()).ok:
+            self.txtTolerance.clear()
 
     def _applyAutoconstrain(self):
         self._runAction(self.rowAutoconstrain, self.model.apply_autoconstrain, self.rowAutoconstrain.text())
@@ -751,19 +660,20 @@ class StructurePane(QtWidgets.QWidget):
 
     def _rebuildAppliedList(self):
         self.appliedTree.clear()
-        self.lblNoChanges.setVisible(not self.model.elements)
-        self.appliedTree.setVisible(bool(self.model.elements))
+        n = len(self.model.elements)
+        self.stagedSection.setTitle(f"Staged changes · {n}" if n else "Staged changes")
+        self.lblNoChanges.setVisible(not n)
+        self.appliedTree.setVisible(bool(n))
         for i, element in enumerate(self.model.elements):
             # a multi-line element (e.g. a constrain block) collapses to one line, elided to the width; the tooltip has it in full
             item = QtWidgets.QTreeWidgetItem([" ".join(element.split())])
             item.setToolTip(0, element)
             self.appliedTree.addTopLevelItem(item)
-            remove = QtWidgets.QToolButton()
-            remove.setText("✕")
-            remove.setAutoRaise(True)
-            remove.setToolTip("Remove this change")
+            remove = GlyphButton("✕", "Remove this change", hover=PALETTE["danger"], size=12)
             remove.clicked.connect(lambda _checked=False, i=i: self._removeElement(i))
             self.appliedTree.setItemWidget(item, 1, remove)
+        _fitHeight(self.appliedTree, 160)
+        self._refreshSendState()
 
     def _removeElement(self, i: int):
         self._showResult(self.model.remove_element(i))
@@ -799,6 +709,19 @@ class StructurePane(QtWidgets.QWidget):
         return ScriptDiffDialog(old, new, self).exec() == QtWidgets.QDialog.DialogCode.Accepted
 
 
+def _fitHeight(tree: QtWidgets.QTreeWidget, cap: int):
+    """Size a list to its visible rows, up to `cap` pixels, beyond which it scrolls; a short list then leaves no empty block behind it."""
+    rows = 0
+    iterator = QtWidgets.QTreeWidgetItemIterator(tree)
+    while iterator.value() is not None:
+        item = iterator.value()
+        parent = item.parent()
+        rows += parent is None or parent.isExpanded()
+        iterator += 1
+    row_height = tree.sizeHintForRow(0) if tree.topLevelItemCount() else tree.fontMetrics().height()
+    tree.setFixedHeight(min(cap, max(1, rows) * max(row_height, 1) + 2 * tree.frameWidth() + 4))
+
+
 class ScriptDiffDialog(QtWidgets.QDialog):
     """A side-by-side diff of the script: the original on the left with removed lines tinted red, the new one on the right with added lines
     tinted green. The two sides scroll together, since their rows are aligned."""
@@ -815,12 +738,14 @@ class ScriptDiffDialog(QtWidgets.QDialog):
         rows = side_by_side_diff(old, new)
         self._fill(self.original, [(r.old, r.old_changed) for r in rows], _DIFF_REMOVED)
         self._fill(self.changed, [(r.new, r.new_changed) for r in rows], _DIFF_ADDED)
-        left, right = self.original.verticalScrollBar(), self.changed.verticalScrollBar()
-        left.valueChanged.connect(right.setValue)
-        right.valueChanged.connect(left.setValue)
+        for one, other in ((self.original, self.changed), (self.changed, self.original)):
+            one.verticalScrollBar().valueChanged.connect(other.verticalScrollBar().setValue)
+            one.horizontalScrollBar().valueChanged.connect(other.horizontalScrollBar().setValue)
 
         buttons = QtWidgets.QDialogButtonBox()
-        buttons.addButton("Apply changes", QtWidgets.QDialogButtonBox.ButtonRole.AcceptRole).setDefault(True)
+        apply = buttons.addButton("Apply changes", QtWidgets.QDialogButtonBox.ButtonRole.AcceptRole)
+        apply.setDefault(True)
+        apply.setStyleSheet(PRIMARY_STYLE)
         buttons.addButton(QtWidgets.QDialogButtonBox.StandardButton.Cancel)
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
@@ -829,7 +754,7 @@ class ScriptDiffDialog(QtWidgets.QDialog):
     @staticmethod
     def _side(grid: QtWidgets.QGridLayout, heading: str, column: int) -> QtWidgets.QPlainTextEdit:
         label = QtWidgets.QLabel(heading)
-        label.setStyleSheet(_MUTED_STYLE)
+        label.setStyleSheet(MUTED_STYLE)
         grid.addWidget(label, 0, column)
         text = QtWidgets.QPlainTextEdit()
         text.setReadOnly(True)

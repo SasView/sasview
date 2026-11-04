@@ -68,10 +68,10 @@ class RigidbodyStructureTest:
         self.click(pane, 0)
         self.click(pane, 2, QtCore.Qt.KeyboardModifier.ControlModifier)
         assert pane.model.highlighted == {(0, None), (2, None)}
-        assert pane.rowMerge.button.styleSheet()  # lit up: clicking it would merge the selection
+        assert pane.rowMerge.isReady()  # lit up: applying it would merge the selection
         assert pane.btnClearSelection.isVisibleTo(pane) or pane._redrawTimer.isActive()
 
-        pane.rowMerge.button.click()
+        pane.rowMerge.apply.trigger()
         assert pane.model.elements == ["merge b1 b3"]
         assert self.names(pane) == ["b1", "b2"]
         assert pane.appliedTree.topLevelItemCount() == 1
@@ -83,7 +83,7 @@ class RigidbodyStructureTest:
     def testRejectedActionKeepsTheField(self, pane):
         """An action the backend refuses leaves the structure and the typed text alone, and says why"""
         pane.rowMerge.edit.setText("b1 nonexistent")
-        pane.rowMerge.button.click()
+        pane.rowMerge.apply.trigger()
         assert pane.model.elements == []
         assert pane.rowMerge.text() == "b1 nonexistent"
         assert pane.lblStatus.text().startswith("Rejected")
@@ -104,30 +104,31 @@ class RigidbodyStructureTest:
         assert pane.model.highlighted == set()
 
     def testResidueSelectionSplitsABody(self, pane):
-        """Clicked residues stand in for the residues of a per-body split, which is revealed since the structure is already split"""
-        assert pane.rowBodySplit.isHidden()
+        """Clicked residues stand in for the residues of a per-body split"""
+        assert not pane.rowBodySplit.isReady()
         pane._toggleSelectedResidue(1, 50)  # b2 spans residues 9-98
-        assert not pane.rowBodySplit.isHidden()
-        assert pane.rowBodySplit.button.styleSheet()
-        pane.rowBodySplit.button.click()
+        assert pane.rowBodySplit.isReady()
+        pane.rowBodySplit.apply.trigger()
         assert pane.model.elements == ["split b2 50"]
         assert len(self.names(pane)) == 4
         assert pane.model.selected_residues == set()
 
     def testResplitWholeStructure(self, pane):
         """The splits field re-splits the whole structure, and a bad value is reverted"""
-        pane.txtSplits.setText("50")
-        pane.btnApplySplits.click()
+        pane.rowSplits.edit.setText("50")
+        pane.rowSplits.apply.trigger()
         assert self.names(pane) == ["b1", "b2"]
-        pane.txtSplits.setText("not a residue")
-        pane.btnApplySplits.click()
-        assert pane.txtSplits.text() == "50"
+        pane.rowSplits.edit.setText("not a residue")
+        pane.rowSplits.apply.trigger()
+        assert pane.rowSplits.text() == "50"
         assert self.names(pane) == ["b1", "b2"]
 
     def testSendToScript(self, calculator, pane, mocker):
         """Staged changes reach the script only once the diff is confirmed, and then return to the refinement"""
+        assert not pane.btnSend.isEnabled()  # nothing staged yet
         pane.rowMerge.edit.setText("b1 b2")
-        pane.rowMerge.button.click()
+        pane.rowMerge.apply.trigger()
+        assert pane.btnSend.isEnabled()
         before = calculator.gui.getText()
 
         mocker.patch.object(pane, "_confirmChange", return_value=False)
@@ -140,14 +141,13 @@ class RigidbodyStructureTest:
         assert calculator.gui.tabs.currentWidget() is calculator.gui.refinementTab
         assert pane.model.elements == [] and self.names(pane) == ["b1", "b3"]
 
-        pane.btnSend.click()
-        assert pane.lblStatus.text() == "No changes to send."
+        assert not pane.btnSend.isEnabled()  # sent, so nothing is left to send
 
     def testSentSplitsReachTheSplitsField(self, calculator, pane, mocker):
         """A re-split sent to the script shows up in the calculator's Splits field"""
         mocker.patch.object(pane, "_confirmChange", return_value=True)
-        pane.txtSplits.setText("50")
-        pane.btnApplySplits.click()
+        pane.rowSplits.edit.setText("50")
+        pane.rowSplits.apply.trigger()
         pane.btnSend.click()
         assert rbscript.load_value(calculator.gui.getText(), "split") == "50"
         assert calculator.gui.txtSplits.text() == "50"
@@ -155,7 +155,7 @@ class RigidbodyStructureTest:
     def testStaleAfterScriptEdit(self, calculator, pane, mocker):
         """Editing the script flags the view as stale when switching back to it; refreshing discards the staged changes after asking"""
         pane.rowDelete.edit.setText("b3")
-        pane.rowDelete.button.click()
+        pane.rowDelete.apply.trigger()
         calculator.gui.showRefinementTab()
         calculator.gui.txtSplits.textEdited.emit("50")
         calculator.gui.tabs.setCurrentWidget(pane)
@@ -166,7 +166,7 @@ class RigidbodyStructureTest:
         ask.assert_called_once()
         assert pane.btnRefresh.isHidden()
         assert pane.model.elements == [] and self.names(pane) == ["b1", "b2"]
-        assert pane.txtSplits.text() == "50"
+        assert pane.rowSplits.text() == "50"
 
     def testCameraFollowsTabSwitches(self, calculator, pane):
         """The structure manager adopts the preview's camera angle when switched to, and hands its own back"""
@@ -191,10 +191,21 @@ class RigidbodyStructureTest:
     def testClosingWithStagedChangesAsks(self, calculator, pane, mocker):
         """Closing the tab with unsent changes asks first"""
         pane.rowDelete.edit.setText("b3")
-        pane.rowDelete.button.click()
+        pane.rowDelete.apply.trigger()
         mocker.patch.object(QtWidgets.QMessageBox, "question", return_value=QtWidgets.QMessageBox.StandardButton.No)
         calculator._onTabCloseRequested(1)
         assert calculator.structurePane is pane
+
+    def testViewBarAndFoldedSettings(self, pane):
+        """The backbone toggle only applies once atoms are drawn, and the fit's tolerance stays folded away until asked for"""
+        assert not pane.chipBackbone.isEnabled()
+        pane.chipAtoms.setChecked(True)
+        assert pane.chipBackbone.isEnabled()
+        pane._homeView()
+
+        assert not pane.txtTolerance.isVisibleTo(pane)
+        pane.btnTolerance.click()
+        assert pane.txtTolerance.isVisibleTo(pane)
 
     def testDiffDialog(self, qapp):
         """The diff shows both scripts row-aligned, with the changed lines marked on each side"""

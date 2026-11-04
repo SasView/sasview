@@ -11,11 +11,13 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
 from matplotlib.figure import Figure
 from pyausaxs.gui.core.files import is_saxs_file, is_structure_file
+from pyausaxs.gui.core.palette import PALETTE
 from pyausaxs.gui.core.syntax import classify_line, scope_partner
 from PySide6 import QtCore, QtWidgets
 from PySide6.QtGui import QColor, QFont, QSyntaxHighlighter, QTextCharFormat, QTextCursor, QTextFormat
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Calculators.RigidbodyWidgets import DANGER_STYLE, HEADING_STYLE, MUTED_STYLE, PRIMARY_STYLE, GlyphButton
 from sas.qtgui.Utilities.CustomGUI.CodeEditor import QCodeEditor
 
 # ANSI SGR code → CSS hex colour for a light-background widget.
@@ -107,14 +109,14 @@ class RigidBodyHighlighter(QSyntaxHighlighter):
 
 
 class FileField(QtWidgets.QWidget):
-    """A labelled path entry with a Browse button, tinted while the typed path is (in)valid. `committed` fires with the path whenever the user
-    settles on one — by browsing, or by finishing an edit of the text. With a `view_tooltip`, a View button beside it fires `viewRequested`;
-    it is enabled while the path is valid and the view isn't blocked (see setViewBlocked)."""
+    """A path entry with a browse symbol, tinted while the typed path is (in)valid. `committed` fires with the path whenever the user settles
+    on one — by browsing, or by finishing an edit of the text. With a `view_tooltip`, a view symbol beside it fires `viewRequested`; it is
+    enabled while the path is valid and the view isn't blocked (see setViewBlocked)."""
 
     committed = QtCore.Signal(str)
     viewRequested = QtCore.Signal()
 
-    def __init__(self, label: str, file_filter: str, validator, parent=None, *, view_tooltip: str | None = None):
+    def __init__(self, file_filter: str, validator, parent=None, *, view_tooltip: str | None = None):
         super().__init__(parent)
         self._filter = file_filter
         self._validator = validator
@@ -122,22 +124,24 @@ class FileField(QtWidgets.QWidget):
         self._view_blocked = False
         layout = QtWidgets.QHBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
-        title = QtWidgets.QLabel(label)
-        title.setMinimumWidth(70)
-        layout.addWidget(title)
+        layout.setSpacing(2)
         self.edit = QtWidgets.QLineEdit()
         self.edit.setPlaceholderText("No file selected")
         layout.addWidget(self.edit, 1)
-        self.button = QtWidgets.QPushButton("Browse…")
+        self.button = GlyphButton("🗁", "Choose a file…")
         layout.addWidget(self.button)
         self.button.clicked.connect(self._browse)
-        self.viewButton = None
-        if view_tooltip is not None:
-            self.viewButton = QtWidgets.QPushButton("View…")
-            self.viewButton.setToolTip(view_tooltip)
-            self.viewButton.setEnabled(False)
-            self.viewButton.clicked.connect(self.viewRequested.emit)
-            layout.addWidget(self.viewButton)
+        self.viewButton = GlyphButton("👁", view_tooltip or "")
+        self.viewButton.setEnabled(False)
+        self.viewButton.clicked.connect(self.viewRequested.emit)
+        layout.addWidget(self.viewButton)
+        if view_tooltip is None:
+            # hidden, but still holding its place, so the fields of a form line up whether they can be viewed or not
+            policy = self.viewButton.sizePolicy()
+            policy.setRetainSizeWhenHidden(True)
+            self.viewButton.setSizePolicy(policy)
+            self.viewButton.hide()
+            self.viewButton = None
         self.edit.editingFinished.connect(lambda: self._commit(self.edit.text()))
         self.edit.textChanged.connect(self._tint)
 
@@ -158,6 +162,7 @@ class FileField(QtWidgets.QWidget):
 
     def _tint(self):
         self.edit.setStyleSheet("" if not self.text() else _VALID_STYLE if self.valid() else _INVALID_STYLE)
+        self.edit.setToolTip(self.text())  # the field is narrow, so the full path is a hover away
         if self.viewButton is not None:
             self.viewButton.setEnabled(self.valid() and not self._view_blocked)
 
@@ -199,6 +204,7 @@ class RigidBodyRefinementUI(QtWidgets.QDialog):
         self.tabs = QtWidgets.QTabWidget()
         self.tabs.setDocumentMode(True)
         self.tabs.setTabsClosable(True)
+        self.tabs.setTabBarAutoHide(True)  # a lone Refinement tab needs no tab bar
         layout.addWidget(self.tabs)
         self.splitter = QtWidgets.QSplitter(QtCore.Qt.Orientation.Horizontal)
         self.refinementTab = self.splitter
@@ -216,71 +222,75 @@ class RigidBodyRefinementUI(QtWidgets.QDialog):
     def _buildControls(self) -> QtWidgets.QWidget:
         controls = QtWidgets.QWidget()
         layout = QtWidgets.QVBoxLayout(controls)
-        layout.setContentsMargins(0, 0, 4, 0)
+        layout.setContentsMargins(0, 0, 6, 0)
+        layout.setSpacing(6)
+        layout.addWidget(self._heading("Input"))
 
         # the input fields are a shortcut for editing the script's load block: each one writes only its own directive, and the script itself
         # is always the authority
-        inputs = QtWidgets.QGroupBox("Input")
-        form = QtWidgets.QVBoxLayout(inputs)
-        self.structureField = FileField("Structure", "Structure files (*.pdb *.ent *.cif *.xyz);;All files (*)", is_structure_file,
+        form = QtWidgets.QFormLayout()
+        form.setHorizontalSpacing(8)
+        form.setFieldGrowthPolicy(QtWidgets.QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
+        self.structureField = FileField("Structure files (*.pdb *.ent *.cif *.xyz);;All files (*)", is_structure_file,
                                         view_tooltip="View the structure and manage its bodies, symmetries and constraints")
-        self.saxsField = FileField("SAXS data", "SAXS data (*.dat *.rsr *.xvg);;All files (*)", is_saxs_file)
-        form.addWidget(self.structureField)
-        form.addWidget(self.saxsField)
-        splits_row = QtWidgets.QHBoxLayout()
-        splits_label = QtWidgets.QLabel("Splits")
-        splits_label.setMinimumWidth(70)
-        splits_row.addWidget(splits_label)
+        self.saxsField = FileField("SAXS data (*.dat *.rsr *.xvg);;All files (*)", is_saxs_file)
         self.txtSplits = QtWidgets.QLineEdit()
         self.txtSplits.setPlaceholderText("residue ids, e.g. 50 100")
         self.txtSplits.setToolTip("Residues at which the structure is split into rigid bodies")
-        splits_row.addWidget(self.txtSplits)
-        form.addLayout(splits_row)
-        layout.addWidget(inputs)
+        for label, field in (("Structure", self.structureField), ("SAXS data", self.saxsField), ("Splits", self.txtSplits)):
+            title = QtWidgets.QLabel(label)
+            title.setStyleSheet(MUTED_STYLE)
+            form.addRow(title, field)
+        layout.addLayout(form)
 
         run_row = QtWidgets.QHBoxLayout()
         self.btnValidate = QtWidgets.QPushButton("Validate")
+        self.btnValidate.setToolTip("Check the script without running it")
         self.btnRun = QtWidgets.QPushButton("Run refinement")
         self.btnRun.setDefault(True)
+        self.btnRun.setStyleSheet(PRIMARY_STYLE)
         self.btnStop = QtWidgets.QPushButton("Stop")
+        self.btnStop.setStyleSheet(DANGER_STYLE)
         self.btnStop.setToolTip("End the refinement after its current iteration, keeping the best conformation found so far")
         self.btnStop.hide()
         run_row.addWidget(self.btnValidate)
-        run_row.addWidget(self.btnRun)
-        run_row.addWidget(self.btnStop)
+        run_row.addWidget(self.btnRun, 1)
+        run_row.addWidget(self.btnStop, 1)
+        layout.addSpacing(4)
         layout.addLayout(run_row)
         self.progress = QtWidgets.QProgressBar()
         self.progress.setRange(0, 0)  # indeterminate
         self.progress.setTextVisible(False)
+        self.progress.setFixedHeight(4)
         self.progress.hide()
         layout.addWidget(self.progress)
 
-        output = QtWidgets.QGroupBox("Output")
-        output_layout = QtWidgets.QVBoxLayout(output)
+        layout.addSpacing(4)
+        layout.addWidget(self._heading("Output"))
         self.outputPane = QtWidgets.QTextEdit()
         self.outputPane.setReadOnly(True)
         self.outputPane.setFont(GuiUtils.getMonospaceFont())
         self.outputPane.setLineWrapMode(QtWidgets.QTextEdit.LineWrapMode.NoWrap)
-        output_layout.addWidget(self.outputPane)
-        layout.addWidget(output, 1)
+        layout.addWidget(self.outputPane, 1)
         return controls
+
+    @staticmethod
+    def _heading(text: str) -> QtWidgets.QLabel:
+        label = QtWidgets.QLabel(text)
+        label.setStyleSheet(HEADING_STYLE)
+        return label
 
     def _buildEditor(self) -> QtWidgets.QWidget:
         pane = QtWidgets.QWidget()
         layout = QtWidgets.QVBoxLayout(pane)
-        layout.setContentsMargins(4, 0, 4, 0)
+        layout.setContentsMargins(6, 0, 6, 0)
         header = QtWidgets.QHBoxLayout()
-        header.addWidget(QtWidgets.QLabel("<b>Refinement script</b>"))
+        header.addWidget(self._heading("Refinement script"))
         header.addStretch()
-        self.btnLoadScript = QtWidgets.QToolButton()
-        self.btnLoadScript.setText("Load…")
-        self.btnLoadScript.setToolTip("Load a script from a file")
-        self.btnSaveScript = QtWidgets.QToolButton()
-        self.btnSaveScript.setText("Save…")
-        self.btnSaveScript.setToolTip("Save the script to a file")
-        self.btnResetScript = QtWidgets.QToolButton()
-        self.btnResetScript.setText("Reset")
-        self.btnResetScript.setToolTip("Reset to the default script, keeping the current load element")
+        self.btnLoadScript = GlyphButton("🗁", "Load a script from a file…")
+        self.btnSaveScript = GlyphButton("🖫", "Save the script to a file…")
+        self.btnResetScript = GlyphButton("✕", "Reset to the default script, keeping the current load element",
+                                          hover=PALETTE["danger"])
         for button in (self.btnLoadScript, self.btnSaveScript, self.btnResetScript):
             header.addWidget(button)
         layout.addLayout(header)
@@ -295,18 +305,17 @@ class RigidBodyRefinementUI(QtWidgets.QDialog):
 
     def _buildResults(self) -> QtWidgets.QWidget:
         self.results = QtWidgets.QTabWidget()
+        self.results.setTabBarAutoHide(True)  # the bar appears once a run adds its fit tabs
 
         # a persistent structure tab: the Cα backbone per body with the split residues in red, kept across runs (fit tabs are added beside it)
         structure = QtWidgets.QWidget()
         layout = QtWidgets.QVBoxLayout(structure)
         layout.setContentsMargins(0, 0, 0, 0)
         toolbar = QtWidgets.QHBoxLayout()
-        self.btnHomeView = QtWidgets.QToolButton()
-        self.btnHomeView.setText("⌂")
-        self.btnHomeView.setToolTip("Reset to the default view")
+        self.btnHomeView = GlyphButton("⌂", "Reset to the default view")
         toolbar.addWidget(self.btnHomeView)
         self.lblHover = QtWidgets.QLabel("")
-        self.lblHover.setStyleSheet("color: #6b7785;")
+        self.lblHover.setStyleSheet(MUTED_STYLE)
         toolbar.addWidget(self.lblHover, 1)
         layout.addLayout(toolbar)
         self.structureFigure = Figure()
