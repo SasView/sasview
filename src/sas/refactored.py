@@ -130,7 +130,7 @@ class TrackedFit:
 
     @property
     def data_being_fitted(self) -> SasData | None:
-        return self._data_manager.get_association_of_type(self, SasData)#
+        return self._data_manager.get_association_of_type(self, SasData)
 
     @property
     def formatName(self) -> str:
