@@ -42,7 +42,6 @@ class PlotWindow(QTabWidget):
         """
         name = dock_container.objectName()
         if dock_widget.isFloating():
-            print("gray")
             dock_container.setStyleSheet("QMainWindow#" + name + " { background-color: gray }")
         else:
             print("white")
