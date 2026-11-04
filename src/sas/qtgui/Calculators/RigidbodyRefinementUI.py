@@ -10,6 +10,7 @@ import re
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
 from matplotlib.figure import Figure
+from pyausaxs import __version__ as pyausaxs_version
 from pyausaxs.gui.core.files import is_saxs_file, is_structure_file
 from pyausaxs.gui.core.palette import PALETTE
 from pyausaxs.gui.core.syntax import classify_line, scope_partner
@@ -197,7 +198,7 @@ class RigidBodyRefinementUI(QtWidgets.QDialog):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Rigid-body refinement")
+        self.setWindowTitle("AUSAXS BioMol rigid body refinement")
         self.resize(1400, 850)
         self._buildUI()
 
@@ -226,6 +227,21 @@ class RigidBodyRefinementUI(QtWidgets.QDialog):
         self.splitter.setStretchFactor(1, 2)
         self.splitter.setStretchFactor(2, 3)
         self.splitter.setSizes([340, 480, 580])
+        layout.addLayout(self._buildFooter())
+
+    def _buildFooter(self) -> QtWidgets.QHBoxLayout:
+        """The pyAUSAXS version and its authors, in small muted text below the tabs."""
+        def label(text: str) -> QtWidgets.QLabel:
+            widget = QtWidgets.QLabel(text)
+            widget.setStyleSheet(f"{MUTED_STYLE} font-size: small;")
+            return widget
+
+        footer = QtWidgets.QHBoxLayout()
+        footer.setContentsMargins(4, 2, 4, 0)
+        footer.addWidget(label(f"pyAUSAXS {pyausaxs_version}"))
+        footer.addStretch()
+        footer.addWidget(label("Kristian Lytje & Jan Skov Pedersen"))
+        return footer
 
     def _buildControls(self) -> QtWidgets.QWidget:
         controls = QtWidgets.QWidget()

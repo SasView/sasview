@@ -373,7 +373,7 @@
   </action>
   <action name="actionRigidBodyRefinement">
    <property name="text">
-    <string>Rigid-body refinement</string>
+    <string>AUSAXS BioMol rigid body refinement</string>
    </property>
   </action>
   <action name="actionGeneric_Scattering_Calculator">
