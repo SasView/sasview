@@ -2,7 +2,7 @@ import os
 
 import pytest
 from pyausaxs.gui.core import script as rbscript
-from PySide6 import QtCore, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtTest import QTest
 
 import sas.qtgui.Calculators.RigidbodyRefinement as RigidbodyRefinement
@@ -206,6 +206,34 @@ class RigidbodyStructureTest:
         assert not pane.txtTolerance.isVisibleTo(pane)
         pane.btnTolerance.click()
         assert pane.txtTolerance.isVisibleTo(pane)
+
+    def testViewIsPacedForDragging(self, pane, qtbot):
+        """A burst of redraw requests renders once, and the hover readout waits until no button is held"""
+        canvas = pane.canvas
+        draws = []
+        canvas.mpl_connect("draw_event", lambda _e: draws.append(1))
+        qtbot.wait(50)
+        draws.clear()
+        for _ in range(20):
+            canvas.draw_idle()
+        qtbot.waitUntil(lambda: bool(draws), timeout=1000)
+        qtbot.wait(50)
+        assert len(draws) == 1
+
+        hovered = []
+        canvas.hovered.connect(hovered.append)
+        centre = QtCore.QPointF(canvas.width() / 2, canvas.height() / 2)
+
+        def move(buttons):
+            event = QtGui.QMouseEvent(QtCore.QEvent.Type.MouseMove, centre, canvas.mapToGlobal(centre), QtCore.Qt.MouseButton.NoButton,
+                                      buttons, QtCore.Qt.KeyboardModifier.NoModifier)
+            QtWidgets.QApplication.sendEvent(canvas, event)
+
+        move(QtCore.Qt.MouseButton.LeftButton)
+        qtbot.wait(80)
+        assert hovered == []
+        move(QtCore.Qt.MouseButton.NoButton)
+        qtbot.waitUntil(lambda: bool(hovered), timeout=1000)
 
     def testDiffDialog(self, qapp):
         """The diff shows both scripts row-aligned, with the changed lines marked on each side"""

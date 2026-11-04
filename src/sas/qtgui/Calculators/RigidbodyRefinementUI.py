@@ -17,7 +17,15 @@ from PySide6 import QtCore, QtWidgets
 from PySide6.QtGui import QColor, QFont, QSyntaxHighlighter, QTextCharFormat, QTextCursor, QTextFormat
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Calculators.RigidbodyWidgets import DANGER_STYLE, HEADING_STYLE, MUTED_STYLE, PRIMARY_STYLE, GlyphButton
+from sas.qtgui.Calculators.RigidbodyWidgets import (
+    DANGER_STYLE,
+    HEADING_STYLE,
+    MUTED_STYLE,
+    PRIMARY_STYLE,
+    GlyphButton,
+    PreviewCanvas,
+    structure_figure,
+)
 from sas.qtgui.Utilities.CustomGUI.CodeEditor import QCodeEditor
 
 # ANSI SGR code → CSS hex colour for a light-background widget.
@@ -318,9 +326,8 @@ class RigidBodyRefinementUI(QtWidgets.QDialog):
         self.lblHover.setStyleSheet(MUTED_STYLE)
         toolbar.addWidget(self.lblHover, 1)
         layout.addLayout(toolbar)
-        self.structureFigure = Figure()
-        self.structureAxes = self.structureFigure.add_subplot(111, projection="3d")
-        self.structureCanvas = FigureCanvas(self.structureFigure)
+        self.structureFigure, self.structureAxes = structure_figure()
+        self.structureCanvas = PreviewCanvas(self.structureFigure)
         layout.addWidget(self.structureCanvas, 1)
         self.structureTab = structure
         self.results.addTab(structure, "Structure")

@@ -69,7 +69,7 @@ class RigidBodyRefinement:
         gui.btnLoadScript.clicked.connect(self.onLoadScript)
         gui.btnSaveScript.clicked.connect(self.onSaveScript)
         gui.btnHomeView.clicked.connect(self._homePreview)
-        gui.structureCanvas.mpl_connect("motion_notify_event", self._onStructureHover)
+        gui.structureCanvas.hovered.connect(self._onStructureHover)
         gui.structureField.viewRequested.connect(self.onViewStructure)
         gui.tabs.currentChanged.connect(self._onTabChanged)
         gui.tabs.tabCloseRequested.connect(self._onTabCloseRequested)
@@ -245,7 +245,6 @@ class RigidBodyRefinement:
                 ax.set_zlim(self._last_valid_lims[2])
                 ax.view_init(elev=view[0], azim=view[1], roll=view[2])
             self._last_valid_lims = [ax.get_xlim(), ax.get_ylim(), ax.get_zlim()]
-        self.gui.structureFigure.set_layout_engine("tight")
         self.gui.structureCanvas.draw_idle()
         if fallback_shown:
             self.gui.appendOutput("Showing the new structure without the script's staged splits/elements — they were written for the "

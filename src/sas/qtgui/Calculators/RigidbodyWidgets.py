@@ -6,6 +6,8 @@ every symbol carries a tooltip naming what it does.
 
 from collections.abc import Callable
 
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
+from matplotlib.figure import Figure
 from pyausaxs.gui.core.palette import PALETTE
 from PySide6 import QtCore, QtGui, QtWidgets
 
@@ -22,22 +24,101 @@ PRIMARY_STYLE = (
 DANGER_STYLE = PRIMARY_STYLE.replace(PALETTE["accent_hover"], PALETTE["danger_hover"]).replace(PALETTE["accent"], PALETTE["danger"])
 
 
-def glyph_icon(glyph: str, colour: str, size: int = 16) -> QtGui.QIcon:
-    """A symbol drawn as an icon, for places that take an icon rather than text (e.g. an action inside a line edit)."""
+def glyph_icon(glyph: str, colour: str, size: int = 16, *, background: str | None = None) -> QtGui.QIcon:
+    """A symbol drawn as an icon, for places that take an icon rather than text (e.g. an action inside a line edit); optionally on a
+    filled, rounded badge."""
     screen = QtGui.QGuiApplication.primaryScreen()
     ratio = screen.devicePixelRatio() if screen is not None else 1.0
     pixmap = QtGui.QPixmap(int(size * ratio), int(size * ratio))
     pixmap.setDevicePixelRatio(ratio)
     pixmap.fill(QtCore.Qt.GlobalColor.transparent)
     painter = QtGui.QPainter(pixmap)
+    painter.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
     painter.setRenderHint(QtGui.QPainter.RenderHint.TextAntialiasing)
+    if background is not None:
+        painter.setPen(QtCore.Qt.PenStyle.NoPen)
+        painter.setBrush(QtGui.QColor(background))
+        painter.drawRoundedRect(QtCore.QRectF(0, 0, size, size), size / 4, size / 4)
     font = QtGui.QFont()
-    font.setPixelSize(int(size * 0.9))
+    font.setPixelSize(int(size * (0.75 if background is not None else 0.9)))
+    font.setBold(True)
     painter.setFont(font)
     painter.setPen(QtGui.QColor(colour))
     painter.drawText(QtCore.QRectF(0, 0, size, size), QtCore.Qt.AlignmentFlag.AlignCenter, glyph)
     painter.end()
     return QtGui.QIcon(pixmap)
+
+
+def structure_figure() -> tuple[Figure, object]:
+    """A figure holding one borderless 3D axis that fills it. No layout engine: with the axis hidden there is nothing for one to fit, and
+    re-fitting on every frame of a rotation costs a third of the frame. Opting out explicitly matters, since SasView's plots switch
+    `figure.autolayout` on globally."""
+    figure = Figure(layout="none")
+    figure.subplots_adjust(left=0, right=1, bottom=0, top=1)
+    axes = figure.add_subplot(111, projection="3d")
+    axes.set_axis_off()
+    return figure, axes
+
+
+class PreviewCanvas(FigureCanvasQTAgg):
+    """A matplotlib canvas paced for dragging a 3D view around.
+
+    The stock Qt canvas renders whenever the event loop goes idle. Under Wayland, Qt hands over every pointer motion at the mouse's polling
+    rate instead of merging them as X11 and Tk do, so a drag renders more frames than the screen can show, and each one holds up the input
+    behind it. This canvas renders at most once per display frame, and passes hover events on (as `hovered`) at a modest rate and never
+    mid-drag, when there is nothing to read out anyway."""
+
+    hovered = QtCore.Signal(object)  # the matplotlib motion event, or None when the readout should clear
+    _HOVER_MS = 30
+
+    def __init__(self, figure: Figure):
+        super().__init__(figure)
+        screen = QtGui.QGuiApplication.primaryScreen()
+        rate = screen.refreshRate() if screen is not None and screen.refreshRate() > 0 else 60.0
+        self._frameMs = max(1, int(1000 / rate))
+        self._frameClock = QtCore.QElapsedTimer()
+        self._frameClock.start()
+        self._frameTimer = QtCore.QTimer(self)
+        self._frameTimer.setSingleShot(True)
+        self._frameTimer.timeout.connect(self._renderFrame)
+        self._hoverEvent = None
+        self._hoverTimer = QtCore.QTimer(self)
+        self._hoverTimer.setSingleShot(True)
+        self._hoverTimer.setInterval(self._HOVER_MS)
+        self._hoverTimer.timeout.connect(self._deliverHover)
+        self.mpl_connect("motion_notify_event", self._queueHover)
+        self.mpl_connect("button_press_event", lambda _e: self._dropHover())
+
+    def draw_idle(self):
+        if not hasattr(self, "_frameTimer"):  # called by the base class while it is still being set up
+            return super().draw_idle()
+        if not self._frameTimer.isActive():
+            self._frameTimer.start(max(0, self._frameMs - self._frameClock.elapsed()))
+
+    def _renderFrame(self):
+        if self.width() <= 0 or self.height() <= 0:
+            return
+        self._frameClock.restart()
+        self.draw()
+
+    def _queueHover(self, event):
+        gui = event.guiEvent
+        if gui is not None and gui.buttons() != QtCore.Qt.MouseButton.NoButton:
+            return  # mid-drag
+        self._hoverEvent = event
+        if not self._hoverTimer.isActive():
+            self._hoverTimer.start()
+
+    def _dropHover(self):
+        """A drag starts: forget the pending readout and clear the shown one, which the moving view is about to make stale."""
+        self._hoverEvent = None
+        self._hoverTimer.stop()
+        self.hovered.emit(None)
+
+    def _deliverHover(self):
+        event, self._hoverEvent = self._hoverEvent, None
+        if event is not None:
+            self.hovered.emit(event)
 
 
 class GlyphButton(QtWidgets.QToolButton):
@@ -140,8 +221,8 @@ class ActionField(QtWidgets.QWidget):
         self._prefill = prefill
         self._ready = False
         self._dimmed = False
-        self._idle_icon = glyph_icon("⏎", PALETTE["border"])
-        self._ready_icon = glyph_icon("⏎", PALETTE["ready"])
+        self._idle_icon = glyph_icon("⏎", PALETTE["muted"], 18)
+        self._ready_icon = glyph_icon("⏎", "white", 18, background=PALETTE["ready"])
         layout = QtWidgets.QHBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(2)

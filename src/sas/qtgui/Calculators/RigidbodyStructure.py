@@ -11,8 +11,6 @@ shares; this module only draws them and forwards what the user types and clicks.
 import os
 from collections.abc import Callable
 
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.figure import Figure
 from pyausaxs.gui.core.loads import RELAXED_LOADS
 from pyausaxs.gui.core.palette import PALETTE
 from pyausaxs.gui.core.plotting import PICK_CLICK_DRAG_TOLERANCE, draw_structure, nearest_ca_residue
@@ -27,8 +25,10 @@ from sas.qtgui.Calculators.RigidbodyWidgets import (
     ActionField,
     CollapsibleSection,
     GlyphButton,
+    PreviewCanvas,
     ToggleChip,
     add_action_row,
+    structure_figure,
 )
 
 # display label -> draw_structure `color_by` mode; the first entry is the default
@@ -129,10 +129,8 @@ class StructurePane(QtWidgets.QWidget):
         bar.addWidget(self.cbColourBy)
         layout.addLayout(bar)
 
-        self.figure = Figure()
-        self.axes = self.figure.add_subplot(111, projection="3d")
-        self.axes.set_axis_off()
-        self.canvas = FigureCanvas(self.figure)
+        self.figure, self.axes = structure_figure()
+        self.canvas = PreviewCanvas(self.figure)
         layout.addWidget(self.canvas, 1)
 
         readout = QtWidgets.QHBoxLayout()
@@ -148,7 +146,7 @@ class StructurePane(QtWidgets.QWidget):
 
         # hover to read the nearest residue, click to toggle it in the selection. A left press only counts as a click if the cursor barely
         # moved by its release; otherwise it was a rotation.
-        self.canvas.mpl_connect("motion_notify_event", self._onPreviewHover)
+        self.canvas.hovered.connect(self._onPreviewHover)
         self.canvas.mpl_connect("button_press_event", self._onPreviewPress)
         self.canvas.mpl_connect("button_release_event", self._onPreviewRelease)
         return pane
@@ -540,7 +538,6 @@ class StructurePane(QtWidgets.QWidget):
         if self._preserveView:  # and the camera angle
             self._setOrientation(view)
         self._preserveView = True
-        self.figure.set_layout_engine("tight")
         self.canvas.draw_idle()
         self._refreshClearChip()
 
