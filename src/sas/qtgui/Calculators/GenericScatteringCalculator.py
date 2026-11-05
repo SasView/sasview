@@ -46,7 +46,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
     def __init__(self, parent=None):
         super(GenericScatteringCalculator, self).__init__()
         self.setupUi(self)
-        
+
 
         self.manager = parent
         self.communicator = GuiUtils.communicator
