@@ -8,7 +8,7 @@ on:
         required: false
         type: string
       sasdata_ref:
-        description: 'Branch or tag for sasdata (default: master)'
+        description: 'Branch or tag for sasdata (default: refactor_24)'
         required: false
         type: string
   workflow_dispatch:
@@ -18,7 +18,7 @@ on:
         required: false
         type: string
       sasdata_ref:
-        description: 'Branch or tag for sasdata (default: master)'
+        description: 'Branch or tag for sasdata (default: refactor_24)'
         required: false
         type: string
   pull_request:
@@ -80,8 +80,9 @@ jobs:
         id: set-refs
         run: |
           # Get refs from inputs (workflow_call or workflow_dispatch) or default to master
+          # for SasModels and refactor_24 for SasData
           SASMODELS_REF="${{ inputs.sasmodels_ref || 'master' }}"
-          SASDATA_REF="${{ inputs.sasdata_ref || 'master' }}"
+          SASDATA_REF="${{ inputs.sasdata_ref || 'refactor_24' }}"
           echo "Using sasmodels ref: $SASMODELS_REF"
           echo "Using sasdata ref: $SASDATA_REF"
 
@@ -91,7 +92,7 @@ jobs:
           import os
 
           sasmodels_ref = os.environ.get('SASMODELS_REF', 'master')
-          sasdata_ref = os.environ.get('SASDATA_REF', 'master')
+          sasdata_ref = os.environ.get('SASDATA_REF', 'refactor_24')
 
           dependency_matrix = [
               {"name": "sasdata", "url": "https://github.com/SasView/sasdata.git", "ref": sasdata_ref},
@@ -103,7 +104,7 @@ jobs:
           PYTHON_SCRIPT
         env:
           SASMODELS_REF: ${{ inputs.sasmodels_ref || 'master' }}
-          SASDATA_REF: ${{ inputs.sasdata_ref || 'master' }}
+          SASDATA_REF: ${{ inputs.sasdata_ref || 'refactor_24' }}
 
   matrix:
     needs: [ruff]
