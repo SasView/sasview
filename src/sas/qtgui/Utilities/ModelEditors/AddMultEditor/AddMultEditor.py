@@ -253,7 +253,7 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
                                      operator=operator,
                                      desc_line=desc_line)
 
-        with open(fname, 'w') as out_f:
+        with open(fname, 'w', encoding="utf-8") as out_f:
             out_f.write(output)
 
     def updateModels(self):

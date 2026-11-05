@@ -236,17 +236,14 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         """
         Overwrite QDialog close method to allow for custom widget close
         """
-        # Invoke fit page events
+        # The window hosting the perspective (attached or detached) is owned by the
+        # WorkspaceManager, which disposes of it on an accepted close and minimises
+        # it when the close is refused.
         if self._allow_close:
             # reset the closability flag
             self.setClosable(value=False)
-            # Tell the MdiArea to close the container if it is visible
-            if self.parentWidget():
-                self.parentWidget().close()
             event.accept()
         else:
-            # Maybe we should just minimize
-            self.setWindowState(QtCore.Qt.WindowMinimized)
             event.ignore()
 
     def addFit(self, data, is_batch=False, tab_index=None):
