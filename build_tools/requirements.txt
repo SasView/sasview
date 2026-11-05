@@ -25,10 +25,7 @@ pyparsing
 PySide6
 pytools
 qtconsole
-# SasData should normally be pinned to the `refactor_24` branch, but it is
-# temporarily pinned to the `refactor_24_empty_metadata` because breaking
-# changes were introduced to the main refactoring branch regarding data loaders.
-sasdata @ git+https://github.com/SasView/sasdata.git@refactor_24_empty_metadata
+sasdata
 sasmodels
 scipy
 siphash24
