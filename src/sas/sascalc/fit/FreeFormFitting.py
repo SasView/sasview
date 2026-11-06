@@ -16,12 +16,11 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+
+import numpy as np
+import numpy.typing as npt
 
 from sas.sascalc.fit.AbstractFitEngine import FitEngine, FResult
-
-if TYPE_CHECKING:
-    import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -67,10 +66,10 @@ class FreeFormDistribution:
     """One fitted parameter distribution, named in SasView terms."""
 
     param: str  # SasView parameter name, e.g. 'radius', 'length'
-    grid: np.ndarray  # bin centers
-    weights: np.ndarray  # distribution weights (sum to 1)
+    grid: npt.NDArray[np.float64]  # bin centers
+    weights: npt.NDArray[np.float64]  # distribution weights (sum to 1)
     # volume-weighted distribution; single-parameter models only, else None
-    volume_weights: np.ndarray = None
+    volume_weights: npt.NDArray[np.float64] | None = None
 
 
 @dataclass
@@ -84,9 +83,9 @@ class FreeFormResult:
     scale: float  # SasView scale (volume fraction) = xi * <V> * 1e4
     xi: float  # raw ffsi scale: I_opt = xi * Gw + background
     background: float  # b_opt
-    q: np.ndarray  # masked q the inversion ran on
-    theory: np.ndarray  # I_opt = xi * Gw + background on q
-    residuals: np.ndarray  # (theory - iq) / diq
+    q: npt.NDArray[np.float64]  # masked q the inversion ran on
+    theory: npt.NDArray[np.float64]  # I_opt = xi * Gw + background on q
+    residuals: npt.NDArray[np.float64]  # (theory - iq) / diq
     chi2: float  # sum(residuals**2) / residuals.size
     distributions: list  # list[FreeFormDistribution]
 
