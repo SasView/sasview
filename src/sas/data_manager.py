@@ -117,8 +117,11 @@ class NewDataManager(QObject):
         data = _unique(data)
         return len(data) > 0 and self._rejection_reason(perspective, data) is None
 
-    def check_perspective_can_accept_data(self, perspective: Perspective, datum: TrackedData):
-        reason = self._rejection_reason(perspective, [datum])
+    def check_perspective_can_accept_data(self, perspective: Perspective, data: TrackedData | list[TrackedData]):
+        """Raise a ValueError if the given data can't all be sent to the perspective in one go."""
+        if not isinstance(data, list):
+            data = [data]
+        reason = self._rejection_reason(perspective, data)
         if reason is not None:
             raise ValueError(reason)
 
@@ -149,9 +152,7 @@ class NewDataManager(QObject):
         is validated before the first association is made, so a rejection never
         leaves a partial send behind."""
         unique = _unique(data)
-        reason = self._rejection_reason(perspective, unique)
-        if reason is not None:
-            raise ValueError(reason)
+        self.check_perspective_can_accept_data(perspective, unique)
         for datum in unique:
             self._validate_association(perspective, datum)
         for datum in unique:

@@ -135,11 +135,9 @@ class GuiManager:
             self.actionWhatsNew()
 
     def handleNewAssociation(self, datum1: TrackedData, datum2: TrackedData):
-        # If any perspectives have new data/lost data, then they need to be notified.
-
-        for perspective, other in ((datum1, datum2), (datum2, datum1)):
-            if isinstance(perspective, NewPerspective):
-                perspective.receive(other)
+        # Associations are validated as (perspective, data), so only datum1 can be a perspective.
+        if isinstance(datum1, NewPerspective):
+            datum1.receive(datum2)
 
         self.filesWidget.tree_view.addAssociation(datum1, datum2)
 
@@ -286,8 +284,7 @@ class GuiManager:
     def current_window_perspective_changed(self, perspective_window: QMdiSubWindow | None):
         if perspective_window is not None and isinstance(perspective_window.widget(), NewPerspective):
             perspective = cast(NewPerspective, perspective_window.widget())
-            # Only retarget Send; selecting the perspective in the tree here would
-            # wipe the user's data selection.
+            # does not select the perspective in the tree to avoid wiping the user selection
             self.filesWidget.setTargetPerspective(perspective)
 
     @Slot()

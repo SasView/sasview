@@ -201,13 +201,16 @@ class NewDataExplorer(QWidget):
         return self._recent_perspectives[-1] if self._recent_perspectives else None
 
     def setTargetPerspective(self, perspective: Perspective):
+        # moves the target perspective to the end of the list
         self._recent_perspectives = [p for p in self._recent_perspectives if p is not perspective]
         self._recent_perspectives.append(perspective)
         self.refreshSendState()
 
     @Slot(object)
     def onDataRemoved(self, datum):
-        self._recent_perspectives = [p for p in self._recent_perspectives if p is not datum]
+        # Only perspectives can be Send targets, but any removal can change the Send state.
+        if isinstance_fix(datum, Perspective):
+            self._recent_perspectives = [p for p in self._recent_perspectives if p is not datum]
         self.refreshSendState()
 
     @Slot()

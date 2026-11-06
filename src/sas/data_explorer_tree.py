@@ -77,20 +77,22 @@ class DataExplorerTree(QTreeWidget):
         """Highlight the load row while files are being dragged over the explorer."""
         self.load_hint.setActive(active)
 
-    def _dataItems(self, root: QTreeWidgetItem) -> list[QTreeWidgetItem]:
-        """The data items directly under root."""
+    def _dataItems(self, root: QTreeWidgetItem | None = None) -> list[QTreeWidgetItem]:
+        """The data items directly under root (the top level by default)."""
+        if root is None:
+            root = self.invisibleRootItem()
         return [root.child(i) for i in range(root.childCount()) if root.child(i) is not self._load_row]
 
     def dataItemCount(self) -> int:
         """Number of top level data items (the load row isn't counted)."""
-        return len(self._dataItems(self.invisibleRootItem()))
+        return len(self._dataItems())
 
     # These methods are designed to listen to updates coming from the data explorer. They will eventually replace the
     # 'buildTable' function.
 
     def addAssociation(self, datum1: TrackedData, datum2: TrackedData):
         # TODO: Order of data is assumed which may not be true.
-        for item in self._dataItems(self.invisibleRootItem()):
+        for item in self._dataItems():
             # FIXME: Repetition
             item_datum = cast(TrackedData, item.data(0, Qt.ItemDataRole.UserRole))
             if item_datum == datum1:
@@ -144,7 +146,6 @@ class DataExplorerTree(QTreeWidget):
         if action is None:
             return
         result: DataExplorerMenuAction = action.data()
-        errors: list[ValueError] = []
         match result.action:
             case "remove":
                 # TODO: Work for all data.
@@ -152,18 +153,14 @@ class DataExplorerTree(QTreeWidget):
             case "view_data":
                 self.view_data_activated.emit()
             case "send_to":
-                # TODO: This cast might not be necessary.
-                to_perspective = cast(Perspective, result.action_data)
-                self.sendToPerspective(to_perspective, self.currentTrackedData)
+                assert result.action_data is not None, "send_to actions always carry a perspective"
+                self.sendToPerspective(result.action_data, self.currentTrackedData)
             case "make_trend":
                 trend_data = cast(list[SasData], self.currentTrackedData)
                 trend_creation_dialog = TrendCreation(trend_data, self._data_manager.default_new_trend_name)
                 creation_result = trend_creation_dialog.exec()
                 if creation_result == QDialog.DialogCode.Accepted:
                     self._data_manager.register_trend(trend_creation_dialog.proposed_trend)
-        if len(errors):
-            box = DataExplorerErrorMessage(self, errors)
-            box.show()
 
     def sendToPerspective(self, perspective: Perspective, data: list[TrackedData]):
         """Send the given data to the given perspective. If any of the data can't be sent, show an error message instead."""
@@ -176,7 +173,7 @@ class DataExplorerTree(QTreeWidget):
     def dimUnaccepted(self, perspective: Perspective | None):
         """Dim the top level data items that can't be sent to the given perspective. Passing None clears all dimming."""
         dimmed = self.palette().brush(QPalette.ColorGroup.Disabled, QPalette.ColorRole.Text)
-        for item in self._dataItems(self.invisibleRootItem()):
+        for item in self._dataItems():
             datum = cast(TrackedData, item.data(0, Qt.ItemDataRole.UserRole))
             if isinstance_fix(datum, Perspective):
                 continue

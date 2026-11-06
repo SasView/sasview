@@ -14,16 +14,23 @@ if TYPE_CHECKING:
     from sas.data_manager import NewDataManager as DataManager
     from sas.data_manager import TrackedData
 
-# A data format is either a sasdata DatasetType (e.g. one_dim), which matches
-# SasData of exactly that type, or a class (e.g. SasData, Trend), which matches
-# any instance of it.
+# What a perspective can accept, written in one of two ways:
+#   - A DatasetType *instance*, e.g. one_dim: only SasData whose dataset_type is
+#     exactly that. Use this to accept some kinds of SasData but not others.
+#   - A class, e.g. SasData or Trend: any instance of that class.
 DataFormat = DatasetType | type
+
+# Called with the datum once it has been sent to the perspective.
 DataHandler = Callable[["TrackedData"], None]
 
 
 def matches_format(datum: "TrackedData", data_format: DataFormat) -> bool:
+    """Whether datum is of the given data format (see DataFormat)."""
     if isinstance(data_format, DatasetType):
+        # The format is a dataset type like one_dim, so only SasData can match,
+        # and only if it is that type of dataset.
         return isinstance(datum, SasData) and datum.dataset_type == data_format
+    # Otherwise the format is a class, so any instance of it (or of a subclass) matches.
     return isinstance(datum, data_format)
 
 # TODO: None of these classes belong in here. This is a temporary location of
