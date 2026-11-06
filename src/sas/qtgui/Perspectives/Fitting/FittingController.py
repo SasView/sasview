@@ -15,6 +15,13 @@ from PySide6 import QtGui
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
+from sas.sascalc.fit.FreeFormFitting import (
+    FFSI_AVAILABLE,
+    FREE_FORM_FIT_PARAMS,
+    SUPPORTED_MODELS,
+    FreeFormFit,
+    is_supported,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -164,13 +171,6 @@ class FittingController:
 
         Mirrors the bumps branch of prepareFitters
         """
-        from sas.sascalc.fit.FreeFormFitting import (
-            FFSI_AVAILABLE,
-            FREE_FORM_FIT_PARAMS,
-            SUPPORTED_MODELS,
-            FreeFormFit,
-            is_supported,
-        )
 
         if not FFSI_AVAILABLE:
             raise ValueError("Free-form inversion requires the ffsi package to be installed.")
