@@ -12,7 +12,7 @@ from PySide6.QtWidgets import QDialog, QDockWidget, QLabel, QMdiSubWindow, QMess
 from shiboken6 import isValid
 from twisted.internet import reactor
 
-from sasdata.temp_ascii_reader import load_data
+from sasdata.data_io.importers.import_ascii import load_data
 
 import sas
 

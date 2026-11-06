@@ -23,9 +23,9 @@ from PySide6.QtWidgets import (
 )
 
 from sasdata.ascii_reader_metadata import AsciiReaderMetadata
+from sasdata.data_io.importers.import_ascii import AsciiReaderParams, load_data, split_line
 from sasdata.dataset_types import DatasetType, angle_dim, dataset_types, one_dim, sesans, two_dim
 from sasdata.guess import guess_column_count, guess_columns, guess_starting_position
-from sasdata.temp_ascii_reader import AsciiReaderParams, load_data, split_line
 
 from sas.ascii_dialog.col_editor import ColEditor
 from sas.ascii_dialog.constants import TABLE_MAX_ROWS

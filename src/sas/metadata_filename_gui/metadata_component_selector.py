@@ -8,7 +8,7 @@ class MetadataComponentSelector(QWidget):
     # Creating a separate signal for this because the custom button may be destroyed/recreated whenever the options are
     # redrawn.
 
-    custom_button_pressed = Signal(Qt.MouseButton())
+    custom_button_pressed = Signal(Qt.MouseButton)
 
     def __init__(self, category: str, metadatum: str, filename: str, internal_metadata: AsciiReaderMetadata):
         super().__init__()
@@ -37,7 +37,6 @@ class MetadataComponentSelector(QWidget):
             self.option_buttons.append(option_button)
         # This final button is to convert to use custom entry instead of this.
         self.custom_entry_button = QPushButton('Custom')
-        # self.custom_entry_button.clicked.connect(self.custom_button_pressed)
         self.custom_entry_button.clicked.connect(self.handle_custom_button)
         self.layout.addWidget(self.custom_entry_button)
 

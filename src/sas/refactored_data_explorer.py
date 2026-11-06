@@ -13,10 +13,10 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from sasdata.temp_ascii_reader import load_data as load_advanced_ascii_data
-from sasdata.temp_ascii_reader import load_data_default_params as load_ascii_data
-from sasdata.temp_hdf5_reader import load_data as load_hdf5_data
-from sasdata.temp_xml_reader import load_data as load_xml_data
+from sasdata.data_io.importers.import_ascii import load_data as load_advanced_ascii_data
+from sasdata.data_io.importers.import_ascii import load_data_default_params as load_ascii_data
+from sasdata.data_io.importers.import_hdf5 import load_data as load_hdf5_data
+from sasdata.data_io.importers.import_xml import load_data as load_xml_data
 
 from sas.ascii_dialog.dialog import AsciiDialog
 from sas.data_explorer_error_message import DataExplorerErrorMessage

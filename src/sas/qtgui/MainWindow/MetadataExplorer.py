@@ -14,9 +14,9 @@ from PySide6.QtWidgets import (
 )
 
 from sasdata.data import SasData
+from sasdata.data_io.importers.import_xml import load_data
 from sasdata.metadata import Metadata, MetaNode
 from sasdata.quantities.quantity import Quantity
-from sasdata.temp_xml_reader import load_data
 
 
 def convert_raw_to_dict(to_convert: MetaNode) -> dict:
