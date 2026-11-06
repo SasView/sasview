@@ -3,7 +3,7 @@ import os
 from os.path import basename
 
 from PySide6.QtCore import Qt, Signal, Slot
-from PySide6.QtGui import QDragEnterEvent, QDragMoveEvent, QDropEvent
+from PySide6.QtGui import QDragEnterEvent, QDragLeaveEvent, QDragMoveEvent, QDropEvent
 from PySide6.QtWidgets import (
     QComboBox,
     QFileDialog,
@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QMessageBox,
     QPushButton,
+    QStackedWidget,
     QVBoxLayout,
     QWidget,
 )
@@ -21,6 +22,7 @@ from sasdata.data_io.importers.import_hdf5 import load_data as load_hdf5_data
 from sasdata.data_io.importers.import_xml import load_data as load_xml_data
 
 from sas.ascii_dialog.dialog import AsciiDialog
+from sas.data_explorer_drop_hint import DropHint
 from sas.data_explorer_error_message import DataExplorerErrorMessage
 from sas.data_explorer_tree import DataExplorerTree
 from sas.data_manager import NewDataManager as DataManager
@@ -87,6 +89,16 @@ class NewDataExplorer(QWidget):
         self.tree_view = DataExplorerTree(self._data_manager, self)
         self.tree_view.current_datum_removed.connect(self.onRemove)
 
+        # While the tree is empty, show a hint that files can be loaded or dropped.
+        self.drop_hint = DropHint(self)
+        self.drop_hint.load_requested.connect(self.onLoadFile)
+        self.tree_stack = QStackedWidget(self)
+        self.tree_stack.addWidget(self.drop_hint)
+        self.tree_stack.addWidget(self.tree_view)
+        self.tree_view.model().rowsInserted.connect(self.updateDropHint)
+        self.tree_view.model().rowsRemoved.connect(self.updateDropHint)
+        self.tree_view.model().modelReset.connect(self.updateDropHint)
+
         # TODO: Is there a better name for this?
         self.final_row = QHBoxLayout()
 
@@ -101,8 +113,13 @@ class NewDataExplorer(QWidget):
         self.layout.addLayout(self.add_data_row)
         self.layout.addWidget(self.filter_label)
         self.layout.addLayout(self.filter_row)
-        self.layout.addWidget(self.tree_view)
+        self.layout.addWidget(self.tree_stack)
         self.layout.addLayout(self.final_row)
+
+    @Slot()
+    def updateDropHint(self):
+        empty = self.tree_view.topLevelItemCount() == 0
+        self.tree_stack.setCurrentWidget(self.drop_hint if empty else self.tree_view)
 
     @Slot()
     def add_perspective(self):
@@ -204,17 +221,30 @@ class NewDataExplorer(QWidget):
                 filenames.append(path)
         return filenames
 
+    @staticmethod
+    def _hasLocalFiles(event: QDragEnterEvent | QDragMoveEvent) -> bool:
+        return event.mimeData().hasUrls() and any(url.isLocalFile() for url in event.mimeData().urls())
+
     def dragEnterEvent(self, event: QDragEnterEvent):
-        if event.mimeData().hasUrls() and any(url.isLocalFile() for url in event.mimeData().urls()):
+        if self._hasLocalFiles(event):
+            event.setDropAction(Qt.DropAction.CopyAction)
+            event.accept()
+            self.drop_hint.setActive(True)
+        else:
+            event.ignore()
+
+    def dragMoveEvent(self, event: QDragMoveEvent):
+        if self._hasLocalFiles(event):
             event.setDropAction(Qt.DropAction.CopyAction)
             event.accept()
         else:
             event.ignore()
 
-    def dragMoveEvent(self, event: QDragMoveEvent):
-        self.dragEnterEvent(event)
+    def dragLeaveEvent(self, event: QDragLeaveEvent):
+        self.drop_hint.setActive(False)
 
     def dropEvent(self, event: QDropEvent):
+        self.drop_hint.setActive(False)
         filenames = self._droppedFiles(event)
         if not filenames:
             event.ignore()
