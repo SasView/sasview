@@ -1,7 +1,10 @@
 import logging
+import os
+from collections.abc import Callable, Iterator
 from os.path import basename
 
-from PySide6.QtCore import Signal, Slot
+from PySide6.QtCore import Qt, Signal, Slot
+from PySide6.QtGui import QDragEnterEvent, QDragLeaveEvent, QDragMoveEvent, QDropEvent
 from PySide6.QtWidgets import (
     QComboBox,
     QFileDialog,
@@ -9,6 +12,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QMessageBox,
     QPushButton,
+    QStackedWidget,
     QVBoxLayout,
     QWidget,
 )
@@ -19,12 +23,58 @@ from sasdata.data_io.importers.import_hdf5 import load_data as load_hdf5_data
 from sasdata.data_io.importers.import_xml import load_data as load_xml_data
 
 from sas.ascii_dialog.dialog import AsciiDialog
+from sas.data_explorer_drop_hint import DropHint
 from sas.data_explorer_error_message import DataExplorerErrorMessage
 from sas.data_explorer_tree import DataExplorerTree
 from sas.data_manager import NewDataManager as DataManager
 from sas.dummy_perspective import DummyPerspective
 from sas.qtgui.Utilities.MuMag.MuMag import MuMag
 from sas.refactored import Perspective
+
+
+def _load_ascii(filename: str) -> dict:
+    # Since we're only giving the load function one filename, we can assume only
+    # one data object is being loaded.
+    return {basename(filename): load_ascii_data(filename)[0]}
+
+
+# TODO: The logic for deciding which reader to use is temporary. It won't work
+# for all file extensions, and ultimately this logic probably needs to be moved
+# into sasdata.
+# The file formats SasView can load: name -> (extensions, loader). The file
+# dialog filters and drag and drop are both derived from this, so only files
+# with these extensions can be picked or dropped.
+SUPPORTED_FORMATS: dict[str, tuple[tuple[str, ...], Callable[[str], dict]]] = {
+    "XML": ((".xml",), load_xml_data),
+    "HDF5": ((".h5", ".hdf"), load_hdf5_data),
+    "ASCII": ((".txt", ".csv"), _load_ascii),
+}
+
+
+def _loaders_by_extension() -> dict[str, Callable[[str], dict]]:
+    loaders = {}
+    for extensions, loader in SUPPORTED_FORMATS.values():
+        for extension in extensions:
+            loaders[extension] = loader
+    return loaders
+
+
+_LOADERS = _loaders_by_extension()
+
+
+def _loader_for(filename: str) -> Callable[[str], dict] | None:
+    return _LOADERS.get(os.path.splitext(filename)[1].lower())
+
+
+def _file_dialog_filters() -> str:
+    def patterns(extensions) -> str:
+        return " ".join(f"*{ext}" for ext in extensions)
+
+    filters = [f"All supported files ({patterns(_LOADERS)})"]
+    for name, (extensions, _) in SUPPORTED_FORMATS.items():
+        filters.append(f"{name} files ({patterns(extensions)})")
+    return ";;".join(filters)
+
 
 # TODO: Eventually, the values (should) never be None.
 # FIXME: Linter is complaining about DummyPew
@@ -46,6 +96,7 @@ class NewDataExplorer(QWidget):
     def __init__(self, data_manager: DataManager, parent: QWidget | None = ...) -> None:
         super().__init__(parent)
         self._data_manager = data_manager
+        self.setAcceptDrops(True)
 
         self.layout = QVBoxLayout(self)
 
@@ -82,6 +133,16 @@ class NewDataExplorer(QWidget):
         self.tree_view = DataExplorerTree(self._data_manager, self)
         self.tree_view.current_datum_removed.connect(self.onRemove)
 
+        # While the tree is empty, show a hint that files can be loaded or dropped.
+        self.drop_hint = DropHint(self)
+        self.drop_hint.load_requested.connect(self.onLoadFile)
+        self.tree_stack = QStackedWidget(self)
+        self.tree_stack.addWidget(self.drop_hint)
+        self.tree_stack.addWidget(self.tree_view)
+        self.tree_view.model().rowsInserted.connect(self.updateDropHint)
+        self.tree_view.model().rowsRemoved.connect(self.updateDropHint)
+        self.tree_view.model().modelReset.connect(self.updateDropHint)
+
         # TODO: Is there a better name for this?
         self.final_row = QHBoxLayout()
 
@@ -96,8 +157,13 @@ class NewDataExplorer(QWidget):
         self.layout.addLayout(self.add_data_row)
         self.layout.addWidget(self.filter_label)
         self.layout.addLayout(self.filter_row)
-        self.layout.addWidget(self.tree_view)
+        self.layout.addWidget(self.tree_stack)
         self.layout.addLayout(self.final_row)
+
+    @Slot()
+    def updateDropHint(self):
+        empty = self.tree_view.topLevelItemCount() == 0
+        self.tree_stack.setCurrentWidget(self.drop_hint if empty else self.tree_view)
 
     @Slot()
     def add_perspective(self):
@@ -133,40 +199,88 @@ class NewDataExplorer(QWidget):
 
     @Slot()
     def onLoadFile(self):
-        # TODO: Probably want to add filters.
         filenames, _ = QFileDialog.getOpenFileNames(
             self,
             "Open Data File",
+            filter=_file_dialog_filters(),
         )
-        if len(filenames) == 0:
-            return
-        for filename in filenames:
-            # FIXME: This would probably break if there isn't an extension.
+        self.loadFiles(filenames)
 
-            # TODO: The logic for deciding which reader to use is temporary. It
-            # won't work for all file extensions, and ultimately this logic probably
-            # needs to be moved in sasdata.
-            file_extension = filename.split(".")[-1].lower()
-            match file_extension:
-                case "xml":
-                    loaded_data = load_xml_data(filename)
-                case "h5" | "hdf":
-                    loaded_data = load_hdf5_data(filename)
-                case "txt" | "csv":
-                    data_list = load_ascii_data(filename)
-                    # Since we're only giving the load function one filename, we can
-                    # assume only one data object is being loaded.
-                    loaded_data = dict([(basename(filename), data_list[0])])
-                case _:
-                    QMessageBox.critical(
-                        self,
-                        "Data Loading Error",
-                        f"Error loading {filename}. Extension not recognised.",
-                    )
-                    return
+    def loadFiles(self, filenames: list[str]):
+        """Load each file into the data manager. Files in an unsupported format
+        are skipped; files that fail to load are skipped and reported together
+        at the end."""
+        failures: list[str] = []
+        for filename in filenames:
+            loader = _loader_for(filename)
+            if loader is None:
+                continue
+            try:
+                loaded_data = loader(filename)
+            except Exception as err:
+                logging.exception(f"Error loading {filename}")
+                failures.append(f"{basename(filename)}: {err}")
+                continue
 
             for _, datum in loaded_data.items():
                 self._data_manager.add_data(datum)
+
+        if failures:
+            QMessageBox.critical(
+                self,
+                "Data Loading Error",
+                "The following files could not be loaded:\n\n" + "\n".join(failures),
+            )
+
+    @staticmethod
+    def _droppedFiles(event: QDragEnterEvent | QDragMoveEvent | QDropEvent) -> Iterator[str]:
+        """Local files in a supported format in a drag, with folders expanded
+        to the files directly inside them (not recursive)."""
+        for url in event.mimeData().urls():
+            path = url.toLocalFile()
+            if not path:
+                continue
+            if os.path.isdir(path):
+                candidates = (os.path.join(path, name) for name in sorted(os.listdir(path)))
+            else:
+                candidates = (path,)
+            for candidate in candidates:
+                if _loader_for(candidate) is not None and os.path.isfile(candidate):
+                    yield candidate
+
+    @classmethod
+    def _hasSupportedFiles(cls, event: QDragEnterEvent | QDragMoveEvent) -> bool:
+        return any(cls._droppedFiles(event))
+
+    def dragEnterEvent(self, event: QDragEnterEvent):
+        # Only accept drags carrying something we can load, so the cursor shows
+        # the drop isn't allowed otherwise.
+        if self._hasSupportedFiles(event):
+            event.setDropAction(Qt.DropAction.CopyAction)
+            event.accept()
+            self.drop_hint.setActive(True)
+        else:
+            event.ignore()
+
+    def dragMoveEvent(self, event: QDragMoveEvent):
+        if self._hasSupportedFiles(event):
+            event.setDropAction(Qt.DropAction.CopyAction)
+            event.accept()
+        else:
+            event.ignore()
+
+    def dragLeaveEvent(self, event: QDragLeaveEvent):
+        self.drop_hint.setActive(False)
+
+    def dropEvent(self, event: QDropEvent):
+        self.drop_hint.setActive(False)
+        filenames = list(self._droppedFiles(event))
+        if not filenames:
+            event.ignore()
+            return
+        event.setDropAction(Qt.DropAction.CopyAction)
+        event.accept()
+        self.loadFiles(filenames)
 
     @Slot()
     def onAdvancedLoad(self):
