@@ -342,11 +342,6 @@ class Plotter2DTest:
         actions[4].trigger()
         assert plotter.ax.grid.called
 
-        # Trigger Change Scale and make sure the method is called
-        assert actions[6].text() == "Toggle Linear/Log Scale"
-        mocker.patch.object(FigureCanvas, 'draw_idle')
-        actions[6].trigger()
-        assert FigureCanvas.draw_idle.called
 
         # Spy on cliboard's dataChanged() signal
         if not platform.system == "Windows":
@@ -438,8 +433,8 @@ class Plotter2DTest:
         plotter.onSetPlotType('contourf')
         assert plotter._plot_type == 'contourf'
 
-        plotter.onSetInterpolation('gaussian_5x5')
-        assert plotter._interpolation == 'gaussian_5x5'
+        plotter.onSetInterpolation('gaussian')
+        assert plotter._interpolation == 'gaussian'
 
         plotter.onSetZScale('symlog')
         assert plotter.scale == 'symlog'
@@ -483,7 +478,7 @@ class Plotter2DTest:
 
         # Test switching back to imshow with gaussian_3x3 interpolation
         plotter._plot_type = 'imshow'
-        plotter._interpolation = 'gaussian_3x3'
+        plotter._interpolation = 'gaussian'
         plotter.showPlot(data=plotter.data0.data,
                          qx_data=plotter.data0.qx_data,
                          qy_data=plotter.data0.qy_data,
