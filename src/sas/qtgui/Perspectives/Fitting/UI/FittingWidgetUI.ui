@@ -302,6 +302,13 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QCheckBox" name="chkFreeForm">
+            <property name="text">
+             <string>Free Form</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -465,6 +472,7 @@
   <tabstop>chk2DView</tabstop>
   <tabstop>chkMagnetism</tabstop>
   <tabstop>chkChainFit</tabstop>
+  <tabstop>chkFreeForm</tabstop>
   <tabstop>lstMagnetic</tabstop>
   <tabstop>cmdMagneticDisplay</tabstop>
   <tabstop>cmdPlot</tabstop>
