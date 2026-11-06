@@ -225,6 +225,9 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         # If true, plots generated when using slicers will be on the same canvas
         self.STACK_PLOTS = True
 
+        # Developer menu
+        self.DEV_MENU = False
+
         #
         # Lock the class down, this is necessary both for
         # securing the class, and for setting up reading/writing files
