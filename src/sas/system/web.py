@@ -1,3 +1,12 @@
+import logging
+
+import requests
+from packaging.version import Version, parse
+
+from sas.system import config
+
+logger = logging.getLogger("Web Configuration")
+
 class WebLinks:
     def __init__(self):
         self.nist_url = "https://www.nist.gov/ncnr"
@@ -21,6 +30,27 @@ class WebLinks:
         self.update_url = 'https://www.sasview.org/latestversion.json'
 
         self.help_email = "help@sasview.org"
+
+
+def get_current_release_version() -> tuple[str, str, Version] | None:
+    """ Get the current version from the server """
+    try:
+        response = requests.get(web.update_url, timeout=config.UPDATE_TIMEOUT)
+        # Will throw Exception if the HTTP status code returned isn't success
+        # (2xx)
+        response.raise_for_status()
+        version_info = response.json()
+        logger.info("Connected to www.sasview.org. Received: %s", version_info)
+
+        version_string = version_info["version"]
+        url = version_info["download_url"]
+
+        return version_string, url, parse(version_string)
+
+    except Exception as ex:
+        logger.info("Failed to get version number %s", ex)
+        return None
+
 
 web = WebLinks()
 
