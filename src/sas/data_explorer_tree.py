@@ -108,8 +108,8 @@ class DataExplorerTree(QTreeWidget):
     def _apply_filter(self, item: QTreeWidgetItem, recursive: bool = False):
         datum = cast(TrackedData, item.data(0, Qt.ItemDataRole.UserRole))
         item.setHidden(tracked_data_type(datum) not in self._shown_types)
-        # Items that can't be seen must not stay selected, or actions like
-        # Remove would act on them.
+
+        # deselect all hidden items to avoid accidental interactions with them
         if not self._is_visible(item):
             item.setSelected(False)
         if recursive:

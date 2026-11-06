@@ -82,8 +82,6 @@ class DataExplorerFilterButton(QToolButton):
 
     def paintEvent(self, event):
         super().paintEvent(event)
-        # Draw the funnel in the palette's colours so it follows light and dark
-        # themes. Filled with the highlight colour while anything is hidden.
         filtering = self.is_filtering()
         role = QPalette.ColorRole.Highlight if filtering else QPalette.ColorRole.ButtonText
         colour = self.palette().color(role)
