@@ -28,6 +28,15 @@ def isinstance_fix(obj: object, t: type | str) -> bool:
     else:
         return False
 
+def _unique(data: list[TrackedData]) -> list[TrackedData]:
+    """Drop repeats by identity. The same datum can be selected twice in the
+    tree, e.g. at the top level and again under a trend."""
+    unique: list[TrackedData] = []
+    for datum in data:
+        if not any(datum is seen for seen in unique):
+            unique.append(datum)
+    return unique
+
 # Making this a QObject so it'll support events.
 class NewDataManager(QObject):
     # Don't mutate these directly, or scary bad stuff will happen.
@@ -90,21 +99,40 @@ class NewDataManager(QObject):
     # data at the same time. So it doesn't matter that the perspective is
     # associated with the data becuase they will both be removed.
 
-    def check_perspective_can_accept_data(self, perspective: Perspective, datum: TrackedData):
+    def _rejection_reason(self, perspective: Perspective, data: list[TrackedData]) -> str | None:
         existing_associations = self.get_all_associations(perspective)
-        if not perspective.supports_multiple_data and len(existing_associations) > 0:
-            raise ValueError(f"{perspective.title} doesn't support multiple data being sent to it.")
-        supported = False
-        for supported_type in perspective.supported_data:
-            if isinstance(datum, supported_type):
-                supported = True
-                break
-        if not supported:
-            raise ValueError(f"{perspective.title} does not support this data.")
+        if not perspective.supports_multiple_data and len(existing_associations) + len(data) > 1:
+            return f"{perspective.title} doesn't support multiple data being sent to it."
+        for datum in data:
+            if not perspective.accepts(datum):
+                return f"{perspective.title} does not support this data."
+            if any(existing is datum for existing in existing_associations):
+                return f"This data has already been sent to {perspective.formatName}."
+        return None
+
+    def can_accept(self, perspective: Perspective, data: TrackedData | list[TrackedData]) -> bool:
+        """Whether all of the given data can be sent to the perspective in one go."""
+        if not isinstance(data, list):
+            data = [data]
+        data = _unique(data)
+        return len(data) > 0 and self._rejection_reason(perspective, data) is None
+
+    def check_perspective_can_accept_data(self, perspective: Perspective, data: TrackedData | list[TrackedData]):
+        """Raise a ValueError if the given data can't all be sent to the perspective in one go."""
+        if not isinstance(data, list):
+            data = [data]
+        reason = self._rejection_reason(perspective, data)
+        if reason is not None:
+            raise ValueError(reason)
+        # Checked only here, not in can_accept, so Send stays enabled and the user gets told why.
+        for datum in data:
+            reason = perspective.rejection_reason(datum)
+            if reason is not None:
+                raise ValueError(reason)
 
     # TODO: May want more rules to prevent associations being made twice.
-    def make_association(self, data_1: TrackedData, data_2: TrackedData):
-        if not (data_1 in self._all_data_entries or data_2 in self._all_data_entries):
+    def _validate_association(self, data_1: TrackedData, data_2: TrackedData):
+        if not (data_1 in self._all_data_entries and data_2 in self._all_data_entries):
             raise ValueError('Both data_1, and data_2 need to be tracked in the data manager.')
         if not any([isinstance_fix(data_1, x) and isinstance_fix(data_2, y) for x, y in valid_associations]):
             # TODO: Clearer error message. .
@@ -115,8 +143,25 @@ class NewDataManager(QObject):
             raise ValueError('An assocation of these types already exists.')
         if isinstance_fix(data_1, Perspective):
             self.check_perspective_can_accept_data(data_1, data_2)
-        self.associations.append(proposed_assoc)
+
+    def _apply_association(self, data_1: TrackedData, data_2: TrackedData):
+        self.associations.append((data_1, data_2))
         self.new_association.emit(data_1, data_2)
+
+    def make_association(self, data_1: TrackedData, data_2: TrackedData):
+        self._validate_association(data_1, data_2)
+        self._apply_association(data_1, data_2)
+
+    def send_to_perspective(self, perspective: Perspective, data: list[TrackedData]):
+        """Associate all of data with the perspective, or none of it. Everything
+        is validated before the first association is made, so a rejection never
+        leaves a partial send behind."""
+        unique = _unique(data)
+        self.check_perspective_can_accept_data(perspective, unique)
+        for datum in unique:
+            self._validate_association(perspective, datum)
+        for datum in unique:
+            self._apply_association(perspective, datum)
 
     def get_association_or_none(self, data: TrackedData) -> TrackedData | None:
         for assoc in self.associations:

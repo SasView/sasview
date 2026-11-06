@@ -7,7 +7,7 @@ from sasdata.data import SasData
 
 from sas.data_manager import NewDataManager as DataManager
 from sas.data_manager import TrackedData
-from sas.refactored import Perspective
+from sas.refactored import DataFormat, DataHandler, Perspective
 
 
 class DummyPerspective(Perspective):
@@ -28,16 +28,13 @@ class DummyPerspective(Perspective):
 
     @property
     @override
-    def supported_data(self) -> set[type[TrackedData]]:
-        return {SasData}
+    def accepted_data(self) -> list[tuple[DataFormat, DataHandler]]:
+        return [(SasData, self.onSasData)]
 
     @property
     @override
     def supports_multiple_data(self) -> bool:
         return True
 
-    @override
-    def newAssocation(self):
-        self.data_list.clear()
-        for datum in cast(list[SasData], self.associatedData):
-            self.data_list.addItem(datum.name)
+    def onSasData(self, datum: TrackedData):
+        self.data_list.addItem(cast(SasData, datum).name)
