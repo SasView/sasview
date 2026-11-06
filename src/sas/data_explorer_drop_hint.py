@@ -178,10 +178,11 @@ class AddDataRow(QWidget):
         # Box
         pen = QPen(color, 1)
         painter.setPen(pen)
+
         # In a tree, the view places this widget after the root indentation, so
         # it starts further from the viewport's left edge than it ends from the
         # right. Mirror that offset on the right to keep the box centred.
-        right = max(0, self.x()) if self.parent() is not None else 0
+        right = max(0, self.x())
         box = QRectF(self.rect()).adjusted(2.5, 3.5, -2.5 - right, -3.5)
         painter.drawRoundedRect(box, 4, 4)
         # Plus
