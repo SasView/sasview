@@ -1,4 +1,4 @@
-from PySide6.QtCore import QEvent, QPointF, QRectF, QSize, Qt, Signal
+from PySide6.QtCore import QPointF, QRectF, QSize, Qt, Signal
 from PySide6.QtGui import QColor, QPainter, QPalette, QPen
 from PySide6.QtWidgets import QLabel, QSizePolicy, QVBoxLayout, QWidget
 
@@ -104,13 +104,6 @@ class DropHint(QWidget):
     def _setHovered(self, hovered: bool):
         self._hovered = hovered
         self._refresh()
-
-    def changeEvent(self, event):
-        # The text colours are baked into the label's HTML, so redo them when the
-        # theme changes.
-        if event.type() in (QEvent.Type.PaletteChange, QEvent.Type.ApplicationPaletteChange):
-            self._refresh()
-        super().changeEvent(event)
 
     def _refresh(self):
         highlighted = self._dragging or self._hovered
