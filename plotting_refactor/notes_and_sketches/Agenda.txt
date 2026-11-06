@@ -1,0 +1,122 @@
+Possible Todos for the demo: (I will not put effort into realizing these, just ideas and corrections)
+1 Residuals for a fit need to be plotted beneath the Fit and therefore the grid structure of the plotting needs change
+2 Real data linking could be something to look into (right now, there is only the identifier)
+3 Dragging modifiers across the PlotTreeWidget causes trouble, because it does not autoscroll for whatever reason
+    This could maybe be fixed with using a debugger
+    It is possible to start the application normally and connect a debugger to the running instance afterwards
+4 Delete button for modifiers
+
+Current working branch for the integration of the demo into SasView is: plotting_refactor_integration
+This branch (plotting_refactor_tabs) is with a standalone example in the plotting_refactor folder
+    To start the demo, plotting_refactor/MainWindow.py needs to be executed
+
+
+Other todos that were mentioned and could need integration in SasView in general:
+The button for killing a Fitpage is way too small when executing SasView in a remote windows/linux instance
+    Is there the possibility to have a prompt if the current Fitpage should really be closed?
+    The showing of this prompt could be enabled/disabled in the settings
+
+Lionel had a request with integration of a functionality similar to this:
+https://github.com/criosx/molgroups/tree/main
+
+
+Information regarding SasView that helps to understand the plotting process a little better:
+PlotterWidget extends PlotterBase (PlotterWidget is a class in the file Plotter.py)
+PlotterBase extends QWidget (uses for example QWidget.show or QWidget.showNormal)
+PlotterBase gets its manager from PlotterWidget
+PlotterWidget is instantiated in DataExplorerWindow method plotData (ll.1205)
+DataExplorerWindow is given as the parent and the manager to the PlotterWidget
+DataExplorerWindow has the MainWindow as its parent, the GuiManager as its guimanager and the GuiManager._data_manager as its manager
+
+GuiManager.communicate is an instance of GuiUtils.Communicate()
+GuiUtils.Communicate is a utility class for tracking the Qt Signals and connecting all of them to the right end
+GuiUtils.Communicate extends QtCore.QObject. This class defines all the signals that are needed and processed (ll.83f.)
+Signals are connected to everything in GuiManager.addCallbacks which executed when instantiating the GuiManager
+    in the start of the SasView MainWindow (MainWindow.py)
+
+
+Short overview on the plotting process:
+What happens when clicking the "Plot" button in the FittingWidget in Sasview?
+(1) FittingWidget.py -> onPlot -> showPlot/showTheoryPlot -> _requestPlots -> goes to tabbedPlotWidget among other things
+    -> throws Signal to GuiManager
+(2) Signal for Guimanager.showPlotFromName or Guimanager.showPlot redirects to
+    to DataExplorerWidget.displayData or DataExplorerWidget.displayDataByName
+(3) displayData ends in either active_plots.showNormal(4.1) or plotData(4.2) or updatePlot(4.3) or appendOrUpdatePlot(4.4)
+(4.1) active_plots.showNormal is just a QWidget method that shows the Widget in its restored original size
+(4.2) plotData creates a PlotterWidget instance and sets the item of it to the given item of the method (DataExplorer ll.1205)
+(4.3) updatePlot goes to PlotterWidget.replacePlot:
+        This updates the bookkeeping dictionary self.active_plots, where all the PlotterWidget items that are currently
+        needed are saved
+(4.4) appendOrUpdatePlot checks if the given plot already exists in the plot_dict of the PlotterWidget and depending on
+        that, it either uses PlotterWidget.plot or PlotterWidget.replacePlot
+
+Strategy for integration of the demo (at first)
+
+Using methods that are already existing in SasView to feed all of the existing infrastructure
+    into the new TabbedPlotWidget
+Therefore there have to be places in the code where existing classes like for example DataExplorer, Plotter,
+    PlotterBase, GuiManager, FittingWidget are communicating with the new TabbedPlotWidget and tell them about the
+    requested plots and all the other information that is provided when fitting/simulating something.
+    These places in the code will feed the TabbedPlotWidget.
+
+Example: displayData is used as a method not to plot something directly but to manage what should be plotted and
+then give all that is needed to another method that plots. This can be used to not only plot in the original infra-
+structure, but also plot the same in the TabbedPlotWidget
+
+Therefore, some of the classes can interact with tabbedPlotWidget (which is a variable/object of GuiManager right now)
+and tell it to do something. The classes therefore interact via its parent with self.parent.tabbedPlotWidget or similar
+
+In order to use the existing infrastructure, it is important to understand the reason behind all the methods that are
+included into the plotting process and then understand how this can be used to feed all the needed information for
+a similar plotting behaviour in the TabbedPlotWidget.
+
+Overview: How to get to the TabbedFittingWidget from some classes that might need access:
+    from Dataexplorer: self.parent.tabbedPlotWidget
+    from Plotter: self.parent.parent.tabbedPlotWidget
+    from PlotterBase: self.parent.parent.tabbedPlotWidget
+    from GuiManager: self.tabbedPlotWidget
+
+
+Dictionaries for plot management:
+DataExplorerWindow.active_plots: all of the PlotterWidget instances are added in here to keep track of the windows?
+PlotterWidget.plot_dict: keep track of all the datasets that have been printed in this particular window, so that no
+    other window with the same dataset is displayed? (this is just a conjecture at the moment)
+
+Structure of the Subtabs(which extends QTabWidget):
+-> Tabs are DockContainers(QMainWindows)
+-> setting the widget of the DockContainers with the docking zone to CanvasWidgets(QWidgets)
+-> CanvasWidgets are filled with layouts that have only one widget at the moment: a ClickableCanvas(FigureCanvasQtAgg)
+-> ClickableCanvas has the figure and extends a FigureCanvasQtAgg that can act upon events on the canvas like clicking
+
+Problem/Challenge: The figure for the canvas and the layout for the CanvasWidget(which can include a matplotlib
+    navigation toolbar if this is needed) have to be there before creating all the objects. Then one can give the layout
+    and the figure into the creation and set them this way
+
+Problem/Challenge: Existing Axes objects from Matplotlib that come with all the other handy stuff (title, labels, ...)
+cannot be transferred to other figures very easily. Therefore, the created Axes from the Plotter cannot just be
+given back up the stream and then be integrated into the TabbedPlotWidget
+    Possible solution: When plotting something in the TabbedPlotWidget, just create an axes and feed it into the
+    plotting functionality of the Plotter afterwards. Then, all the steps are made on the right axes (again)
+Does this solution need to know, how many plots there are beforehand?
+
+
+Problems with the current solution of with plotting on both axes at the same time:
+1 In one of the Axes, Data and Fit are plotted twice
+2 Legends are breaking stuff with subplots because of the width of them
+3 The first plot seems to be empty always
+    -> This has maybe something to do with showing Fit+Data on another axes and thus this gets ignored?
+    -> For example when fitting a Data1d: for the merged fit and dataset plot, the for loop in plot dats is executed
+        twice instead of only once, because there is only one axes for it in there
+        this is also the case for the normal axes that exists in the qwidget, but it leads to too many axes being produced
+        by using len(plots) itself as an indicator for how many axes need to be generated in SubTabs
+
+    Solution could be: first iterating over the len(plots and check in there, how many plots are really needed
+4 2d plots do not work at all
+
+
+SubTabs need to be actually applied, right now, all plots are plotted in the first SubTab, but the SubTabs as a
+    QTabWidget are not actually used, everything is just stored in the first one.
+    This possibly also means, that parts of the code with the figure need to be refactored already, since
+    every Tab in the SubTab would need its own figure which could be complicated to be accessed through all the layers
+    from the QTabWidget SubTabs itself.
+appendOrUpdatePlot in DataExplorer needs refactoring to work with the TabbedPlotWidget

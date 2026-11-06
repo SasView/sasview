@@ -1,0 +1,16 @@
+lucas student starting soon
+
+data has convolution for resolutions and e.g. hankel transformation
+builtin for models to go from the real model to the data
+
+comparing 2 models together?
+bumps- parallelizing model calculation, jeff is going to raffle? code camp to work on this
+
+how is the data serialized?
+does an earlier fit and data object live on, if the fitpage is recalculated?
+how can changes to an object be kept in storage? stacks?
+
+json objects in the background?
+tree or order in which the stuff happened? list of changes is temporary?
+
+where does the save and load live? - on main sasview
