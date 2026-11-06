@@ -71,6 +71,12 @@ class Perspective(QDialog):
     def accepts(self, datum: "TrackedData") -> bool:
         return self.handler_for(datum) is not None
 
+    def rejection_reason(self, datum: "TrackedData") -> str | None:
+        """Why this datum can't be used even though its format is accepted, or
+        None if it can. Unlike accepts(), this is only checked when data is
+        actually sent, so Send stays enabled and the user is told the reason."""
+        return None
+
     def receive(self, datum: "TrackedData"):
         """Called once data has been associated with this perspective."""
         handler = self.handler_for(datum)

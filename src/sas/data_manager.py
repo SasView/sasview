@@ -124,6 +124,11 @@ class NewDataManager(QObject):
         reason = self._rejection_reason(perspective, data)
         if reason is not None:
             raise ValueError(reason)
+        # Checked only here, not in can_accept, so Send stays enabled and the user gets told why.
+        for datum in data:
+            reason = perspective.rejection_reason(datum)
+            if reason is not None:
+                raise ValueError(reason)
 
     # TODO: May want more rules to prevent associations being made twice.
     def _validate_association(self, data_1: TrackedData, data_2: TrackedData):

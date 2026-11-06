@@ -102,6 +102,16 @@ class MuMag(Perspective, Ui_MuMagTool):
     def accepted_data(self) -> list[tuple[DataFormat, DataHandler]]:
         return [(Trend, self.onTrend)]
 
+    # The trend axes the analysis reads by name; a trend without all of them can't be used.
+    REQUIRED_TREND_AXES = ("applied_magnetic_field", "saturation_magnetization", "demagnetizing_field")
+
+    @override
+    def rejection_reason(self, datum: TrackedData) -> str | None:
+        missing = [axis for axis in self.REQUIRED_TREND_AXES if axis not in cast(Trend, datum).trend_axes]
+        if missing:
+            return f"This trend is missing the axes {self.title} needs: {', '.join(missing)}."
+        return None
+
     @property
     @override
     def supports_multiple_data(self) -> bool:
