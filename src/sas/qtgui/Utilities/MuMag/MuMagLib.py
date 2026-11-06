@@ -136,7 +136,7 @@ class MuMagLib:
         get an initial estimate which can then be refined"""
 
         a_values = np.linspace(
-            parameters.exchange_A_min,
+            np.max(0, parameters.exchange_A_min),
             parameters.exchange_A_max,
             parameters.exchange_A_n) * 1e-12  # From pJ/m to J/m
 
@@ -198,7 +198,7 @@ class MuMagLib:
         n_q = q.shape[1]
 
         # Micromagnetic Model
-        internal_field = (applied_field - demagnetising_field).reshape(-1, 1)
+        internal_field = (np.max(0, applied_field - demagnetising_field)).reshape(-1, 1)
         magnetic_scattering_length = np.sqrt(
             (2 * A) / (MuMagLib.mu_0 * saturation_magnetisation.reshape(-1, 1) * internal_field))
         effective_field = internal_field * (1 + (magnetic_scattering_length ** 2) * (q ** 2))
