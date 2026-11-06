@@ -419,11 +419,8 @@ class Plotter2DTest:
                               zmax=None)
         FigureCanvas.draw_idle.assert_called()
 
-    def testAdvancedDisplayControlMenu(self, plotter, monkeypatch):
-        """ Test Display Control context menu when preference is enabled """
-        from sas.system import config
-        monkeypatch.setattr(config, 'ENABLE_ADVANCED_2D_PLOT_OPTIONS', True)
-
+    def testAdvancedDisplayControlMenu(self, plotter):
+        """ Test Display Control context menu is available by default """
         plotter.createContextMenu()
         # Find Display Control menu
         menus = [action.menu() for action in plotter.contextMenu.actions() if action.menu() is not None]
@@ -447,11 +444,8 @@ class Plotter2DTest:
         plotter.onSetZScale('symlog')
         assert plotter.scale == 'symlog'
 
-    def testShow2DPlotAdvancedScales(self, plotter, mocker, monkeypatch):
+    def testShow2DPlotAdvancedScales(self, plotter, mocker):
         """ Test 2D plot rendering with advanced scales (symlog, arcsinh) and LogNorm """
-        from sas.system import config
-        monkeypatch.setattr(config, 'ENABLE_ADVANCED_2D_PLOT_OPTIONS', True)
-
         mocker.patch.object(FigureCanvas, 'draw_idle')
 
         plotter.dimension = 2
@@ -469,11 +463,8 @@ class Plotter2DTest:
             assert plotter.im is not None
             assert plotter.cb is not None
 
-    def testShow2DPlotContourfAndInterpolation(self, plotter, mocker, monkeypatch):
+    def testShow2DPlotContourfAndInterpolation(self, plotter, mocker):
         """ Test 2D plot rendering with contourf and different interpolations """
-        from sas.system import config
-        monkeypatch.setattr(config, 'ENABLE_ADVANCED_2D_PLOT_OPTIONS', True)
-
         mocker.patch.object(FigureCanvas, 'draw_idle')
 
         plotter.dimension = 2
