@@ -127,5 +127,5 @@ class DropHint(QWidget):
         muted = opaque(QPalette.ColorRole.Highlight if highlighted else QPalette.ColorRole.PlaceholderText)
         self.label.setText(
             f'<span style="color:{text};"><b>Choose a file</b></span>'
-            f'<span style="color:{muted};"> or drag it here.</span>'
+            f'<span style="color:{muted};">, directory, or drag it here.</span>'
         )

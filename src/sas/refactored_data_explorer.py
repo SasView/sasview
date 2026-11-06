@@ -50,8 +50,6 @@ class NewDataExplorer(QWidget):
     def __init__(self, data_manager: DataManager, parent: QWidget | None = ...) -> None:
         super().__init__(parent)
         self._data_manager = data_manager
-        # Files dropped anywhere on the explorer (the tree included, since it
-        # doesn't accept drops itself) are loaded.
         self.setAcceptDrops(True)
 
         self.layout = QVBoxLayout(self)
