@@ -27,6 +27,7 @@ from sas.data_explorer_drop_hint import DropHint
 from sas.data_explorer_error_message import DataExplorerErrorMessage
 from sas.data_explorer_tree import DataExplorerTree
 from sas.data_manager import NewDataManager as DataManager
+from sas.data_manager import isinstance_fix
 from sas.dummy_perspective import DummyPerspective
 from sas.qtgui.Utilities.MuMag.MuMag import MuMag
 from sas.refactored import Perspective
@@ -151,9 +152,22 @@ class NewDataExplorer(QWidget):
         self.remove_button.setToolTip("Remove the selected data from SasView")
         self.remove_button.clicked.connect(self.onRemove)
         self.plot_button = QPushButton("Plot", self)
+        self.send_button = QPushButton("Send", self)
+        self.send_button.setEnabled(False)
+        self.send_button.clicked.connect(self.onSend)
 
         self.final_row.addWidget(self.remove_button)
         self.final_row.addWidget(self.plot_button)
+        self.final_row.addWidget(self.send_button)
+
+        # Perspectives in order of most recent use; the last one is where Send
+        # goes. Kept as a list so closing the target falls back to the previous one.
+        self._recent_perspectives: list[Perspective] = []
+        self._data_manager.new_perspective.connect(self.setTargetPerspective)
+        self._data_manager.new_data.connect(self.refreshSendState)
+        self._data_manager.data_removed.connect(self.onDataRemoved)
+        self._data_manager.new_association.connect(self.refreshSendState)
+        self.tree_view.itemSelectionChanged.connect(self.onSelectionChanged)
 
         self.layout.addLayout(self.add_data_row)
         self.layout.addWidget(self.filter_label)
@@ -181,6 +195,47 @@ class NewDataExplorer(QWidget):
         self._data_manager.add_data(new_perspective_dialog)
         logging.info(to_add)
         self.add_perspective_button.setCurrentIndex(0)
+
+    @property
+    def targetPerspective(self) -> Perspective | None:
+        return self._recent_perspectives[-1] if self._recent_perspectives else None
+
+    def setTargetPerspective(self, perspective: Perspective):
+        self._recent_perspectives = [p for p in self._recent_perspectives if p is not perspective]
+        self._recent_perspectives.append(perspective)
+        self.refreshSendState()
+
+    @Slot(object)
+    def onDataRemoved(self, datum):
+        self._recent_perspectives = [p for p in self._recent_perspectives if p is not datum]
+        self.refreshSendState()
+
+    @Slot()
+    def onSelectionChanged(self):
+        selected = self.tree_view.currentTrackedData
+        if len(selected) == 1 and isinstance_fix(selected[0], Perspective):
+            self.setTargetPerspective(selected[0])
+        else:
+            self.refreshSendState()
+
+    @Slot()
+    def refreshSendState(self):
+        target = self.targetPerspective
+        self.tree_view.dimUnaccepted(target)
+        if target is None:
+            self.send_button.setEnabled(False)
+            self.send_button.setToolTip("Open a perspective to send data to it")
+            return
+        self.send_button.setToolTip(f"Send the selected data to {target.formatName}")
+        # Mixed selections are rejected outright: everything selected must be accepted.
+        self.send_button.setEnabled(self._data_manager.can_accept(target, self.tree_view.currentTrackedData))
+
+    @Slot()
+    def onSend(self):
+        target = self.targetPerspective
+        if target is None:
+            return
+        self.tree_view.sendToPerspective(target, self.tree_view.currentTrackedData)
 
     @Slot()
     def onRemove(self):

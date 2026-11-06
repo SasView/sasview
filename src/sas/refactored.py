@@ -1,5 +1,6 @@
 import logging
 from abc import abstractmethod
+from collections.abc import Callable
 
 # This is ugly but necessary to avoid a cyclic dependency
 from typing import TYPE_CHECKING
@@ -7,10 +8,23 @@ from typing import TYPE_CHECKING
 from PySide6.QtWidgets import QDialog, QWidget
 
 from sasdata.data import SasData
+from sasdata.dataset_types import DatasetType
 
 if TYPE_CHECKING:
     from sas.data_manager import NewDataManager as DataManager
     from sas.data_manager import TrackedData
+
+# A data format is either a sasdata DatasetType (e.g. one_dim), which matches
+# SasData of exactly that type, or a class (e.g. SasData, Trend), which matches
+# any instance of it.
+DataFormat = DatasetType | type
+DataHandler = Callable[["TrackedData"], None]
+
+
+def matches_format(datum: "TrackedData", data_format: DataFormat) -> bool:
+    if isinstance(data_format, DatasetType):
+        return isinstance(datum, SasData) and datum.dataset_type == data_format
+    return isinstance(datum, data_format)
 
 # TODO: None of these classes belong in here. This is a temporary location of
 # them so I can sketch out what they should look like.
@@ -36,8 +50,26 @@ class Perspective(QDialog):
 
     @property
     @abstractmethod
-    def supported_data(self) -> set[type["TrackedData"]]:
-        """The types of data that can be sent to the perspective"""
+    def accepted_data(self) -> list[tuple[DataFormat, DataHandler]]:
+        """Master list of the data formats this perspective accepts, each paired
+        with the handler that is called when data of that format is sent to it.
+        The first matching entry wins."""
+
+    def handler_for(self, datum: "TrackedData") -> DataHandler | None:
+        for data_format, handler in self.accepted_data:
+            if matches_format(datum, data_format):
+                return handler
+        return None
+
+    def accepts(self, datum: "TrackedData") -> bool:
+        return self.handler_for(datum) is not None
+
+    def receive(self, datum: "TrackedData"):
+        """Called once data has been associated with this perspective."""
+        handler = self.handler_for(datum)
+        if handler is None:
+            raise ValueError(f"{self.title} does not accept {datum}.")
+        handler(datum)
 
     @property
     @abstractmethod
@@ -72,13 +104,6 @@ class Perspective(QDialog):
     def onDone(self):
         self._data_manager.remove_data(self)
         logging.info(f'Perspective {self.title} done.')
-
-    # TODO: Maybe we want to pass the new association. I was thinking that
-    # perhaps the perspective will need to do a full update, and then this won't
-    # be relevant.
-    @abstractmethod
-    def newAssocation(self):
-        pass
 
     @property
     def associatedData(self) -> list["TrackedData"]:

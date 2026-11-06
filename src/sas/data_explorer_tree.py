@@ -2,7 +2,7 @@ import logging
 from typing import cast
 
 from PySide6.QtCore import QSize, Qt, Signal
-from PySide6.QtGui import QCursor
+from PySide6.QtGui import QCursor, QPalette
 from PySide6.QtWidgets import QAbstractItemView, QDialog, QTreeWidget, QTreeWidgetItem, QWidget
 
 from sasdata.data import SasData
@@ -154,13 +154,7 @@ class DataExplorerTree(QTreeWidget):
             case "send_to":
                 # TODO: This cast might not be necessary.
                 to_perspective = cast(Perspective, result.action_data)
-                # TODO: I'm a bit worried about potential repetition if there are more actions here. Will need to
-                # watch this.
-                for datum in self.currentTrackedData:
-                    try:
-                        self._data_manager.make_association(to_perspective, datum)
-                    except ValueError as err:
-                        errors.append(err)
+                self.sendToPerspective(to_perspective, self.currentTrackedData)
             case "make_trend":
                 trend_data = cast(list[SasData], self.currentTrackedData)
                 trend_creation_dialog = TrendCreation(trend_data, self._data_manager.default_new_trend_name)
@@ -170,6 +164,26 @@ class DataExplorerTree(QTreeWidget):
         if len(errors):
             box = DataExplorerErrorMessage(self, errors)
             box.show()
+
+    def sendToPerspective(self, perspective: Perspective, data: list[TrackedData]):
+        """Send the given data to the given perspective. If any of the data can't be sent, show an error message instead."""
+        try:
+            self._data_manager.send_to_perspective(perspective, data)
+        except ValueError as err:
+            box = DataExplorerErrorMessage(self, [err])
+            box.show()
+
+    def dimUnaccepted(self, perspective: Perspective | None):
+        """Dim the top level data items that can't be sent to the given perspective. Passing None clears all dimming."""
+        dimmed = self.palette().brush(QPalette.ColorGroup.Disabled, QPalette.ColorRole.Text)
+        for item in self._dataItems(self.invisibleRootItem()):
+            datum = cast(TrackedData, item.data(0, Qt.ItemDataRole.UserRole))
+            if isinstance_fix(datum, Perspective):
+                continue
+            if perspective is not None and not self._data_manager.can_accept(perspective, datum):
+                item.setForeground(0, dimmed)
+            else:
+                item.setData(0, Qt.ItemDataRole.ForegroundRole, None)
 
     def showViewData(self):
         associated = self._data_manager.get_association_or_none(self.currentTrackedDatum)

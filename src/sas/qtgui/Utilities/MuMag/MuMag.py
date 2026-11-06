@@ -23,7 +23,7 @@ from sas.qtgui.Utilities.MuMag.datastructures import (
 )
 from sas.qtgui.Utilities.MuMag.MuMagLib import MuMagLib
 from sas.qtgui.Utilities.MuMag.UI.MuMagUI import Ui_MuMagTool
-from sas.refactored import Perspective
+from sas.refactored import DataFormat, DataHandler, Perspective
 
 log = getLogger("MuMag")
 
@@ -99,16 +99,15 @@ class MuMag(Perspective, Ui_MuMagTool):
 
     @property
     @override
-    def supported_data(self) -> set[type[TrackedData]]:
-        return {Trend}
+    def accepted_data(self) -> list[tuple[DataFormat, DataHandler]]:
+        return [(Trend, self.onTrend)]
 
     @property
     @override
     def supports_multiple_data(self) -> bool:
         return False
 
-    @override
-    def newAssocation(self):
+    def onTrend(self, datum: TrackedData):
         self.show_input_data()
         self.plot_tabs.setTabEnabled(0, True)
 
