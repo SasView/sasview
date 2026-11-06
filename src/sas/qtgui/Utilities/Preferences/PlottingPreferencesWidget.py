@@ -13,8 +13,7 @@ class PlottingPreferencesWidget(PreferencesWidget):
                               'DISABLE_RESIDUAL_PLOT',
                               'DISABLE_POLYDISPERSITY_PLOT',
                               'USE_MATPLOTLIB_TOOLBAR',
-                              'STACK_PLOTS',
-                              'ENABLE_ADVANCED_2D_PLOT_OPTIONS']
+                              'STACK_PLOTS']
 
     def _addAllWidgets(self):
         self.legendFullWidth = self.addCheckBox(
@@ -52,11 +51,6 @@ class PlottingPreferencesWidget(PreferencesWidget):
             checked=config.STACK_PLOTS)
         self.stackplots.clicked.connect(
             lambda: self._stageChange('STACK_PLOTS', self.stackplots.isChecked()))
-        self.advanced2DOptions = self.addCheckBox(
-            title="Enable advanced 2D plot rendering and display options",
-            checked=config.ENABLE_ADVANCED_2D_PLOT_OPTIONS)
-        self.advanced2DOptions.clicked.connect(
-            lambda: self._stageChange('ENABLE_ADVANCED_2D_PLOT_OPTIONS', self.advanced2DOptions.isChecked()))
 
     def _toggleBlockAllSignaling(self, toggle):
         self.legendFullWidth.blockSignals(toggle)
@@ -66,7 +60,6 @@ class PlottingPreferencesWidget(PreferencesWidget):
         self.disablePolydispersityPlot.blockSignals(toggle)
         self.useMatplotlibToolbar.blockSignals(toggle)
         self.stackplots.blockSignals(toggle)
-        self.advanced2DOptions.blockSignals(toggle)
 
     def _restoreFromConfig(self):
         self.legendFullWidth.setChecked(bool(config.FITTING_PLOT_FULL_WIDTH_LEGENDS))
@@ -77,4 +70,3 @@ class PlottingPreferencesWidget(PreferencesWidget):
         self.disablePolydispersityPlot.setChecked(config.DISABLE_POLYDISPERSITY_PLOT)
         self.useMatplotlibToolbar.setChecked(config.USE_MATPLOTLIB_TOOLBAR)
         self.stackplots.setChecked(config.STACK_PLOTS)
-        self.advanced2DOptions.setChecked(config.ENABLE_ADVANCED_2D_PLOT_OPTIONS)

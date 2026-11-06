@@ -237,21 +237,14 @@ class Plotter2DWidget(PlotterBase):
              functools.partial(self.onSavePoints, self.data0))
         self.contextMenu.addSeparator()
 
-        # Additional items for slicer interaction
-        self.contextMenu.addSeparator()
-        self.actionColorMap = self.contextMenu.addAction("&2D Color Map")
-        self.actionColorMap.triggered.connect(self.onColorMap)
+        self.addAdvancedDisplayControlMenu()
+
         self.contextMenu.addSeparator()
         self.actionToggleMaskedData = self.contextMenu.addAction("&Toggle Masked Data")
         self.actionToggleMaskedData.triggered.connect(self.onToggleMaskedData)
         self.contextMenu.addSeparator()
-        self.actionChangeScale = self.contextMenu.addAction("Toggle Linear/Log Scale")
-        self.actionChangeScale.triggered.connect(self.onToggleScale)
-        self.contextMenu.addSeparator()
         self.actionToggleMenu = self.contextMenu.addAction("Toggle Navigation Menu")
         self.actionToggleMenu.triggered.connect(self.onToggleMenu)
-
-        self.addAdvancedDisplayControlMenu()
 
         self.addHelpToContextMenu()
 
@@ -277,7 +270,6 @@ class Plotter2DWidget(PlotterBase):
         """
         Add the Advanced Display Control submenu to contextMenu
         """
-        self.contextMenu.addSeparator()
         display_control_menu = self.contextMenu.addMenu("Display Control")
 
         # Plot Type submenu
@@ -326,6 +318,10 @@ class Plotter2DWidget(PlotterBase):
         scale_menu.addSeparator()
         action_manual = scale_menu.addAction("Manual Z Scale...")
         action_manual.triggered.connect(self.onColorMap)
+
+        display_control_menu.addSeparator()
+        self.actionColorMap = display_control_menu.addAction("&2D Color Map...")
+        self.actionColorMap.triggered.connect(self.onColorMap)
 
     def onSetPlotType(self, plot_type):
         """
