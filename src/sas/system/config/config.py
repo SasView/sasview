@@ -225,6 +225,9 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         # If true, plots generated when using slicers will be on the same canvas
         self.STACK_PLOTS = True
 
+        # Enable advanced 2D plot rendering and display options
+        self.ENABLE_ADVANCED_2D_PLOT_OPTIONS = False
+
         #
         # Lock the class down, this is necessary both for
         # securing the class, and for setting up reading/writing files

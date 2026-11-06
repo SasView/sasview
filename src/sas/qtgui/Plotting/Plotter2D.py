@@ -61,6 +61,9 @@ class Plotter2DWidget(PlotterBase):
         self.cmap = DEFAULT_CMAP.name
         # Default scale
         self.scale = 'log_{10}'
+        # Advanced display options
+        self._plot_type = 'imshow'  # 'imshow' or 'contourf'
+        self._interpolation = 'nearest'
         # to set the order of lines drawn first.
         self.slicer_z = 5
         # Reference to the current slicer
@@ -248,6 +251,8 @@ class Plotter2DWidget(PlotterBase):
         self.actionToggleMenu = self.contextMenu.addAction("Toggle Navigation Menu")
         self.actionToggleMenu.triggered.connect(self.onToggleMenu)
 
+        self.addAdvancedDisplayControlMenu()
+
         self.addHelpToContextMenu()
 
     def createContextMenuQuick(self):
@@ -266,7 +271,89 @@ class Plotter2DWidget(PlotterBase):
         if self.dimension == 2:
             self.actionToggleGrid.triggered.connect(self.onGridToggle)
 
+        self.addAdvancedDisplayControlMenu()
+
         self.addHelpToContextMenu()
+
+    def addAdvancedDisplayControlMenu(self):
+        """
+        Add the Advanced Display Control submenu to contextMenu if enabled in preferences
+        """
+        if not getattr(config, 'ENABLE_ADVANCED_2D_PLOT_OPTIONS', False):
+            return
+
+        self.contextMenu.addSeparator()
+        display_control_menu = self.contextMenu.addMenu("Display Control")
+
+        # Plot Type submenu
+        plot_type_menu = display_control_menu.addMenu("Plot Type")
+        action_image = plot_type_menu.addAction("Image (imshow)")
+        action_image.setCheckable(True)
+        action_image.setChecked(self._plot_type == 'imshow')
+        action_image.triggered.connect(functools.partial(self.onSetPlotType, 'imshow'))
+
+        action_contour = plot_type_menu.addAction("Filled Contour (contourf)")
+        action_contour.setCheckable(True)
+        action_contour.setChecked(self._plot_type == 'contourf')
+        action_contour.triggered.connect(functools.partial(self.onSetPlotType, 'contourf'))
+
+        # Interpolation submenu
+        interp_menu = display_control_menu.addMenu("Interpolation")
+        interp_options = [
+            ("Nearest", "nearest"),
+            ("Bilinear", "bilinear"),
+            ("Bicubic", "bicubic"),
+            ("Gaussian (Default)", "gaussian"),
+            ("Gaussian (3x3 Kernel)", "gaussian_3x3"),
+            ("Gaussian (5x5 Kernel)", "gaussian_5x5"),
+            ("Gaussian (7x7 Kernel)", "gaussian_7x7"),
+        ]
+        for label, interp_val in interp_options:
+            action = interp_menu.addAction(label)
+            action.setCheckable(True)
+            action.setChecked(self._interpolation == interp_val)
+            action.triggered.connect(functools.partial(self.onSetInterpolation, interp_val))
+
+        # Z Scale submenu
+        scale_menu = display_control_menu.addMenu("Z Scale")
+        scale_options = [
+            ("Linear", "linear"),
+            ("Log Z", "log_{10}"),
+            ("Symmetrical Z Log", "symlog"),
+            ("Hyperbolic Arcsine", "arcsinh"),
+        ]
+        for label, scale_val in scale_options:
+            action = scale_menu.addAction(label)
+            action.setCheckable(True)
+            action.setChecked(self.scale == scale_val)
+            action.triggered.connect(functools.partial(self.onSetZScale, scale_val))
+
+        scale_menu.addSeparator()
+        action_manual = scale_menu.addAction("Manual Z Scale...")
+        action_manual.triggered.connect(self.onColorMap)
+
+    def onSetPlotType(self, plot_type):
+        """
+        Set 2D plot rendering type ('imshow' or 'contourf') and redraw
+        """
+        self._plot_type = plot_type
+        self.plot()
+
+    def onSetInterpolation(self, interpolation):
+        """
+        Set 2D plot interpolation mode and redraw
+        """
+        self._interpolation = interpolation
+        self.plot()
+
+    def onSetZScale(self, scale):
+        """
+        Set 2D plot Z intensity scale and redraw
+        """
+        self.scale = scale
+        self.vmin = None
+        self.vmax = None
+        self.plot()
 
     def onToggleMaskedData(self, event):
         """ Toggle the visibility of masked data points."""
@@ -876,49 +963,139 @@ class Plotter2DWidget(PlotterBase):
         self.data0.y_bins = y_bins
 
         zmin_temp = self.zmin
-        # check scale
-        if self.scale == 'log_{10}':
-            #with numpy.errstate(all='ignore'):
-            #    output = numpy.log10(output)
-            #index = numpy.isfinite(output)
-            #if not index.all():
-            #    cutoff = (numpy.quantile(output[index], 0.05) - numpy.log10(2) if index.any() else 0.)
-            #    output[output < cutoff] = cutoff
-            #    output[~index] = cutoff
-            try:
-                if  self.zmin <= 0  and len(output[output > 0]) > 0:
-                    zmin_temp = self.zmin
+        use_advanced = getattr(config, 'ENABLE_ADVANCED_2D_PLOT_OPTIONS', False) or \
+                       self.scale in ('symlog', 'arcsinh') or \
+                       self._plot_type != 'imshow' or \
+                       self._interpolation != 'nearest'
+
+        if not use_advanced:
+            # check scale
+            if self.scale == 'log_{10}':
+                #with numpy.errstate(all='ignore'):
+                #    output = numpy.log10(output)
+                #index = numpy.isfinite(output)
+                #if not index.all():
+                #    cutoff = (numpy.quantile(output[index], 0.05) - numpy.log10(2) if index.any() else 0.)
+                #    output[output < cutoff] = cutoff
+                #    output[~index] = cutoff
+                try:
+                    if  self.zmin <= 0  and len(output[output > 0]) > 0:
+                        zmin_temp = self.zmin
+                        output[output > 0] = numpy.log10(output[output > 0])
+                    elif self.zmin <= 0:
+                        zmin_temp = self.zmin
+                        output[output > 0] = numpy.zeros(len(output))
+                        output[output <= 0] = MIN_Z
+                    else:
+                        zmin_temp = self.zmin
+                        output[output > 0] = numpy.log10(output[output > 0])
+                except:
+                    #Too many problems in 2D plot with scale
                     output[output > 0] = numpy.log10(output[output > 0])
-                elif self.zmin <= 0:
-                    zmin_temp = self.zmin
-                    output[output > 0] = numpy.zeros(len(output))
-                    output[output <= 0] = MIN_Z
-                else:
-                    zmin_temp = self.zmin
-                    output[output > 0] = numpy.log10(output[output > 0])
-            except:
-                #Too many problems in 2D plot with scale
-                output[output > 0] = numpy.log10(output[output > 0])
-                pass
+                    pass
+        else:
+            finite_mask = numpy.isfinite(output)
+            finite_vals = output[finite_mask]
+            if len(finite_vals) > 0:
+                data_min = float(numpy.min(finite_vals))
+                data_max = float(numpy.max(finite_vals))
+            else:
+                data_min, data_max = 0.0, 1.0
+
+            zmin_val = self.vmin if self.vmin is not None else data_min
+            zmax_val = self.vmax if self.vmax is not None else data_max
+            if zmax_val <= zmin_val:
+                zmax_val = zmin_val + 1.0
+
+            if self.scale == 'log_{10}':
+                if zmin_val <= 0:
+                    pos_vals = finite_vals[finite_vals > 0]
+                    zmin_val = float(numpy.min(pos_vals)) if len(pos_vals) > 0 else 1e-4
+                if zmax_val <= zmin_val:
+                    zmax_val = zmin_val + 1.0
+                norm = mpl.colors.LogNorm(vmin=zmin_val, vmax=zmax_val)
+            elif self.scale == 'symlog':
+                abs_finite = numpy.abs(finite_vals[finite_vals != 0])
+                linthresh = float(numpy.min(abs_finite)) if len(abs_finite) > 0 else 1.0
+                linthresh = max(1e-4, min(linthresh, 1.0))
+                norm = mpl.colors.SymLogNorm(linthresh=linthresh, vmin=zmin_val, vmax=zmax_val, base=10)
+            elif self.scale == 'arcsinh':
+                norm = mpl.colors.AsinhNorm(linear_width=1.0, vmin=zmin_val, vmax=zmax_val)
+            else:
+                norm = mpl.colors.Normalize(vmin=zmin_val, vmax=zmax_val)
 
         self.cmap = cmap
         if self.dimension != 3:
             #Re-adjust colorbar
             self.figure.subplots_adjust(left=0.2, right=.8, bottom=.2)
 
-            zmax_temp = self.zmax
-            if self.vmin is not None:
-                zmin_temp = self.vmin
-                zmax_temp = self.vmax
-            if self.im is not None and update:
-                self.im.set_data(output)
+            if use_advanced:
+                if self.cb is not None and not update:
+                    try:
+                        self.cb.remove()
+                    except Exception:
+                        pass
+                    self.cb = None
+
+                if self.im is not None and not update:
+                    try:
+                        self.im.remove()
+                    except Exception:
+                        pass
+                    self.im = None
+
+                if self._plot_type == 'contourf':
+                    ny, nx = output.shape
+                    x_coords = numpy.linspace(self.xmin, self.xmax, nx)
+                    y_coords = numpy.linspace(self.ymin, self.ymax, ny)
+                    grid_x, grid_y = numpy.meshgrid(x_coords, y_coords)
+                    self.im = self.ax.contourf(grid_x, grid_y, output, levels=50,
+                                               norm=norm, cmap=self.cmap)
+                else:
+                    interp = self._interpolation
+                    filterrad = None
+                    if interp == 'gaussian_3x3':
+                        interp = 'gaussian'
+                        filterrad = 1.5
+                    elif interp == 'gaussian_5x5':
+                        interp = 'gaussian'
+                        filterrad = 2.5
+                    elif interp == 'gaussian_7x7':
+                        interp = 'gaussian'
+                        filterrad = 3.5
+
+                    imshow_kwargs = {
+                        'interpolation': interp,
+                        'origin': 'lower',
+                        'norm': norm,
+                        'cmap': self.cmap,
+                        'extent': (self.xmin, self.xmax, self.ymin, self.ymax)
+                    }
+                    if filterrad is not None:
+                        imshow_kwargs['filterrad'] = filterrad
+
+                    if self.im is not None and update and isinstance(self.im, mpl.image.AxesImage):
+                        self.im.set_data(output)
+                        self.im.set_norm(norm)
+                        self.im.set_clim(norm.vmin, norm.vmax)
+                        if hasattr(self.im, 'set_interpolation'):
+                            self.im.set_interpolation(interp)
+                    else:
+                        self.im = self.ax.imshow(output, **imshow_kwargs)
             else:
-                self.im = self.ax.imshow(output, interpolation='nearest',
-                                origin='lower',
-                                vmin=zmin_temp, vmax=zmax_temp,
-                                cmap=self.cmap,
-                                extent=(self.xmin, self.xmax,
-                                        self.ymin, self.ymax))
+                zmax_temp = self.zmax
+                if self.vmin is not None:
+                    zmin_temp = self.vmin
+                    zmax_temp = self.vmax
+                if self.im is not None and update:
+                    self.im.set_data(output)
+                else:
+                    self.im = self.ax.imshow(output, interpolation='nearest',
+                                    origin='lower',
+                                    vmin=zmin_temp, vmax=zmax_temp,
+                                    cmap=self.cmap,
+                                    extent=(self.xmin, self.xmax,
+                                            self.ymin, self.ymax))
 
             # color bar for the plot
             cbax = self.figure.add_axes([0.88, 0.2, 0.02, 0.7])
@@ -933,7 +1110,11 @@ class Plotter2DWidget(PlotterBase):
 
             # remove color bar in case we have it on screen
             if self.cb is not None:
-                self.cb.remove()
+                try:
+                    self.cb.remove()
+                except Exception:
+                    pass
+                self.cb = None
             if cbax is None:
                 self.ax.set_frame_on(False)
                 self.cb = self.figure.colorbar(self.im, shrink=0.8, aspect=20)
@@ -941,7 +1122,14 @@ class Plotter2DWidget(PlotterBase):
                 self.cb = self.figure.colorbar(self.im, cax=cbax)
 
             self.cb.update_normal(self.im)
-            self.cb.set_label('$' + self.scale + '$')
+            if self.scale == 'log_{10}':
+                self.cb.set_label(r'$\log_{10}$')
+            elif self.scale == 'symlog':
+                self.cb.set_label('SymLog')
+            elif self.scale == 'arcsinh':
+                self.cb.set_label('arcsinh')
+            else:
+                self.cb.set_label('$' + self.scale + '$')
 
             self.vmin = self.cb.vmin
             self.vmax = self.cb.vmax
