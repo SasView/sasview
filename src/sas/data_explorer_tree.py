@@ -77,20 +77,20 @@ class DataExplorerTree(QTreeWidget):
         """Highlight the load row while files are being dragged over the explorer."""
         self.load_hint.setActive(active)
 
-    def _childItems(self, root: QTreeWidgetItem) -> list[QTreeWidgetItem]:
-        """The children of root that hold data, i.e. everything but the load row."""
+    def _dataItems(self, root: QTreeWidgetItem) -> list[QTreeWidgetItem]:
+        """The data items directly under root."""
         return [root.child(i) for i in range(root.childCount()) if root.child(i) is not self._load_row]
 
     def dataItemCount(self) -> int:
         """Number of top level data items (the load row isn't counted)."""
-        return len(self._childItems(self.invisibleRootItem()))
+        return len(self._dataItems(self.invisibleRootItem()))
 
     # These methods are designed to listen to updates coming from the data explorer. They will eventually replace the
     # 'buildTable' function.
 
     def addAssociation(self, datum1: TrackedData, datum2: TrackedData):
         # TODO: Order of data is assumed which may not be true.
-        for item in self._childItems(self.invisibleRootItem()):
+        for item in self._dataItems(self.invisibleRootItem()):
             # FIXME: Repetition
             item_datum = cast(TrackedData, item.data(0, Qt.ItemDataRole.UserRole))
             if item_datum == datum1:
@@ -121,7 +121,7 @@ class DataExplorerTree(QTreeWidget):
         # TODO: This assumes that, if the root item is to be deleted, all of its children have already been deleted.
         # This may be the right assumption to make but I need to verify this.
         to_remove: list[QTreeWidgetItem] = []
-        for item in self._childItems(root):
+        for item in self._dataItems(root):
             item_datum = cast(TrackedData, item.data(0, Qt.ItemDataRole.UserRole))
             if item_datum == datum and (
                 root_datum is not None
@@ -204,7 +204,7 @@ class DataExplorerTree(QTreeWidget):
     ):
         if root is None:
             root = self.invisibleRootItem()
-        for item in self._childItems(root):
+        for item in self._dataItems(root):
             item_datum = cast(TrackedData, item.data(0, Qt.ItemDataRole.UserRole))
             if item_datum == datum:
                 self.setCurrentItem(item)
