@@ -287,13 +287,10 @@ class Plotter2DWidget(PlotterBase):
         # Interpolation submenu
         interp_menu = display_control_menu.addMenu("Interpolation")
         interp_options = [
-            ("Nearest", "nearest"),
+            ("None (Default)", "None"),
             ("Bilinear", "bilinear"),
             ("Bicubic", "bicubic"),
-            ("Gaussian (Default)", "gaussian"),
-            ("Gaussian (3x3 Kernel)", "gaussian_3x3"),
-            ("Gaussian (5x5 Kernel)", "gaussian_5x5"),
-            ("Gaussian (7x7 Kernel)", "gaussian_7x7"),
+            ("Gaussian", "gaussian")
         ]
         for label, interp_val in interp_options:
             action = interp_menu.addAction(label)
