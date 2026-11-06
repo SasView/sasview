@@ -6,7 +6,6 @@ from PySide6.QtWidgets import (
     QComboBox,
     QFileDialog,
     QHBoxLayout,
-    QLabel,
     QMessageBox,
     QPushButton,
     QVBoxLayout,
@@ -20,6 +19,7 @@ from sasdata.data_io.importers.import_xml import load_data as load_xml_data
 
 from sas.ascii_dialog.dialog import AsciiDialog
 from sas.data_explorer_error_message import DataExplorerErrorMessage
+from sas.data_explorer_filter_button import DataExplorerFilterButton
 from sas.data_explorer_tree import DataExplorerTree
 from sas.data_manager import NewDataManager as DataManager
 from sas.dummy_perspective import DummyPerspective
@@ -63,24 +63,19 @@ class NewDataExplorer(QWidget):
             self.add_perspective_button.addItem(p)
         self.add_perspective_button.currentTextChanged.connect(self.add_perspective)
 
+        self.filter_button = DataExplorerFilterButton(self)
+
         self.add_data_row.addWidget(self.load_data_row)
         self.add_data_row.addWidget(self.add_perspective_button)
-
-        self.filter_label = QLabel("Filters")
-
-        self.filter_row = QHBoxLayout()
-        filter_names = ["Data", "Perspective", "Theory", "Plot"]
-        self.filter_buttons: dict[str, QPushButton] = {
-            name: QPushButton(name, self) for name in filter_names
-        }
-        for widget in self.filter_buttons.values():
-            widget.setCheckable(True)
-            self.filter_row.addWidget(widget)
+        self.add_data_row.addWidget(self.filter_button)
 
         # TODO: I suspect this may end up being a separate widget. For now, just
         # use an empty tree view.
         self.tree_view = DataExplorerTree(self._data_manager, self)
         self.tree_view.current_datum_removed.connect(self.onRemove)
+        self.filter_button.filters_changed.connect(
+            lambda: self.tree_view.setShownTypes(self.filter_button.shown_types())
+        )
 
         # TODO: Is there a better name for this?
         self.final_row = QHBoxLayout()
@@ -94,8 +89,6 @@ class NewDataExplorer(QWidget):
         self.final_row.addWidget(self.plot_button)
 
         self.layout.addLayout(self.add_data_row)
-        self.layout.addWidget(self.filter_label)
-        self.layout.addLayout(self.filter_row)
         self.layout.addWidget(self.tree_view)
         self.layout.addLayout(self.final_row)
 
