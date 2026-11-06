@@ -1,7 +1,9 @@
 import logging
+import os
 from os.path import basename
 
-from PySide6.QtCore import Signal, Slot
+from PySide6.QtCore import Qt, Signal, Slot
+from PySide6.QtGui import QDragEnterEvent, QDragMoveEvent, QDropEvent
 from PySide6.QtWidgets import (
     QComboBox,
     QFileDialog,
@@ -46,6 +48,9 @@ class NewDataExplorer(QWidget):
     def __init__(self, data_manager: DataManager, parent: QWidget | None = ...) -> None:
         super().__init__(parent)
         self._data_manager = data_manager
+        # Files dropped anywhere on the explorer (the tree included, since it
+        # doesn't accept drops itself) are loaded.
+        self.setAcceptDrops(True)
 
         self.layout = QVBoxLayout(self)
 
@@ -138,35 +143,85 @@ class NewDataExplorer(QWidget):
             self,
             "Open Data File",
         )
-        if len(filenames) == 0:
-            return
-        for filename in filenames:
-            # FIXME: This would probably break if there isn't an extension.
+        self.loadFiles(filenames)
 
+    def loadFiles(self, filenames: list[str]):
+        """Load each file into the data manager. Files that can't be loaded are
+        skipped, and all failures are reported together at the end."""
+        failures: list[str] = []
+        for filename in filenames:
             # TODO: The logic for deciding which reader to use is temporary. It
             # won't work for all file extensions, and ultimately this logic probably
             # needs to be moved in sasdata.
-            file_extension = filename.split(".")[-1].lower()
-            match file_extension:
-                case "xml":
-                    loaded_data = load_xml_data(filename)
-                case "h5" | "hdf":
-                    loaded_data = load_hdf5_data(filename)
-                case "txt" | "csv":
-                    data_list = load_ascii_data(filename)
-                    # Since we're only giving the load function one filename, we can
-                    # assume only one data object is being loaded.
-                    loaded_data = dict([(basename(filename), data_list[0])])
-                case _:
-                    QMessageBox.critical(
-                        self,
-                        "Data Loading Error",
-                        f"Error loading {filename}. Extension not recognised.",
-                    )
-                    return
+            _, file_extension = os.path.splitext(filename)
+            try:
+                match file_extension.lower():
+                    case ".xml":
+                        loaded_data = load_xml_data(filename)
+                    case ".h5" | ".hdf":
+                        loaded_data = load_hdf5_data(filename)
+                    case ".txt" | ".csv":
+                        data_list = load_ascii_data(filename)
+                        # Since we're only giving the load function one filename, we can
+                        # assume only one data object is being loaded.
+                        loaded_data = dict([(basename(filename), data_list[0])])
+                    case _:
+                        failures.append(f"{basename(filename)}: extension not recognised.")
+                        continue
+            except Exception as err:
+                logging.exception(f"Error loading {filename}")
+                failures.append(f"{basename(filename)}: {err}")
+                continue
 
             for _, datum in loaded_data.items():
                 self._data_manager.add_data(datum)
+
+        if failures:
+            QMessageBox.critical(
+                self,
+                "Data Loading Error",
+                "The following files could not be loaded:\n\n" + "\n".join(failures),
+            )
+
+    @staticmethod
+    def _droppedFiles(event: QDragEnterEvent | QDragMoveEvent | QDropEvent) -> list[str]:
+        """Local file paths in a drag, with folders expanded to the files
+        directly inside them (not recursive)."""
+        if not event.mimeData().hasUrls():
+            return []
+        filenames: list[str] = []
+        for url in event.mimeData().urls():
+            path = url.toLocalFile()
+            if not path:
+                continue
+            if os.path.isdir(path):
+                filenames += sorted(
+                    os.path.join(path, name)
+                    for name in os.listdir(path)
+                    if os.path.isfile(os.path.join(path, name))
+                )
+            else:
+                filenames.append(path)
+        return filenames
+
+    def dragEnterEvent(self, event: QDragEnterEvent):
+        if event.mimeData().hasUrls() and any(url.isLocalFile() for url in event.mimeData().urls()):
+            event.setDropAction(Qt.DropAction.CopyAction)
+            event.accept()
+        else:
+            event.ignore()
+
+    def dragMoveEvent(self, event: QDragMoveEvent):
+        self.dragEnterEvent(event)
+
+    def dropEvent(self, event: QDropEvent):
+        filenames = self._droppedFiles(event)
+        if not filenames:
+            event.ignore()
+            return
+        event.setDropAction(Qt.DropAction.CopyAction)
+        event.accept()
+        self.loadFiles(filenames)
 
     @Slot()
     def onAdvancedLoad(self):
