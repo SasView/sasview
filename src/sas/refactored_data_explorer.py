@@ -250,7 +250,7 @@ class NewDataExplorer(QWidget):
 
     @classmethod
     def _hasSupportedFiles(cls, event: QDragEnterEvent | QDragMoveEvent) -> bool:
-        return next(cls._droppedFiles(event), None) is not None
+        return any(cls._droppedFiles(event))
 
     def dragEnterEvent(self, event: QDragEnterEvent):
         # Only accept drags carrying something we can load, so the cursor shows
