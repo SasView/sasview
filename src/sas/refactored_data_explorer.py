@@ -63,7 +63,6 @@ class NewDataExplorer(QWidget):
             self.add_perspective_button.addItem(p)
         self.add_perspective_button.currentTextChanged.connect(self.add_perspective)
 
-        # TODO: Not yet connected to the tree; filtering will come separately.
         self.filter_button = DataExplorerFilterButton(self)
 
         self.add_data_row.addWidget(self.load_data_row)
@@ -74,6 +73,9 @@ class NewDataExplorer(QWidget):
         # use an empty tree view.
         self.tree_view = DataExplorerTree(self._data_manager, self)
         self.tree_view.current_datum_removed.connect(self.onRemove)
+        self.filter_button.filters_changed.connect(
+            lambda: self.tree_view.setShownTypes(self.filter_button.shown_types())
+        )
 
         # TODO: Is there a better name for this?
         self.final_row = QHBoxLayout()

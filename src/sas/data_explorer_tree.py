@@ -9,6 +9,7 @@ from sasdata.data import SasData
 from sasdata.trend import NamedTrend, Trend
 
 from sas.data_explorer_error_message import DataExplorerErrorMessage
+from sas.data_explorer_filter_button import FILTER_TYPES
 from sas.data_explorer_menu import DataExplorerMenu, DataExplorerMenuAction
 from sas.data_manager import NewDataManager as DataManager
 from sas.data_manager import TrackedData, isinstance_fix
@@ -33,6 +34,16 @@ def tracked_data_name(data: TrackedData) -> str:
         return data.formatName
 
 
+def tracked_data_type(data: TrackedData) -> str:
+    """The filter key (see FILTER_TYPES) for the kind of item this is."""
+    if isinstance_fix(data, 'Perspective'):
+        return "Perspective"
+    # A trend is a series of data and is sent to perspectives like data, so it
+    # is filtered along with it.
+    # TODO: Theories and plots aren't tracked yet; classify them once they are.
+    return "Data"
+
+
 class DataExplorerTree(QTreeWidget):
     current_datum_removed = Signal()
     view_data_activated = Signal()
@@ -50,6 +61,8 @@ class DataExplorerTree(QTreeWidget):
         self.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
         _ = self.customContextMenuRequested.connect(self.showContextMenu)
         self.headerItem().setHidden(True)
+
+        self._shown_types: set[str] = set(FILTER_TYPES)
 
     def initTable(self):
         self.clear()
@@ -70,6 +83,7 @@ class DataExplorerTree(QTreeWidget):
                 new_assoc_item = QTreeWidgetItem([tracked_data_name(datum2)])
                 new_assoc_item.setData(0, Qt.ItemDataRole.UserRole, datum2)
                 item.addChild(new_assoc_item)
+                self._apply_filter(new_assoc_item)
                 # By breaking here, we are assuming there are no more top level datum1 items in the tree.
                 break
 
@@ -81,6 +95,34 @@ class DataExplorerTree(QTreeWidget):
         item = QTreeWidgetItem([tracked_data_name(datum)])
         item.setData(0, Qt.ItemDataRole.UserRole, datum)
         self.addTopLevelItem(item)
+        self._apply_filter(item)
+
+    def setShownTypes(self, shown_types: set[str]):
+        """Show only the items whose type (see tracked_data_type) is in
+        shown_types. Hiding an item hides everything under it."""
+        self._shown_types = set(shown_types)
+        root = self.invisibleRootItem()
+        for i in range(root.childCount()):
+            self._apply_filter(root.child(i), recursive=True)
+
+    def _apply_filter(self, item: QTreeWidgetItem, recursive: bool = False):
+        datum = cast(TrackedData, item.data(0, Qt.ItemDataRole.UserRole))
+        item.setHidden(tracked_data_type(datum) not in self._shown_types)
+        # Items that can't be seen must not stay selected, or actions like
+        # Remove would act on them.
+        if not self._is_visible(item):
+            item.setSelected(False)
+        if recursive:
+            for i in range(item.childCount()):
+                self._apply_filter(item.child(i), recursive=True)
+
+    @staticmethod
+    def _is_visible(item: QTreeWidgetItem | None) -> bool:
+        while item is not None:
+            if item.isHidden():
+                return False
+            item = item.parent()
+        return True
 
     def removeFromTable(
         self,
