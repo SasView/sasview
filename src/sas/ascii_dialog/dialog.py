@@ -295,7 +295,16 @@ class AsciiDialog(QDialog):
             # We don't have any actual data yet so we're just updating the warning based on the column.
             self.warning_label.updateWarning(required_missing, duplicates)
         else:
-            self.warning_label.updateWarning(required_missing, duplicates, [self.splitLine(line) for line in self.rawCsv], self.rowsIsIncluded, self.startingPos)
+            # Only the columns that aren't ignored are loaded, so only those need to be readable.
+            used_columns = [i for i, name in enumerate(self.col_editor.colNames()) if name != '<ignore>']
+            self.warning_label.updateWarning(
+                required_missing,
+                duplicates,
+                [self.splitLine(line) for line in self.rawCsv],
+                self.rowsIsIncluded,
+                self.startingPos,
+                used_columns,
+            )
 
     @Slot()
     def loadFile(self) -> None:
