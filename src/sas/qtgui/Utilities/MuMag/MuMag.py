@@ -195,7 +195,7 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
 
         try:
             self.fit_data = MuMagLib.simple_fit(self.data, parameters)
-            
+
         except FitFailure as ff:
             log.error("Fitting failed - are the parameters correct? "+repr(ff))
             return

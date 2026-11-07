@@ -433,10 +433,10 @@ class MuMagLib:
             x_4 = max(0.0, min(x_1, x_3))
             # Get the least squares data to return it and update plots
             refined_least_squared_data = least_squares_function(data, x_4)
-        else:        
+        else:
             for i in range(200):
                 if np.abs(2 * (x_4 - x_3) / (x_4 + x_3)) < epsilon:
-                    break                
+                    break
 
                 x_1, x_2, x_3 = x_2, x_3, x_4
                 y_1, y_2, y_3 = y_2, y_3, refined_least_squared_data.exchange_A_chi_sq
@@ -451,11 +451,11 @@ class MuMagLib:
                         x_4,
                         max(0.0, min(x_1, x_3)),
                         max(x_1, x_3),
-                    )                    
+                    )
                     x_4 = max(0.0, min(x_1, x_3))
                 # Get the least squares data for the found best A value to return it and update plots
                 refined_least_squared_data = least_squares_function(data, x_4)
-                
+
         return refined_least_squared_data
 
     @staticmethod
