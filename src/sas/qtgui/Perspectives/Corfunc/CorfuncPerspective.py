@@ -816,6 +816,15 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
         self._allow_close = value
 
+    def reject(self):
+        """
+        Ignore QDialog's Esc-to-reject behaviour
+
+        This perspective lives inside the MDI area, so the default reject()
+        would hide the widget without going through closeEvent(), leaving an
+        empty subwindow frame behind (see issue #4001).
+        """
+
     def closeEvent(self, event):
         """
         Overwrite QDialog close method to allow for custom widget close

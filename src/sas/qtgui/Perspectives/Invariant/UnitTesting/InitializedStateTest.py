@@ -1,7 +1,8 @@
 """Tests for the Invariant perspective initialized state."""
 
 import pytest
-from PySide6 import QtWidgets
+from PySide6 import QtCore, QtWidgets
+from PySide6.QtTest import QTest
 
 from sas.qtgui.Perspectives.Invariant.InvariantUtils import WIDGETS
 from sas.qtgui.Utilities import GuiUtils
@@ -15,6 +16,12 @@ class TestInvariantDefaults:
         assert self.window.name == "Invariant"
         assert self.window.windowTitle() == "Invariant Perspective"
         assert self.window.title == self.window.windowTitle()
+
+    def test_escape_does_not_hide_window(self):
+        """Esc must not hide the perspective - see issue #4001."""
+        assert self.window.isVisible()
+        QTest.keyClick(self.window, QtCore.Qt.Key_Escape)
+        assert self.window.isVisible()
 
     NUMERIC_CASES: list[tuple[str, float]] = [
         ("txtTotalQMin", 0.0),
