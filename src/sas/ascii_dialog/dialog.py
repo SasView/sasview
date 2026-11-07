@@ -24,7 +24,7 @@ from PySide6.QtWidgets import (
 
 from sasdata.ascii_reader_metadata import AsciiReaderMetadata
 from sasdata.data_io.importers.import_ascii import AsciiReaderParams, load_data, split_line
-from sasdata.dataset_types import DatasetType, angle_dim, dataset_types, one_dim, sesans, two_dim
+from sasdata.dataset_types import DatasetType, angle_dim, one_dim, sesans, two_dim
 from sasdata.guess import guess_column_count, guess_columns, guess_starting_position
 
 from sas.ascii_dialog.col_editor import ColEditor
@@ -82,16 +82,18 @@ class AsciiDialog(QDialog):
         self.dataset_layout = QHBoxLayout()
         self.dataset_label = QLabel("Dataset Type")
         self.dataset_combobox = QComboBox()
-        # TODO: Temporarily exclude SESANS until that's been fixed.
-        self.dataset_combobox.addItems(list(dataset_types))
+        # The options are listed in the order of dataset_dictionary, with 1D I vs Q as the default.
+        # TODO: SESANS was previously excluded here until SESANS loading was fixed. Check whether it should be offered.
+        self.dataset_combobox.addItems(list(dataset_dictionary))
+        self.dataset_combobox.setCurrentText(one_dim.name)
         self.dataset_layout.addWidget(self.dataset_label)
         self.dataset_layout.addWidget(self.dataset_combobox)
 
-        ## Seperator
+        ## Separators
         self.sep_layout = QHBoxLayout()
 
         self.sep_widgets: list[QWidget] = []
-        self.sep_label = QLabel('Seperators:')
+        self.sep_label = QLabel('Separators:')
         self.sep_layout.addWidget(self.sep_label)
         for seperator_name, value in self.seperators.items():
             check_box = QCheckBox(seperator_name)
@@ -194,7 +196,7 @@ class AsciiDialog(QDialog):
         return set([i for i, included in enumerate(self.rowsIsIncluded) if not included])
 
     def splitLine(self, line: str) -> list[str]:
-        """Split a line in a CSV file based on which seperators the user has
+        """Split a line in a CSV file based on which separators the user has
         selected on the widget.
 
         """
@@ -334,7 +336,7 @@ class AsciiDialog(QDialog):
                 QMessageBox.critical(self, 'File Read Error', f'There was an error reading {basename}')
             except UnicodeDecodeError:
                 QMessageBox.critical(self, 'File Read Error', f"""There was an error decoding {basename}.
-This could potentially be because the file {basename} an ASCII format.""")
+This could potentially be because the file {basename} is not in an ASCII format.""")
         # Attempt guesses on the first file that was loaded.
         self.attemptGuesses()
 
@@ -363,7 +365,7 @@ This could potentially be because the file {basename} an ASCII format.""")
 
     @Slot()
     def updateSeperator(self) -> None:
-        """Changed when the user modifies the set of seperators being used."""
+        """Changed when the user modifies the set of separators being used."""
         self.fillTable()
         self.updateWarningLabel()
 
@@ -375,7 +377,7 @@ This could potentially be because the file {basename} an ASCII format.""")
 
     @Slot()
     def updateCurrentFile(self) -> None:
-        """Triggered when the current file (choosen from the file chooser
+        """Triggered when the current file (chosen from the file chooser
         ComboBox) changes.
 
         """
@@ -396,7 +398,7 @@ This could potentially be because the file {basename} an ASCII format.""")
 
     @Slot()
     def seperatorToggle(self) -> None:
-        """Triggered when one of the seperator check boxes has been toggled."""
+        """Triggered when one of the separator check boxes has been toggled."""
         check_box = self.sender()
         self.seperators[check_box.text()] = check_box.isChecked()
         self.fillTable()
