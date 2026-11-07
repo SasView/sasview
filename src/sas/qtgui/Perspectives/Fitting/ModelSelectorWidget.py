@@ -11,14 +11,15 @@ from typing import Any
 
 from PySide6 import QtCore, QtWidgets
 
+from sas.qtgui.Perspectives.Fitting.FittingConstants import (
+    CATEGORY_DEFAULT,
+    CATEGORY_STRUCTURE,
+    MODEL_DEFAULT,
+    STRUCTURE_DEFAULT,
+)
+
 logger = logging.getLogger(__name__)
 
-# Constants
-CATEGORY_DEFAULT = "Choose category..."
-CATEGORY_STRUCTURE = "Structure Factor"
-CATEGORY_CUSTOM = "Plugin Models"
-MODEL_DEFAULT = "Choose model..."
-STRUCTURE_DEFAULT = "None"
 
 
 class ModelSelectorWidget(QtWidgets.QWidget):

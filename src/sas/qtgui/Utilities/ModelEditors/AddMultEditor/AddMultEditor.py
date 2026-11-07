@@ -13,7 +13,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from sasmodels.sasview_model import load_standard_models
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Perspectives.Fitting.FittingWidget import SUPPRESSED_MODELS
+from sas.qtgui.Perspectives.Fitting.FittingConstants import SUPPRESSED_MODELS
 from sas.qtgui.Utilities.BackgroundColor import BG_DEFAULT, BG_ERROR
 
 # Local UI

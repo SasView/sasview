@@ -5,6 +5,17 @@ import numpy
 from PySide6 import QtCore, QtGui, QtWidgets
 
 from sas.qtgui.Perspectives.Fitting.AssociatedComboBox import AssociatedComboBox
+from sas.qtgui.Perspectives.Fitting.model.kernel import (  # noqa: F401 (re-exported)
+    fixed_choices,
+    getIterParams,
+    getMultiplicity,
+    replaceShellName,
+)
+from sas.qtgui.Perspectives.Fitting.model.serializer import (  # noqa: F401 (re-exported)
+    formatParameters,
+    formatParametersExcel,
+    formatParametersLatex,
+)
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
 from sas.sascalc.fit.expression import check_constraints
 
@@ -54,34 +65,6 @@ class ToolTippedItemModel(QtGui.QStandardItemModel):
 
         return QtGui.QStandardItemModel.headerData(self, section, orientation, role)
 
-def replaceShellName(param_name, value):
-    """
-    Updates parameter name from <param_name>[n_shell] to <param_name>value
-    """
-    assert '[' in param_name
-    return param_name[:param_name.index('[')]+str(value)
-
-def getIterParams(model):
-    """
-    Returns a list of all multi-shell parameters in 'model'
-    """
-    return list([par for par in model.iq_parameters if "[" in par.name])
-
-def getMultiplicity(model):
-    """
-    Finds out if 'model' has multishell parameters.
-    If so, returns the name of the counter parameter and the number of shells
-    """
-    iter_params = getIterParams(model)
-    param_name = ""
-    param_length = 0
-    if iter_params:
-        param_length = iter_params[0].length
-        param_name = iter_params[0].length_control
-        if param_name is None and '[' in iter_params[0].name:
-            param_name = iter_params[0].name[:iter_params[0].name.index('[')]
-    return (param_name, param_length)
-
 def createFixedChoiceComboBox(param, item_row):
     """
     Determines whether param is a fixed-choice parameter, modifies items in item_row appropriately and returns a combo
@@ -93,12 +76,7 @@ def createFixedChoiceComboBox(param, item_row):
     # Determine whether this is a fixed-choice parameter. There are lots of conditionals, simply because the
     # implementation is not yet concrete; there are several possible indicators that the parameter is fixed-choice.
     # TODO: (when the sasmodels implementation is concrete, clean this up)
-    choices = None
-    if isinstance(param.choices, (list, tuple)) and len(param.choices) > 0:
-        # The choices property is concrete in sasmodels, probably will use this
-        choices = param.choices
-    elif isinstance(param.units, (list, tuple)):
-        choices = [str(x) for x in param.units]
+    choices = fixed_choices(param)
 
     cbox = None
     if choices is not None:
@@ -877,110 +855,6 @@ def getOrientationParam(kernel_module=None):
                      [max_state, details[2]], details[0]])
 
     return param
-
-def formatParameters(parameters: list, entry_sep=',', line_sep=':'):
-    """
-    Prepare the parameter string in the standard SasView layout
-    """
-
-    parameter_strings = ["sasview_parameter_values"]
-    for parameter in parameters:
-        parameter_strings.append(entry_sep.join([str(component) for component in parameter]))
-
-    return line_sep.join(parameter_strings)
-
-def formatParametersExcel(parameters: list):
-    """
-    Prepare the parameter string in the Excel format (tab delimited)
-    """
-    crlf = chr(13) + chr(10)
-    tab = chr(9)
-
-    output_string = ""
-    # names
-    names = ""
-    values = ""
-    check = ""
-    for parameter in parameters:
-        names += parameter[0]+tab
-        if len(parameter) > 3:
-            # Add the error column if fitted
-            if parameter[1] == "True" and parameter[3] is not None:
-                names += parameter[0]+"_err"+tab
-
-            values += parameter[2]+tab
-            check += str(parameter[1])+tab
-            if parameter[1] == "True" and parameter[3] is not None:
-                values += parameter[3]+tab
-            # add .npts and .nsigmas when necessary
-            if parameter[0][-6:] == ".width":
-                names += parameter[0].replace('.width', '.nsigmas') + tab
-                names += parameter[0].replace('.width', '.npts') + tab
-                values += parameter[5] + tab + parameter[4] + tab
-        else:
-            # Empty statement for debugging purposes
-            pass
-
-    output_string = names + crlf + values + crlf + check
-    return output_string
-
-def formatParametersLatex(parameters: list):
-    """
-    Prepare the parameter string in latex
-    """
-
-    output_string = r'\begin{table}'
-    output_string += r'\begin{tabular}[h]'
-
-    crlf = chr(13) + chr(10)
-    output_string += '{|'
-    output_string += 'l|l|'*len(parameters)
-    output_string += r'}\hline'
-    output_string += crlf
-
-    names = ""
-    values = ""
-
-    for index, parameter in enumerate(parameters):
-        name = parameter[0] # Parameter name
-        names += name.replace('_', r'\_')  # Escape underscores
-        if len(parameter) > 3:
-            values += f" {parameter[2]}"
-            # Add the error column if fitted
-            if parameter[1] == "True" and parameter[3] is not None:
-                names += f" & {parameter[0]} " + r'\_err'
-                values += f' & {parameter[3]}'
-
-            if index < len(parameters) - 1:
-                names += ' & '
-                values += ' & '
-
-            # add .npts and .nsigmas when necessary
-            if parameter[0][-6:] == ".width":
-                names += parameter[0].replace('.width', '.nsigmas') + ' & '
-                names += parameter[0].replace('.width', '.npts')
-                values += parameter[5] + ' & '
-                values += parameter[4]
-
-                if index < len(parameters) - 1:
-                    names += ' & '
-                    values += ' & '
-        elif len(parameter) > 2:
-            values += f' & {parameter[2]} &'
-        else:
-            values += f' & {parameter[1]} &'
-
-    output_string += names
-    output_string += r'\\ \hline'
-    output_string += crlf
-
-    output_string += values
-    output_string += r'\\ \hline'
-    output_string += crlf
-    output_string += r'\end{tabular}'
-    output_string += r'\end{table}'
-
-    return output_string
 
 def isParamPolydisperse(param_name, kernel_params, is2D=False):
     """

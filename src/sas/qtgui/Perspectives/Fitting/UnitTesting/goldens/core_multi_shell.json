@@ -1,0 +1,2999 @@
+[
+ {
+  "rows": [
+   [
+    "model_name",
+    "core_multi_shell"
+   ],
+   [
+    "scale",
+    "False",
+    "1",
+    null,
+    "0.0",
+    "inf",
+    []
+   ],
+   [
+    "background",
+    "False",
+    "0.001",
+    null,
+    "-inf",
+    "inf",
+    []
+   ],
+   [
+    "core_multi_shell",
+    null,
+    "",
+    null,
+    "",
+    "",
+    []
+   ],
+   [
+    "sld_core",
+    "False",
+    "1",
+    null,
+    "-inf",
+    "inf",
+    []
+   ],
+   [
+    "radius",
+    "False",
+    "200",
+    null,
+    "0.0",
+    "inf",
+    []
+   ],
+   [
+    "sld_solvent",
+    "False",
+    "6.4",
+    null,
+    "-inf",
+    "inf",
+    []
+   ],
+   [
+    "n",
+    null,
+    "",
+    null,
+    "0",
+    "10",
+    []
+   ],
+   [
+    "sld1",
+    "False",
+    "1.7",
+    null,
+    "-inf",
+    "inf",
+    []
+   ],
+   [
+    "thickness1",
+    "False",
+    "40",
+    null,
+    "0.0",
+    "inf",
+    []
+   ],
+   [
+    "sld2",
+    "False",
+    "1.7",
+    null,
+    "-inf",
+    "inf",
+    []
+   ],
+   [
+    "thickness2",
+    "True",
+    "12",
+    null,
+    "0.0",
+    "inf",
+    []
+   ],
+   [
+    "sld3",
+    "False",
+    "1.7",
+    null,
+    "-inf",
+    "inf",
+    []
+   ],
+   [
+    "thickness3",
+    "False",
+    "40",
+    null,
+    "0.0",
+    "inf",
+    []
+   ],
+   [
+    "multiplicity",
+    "3"
+   ],
+   [
+    "is_data",
+    "True"
+   ],
+   [
+    "tab_index",
+    "1"
+   ],
+   [
+    "is_batch_fitting",
+    "False"
+   ],
+   [
+    "data_name",
+    [
+     "data1"
+    ]
+   ],
+   [
+    "data_id",
+    [
+     "d1"
+    ]
+   ],
+   [
+    "tab_name",
+    "M1"
+   ],
+   [
+    "q_range_min",
+    "0.005"
+   ],
+   [
+    "q_range_max",
+    "0.4"
+   ],
+   [
+    "q_weighting",
+    "1"
+   ],
+   [
+    "weighting",
+    "1"
+   ],
+   [
+    "smearing",
+    "0"
+   ],
+   [
+    "smearing_min",
+    "None"
+   ],
+   [
+    "smearing_max",
+    "None"
+   ],
+   [
+    "polydisperse_params",
+    "False"
+   ],
+   [
+    "magnetic_params",
+    "False"
+   ],
+   [
+    "chainfit_params",
+    "False"
+   ],
+   [
+    "2D_params",
+    "False"
+   ],
+   [
+    "fitpage_category",
+    "Sphere"
+   ],
+   [
+    "fitpage_model",
+    "core_multi_shell"
+   ],
+   [
+    "fitpage_structure",
+    "None"
+   ]
+  ],
+  "clipboard": "sasview_parameter_values:model_name,core_multi_shell:scale,False,1,None,0.0,inf,():background,False,0.001,None,-inf,inf,():core_multi_shell,None,,None,,,():sld_core,False,1,None,-inf,inf,():radius,False,200,None,0.0,inf,():sld_solvent,False,6.4,None,-inf,inf,():n,None,,None,0,10,():sld1,False,1.7,None,-inf,inf,():thickness1,False,40,None,0.0,inf,():sld2,False,1.7,None,-inf,inf,():thickness2,True,12,None,0.0,inf,():sld3,False,1.7,None,-inf,inf,():thickness3,False,40,None,0.0,inf,():multiplicity,3:is_data,True:tab_index,1:is_batch_fitting,False:data_name,['data1']:data_id,['d1']:tab_name,M1:q_range_min,0.005:q_range_max,0.4:q_weighting,1:weighting,1:smearing,0:smearing_min,None:smearing_max,None:polydisperse_params,False:magnetic_params,False:chainfit_params,False:2D_params,False:fitpage_category,Sphere:fitpage_model,core_multi_shell:fitpage_structure,None",
+  "excel": "scale\tbackground\tcore_multi_shell\tsld_core\tradius\tsld_solvent\tn\tsld1\tthickness1\tsld2\tthickness2\tsld3\tthickness3\tmultiplicity\t\r\n1\t0.001\t\t1\t200\t6.4\t\t1.7\t40\t1.7\t12\t1.7\t40\t\r\nFalse\tFalse\tNone\tFalse\tFalse\tFalse\tNone\tFalse\tFalse\tFalse\tTrue\tFalse\tFalse\t",
+  "latex": "\\begin{table}\\begin{tabular}[h]{|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|}\\hline\r\nscale & background & core\\_multi\\_shell & sld\\_core & radius & sld\\_solvent & n & sld1 & thickness1 & sld2 & thickness2 & sld3 & thickness3 & multiplicity\\\\ \\hline\r\n 1 &  0.001 &   &  1 &  200 &  6.4 &   &  1.7 &  40 &  1.7 &  12 &  1.7 &  40 &  & 3 &\\\\ \\hline\r\n\\end{tabular}\\end{table}",
+  "serialized": {
+   "d1": {
+    "fit_params": [
+     {
+      "model_name": [
+       "core_multi_shell"
+      ],
+      "scale": [
+       "False",
+       "1",
+       null,
+       "0.0",
+       "inf",
+       []
+      ],
+      "background": [
+       "False",
+       "0.001",
+       null,
+       "-inf",
+       "inf",
+       []
+      ],
+      "core_multi_shell": [
+       null,
+       "",
+       null,
+       "",
+       "",
+       []
+      ],
+      "sld_core": [
+       "False",
+       "1",
+       null,
+       "-inf",
+       "inf",
+       []
+      ],
+      "radius": [
+       "False",
+       "200",
+       null,
+       "0.0",
+       "inf",
+       []
+      ],
+      "sld_solvent": [
+       "False",
+       "6.4",
+       null,
+       "-inf",
+       "inf",
+       []
+      ],
+      "n": [
+       null,
+       "",
+       null,
+       "0",
+       "10",
+       []
+      ],
+      "sld1": [
+       "False",
+       "1.7",
+       null,
+       "-inf",
+       "inf",
+       []
+      ],
+      "thickness1": [
+       "False",
+       "40",
+       null,
+       "0.0",
+       "inf",
+       []
+      ],
+      "sld2": [
+       "False",
+       "1.7",
+       null,
+       "-inf",
+       "inf",
+       []
+      ],
+      "thickness2": [
+       "True",
+       "12",
+       null,
+       "0.0",
+       "inf",
+       []
+      ],
+      "sld3": [
+       "False",
+       "1.7",
+       null,
+       "-inf",
+       "inf",
+       []
+      ],
+      "thickness3": [
+       "False",
+       "40",
+       null,
+       "0.0",
+       "inf",
+       []
+      ],
+      "multiplicity": [
+       "3"
+      ],
+      "is_data": [
+       "True"
+      ],
+      "tab_index": [
+       "1"
+      ],
+      "is_batch_fitting": [
+       "False"
+      ],
+      "data_name": [
+       [
+        "data1"
+       ]
+      ],
+      "data_id": [
+       [
+        "d1"
+       ]
+      ],
+      "tab_name": [
+       "M1"
+      ],
+      "q_range_min": [
+       "0.005"
+      ],
+      "q_range_max": [
+       "0.4"
+      ],
+      "q_weighting": [
+       "1"
+      ],
+      "weighting": [
+       "1"
+      ],
+      "smearing": [
+       "0"
+      ],
+      "smearing_min": [
+       "None"
+      ],
+      "smearing_max": [
+       "None"
+      ],
+      "polydisperse_params": [
+       "False"
+      ],
+      "magnetic_params": [
+       "False"
+      ],
+      "chainfit_params": [
+       "False"
+      ],
+      "2D_params": [
+       "False"
+      ],
+      "fitpage_category": [
+       "Sphere"
+      ],
+      "fitpage_model": [
+       "core_multi_shell"
+      ],
+      "fitpage_structure": [
+       "None"
+      ]
+     }
+    ]
+   }
+  },
+  "fit_state": {
+   "categorycombobox": "Sphere",
+   "formfactorcombobox": "core_multi_shell",
+   "structurecombobox": "None",
+   "tcChi": null,
+   "enable2D": false,
+   "data": [
+    "Data1D",
+    "d1"
+   ],
+   "qmin": 0.005,
+   "qmax": 0.4,
+   "npts": 40,
+   "parameters": [
+    [
+     false,
+     "scale",
+     "1",
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "0.0"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     ""
+    ],
+    [
+     false,
+     "background",
+     "0.001",
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1/cm"
+    ],
+    [
+     false,
+     "core_multi_shell",
+     "",
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      ""
+     ],
+     [
+      true,
+      ""
+     ],
+     ""
+    ],
+    [
+     false,
+     "sld_core",
+     "1",
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1e-6/Ang^2"
+    ],
+    [
+     false,
+     "radius",
+     "200",
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "0.0"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "Ang"
+    ],
+    [
+     false,
+     "sld_solvent",
+     "6.4",
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1e-6/Ang^2"
+    ],
+    [
+     false,
+     "n",
+     "",
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "0"
+     ],
+     [
+      true,
+      "10"
+     ],
+     ""
+    ],
+    [
+     false,
+     "sld1",
+     "1.7",
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1e-6/Ang^2"
+    ],
+    [
+     false,
+     "thickness1",
+     "40",
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "0.0"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "Ang"
+    ],
+    [
+     false,
+     "sld2",
+     "1.7",
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1e-6/Ang^2"
+    ],
+    [
+     true,
+     "thickness2",
+     "12",
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "0.0"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "Ang"
+    ],
+    [
+     false,
+     "sld3",
+     "1.7",
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1e-6/Ang^2"
+    ],
+    [
+     false,
+     "thickness3",
+     "40",
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "0.0"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "Ang"
+    ]
+   ],
+   "orientation_params_disp": [
+    [
+     true,
+     "n",
+     1,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      0.0
+     ],
+     [
+      true,
+      10.0
+     ],
+     ""
+    ],
+    [
+     true,
+     "scale",
+     1.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      0.0
+     ],
+     [
+      true,
+      "inf"
+     ],
+     ""
+    ],
+    [
+     true,
+     "background",
+     0.001,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1/cm"
+    ],
+    [
+     true,
+     "sld_core",
+     1.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1e-6/Ang^2"
+    ],
+    [
+     true,
+     "sld_core_M0",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1e-6/Ang^2"
+    ],
+    [
+     true,
+     "sld_core_mtheta",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      -90.0
+     ],
+     [
+      true,
+      90.0
+     ],
+     "degrees"
+    ],
+    [
+     true,
+     "sld_core_mphi",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      -180.0
+     ],
+     [
+      true,
+      180.0
+     ],
+     "degrees"
+    ],
+    [
+     true,
+     "radius",
+     200.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      0.0
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "Ang"
+    ],
+    [
+     true,
+     "sld_solvent",
+     6.4,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1e-6/Ang^2"
+    ],
+    [
+     true,
+     "sld_solvent_M0",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1e-6/Ang^2"
+    ],
+    [
+     true,
+     "sld_solvent_mtheta",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      -90.0
+     ],
+     [
+      true,
+      90.0
+     ],
+     "degrees"
+    ],
+    [
+     true,
+     "sld_solvent_mphi",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      -180.0
+     ],
+     [
+      true,
+      180.0
+     ],
+     "degrees"
+    ],
+    [
+     true,
+     "sld1",
+     1.7000000476837158,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1e-6/Ang^2"
+    ],
+    [
+     true,
+     "sld1_M0",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1e-6/Ang^2"
+    ],
+    [
+     true,
+     "sld1_mtheta",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      -90.0
+     ],
+     [
+      true,
+      90.0
+     ],
+     "degrees"
+    ],
+    [
+     true,
+     "sld1_mphi",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      -180.0
+     ],
+     [
+      true,
+      180.0
+     ],
+     "degrees"
+    ],
+    [
+     true,
+     "thickness1",
+     40.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      0.0
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "Ang"
+    ],
+    [
+     true,
+     "sld2",
+     1.7000000476837158,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1e-6/Ang^2"
+    ],
+    [
+     true,
+     "sld2_M0",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1e-6/Ang^2"
+    ],
+    [
+     true,
+     "sld2_mtheta",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      -90.0
+     ],
+     [
+      true,
+      90.0
+     ],
+     "degrees"
+    ],
+    [
+     true,
+     "sld2_mphi",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      -180.0
+     ],
+     [
+      true,
+      180.0
+     ],
+     "degrees"
+    ],
+    [
+     true,
+     "thickness2",
+     12.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      0.0
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "Ang"
+    ],
+    [
+     true,
+     "sld3",
+     1.7000000476837158,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1e-6/Ang^2"
+    ],
+    [
+     true,
+     "sld3_M0",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1e-6/Ang^2"
+    ],
+    [
+     true,
+     "sld3_mtheta",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      -90.0
+     ],
+     [
+      true,
+      90.0
+     ],
+     "degrees"
+    ],
+    [
+     true,
+     "sld3_mphi",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      -180.0
+     ],
+     [
+      true,
+      180.0
+     ],
+     "degrees"
+    ],
+    [
+     true,
+     "thickness3",
+     40.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      0.0
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "Ang"
+    ],
+    [
+     true,
+     "sld4",
+     1.7000000476837158,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1e-6/Ang^2"
+    ],
+    [
+     true,
+     "sld4_M0",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1e-6/Ang^2"
+    ],
+    [
+     true,
+     "sld4_mtheta",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      -90.0
+     ],
+     [
+      true,
+      90.0
+     ],
+     "degrees"
+    ],
+    [
+     true,
+     "sld4_mphi",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      -180.0
+     ],
+     [
+      true,
+      180.0
+     ],
+     "degrees"
+    ],
+    [
+     true,
+     "thickness4",
+     40.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      0.0
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "Ang"
+    ],
+    [
+     true,
+     "sld5",
+     1.7,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1e-6/Ang^2"
+    ],
+    [
+     true,
+     "sld5_M0",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1e-6/Ang^2"
+    ],
+    [
+     true,
+     "sld5_mtheta",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      -90.0
+     ],
+     [
+      true,
+      90.0
+     ],
+     "degrees"
+    ],
+    [
+     true,
+     "sld5_mphi",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      -180.0
+     ],
+     [
+      true,
+      180.0
+     ],
+     "degrees"
+    ],
+    [
+     true,
+     "thickness5",
+     40.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      0.0
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "Ang"
+    ],
+    [
+     true,
+     "sld6",
+     1.7,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1e-6/Ang^2"
+    ],
+    [
+     true,
+     "sld6_M0",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1e-6/Ang^2"
+    ],
+    [
+     true,
+     "sld6_mtheta",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      -90.0
+     ],
+     [
+      true,
+      90.0
+     ],
+     "degrees"
+    ],
+    [
+     true,
+     "sld6_mphi",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      -180.0
+     ],
+     [
+      true,
+      180.0
+     ],
+     "degrees"
+    ],
+    [
+     true,
+     "thickness6",
+     40.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      0.0
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "Ang"
+    ],
+    [
+     true,
+     "sld7",
+     1.7,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1e-6/Ang^2"
+    ],
+    [
+     true,
+     "sld7_M0",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1e-6/Ang^2"
+    ],
+    [
+     true,
+     "sld7_mtheta",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      -90.0
+     ],
+     [
+      true,
+      90.0
+     ],
+     "degrees"
+    ],
+    [
+     true,
+     "sld7_mphi",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      -180.0
+     ],
+     [
+      true,
+      180.0
+     ],
+     "degrees"
+    ],
+    [
+     true,
+     "thickness7",
+     40.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      0.0
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "Ang"
+    ],
+    [
+     true,
+     "sld8",
+     1.7,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1e-6/Ang^2"
+    ],
+    [
+     true,
+     "sld8_M0",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1e-6/Ang^2"
+    ],
+    [
+     true,
+     "sld8_mtheta",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      -90.0
+     ],
+     [
+      true,
+      90.0
+     ],
+     "degrees"
+    ],
+    [
+     true,
+     "sld8_mphi",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      -180.0
+     ],
+     [
+      true,
+      180.0
+     ],
+     "degrees"
+    ],
+    [
+     true,
+     "thickness8",
+     40.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      0.0
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "Ang"
+    ],
+    [
+     true,
+     "sld9",
+     1.7,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1e-6/Ang^2"
+    ],
+    [
+     true,
+     "sld9_M0",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1e-6/Ang^2"
+    ],
+    [
+     true,
+     "sld9_mtheta",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      -90.0
+     ],
+     [
+      true,
+      90.0
+     ],
+     "degrees"
+    ],
+    [
+     true,
+     "sld9_mphi",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      -180.0
+     ],
+     [
+      true,
+      180.0
+     ],
+     "degrees"
+    ],
+    [
+     true,
+     "thickness9",
+     40.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      0.0
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "Ang"
+    ],
+    [
+     true,
+     "sld10",
+     1.7,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1e-6/Ang^2"
+    ],
+    [
+     true,
+     "sld10_M0",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1e-6/Ang^2"
+    ],
+    [
+     true,
+     "sld10_mtheta",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      -90.0
+     ],
+     [
+      true,
+      90.0
+     ],
+     "degrees"
+    ],
+    [
+     true,
+     "sld10_mphi",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      -180.0
+     ],
+     [
+      true,
+      180.0
+     ],
+     "degrees"
+    ],
+    [
+     true,
+     "thickness10",
+     40.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      0.0
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "Ang"
+    ],
+    [
+     true,
+     "up_frac_i",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      0.0
+     ],
+     [
+      true,
+      1.0
+     ],
+     ""
+    ],
+    [
+     true,
+     "up_frac_f",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      0.0
+     ],
+     [
+      true,
+      1.0
+     ],
+     ""
+    ],
+    [
+     true,
+     "up_theta",
+     90.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      0.0
+     ],
+     [
+      true,
+      360.0
+     ],
+     "degrees"
+    ],
+    [
+     true,
+     "up_phi",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      0.0
+     ],
+     [
+      true,
+      180.0
+     ],
+     "degrees"
+    ]
+   ]
+  },
+  "symbols": {
+   "M1.scale": 1.0,
+   "M1.background": 0.0010000000474974513,
+   "M1.sld_core": 1.0,
+   "M1.radius": 200.0,
+   "M1.sld_solvent": 6.400000095367432,
+   "M1.sld1": 1.7000000476837158,
+   "M1.thickness1": 40.0,
+   "M1.sld2": 1.7000000476837158,
+   "M1.thickness2": 12.0,
+   "M1.sld3": 1.7000000476837158,
+   "M1.thickness3": 40.0
+  },
+  "report": "<html>\n<head>\n<meta http-equiv=Content-Type content='text/html; charset=utf-8'> \n</head>\n<body lang=EN-US>\n<div>\n<p><b><span><center> data1 [TIMESTAMP] </center></span></center></b></p><p>&nbsp;</p><p><center>File name: data1.txt</center></p>\n<p><center>SasView version: [MASKED]</center></p>\n<p><center>SasModels version: [MASKED]</center></p>\n<p><center>Fit optimizer used: Levenberg-Marquardt</center></p>\n<p><center>Model name: core_multi_shell</center></p>\n<p><center>Q Range of the Data: min = 0.005, max = 0.4</center></p>\n<p><center>Q Range of the Fit: min = 0.005, max = 0.4</center></p>\n<p><center>Chi2/Npts: NaN</center></p>\n<p><center>scale = 1 (fixed) </center></p>\n<p><center>background = 0.001 (fixed) cm<sup>-1</sup></center></p>\n<p><center>core_multi_shell =  (fixed) </center></p>\n<p><center>sld_core = 1 (fixed) 10<sup>-6</sup>/\u00c5<sup>2</sup></center></p>\n<p><center>radius = 200 (fixed) \u212b</center></p>\n<p><center>sld_solvent = 6.4 (fixed) 10<sup>-6</sup>/\u00c5<sup>2</sup></center></p>\n<p><center>n =  (fixed) </center></p>\n<p><center>sld1 = 1.7 (fixed) 10<sup>-6</sup>/\u00c5<sup>2</sup></center></p>\n<p><center>thickness1 = 40 (fixed) \u212b</center></p>\n<p><center>sld2 = 1.7 (fixed) 10<sup>-6</sup>/\u00c5<sup>2</sup></center></p>\n<p><center>thickness2 = 12 &#177; 0.0 \u212b</center></p>\n<p><center>sld3 = 1.7 (fixed) 10<sup>-6</sup>/\u00c5<sup>2</sup></center></p>\n<p><center>thickness3 = 40 (fixed) \u212b</center></p>\n",
+  "theory_inputs": {
+   "name": "M1",
+   "params": {
+    "n": 1,
+    "scale": 1.0,
+    "background": 0.001,
+    "sld_core": 1.0,
+    "sld_core_M0": 0.0,
+    "sld_core_mtheta": 0.0,
+    "sld_core_mphi": 0.0,
+    "radius": 200.0,
+    "sld_solvent": 6.4,
+    "sld_solvent_M0": 0.0,
+    "sld_solvent_mtheta": 0.0,
+    "sld_solvent_mphi": 0.0,
+    "sld1": 1.7000000476837158,
+    "sld1_M0": 0.0,
+    "sld1_mtheta": 0.0,
+    "sld1_mphi": 0.0,
+    "thickness1": 40.0,
+    "sld2": 1.7000000476837158,
+    "sld2_M0": 0.0,
+    "sld2_mtheta": 0.0,
+    "sld2_mphi": 0.0,
+    "thickness2": 12.0,
+    "sld3": 1.7000000476837158,
+    "sld3_M0": 0.0,
+    "sld3_mtheta": 0.0,
+    "sld3_mphi": 0.0,
+    "thickness3": 40.0,
+    "sld4": 1.7000000476837158,
+    "sld4_M0": 0.0,
+    "sld4_mtheta": 0.0,
+    "sld4_mphi": 0.0,
+    "thickness4": 40.0,
+    "sld5": 1.7,
+    "sld5_M0": 0.0,
+    "sld5_mtheta": 0.0,
+    "sld5_mphi": 0.0,
+    "thickness5": 40.0,
+    "sld6": 1.7,
+    "sld6_M0": 0.0,
+    "sld6_mtheta": 0.0,
+    "sld6_mphi": 0.0,
+    "thickness6": 40.0,
+    "sld7": 1.7,
+    "sld7_M0": 0.0,
+    "sld7_mtheta": 0.0,
+    "sld7_mphi": 0.0,
+    "thickness7": 40.0,
+    "sld8": 1.7,
+    "sld8_M0": 0.0,
+    "sld8_mtheta": 0.0,
+    "sld8_mphi": 0.0,
+    "thickness8": 40.0,
+    "sld9": 1.7,
+    "sld9_M0": 0.0,
+    "sld9_mtheta": 0.0,
+    "sld9_mphi": 0.0,
+    "thickness9": 40.0,
+    "sld10": 1.7,
+    "sld10_M0": 0.0,
+    "sld10_mtheta": 0.0,
+    "sld10_mphi": 0.0,
+    "thickness10": 40.0,
+    "up_frac_i": 0.0,
+    "up_frac_f": 0.0,
+    "up_theta": 0.0,
+    "up_phi": 0.0
+   },
+   "details": {
+    "n": [
+     "",
+     0.0,
+     10.0
+    ],
+    "scale": [
+     "",
+     0.0,
+     "inf"
+    ],
+    "background": [
+     "1/cm",
+     "-inf",
+     "inf"
+    ],
+    "sld_core": [
+     "1e-6/Ang^2",
+     "-inf",
+     "inf"
+    ],
+    "sld_core_M0": [
+     "1e-6/Ang^2",
+     "-inf",
+     "inf"
+    ],
+    "sld_core_mtheta": [
+     "degrees",
+     -90.0,
+     90.0
+    ],
+    "sld_core_mphi": [
+     "degrees",
+     -180.0,
+     180.0
+    ],
+    "radius": [
+     "Ang",
+     0.0,
+     "inf"
+    ],
+    "radius.width": [
+     "",
+     0.0,
+     1.0
+    ],
+    "sld_solvent": [
+     "1e-6/Ang^2",
+     "-inf",
+     "inf"
+    ],
+    "sld_solvent_M0": [
+     "1e-6/Ang^2",
+     "-inf",
+     "inf"
+    ],
+    "sld_solvent_mtheta": [
+     "degrees",
+     -90.0,
+     90.0
+    ],
+    "sld_solvent_mphi": [
+     "degrees",
+     -180.0,
+     180.0
+    ],
+    "sld1": [
+     "1e-6/Ang^2",
+     "-inf",
+     "inf"
+    ],
+    "sld1_M0": [
+     "1e-6/Ang^2",
+     "-inf",
+     "inf"
+    ],
+    "sld1_mtheta": [
+     "degrees",
+     -90.0,
+     90.0
+    ],
+    "sld1_mphi": [
+     "degrees",
+     -180.0,
+     180.0
+    ],
+    "thickness1": [
+     "Ang",
+     0.0,
+     "inf"
+    ],
+    "thickness1.width": [
+     "",
+     0.0,
+     1.0
+    ],
+    "sld2": [
+     "1e-6/Ang^2",
+     "-inf",
+     "inf"
+    ],
+    "sld2_M0": [
+     "1e-6/Ang^2",
+     "-inf",
+     "inf"
+    ],
+    "sld2_mtheta": [
+     "degrees",
+     -90.0,
+     90.0
+    ],
+    "sld2_mphi": [
+     "degrees",
+     -180.0,
+     180.0
+    ],
+    "thickness2": [
+     "Ang",
+     0.0,
+     "inf"
+    ],
+    "thickness2.width": [
+     "",
+     0.0,
+     1.0
+    ],
+    "sld3": [
+     "1e-6/Ang^2",
+     "-inf",
+     "inf"
+    ],
+    "sld3_M0": [
+     "1e-6/Ang^2",
+     "-inf",
+     "inf"
+    ],
+    "sld3_mtheta": [
+     "degrees",
+     -90.0,
+     90.0
+    ],
+    "sld3_mphi": [
+     "degrees",
+     -180.0,
+     180.0
+    ],
+    "thickness3": [
+     "Ang",
+     0.0,
+     "inf"
+    ],
+    "thickness3.width": [
+     "",
+     0.0,
+     1.0
+    ],
+    "sld4": [
+     "1e-6/Ang^2",
+     "-inf",
+     "inf"
+    ],
+    "sld4_M0": [
+     "1e-6/Ang^2",
+     "-inf",
+     "inf"
+    ],
+    "sld4_mtheta": [
+     "degrees",
+     -90.0,
+     90.0
+    ],
+    "sld4_mphi": [
+     "degrees",
+     -180.0,
+     180.0
+    ],
+    "thickness4": [
+     "Ang",
+     0.0,
+     "inf"
+    ],
+    "thickness4.width": [
+     "",
+     0.0,
+     1.0
+    ],
+    "sld5": [
+     "1e-6/Ang^2",
+     "-inf",
+     "inf"
+    ],
+    "sld5_M0": [
+     "1e-6/Ang^2",
+     "-inf",
+     "inf"
+    ],
+    "sld5_mtheta": [
+     "degrees",
+     -90.0,
+     90.0
+    ],
+    "sld5_mphi": [
+     "degrees",
+     -180.0,
+     180.0
+    ],
+    "thickness5": [
+     "Ang",
+     0.0,
+     "inf"
+    ],
+    "thickness5.width": [
+     "",
+     0.0,
+     1.0
+    ],
+    "sld6": [
+     "1e-6/Ang^2",
+     "-inf",
+     "inf"
+    ],
+    "sld6_M0": [
+     "1e-6/Ang^2",
+     "-inf",
+     "inf"
+    ],
+    "sld6_mtheta": [
+     "degrees",
+     -90.0,
+     90.0
+    ],
+    "sld6_mphi": [
+     "degrees",
+     -180.0,
+     180.0
+    ],
+    "thickness6": [
+     "Ang",
+     0.0,
+     "inf"
+    ],
+    "thickness6.width": [
+     "",
+     0.0,
+     1.0
+    ],
+    "sld7": [
+     "1e-6/Ang^2",
+     "-inf",
+     "inf"
+    ],
+    "sld7_M0": [
+     "1e-6/Ang^2",
+     "-inf",
+     "inf"
+    ],
+    "sld7_mtheta": [
+     "degrees",
+     -90.0,
+     90.0
+    ],
+    "sld7_mphi": [
+     "degrees",
+     -180.0,
+     180.0
+    ],
+    "thickness7": [
+     "Ang",
+     0.0,
+     "inf"
+    ],
+    "thickness7.width": [
+     "",
+     0.0,
+     1.0
+    ],
+    "sld8": [
+     "1e-6/Ang^2",
+     "-inf",
+     "inf"
+    ],
+    "sld8_M0": [
+     "1e-6/Ang^2",
+     "-inf",
+     "inf"
+    ],
+    "sld8_mtheta": [
+     "degrees",
+     -90.0,
+     90.0
+    ],
+    "sld8_mphi": [
+     "degrees",
+     -180.0,
+     180.0
+    ],
+    "thickness8": [
+     "Ang",
+     0.0,
+     "inf"
+    ],
+    "thickness8.width": [
+     "",
+     0.0,
+     1.0
+    ],
+    "sld9": [
+     "1e-6/Ang^2",
+     "-inf",
+     "inf"
+    ],
+    "sld9_M0": [
+     "1e-6/Ang^2",
+     "-inf",
+     "inf"
+    ],
+    "sld9_mtheta": [
+     "degrees",
+     -90.0,
+     90.0
+    ],
+    "sld9_mphi": [
+     "degrees",
+     -180.0,
+     180.0
+    ],
+    "thickness9": [
+     "Ang",
+     0.0,
+     "inf"
+    ],
+    "thickness9.width": [
+     "",
+     0.0,
+     1.0
+    ],
+    "sld10": [
+     "1e-6/Ang^2",
+     "-inf",
+     "inf"
+    ],
+    "sld10_M0": [
+     "1e-6/Ang^2",
+     "-inf",
+     "inf"
+    ],
+    "sld10_mtheta": [
+     "degrees",
+     -90.0,
+     90.0
+    ],
+    "sld10_mphi": [
+     "degrees",
+     -180.0,
+     180.0
+    ],
+    "thickness10": [
+     "Ang",
+     0.0,
+     "inf"
+    ],
+    "thickness10.width": [
+     "",
+     0.0,
+     1.0
+    ],
+    "up_frac_i": [
+     "",
+     0.0,
+     1.0
+    ],
+    "up_frac_f": [
+     "",
+     0.0,
+     1.0
+    ],
+    "up_theta": [
+     "degrees",
+     0.0,
+     360.0
+    ],
+    "up_phi": [
+     "degrees",
+     0.0,
+     180.0
+    ]
+   },
+   "dispersion": {
+    "radius": {
+     "width": 0,
+     "npts": 35,
+     "nsigmas": 3,
+     "type": "gaussian"
+    },
+    "thickness1": {
+     "width": 0,
+     "npts": 35,
+     "nsigmas": 3,
+     "type": "gaussian"
+    },
+    "thickness2": {
+     "width": 0,
+     "npts": 35,
+     "nsigmas": 3,
+     "type": "gaussian"
+    },
+    "thickness3": {
+     "width": 0,
+     "npts": 35,
+     "nsigmas": 3,
+     "type": "gaussian"
+    },
+    "thickness4": {
+     "width": 0,
+     "npts": 35,
+     "nsigmas": 3,
+     "type": "gaussian"
+    },
+    "thickness5": {
+     "width": 0,
+     "npts": 35,
+     "nsigmas": 3,
+     "type": "gaussian"
+    },
+    "thickness6": {
+     "width": 0,
+     "npts": 35,
+     "nsigmas": 3,
+     "type": "gaussian"
+    },
+    "thickness7": {
+     "width": 0,
+     "npts": 35,
+     "nsigmas": 3,
+     "type": "gaussian"
+    },
+    "thickness8": {
+     "width": 0,
+     "npts": 35,
+     "nsigmas": 3,
+     "type": "gaussian"
+    },
+    "thickness9": {
+     "width": 0,
+     "npts": 35,
+     "nsigmas": 3,
+     "type": "gaussian"
+    },
+    "thickness10": {
+     "width": 0,
+     "npts": 35,
+     "nsigmas": 3,
+     "type": "gaussian"
+    }
+   },
+   "smearer": "NoneType"
+  },
+  "fit_inputs": [
+   {
+    "model": {
+     "name": "M1",
+     "params": {
+      "n": 1,
+      "scale": 1.0,
+      "background": 0.001,
+      "sld_core": 1.0,
+      "sld_core_M0": 0.0,
+      "sld_core_mtheta": 0.0,
+      "sld_core_mphi": 0.0,
+      "radius": 200.0,
+      "sld_solvent": 6.4,
+      "sld_solvent_M0": 0.0,
+      "sld_solvent_mtheta": 0.0,
+      "sld_solvent_mphi": 0.0,
+      "sld1": 1.7000000476837158,
+      "sld1_M0": 0.0,
+      "sld1_mtheta": 0.0,
+      "sld1_mphi": 0.0,
+      "thickness1": 40.0,
+      "sld2": 1.7000000476837158,
+      "sld2_M0": 0.0,
+      "sld2_mtheta": 0.0,
+      "sld2_mphi": 0.0,
+      "thickness2": 12.0,
+      "sld3": 1.7000000476837158,
+      "sld3_M0": 0.0,
+      "sld3_mtheta": 0.0,
+      "sld3_mphi": 0.0,
+      "thickness3": 40.0,
+      "sld4": 1.7000000476837158,
+      "sld4_M0": 0.0,
+      "sld4_mtheta": 0.0,
+      "sld4_mphi": 0.0,
+      "thickness4": 40.0,
+      "sld5": 1.7,
+      "sld5_M0": 0.0,
+      "sld5_mtheta": 0.0,
+      "sld5_mphi": 0.0,
+      "thickness5": 40.0,
+      "sld6": 1.7,
+      "sld6_M0": 0.0,
+      "sld6_mtheta": 0.0,
+      "sld6_mphi": 0.0,
+      "thickness6": 40.0,
+      "sld7": 1.7,
+      "sld7_M0": 0.0,
+      "sld7_mtheta": 0.0,
+      "sld7_mphi": 0.0,
+      "thickness7": 40.0,
+      "sld8": 1.7,
+      "sld8_M0": 0.0,
+      "sld8_mtheta": 0.0,
+      "sld8_mphi": 0.0,
+      "thickness8": 40.0,
+      "sld9": 1.7,
+      "sld9_M0": 0.0,
+      "sld9_mtheta": 0.0,
+      "sld9_mphi": 0.0,
+      "thickness9": 40.0,
+      "sld10": 1.7,
+      "sld10_M0": 0.0,
+      "sld10_mtheta": 0.0,
+      "sld10_mphi": 0.0,
+      "thickness10": 40.0,
+      "up_frac_i": 0.0,
+      "up_frac_f": 0.0,
+      "up_theta": 0.0,
+      "up_phi": 0.0
+     },
+     "details": {
+      "n": [
+       "",
+       0.0,
+       10.0
+      ],
+      "scale": [
+       "",
+       0.0,
+       "inf"
+      ],
+      "background": [
+       "1/cm",
+       "-inf",
+       "inf"
+      ],
+      "sld_core": [
+       "1e-6/Ang^2",
+       "-inf",
+       "inf"
+      ],
+      "sld_core_M0": [
+       "1e-6/Ang^2",
+       "-inf",
+       "inf"
+      ],
+      "sld_core_mtheta": [
+       "degrees",
+       -90.0,
+       90.0
+      ],
+      "sld_core_mphi": [
+       "degrees",
+       -180.0,
+       180.0
+      ],
+      "radius": [
+       "Ang",
+       0.0,
+       "inf"
+      ],
+      "radius.width": [
+       "",
+       0.0,
+       1.0
+      ],
+      "sld_solvent": [
+       "1e-6/Ang^2",
+       "-inf",
+       "inf"
+      ],
+      "sld_solvent_M0": [
+       "1e-6/Ang^2",
+       "-inf",
+       "inf"
+      ],
+      "sld_solvent_mtheta": [
+       "degrees",
+       -90.0,
+       90.0
+      ],
+      "sld_solvent_mphi": [
+       "degrees",
+       -180.0,
+       180.0
+      ],
+      "sld1": [
+       "1e-6/Ang^2",
+       "-inf",
+       "inf"
+      ],
+      "sld1_M0": [
+       "1e-6/Ang^2",
+       "-inf",
+       "inf"
+      ],
+      "sld1_mtheta": [
+       "degrees",
+       -90.0,
+       90.0
+      ],
+      "sld1_mphi": [
+       "degrees",
+       -180.0,
+       180.0
+      ],
+      "thickness1": [
+       "Ang",
+       0.0,
+       "inf"
+      ],
+      "thickness1.width": [
+       "",
+       0.0,
+       1.0
+      ],
+      "sld2": [
+       "1e-6/Ang^2",
+       "-inf",
+       "inf"
+      ],
+      "sld2_M0": [
+       "1e-6/Ang^2",
+       "-inf",
+       "inf"
+      ],
+      "sld2_mtheta": [
+       "degrees",
+       -90.0,
+       90.0
+      ],
+      "sld2_mphi": [
+       "degrees",
+       -180.0,
+       180.0
+      ],
+      "thickness2": [
+       "Ang",
+       0.0,
+       "inf"
+      ],
+      "thickness2.width": [
+       "",
+       0.0,
+       1.0
+      ],
+      "sld3": [
+       "1e-6/Ang^2",
+       "-inf",
+       "inf"
+      ],
+      "sld3_M0": [
+       "1e-6/Ang^2",
+       "-inf",
+       "inf"
+      ],
+      "sld3_mtheta": [
+       "degrees",
+       -90.0,
+       90.0
+      ],
+      "sld3_mphi": [
+       "degrees",
+       -180.0,
+       180.0
+      ],
+      "thickness3": [
+       "Ang",
+       0.0,
+       "inf"
+      ],
+      "thickness3.width": [
+       "",
+       0.0,
+       1.0
+      ],
+      "sld4": [
+       "1e-6/Ang^2",
+       "-inf",
+       "inf"
+      ],
+      "sld4_M0": [
+       "1e-6/Ang^2",
+       "-inf",
+       "inf"
+      ],
+      "sld4_mtheta": [
+       "degrees",
+       -90.0,
+       90.0
+      ],
+      "sld4_mphi": [
+       "degrees",
+       -180.0,
+       180.0
+      ],
+      "thickness4": [
+       "Ang",
+       0.0,
+       "inf"
+      ],
+      "thickness4.width": [
+       "",
+       0.0,
+       1.0
+      ],
+      "sld5": [
+       "1e-6/Ang^2",
+       "-inf",
+       "inf"
+      ],
+      "sld5_M0": [
+       "1e-6/Ang^2",
+       "-inf",
+       "inf"
+      ],
+      "sld5_mtheta": [
+       "degrees",
+       -90.0,
+       90.0
+      ],
+      "sld5_mphi": [
+       "degrees",
+       -180.0,
+       180.0
+      ],
+      "thickness5": [
+       "Ang",
+       0.0,
+       "inf"
+      ],
+      "thickness5.width": [
+       "",
+       0.0,
+       1.0
+      ],
+      "sld6": [
+       "1e-6/Ang^2",
+       "-inf",
+       "inf"
+      ],
+      "sld6_M0": [
+       "1e-6/Ang^2",
+       "-inf",
+       "inf"
+      ],
+      "sld6_mtheta": [
+       "degrees",
+       -90.0,
+       90.0
+      ],
+      "sld6_mphi": [
+       "degrees",
+       -180.0,
+       180.0
+      ],
+      "thickness6": [
+       "Ang",
+       0.0,
+       "inf"
+      ],
+      "thickness6.width": [
+       "",
+       0.0,
+       1.0
+      ],
+      "sld7": [
+       "1e-6/Ang^2",
+       "-inf",
+       "inf"
+      ],
+      "sld7_M0": [
+       "1e-6/Ang^2",
+       "-inf",
+       "inf"
+      ],
+      "sld7_mtheta": [
+       "degrees",
+       -90.0,
+       90.0
+      ],
+      "sld7_mphi": [
+       "degrees",
+       -180.0,
+       180.0
+      ],
+      "thickness7": [
+       "Ang",
+       0.0,
+       "inf"
+      ],
+      "thickness7.width": [
+       "",
+       0.0,
+       1.0
+      ],
+      "sld8": [
+       "1e-6/Ang^2",
+       "-inf",
+       "inf"
+      ],
+      "sld8_M0": [
+       "1e-6/Ang^2",
+       "-inf",
+       "inf"
+      ],
+      "sld8_mtheta": [
+       "degrees",
+       -90.0,
+       90.0
+      ],
+      "sld8_mphi": [
+       "degrees",
+       -180.0,
+       180.0
+      ],
+      "thickness8": [
+       "Ang",
+       0.0,
+       "inf"
+      ],
+      "thickness8.width": [
+       "",
+       0.0,
+       1.0
+      ],
+      "sld9": [
+       "1e-6/Ang^2",
+       "-inf",
+       "inf"
+      ],
+      "sld9_M0": [
+       "1e-6/Ang^2",
+       "-inf",
+       "inf"
+      ],
+      "sld9_mtheta": [
+       "degrees",
+       -90.0,
+       90.0
+      ],
+      "sld9_mphi": [
+       "degrees",
+       -180.0,
+       180.0
+      ],
+      "thickness9": [
+       "Ang",
+       0.0,
+       "inf"
+      ],
+      "thickness9.width": [
+       "",
+       0.0,
+       1.0
+      ],
+      "sld10": [
+       "1e-6/Ang^2",
+       "-inf",
+       "inf"
+      ],
+      "sld10_M0": [
+       "1e-6/Ang^2",
+       "-inf",
+       "inf"
+      ],
+      "sld10_mtheta": [
+       "degrees",
+       -90.0,
+       90.0
+      ],
+      "sld10_mphi": [
+       "degrees",
+       -180.0,
+       180.0
+      ],
+      "thickness10": [
+       "Ang",
+       0.0,
+       "inf"
+      ],
+      "thickness10.width": [
+       "",
+       0.0,
+       1.0
+      ],
+      "up_frac_i": [
+       "",
+       0.0,
+       1.0
+      ],
+      "up_frac_f": [
+       "",
+       0.0,
+       1.0
+      ],
+      "up_theta": [
+       "degrees",
+       0.0,
+       360.0
+      ],
+      "up_phi": [
+       "degrees",
+       0.0,
+       180.0
+      ]
+     },
+     "dispersion": {
+      "radius": {
+       "width": 0,
+       "npts": 35,
+       "nsigmas": 3,
+       "type": "gaussian"
+      },
+      "thickness1": {
+       "width": 0,
+       "npts": 35,
+       "nsigmas": 3,
+       "type": "gaussian"
+      },
+      "thickness2": {
+       "width": 0,
+       "npts": 35,
+       "nsigmas": 3,
+       "type": "gaussian"
+      },
+      "thickness3": {
+       "width": 0,
+       "npts": 35,
+       "nsigmas": 3,
+       "type": "gaussian"
+      },
+      "thickness4": {
+       "width": 0,
+       "npts": 35,
+       "nsigmas": 3,
+       "type": "gaussian"
+      },
+      "thickness5": {
+       "width": 0,
+       "npts": 35,
+       "nsigmas": 3,
+       "type": "gaussian"
+      },
+      "thickness6": {
+       "width": 0,
+       "npts": 35,
+       "nsigmas": 3,
+       "type": "gaussian"
+      },
+      "thickness7": {
+       "width": 0,
+       "npts": 35,
+       "nsigmas": 3,
+       "type": "gaussian"
+      },
+      "thickness8": {
+       "width": 0,
+       "npts": 35,
+       "nsigmas": 3,
+       "type": "gaussian"
+      },
+      "thickness9": {
+       "width": 0,
+       "npts": 35,
+       "nsigmas": 3,
+       "type": "gaussian"
+      },
+      "thickness10": {
+       "width": 0,
+       "npts": 35,
+       "nsigmas": 3,
+       "type": "gaussian"
+      }
+     }
+    },
+    "fit_id": 0,
+    "params_to_fit": [
+     "thickness2"
+    ],
+    "constraints": [],
+    "data": "d1",
+    "smearer": "NoneType",
+    "qmin": 0.005,
+    "qmax": 0.4
+   }
+  ]
+ }
+]

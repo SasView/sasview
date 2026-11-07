@@ -12,6 +12,7 @@ from sasmodels.weights import MODELS as POLYDISPERSITY_MODELS
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
+from sas.qtgui.Perspectives.Fitting.FittingConstants import DEFAULT_POLYDISP_FUNCTION
 
 # Local UI
 from sas.qtgui.Perspectives.Fitting.UI.PolydispersityWidget import Ui_PolydispersityWidgetUI
@@ -21,7 +22,6 @@ from sas.qtgui.Perspectives.Fitting.UndoRedo import (
 )
 from sas.qtgui.Perspectives.Fitting.ViewDelegate import PolyViewDelegate
 
-DEFAULT_POLYDISP_FUNCTION = 'gaussian'
 logger = logging.getLogger(__name__)
 
 class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):

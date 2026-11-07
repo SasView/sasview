@@ -1,0 +1,1093 @@
+[
+ {
+  "rows": [
+   [
+    "model_name",
+    "sphere"
+   ],
+   [
+    "scale",
+    "False",
+    "1",
+    null,
+    "0.0",
+    "inf",
+    []
+   ],
+   [
+    "background",
+    "False",
+    "0.001",
+    null,
+    "-inf",
+    "inf",
+    []
+   ],
+   [
+    "structure_factor_mode",
+    null,
+    "0",
+    null,
+    "",
+    "",
+    []
+   ],
+   [
+    "radius_effective_mode",
+    null,
+    "0",
+    null,
+    "",
+    "",
+    []
+   ],
+   [
+    "sphere",
+    null,
+    "",
+    null,
+    "",
+    "",
+    []
+   ],
+   [
+    "sld",
+    "False",
+    "1",
+    null,
+    "-inf",
+    "inf",
+    []
+   ],
+   [
+    "sld_solvent",
+    "False",
+    "6",
+    null,
+    "-inf",
+    "inf",
+    []
+   ],
+   [
+    "radius",
+    "False",
+    "50",
+    null,
+    "0.0",
+    "inf",
+    []
+   ],
+   [
+    "hardsphere",
+    null,
+    "",
+    null,
+    "",
+    "",
+    []
+   ],
+   [
+    "radius_effective",
+    "False",
+    "45.0",
+    null,
+    "0.0",
+    "inf",
+    []
+   ],
+   [
+    "volfraction",
+    "False",
+    "0.2",
+    null,
+    "0.0",
+    "0.74",
+    []
+   ],
+   [
+    "is_data",
+    "True"
+   ],
+   [
+    "tab_index",
+    "1"
+   ],
+   [
+    "is_batch_fitting",
+    "False"
+   ],
+   [
+    "data_name",
+    [
+     "data1"
+    ]
+   ],
+   [
+    "data_id",
+    [
+     "d1"
+    ]
+   ],
+   [
+    "tab_name",
+    "M1"
+   ],
+   [
+    "q_range_min",
+    "0.005"
+   ],
+   [
+    "q_range_max",
+    "0.4"
+   ],
+   [
+    "q_weighting",
+    "1"
+   ],
+   [
+    "weighting",
+    "1"
+   ],
+   [
+    "smearing",
+    "0"
+   ],
+   [
+    "smearing_min",
+    "None"
+   ],
+   [
+    "smearing_max",
+    "None"
+   ],
+   [
+    "polydisperse_params",
+    "False"
+   ],
+   [
+    "magnetic_params",
+    "False"
+   ],
+   [
+    "chainfit_params",
+    "False"
+   ],
+   [
+    "2D_params",
+    "False"
+   ],
+   [
+    "fitpage_category",
+    "Sphere"
+   ],
+   [
+    "fitpage_model",
+    "sphere"
+   ],
+   [
+    "fitpage_structure",
+    "hardsphere"
+   ]
+  ],
+  "clipboard": "sasview_parameter_values:model_name,sphere:scale,False,1,None,0.0,inf,():background,False,0.001,None,-inf,inf,():structure_factor_mode,None,0,None,,,():radius_effective_mode,None,0,None,,,():sphere,None,,None,,,():sld,False,1,None,-inf,inf,():sld_solvent,False,6,None,-inf,inf,():radius,False,50,None,0.0,inf,():hardsphere,None,,None,,,():radius_effective,False,45.0,None,0.0,inf,():volfraction,False,0.2,None,0.0,0.74,():is_data,True:tab_index,1:is_batch_fitting,False:data_name,['data1']:data_id,['d1']:tab_name,M1:q_range_min,0.005:q_range_max,0.4:q_weighting,1:weighting,1:smearing,0:smearing_min,None:smearing_max,None:polydisperse_params,False:magnetic_params,False:chainfit_params,False:2D_params,False:fitpage_category,Sphere:fitpage_model,sphere:fitpage_structure,hardsphere",
+  "excel": "scale\tbackground\tstructure_factor_mode\tradius_effective_mode\tsphere\tsld\tsld_solvent\tradius\thardsphere\tradius_effective\tvolfraction\t\r\n1\t0.001\t0\t0\t\t1\t6\t50\t\t45.0\t0.2\t\r\nFalse\tFalse\tNone\tNone\tNone\tFalse\tFalse\tFalse\tNone\tFalse\tFalse\t",
+  "latex": "\\begin{table}\\begin{tabular}[h]{|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|}\\hline\r\nscale & background & structure\\_factor\\_mode & radius\\_effective\\_mode & sphere & sld & sld\\_solvent & radius & hardsphere & radius\\_effective & volfraction\\\\ \\hline\r\n 1 &  0.001 &  0 &  0 &   &  1 &  6 &  50 &   &  45.0 &  0.2\\\\ \\hline\r\n\\end{tabular}\\end{table}",
+  "serialized": {
+   "d1": {
+    "fit_params": [
+     {
+      "model_name": [
+       "sphere"
+      ],
+      "scale": [
+       "False",
+       "1",
+       null,
+       "0.0",
+       "inf",
+       []
+      ],
+      "background": [
+       "False",
+       "0.001",
+       null,
+       "-inf",
+       "inf",
+       []
+      ],
+      "structure_factor_mode": [
+       null,
+       "0",
+       null,
+       "",
+       "",
+       []
+      ],
+      "radius_effective_mode": [
+       null,
+       "0",
+       null,
+       "",
+       "",
+       []
+      ],
+      "sphere": [
+       null,
+       "",
+       null,
+       "",
+       "",
+       []
+      ],
+      "sld": [
+       "False",
+       "1",
+       null,
+       "-inf",
+       "inf",
+       []
+      ],
+      "sld_solvent": [
+       "False",
+       "6",
+       null,
+       "-inf",
+       "inf",
+       []
+      ],
+      "radius": [
+       "False",
+       "50",
+       null,
+       "0.0",
+       "inf",
+       []
+      ],
+      "hardsphere": [
+       null,
+       "",
+       null,
+       "",
+       "",
+       []
+      ],
+      "radius_effective": [
+       "False",
+       "45.0",
+       null,
+       "0.0",
+       "inf",
+       []
+      ],
+      "volfraction": [
+       "False",
+       "0.2",
+       null,
+       "0.0",
+       "0.74",
+       []
+      ],
+      "is_data": [
+       "True"
+      ],
+      "tab_index": [
+       "1"
+      ],
+      "is_batch_fitting": [
+       "False"
+      ],
+      "data_name": [
+       [
+        "data1"
+       ]
+      ],
+      "data_id": [
+       [
+        "d1"
+       ]
+      ],
+      "tab_name": [
+       "M1"
+      ],
+      "q_range_min": [
+       "0.005"
+      ],
+      "q_range_max": [
+       "0.4"
+      ],
+      "q_weighting": [
+       "1"
+      ],
+      "weighting": [
+       "1"
+      ],
+      "smearing": [
+       "0"
+      ],
+      "smearing_min": [
+       "None"
+      ],
+      "smearing_max": [
+       "None"
+      ],
+      "polydisperse_params": [
+       "False"
+      ],
+      "magnetic_params": [
+       "False"
+      ],
+      "chainfit_params": [
+       "False"
+      ],
+      "2D_params": [
+       "False"
+      ],
+      "fitpage_category": [
+       "Sphere"
+      ],
+      "fitpage_model": [
+       "sphere"
+      ],
+      "fitpage_structure": [
+       "hardsphere"
+      ]
+     }
+    ]
+   }
+  },
+  "fit_state": {
+   "categorycombobox": "Sphere",
+   "formfactorcombobox": "sphere",
+   "structurecombobox": "hardsphere",
+   "tcChi": null,
+   "enable2D": false,
+   "data": [
+    "Data1D",
+    "d1"
+   ],
+   "qmin": 0.005,
+   "qmax": 0.4,
+   "npts": 40,
+   "parameters": [
+    [
+     false,
+     "scale",
+     "1",
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "0.0"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     ""
+    ],
+    [
+     false,
+     "background",
+     "0.001",
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1/cm"
+    ],
+    [
+     false,
+     "structure_factor_mode",
+     "0",
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      ""
+     ],
+     [
+      true,
+      ""
+     ],
+     ""
+    ],
+    [
+     false,
+     "radius_effective_mode",
+     "0",
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      ""
+     ],
+     [
+      true,
+      ""
+     ],
+     ""
+    ],
+    [
+     false,
+     "sphere",
+     "",
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      ""
+     ],
+     [
+      true,
+      ""
+     ],
+     ""
+    ],
+    [
+     false,
+     "sld",
+     "1",
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1e-6/Ang^2"
+    ],
+    [
+     false,
+     "sld_solvent",
+     "6",
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1e-6/Ang^2"
+    ],
+    [
+     false,
+     "radius",
+     "50",
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "0.0"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "Ang"
+    ],
+    [
+     false,
+     "hardsphere",
+     "",
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      ""
+     ],
+     [
+      true,
+      ""
+     ],
+     ""
+    ],
+    [
+     false,
+     "radius_effective",
+     "45.0",
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "0.0"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "Ang"
+    ],
+    [
+     false,
+     "volfraction",
+     "0.2",
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "0.0"
+     ],
+     [
+      true,
+      "0.74"
+     ],
+     ""
+    ]
+   ],
+   "orientation_params_disp": [
+    [
+     true,
+     "scale",
+     1.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      0.0
+     ],
+     [
+      true,
+      "inf"
+     ],
+     ""
+    ],
+    [
+     true,
+     "background",
+     0.001,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1/cm"
+    ],
+    [
+     true,
+     "sld",
+     1,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1e-6/Ang^2"
+    ],
+    [
+     true,
+     "sld_M0",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1e-6/Ang^2"
+    ],
+    [
+     true,
+     "sld_mtheta",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      -90.0
+     ],
+     [
+      true,
+      90.0
+     ],
+     "degrees"
+    ],
+    [
+     true,
+     "sld_mphi",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      -180.0
+     ],
+     [
+      true,
+      180.0
+     ],
+     "degrees"
+    ],
+    [
+     true,
+     "sld_solvent",
+     6,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1e-6/Ang^2"
+    ],
+    [
+     true,
+     "sld_solvent_M0",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1e-6/Ang^2"
+    ],
+    [
+     true,
+     "sld_solvent_mtheta",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      -90.0
+     ],
+     [
+      true,
+      90.0
+     ],
+     "degrees"
+    ],
+    [
+     true,
+     "sld_solvent_mphi",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      -180.0
+     ],
+     [
+      true,
+      180.0
+     ],
+     "degrees"
+    ],
+    [
+     true,
+     "radius",
+     50,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      0.0
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "Ang"
+    ],
+    [
+     true,
+     "radius_effective",
+     45.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      0.0
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "Ang"
+    ],
+    [
+     true,
+     "volfraction",
+     0.2,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      0.0
+     ],
+     [
+      true,
+      0.74
+     ],
+     ""
+    ],
+    [
+     true,
+     "structure_factor_mode",
+     0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      0.0
+     ],
+     [
+      true,
+      1.0
+     ],
+     ""
+    ],
+    [
+     true,
+     "radius_effective_mode",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      0.0
+     ],
+     [
+      true,
+      1.0
+     ],
+     ""
+    ],
+    [
+     true,
+     "up_frac_i",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      0.0
+     ],
+     [
+      true,
+      1.0
+     ],
+     ""
+    ],
+    [
+     true,
+     "up_frac_f",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      0.0
+     ],
+     [
+      true,
+      1.0
+     ],
+     ""
+    ],
+    [
+     true,
+     "up_theta",
+     90.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      0.0
+     ],
+     [
+      true,
+      360.0
+     ],
+     "degrees"
+    ],
+    [
+     true,
+     "up_phi",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      0.0
+     ],
+     [
+      true,
+      180.0
+     ],
+     "degrees"
+    ]
+   ]
+  },
+  "symbols": {
+   "M1.scale": 1.0,
+   "M1.background": 0.0010000000474974513,
+   "M1.sld": 1.0,
+   "M1.sld_solvent": 6.0,
+   "M1.radius": 50.0,
+   "M1.radius_effective": 45.0,
+   "M1.volfraction": 0.20000000298023224
+  },
+  "report": "<html>\n<head>\n<meta http-equiv=Content-Type content='text/html; charset=utf-8'> \n</head>\n<body lang=EN-US>\n<div>\n<p><b><span><center> data1 [TIMESTAMP] </center></span></center></b></p><p>&nbsp;</p><p><center>File name: data1.txt</center></p>\n<p><center>SasView version: [MASKED]</center></p>\n<p><center>SasModels version: [MASKED]</center></p>\n<p><center>Fit optimizer used: Levenberg-Marquardt</center></p>\n<p><center>Model name: sphere@hardsphere</center></p>\n<p><center>Q Range of the Data: min = 0.005, max = 0.4</center></p>\n<p><center>Q Range of the Fit: min = 0.005, max = 0.4</center></p>\n<p><center>Chi2/Npts: NaN</center></p>\n<p><center>scale = 1 (fixed) </center></p>\n<p><center>background = 0.001 (fixed) cm<sup>-1</sup></center></p>\n<p><center>structure_factor_mode = 0 (fixed) </center></p>\n<p><center>radius_effective_mode = 0 (fixed) </center></p>\n<p><center>sphere =  (fixed) </center></p>\n<p><center>sld = 1 (fixed) 10<sup>-6</sup>/\u00c5<sup>2</sup></center></p>\n<p><center>sld_solvent = 6 (fixed) 10<sup>-6</sup>/\u00c5<sup>2</sup></center></p>\n<p><center>radius = 50 (fixed) \u212b</center></p>\n<p><center>hardsphere =  (fixed) </center></p>\n<p><center>radius_effective = 45.0 (fixed) \u212b</center></p>\n<p><center>volfraction = 0.2 (fixed) </center></p>\n",
+  "theory_inputs": {
+   "name": "M1",
+   "params": {
+    "scale": 1.0,
+    "background": 0.001,
+    "sld": 1,
+    "sld_M0": 0.0,
+    "sld_mtheta": 0.0,
+    "sld_mphi": 0.0,
+    "sld_solvent": 6,
+    "sld_solvent_M0": 0.0,
+    "sld_solvent_mtheta": 0.0,
+    "sld_solvent_mphi": 0.0,
+    "radius": 50,
+    "radius_effective": 45.0,
+    "volfraction": 0.2,
+    "structure_factor_mode": 0,
+    "radius_effective_mode": 0.0,
+    "up_frac_i": 0.0,
+    "up_frac_f": 0.0,
+    "up_theta": 0.0,
+    "up_phi": 0.0
+   },
+   "details": {
+    "scale": [
+     "",
+     0.0,
+     "inf"
+    ],
+    "background": [
+     "1/cm",
+     "-inf",
+     "inf"
+    ],
+    "sld": [
+     "1e-6/Ang^2",
+     "-inf",
+     "inf"
+    ],
+    "sld_M0": [
+     "1e-6/Ang^2",
+     "-inf",
+     "inf"
+    ],
+    "sld_mtheta": [
+     "degrees",
+     -90.0,
+     90.0
+    ],
+    "sld_mphi": [
+     "degrees",
+     -180.0,
+     180.0
+    ],
+    "sld_solvent": [
+     "1e-6/Ang^2",
+     "-inf",
+     "inf"
+    ],
+    "sld_solvent_M0": [
+     "1e-6/Ang^2",
+     "-inf",
+     "inf"
+    ],
+    "sld_solvent_mtheta": [
+     "degrees",
+     -90.0,
+     90.0
+    ],
+    "sld_solvent_mphi": [
+     "degrees",
+     -180.0,
+     180.0
+    ],
+    "radius": [
+     "Ang",
+     0.0,
+     "inf"
+    ],
+    "radius.width": [
+     "",
+     0.0,
+     1.0
+    ],
+    "radius_effective": [
+     "Ang",
+     0.0,
+     "inf"
+    ],
+    "volfraction": [
+     "",
+     0.0,
+     0.74
+    ],
+    "structure_factor_mode": [
+     "",
+     0.0,
+     1.0
+    ],
+    "radius_effective_mode": [
+     "",
+     0.0,
+     1.0
+    ],
+    "up_frac_i": [
+     "",
+     0.0,
+     1.0
+    ],
+    "up_frac_f": [
+     "",
+     0.0,
+     1.0
+    ],
+    "up_theta": [
+     "degrees",
+     0.0,
+     360.0
+    ],
+    "up_phi": [
+     "degrees",
+     0.0,
+     180.0
+    ]
+   },
+   "dispersion": {
+    "radius": {
+     "width": 0,
+     "npts": 35,
+     "nsigmas": 3,
+     "type": "gaussian"
+    }
+   },
+   "smearer": "NoneType"
+  },
+  "fit_inputs": null
+ }
+]

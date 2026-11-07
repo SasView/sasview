@@ -1,0 +1,932 @@
+[
+ {
+  "rows": [
+   [
+    "model_name",
+    "sphere"
+   ],
+   [
+    "scale",
+    "False",
+    "1",
+    null,
+    "0.0",
+    "inf",
+    []
+   ],
+   [
+    "background",
+    null,
+    "0",
+    null,
+    "-inf",
+    "inf",
+    []
+   ],
+   [
+    "sphere",
+    null,
+    "",
+    null,
+    "",
+    "",
+    []
+   ],
+   [
+    "sld",
+    "False",
+    "1",
+    null,
+    "-inf",
+    "inf",
+    []
+   ],
+   [
+    "sld_solvent",
+    "False",
+    "6",
+    null,
+    "-inf",
+    "inf",
+    []
+   ],
+   [
+    "radius",
+    "True",
+    "50",
+    null,
+    "0.0",
+    "inf",
+    []
+   ],
+   [
+    "is_data",
+    "True"
+   ],
+   [
+    "tab_index",
+    "1"
+   ],
+   [
+    "is_batch_fitting",
+    "False"
+   ],
+   [
+    "data_name",
+    [
+     "sesans"
+    ]
+   ],
+   [
+    "data_id",
+    [
+     "ds"
+    ]
+   ],
+   [
+    "tab_name",
+    "M1"
+   ],
+   [
+    "q_range_min",
+    "100.0"
+   ],
+   [
+    "q_range_max",
+    "10000.0"
+   ],
+   [
+    "q_weighting",
+    "1"
+   ],
+   [
+    "weighting",
+    "1"
+   ],
+   [
+    "smearing",
+    "1"
+   ],
+   [
+    "smearing_min",
+    "0.0"
+   ],
+   [
+    "smearing_max",
+    "0.0"
+   ],
+   [
+    "polydisperse_params",
+    "False"
+   ],
+   [
+    "magnetic_params",
+    "False"
+   ],
+   [
+    "chainfit_params",
+    "False"
+   ],
+   [
+    "2D_params",
+    "False"
+   ],
+   [
+    "fitpage_category",
+    "Sphere"
+   ],
+   [
+    "fitpage_model",
+    "sphere"
+   ],
+   [
+    "fitpage_structure",
+    "None"
+   ]
+  ],
+  "clipboard": "sasview_parameter_values:model_name,sphere:scale,False,1,None,0.0,inf,():background,None,0,None,-inf,inf,():sphere,None,,None,,,():sld,False,1,None,-inf,inf,():sld_solvent,False,6,None,-inf,inf,():radius,True,50,None,0.0,inf,():is_data,True:tab_index,1:is_batch_fitting,False:data_name,['sesans']:data_id,['ds']:tab_name,M1:q_range_min,100.0:q_range_max,10000.0:q_weighting,1:weighting,1:smearing,1:smearing_min,0.0:smearing_max,0.0:polydisperse_params,False:magnetic_params,False:chainfit_params,False:2D_params,False:fitpage_category,Sphere:fitpage_model,sphere:fitpage_structure,None",
+  "excel": "scale\tbackground\tsphere\tsld\tsld_solvent\tradius\t\r\n1\t0\t\t1\t6\t50\t\r\nFalse\tNone\tNone\tFalse\tFalse\tTrue\t",
+  "latex": "\\begin{table}\\begin{tabular}[h]{|l|l|l|l|l|l|l|l|l|l|l|l|}\\hline\r\nscale & background & sphere & sld & sld\\_solvent & radius\\\\ \\hline\r\n 1 &  0 &   &  1 &  6 &  50\\\\ \\hline\r\n\\end{tabular}\\end{table}",
+  "serialized": {
+   "ds": {
+    "fit_params": [
+     {
+      "model_name": [
+       "sphere"
+      ],
+      "scale": [
+       "False",
+       "1",
+       null,
+       "0.0",
+       "inf",
+       []
+      ],
+      "background": [
+       null,
+       "0",
+       null,
+       "-inf",
+       "inf",
+       []
+      ],
+      "sphere": [
+       null,
+       "",
+       null,
+       "",
+       "",
+       []
+      ],
+      "sld": [
+       "False",
+       "1",
+       null,
+       "-inf",
+       "inf",
+       []
+      ],
+      "sld_solvent": [
+       "False",
+       "6",
+       null,
+       "-inf",
+       "inf",
+       []
+      ],
+      "radius": [
+       "True",
+       "50",
+       null,
+       "0.0",
+       "inf",
+       []
+      ],
+      "is_data": [
+       "True"
+      ],
+      "tab_index": [
+       "1"
+      ],
+      "is_batch_fitting": [
+       "False"
+      ],
+      "data_name": [
+       [
+        "sesans"
+       ]
+      ],
+      "data_id": [
+       [
+        "ds"
+       ]
+      ],
+      "tab_name": [
+       "M1"
+      ],
+      "q_range_min": [
+       "100.0"
+      ],
+      "q_range_max": [
+       "10000.0"
+      ],
+      "q_weighting": [
+       "1"
+      ],
+      "weighting": [
+       "1"
+      ],
+      "smearing": [
+       "1"
+      ],
+      "smearing_min": [
+       "0.0"
+      ],
+      "smearing_max": [
+       "0.0"
+      ],
+      "polydisperse_params": [
+       "False"
+      ],
+      "magnetic_params": [
+       "False"
+      ],
+      "chainfit_params": [
+       "False"
+      ],
+      "2D_params": [
+       "False"
+      ],
+      "fitpage_category": [
+       "Sphere"
+      ],
+      "fitpage_model": [
+       "sphere"
+      ],
+      "fitpage_structure": [
+       "None"
+      ]
+     }
+    ]
+   }
+  },
+  "fit_state": {
+   "categorycombobox": "Sphere",
+   "formfactorcombobox": "sphere",
+   "structurecombobox": "None",
+   "tcChi": null,
+   "enable2D": false,
+   "data": [
+    "Data1D",
+    "ds"
+   ],
+   "qmin": 100.0,
+   "qmax": 10000.0,
+   "npts": 40,
+   "parameters": [
+    [
+     false,
+     "scale",
+     "1",
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "0.0"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     ""
+    ],
+    [
+     false,
+     "background",
+     "0",
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1/cm"
+    ],
+    [
+     false,
+     "sphere",
+     "",
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      ""
+     ],
+     [
+      true,
+      ""
+     ],
+     ""
+    ],
+    [
+     false,
+     "sld",
+     "1",
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1e-6/Ang^2"
+    ],
+    [
+     false,
+     "sld_solvent",
+     "6",
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1e-6/Ang^2"
+    ],
+    [
+     true,
+     "radius",
+     "50",
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "0.0"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "Ang"
+    ]
+   ],
+   "orientation_params_disp": [
+    [
+     true,
+     "scale",
+     1.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      0.0
+     ],
+     [
+      true,
+      "inf"
+     ],
+     ""
+    ],
+    [
+     true,
+     "background",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1/cm"
+    ],
+    [
+     true,
+     "sld",
+     1,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1e-6/Ang^2"
+    ],
+    [
+     true,
+     "sld_M0",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1e-6/Ang^2"
+    ],
+    [
+     true,
+     "sld_mtheta",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      -90.0
+     ],
+     [
+      true,
+      90.0
+     ],
+     "degrees"
+    ],
+    [
+     true,
+     "sld_mphi",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      -180.0
+     ],
+     [
+      true,
+      180.0
+     ],
+     "degrees"
+    ],
+    [
+     true,
+     "sld_solvent",
+     6,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1e-6/Ang^2"
+    ],
+    [
+     true,
+     "sld_solvent_M0",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      "-inf"
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "1e-6/Ang^2"
+    ],
+    [
+     true,
+     "sld_solvent_mtheta",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      -90.0
+     ],
+     [
+      true,
+      90.0
+     ],
+     "degrees"
+    ],
+    [
+     true,
+     "sld_solvent_mphi",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      -180.0
+     ],
+     [
+      true,
+      180.0
+     ],
+     "degrees"
+    ],
+    [
+     true,
+     "radius",
+     50,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      0.0
+     ],
+     [
+      true,
+      "inf"
+     ],
+     "Ang"
+    ],
+    [
+     true,
+     "up_frac_i",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      0.0
+     ],
+     [
+      true,
+      1.0
+     ],
+     ""
+    ],
+    [
+     true,
+     "up_frac_f",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      0.0
+     ],
+     [
+      true,
+      1.0
+     ],
+     ""
+    ],
+    [
+     true,
+     "up_theta",
+     90.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      0.0
+     ],
+     [
+      true,
+      360.0
+     ],
+     "degrees"
+    ],
+    [
+     true,
+     "up_phi",
+     0.0,
+     "",
+     [
+      false,
+      0.0
+     ],
+     [
+      true,
+      0.0
+     ],
+     [
+      true,
+      180.0
+     ],
+     "degrees"
+    ]
+   ]
+  },
+  "symbols": {
+   "M1.scale": 1.0,
+   "M1.sld": 1.0,
+   "M1.sld_solvent": 6.0,
+   "M1.radius": 50.0
+  },
+  "report": "<html>\n<head>\n<meta http-equiv=Content-Type content='text/html; charset=utf-8'> \n</head>\n<body lang=EN-US>\n<div>\n<p><b><span><center> sesans [TIMESTAMP] </center></span></center></b></p><p>&nbsp;</p><p><center>File name: sesans.txt</center></p>\n<p><center>SasView version: [MASKED]</center></p>\n<p><center>SasModels version: [MASKED]</center></p>\n<p><center>Fit optimizer used: Levenberg-Marquardt</center></p>\n<p><center>Model name: sphere</center></p>\n<p><center>Q Range of the Data: min = 100.0, max = 10000.0</center></p>\n<p><center>Q Range of the Fit: min = 100.0, max = 10000.0</center></p>\n<p><center>Smearing Information: Hankel Transform</center></p>\n<p><center>Chi2/Npts: NaN</center></p>\n<p><center>scale = 1 (fixed) </center></p>\n<p><center>background = 0 (fixed) cm<sup>-1</sup></center></p>\n<p><center>sphere =  (fixed) </center></p>\n<p><center>sld = 1 (fixed) 10<sup>-6</sup>/\u00c5<sup>2</sup></center></p>\n<p><center>sld_solvent = 6 (fixed) 10<sup>-6</sup>/\u00c5<sup>2</sup></center></p>\n<p><center>radius = 50 &#177; 0.0 \u212b</center></p>\n",
+  "theory_inputs": {
+   "name": "M1",
+   "params": {
+    "scale": 1.0,
+    "background": 0.0,
+    "sld": 1,
+    "sld_M0": 0.0,
+    "sld_mtheta": 0.0,
+    "sld_mphi": 0.0,
+    "sld_solvent": 6,
+    "sld_solvent_M0": 0.0,
+    "sld_solvent_mtheta": 0.0,
+    "sld_solvent_mphi": 0.0,
+    "radius": 50,
+    "up_frac_i": 0.0,
+    "up_frac_f": 0.0,
+    "up_theta": 0.0,
+    "up_phi": 0.0
+   },
+   "details": {
+    "scale": [
+     "",
+     0.0,
+     "inf"
+    ],
+    "background": [
+     "1/cm",
+     "-inf",
+     "inf"
+    ],
+    "sld": [
+     "1e-6/Ang^2",
+     "-inf",
+     "inf"
+    ],
+    "sld_M0": [
+     "1e-6/Ang^2",
+     "-inf",
+     "inf"
+    ],
+    "sld_mtheta": [
+     "degrees",
+     -90.0,
+     90.0
+    ],
+    "sld_mphi": [
+     "degrees",
+     -180.0,
+     180.0
+    ],
+    "sld_solvent": [
+     "1e-6/Ang^2",
+     "-inf",
+     "inf"
+    ],
+    "sld_solvent_M0": [
+     "1e-6/Ang^2",
+     "-inf",
+     "inf"
+    ],
+    "sld_solvent_mtheta": [
+     "degrees",
+     -90.0,
+     90.0
+    ],
+    "sld_solvent_mphi": [
+     "degrees",
+     -180.0,
+     180.0
+    ],
+    "radius": [
+     "Ang",
+     0.0,
+     "inf"
+    ],
+    "radius.width": [
+     "",
+     0.0,
+     1.0
+    ],
+    "up_frac_i": [
+     "",
+     0.0,
+     1.0
+    ],
+    "up_frac_f": [
+     "",
+     0.0,
+     1.0
+    ],
+    "up_theta": [
+     "degrees",
+     0.0,
+     360.0
+    ],
+    "up_phi": [
+     "degrees",
+     0.0,
+     180.0
+    ]
+   },
+   "dispersion": {
+    "radius": {
+     "width": 0,
+     "npts": 35,
+     "nsigmas": 3,
+     "type": "gaussian"
+    }
+   },
+   "smearer": "PySmear"
+  },
+  "fit_inputs": [
+   {
+    "model": {
+     "name": "M1",
+     "params": {
+      "scale": 1.0,
+      "background": 0.0,
+      "sld": 1,
+      "sld_M0": 0.0,
+      "sld_mtheta": 0.0,
+      "sld_mphi": 0.0,
+      "sld_solvent": 6,
+      "sld_solvent_M0": 0.0,
+      "sld_solvent_mtheta": 0.0,
+      "sld_solvent_mphi": 0.0,
+      "radius": 50,
+      "up_frac_i": 0.0,
+      "up_frac_f": 0.0,
+      "up_theta": 0.0,
+      "up_phi": 0.0
+     },
+     "details": {
+      "scale": [
+       "",
+       0.0,
+       "inf"
+      ],
+      "background": [
+       "1/cm",
+       "-inf",
+       "inf"
+      ],
+      "sld": [
+       "1e-6/Ang^2",
+       "-inf",
+       "inf"
+      ],
+      "sld_M0": [
+       "1e-6/Ang^2",
+       "-inf",
+       "inf"
+      ],
+      "sld_mtheta": [
+       "degrees",
+       -90.0,
+       90.0
+      ],
+      "sld_mphi": [
+       "degrees",
+       -180.0,
+       180.0
+      ],
+      "sld_solvent": [
+       "1e-6/Ang^2",
+       "-inf",
+       "inf"
+      ],
+      "sld_solvent_M0": [
+       "1e-6/Ang^2",
+       "-inf",
+       "inf"
+      ],
+      "sld_solvent_mtheta": [
+       "degrees",
+       -90.0,
+       90.0
+      ],
+      "sld_solvent_mphi": [
+       "degrees",
+       -180.0,
+       180.0
+      ],
+      "radius": [
+       "Ang",
+       0.0,
+       "inf"
+      ],
+      "radius.width": [
+       "",
+       0.0,
+       1.0
+      ],
+      "up_frac_i": [
+       "",
+       0.0,
+       1.0
+      ],
+      "up_frac_f": [
+       "",
+       0.0,
+       1.0
+      ],
+      "up_theta": [
+       "degrees",
+       0.0,
+       360.0
+      ],
+      "up_phi": [
+       "degrees",
+       0.0,
+       180.0
+      ]
+     },
+     "dispersion": {
+      "radius": {
+       "width": 0,
+       "npts": 35,
+       "nsigmas": 3,
+       "type": "gaussian"
+      }
+     }
+    },
+    "fit_id": 0,
+    "params_to_fit": [
+     "radius"
+    ],
+    "constraints": [],
+    "data": "ds",
+    "smearer": "PySmear",
+    "qmin": 100.0,
+    "qmax": 10000.0
+   }
+  ]
+ }
+]

@@ -20,14 +20,10 @@ Test organisation:
     TestGuiManagerUndoHookSignalChain — GUI action refresh signal chain
     TestOptionsWidgetSetState         — OptionsWidget.setState() round-trip
 """
-import glob
-import os
 from unittest.mock import MagicMock
 
 import pytest
 from PySide6 import QtCore, QtGui, QtWidgets
-
-from sasmodels.sasview_model import load_custom_model
 
 from sas.qtgui.Perspectives.Fitting import FittingUtilities, FittingWidget
 from sas.qtgui.Perspectives.Fitting.FitThread import FitThread
@@ -40,84 +36,14 @@ from sas.qtgui.Perspectives.Fitting.UndoRedo import (
     ParameterValueCommand,
     SmearingOptionsCommand,
 )
+from sas.qtgui.Perspectives.Fitting.UnitTesting.fitting_test_support import FittingWidgetMod, dummy_manager
 from sas.qtgui.Perspectives.UndoRedo import UndoStack
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Utilities import GuiUtils
-from sas.sascalc.fit.models import ModelManager, ModelManagerBase
 
 # ---------------------------------------------------------------------------
 # Helpers (same pattern as FittingWidgetTest.py)
 # ---------------------------------------------------------------------------
-
-class dummy_manager:
-    HELP_DIRECTORY_LOCATION = "html"
-    communicator = GuiUtils.communicator
-
-    def __init__(self):
-        self._perspective = dummy_perspective()
-
-    def perspective(self):
-        return self._perspective
-
-
-class dummy_perspective:
-
-    def __init__(self):
-        self.symbol_dict = {}
-        self.constraint_list = []
-        self.constraint_tab = None
-
-    def getActiveConstraintList(self):
-        return self.constraint_list
-
-    def getSymbolDictForConstraints(self):
-        return self.symbol_dict
-
-    def getConstraintTab(self):
-        return self.constraint_tab
-
-
-def find_plugin_models_mod():
-    plugins_dir = [
-        os.path.abspath(path) for path in glob.glob("**/plugin_models", recursive=True)
-        if os.path.normpath("qtgui/Perspectives/Fitting/plugin_models") in os.path.abspath(path)
-    ][0]
-    plugins = {}
-    for filename in os.listdir(plugins_dir):
-        name, ext = os.path.splitext(filename)
-        if ext == '.py' and not name == '__init__':
-            path = os.path.abspath(os.path.join(plugins_dir, filename))
-            model = load_custom_model(path)
-            plugins[model.name] = model
-    return plugins
-
-
-class ModelManagerBaseMod(ModelManagerBase):
-    def _is_plugin_dir_changed(self):
-        return False
-
-    def plugins_reset(self):
-        self.plugin_models = find_plugin_models_mod()
-        self.model_dictionary.clear()
-        self.model_dictionary.update(self.standard_models)
-        self.model_dictionary.update(self.plugin_models)
-        return self.get_model_list()
-
-
-class ModelManagerMod(ModelManager):
-    base = None
-
-    def __init__(self):
-        if ModelManagerMod.base is None:
-            ModelManagerMod.base = ModelManagerBaseMod()
-
-
-class FittingWidgetMod(FittingWidget.FittingWidget):
-    def customModels(cls):
-        manager = ModelManagerMod()
-        manager.update()
-        return manager.base.plugin_models
-
 
 # ---------------------------------------------------------------------------
 # Fixtures

@@ -1,106 +1,32 @@
 """Shared undo/redo infrastructure for SasView perspectives.
 
-Provides UndoCommand (abstract base), CompoundCommand (atomic grouping),
-UndoStack (history management), and DictSnapshotCommand (bulk state
-snapshot for perspectives with updateFromParameters()-style restore).
+The stacks themselves live in the Qt-free ``History`` core
+(``Fitting/model/history.py``, FW-MVC-DESIGN.md §3.7). This module provides
+the Qt side used by every perspective:
 
-Originally extracted from Fitting/UndoRedo.py per the UNDO_OTHER.md plan.
+- ``UndoStack``: a ``QObject`` that is a ``History``, adding the
+  ``stackChanged`` signal and the failure dialog, with hooks that call the
+  widget's ``_get_parameter_dict`` / ``_restore_parameter_values``.
+- ``DictSnapshotCommand``: bulk state snapshot for perspectives with an
+  ``updateFromParameters()``-style restore.
+- ``UndoCommand`` and ``CompoundCommand``, re-exported from the core.
 
-Design notes:
-- UndoStack is a QObject so it can emit stackChanged for UI wiring.
-- Each command stores old + new state and applies via widget callbacks.
-- Command capture is suppressed during programmatic updates via suppressed().
-- The shared contract for any "undoable widget" is:
+The shared contract for any "undoable widget" is:
     1. ``self.undo_stack = UndoStack(self)``
     2. ``_get_parameter_dict() -> dict`` — capture current input state
     3. ``_restore_parameter_values(state: dict)`` — apply a state dict
 """
 from __future__ import annotations
 
-import contextlib
 import logging
-import time
-import traceback
 
 from PySide6 import QtCore, QtWidgets
 
+from sas.qtgui.Perspectives.Fitting.model.history import CompoundCommand, History, UndoCommand
+
+__all__ = ["CompoundCommand", "DictSnapshotCommand", "UndoCommand", "UndoStack"]
+
 logger = logging.getLogger(__name__)
-
-
-# ---------------------------------------------------------------------------
-# Base command
-# ---------------------------------------------------------------------------
-
-class UndoCommand:
-    """Abstract base for all undoable actions.
-
-    Subclasses must implement ``undo(widget)`` and ``redo(widget)``.
-    ``description`` is shown in UI tooltips and the failure dialog.
-    """
-
-    def __init__(self, description: str) -> None:
-        self.description: str = description
-        self.timestamp: float = time.monotonic()
-
-    def undo(self, widget) -> None:
-        """Apply the reverse change to *widget*."""
-        raise NotImplementedError(f"{type(self).__name__}.undo() not implemented")
-
-    def redo(self, widget) -> None:
-        """Re-apply the forward change to *widget*."""
-        raise NotImplementedError(f"{type(self).__name__}.redo() not implemented")
-
-    def can_merge(self, other: UndoCommand) -> bool:
-        """Return True if *other* may be merged into this command.
-
-        Merging collapses consecutive edits into a single undo entry.
-        Default: no merging.
-        """
-        return False
-
-    def merge(self, other: UndoCommand) -> UndoCommand:
-        """Return a single command combining *self* (earlier) with *other* (later).
-
-        Only called when ``can_merge(other)`` returns True.
-        """
-        raise NotImplementedError(f"{type(self).__name__}.merge() not implemented")
-
-    def __repr__(self) -> str:
-        return f"<{type(self).__name__}: {self.description!r}>"
-
-
-# ---------------------------------------------------------------------------
-# Compound command (groups multiple commands atomically)
-# ---------------------------------------------------------------------------
-
-class CompoundCommand(UndoCommand):
-    """Groups multiple commands into a single atomic undo/redo entry.
-
-    ``undo()`` executes sub-commands in reverse order.
-    ``redo()`` executes them in forward order.
-    """
-
-    def __init__(
-        self, commands: list[UndoCommand], description: str = ""
-    ) -> None:
-        desc = description or (
-            commands[0].description if commands else "Compound action"
-        )
-        super().__init__(desc)
-        self._commands: list[UndoCommand] = list(commands)
-
-    @property
-    def commands(self) -> list[UndoCommand]:
-        """A copy of the contained command list."""
-        return list(self._commands)
-
-    def undo(self, widget) -> None:
-        for cmd in reversed(self._commands):
-            cmd.undo(widget)
-
-    def redo(self, widget) -> None:
-        for cmd in self._commands:
-            cmd.redo(widget)
 
 
 # ---------------------------------------------------------------------------
@@ -134,221 +60,59 @@ class DictSnapshotCommand(UndoCommand):
 # UndoStack
 # ---------------------------------------------------------------------------
 
-class UndoStack(QtCore.QObject):
-    """Per-tab / per-page undo/redo history.
+class UndoStack(QtCore.QObject, History):
+    """Per-tab / per-page undo/redo history with Qt signalling.
 
-    Responsibilities:
-    - Maintain undo and redo stacks of UndoCommand objects.
-    - Coalesce consecutive commands when supported by the command type.
-    - Emit ``stackChanged`` whenever state changes so that actionUndo /
-      actionRedo enabled state and tooltip text can be refreshed.
-    - Suppress command capture during programmatic updates via the
-      ``suppressed()`` context manager or ``set_enabled(False)``.
-    - Handle command execution failures: log at WARNING, show a dialog,
-      and offer ``reset_to_last_good()`` when failures repeat.
+    ``push`` records a command whose change has already been applied
+    (``History.push_applied``). ``stackChanged`` is emitted whenever the
+    stacks or the enabled state change, so that actionUndo / actionRedo
+    enabled state and tooltip text can be refreshed. A failing undo or redo
+    is logged and reported in a dialog that offers ``reset_to_last_good()``
+    when failures repeat.
 
-    The stack depth defaults to ``config.UNDO_STACK_MAX_DEPTH`` (200). This
-    depth is applied per page/tab/widget (each widget owns its own
-    ``UndoStack``); it is not a global limit shared across all widgets.
+    The stack depth defaults to ``config.UNDO_STACK_MAX_DEPTH`` (200),
+    per widget.
 
     Usage::
 
-        # In widget.__init__:
         self.undo_stack = UndoStack(self)
-
-        # Pushing a command:
         self.undo_stack.push(DictSnapshotCommand(old, new, "Description"))
-
-        # Suppressing during programmatic updates:
         with self.undo_stack.suppressed():
             self.loadFromProject(...)
     """
 
     stackChanged = QtCore.Signal()
 
-    def __init__(
-        self, widget, parent: QtCore.QObject | None = None
-    ) -> None:
-        super().__init__(parent)
-        self._widget = widget
+    def __init__(self, widget, parent: QtCore.QObject | None = None) -> None:
         from sas import config as _sas_config
-        self._max_depth: int = getattr(_sas_config, "UNDO_STACK_MAX_DEPTH", 200)
-        self._undo_stack: list[UndoCommand] = []
-        self._redo_stack: list[UndoCommand] = []
-        self._enabled: bool = True
-        self._replaying: bool = False
-        self._last_good_state: dict | None = None
-        self._consecutive_failures: int = 0
-
-    # ------------------------------------------------------------------
-    # Public API
-    # ------------------------------------------------------------------
+        # Cooperative initialisation: QObject passes the keywords on to History.
+        super().__init__(
+            parent,
+            target=widget,
+            max_depth=getattr(_sas_config, "UNDO_STACK_MAX_DEPTH", 200),
+            snapshot_fn=self._widget_state,
+            restore_fn=lambda state: widget._restore_parameter_values(state),
+            refresh_fn=self._refresh_view,
+        )
+        self._widget = widget
 
     def push(self, cmd: UndoCommand) -> None:
-        """Push *cmd* onto the undo stack.
-
-        - Dropped silently if the stack is disabled or a replay is active.
-        - Coalesced with the stack top when ``top.can_merge(cmd)`` is True.
-        - Clears the redo stack (new action invalidates forward history).
-        - Trims the oldest entry when depth exceeds ``_max_depth``.
-        """
-        if not self._enabled or self._replaying:
-            return
-
-        if self._undo_stack and self._undo_stack[-1].can_merge(cmd):
-            self._undo_stack[-1] = self._undo_stack[-1].merge(cmd)
-        else:
-            self._undo_stack.append(cmd)
-            if len(self._undo_stack) > self._max_depth:
-                dropped = self._undo_stack.pop(0)
-                logger.debug(
-                    "UndoStack: depth limit reached, dropped %r", dropped
-                )
-
-        self._redo_stack.clear()
-        self.stackChanged.emit()
-
-    def undo(self) -> None:
-        """Undo the most recent command."""
-        if not self._enabled or not self._undo_stack:
-            return
-        cmd = self._undo_stack[-1]  # peek — only removed from source on success
-        self._replaying = True
-        try:
-            cmd.undo(self._widget)
-            self._undo_stack.pop()
-            self._redo_stack.append(cmd)
-            self._consecutive_failures = 0
-            self._auto_snapshot()
-            self._refresh_view()
-
-        except Exception:
-            tb = traceback.format_exc()
-            logger.warning("UndoStack: undo failed for %r:\n%s", cmd, tb)
-            self._consecutive_failures += 1
-            self._handle_failure(cmd, tb)
-        finally:
-            self._replaying = False
-            self.stackChanged.emit()
-
-    def redo(self) -> None:
-        """Redo the most recently undone command."""
-        if not self._enabled or not self._redo_stack:
-            return
-        cmd = self._redo_stack[-1]  # peek — only removed from source on success
-        self._replaying = True
-        try:
-            cmd.redo(self._widget)
-            self._redo_stack.pop()
-            self._undo_stack.append(cmd)
-            self._consecutive_failures = 0
-            self._auto_snapshot()
-            self._refresh_view()
-
-        except Exception:
-            tb = traceback.format_exc()
-            logger.warning("UndoStack: redo failed for %r:\n%s", cmd, tb)
-            self._consecutive_failures += 1
-            self._handle_failure(cmd, tb)
-        finally:
-            self._replaying = False
-            self.stackChanged.emit()
-
-    def can_undo(self) -> bool:
-        """Return True if undo is possible (enabled and stack non-empty)."""
-        return self._enabled and bool(self._undo_stack)
-
-    def can_redo(self) -> bool:
-        """Return True if redo is possible (enabled and stack non-empty)."""
-        return self._enabled and bool(self._redo_stack)
-
-    def clear(self) -> None:
-        """Clear both stacks and reset failure state."""
-        self._undo_stack.clear()
-        self._redo_stack.clear()
-        self._last_good_state = None
-        self._consecutive_failures = 0
-        self.stackChanged.emit()
-
-    def set_enabled(self, enabled: bool) -> None:
-        """Enable or disable command capture and undo/redo execution.
-
-        Emits ``stackChanged`` so that action enabled state is refreshed
-        immediately (e.g. buttons grey out when a calculation starts).
-        """
-        self._enabled = enabled
-        self.stackChanged.emit()
-
-    @contextlib.contextmanager
-    def suppressed(self):
-        """Context manager: temporarily disable command capture.
-
-        Use around programmatic updates to prevent spurious entries::
-
-            with self.undo_stack.suppressed():
-                self.loadState(...)
-        """
-        was_enabled = self._enabled
-        self._enabled = False
-        try:
-            yield
-        finally:
-            self._enabled = was_enabled
-
-    def undo_text(self) -> str:
-        """Human-readable label for Undo (suitable for tooltip)."""
-        if self._undo_stack:
-            return f"Undo {self._undo_stack[-1].description}"
-        return "Undo"
-
-    def redo_text(self) -> str:
-        """Human-readable label for Redo (suitable for tooltip)."""
-        if self._redo_stack:
-            return f"Redo {self._redo_stack[-1].description}"
-        return "Redo"
+        """Record *cmd*, whose change has already been applied (see ``History.push_applied``)."""
+        self.push_applied(cmd)
 
     def save_last_good_state(self, state: dict) -> None:
-        """Store *state* as the recovery snapshot."""
-        self._last_good_state = dict(state)
+        """Store a copy of *state* as the recovery snapshot."""
+        super().save_last_good_state(dict(state))
 
-    def reset_to_last_good(self) -> None:
-        """Restore widget parameters from the most recent good snapshot.
+    # -- History hooks ----------------------------------------------------
 
-        Invoked when the user clicks "Reset to Last Good State" in the
-        failure dialog.  If no snapshot exists, logs a warning and returns.
-        """
-        if self._last_good_state is None:
-            logger.warning(
-                "UndoStack: reset_to_last_good called but no snapshot available"
-            )
-            return
-        try:
-            self._widget._restore_parameter_values(self._last_good_state)
-            logger.info(
-                "UndoStack: reset to last good state (%d params)",
-                len(self._last_good_state),
-            )
-        except Exception:
-            logger.warning(
-                "UndoStack: reset_to_last_good failed:\n%s",
-                traceback.format_exc(),
-            )
+    def _changed(self) -> None:
+        self.stackChanged.emit()
 
-    # ------------------------------------------------------------------
-    # Internal helpers
-    # ------------------------------------------------------------------
-
-    def _handle_failure(self, cmd: UndoCommand, tb: str) -> None:
+    def _replay_failed(self, cmd: UndoCommand, tb: str) -> None:
         """Show an error dialog; offer reset when failures repeat."""
-        offer_reset = (
-            self._consecutive_failures >= 2
-            and self._last_good_state is not None
-        )
-        parent = (
-            self._widget
-            if isinstance(self._widget, QtWidgets.QWidget)
-            else None
-        )
+        offer_reset = self._consecutive_failures >= 2 and self._last_good_state is not None
+        parent = self._widget if isinstance(self._widget, QtWidgets.QWidget) else None
         msg_box = QtWidgets.QMessageBox(parent)
         msg_box.setIcon(QtWidgets.QMessageBox.Icon.Warning)
         msg_box.setWindowTitle("Undo/Redo Error")
@@ -370,29 +134,19 @@ class UndoStack(QtCore.QObject):
             if msg_box.clickedButton() is reset_btn:
                 self.reset_to_last_good()
         else:
-            msg_box.setStandardButtons(
-                QtWidgets.QMessageBox.StandardButton.Close
-            )
+            msg_box.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Close)
             msg_box.exec()
 
-    def _auto_snapshot(self) -> None:
-        """Record widget state as the recovery snapshot after a successful replay.
-
-        Calls ``widget._get_parameter_dict()`` if available; silently skips
-        when the method is absent or returns non-dict data.
-        """
+    def _widget_state(self) -> dict | None:
+        """The widget's ``_get_parameter_dict()``, or None if it has none or it is not a dict."""
         try:
             state = self._widget._get_parameter_dict()
         except AttributeError:
-            return
-        if isinstance(state, dict):
-            self._last_good_state = dict(state)
+            return None
+        return dict(state) if isinstance(state, dict) else None
 
     def _refresh_view(self) -> None:
-        """Force viewport repaint after undo/redo (for QTreeView-based widgets).
-
-        Silently skips when the widget doesn't have a ``lstParams``.
-        """
+        """Force a viewport repaint after undo/redo (for QTreeView-based widgets)."""
         try:
             self._widget.lstParams.viewport().update()
         except AttributeError:

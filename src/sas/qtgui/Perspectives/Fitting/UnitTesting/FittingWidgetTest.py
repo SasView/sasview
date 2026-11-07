@@ -1,4 +1,3 @@
-import glob
 import logging
 import os
 import time
@@ -8,116 +7,19 @@ import pytest
 from PySide6 import QtCore, QtGui, QtTest, QtWidgets
 from twisted.internet import threads
 
-from sasmodels.sasview_model import load_custom_model
-
 # Local
 from sas import config
 from sas.qtgui.Perspectives.Fitting import FittingUtilities, FittingWidget
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 from sas.qtgui.Perspectives.Fitting.ModelThread import Calc2D
+from sas.qtgui.Perspectives.Fitting.UnitTesting.fitting_test_support import FittingWidgetMod, dummy_manager
 from sas.qtgui.Perspectives.UndoRedo import UndoStack
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 from sas.qtgui.Utilities import GuiUtils
-from sas.sascalc.fit.models import ModelManager, ModelManagerBase
 
 logger = logging.getLogger(__name__)
 
-
-class dummy_manager:
-    HELP_DIRECTORY_LOCATION = "html"
-    communicator = GuiUtils.communicator
-
-    def __init__(self):
-        self._perspective = dummy_perspective()
-
-    def perspective(self):
-        return self._perspective
-
-class dummy_perspective:
-
-    def __init__(self):
-        self.symbol_dict = {}
-        self.constraint_list = []
-        self.constraint_tab = None
-
-    def getActiveConstraintList(self):
-        return self.constraint_list
-
-    def getSymbolDictForConstraints(self):
-        return self.symbol_dict
-
-    def getConstraintTab(self):
-        return self.constraint_tab
-
-def find_plugin_models_mod():
-    """
-    Modification to sas.sascalc.fit.models.find_plugin_models().
-    Instead of searching for user's plugin directory, the path is set at:
-    'sas/qtgui/Perspectives/Fitting/plugin_models'
-    Modified to test handling of plugin models.
-    """
-    plugins_dir = [
-        os.path.abspath(path) for path in glob.glob("**/plugin_models",recursive=True)
-        if os.path.normpath("qtgui/Perspectives/Fitting/plugin_models") in os.path.abspath(path)
-    ][0]
-
-    plugins = {}
-    for filename in os.listdir(plugins_dir):
-        name, ext = os.path.splitext(filename)
-        if ext == '.py' and not name == '__init__':
-            path = os.path.abspath(os.path.join(plugins_dir, filename))
-            model = load_custom_model(path)
-            plugins[model.name] = model
-
-    return plugins
-
-class ModelManagerBaseMod(ModelManagerBase):
-    """
-    Inherits from ModelManagerBase class and is the base class for the ModelManagerMod.
-    Modified to test handling of plugin models.
-    """
-    def _is_plugin_dir_changed(self):
-        """
-        Originally checked if the plugin directory has changed, returning True if so.
-        Now returns False in all cases to test handling of plugin models.
-        """
-        is_modified = False
-        return is_modified
-
-    def plugins_reset(self):
-        """
-        Returns a dictionary of the models, but will now utilize the find_plugin_models_mod function.
-        """
-        self.plugin_models = find_plugin_models_mod()
-        self.model_dictionary.clear()
-        self.model_dictionary.update(self.standard_models)
-        self.model_dictionary.update(self.plugin_models)
-        return self.get_model_list()
-
-class ModelManagerMod(ModelManager):
-    """
-    Inherits from ModelManager class which manages the list of available models.
-    Modified to test handling of plugin models.
-    """
-    base = None
-
-    def __init__(self):
-        if ModelManagerMod.base is None:
-            ModelManagerMod.base = ModelManagerBaseMod()
-
-class FittingWidgetMod(FittingWidget.FittingWidget):
-    """
-    Inherits from FittingWidget class which is the main widget for selecting form and structure factor models.
-    Modified to test handling of plugin models.
-    """
-    def customModels(cls):
-        """
-        Reads in file names from the modified plugin directory to test handling of plugin models.
-        """
-        manager = ModelManagerMod()
-        manager.update()
-        return manager.base.plugin_models
 
 class FittingWidgetTest:
     """Test the fitting widget GUI"""

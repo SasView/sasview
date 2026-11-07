@@ -23,15 +23,27 @@ from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 from sas.qtgui.Perspectives.Fitting.ConstraintManager import ConstraintManager
 from sas.qtgui.Perspectives.Fitting.FitPage import FitPage
 from sas.qtgui.Perspectives.Fitting.FitThread import FitThread
+from sas.qtgui.Perspectives.Fitting.FittingConstants import (  # noqa: F401 (re-exported)
+    CATEGORY_CUSTOM,
+    CATEGORY_DEFAULT,
+    CATEGORY_STRUCTURE,
+    DEFAULT_POLYDISP_FUNCTION,
+    LAYERED_MODELS,
+    MODEL_DEFAULT,
+    STRUCTURE_DEFAULT,
+    SUPPRESSED_MODELS,
+    TAB_MAGNETISM,
+    TAB_ORDERING,
+    TAB_POLY,
+    polydispersity_plot_name,
+)
 from sas.qtgui.Perspectives.Fitting.FittingController import FittingController
 from sas.qtgui.Perspectives.Fitting.FittingLogic import FittingLogic
 from sas.qtgui.Perspectives.Fitting.FittingState import FittingState
 from sas.qtgui.Perspectives.Fitting.MagnetismWidget import MagnetismWidget
-from sas.qtgui.Perspectives.Fitting.ModelSelectorWidget import ModelSelectorWidget
 from sas.qtgui.Perspectives.Fitting.ModelThread import Calc1D, Calc2D
 from sas.qtgui.Perspectives.Fitting.OptionsWidget import OptionsWidget
 from sas.qtgui.Perspectives.Fitting.OrderWidget import OrderWidget
-from sas.qtgui.Perspectives.Fitting.ParameterListWidget import ParameterListWidget
 from sas.qtgui.Perspectives.Fitting.PolydispersityWidget import PolydispersityWidget
 from sas.qtgui.Perspectives.Fitting.ReportPageLogic import ReportPageLogic
 from sas.qtgui.Perspectives.Fitting.SmearingWidget import SmearingWidget
@@ -56,23 +68,6 @@ from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
 from sas.system import HELP_SYSTEM
 from sas.system.user import find_plugins_dir
 
-TAB_MAGNETISM = 4
-TAB_POLY = 3
-TAB_ORDERING = 5
-CATEGORY_DEFAULT = "Choose category..."
-MODEL_DEFAULT = "Choose model..."
-CATEGORY_STRUCTURE = "Structure Factor"
-CATEGORY_CUSTOM = "Plugin Models"
-STRUCTURE_DEFAULT = "None"
-
-DEFAULT_POLYDISP_FUNCTION = 'gaussian'
-
-# A list of models that are known to not work with how the GUI handles models from sasmodels
-#   NOTE: These models are correct when used directly through the sasmodels package, but how qtgui handles them is wrong
-SUPPRESSED_MODELS = ['rpa']
-# Layered models that have integer parameters are often treated differently. Maintain a list of these models.
-LAYERED_MODELS = ['unified_power_Rg', 'core_multi_shell', 'onion', 'spherical_sld']
-
 # CRUFT: remove when new release of sasmodels is available
 # https://github.com/SasView/sasview/pull/181#discussion_r218135162
 if not hasattr(SasviewModel, 'get_weights'):
@@ -86,7 +81,6 @@ if not hasattr(SasviewModel, 'get_weights'):
     SasviewModel.get_weights = get_weights
 
 logger = logging.getLogger(__name__)
-polydispersity_plot_name = "{} {} polydispersity {}"
 
 class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     """
@@ -99,8 +93,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     Calc1DFinishedSignal = QtCore.Signal(dict)
     Calc2DFinishedSignal = QtCore.Signal(dict)
     keyPressedSignal = QtCore.Signal(QtCore.QEvent)
-
-    MAGNETIC_MODELS = ['sphere', 'core_shell_sphere', 'core_multi_shell', 'cylinder', 'parallelepiped']
 
     def __init__(self, parent: QtWidgets.QWidget | None = None, data: Any | None = None, tab_id: int = 1) -> None:
 
@@ -142,34 +134,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Set up models and views
         self.initializeModels()
-
-        # Initialize ParameterListWidget for main parameter list
-        self.param_list_widget = ParameterListWidget(
-            parent=self,
-            tree_view=self.lstParams,
-            model=self._model_model,
-            model_key="standard"
-        )
-        self.param_list_widget.setCallbacks(
-            rowHasConstraint=self.constraint_manager.rowHasConstraint,
-            rowHasActiveConstraint=self.constraint_manager.rowHasActiveConstraint,
-            isCheckable=self.isCheckable,
-            onAddSimpleConstraint=self.addSimpleConstraint,
-            onDeleteConstraint=self.deleteConstraint,
-            onEditConstraint=self.editConstraint,
-            onShowMultiConstraint=self.showMultiConstraint,
-            onSelectParameters=self.selectParameters,
-            onDeselectParameters=self.deselectParameters,
-            onShowModelDescription=self.showModelDescription
-        )
-
-        # Initialize ModelSelectorWidget for category/model/structure selection
-        self.model_selector = ModelSelectorWidget(
-            parent=self,
-            category_combo=self.cbCategory,
-            model_combo=self.cbModel,
-            structure_combo=self.cbStructureFactor
-        )
 
         # Defaults for the structure factors
         self.setDefaultStructureCombo()
@@ -1722,7 +1686,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             msg = "Fitting failed."
             self.communicator.statusBarUpdateSignal.emit(msg)
             # reload the kernel_module in case it's corrupted
-            self.kernel_module = copy.deepcopy(self.kernel_module_copy)
+            self.logic.kernel_module = copy.deepcopy(self.kernel_module_copy)
             return
 
         # Capture parameter snapshot BEFORE fit results are applied
