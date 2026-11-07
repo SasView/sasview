@@ -160,7 +160,7 @@
                 <item row="2" column="0">
                  <widget class="QLabel" name="label_6">
                   <property name="text">
-                   <string>Applied Field (μ&lt;sub&gt;0&lt;/sub&gt; H&lt;sub&gt;min&lt;/sub&gt;):</string>
+                   <string>Smallest Used Field (μ&lt;sub&gt;0&lt;/sub&gt; H&lt;sub&gt;min&lt;/sub&gt;):</string>
                   </property>
                  </widget>
                 </item>
