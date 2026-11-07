@@ -569,6 +569,39 @@ To return to including all data in the fit, click the *Reset* button.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
+.. _Parameter_Slider:
+
+Exploring a parameter with the slider
+-------------------------------------
+
+Below the parameter table on the *Model* tab is a slider that controls the
+parameter currently selected in the table. Select a single parameter row and
+drag the slider: the value in the table updates as you drag, and so does the
+model curve if its plot is open. Until the model has been plotted with
+*Compute/Plot*, or after its plot is closed, the slider only changes the value
+and does not recalculate the model. The curve updates only on the current
+*FitPage*; constraints that link this parameter to other pages are applied when
+fitting.
+
+The text boxes either side of the slider set its range. They default to the
+current value minus and plus 100 % (-1 to 1 for a value of zero), clipped to the
+limits the model allows for that parameter, such as a radius that cannot be
+negative. These are independent of the *Min* and *Max* columns of the table,
+which only bound the fit. Type a new limit and press *Enter* to apply it. If the
+new range excludes the current value, the value moves to the nearest end of the
+range. The range is remembered for each parameter until the model is changed.
+
+With the slider focused, the arrow keys move it by 1 % of the range and
+*Page Up*/*Page Down* by 10 %. The mouse wheel changes the value only while the
+slider has focus. A whole drag is undone in one step with *Undo*.
+
+The slider is disabled while a fit is running, for constrained parameters, for
+parameters that cannot be edited, and for parameters chosen from a list (such as
+*radius_effective_mode* or the number of shells). It is not available on
+*BatchPages*.
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
 Shortcuts
 ---------
 

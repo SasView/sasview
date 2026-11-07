@@ -436,6 +436,12 @@ class TestUndoStack:
         assert stack.can_undo()
         assert not stack.can_redo()
 
+    def test_merge_that_cancels_out_is_dropped(self, stack):
+        # e.g. a slider drag that returns to its starting value
+        stack.push(ParameterValueCommand("radius", 50.0, 60.0))
+        stack.push(ParameterValueCommand("radius", 60.0, 50.0))
+        assert not stack.can_undo()
+
     def test_undo_moves_to_redo(self, stack, widget):
         stack.push(_make_cmd())
         stack.undo()

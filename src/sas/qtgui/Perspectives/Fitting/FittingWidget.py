@@ -32,6 +32,7 @@ from sas.qtgui.Perspectives.Fitting.ModelThread import Calc1D, Calc2D
 from sas.qtgui.Perspectives.Fitting.OptionsWidget import OptionsWidget
 from sas.qtgui.Perspectives.Fitting.OrderWidget import OrderWidget
 from sas.qtgui.Perspectives.Fitting.ParameterListWidget import ParameterListWidget
+from sas.qtgui.Perspectives.Fitting.ParameterSliderWidget import NO_SELECTION_REASON, ParameterSliderWidget
 from sas.qtgui.Perspectives.Fitting.PolydispersityWidget import PolydispersityWidget
 from sas.qtgui.Perspectives.Fitting.ReportPageLogic import ReportPageLogic
 from sas.qtgui.Perspectives.Fitting.SmearingWidget import SmearingWidget
@@ -47,6 +48,7 @@ from sas.qtgui.Perspectives.Fitting.UndoRedo import (
 )
 from sas.qtgui.Perspectives.Fitting.ViewDelegate import ModelViewDelegate
 from sas.qtgui.Perspectives.UndoRedo import UndoStack
+from sas.qtgui.Plotting import PlotHelper
 from sas.qtgui.Plotting.Plotter import PlotterWidget
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
 from sas.qtgui.Utilities.BackgroundColor import BG_DEFAULT, BG_ERROR
@@ -98,6 +100,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     batchFittingFinishedSignal = QtCore.Signal(tuple)
     Calc1DFinishedSignal = QtCore.Signal(dict)
     Calc2DFinishedSignal = QtCore.Signal(dict)
+    # (result dict or None on failure, live calculation generation)
+    LiveCalcFinishedSignal = QtCore.Signal(object, int)
     keyPressedSignal = QtCore.Signal(QtCore.QEvent)
 
     MAGNETIC_MODELS = ['sphere', 'core_shell_sphere', 'core_multi_shell', 'cylinder', 'parallelepiped']
@@ -353,6 +357,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Current parameters
         self.page_parameters = None
 
+        # Parameter slider state
+        self._slider_ranges = {}          # {param name: (min, max)} last range used per parameter
+        self._slider_writing = False      # True while the slider writes into the table
+        self._live_calc_gen = 0           # generation of the current live calculation
+        self._live_calc_running = False   # a live calculation is in flight
+        self._live_calc_pending = False   # the slider moved while a calculation was running
+
         # signal communicator
         self.communicator = GuiUtils.communicator
 
@@ -393,6 +404,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.order_widget = OrderWidget(self, self.all_data)
         layout.addWidget(self.order_widget)
         self.tabOrder.setLayout(layout)
+
+        # Parameter slider, directly under the main parameter table
+        self.slider_widget = ParameterSliderWidget(self)
+        self.gridLayout_2.addWidget(self.slider_widget, 2, 0)
+        QtWidgets.QWidget.setTabOrder(self.lstParams, self.slider_widget.txtSliderMin)
+        QtWidgets.QWidget.setTabOrder(self.slider_widget.txtSliderMin, self.slider_widget.sldParameter)
+        QtWidgets.QWidget.setTabOrder(self.slider_widget.sldParameter, self.slider_widget.txtSliderMax)
 
         # Define bold font for use in various controls
         self.boldFont = QtGui.QFont()
@@ -524,6 +542,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 self.chkChainFit.setVisible(True)
                 # This panel is not designed to view individual fits, so disable plotting
                 self.cmdPlot.setVisible(False)
+                self.slider_widget.setVisible(False)
             # Similarly on other tabs
             self.options_widget.setEnablementOnDataLoad()
             self.onSelectModel()
@@ -695,6 +714,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self._model_model.dataChanged.connect(self.onMainParamsChange)
         self.lstParams.selectionModel().selectionChanged.connect(self.onSelectionChanged)
         self.lstParams.installEventFilter(self)
+
+        # Parameter slider. Do not connect slider slots to _model_model.dataChanged:
+        # FittingController.updateModelFromList disconnects every slot on it.
+        self.slider_widget.valueChanged.connect(self.onSliderValueChanged)
+        self.slider_widget.rangeChanged.connect(self.onSliderRangeChanged)
+        self.slider_widget.rangeRejected.connect(self.communicator.statusBarUpdateSignal)
+        self.LiveCalcFinishedSignal.connect(self._onLiveCalcFinished)
+        self._model_model.modelReset.connect(self._onParamTableReset)
+        self._model_model.rowsRemoved.connect(self._refreshSlider)
 
         # Local signals
         self.batchFittingFinishedSignal.connect(self.batchFitComplete)
@@ -931,6 +959,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # Enable checkbox interaction
             model.item(row, 0).setEnabled(True)
         model.blockSignals(False)
+        # Constraints are added and removed through here
+        self._refreshSlider()
 
     def getModelKey(self, constraint: Constraint) -> str | None:
         """
@@ -1326,6 +1356,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         React to parameter selection
         """
+        # Before the early returns below, which skip unconstrained rows
+        self._bindSliderToSelection()
+
         current_list = self.tabToList[self.tabFitting.currentIndex()]
         model_key = self.tabToKey[self.tabFitting.currentIndex()]
 
@@ -1762,6 +1795,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.fitting_controller.updateModelFromList(param_dict)
             self.polydispersity_widget.updatePolyModelFromList(param_dict)
             self.magnetism_widget.updateMagnetModelFromList(param_dict)
+        # The table was updated with dataChanged disconnected
+        self._refreshSlider()
 
         # Clean up polydispersity plots if polydispersity has been disabled
         if not self.chkPolydispersity.isChecked():
@@ -2378,6 +2413,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # don't update the chart
             return
 
+        if self._slider_writing:
+            # Per-tick fast path: the slider never writes radius_effective_mode,
+            # and page_parameters is refreshed once the drag settles.
+            return
+
         # handle display of effective radius parameter according to radius_effective_mode; pass ER into model if
         # necessary
         self.processEffectiveRadius()
@@ -2385,6 +2425,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Keep page_parameters up-to-date so parameter retention across
         # model switches works even when no plot has been computed yet.
         self.page_parameters = self.getParameterDict()
+        self._refreshSlider()
 
     def processEffectiveRadius(self) -> None:
         """
@@ -2445,6 +2486,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # make not checkable (and uncheck)
             item_name.setCheckState(QtCore.Qt.Unchecked)
             item_name.setCheckable(False)
+        self._refreshSlider()
 
     def isCheckable(self, row: int, model_key: str = "standard") -> bool:
         model = self.model_dict[model_key]
@@ -2592,9 +2634,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # add magnetic params if asked
         self.magnetism_widget.updateModel(model)
 
-    def calculateQGridForModelExt(self, data: Data1D | Data2D | None = None, model: Any | None = None, completefn: Any | None = None, use_threads: bool = True) -> None:
+    def calculateQGridForModelExt(self, data: Data1D | Data2D | None = None, model: Any | None = None, completefn: Any | None = None, use_threads: bool = True, live_generation: int | None = None) -> None:
         """
-        Wrapper for Calc1D/2D calls
+        Wrapper for Calc1D/2D calls.
+
+        With *live_generation* set (slider drag), the page stays interactive and
+        completion or failure is reported through LiveCalcFinishedSignal.
         """
         if data is None:
             data = self.data
@@ -2602,13 +2647,28 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             model = copy.deepcopy(self.logic.kernel_module)
             self.updateKernelModelWithExtraParams(model)
 
+        exception_handler = self.calcException
+        errback = self.calculateDataFailed
+        if live_generation is not None:
+            def completefn(return_data, gen=live_generation):
+                self.LiveCalcFinishedSignal.emit(return_data, gen)
+
+            def exception_handler(etype, value, tb, gen=live_generation):
+                logger.error("".join(traceback.format_exception(etype, value, tb)))
+                self.LiveCalcFinishedSignal.emit(None, gen)
+
+            def errback(reason, gen=live_generation):
+                logger.error("Live calculation failed: %s", reason)
+                self.LiveCalcFinishedSignal.emit(None, gen)
+
         if completefn is None:
             completefn = self.methodCompleteForData()
         smearer = self.smearing_widget.smearer()
         weight = FittingUtilities.getWeight(data=data, is2d=self.is2D, flag=self.weighting)
 
-        # Disable buttons/table
-        self.disableInteractiveElementsOnCalculate()
+        if live_generation is None:
+            # Disable buttons/table
+            self.disableInteractiveElementsOnCalculate()
         # Awful API to a backend method.
         calc_thread = self.methodCalculateForData()(data=data,
                                                model=model,
@@ -2622,14 +2682,14 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                                                toggle_mode_on=False,
                                                completefn=completefn,
                                                update_chisqr=True,
-                                               exception_handler=self.calcException,
+                                               exception_handler=exception_handler,
                                                source=None)
         if use_threads:
             if config.USING_TWISTED:
                 # start the thread with twisted
                 thread = threads.deferToThread(calc_thread.compute)
                 thread.addCallback(completefn)
-                thread.addErrback(self.calculateDataFailed)
+                thread.addErrback(errback)
             else:
                 # Use the old python threads + Queue
                 calc_thread.queue()
@@ -2673,12 +2733,14 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.createNewIndex(plot)
             new_plots.append(plot)
 
-    def complete1D(self, return_data: dict) -> None:
+    def complete1D(self, return_data: dict, live: bool = False) -> None:
         """
         Plot the current 1D data
         """
-        # Bring the GUI to normal state
-        self.enableInteractiveElements()
+        # Bring the GUI to normal state. A live (slider) calculation never
+        # disabled it, and must not re-enable it during a fit.
+        if not live:
+            self.enableInteractiveElements()
         if return_data is None:
             return
         fitted_data = self.logic.new1DPlot(return_data, self.tab_id)
@@ -2742,12 +2804,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Update radius_effective if relevant
         self.updateEffectiveRadius(return_data)
 
-    def complete2D(self, return_data: dict) -> None:
+    def complete2D(self, return_data: dict, live: bool = False) -> None:
         """
         Plot the current 2D data
         """
-        # Bring the GUI to normal state
-        self.enableInteractiveElements()
+        # Bring the GUI to normal state (see complete1D)
+        if not live:
+            self.enableInteractiveElements()
 
         if return_data is None:
             return
@@ -3104,6 +3167,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.cbStructureFactor.setEnabled(enabled)
 
         self.cmdPlot.setEnabled(enabled)
+        self.slider_widget.setEnabled(enabled)
 
     def enableInteractiveElements(self) -> None:
         """
@@ -3121,6 +3185,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Set button caption on fitting/calculate start
         Disable the param table(s)
         """
+        # A fit (single, simultaneous or constrained) supersedes any slider calculation
+        self._invalidateLiveCalc()
         # Notify the user that fitting is being run
         # Allow for stopping the job
         self.cmdFit.setStyleSheet(BG_ERROR)
@@ -3237,33 +3303,199 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     # Undo/redo helper methods (called by UndoCommand subclasses)
     # ------------------------------------------------------------------
 
+    def _paramNameForRow(self, row: int) -> str | None:
+        """Parameter name of a top-level row of the main model (UserRole data handles duplicate names)."""
+        name_item = self._model_model.item(row, 0)
+        if name_item is None:
+            return None
+        return str(name_item.data(QtCore.Qt.UserRole) or name_item.text())
+
+    def _mainRowForParam(self, param_name: str) -> int | None:
+        """Row of *param_name* in the main model only (unlike getRowFromName)."""
+        for row in range(self._model_model.rowCount()):
+            if self._paramNameForRow(row) == param_name:
+                return row
+        return None
+
+    def _setMainParamCell(self, param_name: str, column: int, value: float) -> None:
+        row = self._mainRowForParam(param_name)
+        item = None if row is None else self._model_model.item(row, column)
+        if item:
+            item.setText(GuiUtils.formatNumber(value, high=True))
+
     def _update_model_param_value(self, param_name: str, value: float) -> None:
         """Update the UI model item for a parameter value (called by undo/redo)."""
-        for row in range(self._model_model.rowCount()):
-            name_item = self._model_model.item(row, 0)
-            if name_item is None:
-                continue
-            row_name = str(name_item.data(QtCore.Qt.UserRole) or name_item.text())
-            if row_name == param_name:
-                col = self.lstParams.itemDelegate().param_value
-                value_item = self._model_model.item(row, col)
-                if value_item:
-                    value_item.setText(GuiUtils.formatNumber(value, high=True))
-                return
+        self._setMainParamCell(param_name, self.lstParams.itemDelegate().param_value, value)
 
     def _update_model_param_limit(self, param_name: str, bound: str, value: float) -> None:
         """Update min or max bound in the UI model (called by undo/redo)."""
-        col = self.lstParams.itemDelegate().param_min if bound == "min" else self.lstParams.itemDelegate().param_max
-        for row in range(self._model_model.rowCount()):
-            name_item = self._model_model.item(row, 0)
-            if name_item is None:
-                continue
-            row_name = str(name_item.data(QtCore.Qt.UserRole) or name_item.text())
-            if row_name == param_name:
-                item = self._model_model.item(row, col)
-                if item:
-                    item.setText(GuiUtils.formatNumber(value, high=True))
-                return
+        delegate = self.lstParams.itemDelegate()
+        self._setMainParamCell(param_name, delegate.param_min if bound == "min" else delegate.param_max, value)
+
+    # ------------------------------------------------------------------
+    # Parameter slider
+    # ------------------------------------------------------------------
+
+    def _sliderIneligibilityReason(self, name: str | None) -> str | None:
+        """Why *name* cannot be bound to the slider, or None if it can."""
+        if self.is_batch_fitting:
+            return "The slider is not available for batch fitting."
+        if name is None:
+            return NO_SELECTION_REASON
+        kernel = self.logic.kernel_module
+        row = self._mainRowForParam(name)
+        if kernel is None or row is None or name not in kernel.params:
+            return f"{name} is not editable."
+        if self.rowHasActiveConstraint(row):
+            return f"{name} is constrained; remove the constraint to use the slider."
+        value_index = self._model_model.index(row, self.lstParams.itemDelegate().param_value)
+        # Fixed-choice parameters and the shell count are shown as combo boxes set with
+        # setIndexWidget, i.e. persistent editors. indexWidget() alone would also return
+        # the transient editor opened by clicking the value cell.
+        if self.lstParams.isPersistentEditorOpen(value_index):
+            return f"{name} is a fixed-choice parameter and cannot be controlled by the slider."
+        value_item = self._model_model.itemFromIndex(value_index)
+        if value_item is None or not value_item.isEditable():
+            return f"{name} is not editable."
+        if not np.isfinite(kernel.getParam(name)):
+            return f"{name} has no finite value."
+        return None
+
+    def _paramPhysicalLimits(self, name: str) -> tuple[float, float]:
+        """Model limits of *name*, not the user's fit bounds from the Min/Max columns."""
+        try:
+            low, high = self.logic.kernel_module._model_info.parameters[name].limits
+            return float(low), float(high)
+        except (AttributeError, KeyError, TypeError, ValueError):
+            return -np.inf, np.inf
+
+    def _bindSlider(self, name: str | None) -> None:
+        """Bind the slider to *name*, or unbind it with the reason it cannot be bound."""
+        reason = self._sliderIneligibilityReason(name)
+        if reason is None:
+            value = self.logic.kernel_module.getParam(name)
+            hard_min, hard_max = self._paramPhysicalLimits(name)
+            # Keep the last range used for this parameter while it is valid and holds the value
+            slider_range = self._slider_ranges.get(name)
+            if slider_range is not None:
+                slider_range = ParameterSliderWidget.validateRange(*slider_range, hard_min, hard_max)
+                if isinstance(slider_range, str) or not slider_range[0] <= value <= slider_range[1]:
+                    slider_range = None
+            if slider_range is None:
+                slider_range = ParameterSliderWidget.defaultRange(value, hard_min, hard_max)
+            if slider_range is None:
+                reason = f"{name} is not editable."
+        if reason is not None:
+            self.slider_widget.unbind(reason)
+            return
+        self._slider_ranges[name] = slider_range
+        units = self.logic.kernel_module.details.get(name, [""])[0]
+        self.slider_widget.bind(name, value, *slider_range, hard_min, hard_max, units)
+
+    def _bindSliderToSelection(self) -> None:
+        """Bind the slider to the single selected row of lstParams, whichever tab is in front."""
+        rows = self.lstParams.selectionModel().selectedRows()
+        name = None
+        if len(rows) == 1 and not rows[0].parent().isValid():
+            name = self._paramNameForRow(rows[0].row())
+        self._bindSlider(name)
+
+    def _refreshSlider(self, *_args) -> None:
+        """
+        Re-read value, limits and eligibility of the bound parameter.
+        Called wherever the table changes without a selection change.
+        """
+        if self.slider_widget.isBound() and not self._slider_writing:
+            self._bindSlider(self.slider_widget.name())
+
+    def _onParamTableReset(self) -> None:
+        """The parameter table was cleared (model, structure factor, 2D or category change)."""
+        self._slider_ranges.clear()
+        self._invalidateLiveCalc()
+        self.slider_widget.unbind()
+
+    def onSliderValueChanged(self, name: str, value: float) -> None:
+        """Write a slider value into the table, then request a live recalculation."""
+        row = self._mainRowForParam(name)
+        if row is None:
+            return
+        item = self._model_model.item(row, self.lstParams.itemDelegate().param_value)
+        text = GuiUtils.formatNumber(value, high=True)
+        if item is None or item.text() == text:
+            return  # no visible change: no write, no undo entry, no recalculation
+        self._slider_writing = True
+        try:
+            # Goes through onMainParamsChange: kernel update and undo capture
+            item.setText(text)
+        finally:
+            self._slider_writing = False
+        if self._modelPlotIsOpen():
+            self._requestLiveRecalc()
+        else:
+            # Nothing on screen to update. Keep the work skipped in onMainParamsChange
+            # that a live calculation would otherwise do once the drag settles.
+            self.page_parameters = self.getParameterDict()
+
+    def _modelPlotIsOpen(self) -> bool:
+        """True if an open plot window shows the model curve last computed by this page."""
+        if self.model_data is None:
+            return False  # nothing calculated yet
+        for plot_id in PlotHelper.currentPlotIds():
+            plot = PlotHelper.plotById(plot_id)
+            # 1D plotters key their curves by name; 2D plotters hold their data in a list
+            names = set(getattr(plot, "plot_dict", {})) | {data.name for data in (getattr(plot, "data", None) or [])}
+            if self.model_data.name in names:
+                return True
+        return False
+
+    def onSliderRangeChanged(self, name: str, vmin: float, vmax: float) -> None:
+        self._slider_ranges[name] = (vmin, vmax)
+
+    def _requestLiveRecalc(self) -> None:
+        """Throttle: at most one live calculation in flight, the latest value always computed."""
+        if self._live_calc_running:
+            self._live_calc_pending = True
+            return
+        self._live_calc_pending = False
+        if self.logic.kernel_module is None:
+            return
+        self._live_calc_gen += 1
+        self._live_calc_running = True
+        try:
+            self.calculateQGridForModelExt(live_generation=self._live_calc_gen)
+        except Exception:
+            self._live_calc_running = False
+            logger.exception("Live recalculation failed to start")
+
+    def _invalidateLiveCalc(self) -> None:
+        """Discard the result of any live calculation still in flight."""
+        self._live_calc_gen += 1
+        self._live_calc_running = False
+        self._live_calc_pending = False
+
+    def _onLiveCalcFinished(self, return_data: dict | None, generation: int) -> None:
+        """
+        Completion (or failure, with return_data None) of a live calculation.
+        Only the current generation counts: a fit or table reset discards older ones.
+        """
+        if generation != self._live_calc_gen:
+            return
+        try:
+            if return_data is not None:
+                complete = self.complete1D if isinstance(self.data, Data1D) else self.complete2D
+                complete(return_data, live=True)
+        finally:
+            # Plotting processes events, so a fit may have superseded this calculation meanwhile
+            superseded = generation != self._live_calc_gen
+            if not superseded:
+                self._live_calc_running = False
+        if superseded:
+            return
+        if self._live_calc_pending:
+            self._requestLiveRecalc()
+        else:
+            # Drag settled: work skipped per tick in onMainParamsChange
+            self.page_parameters = self.getParameterDict()
 
     def _restore_model_selection(self, triple: tuple, params: dict) -> None:
         """Restore model selection and parameter values (called by undo/redo).

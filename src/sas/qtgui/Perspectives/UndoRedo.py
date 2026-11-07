@@ -65,6 +65,10 @@ class UndoCommand:
         """
         raise NotImplementedError(f"{type(self).__name__}.merge() not implemented")
 
+    def is_noop(self) -> bool:
+        """Return True if undoing this command would change nothing."""
+        return False
+
     def __repr__(self) -> str:
         return f"<{type(self).__name__}: {self.description!r}>"
 
@@ -188,7 +192,8 @@ class UndoStack(QtCore.QObject):
         """Push *cmd* onto the undo stack.
 
         - Dropped silently if the stack is disabled or a replay is active.
-        - Coalesced with the stack top when ``top.can_merge(cmd)`` is True.
+        - Coalesced with the stack top when ``top.can_merge(cmd)`` is True;
+          a merge that cancels out (``is_noop()``) removes the entry.
         - Clears the redo stack (new action invalidates forward history).
         - Trims the oldest entry when depth exceeds ``_max_depth``.
         """
@@ -196,7 +201,12 @@ class UndoStack(QtCore.QObject):
             return
 
         if self._undo_stack and self._undo_stack[-1].can_merge(cmd):
-            self._undo_stack[-1] = self._undo_stack[-1].merge(cmd)
+            merged = self._undo_stack[-1].merge(cmd)
+            if merged.is_noop():
+                # e.g. a slider drag that ends where it started
+                self._undo_stack.pop()
+            else:
+                self._undo_stack[-1] = merged
         else:
             self._undo_stack.append(cmd)
             if len(self._undo_stack) > self._max_depth:
