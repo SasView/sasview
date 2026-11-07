@@ -217,7 +217,7 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         object
         """
         for fit_page_name, constraint_list in constraint_dict.items():
-            tab = self.getTabByName(fit_page_name)
+            tab = self.getTabByMnemonic(fit_page_name)
             for constraint_param in constraint_list:
                 if constraint_param is not None and len(constraint_param) == 5:
                     constraint = Constraint()
@@ -592,7 +592,7 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         """
         constraints = []
         for tab in self.getFitTabs():
-            tab_name = tab.modelName()
+            tab_name = tab.document.identity.mnemonic
             tab_constraints = tab.getConstraintsForAllModels()
             constraints.extend((tab_name + "." + par, expr) for par, expr in tab_constraints)
 
@@ -629,6 +629,12 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
             if hasattr(tab, 'modelName') and tab.modelName() == name:
                 return tab
         return None
+
+    def getTabByMnemonic(self, mnemonic):
+        """
+        Returns the fit tab whose constraint-symbol prefix is *mnemonic*, e.g. 'M1' or a renamed 'sample'
+        """
+        return next((tab for tab in self.getFitTabs() if tab.document.identity.mnemonic == mnemonic), None)
 
     def reset(self):
         """

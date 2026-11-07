@@ -35,7 +35,7 @@
    [
     "m",
     "False",
-    "2",
+    "2.0",
     null,
     "-inf",
     "inf",
@@ -44,7 +44,7 @@
    [
     "b",
     "False",
-    "1",
+    "1.0",
     null,
     "-inf",
     "inf",
@@ -135,9 +135,9 @@
     "None"
    ]
   ],
-  "clipboard": "sasview_parameter_values:model_name,plugin_template:scale,True,1.0,None,0.0,inf,():background,False,0.001,None,-inf,inf,():plugin_template,None,,None,,,():m,False,2,None,-inf,inf,():b,False,1,None,-inf,inf,():is_data,True:tab_index,1:is_batch_fitting,False:data_name,['data1']:data_id,['d1']:tab_name,M1:q_range_min,0.005:q_range_max,0.4:q_weighting,1:weighting,1:smearing,0:smearing_min,None:smearing_max,None:polydisperse_params,False:magnetic_params,False:chainfit_params,False:2D_params,False:fitpage_category,Plugin Models:fitpage_model,plugin_template:fitpage_structure,None",
-  "excel": "scale\tbackground\tplugin_template\tm\tb\t\r\n1.0\t0.001\t\t2\t1\t\r\nTrue\tFalse\tNone\tFalse\tFalse\t",
-  "latex": "\\begin{table}\\begin{tabular}[h]{|l|l|l|l|l|l|l|l|l|l|}\\hline\r\nscale & background & plugin\\_template & m & b\\\\ \\hline\r\n 1.0 &  0.001 &   &  2 &  1\\\\ \\hline\r\n\\end{tabular}\\end{table}",
+  "clipboard": "sasview_parameter_values:model_name,plugin_template:scale,True,1.0,None,0.0,inf,():background,False,0.001,None,-inf,inf,():plugin_template,None,,None,,,():m,False,2.0,None,-inf,inf,():b,False,1.0,None,-inf,inf,():is_data,True:tab_index,1:is_batch_fitting,False:data_name,['data1']:data_id,['d1']:tab_name,M1:q_range_min,0.005:q_range_max,0.4:q_weighting,1:weighting,1:smearing,0:smearing_min,None:smearing_max,None:polydisperse_params,False:magnetic_params,False:chainfit_params,False:2D_params,False:fitpage_category,Plugin Models:fitpage_model,plugin_template:fitpage_structure,None",
+  "excel": "scale\tbackground\tplugin_template\tm\tb\t\r\n1.0\t0.001\t\t2.0\t1.0\t\r\nTrue\tFalse\tNone\tFalse\tFalse\t",
+  "latex": "\\begin{table}\\begin{tabular}[h]{|l|l|l|l|l|l|l|l|l|l|}\\hline\r\nscale & background & plugin\\_template & m & b\\\\ \\hline\r\n 1.0 &  0.001 &   &  2.0 &  1.0\\\\ \\hline\r\n\\end{tabular}\\end{table}",
   "serialized": {
    "d1": {
     "fit_params": [
@@ -171,7 +171,7 @@
       ],
       "m": [
        "False",
-       "2",
+       "2.0",
        null,
        "-inf",
        "inf",
@@ -179,7 +179,7 @@
       ],
       "b": [
        "False",
-       "1",
+       "1.0",
        null,
        "-inf",
        "inf",
@@ -326,7 +326,7 @@
     [
      false,
      "m",
-     "2",
+     "2.0",
      "",
      [
       false,
@@ -345,7 +345,7 @@
     [
      false,
      "b",
-     "1",
+     "1.0",
      "",
      [
       false,
@@ -443,11 +443,11 @@
   },
   "symbols": {
    "M1.scale": 1.0,
-   "M1.background": 0.0010000000474974513,
+   "M1.background": 0.001,
    "M1.m": 2.0,
    "M1.b": 1.0
   },
-  "report": "<html>\n<head>\n<meta http-equiv=Content-Type content='text/html; charset=utf-8'> \n</head>\n<body lang=EN-US>\n<div>\n<p><b><span><center> data1 [TIMESTAMP] </center></span></center></b></p><p>&nbsp;</p><p><center>File name: data1.txt</center></p>\n<p><center>SasView version: [MASKED]</center></p>\n<p><center>SasModels version: [MASKED]</center></p>\n<p><center>Fit optimizer used: Levenberg-Marquardt</center></p>\n<p><center>Model name: plugin_template</center></p>\n<p><center>Q Range of the Data: min = 0.005, max = 0.4</center></p>\n<p><center>Q Range of the Fit: min = 0.005, max = 0.4</center></p>\n<p><center>Chi2/Npts: NaN</center></p>\n<p><center>scale = 1.0 &#177; 0.0 </center></p>\n<p><center>background = 0.001 (fixed) cm<sup>-1</sup></center></p>\n<p><center>plugin_template =  (fixed) </center></p>\n<p><center>m = 2 (fixed) Ang/cm</center></p>\n<p><center>b = 1 (fixed) cm<sup>-1</sup></center></p>\n",
+  "report": "<html>\n<head>\n<meta http-equiv=Content-Type content='text/html; charset=utf-8'> \n</head>\n<body lang=EN-US>\n<div>\n<p><b><span><center> data1 [TIMESTAMP] </center></span></center></b></p><p>&nbsp;</p><p><center>File name: data1.txt</center></p>\n<p><center>SasView version: [MASKED]</center></p>\n<p><center>SasModels version: [MASKED]</center></p>\n<p><center>Fit optimizer used: Levenberg-Marquardt</center></p>\n<p><center>Model name: plugin_template</center></p>\n<p><center>Q Range of the Data: min = 0.005, max = 0.4</center></p>\n<p><center>Q Range of the Fit: min = 0.005, max = 0.4</center></p>\n<p><center>Chi2/Npts: NaN</center></p>\n<p><center>scale = 1.0 &#177; 0.0 </center></p>\n<p><center>background = 0.001 (fixed) cm<sup>-1</sup></center></p>\n<p><center>plugin_template =  (fixed) </center></p>\n<p><center>m = 2.0 (fixed) Ang/cm</center></p>\n<p><center>b = 1.0 (fixed) cm<sup>-1</sup></center></p>\n",
   "theory_inputs": {
    "name": "M1",
    "params": {

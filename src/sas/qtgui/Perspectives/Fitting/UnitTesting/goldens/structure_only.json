@@ -334,7 +334,7 @@
   },
   "symbols": {
    "M1.radius_effective": 50.0,
-   "M1.volfraction": 0.20000000298023224
+   "M1.volfraction": 0.2
   },
   "report": "<html>\n<head>\n<meta http-equiv=Content-Type content='text/html; charset=utf-8'> \n</head>\n<body lang=EN-US>\n<div>\n<p><b><span><center> data1 [TIMESTAMP] </center></span></center></b></p><p>&nbsp;</p><p><center>File name: data1.txt</center></p>\n<p><center>SasView version: [MASKED]</center></p>\n<p><center>SasModels version: [MASKED]</center></p>\n<p><center>Fit optimizer used: Levenberg-Marquardt</center></p>\n<p><center>Model name: hardsphere</center></p>\n<p><center>Q Range of the Data: min = 0.005, max = 0.4</center></p>\n<p><center>Q Range of the Fit: min = 0.005, max = 0.4</center></p>\n<p><center>Chi2/Npts: NaN</center></p>\n<p><center>hardsphere =  (fixed) </center></p>\n<p><center>radius_effective = 50.0 (fixed) \u212b</center></p>\n<p><center>volfraction = 0.2 &#177; 0.0 </center></p>\n",
   "theory_inputs": {

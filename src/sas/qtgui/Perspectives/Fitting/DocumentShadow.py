@@ -16,6 +16,11 @@ Only fields that differ are written, so each ChangeSet names what changed.
 If the legacy stores cannot be read back, the error is logged (debug) and kept in
 ``shadow.errors`` (the tests assert it stays empty); the application goes on.
 
+Readers (Phase 3) are decorated with ``@reads(doc_reader)``: they answer from the
+document while it is in step with the page (``shadow.in_sync``). Inside a
+mirrored operation the document does not hold the writer's change yet, and after
+a failed read-back it is stale; then the legacy reader answers.
+
 Temporary: removed in Phase 5, when the writers become controller intents.
 """
 from __future__ import annotations
@@ -78,6 +83,25 @@ def mirrors(*sections: str):
     return decorator
 
 
+def reads(doc_reader):
+    """Decorator for legacy readers: return ``doc_reader(self, *args)`` while the page's document is in sync.
+
+    Otherwise (inside a mirrored operation, after a failed read-back, outside a page) the legacy
+    reader runs. The tests compare the two: ``wrapper.from_document`` is *doc_reader*, and inside
+    ``shadow.operation()`` the wrapper answers from the legacy stores.
+    """
+    def decorator(method):
+        @functools.wraps(method)
+        def wrapper(self, *args, **kwargs):
+            shadow = _shadow_of(self)
+            if shadow is not None and shadow.in_sync:
+                return doc_reader(self, *args, **kwargs)
+            return method(self, *args, **kwargs)
+        wrapper.from_document = doc_reader
+        return wrapper
+    return decorator
+
+
 def _shadow_of(widget):
     """The DocumentShadow of the page that *widget* is, or belongs to; None outside a page."""
     for owner in (widget, getattr(widget, "_fitting_widget", None), getattr(widget, "parent", None)):
@@ -106,7 +130,13 @@ class DocumentShadow:
         self._depth = 0
         self._pending: set[str] = set()
         self.active = False
+        self._stale = False            # the last read-back failed; the next one reads every section
         self.errors: list[str] = []    # read-back failures; the tests assert there are none
+
+    @property
+    def in_sync(self) -> bool:
+        """The document holds the page's current state, so readers may use it."""
+        return self.active and self._depth == 0 and not self._stale
 
     def start(self) -> None:
         """Called at the end of FittingWidget.__init__: seed the document from the finished page."""
@@ -129,18 +159,22 @@ class DocumentShadow:
     # ------------------------------------------------------------------
 
     def _sync(self, sections: set[str]) -> None:
+        if not sections:
+            return
         doc = self._page.document
-        if "layout" in sections:
+        if "layout" in sections or self._stale:
             sections = set(SECTIONS)
         try:
             with doc.transaction(Origin.USER) as tx:
                 for section in SECTIONS:
                     if section in sections:
                         getattr(self, f"_sync_{section}")(doc, tx)
+            self._stale = False
         except Exception as error:
             # Never raise: writers run in Qt slots, where an exception would be lost anyway.
+            self._stale = True
             self.errors.append(f"{type(error).__name__}: {error} (sections {sorted(sections)})")
-            # Debug level: nothing reads the document yet (Phase 3), and the tests check it.
+            # Debug level: while the document is stale the readers use the legacy stores, and the tests check it.
             logger.debug("The fit page document is out of step with the page (sections %s)", sorted(sections),
                          exc_info=True)
 
@@ -273,7 +307,7 @@ class DocumentShadow:
             fields = dict(value=_number(cell(1)), fit=table.item(row, 0).checkState() == QtCore.Qt.Checked,
                           error=_number(cell(2)) if offset else None, min=_number(cell(2 + offset)),
                           max=_number(cell(3 + offset)), dispersion=dispersion)
-            self._update(tx, p, fields, None)
+            self._update(tx, p, fields, self._page.getConstraintForRow(row, model_key="poly"))
 
     def _read_magnet(self, params, tx) -> None:
         widget = self._page.magnetism_widget
@@ -287,7 +321,7 @@ class DocumentShadow:
             fields = dict(value=_number(cell(1)), fit=table.item(row, 0).checkState() == QtCore.Qt.Checked,
                           error=_number(cell(2)) if offset else None, min=_number(cell(2 + offset)),
                           max=_number(cell(3 + offset)))
-            self._update(tx, p, fields, None)
+            self._update(tx, p, fields, self._page.getConstraintForRow(row, model_key="magnet"))
 
     @staticmethod
     def _update(tx, p, fields: dict, constraint) -> None:

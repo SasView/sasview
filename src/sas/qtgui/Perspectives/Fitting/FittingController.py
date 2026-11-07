@@ -14,6 +14,7 @@ from PySide6 import QtGui
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
+from sas.qtgui.Perspectives.Fitting.model import rules
 from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
 
 logger = logging.getLogger(__name__)
@@ -79,30 +80,17 @@ class FittingController:
             If no parameters are selected for fitting or if model setup fails
         """
         # Data going in
-        data = self.logic.data
         model = self.logic.kernel_module
-        qmin = self.widget.q_range_min
-        qmax = self.widget.q_range_max
 
         # Update the model with extra parameters (polydispersity, magnetism)
         # This ensures that values from the PolydispersityWidget and MagnetismWidget
         # are applied to the kernel_module before fitting
         self.widget.updateKernelModelWithExtraParams(model)
 
-        # Gather all parameters to fit
-        params_to_fit = copy.deepcopy(self.widget.main_params_to_fit)
-
-        # Add polydispersity parameters if enabled
-        if self.widget.chkPolydispersity.isChecked():
-            for p in self.widget.polydispersity_widget.poly_params_to_fit:
-                if "Distribution of" in p:
-                    params_to_fit += [self.widget.polydispersity_widget.polyNameToParam(p)]
-                else:
-                    params_to_fit += [p]
-
-        # Add magnetism parameters if enabled
-        if self.widget.chkMagnetism.isChecked() and self.widget.canHaveMagnetism():
-            params_to_fit += self.widget.magnetism_widget.magnet_params_to_fit
+        if self.widget.shadow.in_sync:
+            qmin, qmax, params_to_fit = self.document_fit_inputs()
+        else:
+            qmin, qmax, params_to_fit = self.legacy_fit_inputs()
 
         if not params_to_fit:
             raise ValueError('Fitting requires at least one parameter to optimize.')
@@ -152,6 +140,28 @@ class FittingController:
             fitters.append(fitter_single)
 
         return fitters, fit_id
+
+    def document_fit_inputs(self) -> tuple[float, float, list[str]]:
+        """Q range and parameters to fit (by their legacy row names) from the page's document (Phase 3)."""
+        doc = self.widget.document
+        return doc.options.qmin, doc.options.qmax, [doc.parameters.legacy_key(k) for k in rules.keys_to_fit(doc)]
+
+    def legacy_fit_inputs(self) -> tuple[float, float, list[str]]:
+        """Q range and parameters to fit from the widget, when its document is not in sync."""
+        params_to_fit = copy.deepcopy(self.widget.main_params_to_fit)
+
+        # Add polydispersity parameters if enabled
+        if self.widget.chkPolydispersity.isChecked():
+            for p in self.widget.polydispersity_widget.poly_params_to_fit:
+                if "Distribution of" in p:
+                    params_to_fit += [self.widget.polydispersity_widget.polyNameToParam(p)]
+                else:
+                    params_to_fit += [p]
+
+        # Add magnetism parameters if enabled
+        if self.widget.chkMagnetism.isChecked() and self.widget.canHaveMagnetism():
+            params_to_fit += self.widget.magnetism_widget.magnet_params_to_fit
+        return self.widget.q_range_min, self.widget.q_range_max, params_to_fit
 
     def paramDictFromResults(self, results: Any) -> dict[str, tuple[float, float]] | None:
         """

@@ -11,6 +11,7 @@ import os
 from sasmodels.sasview_model import load_custom_model
 
 from sas.qtgui.Perspectives.Fitting import FittingWidget
+from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
 from sas.qtgui.Perspectives.Fitting.UnitTesting.shadow_invariant import ShadowChecker
 from sas.qtgui.Utilities import GuiUtils
 from sas.sascalc.fit.models import ModelManager, ModelManagerBase
@@ -28,11 +29,18 @@ class dummy_manager:
 
 
 class dummy_perspective:
+    # The real lookups, over the pages a test adds to fit_tabs
+    getTabByMnemonic = FittingWindow.getTabByMnemonic
+    updateFromConstraints = FittingWindow.updateFromConstraints
 
     def __init__(self):
         self.symbol_dict = {}
         self.constraint_list = []
         self.constraint_tab = None
+        self.fit_tabs = []
+
+    def getFitTabs(self):
+        return self.fit_tabs
 
     def getActiveConstraintList(self):
         return self.constraint_list

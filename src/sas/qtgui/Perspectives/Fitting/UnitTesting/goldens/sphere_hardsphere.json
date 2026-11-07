@@ -8,7 +8,7 @@
    [
     "scale",
     "False",
-    "1",
+    "1.0",
     null,
     "0.0",
     "inf",
@@ -53,7 +53,7 @@
    [
     "sld",
     "False",
-    "1",
+    "1.0",
     null,
     "-inf",
     "inf",
@@ -62,7 +62,7 @@
    [
     "sld_solvent",
     "False",
-    "6",
+    "6.0",
     null,
     "-inf",
     "inf",
@@ -71,7 +71,7 @@
    [
     "radius",
     "True",
-    "50",
+    "50.0",
     null,
     "0.0",
     "inf",
@@ -189,9 +189,9 @@
     "hardsphere"
    ]
   ],
-  "clipboard": "sasview_parameter_values:model_name,sphere:scale,False,1,None,0.0,inf,():background,False,0.001,None,-inf,inf,():structure_factor_mode,None,0,None,,,():radius_effective_mode,None,1,None,,,():sphere,None,,None,,,():sld,False,1,None,-inf,inf,():sld_solvent,False,6,None,-inf,inf,():radius,True,50,None,0.0,inf,():hardsphere,None,,None,,,():radius_effective,None,50.0,None,0.0,inf,():volfraction,False,0.3,None,0.0,0.74,():is_data,True:tab_index,1:is_batch_fitting,False:data_name,['data1']:data_id,['d1']:tab_name,M1:q_range_min,0.005:q_range_max,0.4:q_weighting,1:weighting,1:smearing,0:smearing_min,None:smearing_max,None:polydisperse_params,False:magnetic_params,False:chainfit_params,False:2D_params,False:fitpage_category,Sphere:fitpage_model,sphere:fitpage_structure,hardsphere",
-  "excel": "scale\tbackground\tstructure_factor_mode\tradius_effective_mode\tsphere\tsld\tsld_solvent\tradius\thardsphere\tradius_effective\tvolfraction\t\r\n1\t0.001\t0\t1\t\t1\t6\t50\t\t50.0\t0.3\t\r\nFalse\tFalse\tNone\tNone\tNone\tFalse\tFalse\tTrue\tNone\tNone\tFalse\t",
-  "latex": "\\begin{table}\\begin{tabular}[h]{|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|}\\hline\r\nscale & background & structure\\_factor\\_mode & radius\\_effective\\_mode & sphere & sld & sld\\_solvent & radius & hardsphere & radius\\_effective & volfraction\\\\ \\hline\r\n 1 &  0.001 &  0 &  1 &   &  1 &  6 &  50 &   &  50.0 &  0.3\\\\ \\hline\r\n\\end{tabular}\\end{table}",
+  "clipboard": "sasview_parameter_values:model_name,sphere:scale,False,1.0,None,0.0,inf,():background,False,0.001,None,-inf,inf,():structure_factor_mode,None,0,None,,,():radius_effective_mode,None,1,None,,,():sphere,None,,None,,,():sld,False,1.0,None,-inf,inf,():sld_solvent,False,6.0,None,-inf,inf,():radius,True,50.0,None,0.0,inf,():hardsphere,None,,None,,,():radius_effective,None,50.0,None,0.0,inf,():volfraction,False,0.3,None,0.0,0.74,():is_data,True:tab_index,1:is_batch_fitting,False:data_name,['data1']:data_id,['d1']:tab_name,M1:q_range_min,0.005:q_range_max,0.4:q_weighting,1:weighting,1:smearing,0:smearing_min,None:smearing_max,None:polydisperse_params,False:magnetic_params,False:chainfit_params,False:2D_params,False:fitpage_category,Sphere:fitpage_model,sphere:fitpage_structure,hardsphere",
+  "excel": "scale\tbackground\tstructure_factor_mode\tradius_effective_mode\tsphere\tsld\tsld_solvent\tradius\thardsphere\tradius_effective\tvolfraction\t\r\n1.0\t0.001\t0\t1\t\t1.0\t6.0\t50.0\t\t50.0\t0.3\t\r\nFalse\tFalse\tNone\tNone\tNone\tFalse\tFalse\tTrue\tNone\tNone\tFalse\t",
+  "latex": "\\begin{table}\\begin{tabular}[h]{|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|}\\hline\r\nscale & background & structure\\_factor\\_mode & radius\\_effective\\_mode & sphere & sld & sld\\_solvent & radius & hardsphere & radius\\_effective & volfraction\\\\ \\hline\r\n 1.0 &  0.001 &  0 &  1 &   &  1.0 &  6.0 &  50.0 &   &  50.0 &  0.3\\\\ \\hline\r\n\\end{tabular}\\end{table}",
   "serialized": {
    "d1": {
     "fit_params": [
@@ -201,7 +201,7 @@
       ],
       "scale": [
        "False",
-       "1",
+       "1.0",
        null,
        "0.0",
        "inf",
@@ -241,7 +241,7 @@
       ],
       "sld": [
        "False",
-       "1",
+       "1.0",
        null,
        "-inf",
        "inf",
@@ -249,7 +249,7 @@
       ],
       "sld_solvent": [
        "False",
-       "6",
+       "6.0",
        null,
        "-inf",
        "inf",
@@ -257,7 +257,7 @@
       ],
       "radius": [
        "True",
-       "50",
+       "50.0",
        null,
        "0.0",
        "inf",
@@ -372,7 +372,7 @@
     [
      false,
      "scale",
-     "1",
+     "1.0",
      "",
      [
       false,
@@ -467,7 +467,7 @@
     [
      false,
      "sld",
-     "1",
+     "1.0",
      "",
      [
       false,
@@ -486,7 +486,7 @@
     [
      false,
      "sld_solvent",
-     "6",
+     "6.0",
      "",
      [
       false,
@@ -505,7 +505,7 @@
     [
      true,
      "radius",
-     "50",
+     "50.0",
      "",
      [
       false,
@@ -945,13 +945,13 @@
   },
   "symbols": {
    "M1.scale": 1.0,
-   "M1.background": 0.0010000000474974513,
+   "M1.background": 0.001,
    "M1.sld": 1.0,
    "M1.sld_solvent": 6.0,
    "M1.radius": 50.0,
-   "M1.volfraction": 0.30000001192092896
+   "M1.volfraction": 0.3
   },
-  "report": "<html>\n<head>\n<meta http-equiv=Content-Type content='text/html; charset=utf-8'> \n</head>\n<body lang=EN-US>\n<div>\n<p><b><span><center> data1 [TIMESTAMP] </center></span></center></b></p><p>&nbsp;</p><p><center>File name: data1.txt</center></p>\n<p><center>SasView version: [MASKED]</center></p>\n<p><center>SasModels version: [MASKED]</center></p>\n<p><center>Fit optimizer used: Levenberg-Marquardt</center></p>\n<p><center>Model name: sphere@hardsphere</center></p>\n<p><center>Q Range of the Data: min = 0.005, max = 0.4</center></p>\n<p><center>Q Range of the Fit: min = 0.005, max = 0.4</center></p>\n<p><center>Chi2/Npts: NaN</center></p>\n<p><center>scale = 1 (fixed) </center></p>\n<p><center>background = 0.001 (fixed) cm<sup>-1</sup></center></p>\n<p><center>structure_factor_mode = 0 (fixed) </center></p>\n<p><center>radius_effective_mode = 1 (fixed) </center></p>\n<p><center>sphere =  (fixed) </center></p>\n<p><center>sld = 1 (fixed) 10<sup>-6</sup>/\u00c5<sup>2</sup></center></p>\n<p><center>sld_solvent = 6 (fixed) 10<sup>-6</sup>/\u00c5<sup>2</sup></center></p>\n<p><center>radius = 50 &#177; 0.0 \u212b</center></p>\n<p><center>hardsphere =  (fixed) </center></p>\n<p><center>radius_effective = 50.0 (fixed) \u212b</center></p>\n<p><center>volfraction = 0.3 (fixed) </center></p>\n",
+  "report": "<html>\n<head>\n<meta http-equiv=Content-Type content='text/html; charset=utf-8'> \n</head>\n<body lang=EN-US>\n<div>\n<p><b><span><center> data1 [TIMESTAMP] </center></span></center></b></p><p>&nbsp;</p><p><center>File name: data1.txt</center></p>\n<p><center>SasView version: [MASKED]</center></p>\n<p><center>SasModels version: [MASKED]</center></p>\n<p><center>Fit optimizer used: Levenberg-Marquardt</center></p>\n<p><center>Model name: sphere@hardsphere</center></p>\n<p><center>Q Range of the Data: min = 0.005, max = 0.4</center></p>\n<p><center>Q Range of the Fit: min = 0.005, max = 0.4</center></p>\n<p><center>Chi2/Npts: NaN</center></p>\n<p><center>scale = 1.0 (fixed) </center></p>\n<p><center>background = 0.001 (fixed) cm<sup>-1</sup></center></p>\n<p><center>structure_factor_mode = 0 (fixed) </center></p>\n<p><center>radius_effective_mode = 1 (fixed) </center></p>\n<p><center>sphere =  (fixed) </center></p>\n<p><center>sld = 1.0 (fixed) 10<sup>-6</sup>/\u00c5<sup>2</sup></center></p>\n<p><center>sld_solvent = 6.0 (fixed) 10<sup>-6</sup>/\u00c5<sup>2</sup></center></p>\n<p><center>radius = 50.0 &#177; 0.0 \u212b</center></p>\n<p><center>hardsphere =  (fixed) </center></p>\n<p><center>radius_effective = 50.0 (fixed) \u212b</center></p>\n<p><center>volfraction = 0.3 (fixed) </center></p>\n",
   "theory_inputs": {
    "name": "M1",
    "params": {

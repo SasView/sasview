@@ -8,7 +8,7 @@
    [
     "scale",
     "False",
-    "1",
+    "1.0",
     null,
     "0.0",
     "inf",
@@ -17,7 +17,7 @@
    [
     "background",
     null,
-    "0",
+    "0.0",
     null,
     "-inf",
     "inf",
@@ -35,7 +35,7 @@
    [
     "sld",
     "False",
-    "1",
+    "1.0",
     null,
     "-inf",
     "inf",
@@ -44,7 +44,7 @@
    [
     "sld_solvent",
     "False",
-    "6",
+    "6.0",
     null,
     "-inf",
     "inf",
@@ -53,7 +53,7 @@
    [
     "radius",
     "True",
-    "50",
+    "50.0",
     null,
     "0.0",
     "inf",
@@ -144,9 +144,9 @@
     "None"
    ]
   ],
-  "clipboard": "sasview_parameter_values:model_name,sphere:scale,False,1,None,0.0,inf,():background,None,0,None,-inf,inf,():sphere,None,,None,,,():sld,False,1,None,-inf,inf,():sld_solvent,False,6,None,-inf,inf,():radius,True,50,None,0.0,inf,():is_data,True:tab_index,1:is_batch_fitting,False:data_name,['sesans']:data_id,['ds']:tab_name,M1:q_range_min,100.0:q_range_max,10000.0:q_weighting,1:weighting,1:smearing,1:smearing_min,0.0:smearing_max,0.0:polydisperse_params,False:magnetic_params,False:chainfit_params,False:2D_params,False:fitpage_category,Sphere:fitpage_model,sphere:fitpage_structure,None",
-  "excel": "scale\tbackground\tsphere\tsld\tsld_solvent\tradius\t\r\n1\t0\t\t1\t6\t50\t\r\nFalse\tNone\tNone\tFalse\tFalse\tTrue\t",
-  "latex": "\\begin{table}\\begin{tabular}[h]{|l|l|l|l|l|l|l|l|l|l|l|l|}\\hline\r\nscale & background & sphere & sld & sld\\_solvent & radius\\\\ \\hline\r\n 1 &  0 &   &  1 &  6 &  50\\\\ \\hline\r\n\\end{tabular}\\end{table}",
+  "clipboard": "sasview_parameter_values:model_name,sphere:scale,False,1.0,None,0.0,inf,():background,None,0.0,None,-inf,inf,():sphere,None,,None,,,():sld,False,1.0,None,-inf,inf,():sld_solvent,False,6.0,None,-inf,inf,():radius,True,50.0,None,0.0,inf,():is_data,True:tab_index,1:is_batch_fitting,False:data_name,['sesans']:data_id,['ds']:tab_name,M1:q_range_min,100.0:q_range_max,10000.0:q_weighting,1:weighting,1:smearing,1:smearing_min,0.0:smearing_max,0.0:polydisperse_params,False:magnetic_params,False:chainfit_params,False:2D_params,False:fitpage_category,Sphere:fitpage_model,sphere:fitpage_structure,None",
+  "excel": "scale\tbackground\tsphere\tsld\tsld_solvent\tradius\t\r\n1.0\t0.0\t\t1.0\t6.0\t50.0\t\r\nFalse\tNone\tNone\tFalse\tFalse\tTrue\t",
+  "latex": "\\begin{table}\\begin{tabular}[h]{|l|l|l|l|l|l|l|l|l|l|l|l|}\\hline\r\nscale & background & sphere & sld & sld\\_solvent & radius\\\\ \\hline\r\n 1.0 &  0.0 &   &  1.0 &  6.0 &  50.0\\\\ \\hline\r\n\\end{tabular}\\end{table}",
   "serialized": {
    "ds": {
     "fit_params": [
@@ -156,7 +156,7 @@
       ],
       "scale": [
        "False",
-       "1",
+       "1.0",
        null,
        "0.0",
        "inf",
@@ -164,7 +164,7 @@
       ],
       "background": [
        null,
-       "0",
+       "0.0",
        null,
        "-inf",
        "inf",
@@ -180,7 +180,7 @@
       ],
       "sld": [
        "False",
-       "1",
+       "1.0",
        null,
        "-inf",
        "inf",
@@ -188,7 +188,7 @@
       ],
       "sld_solvent": [
        "False",
-       "6",
+       "6.0",
        null,
        "-inf",
        "inf",
@@ -196,7 +196,7 @@
       ],
       "radius": [
        "True",
-       "50",
+       "50.0",
        null,
        "0.0",
        "inf",
@@ -287,7 +287,7 @@
     [
      false,
      "scale",
-     "1",
+     "1.0",
      "",
      [
       false,
@@ -306,7 +306,7 @@
     [
      false,
      "background",
-     "0",
+     "0.0",
      "",
      [
       false,
@@ -344,7 +344,7 @@
     [
      false,
      "sld",
-     "1",
+     "1.0",
      "",
      [
       false,
@@ -363,7 +363,7 @@
     [
      false,
      "sld_solvent",
-     "6",
+     "6.0",
      "",
      [
       false,
@@ -382,7 +382,7 @@
     [
      true,
      "radius",
-     "50",
+     "50.0",
      "",
      [
       false,
@@ -693,7 +693,7 @@
    "M1.sld_solvent": 6.0,
    "M1.radius": 50.0
   },
-  "report": "<html>\n<head>\n<meta http-equiv=Content-Type content='text/html; charset=utf-8'> \n</head>\n<body lang=EN-US>\n<div>\n<p><b><span><center> sesans [TIMESTAMP] </center></span></center></b></p><p>&nbsp;</p><p><center>File name: sesans.txt</center></p>\n<p><center>SasView version: [MASKED]</center></p>\n<p><center>SasModels version: [MASKED]</center></p>\n<p><center>Fit optimizer used: Levenberg-Marquardt</center></p>\n<p><center>Model name: sphere</center></p>\n<p><center>Q Range of the Data: min = 100.0, max = 10000.0</center></p>\n<p><center>Q Range of the Fit: min = 100.0, max = 10000.0</center></p>\n<p><center>Smearing Information: Hankel Transform</center></p>\n<p><center>Chi2/Npts: NaN</center></p>\n<p><center>scale = 1 (fixed) </center></p>\n<p><center>background = 0 (fixed) cm<sup>-1</sup></center></p>\n<p><center>sphere =  (fixed) </center></p>\n<p><center>sld = 1 (fixed) 10<sup>-6</sup>/\u00c5<sup>2</sup></center></p>\n<p><center>sld_solvent = 6 (fixed) 10<sup>-6</sup>/\u00c5<sup>2</sup></center></p>\n<p><center>radius = 50 &#177; 0.0 \u212b</center></p>\n",
+  "report": "<html>\n<head>\n<meta http-equiv=Content-Type content='text/html; charset=utf-8'> \n</head>\n<body lang=EN-US>\n<div>\n<p><b><span><center> sesans [TIMESTAMP] </center></span></center></b></p><p>&nbsp;</p><p><center>File name: sesans.txt</center></p>\n<p><center>SasView version: [MASKED]</center></p>\n<p><center>SasModels version: [MASKED]</center></p>\n<p><center>Fit optimizer used: Levenberg-Marquardt</center></p>\n<p><center>Model name: sphere</center></p>\n<p><center>Q Range of the Data: min = 100.0, max = 10000.0</center></p>\n<p><center>Q Range of the Fit: min = 100.0, max = 10000.0</center></p>\n<p><center>Smearing Information: Hankel Transform</center></p>\n<p><center>Chi2/Npts: NaN</center></p>\n<p><center>scale = 1.0 (fixed) </center></p>\n<p><center>background = 0.0 (fixed) cm<sup>-1</sup></center></p>\n<p><center>sphere =  (fixed) </center></p>\n<p><center>sld = 1.0 (fixed) 10<sup>-6</sup>/\u00c5<sup>2</sup></center></p>\n<p><center>sld_solvent = 6.0 (fixed) 10<sup>-6</sup>/\u00c5<sup>2</sup></center></p>\n<p><center>radius = 50.0 &#177; 0.0 \u212b</center></p>\n",
   "theory_inputs": {
    "name": "M1",
    "params": {

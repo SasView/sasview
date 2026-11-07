@@ -21,7 +21,7 @@ from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.ConsoleUpdate import ConsoleUpdate
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 from sas.qtgui.Perspectives.Fitting.ConstraintManager import ConstraintManager
-from sas.qtgui.Perspectives.Fitting.DocumentShadow import DocumentShadow, mirrors
+from sas.qtgui.Perspectives.Fitting.DocumentShadow import DocumentShadow, mirrors, reads
 from sas.qtgui.Perspectives.Fitting.FitPage import FitPage
 from sas.qtgui.Perspectives.Fitting.FitThread import FitThread
 from sas.qtgui.Perspectives.Fitting.FittingConstants import (  # noqa: F401 (re-exported)
@@ -42,9 +42,10 @@ from sas.qtgui.Perspectives.Fitting.FittingController import FittingController
 from sas.qtgui.Perspectives.Fitting.FittingLogic import FittingLogic
 from sas.qtgui.Perspectives.Fitting.FittingState import FittingState
 from sas.qtgui.Perspectives.Fitting.MagnetismWidget import MagnetismWidget
+from sas.qtgui.Perspectives.Fitting.model import serializer
 from sas.qtgui.Perspectives.Fitting.model.document import FitPageDocument
 from sas.qtgui.Perspectives.Fitting.model.kernel import KernelBuilder
-from sas.qtgui.Perspectives.Fitting.model.parameters import PageIdentity
+from sas.qtgui.Perspectives.Fitting.model.parameters import PageIdentity, Table
 from sas.qtgui.Perspectives.Fitting.ModelThread import Calc1D, Calc2D
 from sas.qtgui.Perspectives.Fitting.OptionsWidget import OptionsWidget
 from sas.qtgui.Perspectives.Fitting.OrderWidget import OrderWidget
@@ -85,6 +86,15 @@ if not hasattr(SasviewModel, 'get_weights'):
     SasviewModel.get_weights = get_weights
 
 logger = logging.getLogger(__name__)
+
+# The legacy item model of each table (FittingWidget.model_dict), for the readers of the document
+MODEL_TABLES = {"standard": Table.MAIN, "poly": Table.POLY, "magnet": Table.MAGNET}
+
+
+def _active_complex_constraints(doc, table: Table | None = None) -> list[tuple[str, str]]:
+    """getComplexConstraintsFor*: (key, expression) of the active constraints that have an expression."""
+    return [(p.key, p.constraint.func) for p in doc.constrained(table) if p.constraint.active and p.constraint.func]
+
 
 class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     """
@@ -1075,6 +1085,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         for row in self.selectedParameters(model_key=model_key):
             self.model_dict[model_key].item(row, 0).setCheckState(status)
 
+    @reads(lambda self: [(self.document.parameters.legacy_key(p.key), p.constraint.func)
+                         for p in self.document.constrained() if p.constraint.active])
     def getConstraintsForAllModels(self) -> list[tuple[str, str]]:
         """
         Return a list of tuples. Each tuple contains constraints mapped as
@@ -1085,6 +1097,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         return self.constraint_manager.getConstraintsForAllModels()
 
+    @reads(lambda self: _active_complex_constraints(self.document))
     def getComplexConstraintsForAllModels(self) -> list[tuple[str, str]]:
         """
         Returns a list of tuples containing all the constraints defined
@@ -1094,6 +1107,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         return self.constraint_manager.getComplexConstraintsForAllModels()
 
+    @reads(lambda self, model_key: _active_complex_constraints(self.document, MODEL_TABLES[model_key]))
     def getComplexConstraintsForModel(self, model_key: str) -> list[tuple[str, str]]:
         """
         Return a list of tuples. Each tuple contains constraints mapped as
@@ -1105,6 +1119,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         return self.constraint_manager.getComplexConstraintsForModel(model_key)
 
+    @reads(lambda self, model_key: [(self.document.parameters.legacy_key(p.key), p.constraint.func)
+                                    for p in self.document.constrained(MODEL_TABLES[model_key])])
     def getFullConstraintNameListForModel(self, model_key: str) -> list[tuple[str, str]]:
         """
         Return a list of tuples. Each tuple contains constraints mapped as
@@ -1160,6 +1176,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         menu.addAction(action)
         return menu
 
+    @reads(lambda self: self.document.can_have_magnetism())
     def canHaveMagnetism(self) -> bool:
         """
         Checks if the current model has magnetic scattering implemented
@@ -2147,8 +2164,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Now we claim the model has been loaded
         self.model_is_loaded = True
-        # Change the model name to a monicker
-        self.logic.kernel_module.name = self.modelName()
+        # The kernel is named after the page's mnemonic (R-3)
+        self.logic.kernel_module.name = self.document.identity.mnemonic
         # Update the smearing tab
         self.smearing_widget.updateKernelModel(kernel_model=self.logic.kernel_module)
 
@@ -2208,8 +2225,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Instantiate the current sasmodel
         self.logic.kernel_module = self.models[model_name]()
 
-        # Change the model name to a monicker
-        self.logic.kernel_module.name = self.modelName()
+        # The kernel is named after the page's mnemonic (R-3)
+        self.logic.kernel_module.name = self.document.identity.mnemonic
 
         # Explicitly add scale and background with default values
         with self.undo_stack.suppressed():
@@ -2242,7 +2259,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if self.logic.kernel_module is None:
             self.logic.kernel_module = kernel_module
             # Structure factor is the only selected model; build it and show all its params
-            self.logic.kernel_module.name = self.modelName()
+            self.logic.kernel_module.name = self.document.identity.mnemonic
             s_params = self.logic.kernel_module._model_info.parameters
         else:
             # Assure we only have one volfraction shown
@@ -2287,8 +2304,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             p_kernel.multiplicity = p_kernel.multiplicity_info.number
 
         self.logic.kernel_module = MultiplicationModel(p_kernel, s_kernel)
-        # Modify the name to correspond to shown items
-        self.logic.kernel_module.name = self.modelName()
+        # The kernel is named after the page's mnemonic (R-3)
+        self.logic.kernel_module.name = self.document.identity.mnemonic
 
         # TODO: set model layout in sasmodels
         info = self.logic.kernel_module._model_info
@@ -2319,6 +2336,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         return (s_params, product_params)
 
+    @reads(lambda self: self.document.can_fit())
     def haveParamsToFit(self) -> bool:
         """
         Finds out if there are any parameters ready to be fitted
@@ -3538,6 +3556,17 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             index = self.all_data[self.data_index]
         else:
             index = self.theory_item
+        report_logic = ReportPageLogic(self,
+                                       kernel_module=self.logic.kernel_module,
+                                       data=self.data,
+                                       index=index,
+                                       params=self._report_parameters())
+
+        return report_logic.reportList()
+
+    @reads(lambda self: serializer.report_parameters(self.document))
+    def _report_parameters(self) -> list[list]:
+        """The report's parameter rows: getStandardParam of the main table, and of the poly and magnet tables when shown."""
         params = FittingUtilities.getStandardParam(self._model_model)
         poly_params = []
         magnet_params = []
@@ -3545,13 +3574,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             poly_params = FittingUtilities.getStandardParam(self.polydispersity_widget.poly_model)
         if self.chkMagnetism.isChecked() and self.canHaveMagnetism() and self.magnetism_widget._magnet_model.rowCount() > 0:
             magnet_params = FittingUtilities.getStandardParam(self.magnetism_widget._magnet_model)
-        report_logic = ReportPageLogic(self,
-                                       kernel_module=self.logic.kernel_module,
-                                       data=self.data,
-                                       index=index,
-                                       params=params+poly_params+magnet_params)
-
-        return report_logic.reportList()
+        return params + poly_params + magnet_params
 
     def loadPageStateCallback(self, state: Any | None = None, datainfo: Any | None = None, format: Any | None = None) -> None:
         """
@@ -3612,10 +3635,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         # Check if the clipboard contains right stuff
         cb = QtWidgets.QApplication.clipboard()
-        cb_text = cb.text()
-
-        lines = cb_text.split(':')
-        if lines[0] != 'sasview_parameter_values':
+        line_dict = serializer.parse_clipboard(cb.text())
+        if line_dict is None:
             msg = "Clipboard content is incompatible with the Fit Page."
             msgbox = QtWidgets.QMessageBox(self)
             msgbox.setIcon(QtWidgets.QMessageBox.Warning)
@@ -3623,13 +3644,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             msgbox.setWindowTitle("Clipboard")
             msgbox.exec_()
             return
-
-        # put the text into dictionary
-        line_dict = {}
-        for line in lines[1:]:
-            content = line.split(',')
-            if len(content) > 1 and content[0] != "tab_name":
-                line_dict[content[0]] = content[1:]
 
         self.updatePageWithParameters(line_dict)
 
@@ -3690,6 +3704,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         cb.setText(data)
 
 
+    @reads(lambda self: serializer.fit_model_rows(self.document))
     def getFitModel(self) -> list[list[str]]:
         """
         serializes combobox state
@@ -3704,6 +3719,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         return param_list
 
+    @reads(lambda self: serializer.fit_page_rows(self.document))
     def getFitPage(self) -> list[list[str]]:
         """
         serializes full state of this fit page
@@ -3729,7 +3745,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         param_list.append(['is_batch_fitting', str(self.is_batch_fitting)])
         param_list.append(['data_name', names])
         param_list.append(['data_id', data_ids])
-        param_list.append(['tab_name', self.modelName()])
+        kernel = self.logic.kernel_module
+        param_list.append(['tab_name', kernel.name if kernel is not None else self.modelName()])
         # option tab
         param_list.append(['q_range_min', str(self.q_range_min)])
         param_list.append(['q_range_max', str(self.q_range_max)])
@@ -3755,6 +3772,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         return param_list
 
+    @reads(lambda self: serializer.fit_parameter_rows(self.document))
     def getFitParameters(self) -> list[list[str | tuple]]:
         """
         serializes current parameters
@@ -3863,7 +3881,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 self.updateMultiplicityCombo(multip)
 
         if 'tab_name' in line_dict and self.logic.kernel_module is not None:
-            self.logic.kernel_module.name = line_dict['tab_name'][0]
+            self.logic.kernel_module.name = self._loadedMnemonic(line_dict['tab_name'][0])
+            # The constraint tab lists the pages by mnemonic
+            self.newModelSignal.emit()
         if 'polydisperse_params' in line_dict:
             self.chkPolydispersity.setChecked(line_dict['polydisperse_params'][0]=='True')
         if 'magnetic_params' in line_dict:
@@ -3927,6 +3947,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.updateFullModel(context)
         self.polydispersity_widget.updateFullPolyModel(context)
         self.magnetism_widget.updateFullMagnetModel(context)
+
+    def _loadedMnemonic(self, name: str) -> str:
+        """The saved page name, or M<tab#> if another open page already uses it (R-3)."""
+        others = [] if self.parent is None else self.parent.perspective().getFitTabs()
+        if all(tab is self or tab.document.identity.mnemonic != name for tab in others):
+            return name
+        msg = f"Fit page name {name} is already in use, so this page is named {self.modelName()}."
+        self.communicator.statusBarUpdateSignal.emit(msg)
+        return self.modelName()
 
     def updateMultiplicityCombo(self, multip: int) -> None:
         """
@@ -3998,6 +4027,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.updateQRange()
         self.updateData()
 
+    @reads(lambda self, state=None: serializer.page_state(self.document, state, self.logic.kernel_module, self.chi2))
     def getCurrentFitState(self, state: Any | None = None) -> None:
         """
         Store current state for fit_page
@@ -4023,6 +4053,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         state.parameters = FittingUtilities.getStandardParam(self._model_model)
         state.orientation_params_disp = FittingUtilities.getOrientationParam(self.logic.kernel_module)
 
+    @reads(lambda self: self.document.symbol_table())
     def getSymbolDict(self) -> dict[str, float]:
         """
         Return a dict containing a list of all the symbols used for fitting

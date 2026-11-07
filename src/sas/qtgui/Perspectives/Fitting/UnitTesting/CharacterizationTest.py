@@ -34,6 +34,7 @@ def page(request):
 
 
 def rows(page) -> dict:
+    """The legacy rows by key; numbers are written in the canonical format (register R-6)."""
     return {r[0]: r for r in page.getFitPage() + page.getFitModel()}
 
 
@@ -124,7 +125,7 @@ class RetentionTest:
         g.set_cell(page._model_model, "sld", 1, "2.5")
         g.set_checked(page._model_model, "length")
         g.select_model(page, "Cylinder", "hollow_cylinder")
-        assert rows(page)["radius"][:6] == ["radius", "True", "33", None, "5.0", "90.0"]
+        assert rows(page)["radius"][:6] == ["radius", "True", "33.0", None, "5.0", "90.0"]
         assert rows(page)["sld"][2] == "2.5"
         assert rows(page)["length"][1] == "True"
         assert page.logic.kernel_module.details["radius"][1:] == [5.0, 90.0]
@@ -147,7 +148,7 @@ class RetentionTest:
         page.chkPolydispersity.setChecked(True)
         g.set_cell(page.polydispersity_widget.poly_model, "Distribution of radius", 1, "0.2")
         g.select_model(page, "Cylinder", "hollow_cylinder")
-        assert rows(page)["radius"][2] == "33"
+        assert rows(page)["radius"][2] == "33.0"
         assert rows(page)["length"][1] == "False"
         assert page.logic.kernel_module.getParam("radius.width") == 0
 
@@ -163,7 +164,7 @@ class RetentionTest:
     def testStructureFactorSwitchKeepsValues(self, page):
         g.set_cell(page._model_model, "radius", 1, "33.0")
         page.cbStructureFactor.setCurrentIndex(page.cbStructureFactor.findText("hardsphere"))
-        assert rows(page)["radius"][2] == "33"
+        assert rows(page)["radius"][2] == "33.0"
         assert page.logic.kernel_module.getParam("radius") == 33.0
 
     def testShrunkShellsComeBackWithDefaults(self):
@@ -175,7 +176,7 @@ class RetentionTest:
         g.set_multiplicity(p, 2)
         g.set_multiplicity(p, 3)
         assert rows(p)["thickness3"][2] == "40.0"
-        assert rows(p)["radius"][2] == "66"
+        assert rows(p)["radius"][2] == "66.0"
         p.close()
 
 
@@ -215,12 +216,12 @@ class PasteAndLoadTest:
         QtWidgets.QApplication.clipboard().setText(cylinder_text)
         sphere_page.clipboard_paste()
         assert sphere_page.cbModel.currentText() == "sphere"
-        assert rows(sphere_page)["radius"][2] == "44"
+        assert rows(sphere_page)["radius"][2] == "44.0"
         pushed = sphere_page.undo_stack._undo_stack[depth:]
         assert len(pushed) > 1
         assert all(isinstance(cmd, ParameterValueCommand) for cmd in pushed)
 
-    def testProjectLoadSelectsModelAndIgnoresTabName(self, cylinder_text):
+    def testProjectLoadSelectsModelAndKeepsTabName(self, cylinder_text):
         line_dict = {}
         for line in cylinder_text.replace("tab_name,M1", "tab_name,renamed").split(":")[1:]:
             content = line.split(",")
@@ -229,10 +230,10 @@ class PasteAndLoadTest:
         p = g.new_page(tab_id=3, data=g.make_data1d("d3", "data3"))
         p.createPageForParameters(line_dict)
         assert p.cbModel.currentText() == "cylinder"
-        assert rows(p)["radius"][2] == "44"
-        # The kernel takes the saved name, but tab_name is written back from modelName() (R-3)
+        assert rows(p)["radius"][2] == "44.0"
+        # The page takes the saved name, and saves it again (R-3, changed in Phase 3a)
         assert p.logic.kernel_module.name == "renamed"
-        assert rows(p)["tab_name"] == ["tab_name", "M3"]
+        assert rows(p)["tab_name"] == ["tab_name", "renamed"]
         # Today the load leaves value commands on the stack (§2.3 targets a cleared stack)
         assert p.undo_stack.can_undo()
         p.close()
@@ -248,7 +249,7 @@ class FitUndoTest:
         assert page.lblChi2Value.text() == "1.5"
 
         page.undo_stack.undo()
-        assert rows(page)["radius"][2:4] == ["20", None]
+        assert rows(page)["radius"][2:4] == ["20.0", None]
         assert not page.has_error_column
         assert page.lblChi2Value.text() == "1.5"
 

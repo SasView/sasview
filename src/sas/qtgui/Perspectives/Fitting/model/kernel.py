@@ -146,7 +146,7 @@ class KernelBuilder:
         return Parameter(
             key=key or par.name, label=par.name, table=Table.MAIN, section=section,
             kind=ValueKind.CHOICE if choices else ValueKind.FLOAT,
-            value=int(par.default) if choices else par.default,
+            value=int(par.default) if choices else float(par.default),
             min=None if no_bounds else par.limits[0], max=None if no_bounds else par.limits[1],
             units=str(par.units), fittable=not no_bounds,
             choices=tuple(choices) if choices else None)
@@ -229,9 +229,9 @@ class KernelBuilder:
             _, low, high = kernel.details[width]
             result.append(Parameter(
                 key=width, label="Distribution of " + name, table=Table.POLY, section=POLY_SECTION,
-                kind=ValueKind.FLOAT, value=kernel.getParam(width), min=low, max=high,
-                dispersion=Dispersion(npts=kernel.getParam(name + '.npts'),
-                                      nsigmas=kernel.getParam(name + '.nsigmas'),
+                kind=ValueKind.FLOAT, value=float(kernel.getParam(width)), min=low, max=high,
+                dispersion=Dispersion(npts=int(kernel.getParam(name + '.npts')),
+                                      nsigmas=float(kernel.getParam(name + '.nsigmas')),
                                       type=DEFAULT_POLYDISP_FUNCTION)))
         return result
 
@@ -251,6 +251,6 @@ class KernelBuilder:
                     continue
             result.append(Parameter(
                 key=par.name, label=par.name, table=Table.MAGNET, section=MAGNET_SECTION,
-                kind=ValueKind.FLOAT, value=par.default, min=par.limits[0], max=par.limits[1],
+                kind=ValueKind.FLOAT, value=float(par.default), min=par.limits[0], max=par.limits[1],
                 units=str(par.units)))
         return result

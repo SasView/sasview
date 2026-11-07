@@ -1,5 +1,6 @@
 """
-The Phase 2 shadow document (FW-MVC-DESIGN.md §6): how legacy writers reach FittingWidget.document.
+The shadow document (FW-MVC-DESIGN.md §6, Phases 2 and 3): how legacy writers reach FittingWidget.document,
+and when the readers answer from it.
 """
 from unittest.mock import MagicMock
 
@@ -146,6 +147,30 @@ def testReadBackFailureIsRecordedNotRaised(page):
     assert page.shadow.errors and "ShadowError" in page.shadow.errors[0]
     page.shadow.errors.clear()
     page._model_model.removeRow(page._model_model.rowCount() - 1)
+
+
+def radius_text(page) -> str:
+    return next(row for row in page.getFitPage() if row[0] == "radius")[2]
+
+
+def testReadersAnswerFromTheDocumentOutsideOperations(page):
+    """Phase 3: the document writes numbers canonically (R-6), the table cell says "20"."""
+    assert page.shadow.in_sync and radius_text(page) == "20.0"
+    with page.shadow.operation():
+        assert not page.shadow.in_sync and radius_text(page) == "20"
+
+
+def testStaleDocumentFallsBackUntilAReadBackSucceeds(page, monkeypatch):
+    def fail(doc, tx):
+        raise RuntimeError("cannot read the options")
+    monkeypatch.setattr(page.shadow, "_sync_options", fail)
+    page.options_widget.updateMinQ(0.01)                # a mirrored write whose read-back fails
+    assert not page.shadow.in_sync and radius_text(page) == "20"
+    page.shadow.errors.clear()
+    monkeypatch.undo()
+    with page.shadow.operation("flags"):                # the next read-back re-reads every section
+        pass
+    assert page.shadow.in_sync and page.document.options.qmin == 0.01
 
 
 def testDecoratorPassesOnlyAcceptedSignalArguments():

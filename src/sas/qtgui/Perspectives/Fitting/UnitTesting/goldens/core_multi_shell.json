@@ -8,7 +8,7 @@
    [
     "scale",
     "False",
-    "1",
+    "1.0",
     null,
     "0.0",
     "inf",
@@ -35,7 +35,7 @@
    [
     "sld_core",
     "False",
-    "1",
+    "1.0",
     null,
     "-inf",
     "inf",
@@ -44,7 +44,7 @@
    [
     "radius",
     "False",
-    "200",
+    "200.0",
     null,
     "0.0",
     "inf",
@@ -80,7 +80,7 @@
    [
     "thickness1",
     "False",
-    "40",
+    "40.0",
     null,
     "0.0",
     "inf",
@@ -98,7 +98,7 @@
    [
     "thickness2",
     "True",
-    "12",
+    "12.0",
     null,
     "0.0",
     "inf",
@@ -116,7 +116,7 @@
    [
     "thickness3",
     "False",
-    "40",
+    "40.0",
     null,
     "0.0",
     "inf",
@@ -211,9 +211,9 @@
     "None"
    ]
   ],
-  "clipboard": "sasview_parameter_values:model_name,core_multi_shell:scale,False,1,None,0.0,inf,():background,False,0.001,None,-inf,inf,():core_multi_shell,None,,None,,,():sld_core,False,1,None,-inf,inf,():radius,False,200,None,0.0,inf,():sld_solvent,False,6.4,None,-inf,inf,():n,None,,None,0,10,():sld1,False,1.7,None,-inf,inf,():thickness1,False,40,None,0.0,inf,():sld2,False,1.7,None,-inf,inf,():thickness2,True,12,None,0.0,inf,():sld3,False,1.7,None,-inf,inf,():thickness3,False,40,None,0.0,inf,():multiplicity,3:is_data,True:tab_index,1:is_batch_fitting,False:data_name,['data1']:data_id,['d1']:tab_name,M1:q_range_min,0.005:q_range_max,0.4:q_weighting,1:weighting,1:smearing,0:smearing_min,None:smearing_max,None:polydisperse_params,False:magnetic_params,False:chainfit_params,False:2D_params,False:fitpage_category,Sphere:fitpage_model,core_multi_shell:fitpage_structure,None",
-  "excel": "scale\tbackground\tcore_multi_shell\tsld_core\tradius\tsld_solvent\tn\tsld1\tthickness1\tsld2\tthickness2\tsld3\tthickness3\tmultiplicity\t\r\n1\t0.001\t\t1\t200\t6.4\t\t1.7\t40\t1.7\t12\t1.7\t40\t\r\nFalse\tFalse\tNone\tFalse\tFalse\tFalse\tNone\tFalse\tFalse\tFalse\tTrue\tFalse\tFalse\t",
-  "latex": "\\begin{table}\\begin{tabular}[h]{|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|}\\hline\r\nscale & background & core\\_multi\\_shell & sld\\_core & radius & sld\\_solvent & n & sld1 & thickness1 & sld2 & thickness2 & sld3 & thickness3 & multiplicity\\\\ \\hline\r\n 1 &  0.001 &   &  1 &  200 &  6.4 &   &  1.7 &  40 &  1.7 &  12 &  1.7 &  40 &  & 3 &\\\\ \\hline\r\n\\end{tabular}\\end{table}",
+  "clipboard": "sasview_parameter_values:model_name,core_multi_shell:scale,False,1.0,None,0.0,inf,():background,False,0.001,None,-inf,inf,():core_multi_shell,None,,None,,,():sld_core,False,1.0,None,-inf,inf,():radius,False,200.0,None,0.0,inf,():sld_solvent,False,6.4,None,-inf,inf,():n,None,,None,0,10,():sld1,False,1.7,None,-inf,inf,():thickness1,False,40.0,None,0.0,inf,():sld2,False,1.7,None,-inf,inf,():thickness2,True,12.0,None,0.0,inf,():sld3,False,1.7,None,-inf,inf,():thickness3,False,40.0,None,0.0,inf,():multiplicity,3:is_data,True:tab_index,1:is_batch_fitting,False:data_name,['data1']:data_id,['d1']:tab_name,M1:q_range_min,0.005:q_range_max,0.4:q_weighting,1:weighting,1:smearing,0:smearing_min,None:smearing_max,None:polydisperse_params,False:magnetic_params,False:chainfit_params,False:2D_params,False:fitpage_category,Sphere:fitpage_model,core_multi_shell:fitpage_structure,None",
+  "excel": "scale\tbackground\tcore_multi_shell\tsld_core\tradius\tsld_solvent\tn\tsld1\tthickness1\tsld2\tthickness2\tsld3\tthickness3\tmultiplicity\t\r\n1.0\t0.001\t\t1.0\t200.0\t6.4\t\t1.7\t40.0\t1.7\t12.0\t1.7\t40.0\t\r\nFalse\tFalse\tNone\tFalse\tFalse\tFalse\tNone\tFalse\tFalse\tFalse\tTrue\tFalse\tFalse\t",
+  "latex": "\\begin{table}\\begin{tabular}[h]{|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|}\\hline\r\nscale & background & core\\_multi\\_shell & sld\\_core & radius & sld\\_solvent & n & sld1 & thickness1 & sld2 & thickness2 & sld3 & thickness3 & multiplicity\\\\ \\hline\r\n 1.0 &  0.001 &   &  1.0 &  200.0 &  6.4 &   &  1.7 &  40.0 &  1.7 &  12.0 &  1.7 &  40.0 &  & 3 &\\\\ \\hline\r\n\\end{tabular}\\end{table}",
   "serialized": {
    "d1": {
     "fit_params": [
@@ -223,7 +223,7 @@
       ],
       "scale": [
        "False",
-       "1",
+       "1.0",
        null,
        "0.0",
        "inf",
@@ -247,7 +247,7 @@
       ],
       "sld_core": [
        "False",
-       "1",
+       "1.0",
        null,
        "-inf",
        "inf",
@@ -255,7 +255,7 @@
       ],
       "radius": [
        "False",
-       "200",
+       "200.0",
        null,
        "0.0",
        "inf",
@@ -287,7 +287,7 @@
       ],
       "thickness1": [
        "False",
-       "40",
+       "40.0",
        null,
        "0.0",
        "inf",
@@ -303,7 +303,7 @@
       ],
       "thickness2": [
        "True",
-       "12",
+       "12.0",
        null,
        "0.0",
        "inf",
@@ -319,7 +319,7 @@
       ],
       "thickness3": [
        "False",
-       "40",
+       "40.0",
        null,
        "0.0",
        "inf",
@@ -413,7 +413,7 @@
     [
      false,
      "scale",
-     "1",
+     "1.0",
      "",
      [
       false,
@@ -470,7 +470,7 @@
     [
      false,
      "sld_core",
-     "1",
+     "1.0",
      "",
      [
       false,
@@ -489,7 +489,7 @@
     [
      false,
      "radius",
-     "200",
+     "200.0",
      "",
      [
       false,
@@ -565,7 +565,7 @@
     [
      false,
      "thickness1",
-     "40",
+     "40.0",
      "",
      [
       false,
@@ -603,7 +603,7 @@
     [
      true,
      "thickness2",
-     "12",
+     "12.0",
      "",
      [
       false,
@@ -641,7 +641,7 @@
     [
      false,
      "thickness3",
-     "40",
+     "40.0",
      "",
      [
       false,
@@ -1917,18 +1917,18 @@
   },
   "symbols": {
    "M1.scale": 1.0,
-   "M1.background": 0.0010000000474974513,
+   "M1.background": 0.001,
    "M1.sld_core": 1.0,
    "M1.radius": 200.0,
-   "M1.sld_solvent": 6.400000095367432,
-   "M1.sld1": 1.7000000476837158,
+   "M1.sld_solvent": 6.4,
+   "M1.sld1": 1.7,
    "M1.thickness1": 40.0,
-   "M1.sld2": 1.7000000476837158,
+   "M1.sld2": 1.7,
    "M1.thickness2": 12.0,
-   "M1.sld3": 1.7000000476837158,
+   "M1.sld3": 1.7,
    "M1.thickness3": 40.0
   },
-  "report": "<html>\n<head>\n<meta http-equiv=Content-Type content='text/html; charset=utf-8'> \n</head>\n<body lang=EN-US>\n<div>\n<p><b><span><center> data1 [TIMESTAMP] </center></span></center></b></p><p>&nbsp;</p><p><center>File name: data1.txt</center></p>\n<p><center>SasView version: [MASKED]</center></p>\n<p><center>SasModels version: [MASKED]</center></p>\n<p><center>Fit optimizer used: Levenberg-Marquardt</center></p>\n<p><center>Model name: core_multi_shell</center></p>\n<p><center>Q Range of the Data: min = 0.005, max = 0.4</center></p>\n<p><center>Q Range of the Fit: min = 0.005, max = 0.4</center></p>\n<p><center>Chi2/Npts: NaN</center></p>\n<p><center>scale = 1 (fixed) </center></p>\n<p><center>background = 0.001 (fixed) cm<sup>-1</sup></center></p>\n<p><center>core_multi_shell =  (fixed) </center></p>\n<p><center>sld_core = 1 (fixed) 10<sup>-6</sup>/\u00c5<sup>2</sup></center></p>\n<p><center>radius = 200 (fixed) \u212b</center></p>\n<p><center>sld_solvent = 6.4 (fixed) 10<sup>-6</sup>/\u00c5<sup>2</sup></center></p>\n<p><center>n =  (fixed) </center></p>\n<p><center>sld1 = 1.7 (fixed) 10<sup>-6</sup>/\u00c5<sup>2</sup></center></p>\n<p><center>thickness1 = 40 (fixed) \u212b</center></p>\n<p><center>sld2 = 1.7 (fixed) 10<sup>-6</sup>/\u00c5<sup>2</sup></center></p>\n<p><center>thickness2 = 12 &#177; 0.0 \u212b</center></p>\n<p><center>sld3 = 1.7 (fixed) 10<sup>-6</sup>/\u00c5<sup>2</sup></center></p>\n<p><center>thickness3 = 40 (fixed) \u212b</center></p>\n",
+  "report": "<html>\n<head>\n<meta http-equiv=Content-Type content='text/html; charset=utf-8'> \n</head>\n<body lang=EN-US>\n<div>\n<p><b><span><center> data1 [TIMESTAMP] </center></span></center></b></p><p>&nbsp;</p><p><center>File name: data1.txt</center></p>\n<p><center>SasView version: [MASKED]</center></p>\n<p><center>SasModels version: [MASKED]</center></p>\n<p><center>Fit optimizer used: Levenberg-Marquardt</center></p>\n<p><center>Model name: core_multi_shell</center></p>\n<p><center>Q Range of the Data: min = 0.005, max = 0.4</center></p>\n<p><center>Q Range of the Fit: min = 0.005, max = 0.4</center></p>\n<p><center>Chi2/Npts: NaN</center></p>\n<p><center>scale = 1.0 (fixed) </center></p>\n<p><center>background = 0.001 (fixed) cm<sup>-1</sup></center></p>\n<p><center>core_multi_shell =  (fixed) </center></p>\n<p><center>sld_core = 1.0 (fixed) 10<sup>-6</sup>/\u00c5<sup>2</sup></center></p>\n<p><center>radius = 200.0 (fixed) \u212b</center></p>\n<p><center>sld_solvent = 6.4 (fixed) 10<sup>-6</sup>/\u00c5<sup>2</sup></center></p>\n<p><center>n =  (fixed) </center></p>\n<p><center>sld1 = 1.7 (fixed) 10<sup>-6</sup>/\u00c5<sup>2</sup></center></p>\n<p><center>thickness1 = 40.0 (fixed) \u212b</center></p>\n<p><center>sld2 = 1.7 (fixed) 10<sup>-6</sup>/\u00c5<sup>2</sup></center></p>\n<p><center>thickness2 = 12.0 &#177; 0.0 \u212b</center></p>\n<p><center>sld3 = 1.7 (fixed) 10<sup>-6</sup>/\u00c5<sup>2</sup></center></p>\n<p><center>thickness3 = 40.0 (fixed) \u212b</center></p>\n",
   "theory_inputs": {
    "name": "M1",
    "params": {

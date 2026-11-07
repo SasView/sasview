@@ -227,5 +227,9 @@ class DecodeTest:
         assert payload.data_ids == ["d2"]
         assert payload.tab_name == "M2"
 
+    def testTabNameIsTheMnemonic(self):
+        first, _ = CASES["two_pages"]()
+        assert serializer.line_dict(serializer.legacy_rows(first))["tab_name"] == ["sample"]
+
     def testForeignTextIsRejected(self):
         assert serializer.parse_clipboard("something else") is None

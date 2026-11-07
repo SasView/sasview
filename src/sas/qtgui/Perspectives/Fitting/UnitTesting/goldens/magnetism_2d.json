@@ -35,7 +35,7 @@
    [
     "sld",
     "False",
-    "1",
+    "1.0",
     null,
     "-inf",
     "inf",
@@ -44,7 +44,7 @@
    [
     "sld_solvent",
     "False",
-    "6",
+    "6.0",
     null,
     "-inf",
     "inf",
@@ -53,7 +53,7 @@
    [
     "radius",
     "True",
-    "50",
+    "50.0",
     null,
     "0.0",
     "inf",
@@ -234,9 +234,9 @@
     "None"
    ]
   ],
-  "clipboard": "sasview_parameter_values:model_name,sphere:scale,False,1.0,None,0.0,inf,():background,False,0.001,None,-inf,inf,():sphere,None,,None,,,():sld,False,1,None,-inf,inf,():sld_solvent,False,6,None,-inf,inf,():radius,True,50,None,0.0,inf,():up_frac_i,False,0.0,None,0.0,1.0,():up_frac_f,False,0.0,None,0.0,1.0,():up_theta,False,90.0,None,0.0,360.0,():up_phi,False,0.0,None,0.0,180.0,():sld_M0,True,2.5,None,-inf,inf,():sld_mtheta,False,0.0,None,-90.0,90.0,():sld_mphi,False,0.0,None,-180.0,180.0,():sld_solvent_M0,False,0.0,None,-inf,inf,():sld_solvent_mtheta,False,0.0,None,-90.0,90.0,():sld_solvent_mphi,False,0.0,None,-180.0,180.0,():is_data,True:tab_index,1:is_batch_fitting,False:data_name,['data2d']:data_id,['d2']:tab_name,M1:q_range_min,0.0:q_range_max,0.14142135623730953:q_weighting,1:weighting,1:smearing,0:smearing_min,None:smearing_max,None:polydisperse_params,False:magnetic_params,True:chainfit_params,False:2D_params,False:fitpage_category,Sphere:fitpage_model,sphere:fitpage_structure,None",
-  "excel": "scale\tbackground\tsphere\tsld\tsld_solvent\tradius\tup_frac_i\tup_frac_f\tup_theta\tup_phi\tsld_M0\tsld_mtheta\tsld_mphi\tsld_solvent_M0\tsld_solvent_mtheta\tsld_solvent_mphi\t\r\n1.0\t0.001\t\t1\t6\t50\t0.0\t0.0\t90.0\t0.0\t2.5\t0.0\t0.0\t0.0\t0.0\t0.0\t\r\nFalse\tFalse\tNone\tFalse\tFalse\tTrue\tFalse\tFalse\tFalse\tFalse\tTrue\tFalse\tFalse\tFalse\tFalse\tFalse\t",
-  "latex": "\\begin{table}\\begin{tabular}[h]{|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|}\\hline\r\nscale & background & sphere & sld & sld\\_solvent & radius & up\\_frac\\_i & up\\_frac\\_f & up\\_theta & up\\_phi & sld\\_M0 & sld\\_mtheta & sld\\_mphi & sld\\_solvent\\_M0 & sld\\_solvent\\_mtheta & sld\\_solvent\\_mphi\\\\ \\hline\r\n 1.0 &  0.001 &   &  1 &  6 &  50 &  0.0 &  0.0 &  90.0 &  0.0 &  2.5 &  0.0 &  0.0 &  0.0 &  0.0 &  0.0\\\\ \\hline\r\n\\end{tabular}\\end{table}",
+  "clipboard": "sasview_parameter_values:model_name,sphere:scale,False,1.0,None,0.0,inf,():background,False,0.001,None,-inf,inf,():sphere,None,,None,,,():sld,False,1.0,None,-inf,inf,():sld_solvent,False,6.0,None,-inf,inf,():radius,True,50.0,None,0.0,inf,():up_frac_i,False,0.0,None,0.0,1.0,():up_frac_f,False,0.0,None,0.0,1.0,():up_theta,False,90.0,None,0.0,360.0,():up_phi,False,0.0,None,0.0,180.0,():sld_M0,True,2.5,None,-inf,inf,():sld_mtheta,False,0.0,None,-90.0,90.0,():sld_mphi,False,0.0,None,-180.0,180.0,():sld_solvent_M0,False,0.0,None,-inf,inf,():sld_solvent_mtheta,False,0.0,None,-90.0,90.0,():sld_solvent_mphi,False,0.0,None,-180.0,180.0,():is_data,True:tab_index,1:is_batch_fitting,False:data_name,['data2d']:data_id,['d2']:tab_name,M1:q_range_min,0.0:q_range_max,0.14142135623730953:q_weighting,1:weighting,1:smearing,0:smearing_min,None:smearing_max,None:polydisperse_params,False:magnetic_params,True:chainfit_params,False:2D_params,False:fitpage_category,Sphere:fitpage_model,sphere:fitpage_structure,None",
+  "excel": "scale\tbackground\tsphere\tsld\tsld_solvent\tradius\tup_frac_i\tup_frac_f\tup_theta\tup_phi\tsld_M0\tsld_mtheta\tsld_mphi\tsld_solvent_M0\tsld_solvent_mtheta\tsld_solvent_mphi\t\r\n1.0\t0.001\t\t1.0\t6.0\t50.0\t0.0\t0.0\t90.0\t0.0\t2.5\t0.0\t0.0\t0.0\t0.0\t0.0\t\r\nFalse\tFalse\tNone\tFalse\tFalse\tTrue\tFalse\tFalse\tFalse\tFalse\tTrue\tFalse\tFalse\tFalse\tFalse\tFalse\t",
+  "latex": "\\begin{table}\\begin{tabular}[h]{|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|}\\hline\r\nscale & background & sphere & sld & sld\\_solvent & radius & up\\_frac\\_i & up\\_frac\\_f & up\\_theta & up\\_phi & sld\\_M0 & sld\\_mtheta & sld\\_mphi & sld\\_solvent\\_M0 & sld\\_solvent\\_mtheta & sld\\_solvent\\_mphi\\\\ \\hline\r\n 1.0 &  0.001 &   &  1.0 &  6.0 &  50.0 &  0.0 &  0.0 &  90.0 &  0.0 &  2.5 &  0.0 &  0.0 &  0.0 &  0.0 &  0.0\\\\ \\hline\r\n\\end{tabular}\\end{table}",
   "serialized": {
    "d2": {
     "fit_params": [
@@ -270,7 +270,7 @@
       ],
       "sld": [
        "False",
-       "1",
+       "1.0",
        null,
        "-inf",
        "inf",
@@ -278,7 +278,7 @@
       ],
       "sld_solvent": [
        "False",
-       "6",
+       "6.0",
        null,
        "-inf",
        "inf",
@@ -286,7 +286,7 @@
       ],
       "radius": [
        "True",
-       "50",
+       "50.0",
        null,
        "0.0",
        "inf",
@@ -514,7 +514,7 @@
     [
      false,
      "sld",
-     "1",
+     "1.0",
      "",
      [
       false,
@@ -533,7 +533,7 @@
     [
      false,
      "sld_solvent",
-     "6",
+     "6.0",
      "",
      [
       false,
@@ -552,7 +552,7 @@
     [
      true,
      "radius",
-     "50",
+     "50.0",
      "",
      [
       false,
@@ -859,12 +859,12 @@
   },
   "symbols": {
    "M1.scale": 1.0,
-   "M1.background": 0.0010000000474974513,
+   "M1.background": 0.001,
    "M1.sld": 1.0,
    "M1.sld_solvent": 6.0,
    "M1.radius": 50.0
   },
-  "report": "<html>\n<head>\n<meta http-equiv=Content-Type content='text/html; charset=utf-8'> \n</head>\n<body lang=EN-US>\n<div>\n<p><b><span><center> data2d [TIMESTAMP] </center></span></center></b></p><p>&nbsp;</p><p><center>File name: data2d.dat</center></p>\n<p><center>SasView version: [MASKED]</center></p>\n<p><center>SasModels version: [MASKED]</center></p>\n<p><center>Fit optimizer used: Levenberg-Marquardt</center></p>\n<p><center>Model name: sphere</center></p>\n<p><center>Q Range of the Data: min = -0.1, max = 0.1</center></p>\n<p><center>Q Range of the Fit: min = 0.0, max = 0.14142135623730953</center></p>\n<p><center>Chi2/Npts: NaN</center></p>\n<p><center>scale = 1.0 (fixed) </center></p>\n<p><center>background = 0.001 (fixed) cm<sup>-1</sup></center></p>\n<p><center>sphere =  (fixed) </center></p>\n<p><center>sld = 1 (fixed) 10<sup>-6</sup>/\u00c5<sup>2</sup></center></p>\n<p><center>sld_solvent = 6 (fixed) 10<sup>-6</sup>/\u00c5<sup>2</sup></center></p>\n<p><center>radius = 50 &#177; 0.0 \u212b</center></p>\n<p><center>up_frac_i = 0.0 (fixed) </center></p>\n<p><center>up_frac_f = 0.0 (fixed) </center></p>\n<p><center>up_theta = 90.0 (fixed) \u00b0</center></p>\n<p><center>up_phi = 0.0 (fixed) \u00b0</center></p>\n<p><center>sld_M0 = 2.5 &#177; 0.0 10<sup>-6</sup>/\u00c5<sup>2</sup></center></p>\n<p><center>sld_mtheta = 0.0 (fixed) \u00b0</center></p>\n<p><center>sld_mphi = 0.0 (fixed) \u00b0</center></p>\n<p><center>sld_solvent_M0 = 0.0 (fixed) 10<sup>-6</sup>/\u00c5<sup>2</sup></center></p>\n<p><center>sld_solvent_mtheta = 0.0 (fixed) \u00b0</center></p>\n<p><center>sld_solvent_mphi = 0.0 (fixed) \u00b0</center></p>\n",
+  "report": "<html>\n<head>\n<meta http-equiv=Content-Type content='text/html; charset=utf-8'> \n</head>\n<body lang=EN-US>\n<div>\n<p><b><span><center> data2d [TIMESTAMP] </center></span></center></b></p><p>&nbsp;</p><p><center>File name: data2d.dat</center></p>\n<p><center>SasView version: [MASKED]</center></p>\n<p><center>SasModels version: [MASKED]</center></p>\n<p><center>Fit optimizer used: Levenberg-Marquardt</center></p>\n<p><center>Model name: sphere</center></p>\n<p><center>Q Range of the Data: min = -0.1, max = 0.1</center></p>\n<p><center>Q Range of the Fit: min = 0.0, max = 0.14142135623730953</center></p>\n<p><center>Chi2/Npts: NaN</center></p>\n<p><center>scale = 1.0 (fixed) </center></p>\n<p><center>background = 0.001 (fixed) cm<sup>-1</sup></center></p>\n<p><center>sphere =  (fixed) </center></p>\n<p><center>sld = 1.0 (fixed) 10<sup>-6</sup>/\u00c5<sup>2</sup></center></p>\n<p><center>sld_solvent = 6.0 (fixed) 10<sup>-6</sup>/\u00c5<sup>2</sup></center></p>\n<p><center>radius = 50.0 &#177; 0.0 \u212b</center></p>\n<p><center>up_frac_i = 0.0 (fixed) </center></p>\n<p><center>up_frac_f = 0.0 (fixed) </center></p>\n<p><center>up_theta = 90.0 (fixed) \u00b0</center></p>\n<p><center>up_phi = 0.0 (fixed) \u00b0</center></p>\n<p><center>sld_M0 = 2.5 &#177; 0.0 10<sup>-6</sup>/\u00c5<sup>2</sup></center></p>\n<p><center>sld_mtheta = 0.0 (fixed) \u00b0</center></p>\n<p><center>sld_mphi = 0.0 (fixed) \u00b0</center></p>\n<p><center>sld_solvent_M0 = 0.0 (fixed) 10<sup>-6</sup>/\u00c5<sup>2</sup></center></p>\n<p><center>sld_solvent_mtheta = 0.0 (fixed) \u00b0</center></p>\n<p><center>sld_solvent_mphi = 0.0 (fixed) \u00b0</center></p>\n",
   "theory_inputs": {
    "name": "M1",
    "params": {

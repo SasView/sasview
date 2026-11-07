@@ -234,7 +234,7 @@ def fit_page_rows(doc) -> list[list]:
     rows.append(["is_batch_fitting", str(doc.mode is PageMode.BATCH)])
     rows.append(["data_name", [str(d.data.name) for d in shown]])
     rows.append(["data_id", [str(d.data.id) for d in shown]])
-    rows.append(["tab_name", f"M{doc.identity.tab_id}"])   # register R-3: not the mnemonic until Phase 3a
+    rows.append(["tab_name", doc.identity.mnemonic])
     options = doc.options
     rows.append(["q_range_min", str(options.qmin)])
     rows.append(["q_range_max", str(options.qmax)])
@@ -328,6 +328,32 @@ def standard_parameters(doc) -> list[list]:
         result.append([p.fit and p.fittable, p.label, value, "", error,
                        [True, _text(p.min)], [True, _text(p.max)], p.units])
     return result
+
+
+def _poly_standard(p: Parameter, with_errors: bool) -> list:
+    """``getStandardParam`` of a poly row. The poly table never has 5 columns, so it reads the
+    columns as if there were an error column: without one, min/max/npts land in error/min/max."""
+    cells = [_text(p.min), _text(p.max), str(int(p.dispersion.npts))]
+    if with_errors:
+        cells = [_text(p.error)] + cells[:2]
+    return [p.fit, p.label, format_number(p.value), "", [True, cells[0]], [True, cells[1]], [True, cells[2]], ""]
+
+
+def _magnet_standard(p: Parameter, with_errors: bool) -> list:
+    error = [True, _text(p.error)] if with_errors else [False, 0.0]
+    return [p.fit, p.label, format_number(p.value), "", error, [True, _text(p.min)], [True, _text(p.max)], p.units]
+
+
+def report_parameters(doc) -> list[list]:
+    """The report's parameter rows (``getReport``): the main table, plus the poly and magnet tables when shown."""
+    params = doc.parameters
+    with_errors = _has_errors(doc)
+    rows = standard_parameters(doc)
+    if doc.flags.polydispersity:
+        rows += [_poly_standard(p, with_errors) for p in params.by_table(Table.POLY)]
+    if doc.flags.magnetism and doc.can_have_magnetism():
+        rows += [_magnet_standard(p, with_errors) for p in params.by_table(Table.MAGNET)]
+    return rows
 
 
 # ---------------------------------------------------------------------------
@@ -435,6 +461,6 @@ __all__ = [
     "PagePayload", "RowValues", "clipboard_text", "decode", "excel_text", "fit_model_rows",
     "fit_page_rows", "fit_parameter_rows", "formatParameters", "formatParametersExcel",
     "formatParametersLatex", "format_number", "latex_text", "legacy_rows", "line_dict",
-    "page_state", "parse_clipboard", "project_dict", "standard_parameters",
+    "page_state", "parse_clipboard", "project_dict", "report_parameters", "standard_parameters",
 ]
 

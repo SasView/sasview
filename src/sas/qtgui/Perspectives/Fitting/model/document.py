@@ -41,6 +41,7 @@ from sas.qtgui.Perspectives.Fitting.model.parameters import (
     ModelSelection,
     PageIdentity,
     PageMode,
+    Parameter,
     ParameterSet,
     Smearing,
     Table,
@@ -338,6 +339,11 @@ class FitPageDocument:
 
     def can_have_magnetism(self) -> bool:
         return rules.can_have_magnetism(self)
+
+    def constrained(self, table: Table | None = None) -> list[Parameter]:
+        """The fittable parameters of *table* (every table if None) that carry a constraint, in table order."""
+        tables = list(Table) if table is None else [table]
+        return [p for t in tables for p in self.parameters.by_table(t) if p.fittable and p.constraint is not None]
 
     def symbol_table(self) -> dict[str, float]:
         """{f"{mnemonic}.{name}": value} for constraints: fittable main rows, plus poly widths when active."""

@@ -145,7 +145,7 @@ class ConstraintManager:
         if model_key == 'poly' and 'Distribution' in constraint.param:
             constraint.param = self.widget.polydispersity_widget.polyNameToParam(constraint.param)
 
-        constraint_list.append((self.widget.modelName() + '.' + constraint.param,
+        constraint_list.append((self.widget.logic.kernel_module.name + '.' + constraint.param,
                                 constraint.func))
 
         # Call the error checking function

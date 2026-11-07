@@ -1261,7 +1261,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             if name in constraint:
                 self.tblConstraints.item(row, 0).setCheckState(QtCore.Qt.Unchecked)
                 # deactivate the constraint
-                tab = self.parent.getTabByName(name[:name.index(":")])
+                tab = self.parent.getTabByMnemonic(name[:name.index(":")])
                 row = tab.getRowFromName(name[name.index(":") + 1:])
                 model_key = tab.getModelKeyFromName(constraint)
                 with tab.shadow.operation("parameters"):
