@@ -5,6 +5,8 @@ import glob
 import math
 import os
 
+import pytest
+
 from sasmodels.sasview_model import load_custom_model, load_standard_models
 
 from sas.qtgui.Perspectives.Fitting.model.document import FitPageDocument
@@ -71,3 +73,46 @@ def flags(doc, **values):
 
 def d1(i="d1", name="data1", **kw):
     return make_data1d(i, name, **kw)
+
+
+# ---------------------------------------------------------------------------
+# Comparison
+# ---------------------------------------------------------------------------
+
+def _as_number(value):
+    if isinstance(value, bool) or value is None:
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def same(actual, expected, path="") -> None:
+    """Assert equality, with numbers (and number text) compared numerically to 1e-6."""
+    if isinstance(expected, dict):
+        assert isinstance(actual, dict) and set(actual) == set(expected), f"{path}: keys differ"
+        for k in expected:
+            same(actual[k], expected[k], f"{path}.{k}")
+        return
+    if isinstance(expected, (list, tuple)):
+        assert isinstance(actual, (list, tuple)) and len(actual) == len(expected), \
+            f"{path}: {actual!r} != {expected!r}"
+        for i, (a, e) in enumerate(zip(actual, expected)):
+            same(a, e, f"{path}[{i}]")
+        return
+    a, e = _as_number(actual), _as_number(expected)
+    if a is not None and e is not None:
+        assert a == pytest.approx(e, rel=1e-6, abs=1e-12) or (math.isinf(a) and a == e), \
+            f"{path}: {actual!r} != {expected!r}"
+        return
+    assert actual == expected, f"{path}: {actual!r} != {expected!r}"
+
+
+def jsonable(value):
+    """Rows hold tuples and None; the goldens hold lists."""
+    if isinstance(value, dict):
+        return {k: jsonable(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [jsonable(v) for v in value]
+    return value

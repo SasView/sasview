@@ -7,6 +7,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # Local UI
+from sas.qtgui.Perspectives.Fitting.DocumentShadow import mirrors
 from sas.qtgui.Perspectives.Fitting.UI.OptionsWidgetUI import Ui_tabOptions
 from sas.qtgui.Plotting.PlotterData import Data2D
 
@@ -269,6 +270,7 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         log_points = self.chkLogData.isChecked()
         return (q_range_min, q_range_max, npts, log_points, self.weighting)
 
+    @mirrors('options')
     def setState(self, q_range_min, q_range_max, npts, log_points, weighting):
         """
         Set the state of controls from provided values.

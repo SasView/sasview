@@ -481,8 +481,9 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             # Remove the key from the dictionaries
             self.available_tabs.pop(self.current_cell, None)
             # Change the model name
-            model = temp_tab.logic.kernel_module
-            model.name = new_moniker
+            with temp_tab.shadow.operation("identity"):
+                model = temp_tab.logic.kernel_module
+                model.name = new_moniker
             # Replace constraint name
             temp_tab.replaceConstraintName(self.current_cell, new_moniker)
             # Replace constraint name in the remaining tabs
@@ -1263,4 +1264,5 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                 tab = self.parent.getTabByName(name[:name.index(":")])
                 row = tab.getRowFromName(name[name.index(":") + 1:])
                 model_key = tab.getModelKeyFromName(constraint)
-                tab.getConstraintForRow(row, model_key=model_key).active = False
+                with tab.shadow.operation("parameters"):
+                    tab.getConstraintForRow(row, model_key=model_key).active = False

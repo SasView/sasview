@@ -19,7 +19,7 @@ from sasmodels import modelinfo
 from sasmodels.product import RADIUS_MODE_ID, STRUCTURE_MODE_ID, VOLFRAC_ID
 from sasmodels.sasview_model import MultiplicationModel
 
-from sas.qtgui.Perspectives.Fitting.FittingConstants import DEFAULT_POLYDISP_FUNCTION
+from sas.qtgui.Perspectives.Fitting.FittingConstants import CATEGORY_STRUCTURE, DEFAULT_POLYDISP_FUNCTION, MODEL_DEFAULT
 from sas.qtgui.Perspectives.Fitting.model.parameters import (
     Capabilities,
     Dispersion,
@@ -96,7 +96,9 @@ class KernelBuilder:
         self._models = models     # model name -> SasviewModel class
 
     def layout(self, selection: ModelSelection, is2D: bool) -> ParameterSet:
-        if not selection.model:
+        """The parameter layout of *selection*. A placeholder model text, or the Structure Factor
+        category, means no form factor (the combo boxes may show either)."""
+        if selection.category == CATEGORY_STRUCTURE or selection.model in ("", MODEL_DEFAULT):
             if not selection.structure:
                 return ParameterSet()
             return self._structure_only(selection.structure, is2D)

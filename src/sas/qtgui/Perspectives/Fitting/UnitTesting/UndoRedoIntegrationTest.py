@@ -59,11 +59,12 @@ def _suppress_message_boxes(monkeypatch):
 
 
 @pytest.fixture
-def widget(qapp, monkeypatch):
+def widget(qapp, monkeypatch, request):
     """Create a real FittingWidget for integration testing."""
     w = FittingWidgetMod(dummy_manager())
     monkeypatch.setattr(FittingUtilities, 'checkConstraints', lambda *a, **kw: None)
     yield w
+    w.shadow_checker.assert_ok(request)
     w.close()
     del w
 
@@ -194,6 +195,7 @@ class TestDatasetUndoHistory:
         assert not w.undo_stack.can_undo()
         assert not w.undo_stack.can_redo()
 
+    @pytest.mark.shadow_exempt("selects batch dataset 1 on a page without data")
     def test_batch_file_switch_clears_existing_undo_history(self, widget_with_model, monkeypatch):
         """Batch file selection changes the active logic, so undo history must reset."""
         w = widget_with_model
@@ -503,6 +505,7 @@ class TestFitResultUndo:
         res.pname = param_names[:len(res.pvec)]
         return ([[res]], 0.5)
 
+    @pytest.mark.shadow_exempt("mocks the writers that apply the fit result to the tables")
     def test_fit_complete_pushes_fit_result_command(self, widget_with_model, monkeypatch):
         """fitComplete should push a FitResultCommand."""
         import copy
@@ -558,6 +561,7 @@ class TestFitResultUndo:
         w.fitComplete(result)
         assert w.undo_stack._enabled
 
+    @pytest.mark.shadow_exempt("uses a MagicMock as the pre-fit kernel")
     def test_fit_complete_failed_no_command(self, widget_with_model, monkeypatch):
         """A failed fit should not push an undo command."""
         w = widget_with_model
@@ -570,6 +574,7 @@ class TestFitResultUndo:
         w.fitComplete(None)
         assert not w.undo_stack.can_undo()
 
+    @pytest.mark.shadow_exempt("mocks the writers that apply the fit result to the tables")
     def test_undo_fit_removes_error_column(self, widget_with_model, monkeypatch):
         """Undoing a fit must remove the now-stale error column from the table."""
         import copy
@@ -684,6 +689,7 @@ class TestGuiManagerUndoHookSignalChain:
         w.undo_stack.push(ParameterValueCommand("scale", 1.0, 2.0))
         assert len(handler_calls) >= 1
 
+    @pytest.mark.shadow_exempt("mocks the writers that apply the fit result to the tables")
     def test_fit_complete_triggers_action_enable_via_signal_chain(
         self, widget_with_model, monkeypatch
     ):
@@ -711,6 +717,7 @@ class TestGuiManagerUndoHookSignalChain:
         assert action_undo.setEnabled.call_args_list[-1] == ((True,),)
         assert w.undo_stack.can_undo()
 
+    @pytest.mark.shadow_exempt("mocks the writers that apply the fit result to the tables")
     def test_fit_complete_emits_communicator_fallback(self, widget_with_model, monkeypatch):
         """fitComplete must emit undoRedoUpdateSignal as a reliable fallback
         for refreshing the GUI action state."""

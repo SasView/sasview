@@ -385,7 +385,8 @@ def case_two_pages():
     second = new_page(tab_id=2, data=make_data1d("d2", "data2"))
     select_model(second, "Cylinder", "cylinder")
     # What ConstraintWidget.onTabCellEdit does on a rename
-    first.logic.kernel_module.name = "sample"
+    with first.shadow.operation("identity"):
+        first.logic.kernel_module.name = "sample"
     first.replaceConstraintName("M1", "sample")
     second.replaceConstraintName("M1", "sample")
     constraint = Constraint(param="radius", func="sample.radius", value_ex="sample.radius")
@@ -412,6 +413,8 @@ def build_and_capture(name: str) -> list[dict]:
     pages = []
     try:
         pages = CASES[name]()
+        for page in pages:
+            page.shadow_checker.assert_ok()
         return [capture(page) for page in pages]
     finally:
         FittingUtilities.checkConstraints = original

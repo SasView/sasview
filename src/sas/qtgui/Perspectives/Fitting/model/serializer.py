@@ -159,14 +159,15 @@ def _constraint_tuple(p: Parameter) -> tuple:
     return () if c is None else (c.value, c.param, c.value_ex, c.validate, c.func)
 
 
-def _has_errors(params: list[Parameter]) -> bool:
-    """A table shows its error column when any of its parameters carries an error."""
-    return any(p.error is not None for p in params)
+def _has_errors(doc) -> bool:
+    """After a fit, every table shows an error column, also for its unfitted rows: the column
+    is shown when any parameter of the page carries an error."""
+    return any(p.error is not None for p in doc.parameters)
 
 
 def _main_rows(doc) -> list[list]:
     params = doc.parameters
-    with_errors = _has_errors(params.by_table(Table.MAIN))
+    with_errors = _has_errors(doc)
     result = []
     for row in params.rows:
         error = "" if with_errors else None
@@ -185,7 +186,7 @@ def _main_rows(doc) -> list[list]:
 
 def _poly_rows(doc) -> list[list]:
     params = doc.parameters.by_table(Table.POLY)
-    with_errors = _has_errors(params)
+    with_errors = _has_errors(doc)
     rows = []
     for p in params:
         d = p.dispersion
@@ -197,7 +198,7 @@ def _poly_rows(doc) -> list[list]:
 
 def _magnet_rows(doc) -> list[list]:
     params = doc.parameters.by_table(Table.MAGNET)
-    with_errors = _has_errors(params)
+    with_errors = _has_errors(doc)
     rows = []
     for p in params:
         error = (format_number(p.error) if p.error is not None else "") if with_errors else None
@@ -314,7 +315,7 @@ def page_state(doc, state, kernel, chi2: float | None = None) -> None:
 def standard_parameters(doc) -> list[list]:
     """``FittingUtilities.getStandardParam`` of the main table."""
     params = doc.parameters
-    with_errors = _has_errors(params.by_table(Table.MAIN))
+    with_errors = _has_errors(doc)
     result = []
     for row in params.rows:
         if row.kind is RowKind.HEADING:

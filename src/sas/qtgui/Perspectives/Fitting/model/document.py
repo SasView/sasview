@@ -151,6 +151,11 @@ class Transaction:
 
     # -- data -----------------------------------------------------------
 
+    def set_mode(self, mode: PageMode) -> None:
+        """Single or batch page: decided when the page receives its data."""
+        self._doc.mode = mode
+        self.events.append(DataChanged(frozenset(self._doc.datasets)))
+
     def set_datasets(self, datasets: list[DataRef], active_id: str | None = None) -> None:
         ids = [d.id for d in datasets]
         if len(set(ids)) != len(ids):
@@ -279,11 +284,11 @@ class FitPageDocument:
     def _state(self) -> tuple:
         return (self.parameters.copy(), self.selection, copy.copy(self.options), copy.copy(self.smearing),
                 copy.copy(self.flags), self.identity.mnemonic, dict(self.datasets), list(self.dataset_order),
-                self.active_id, list(self.chain_order))
+                self.active_id, list(self.chain_order), self.mode)
 
     def _restore_state(self, state: tuple) -> None:
         (self.parameters, self.selection, self.options, self.smearing, self.flags, self.identity.mnemonic,
-         self.datasets, self.dataset_order, self.active_id, self.chain_order) = state
+         self.datasets, self.dataset_order, self.active_id, self.chain_order, self.mode) = state
 
     # -- subscription ---------------------------------------------------
 

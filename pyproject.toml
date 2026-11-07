@@ -191,6 +191,9 @@ python_classes = [
     "*Test",
     "Test*",
 ]
+markers = [
+    "shadow_exempt(reason): the test builds a fit page state the application cannot reach; skip the FitPageDocument shadow check",
+]
 qt_api = "pyside6"
 addopts = [
     "-v",

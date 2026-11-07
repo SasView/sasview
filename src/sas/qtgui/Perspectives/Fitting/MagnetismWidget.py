@@ -9,6 +9,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
+from sas.qtgui.Perspectives.Fitting.DocumentShadow import mirrors
 
 # Local UI
 from sas.qtgui.Perspectives.Fitting.UI.MagnetismWidget import Ui_MagnetismWidgetUI
@@ -72,6 +73,7 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
         """
         self.magneticAnglesWidget.show()
 
+    @mirrors('parameters')
     def setMagneticModel(self) -> None:
         """
         Set magnetism values on model
@@ -108,6 +110,7 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
                             if self._magnet_model.item(row, 0).isCheckable()]
         return magnetic_model_params
 
+    @mirrors('parameters')
     def onMagnetModelChange(self, top: QtCore.QModelIndex, bottom: QtCore.QModelIndex) -> None:
         """
         Callback method for updating the sasmodel magnetic parameters with the GUI values
@@ -193,6 +196,7 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
         for row_i in range(self._magnet_model.rowCount()):
             func(row_i)
 
+    @mirrors('parameters')
     def updateFullMagnetModel(self, param_dict: dict[str, list[str]]) -> None:
         """
         Update the magnetism model with new parameters, create the errors column
@@ -231,6 +235,7 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
 
         self.iterateOverMagnetModel(updateFittedValues)
 
+    @mirrors('parameters')
     def updateMagnetModelFromList(self, param_dict: dict[str, tuple[float, float]]) -> None:
         """
         Update the magnetic model with new parameters, create the errors column

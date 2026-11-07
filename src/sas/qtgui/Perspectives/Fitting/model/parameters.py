@@ -181,9 +181,9 @@ class ParameterSet:
 
 @dataclass(frozen=True)
 class ModelSelection:
-    """What the three combo boxes and the shell count select. Frozen: a valid cache key."""
+    """What the three combo boxes show, and the shell count. Frozen: a valid cache key."""
     category: str = ""
-    model: str = ""              # form factor, or "" when only an S(Q) is selected
+    model: str = ""              # form factor; "", the "Choose model..." placeholder, or ignored in the S(Q) category
     structure: str = ""          # "" when absent
     is_plugin: bool = False
     multiplicity: int | None = None

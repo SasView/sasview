@@ -8,7 +8,6 @@ through transactions. The document's legacy outputs must then equal the
 goldens. Numbers are compared numerically (register R-6: the document stores
 numbers, and the table's text spelling, e.g. "1" versus "1.0", is not kept).
 """
-import math
 from types import SimpleNamespace
 
 import pytest
@@ -21,7 +20,7 @@ from sas.qtgui.Perspectives.Fitting.model.parameters import (
     Dispersion,
     Smearing,
 )
-from sas.qtgui.Perspectives.Fitting.UnitTesting.document_fixtures import d1, edit, flags, page
+from sas.qtgui.Perspectives.Fitting.UnitTesting.document_fixtures import d1, edit, flags, jsonable, page, same
 from sas.qtgui.Perspectives.Fitting.UnitTesting.golden_data import GOLDEN_DIR, load_golden, make_data2d
 
 
@@ -143,49 +142,6 @@ def case_theory_only():
 
 
 CASES = {name[len("case_"):]: fn for name, fn in sorted(globals().items()) if name.startswith("case_")}
-
-
-# ---------------------------------------------------------------------------
-# Comparison
-# ---------------------------------------------------------------------------
-
-def _as_number(value):
-    if isinstance(value, bool) or value is None:
-        return None
-    try:
-        return float(value)
-    except (TypeError, ValueError):
-        return None
-
-
-def same(actual, expected, path="") -> None:
-    """Assert equality, with numbers (and number text) compared numerically to 1e-6."""
-    if isinstance(expected, dict):
-        assert isinstance(actual, dict) and set(actual) == set(expected), f"{path}: keys differ"
-        for k in expected:
-            same(actual[k], expected[k], f"{path}.{k}")
-        return
-    if isinstance(expected, (list, tuple)):
-        assert isinstance(actual, (list, tuple)) and len(actual) == len(expected), \
-            f"{path}: {actual!r} != {expected!r}"
-        for i, (a, e) in enumerate(zip(actual, expected)):
-            same(a, e, f"{path}[{i}]")
-        return
-    a, e = _as_number(actual), _as_number(expected)
-    if a is not None and e is not None:
-        assert a == pytest.approx(e, rel=1e-6, abs=1e-12) or (math.isinf(a) and a == e), \
-            f"{path}: {actual!r} != {expected!r}"
-        return
-    assert actual == expected, f"{path}: {actual!r} != {expected!r}"
-
-
-def jsonable(value):
-    """Rows hold tuples and None; the goldens hold lists."""
-    if isinstance(value, dict):
-        return {k: jsonable(v) for k, v in value.items()}
-    if isinstance(value, (list, tuple)):
-        return [jsonable(v) for v in value]
-    return value
 
 
 @pytest.fixture(params=sorted(CASES))

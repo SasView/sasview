@@ -25,10 +25,11 @@ def _quiet(qapp, monkeypatch):
 
 
 @pytest.fixture
-def page():
+def page(request):
     p = g.new_page(data=g.make_data1d("d1", "data1"))
     g.select_model(p, "Cylinder", "cylinder")
     yield p
+    p.shadow_checker.assert_ok(request)
     p.close()
 
 
@@ -292,7 +293,7 @@ class LiveDefectRegressionTest:
 
     def testFailedFitRestoresTheLiveKernel(self, page):
         page.kernel_module_copy = copy.deepcopy(page.logic.kernel_module)
-        page.kernel_module_copy.setParam("radius", 12.0)
+        page.logic.kernel_module.setParam("radius", 12.0)     # the failed fit corrupted the kernel
         page.fitComplete(None)
-        assert page.logic.kernel_module.getParam("radius") == 12.0
+        assert page.logic.kernel_module.getParam("radius") == 20.0
         assert not hasattr(page, "kernel_module")

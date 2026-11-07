@@ -25,11 +25,12 @@ class FittingWidgetTest:
     """Test the fitting widget GUI"""
 
     @pytest.fixture(autouse=True)
-    def widget(self, qapp, mocker):
+    def widget(self, qapp, mocker, request):
         '''Create/Destroy the GUI'''
         w = FittingWidgetMod(dummy_manager())
         mocker.patch.object(FittingUtilities, 'checkConstraints', return_value=None)
         yield w
+        w.shadow_checker.assert_ok(request)
         """Destroy the GUI"""
         w.close()
         del w
@@ -93,6 +94,7 @@ class FittingWidgetTest:
         # assert widget_with_data.cmdFit.isEnabled()
         assert not widget_with_data.acceptsData()
 
+    @pytest.mark.shadow_exempt("builds the tables with SASModelToQModel, bypassing the model combo boxes")
     def testSelectPolydispersity(self, widget):
         """
         Test if models have been loaded properly
@@ -114,6 +116,7 @@ class FittingWidgetTest:
         assert delegate.poly_function == 6
         assert isinstance(delegate.combo_updated, QtCore.Signal)
 
+    @pytest.mark.shadow_exempt("builds the tables with SASModelToQModel, bypassing the model combo boxes")
     def testSelectMagnetism(self, widget):
         """
         Test if models have been loaded properly
@@ -224,6 +227,7 @@ class FittingWidgetTest:
         assert not widget.cbModel.isEnabled()
         assert widget.cbStructureFactor.isEnabled()
 
+    @pytest.mark.shadow_exempt("mocks SASModelToQModel, so the tables never follow the selection")
     def testSelectModel(self, widget, mocker):
         """
         Assure proper behaviour on changing model
@@ -359,6 +363,7 @@ class FittingWidgetTest:
         # Check the argument type
         assert isinstance(spy.called()[0]['args'][0], QtGui.QStandardItem)
 
+    @pytest.mark.shadow_exempt("builds the tables with SASModelToQModel, bypassing the model combo boxes")
     def testCalculateQGridForModel(self, widget, mocker):
         """
         Check that the fitting 1D data object is ready
@@ -385,6 +390,7 @@ class FittingWidgetTest:
             # Test the mock
             assert Calc2D.queue.called
 
+    @pytest.mark.shadow_exempt("builds the tables with SASModelToQModel, bypassing the model combo boxes")
     def testCalculateResiduals(self, widget):
         """
         Check that the residuals are calculated and plots updated
@@ -462,6 +468,7 @@ class FittingWidgetTest:
             assert 'Distribution of' in widget.polydispersity_widget.poly_model.item(row, 0).text()
         #widget.close()
 
+    @pytest.mark.shadow_exempt("edits the polydispersity table while polydispersity is off (the tab is disabled)")
     def testPolyModelChange(self, widget):
         """
         Polydispersity model changed - test all possible scenarios
@@ -534,6 +541,7 @@ class FittingWidgetTest:
         # no efect
         assert widget.polydispersity_widget.poly_params['radius_bell.nsigmas'] == 222
 
+    @pytest.mark.shadow_exempt("calls the slot with functions the combo box does not show")
     def testOnPolyComboIndexChange(self, widget, mocker):
         """
         Test the slot method for polydisp. combo box index change
@@ -1632,6 +1640,7 @@ class FittingWidgetTest:
         widget.clipboard_paste()
         widget.updatePageWithParameters.assert_called_once()
 
+    @pytest.mark.shadow_exempt("mocks getConstraintForRow")
     def testGetConstraintsForFitting(self, widget, mocker):
         """
         Test the deactivation of constraints when trying to fit a single page
@@ -1714,11 +1723,12 @@ class FittingWidgetUndoRedoTest:
     """Basic undo/redo integration tests (Phase 5, Step 5.3)."""
 
     @pytest.fixture(autouse=True)
-    def widget(self, qapp, monkeypatch):
+    def widget(self, qapp, monkeypatch, request):
         """Create/Destroy the GUI (monkeypatch variant)."""
         w = FittingWidgetMod(dummy_manager())
         monkeypatch.setattr(FittingUtilities, 'checkConstraints', lambda *a, **kw: None)
         yield w
+        w.shadow_checker.assert_ok(request)
         w.close()
 
     def testWidgetHasUndoStack(self, widget):

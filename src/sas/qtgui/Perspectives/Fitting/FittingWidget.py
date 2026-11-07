@@ -21,6 +21,7 @@ from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.ConsoleUpdate import ConsoleUpdate
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 from sas.qtgui.Perspectives.Fitting.ConstraintManager import ConstraintManager
+from sas.qtgui.Perspectives.Fitting.DocumentShadow import DocumentShadow, mirrors
 from sas.qtgui.Perspectives.Fitting.FitPage import FitPage
 from sas.qtgui.Perspectives.Fitting.FitThread import FitThread
 from sas.qtgui.Perspectives.Fitting.FittingConstants import (  # noqa: F401 (re-exported)
@@ -41,6 +42,9 @@ from sas.qtgui.Perspectives.Fitting.FittingController import FittingController
 from sas.qtgui.Perspectives.Fitting.FittingLogic import FittingLogic
 from sas.qtgui.Perspectives.Fitting.FittingState import FittingState
 from sas.qtgui.Perspectives.Fitting.MagnetismWidget import MagnetismWidget
+from sas.qtgui.Perspectives.Fitting.model.document import FitPageDocument
+from sas.qtgui.Perspectives.Fitting.model.kernel import KernelBuilder
+from sas.qtgui.Perspectives.Fitting.model.parameters import PageIdentity
 from sas.qtgui.Perspectives.Fitting.ModelThread import Calc1D, Calc2D
 from sas.qtgui.Perspectives.Fitting.OptionsWidget import OptionsWidget
 from sas.qtgui.Perspectives.Fitting.OrderWidget import OrderWidget
@@ -108,6 +112,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Globals
         self.initializeGlobals()
 
+        # The Qt-free page document. In Phase 2 it shadows the legacy stores (DocumentShadow).
+        self.document = FitPageDocument(PageIdentity(page_id=tab_id, tab_id=tab_id))
+        self.kernel_builder = KernelBuilder(self.models)
+        self.shadow = DocumentShadow(self)
+
         # data index for the batch set
         self.data_index = 0
         # Main Data[12]D holders
@@ -161,6 +170,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.label_17.setStyleSheet(new_font)
         self.label_19.setStyleSheet(new_font)
 
+        # Every legacy writer from here on is mirrored into the document
+        self.shadow.start()
+
     @property
     def logic(self) -> FittingLogic:
         # make sure the logic contains at least one element
@@ -172,6 +184,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     def data(self) -> Data1D | Data2D:
         return self.logic.data
 
+    @mirrors('layout')
     def dataFromItems(self, value: QtGui.QStandardItem | list[QtGui.QStandardItem]) -> None:
         """ data setter """
         # Value is either a list of indices for batch fitting or a simple index
@@ -518,6 +531,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.lblStructure.setEnabled(False)
         self.enabled_sfmodel = False
 
+    @mirrors('parameters')
     def enableBackgroundParameter(self, set_value: float | None = None) -> None:
         """ Enable the background parameter. Optionally set at a specified value. """
         background_row = self.getRowFromName("background")
@@ -526,6 +540,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             if set_value is not None:
                 self._model_model.item(background_row, 1).setText(GuiUtils.formatNumber(set_value, high=True))
 
+    @mirrors('parameters')
     def disableBackgroundParameter(self, set_value: float | None = None) -> None:
         """ Disable the background parameter. Optionally set at a specified value. """
         background_row = self.getRowFromName("background")
@@ -540,6 +555,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.lblStructure.setEnabled(True)
         self.enabled_sfmodel = True
 
+    @mirrors('flags')
     def togglePoly(self, isChecked: bool) -> None:
         """ Enable/disable the polydispersity tab """
         self.tabFitting.setTabEnabled(TAB_POLY, isChecked)
@@ -561,6 +577,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.tabFitting.setTabEnabled(TAB_POLY, isChecked)
         self.cmdFit.setEnabled(self.haveParamsToFit())
 
+    @mirrors('flags')
     def toggleMagnetism(self, isChecked: bool) -> None:
         """ Enable/disable the magnetism tab """
         self.tabFitting.setTabEnabled(TAB_MAGNETISM, isChecked)
@@ -581,6 +598,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.tabFitting.setTabEnabled(TAB_MAGNETISM, isChecked)
         self.cmdFit.setEnabled(self.haveParamsToFit())
 
+    @mirrors('flags')
     def toggleChainFit(self, isChecked: bool) -> None:
         """ Enable/disable chain fitting """
         self.is_chain_fitting = isChecked
@@ -590,6 +608,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         else:
             self.tabFitting.removeTab(TAB_ORDERING)
 
+    @mirrors('layout')
     def toggle2D(self, isChecked: bool) -> None:
         """ Enable/disable the controls dependent on 1D/2D data instance """
         self.chkMagnetism.setEnabled(isChecked)
@@ -803,6 +822,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.actionDeselect.triggered.connect(self.deselectParameters)
         return menu
 
+    @mirrors('parameters')
     def showMultiConstraint(self, current_list: QtWidgets.QTreeView | None = None) -> None:
         """
         Show the constraint widget and receive the expression.
@@ -866,6 +886,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return []
         return self.magnetism_widget.getParamNamesMagnet()
 
+    @mirrors('parameters')
     def modifyViewOnRow(self, row: int, font: QtGui.QFont | None = None, brush: QtGui.QBrush | None = None, model_key: str = "standard") -> None:
         """
         Change how the given row of the main model is shown
@@ -909,6 +930,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         else:
             return None
 
+    @mirrors('parameters')
     def addConstraintToRow(self, constraint: Constraint | None = None, row: int = 0, model_key: str = "standard") -> None:
         """
         Add the constraint object to the requested row.
@@ -917,6 +939,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         self.constraint_manager.addConstraintToRow(constraint, row, model_key)
 
+    @mirrors('parameters')
     def addSimpleConstraint(self) -> None:
         """
         Add a constraint on a single parameter.
@@ -925,6 +948,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         self.constraint_manager.addSimpleConstraint()
 
+    @mirrors('parameters')
     def editConstraint(self) -> None:
         """
         Edit constraints for selected parameters.
@@ -933,6 +957,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         self.constraint_manager.editConstraint()
 
+    @mirrors('parameters')
     def deleteConstraint(self) -> None:
         """
         Delete constraints from selected parameters.
@@ -941,6 +966,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         self.constraint_manager.deleteConstraint()
 
+    @mirrors('parameters')
     def deleteConstraintOnParameter(self, param: str | None = None, model_key: str = "standard") -> None:
         """
         Delete the constraint on model parameter 'param'.
@@ -1004,6 +1030,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         return self.constraint_manager.rowHasActiveComplexConstraint(row, model_key)
 
+    @mirrors('parameters')
     def selectParameters(self) -> None:
         """
         Selected parameter is chosen for fitting
@@ -1015,6 +1042,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         item = model.itemFromIndex(current_list.currentIndex())
         self.setParameterSelection(status, item=item, model_key=model_key)
 
+    @mirrors('parameters')
     def deselectParameters(self) -> None:
         """
         Selected parameters are removed for fitting
@@ -1141,6 +1169,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             has_mag_params = len(self.logic.kernel_module.magnetic_params) > 0
         return self.is2D and has_mag_params
 
+    @mirrors('layout')
     def onSelectModel(self) -> None:
         """
         Respond to select Model from list event
@@ -1216,6 +1245,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # set focus so it doesn't move up
         self.cbModel.setFocus()
 
+    @mirrors('data', 'options')
     def onSelectBatchFilename(self, data_index: int) -> None:
         """
         Update the logic based on the selected file in batch fitting
@@ -1225,6 +1255,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.data_index = data_index
         self.updateQRange()
 
+    @mirrors('layout')
     def onSelectStructureFactor(self) -> None:
         """
         Select Structure Factor from list
@@ -1260,6 +1291,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.polydispersity_widget.resetParameters()
         self.magnetism_widget.magnet_params_to_fit = []
 
+    @mirrors('layout')
     def onCustomModelChange(self) -> None:
         """
         Reload the custom model combobox
@@ -1314,6 +1346,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 return
             self.communicator.statusBarUpdateSignal.emit(update_text)
 
+    @mirrors('options', 'smearing', 'parameters')
     def onSesansData(self) -> None:
         """
         Updates the fitting widget format when SESANS data is loaded.
@@ -1335,6 +1368,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.options_widget.rbWeighting3.setText("Use |sqrt(P Data)|")
         self.options_widget.rbWeighting4.setText("Use |P Data|")
 
+    @mirrors('parameters')
     def replaceConstraintName(self, old_name: str, new_name: str = "") -> None:
         """
         Replace names of models in defined constraints
@@ -1399,6 +1433,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Let others know
         self.newModelSignal.emit()
 
+    @mirrors('layout')
     def onSelectCategory(self) -> None:
         """
         Select Category from list
@@ -1612,6 +1647,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             result = tuple()
         self.batchFittingFinishedSignal.emit(result)
 
+    @mirrors('parameters')
     def batchFitComplete(self, result: tuple) -> None:
         """
         Receive and display batch fitting results
@@ -1674,6 +1710,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             result = tuple()
         self.fittingFinishedSignal.emit(result)
 
+    @mirrors('parameters')
     def fitComplete(self, result: tuple) -> None:
         """
         Receive and display fitting results
@@ -1807,6 +1844,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             param_row.child(0, 4).setText(combo_string)
         self._model_model.blockSignals(False)
 
+    @mirrors('parameters')
     def updateModelFromList(self, param_dict: dict[str, tuple[float, float]]) -> None:
         """
         Update the model with new parameters and create the errors column.
@@ -1832,6 +1870,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         QtWidgets.QApplication.processEvents()
         self.recalculatePlotData()  # recalc+plot theory again (2nd)
 
+    @mirrors('smearing')
     def onSmearingOptionsUpdate(self) -> None:
         """
         React to changes in the smearing widget
@@ -1900,6 +1939,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # return the last data item seen, if nothing was plotted; supposed to be just data)
         return None if data_shown else item
 
+    @mirrors('options')
     def onOptionsUpdate(self) -> None:
         """
         Update local option values and replot
@@ -1932,6 +1972,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.cbStructureFactor.clear()
         self.cbStructureFactor.addItems(sorted(factors))
 
+    @mirrors('data')
     def createDefaultDataset(self) -> None:
         """
         Generate default Dataset 1D/2D for the given model
@@ -2054,6 +2095,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         return new_data
 
+    @mirrors('options')
     def updateQRange(self) -> None:
         """
         Updates Q Range display
@@ -2067,6 +2109,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # set Q range labels on the options tab
         self.options_widget.updateQRange(self.q_range_min, self.q_range_max, self.npts)
 
+    @mirrors('layout')
     def SASModelToQModel(self, model_name: str | None, structure_factor: str | None = None) -> None:
         """
         Setting model parameters into table based on selected category
@@ -2290,6 +2333,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return True
         return False
 
+    @mirrors('parameters')
     def onMainParamsChange(self, top: QtCore.QModelIndex, bottom: QtCore.QModelIndex) -> None:
         """
         Callback method for updating the sasmodel parameters with the GUI values
@@ -2735,6 +2779,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         for plot in new_plots:
             self.communicator.plotUpdateSignal.emit([plot])
 
+    @mirrors('parameters')
     def updateEffectiveRadius(self, return_data: dict) -> None:
         """
         Given return data from sasmodels, update the effective radius parameter in the GUI table with the new
@@ -2801,6 +2846,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.createNewIndex(residuals_plot)
         return residuals_plot
 
+    @mirrors('layout')
     def onCategoriesChanged(self) -> None:
             """
             Reload the category/model comboboxes
@@ -2967,6 +3013,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         func.setCurrentText(str(default_shell_count))
         self.modifyShellsInList(str(default_shell_count))
 
+    @mirrors('layout')
     def modifyShellsInList(self, text: str) -> None:
         """
         Add/remove additional multishell parameters
@@ -3002,10 +3049,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             val = GuiUtils.toDouble(row[1].text())
             self.logic.kernel_module.setParam(par, val)
 
-        # Update relevant models
+        # Update relevant models. The magnet table follows the shells in 1D too, so that it
+        # always matches the layout (it is only shown in 2D).
         self.polydispersity_widget.setPolyModel()
-        if self.canHaveMagnetism():
-            self.magnetism_widget.setMagneticModel()
+        self.magnetism_widget.setMagneticModel()
 
         self.clipboard_paste()
 
@@ -3201,6 +3248,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     # Undo/redo helper methods (called by UndoCommand subclasses)
     # ------------------------------------------------------------------
 
+    @mirrors('parameters')
     def _update_model_param_value(self, param_name: str, value: float) -> None:
         """Update the UI model item for a parameter value (called by undo/redo)."""
         for row in range(self._model_model.rowCount()):
@@ -3215,6 +3263,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                     value_item.setText(GuiUtils.formatNumber(value, high=True))
                 return
 
+    @mirrors('parameters')
     def _update_model_param_limit(self, param_name: str, bound: str, value: float) -> None:
         """Update min or max bound in the UI model (called by undo/redo)."""
         col = self.lstParams.itemDelegate().param_min if bound == "min" else self.lstParams.itemDelegate().param_max
@@ -3229,6 +3278,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                     item.setText(GuiUtils.formatNumber(value, high=True))
                 return
 
+    @mirrors('layout')
     def _restore_model_selection(self, triple: tuple, params: dict) -> None:
         """Restore model selection and parameter values (called by undo/redo).
 
@@ -3251,6 +3301,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # Apply saved parameter values
             self._restore_parameter_values(params)
 
+    @mirrors('options')
     def _apply_fit_options(self, options: dict) -> None:
         """Apply fit options dict (called by undo/redo)."""
         with self.undo_stack.suppressed():
@@ -3267,6 +3318,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.lblMaxRangeDef.setText(GuiUtils.formatNumber(self.q_range_max, high=True))
             self.recalculatePlotData()
 
+    @mirrors('smearing')
     def _apply_smearing_state(self, state: dict) -> None:
         """Apply smearing options from a dict (called by undo/redo)."""
         with self.undo_stack.suppressed():
@@ -3276,6 +3328,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             )
             self.calculateQGridForModel()
 
+    @mirrors('parameters')
     def _restore_parameter_values(self, params: dict) -> None:
         """Restore all kernel parameter values from a ``{name: value}`` dict."""
         with self.undo_stack.suppressed():
@@ -3284,6 +3337,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 self._update_model_param_value(name, value)
             self.calculateQGridForModel()
 
+    @mirrors('parameters')
     def _update_poly_param_value(self, param_name: str, value: float) -> None:
         """Update the polydispersity UI model item for *param_name* (``<name>.width``)."""
         poly_model = self.polydispersity_widget.poly_model
@@ -3298,6 +3352,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                     value_item.setText(GuiUtils.formatNumber(value, high=True))
                 return
 
+    @mirrors('parameters')
     def _update_magnet_param_value(self, param_name: str, value: float) -> None:
         """Update the magnetism UI model item for *param_name*."""
         magnet_model = self.magnetism_widget._magnet_model
@@ -3378,6 +3433,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             "magnet": self._get_magnet_param_dict(kernel_module),
         }
 
+    @mirrors('parameters')
     def _restore_fit_result_snapshot(self, snapshot: dict) -> None:
         """Restore main, polydispersity and magnetism values from a snapshot.
 
@@ -3398,6 +3454,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 self._update_magnet_param_value(name, value)
             self.calculateQGridForModel()
 
+    @mirrors('parameters')
     def _remove_error_columns(self) -> None:
         """Remove the fitted-uncertainty (error) column from the main,
         polydispersity and magnetism tables, restoring the no-error layout.
@@ -3771,6 +3828,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         return param_list
 
+    @mirrors('layout')
     def createPageForParameters(self, line_dict: dict[str, list[str]]) -> None:
         """
         Sets up page with requested model/str factor
@@ -3786,6 +3844,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Now that the page is ready for parameters, fill it up
         self.updatePageWithParameters(line_dict)
 
+    @mirrors('layout')
     def updatePageWithParameters(self, line_dict: dict[str, list[str]], warn_user: bool = True) -> None:
         """
         Update FitPage with parameters in line_dict
@@ -3879,6 +3938,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             widget.setCurrentIndex(widget.findText(str(multip)))
         self.logic.current_shell_displayed = multip
 
+    @mirrors('parameters')
     def updateFullModel(self, param_dict: dict[str, list[str]]) -> None:
         """
         Update the model with new parameters
@@ -3929,6 +3989,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         self.iterateOverModel(updateFittedValues)
 
+    @mirrors('data', 'options')
     def onMaskedData(self) -> None:
         """
         A mask has been applied to current data.

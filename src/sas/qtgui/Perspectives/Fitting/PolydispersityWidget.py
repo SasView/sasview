@@ -12,6 +12,7 @@ from sasmodels.weights import MODELS as POLYDISPERSITY_MODELS
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
+from sas.qtgui.Perspectives.Fitting.DocumentShadow import mirrors
 from sas.qtgui.Perspectives.Fitting.FittingConstants import DEFAULT_POLYDISP_FUNCTION
 
 # Local UI
@@ -66,6 +67,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         """
         return self.poly_model
 
+    @mirrors('parameters')
     def setPolyModel(self) -> None:
         """
         Set polydispersity values
@@ -119,6 +121,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
                              for row in range(self.poly_model.rowCount())]
         return poly_model_params
 
+    @mirrors('parameters')
     def onPolyModelChange(self, top: QtCore.QModelIndex) -> None:
         """
         Callback method for updating the main model and sasmodel
@@ -216,6 +219,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
                 for row_index in range(self.poly_model.rowCount())
                 if isChecked(row_index)]
 
+    @mirrors('parameters')
     def togglePoly(self, isChecked: bool = True) -> None:
         """
         Toggle polydispersity
@@ -292,6 +296,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         self.lstPoly.setIndexWidget(ind, func)
         func.currentIndexChanged.connect(lambda: self.onPolyComboIndexChange(str(func.currentText()), all_items-1))
 
+    @mirrors('parameters')
     def onPolyFilenameChange(self, row_index: int) -> None:
         """
         Respond to filename_updated signal from the delegate
@@ -311,6 +316,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         # Invoke the file reader
         self.onPolyComboIndexChange(array_caption, row_index)
 
+    @mirrors('parameters')
     def onPolyComboIndexChange(self, combo_string: str, row_index: int) -> None:
         """
         Modify polydisp. defaults on function choice
@@ -431,6 +437,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         for row_i in range(self.poly_model.rowCount()):
             func(row_i)
 
+    @mirrors('parameters')
     def updatePolyModelFromList(self, param_dict: dict[str, tuple[float, float]]) -> None:
         """
         Update the polydispersity model with new parameters, create the errors column
@@ -496,6 +503,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         """
         self.poly_params_to_fit = []
 
+    @mirrors('parameters')
     def updateFullPolyModel(self, param_dict: dict[str, list[str]]) -> None:
         """
         Update the polydispersity model with new parameters, create the errors column
