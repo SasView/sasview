@@ -40,7 +40,6 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         self.cbOperator.currentIndexChanged.connect(self.onSelectOperator)
 
         # edit Coefficient text edit
-        self.txtNumber.textChanged.connect(self.onInputCoefficient)
         self.txtOutputData.textChanged.connect(self.onCheckOutputName)
 
         # push buttons
@@ -129,6 +128,8 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         # calculate and send data to DataExplorer
         output = None
         try:
+            # check wether the coefficient is valid
+            onInputCoefficient = self.onInputCoefficient()
             data1 = self.data1
             data2 = self.data2
             output = eval("data1 %s data2" % operator)
@@ -149,8 +150,9 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         # If output is empty, then compute it first
         if self.output is None:
             self.onCompute()
-        # if outputname was unused, proceed to save files
-        if self.onCheckOutputName():
+        # if outputname was unused and compute was successful, 
+        # proceed to save files
+        if self.output is not None and self.onCheckOutputName():
             # add outputname to self.filenames
             self.list_data_items.append(str(self.txtOutputData.text()))
             # send result to DataExplorer
@@ -286,24 +288,23 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
     def onInputCoefficient(self):
         """ Check input of number when a coefficient is required
         for operation """
-        if self.txtNumber.isModified():
-            input_to_check = str(self.txtNumber.text())
+        input_to_check = str(self.txtNumber.text())
 
-            if input_to_check is None or input_to_check == '':
-                msg = 'DataOperation: Number requires a float number'
-                logger.warning(msg)
-                self.txtNumber.setStyleSheet(BG_ERROR)
+        if input_to_check is None or input_to_check == '':
+            msg = 'DataOperation: Number requires a float number'
+            logger.warning(msg)
+            self.txtNumber.setStyleSheet(BG_ERROR)
 
-            elif float(self.txtNumber.text()) == 0.:
-                # should be check that 0 is not chosen
-                msg = 'DataOperation: Number requires a non zero number'
-                logger.warning(msg)
-                self.txtNumber.setStyleSheet(BG_ERROR)
+        elif float(self.txtNumber.text()) == 0.:
+            # should be check that 0 is not chosen
+            msg = 'DataOperation: Number requires a non zero number'
+            logger.warning(msg)
+            self.txtNumber.setStyleSheet(BG_ERROR)
 
-            else:
-                self.txtNumber.setStyleSheet(BG_DEFAULT)
-                self.data2 = float(self.txtNumber.text())
-                self.updatePlot(self.graphData2, self.layoutData2, self.data2)
+        else:
+            self.txtNumber.setStyleSheet(BG_DEFAULT)
+            self.data2 = float(self.txtNumber.text())
+            self.updatePlot(self.graphData2, self.layoutData2, self.data2)
 
     def onCheckChosenData(self):
         """ check that data1 and data2 are compatible """
