@@ -155,7 +155,7 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
         a_min = self.aMinSpinBox.value()
         a_max = self.aMaxSpinBox.value()
 
-        if a_min <= 0:
+        if a_min < 0:
             raise ValueError("minimum A must be greater than zero")
 
         if a_max <= a_min:

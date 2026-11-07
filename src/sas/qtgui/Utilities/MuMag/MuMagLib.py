@@ -136,7 +136,7 @@ class MuMagLib:
         get an initial estimate which can then be refined"""
 
         a_values = np.linspace(
-            np.max(0, parameters.exchange_A_min),
+            np.max([0, parameters.exchange_A_min]),
             parameters.exchange_A_max,
             parameters.exchange_A_n) * 1e-12  # From pJ/m to J/m
 
@@ -172,7 +172,8 @@ class MuMagLib:
 
 
         """
-
+        if not np.isfinite(A) or A < 0:
+            raise FitFailure(f"A must be positive and finite; received A = {A}")
         # Get matrices from the input data
         n_data = len(data)
 
@@ -198,7 +199,7 @@ class MuMagLib:
         n_q = q.shape[1]
 
         # Micromagnetic Model
-        internal_field = (np.max(0, applied_field - demagnetising_field)).reshape(-1, 1)
+        internal_field = (np.maximum( applied_field - demagnetising_field,0)).reshape(-1, 1)
         magnetic_scattering_length = np.sqrt(
             (2 * A) / (MuMagLib.mu_0 * saturation_magnetisation.reshape(-1, 1) * internal_field))
         effective_field = internal_field * (1 + (magnetic_scattering_length ** 2) * (q ** 2))
@@ -292,7 +293,8 @@ class MuMagLib:
 
 
             """
-
+        if not np.isfinite(A) or A < 0:
+            raise FitFailure(f"A must be positive and finite; received A = {A}")
         # Get matrices from the input data
         n_data = len(data)
 
@@ -318,7 +320,7 @@ class MuMagLib:
         n_q = q.shape[1]
 
         # Micromagnetic Model
-        internal_field = (applied_field - demagnetising_field).reshape(-1, 1)
+        internal_field = (np.maximum( applied_field - demagnetising_field,0)).reshape(-1, 1)
         magnetic_scattering_length = np.sqrt(
             (2 * A) / (MuMagLib.mu_0 * saturation_magnetisation.reshape(-1, 1) * internal_field))
         effective_field = internal_field * (1 + (magnetic_scattering_length ** 2) * (q ** 2))
@@ -417,18 +419,43 @@ class MuMagLib:
         x_4 = x_3 + 0.5 * ((x_2 - x_3) ** 2 * (y_3 - y_1) + (x_1 - x_3) ** 2 * (y_2 - y_3)) \
               / ((x_2 - x_3) * (y_3 - y_1) + (x_1 - x_3) * (y_2 - y_3))
 
-        for i in range(200):
-            if np.abs(2 * (x_4 - x_3) / (x_4 + x_3)) < epsilon:
-                break
+        lower_bound = max(0.0, min(x_1, x_3))
+        upper_bound = max(x_1, x_3)
 
-            refined_least_squared_data = least_squares_function(data, x_3)
+        if not lower_bound <= x_4 <= upper_bound:
+            MuMagLib.logger.warning(
+                "Exchange stiffness refinement stopped: interpolated value "
+                "A=%s is outside the valid range [%s, %s]. Are the parameters correct?",
+                x_4,
+                max(0.0, min(x_1, x_3)),
+                max(x_1, x_3),
+            )
+            x_4 = max(0.0, min(x_1, x_3))
+            # Get the least squares data to return it and update plots
+            refined_least_squared_data = least_squares_function(data, x_4)
+        else:        
+            for i in range(200):
+                if np.abs(2 * (x_4 - x_3) / (x_4 + x_3)) < epsilon:
+                    break                
 
-            x_1, x_2, x_3 = x_2, x_3, x_4
-            y_1, y_2, y_3 = y_2, y_3, refined_least_squared_data.exchange_A_chi_sq
+                x_1, x_2, x_3 = x_2, x_3, x_4
+                y_1, y_2, y_3 = y_2, y_3, refined_least_squared_data.exchange_A_chi_sq
 
-            x_4 = x_3 + 0.5 * ((x_2 - x_3) ** 2 * (y_3 - y_1) + (x_1 - x_3) ** 2 * (y_2 - y_3)) \
-                  / ((x_2 - x_3) * (y_3 - y_1) + (x_1 - x_3) * (y_2 - y_3))
+                x_4 = x_3 + 0.5 * ((x_2 - x_3) ** 2 * (y_3 - y_1) + (x_1 - x_3) ** 2 * (y_2 - y_3)) \
+                        / ((x_2 - x_3) * (y_3 - y_1) + (x_1 - x_3) * (y_2 - y_3))
 
+                if not lower_bound <= x_4 <= upper_bound:
+                    MuMagLib.logger.warning(
+                        "Exchange stiffness refinement stopped: interpolated value "
+                        "A=%s is outside the valid range [%s, %s]. Are the parameters correct?",
+                        x_4,
+                        max(0.0, min(x_1, x_3)),
+                        max(x_1, x_3),
+                    )                    
+                    x_4 = max(0.0, min(x_1, x_3))
+                # Get the least squares data for the found best A value to return it and update plots
+                refined_least_squared_data = least_squares_function(data, x_4)
+                
         return refined_least_squared_data
 
     @staticmethod
