@@ -23,11 +23,37 @@ Edit
 ----
 The Edit option allows you to:
 
+- undo the most recent parameter change (``Ctrl+Z``);
+- redo a previously undone parameter change (``Ctrl+Y``);
 - copy and paste parameters between *SasView* analysis windows;
 - copy parameters from a *SasView* analysis window to the Clipboard as either tab-delimited text (compatible with Microsoft Excel) or LaTex-wrapped text;
 - generate a summary 'Report' of the most recent analysis performed;
 - reset parameter values in the P(r) Inversion analysis page;
 - freeze/copy fit results as separate data sets.
+
+The **Undo** and **Redo** commands are also available as buttons in the
+main toolbar, and their tooltips dynamically show which action will be
+reverted (e.g. "Undo Change radius").
+
+Undo/Redo is supported in the following perspectives:
+
+- **Model Fitting**: parameter changes in individual fit pages;
+- **P(r) Inversion**: parameter changes in each inversion page;
+- **Invariant**: parameter changes in the invariant calculator;
+- **Size Distribution**: parameter changes in the size distribution
+  calculator;
+- **Correlation Function**: parameter changes in the correlation
+  function analysis.
+
+Each tab or page maintains its own independent undo history, so
+switching between perspectives or fit pages preserves the undo/redo
+state of each. The default history depth is 200 actions per tab,
+configurable via the ``UNDO_STACK_MAX_DEPTH`` setting in
+:file:`src/sas/system/config/config.py`.
+
+.. note:: Undo/Redo is automatically suppressed during programmatic
+          operations such as loading a project or applying fit results,
+          to prevent spurious entries from cluttering the undo history.
 
 View
 ----
@@ -44,11 +70,54 @@ Window
 ------
 The Window option allows you to select which *SasView* windows are visible;
 
-- enable window cascading/tiling;
-- move focus between windows both forward and backward;
+- enable window cascading/tiling (windows detached from the workspace are not affected);
+- move focus between windows both forward and backward, including detached windows;
+- detach the active window from the workspace, or attach it back (see :ref:`detaching_windows`);
 - minimize all plot windows;
 - close all plot windows;
 - access plots by name;
+
+.. _detaching_windows:
+
+Detaching windows from the workspace
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Analysis perspectives, plots and panels such as the Batch Fitting Results normally open inside the
+*SasView* workspace. Any of them can be detached into its own window, which can then be moved
+anywhere on the desktop, for example onto a second monitor. A detached window keeps all of its
+content and settings, and can be attached back to the workspace at any time.
+
+To detach a window, do one of the following:
+
+- drag the window by its title bar out of the workspace and release it; a thumbnail of the
+  window follows the mouse and the window opens where you release it;
+- click the icon at the top-left corner of the window and select *Detach from Workspace*;
+- make the window active and select *Window > Detach Window from Workspace*, or press
+  [Ctrl]-[Shift]-[D];
+- for a plot, right-click on the plot and select *Detach from Workspace*.
+
+To attach a detached window back to the workspace, do one of the following:
+
+- drag the strip at the top of the detached window (the one holding its title and the
+  *Attach to Workspace* button) onto the workspace and release it where you want the window;
+  an outline shows where it will land;
+- double-click that strip;
+- click *Attach to Workspace* at the top-right of the detached window;
+- make the window active and select *Window > Attach Window to Workspace*, or press
+  [Ctrl]-[Shift]-[D];
+- for a plot, right-click on the plot and select *Attach to Workspace*.
+
+The strip at the top of a detached window is only for attaching. To move a detached window
+around the desktop, drag its normal title bar.
+
+When SasView opens, all perspectives are attached or detached, as selected in the general preferences,
+and switching from one perspective to another may result in some perspectives being attached
+and others detached.
+Closing a detached analysis perspective minimises it, as in the workspace.
+When you switch to another perspective and back, the perspective reappears where you left it,
+attached or detached. Detached windows are closed when *SasView* exits; their placement is
+not saved in project files.
+
+New plots and perspectives can also be opened detached automatically. See :ref:`General_Preferences`.
 
 Analysis
 --------
@@ -89,4 +158,4 @@ The Help option provides access to:
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Piotr Rozyczko, 10 May 2019
+.. note::  This help document was last changed by Piotr Rozyczko, 16 September 2026

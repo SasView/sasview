@@ -15,6 +15,10 @@ from sas.qtgui.Perspectives.Fitting import FittingUtilities
 
 # Local UI
 from sas.qtgui.Perspectives.Fitting.UI.PolydispersityWidget import Ui_PolydispersityWidgetUI
+from sas.qtgui.Perspectives.Fitting.UndoRedo import (
+    ParameterMinMaxCommand,
+    ParameterValueCommand,
+)
 from sas.qtgui.Perspectives.Fitting.ViewDelegate import PolyViewDelegate
 
 DEFAULT_POLYDISP_FUNCTION = 'gaussian'
@@ -35,6 +39,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         self.poly_model = FittingUtilities.ToolTippedItemModel()
         self.is2D = False
         self.isActive = False
+        self._fitting_widget = parent
         self.logic = parent.logic
         self.poly_params = {}
         self.has_poly_error_column = False
@@ -70,7 +75,9 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         self.poly_model.clear()
         self.poly_params = {}
 
-        parameters = self.logic.model_parameters.form_volume_parameters
+        # Copy: '+=' would append the orientation parameters to the sasmodels
+        # ParameterTable itself, duplicating rows on every subsequent call.
+        parameters = list(self.logic.model_parameters.form_volume_parameters)
         if self.is2D:
             parameters += self.logic.model_parameters.orientation_parameters
 
@@ -140,7 +147,6 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
                 if parameter_name_w in self.poly_params_to_fit:
                     self.poly_params_to_fit.remove(parameter_name_w)
             self.cmdFitSignal.emit()
-            # self.updateUndo()
 
         elif model_column in [delegate.poly_min, delegate.poly_max]:
             try:
@@ -152,9 +158,15 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
             current_details = self.logic.kernel_module.details[parameter_name_w]
             if self.has_poly_error_column:
                 # err column changes the indexing
-                current_details[model_column-2] = value
+                pos = model_column - 2
             else:
-                current_details[model_column-1] = value
+                pos = model_column - 1
+            old_val = current_details[pos]
+            current_details[pos] = value
+            bound = "min" if pos == 1 else "max"
+            self._fitting_widget.undo_stack.push(
+                ParameterMinMaxCommand(parameter_name_w, bound, old_val, value)
+            )
 
         elif model_column == delegate.poly_function:
             # name of the function - just pass
@@ -180,8 +192,12 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
                 # Map the column to the poly param that was changed
                 associations = {1: "width", delegate.poly_npts: "npts", delegate.poly_nsigs: "nsigmas"}
                 p_name = f"{parameter_name}.{associations.get(model_column, 'width')}"
+                old_val = self.logic.kernel_module.getParam(p_name)
                 self.poly_params[p_name] = value
                 self.logic.kernel_module.setParam(p_name, value)
+                self._fitting_widget.undo_stack.push(
+                    ParameterValueCommand(p_name, old_val, value)
+                )
 
                 # Update plot
                 self.updateDataSignal.emit()
@@ -523,14 +539,17 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
             # Nsigs
             param_repr = GuiUtils.formatNumber(param_dict[param_name][5+ioffset], high=True)
             self.poly_model.item(row, 5+joffset).setText(param_repr)
-            # Function
+            # Function: the combobox index widget is the only source of truth.
+            # Never write the name into the underlying item - the delegate
+            # paints it under the combobox and it bleeds through on some
+            # platforms/styles (#4105).
             param_repr = param_dict[param_name][6+ioffset]
-            self.poly_model.item(row, 6+joffset).setText(param_repr)
             index = self.poly_model.index(row, 6+joffset)
             widget = self.lstPoly.indexWidget(index)
             if widget is not None and isinstance(widget, QtWidgets.QComboBox):
                 func_index = widget.findText(param_repr)
-                widget.setCurrentIndex(func_index)
+                if func_index >= 0:
+                    widget.setCurrentIndex(func_index)
 
             self.setFocus()
 

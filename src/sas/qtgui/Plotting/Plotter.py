@@ -1166,7 +1166,7 @@ class PlotterWidget(PlotterBase):
         self.canvas.draw_idle()
 
 
-class Plotter(QtWidgets.QDialog, PlotterWidget):
+class Plotter(PlotterWidget):
     def __init__(self, parent=None, quickplot=False):
 
         PlotterWidget.__init__(self, parent=None, manager=parent, quickplot=quickplot)

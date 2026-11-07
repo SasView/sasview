@@ -206,17 +206,15 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         # Close report widgets before closing/minimizing main widget
         self.closeDMax()
         self.closeBatchResults()
+        # The window hosting the perspective (attached or detached) is owned by the
+        # WorkspaceManager, which disposes of it on an accepted close and minimises
+        # it when the close is refused.
         if self._allowClose:
             # reset the closability flag
             self.setClosable(value=False)
-            # Tell the MdiArea to close the container if it is visible
-            if self.parentWidget():
-                self.parentWidget().close()
             event.accept()
         else:
             event.ignore()
-            # Maybe we should just minimize
-            self.setWindowState(QtCore.Qt.WindowMinimized)
 
     def closeDMax(self) -> None:
         if self.currentTab.dmaxWindow is not None:
@@ -315,6 +313,17 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
     def currentTab(self) -> InversionWidget:
         """Returns the tab widget currently shown."""
         return self.currentWidget()
+
+    @property
+    def undo_stack(self):
+        """Return undo stack for the currently selected Inversion tab.
+
+        Delegates to the active ``InversionWidget``'s stack, mirroring
+        ``FittingPerspective.undo_stack``.  Returns ``None`` if the current
+        widget is not an ``InversionWidget``.
+        """
+        w = self.currentWidget()
+        return getattr(w, "undo_stack", None) if isinstance(w, InversionWidget) else None
 
     def currentTabDataId(self) -> list:
         """Returns the data ID of the current tab."""

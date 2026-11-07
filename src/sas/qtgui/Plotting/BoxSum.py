@@ -43,10 +43,19 @@ class BoxSum(QtWidgets.QDialog, Ui_BoxSumUI):
 
         self.setFixedSize(self.minimumSizeHint())
 
-        # Handle the Close button click
-        self.buttonBox.button(QtWidgets.QDialogButtonBox.Close).clicked.connect(self.close)
+        # The Close button emits buttonBox.rejected, which the UI connects to reject().
+        # reject() and Escape both close the widget, so every dismissal route goes
+        # through closeEvent and the owner is notified exactly once.
+
+    def reject(self):
+        """
+        The Close button and Escape close the widget rather than just hiding it
+        """
+        self.close()
 
     def closeEvent(self, event):
-        """Emit the closeWidgetSignal when the dialog is closed via window manager."""
+        """
+        Notify the owner that the widget is closing
+        """
         self.closeWidgetSignal.emit()
-        super(BoxSum, self).closeEvent(event)
+        event.accept()

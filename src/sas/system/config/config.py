@@ -162,6 +162,13 @@ class Config(ConfigBase, metaclass=ConfigMeta):
 
         self.SHOW_WELCOME_PANEL = False
 
+        # Window placement. When True, new plots are opened in their own top-level
+        # window instead of inside the workspace.
+        self.OPEN_PLOTS_DETACHED = False
+        # When True, an analysis perspective is first shown in its own top-level window.
+        # Later in the session a perspective returns to wherever the user last left it.
+        self.OPEN_PERSPECTIVE_DETACHED = False
+
         # OpenCL option - should be a string, either, "none", a number, or pair of form "A:B"
         self.SAS_OPENCL = "none"
 
@@ -204,6 +211,9 @@ class Config(ConfigBase, metaclass=ConfigMeta):
 
         # Default fitting optimizer
         self.FITTING_DEFAULT_OPTIMIZER = "lm"
+
+        # Undo/Redo stack depth per fitting tab
+        self.UNDO_STACK_MAX_DEPTH = 200
 
         # Last version that the "What's New" menu was dismissed for
         self.LAST_WHATS_NEW_HIDDEN_VERSION = "0.0.0"

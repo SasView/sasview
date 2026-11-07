@@ -1,7 +1,7 @@
 .. preferences_help.rst
 
 .. Initial Draft: J Krzywon, August 2022
-.. Last Updated: S Shrestha, January 2026
+.. Last Updated: P Rozyczko, September 2026
 
 .. _Preferences:
 
@@ -14,7 +14,23 @@ appropriate page heading. Not all preferences are housed here, but will be event
 A number of these preferences will only apply to the current SasView window and will reset when closing. Others,
 labelled *persistent* in this document, will be retained for the next time SasView is run.
 
-:ref:`Plot_Preferences`, :ref:`Display_Preferences`, :ref:`GPU_Preferences`, :ref:`Fit_Optimizer_Preferences`
+:ref:`General_Preferences`, :ref:`Plot_Preferences`, :ref:`Display_Preferences`, :ref:`GPU_Preferences`,
+:ref:`Fit_Optimizer_Preferences`
+
+.. _General_Preferences:
+
+General Preferences
+-------------------
+General preferences control where windows open. They apply to windows opened after the change; windows that are
+already open stay where they are. Any window can still be detached from, or attached to, the workspace by hand. See
+:ref:`detaching_windows`.
+
+**Open new plots in separate windows**: When selected, new plots open in their own window outside the *SasView*
+workspace instead of inside it. *persistent*
+
+**Open analysis perspectives in separate windows**: When selected, an analysis perspective opens in its own window
+the first time it is shown in a session. After that, a perspective reappears wherever you last left it, attached
+or detached. *persistent*
 
 .. _Plot_Preferences:
 
