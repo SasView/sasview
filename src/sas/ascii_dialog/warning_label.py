@@ -66,9 +66,8 @@ class WarningLabel(QLabel):
         line can be read as numbers."""
         indices = range(len(line)) if used_columns is None else used_columns
         try:
-            for index in indices:
-                # An IndexError means the line has fewer values than the columns that will be loaded.
-                _ = float(line[index])
+            # An IndexError means the line has fewer values than the columns that will be loaded.
+            _ = [float(line[index]) for index in indices]
         except (ValueError, IndexError):
             return False
         return True
@@ -77,11 +76,11 @@ class WarningLabel(QLabel):
     def unparsableMessage(unparsable_lines: list[int]) -> str:
         """Warning message for the lines that can't be read. Line numbers are
         shown starting from 1, as in the table."""
+        if len(unparsable_lines) == 1:
+            return f'Line {unparsable_lines[0] + 1} could not be read. It will be ignored.'
         shown = ', '.join(str(i + 1) for i in unparsable_lines[:MAX_LINES_LISTED])
         if len(unparsable_lines) > MAX_LINES_LISTED:
             shown += ', ...'
-        if len(unparsable_lines) == 1:
-            return f'Line {shown} could not be read. It will be ignored.'
         return f'{len(unparsable_lines)} lines could not be read (lines {shown}). They will be ignored.'
 
     def __init__(self, initial_missing_columns, initial_duplicate_classes):
