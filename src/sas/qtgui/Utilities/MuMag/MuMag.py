@@ -195,12 +195,12 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
 
         try:
             self.fit_data = MuMagLib.simple_fit(self.data, parameters)
-
+            
         except FitFailure as ff:
             log.error("Fitting failed - are the parameters correct? "+repr(ff))
             return
 
-
+        log.info("Fit completed; updating result plots")
         self.show_fit_results()
 
 
@@ -270,6 +270,7 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
         self.residual_axes.set_visible(True)
         self.s_h_axes.set_visible(True)
         self.longitudinal_scattering_axes.set_visible(True)
+        self.fit_results_figure.canvas.draw_idle()
 
         #
         # Comparison Tab
@@ -302,7 +303,7 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
         self.comparison_axes.set_xlim(qlim)
         self.comparison_axes.set_ylim(ilim)
         self.comparison_figure.tight_layout()
-        self.comparison_figure.canvas.draw()
+        self.comparison_figure.canvas.draw_idle()
 
 
         #
