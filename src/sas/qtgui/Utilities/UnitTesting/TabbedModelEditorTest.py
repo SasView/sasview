@@ -14,7 +14,7 @@ from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import Tabb
 class TabbedModelEditorTest:
     @pytest.fixture(autouse=True)
     def widget(self, qapp, mocker):
-        '''Create/Destroy the editor'''
+        """Create/Destroy the editor"""
         class dummy_manager:
             _parent = QWidget()
             communicator = GuiUtils.communicator
@@ -28,7 +28,7 @@ class TabbedModelEditorTest:
 
     @pytest.fixture(autouse=True)
     def widget_edit(self, qapp, mocker):
-        '''Create/Destroy the editor'''
+        """Create/Destroy the editor"""
         class dummy_manager:
             _parent = QWidget()
             communicator = GuiUtils.communicator
@@ -206,8 +206,7 @@ class TabbedModelEditorTest:
         widget.updateFromEditor()
 
         # Test the behaviour
-        widget.writeFile.assert_called_once()
-        assert widget.writeFile.called_with('testfile.py', boring_text)
+        assert widget.writeFile.called_once_with('testfile.py', boring_text)
 
     @pytest.mark.xfail(reason="2026-02: Unsure how to fix this")
     def testCanWriteModel(self, widget, mocker):
