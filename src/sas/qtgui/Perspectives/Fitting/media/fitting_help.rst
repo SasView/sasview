@@ -593,7 +593,10 @@ range. The range is remembered for each parameter until the model is changed.
 
 With the slider focused, the arrow keys move it by 1 % of the range and
 *Page Up*/*Page Down* by 10 %. The mouse wheel changes the value only while the
-slider has focus. A whole drag is undone in one step with *Undo*.
+slider has focus. *Undo* reverts changes to the same parameter made less than
+5 seconds apart, with the slider or in the table, in one step. A continuous drag
+is therefore undone in one step, while a pause of more than 5 seconds starts a
+new one.
 
 The slider is disabled while a fit is running, for constrained parameters, for
 parameters that cannot be edited, and for parameters chosen from a list (such as

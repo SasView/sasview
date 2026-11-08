@@ -1,9 +1,8 @@
 """
 ParameterSliderWidget - a single slider row bound to one fitting parameter.
 
-The widget works purely in the float domain and knows nothing about sasmodels
-or FittingWidget. FittingWidget binds it to the parameter selected in the
-main parameter table and writes the emitted values back into that table.
+FittingWidget binds it to the parameter selected in the
+main parameter table and writes the emitted values back.
 """
 import math
 
@@ -35,9 +34,9 @@ class ParameterSliderWidget(QtWidgets.QWidget):
     rangeRejected = QtCore.Signal(str)                # message for the status bar
 
     STEPS = 1000
-    # Smallest step, relative to the range end points, that still changes the
-    # 5-significant-digit value shown in the parameter table.
-    MIN_RELATIVE_STEP = 1e-4
+    # Significant digits of the parameter table ("%.5g", GuiUtils.formatNumber(high=True)).
+    # The kernel is fed from the table text, so a finer step changes nothing.
+    TABLE_DIGITS = 5
 
     def __init__(self, parent: QtWidgets.QWidget | None = None) -> None:
         super().__init__(parent)
@@ -173,9 +172,17 @@ class ParameterSliderWidget(QtWidgets.QWidget):
         if vmin < hard_min or vmax > hard_max:
             return (f"Slider limits must lie within [{GuiUtils.formatNumber(hard_min, high=True)}, "
                     f"{GuiUtils.formatNumber(hard_max, high=True)}].")
-        if (vmax - vmin) / cls.STEPS < cls.MIN_RELATIVE_STEP * max(abs(vmin), abs(vmax)):
+        # The display is coarsest at the end of the range with the larger magnitude.
+        # The tolerance accepts a step equal to the resolution despite float rounding.
+        step = (vmax - vmin) / cls.STEPS
+        if step < cls.tableResolution(max(abs(vmin), abs(vmax))) * (1 - 1e-9):
             return "Slider range is too narrow for the table's display precision."
         return vmin, vmax
+
+    @classmethod
+    def tableResolution(cls, value: float) -> float:
+        """Smallest change of *value* (non-zero) visible in the parameter table."""
+        return 10.0 ** (math.floor(math.log10(abs(value))) - (cls.TABLE_DIGITS - 1))
 
     # ------------------------------------------------------------------
     # Internals

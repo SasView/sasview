@@ -260,6 +260,22 @@ class TestFitting:
         assert widget.cmdFit.text() == "Stop fit"
         assert not widget.slider_widget.isEnabled()
 
+    def test_undo_recalculation_discards_live_completion(self, widget, mocker):
+        # Undo recalculates the restored value; the drag's live result arriving later must not be plotted
+        selectModel(widget)
+        selectParams(widget, "radius")
+        thread = useRealDispatcher(widget, mocker)
+        complete1D = mocker.patch.object(widget, 'complete1D')
+        complete2D = mocker.patch.object(widget, 'complete2D')
+        widget.slider_widget.sldParameter.setValue(800)
+        live_completefn = thread.call_args.kwargs['completefn']
+        widget.undo_stack.undo()
+        assert widget.logic.kernel_module.getParam("radius") == 50.0
+        live_completefn({"result": "radius = 80"})
+        complete1D.assert_not_called()
+        complete2D.assert_not_called()
+        assert not widget._live_calc_running
+
     def test_failed_dispatch_does_not_latch(self, widget):
         selectModel(widget)
         selectParams(widget, "radius")

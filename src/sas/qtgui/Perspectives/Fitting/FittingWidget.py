@@ -3198,6 +3198,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Set button caption on fitting/calculate start
         Disable the param table(s)
         """
+        # A normal calculation (Compute/Plot, undo/redo, option changes) supersedes
+        # any slider calculation: a slower live result must not overwrite its plot.
+        self._invalidateLiveCalc()
         # Notify the user that fitting is being run
         # Allow for stopping the job
         self.cmdFit.setStyleSheet(BG_ERROR)

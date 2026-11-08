@@ -57,9 +57,27 @@ class TestValidateRange:
         (-INF, 1.0, (-INF, INF)),         # not finite
         (-1.0, 1.0, (0.0, INF)),          # outside the hard limits
         (1000.0, 1000.05, (-INF, INF)),   # narrower than the table precision
+        (6.36, 6.37, (-INF, INF)),        # step 1e-5, table shows 1e-4
+        (99.0, 100.5, (-INF, INF)),       # step 1.5e-3, table shows 1e-2 above 100
     ])
     def test_invalid_ranges_return_a_message(self, vmin, vmax, limits):
         assert isinstance(ParameterSliderWidget.validateRange(vmin, vmax, *limits), str)
+
+    @pytest.mark.parametrize("vmin, vmax", [
+        (6.26, 6.46),       # sld +/- 0.1: step 2e-4, table shows 1e-4
+        (95.0, 105.0),      # step equal to the 1e-2 resolution above 100
+        (49.5, 50.5),       # +/- 1 %: step equal to the 1e-3 resolution
+        (-0.5, 0.5),
+        (1e-9, 3e-9),
+    ])
+    def test_narrow_ranges_within_table_precision_are_valid(self, vmin, vmax):
+        assert ParameterSliderWidget.validateRange(vmin, vmax, -INF, INF) == (vmin, vmax)
+
+    @pytest.mark.parametrize("value, resolution", [
+        (6.36, 1e-4), (9.9999, 1e-4), (10.0, 1e-3), (-250.0, 1e-2), (1e-3, 1e-7),
+    ])
+    def test_table_resolution(self, value, resolution):
+        assert ParameterSliderWidget.tableResolution(value) == pytest.approx(resolution)
 
 
 class TestBinding:
