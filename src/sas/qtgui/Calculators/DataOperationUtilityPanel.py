@@ -40,7 +40,8 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         self.cbOperator.currentIndexChanged.connect(self.onSelectOperator)
 
         # edit Coefficient text edit
-        self.txtOutputData.textChanged.connect(self.onCheckOutputName)
+        self.txtNumber.textChanged.connect(self.resetNumberBackground)
+        self.txtOutputData.textChanged.connect(self.resetOutputBackground)
 
         # push buttons
         self.cmdClose.clicked.connect(self.onClose)
@@ -127,9 +128,9 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         operator = self.cbOperator.currentText()
         # calculate and send data to DataExplorer
         output = None
+        # check wether the coefficient is valid
+        self.onInputCoefficient()
         try:
-            # check wether the coefficient is valid
-            onInputCoefficient = self.onInputCoefficient()
             data1 = self.data1
             data2 = self.data2
             output = eval("data1 %s data2" % operator)
@@ -193,6 +194,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         """
         self.txtNumber.setText('1.0')
         self.txtOutputData.setText('MyNewDataName')
+        self.resetOutputBackground()
 
         self.txtNumber.setEnabled(False)
         self.cmdCompute.setEnabled(False)
@@ -290,6 +292,12 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         for operation """
         input_to_check = str(self.txtNumber.text())
 
+        try:
+            float(self.txtNumber.text())
+        except Exception as ex:
+            logger.error(ex)
+            self.txtNumber.setStyleSheet(BG_ERROR)
+            return
         if input_to_check is None or input_to_check == '':
             msg = 'DataOperation: Number requires a float number'
             logger.warning(msg)
@@ -350,10 +358,18 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
                 self.cbData2.setStyleSheet(BG_DEFAULT)
                 return True
 
+    def resetOutputBackground(self):
+        """ Reset background color of output name text field """
+        self.txtOutputData.setStyleSheet(BG_DEFAULT)
+
+    def resetNumberBackground(self):
+        """ Reset background color of coefficient text field """
+        self.txtNumber.setStyleSheet(BG_DEFAULT)
+
     def onCheckOutputName(self):
         """ Check that name of output does not already exist """
         name_to_check = str(self.txtOutputData.text())
-        self.txtOutputData.setStyleSheet(BG_DEFAULT)
+        self.resetOutputBackground()
 
         if name_to_check is None or name_to_check == '':
             self.txtOutputData.setStyleSheet(BG_ERROR)
@@ -366,7 +382,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             return False
 
         else:
-            self.txtOutputData.setStyleSheet(BG_DEFAULT)
+            self.resetOutputBackground()
             return True
 
     # ########
