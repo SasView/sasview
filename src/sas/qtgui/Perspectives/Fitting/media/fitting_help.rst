@@ -575,13 +575,13 @@ Exploring a parameter with the slider
 -------------------------------------
 
 Below the parameter table on the *Model* tab is a slider that controls the
-parameter currently selected in the table. Select a single parameter row and
-drag the slider: the value in the table updates as you drag, and so does the
-model curve if its plot is open. Until the model has been plotted with
-*Compute/Plot*, or after its plot is closed, the slider only changes the value
-and does not recalculate the model. The curve updates only on the current
-*FitPage*; constraints that link this parameter to other pages are applied when
-fitting.
+parameter currently selected in the table. Select a single parameter row by
+clicking any of its cells and drag the slider: the value in the table updates
+as you drag, and so does the model curve if its plot is open. Until the model
+has been plotted with *Compute/Plot*, or after its plot is closed, the slider
+only changes the value and does not recalculate the model. The curve updates
+only on the current *FitPage*; constraints that link this parameter to other
+pages are applied when fitting.
 
 The text boxes either side of the slider set its range. They default to the
 current value minus and plus 100 % (-1 to 1 for a value of zero), clipped to the
