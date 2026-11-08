@@ -1347,6 +1347,48 @@ class FittingWidgetTest:
         # make sure the parameters are different than before
         assert not (widget.getParamNames() == cylinder_params)
 
+    def testPolydisperseConstraintSavedAndRestored(self, widget, mocker):
+        """
+        A constraint on a polydisperse parameter is saved with the fit page and
+        restored when the project is loaded (#2735)
+        """
+        import json
+
+        # select model: cylinder / cylinder, with polydispersity
+        widget.cbCategory.setCurrentIndex(widget.cbCategory.findText("Cylinder"))
+        widget.cbModel.setCurrentIndex(widget.cbModel.findText("cylinder"))
+        widget.chkPolydispersity.setChecked(True)
+        mocker.patch.object(widget, 'modelName', return_value='M2')
+        widget.parent.perspective().constraint_tab = MagicMock()
+
+        param = "radius.width"
+        row = widget.getRowFromName(param)
+        assert widget.getModelKeyFromName(param) == "poly"
+        # M2.radius.width is constrained to M1.radius.width
+        constraint = Constraint(parent=None, param=param, value=param, func="M1.radius.width",
+                                value_ex="M2.radius.width")
+        widget.addConstraintToRow(constraint=constraint, row=row, model_key="poly")
+
+        # Save: the constraint is the last item of the parameter's entry
+        params = {line[0]: line[1:] for line in widget.getFitPage() if len(line) > 1}
+        assert params[param][-1] == (param, param, "M2.radius.width", True, "M1.radius.width")
+
+        # Load: the constraint is found in the project (saved as JSON, so tuples become lists)
+        project = json.loads(json.dumps({'dataset': {'fit_params': [params]}}))
+        saved_constraints = GuiUtils.getConstraints(project)['M2']
+        assert saved_constraints == [[param, param, "M2.radius.width", True, "M1.radius.width"]]
+
+        # ... and restored on the right row, as FittingPerspective.updateFromConstraints does
+        widget.deleteConstraintOnParameter(param=param, model_key="poly")
+        assert widget.getConstraintForRow(row, model_key="poly") is None
+        value, param_name, value_ex, validate, func = saved_constraints[0]
+        restored = Constraint(param=param_name, value=value, func=func, value_ex=value_ex)
+        restored.validate = validate
+        model_key = widget.getModelKey(restored)
+        assert model_key == "poly"
+        widget.addConstraintToRow(constraint=restored, row=widget.getRowFromName(param_name), model_key=model_key)
+        assert widget.getConstraintForRow(row, model_key="poly").func == "M1.radius.width"
+
     def testAddConstraintToRow(self, widget, mocker):
         """
         Test the constraint row add operation
