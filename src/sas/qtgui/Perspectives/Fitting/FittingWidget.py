@@ -23,7 +23,7 @@ from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 from sas.qtgui.Perspectives.Fitting.FitPage import FitPage
 from sas.qtgui.Perspectives.Fitting.FitThread import FitThread
 from sas.qtgui.Perspectives.Fitting.FittingLogic import FittingLogic
-from sas.qtgui.Perspectives.Fitting.InViewWidget import InViewWidget
+from sas.qtgui.Perspectives.Fitting.InViewWidget import InViewWidget, suggest_finite_bounds
 from sas.qtgui.Perspectives.Fitting.MagnetismWidget import MagnetismWidget
 from sas.qtgui.Perspectives.Fitting.ModelThread import Calc1D, Calc2D
 from sas.qtgui.Perspectives.Fitting.MultiConstraint import MultiConstraint
@@ -1687,7 +1687,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 # Enabling paramters edits
                 self.lstParams.setEnabled(True)
                 self.cbCategory.setEnabled(True)
-                self.cmdFit.setEnabled(True)
+                self.cmdFit.setEnabled(self.haveParamsToFit())
                 self.cmdPlot.setEnabled(True)
 
 
@@ -1699,36 +1699,19 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.cmdPlot.setEnabled(False)
 
         ###
-        # Validate parameter bounds for InView (no +/-inf allowed)
+        # arameters with +/-inf bounds: suggest finite ranges the user can accept
         params = list(self.main_params_to_fit)
         if self.chkPolydispersity.isChecked():
             params += list(self.polydispersity_widget.poly_params_to_fit)
-        has_infinite_bounds = False
-        for p in params:
-            try:
-                details = self.logic.kernel_module.details.get(p)
-                if details is None or len(details) < 3:
-                    continue
-                pmin, pmax = details[1], details[2]
-                # Disallow non-finite bounds
-                if not np.isfinite(pmin) or not np.isfinite(pmax):
-                    has_infinite_bounds = True
-                    break
-            except Exception:
-                # If anything odd, be conservative and flag
-                has_infinite_bounds = True
-                break
-        if has_infinite_bounds:
-            QtWidgets.QMessageBox.warning(self, "InView",
-                "Some parameters have infinite bounds. Please set appropriate min/max ranges.")
-            # Re-enable controls since we are not opening InView
+        if not suggest_finite_bounds(self, params, parent = self):
+            self._in_view_widget.deleteLater()
+            self._in_view_widget = None
             self.lstParams.setEnabled(True)
             self.cbCategory.setEnabled(True)
-            self.cmdFit.setEnabled(True)
+            self.cmdFit.setEnabled(self.haveParamsToFit())
             self.cmdPlot.setEnabled(True)
             return
-        ###
-
+    
         # Pushing the 1D data set to InView
         self._in_view_widget.setData(self.logic.data)
 
