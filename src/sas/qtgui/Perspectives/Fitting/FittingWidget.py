@@ -1543,7 +1543,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.cmdFit.setEnabled(self.haveParamsToFit())
             self.cmdPlot.setEnabled(True)
             return
-    
+
         # Pushing the 1D data set to InView
         self._in_view_widget.setData(self.logic.data)
 

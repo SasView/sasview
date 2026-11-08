@@ -2,7 +2,6 @@ import copy
 import logging
 
 import numpy as np
-
 from PySide6 import QtCore, QtGui, QtWidgets
 
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
@@ -15,11 +14,11 @@ from sas.system import HELP_SYSTEM
 
 logger = logging.getLogger(__name__)
 
-SLIDER_STEPS = 1000        
-UPDATE_INTERVAL_MS = 15    
-LOG_SLIDER_RATIO = 1e3     
-FIXED_XLIM = (1e-4, 1.0)   
-FIXED_YLIM = (1e-3, 1e4)   
+SLIDER_STEPS = 1000
+UPDATE_INTERVAL_MS = 15
+LOG_SLIDER_RATIO = 1e3
+FIXED_XLIM = (1e-4, 1.0)
+FIXED_YLIM = (1e-3, 1e4)
 DATA_MARGIN = 0.05
 
 def format_value(val):
@@ -33,7 +32,7 @@ def format_value(val):
 class CompactSpinBox(QtWidgets.QDoubleSpinBox):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setDecimals(12)            
+        self.setDecimals(12)
 
     def textFromValue(self, value):
         return format_value(value)
@@ -141,7 +140,7 @@ class SuggestBoundsDialog(QtWidgets.QDialog):
 def suggest_finite_bounds(fitting_widget, params, parent = None):
     kernel = fitting_widget.logic.kernel_module
     rows = []
-    for name in dict.fromkeys(params):  
+    for name in dict.fromkeys(params):
         details = kernel.details.get(name)
         if details is None or len(details) < 3:
             continue
@@ -261,7 +260,7 @@ class InViewWidget(QtWidgets.QWidget, Ui_InViewWidgetUI):
             except Exception:
                 pmin = None
                 pmax = None
-            pmin, pmax = finite_range(float(val), pmin, pmax) 
+            pmin, pmax = finite_range(float(val), pmin, pmax)
             use_log = pmin >0 and pmax / pmin > LOG_SLIDER_RATIO
             ###
             unit = ""
@@ -281,7 +280,7 @@ class InViewWidget(QtWidgets.QWidget, Ui_InViewWidgetUI):
                 'min': float(pmin),
                 'max': float(pmax),
                 'value': float(val),
-                'unit': unit, 
+                'unit': unit,
                 'log': use_log
             }
             #self._param_info[name] = {'min': float(pmin), 'max': float(pmax), 'value': float(val)}
@@ -388,7 +387,7 @@ class InViewWidget(QtWidgets.QWidget, Ui_InViewWidgetUI):
     def _schedule_update(self):
         if not self._update_timer.isActive():
             self._update_timer.start()
-        
+
     def _on_slider_changed(self, name, pos):
         meta = self._slider_meta.get(name)
         if not meta:
@@ -604,7 +603,7 @@ class InViewWidget(QtWidgets.QWidget, Ui_InViewWidgetUI):
             xlim = self._padded_range(data.x, self._is_log('x'))
             ylim = self._padded_range(data.y,self._is_log('y'))
         return xlim or FIXED_XLIM, ylim or FIXED_YLIM
-    
+
     @staticmethod
 
     def _padded_range(values, log_axis):
@@ -647,11 +646,11 @@ class InViewWidget(QtWidgets.QWidget, Ui_InViewWidgetUI):
             return
         self._set_limits((x0, x1), (y0, y1))
         self.plotter.canvas.draw_idle()
-    
+
     def closeEvent(self, event):
         self._update_timer.stop()
-        super().closeEvent(event)        
-            
+        super().closeEvent(event)
+
     def _apply_to_fitpage(self):
         if self._fw is None:
             return
