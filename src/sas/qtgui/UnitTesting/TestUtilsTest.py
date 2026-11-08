@@ -17,6 +17,7 @@ class TestUtilsTest:
             # Test the signal callback
             assert signal == test_string
 
+        # Keep this as a separate Communicate object due to the different signals being generated to minimize conflicts
         communicator = Communicate()
         communicator.statusBarUpdateSignal.connect(signalReceived)
 

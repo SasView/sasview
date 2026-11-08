@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Generic, NamedTuple, TypeVar
+from typing import Generic, TypeVar
 
 from sasdata.dataloader.data_info import Data1D
 
@@ -85,31 +85,3 @@ class LongPeriodMethod(EntryListEnum):
     """ Methods for estimating the long period """
     MAX = 'max'
     DOUBLE_MIN = 'double-min'
-
-
-@dataclass
-class SettableExtrapolationParameters:
-    """ Extrapolation parameters that can be set by the user"""
-    point_1: float
-    point_2: float
-    point_3: float
-
-
-
-class ExtrapolationParameters(NamedTuple):
-    """ Represents the parameters defining extrapolation"""
-    data_q_min: float
-    point_1: float
-    point_2: float
-    point_3: float
-    data_q_max: float
-
-@dataclass
-class ExtrapolationInteractionState:
-    """ Represents the state of the slider used to control extrapolation parameters
-
-    Contains extrapolation parameters along with the representation of the hover state.
-    """
-    extrapolation_parameters: ExtrapolationParameters
-    working_line_id: int | None = None
-    dragging_line_position: float | None = None

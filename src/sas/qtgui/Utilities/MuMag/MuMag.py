@@ -35,6 +35,7 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
         self.SimpleFitButton.clicked.connect(self.onFit)
         self.SaveResultsButton.clicked.connect(self.onSave)
         self.helpButton.clicked.connect(self.onHelp)
+        self.closeButton.clicked.connect(self.close)
 
         #
         # Data

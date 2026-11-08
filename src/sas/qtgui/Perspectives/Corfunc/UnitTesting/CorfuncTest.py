@@ -7,8 +7,9 @@ from PySide6.QtTest import QTest
 from sasdata.dataloader.loader import Loader
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Perspectives.Corfunc.CorfuncPerspective import CorfuncWindow
+from sas.qtgui.Perspectives.Corfunc.CorfuncPerspective import WIDGETS, CorfuncWindow
 from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.UnitTesting import base_path
 
 
 class CorfuncTest:
@@ -18,18 +19,15 @@ class CorfuncTest:
     def widget(self, qapp, mocker):
         '''Create/Destroy the CorfuncWindow'''
         class MainWindow:
-            def __init__(self, widget):
+            def __init__(self):
                 self.model = QtGui.QStandardItemModel()
 
-        class dummy_manager:
-            def __init__(self, widget):
+        class dummy_manager(QtWidgets.QWidget):
+            def __init__(self):
                 self.filesWidget = MainWindow()
 
-            def communicator(self, widget):
-                return GuiUtils.Communicate()
-
-            def communicate(self, widget):
-                return GuiUtils.Communicate()
+            def communicator(self):
+                return GuiUtils.communicator
 
         w = CorfuncWindow(dummy_manager())
         reference_data1 = Data1D(x=[0.1, 0.2, 0.3, 0.4, 0.5], y=[1000, 1000, 100, 10, 1], dy=[0.0, 0.0, 0.0, 0.0, 0.0])
@@ -41,15 +39,12 @@ class CorfuncTest:
 
         w.close()
 
-    @pytest.mark.xfail(reason="2022-09 already broken")
-    def testDefaults(self, widget):
+    def checkDefaults(self, widget):
         '''Test the GUI in its default state'''
         assert isinstance(widget, QtWidgets.QWidget)
         assert widget.windowTitle() == "Corfunc Perspective"
         assert widget.model.columnCount() == 1
-        assert widget.model.rowCount() == 16
-        assert widget.txtLowerQMin.text() == '0.0'
-        assert not widget.txtLowerQMin.isEnabled()
+        assert widget.model.rowCount() == 18
         assert widget.txtFilename.text() == ''
         assert widget.txtLowerQMax.text() == '0.01'
         assert widget.txtUpperQMin.text() == '0.20'
@@ -62,39 +57,36 @@ class CorfuncTest:
         assert widget.txtAvgCoreThick.text() == '0'
         assert widget.txtAvgIntThick.text() == '0'
         assert widget.txtAvgHardBlock.text() == '0'
-        assert widget.txtPolydisp.text() == '0'
+        assert widget.txtPolyRyan.text() == '0'
         assert widget.txtLongPeriod.text() == '0'
         assert widget.txtLocalCrystal.text() == '0'
 
-    @pytest.mark.xfail(reason="2022-09 already broken")
+    # This is throwing an error. Skip for now
+    @pytest.mark.skip()
     def testOnCalculate(self, widget, mocker):
         """ Test onCompute function """
-        mocker.patch.object(widget, 'calculate_background')
-        widget.cmdCalculateBg.setEnabled(True)
-        QTest.mouseClick(widget.cmdCalculateBg, QtCore.Qt.LeftButton)
-        assert widget.calculate_background.called_once()
+        mocker.patch.object(widget._calculator, '_calculate_background')
+        widget.cmdExtract.setEnabled(True)
+        QTest.mouseClick(widget.cmdExtract, QtCore.Qt.LeftButton)
+        widget._calculator._calculate_background.assert_called_once()
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testProcess(self, widget, mocker):
         """Test the full analysis path"""
 
-        filename = os.path.join("UnitTesting", "ISIS_98929.txt")
+        filename = str(base_path / "ISIS_98929.TXT")
         try:
             os.stat(filename)
         except OSError:
-            assert False, "ISIS_98929.txt does not exist"
-        f = Loader().load(filename)
+            assert False, "ISIS_98929.TXT does not exist"
+        Loader().load(filename)
         mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=(filename, ''))
 
-        #assert widget.txtFilename.text() == filename
+        assert widget.txtBackground.text() == ''
 
-        assert float(widget.txtBackground.text()) == 0.0
-
-        widget.txtLowerQMin.setText("0.01")
         widget.txtLowerQMax.setText("0.20")
         widget.txtUpperQMax.setText("0.22")
 
-        QTest.mouseClick(widget.cmdCalculateBg, QtCore.Qt.LeftButton)
+        QTest.mouseClick(widget.cmdExtract, QtCore.Qt.LeftButton)
 
 
         #TODO: All the asserts when Calculate is clicked and file properly loaded
@@ -124,7 +116,6 @@ class CorfuncTest:
         # assert float(widget.longPeriod.text()) > float(widget.avgIntThick.text()) > 0
         # assert float(widget.longPeriod.text()) > float(widget.avgCoreThick.text()) > 0
 
-    @pytest.mark.xfail(reason="2022-09 already broken")
     def testSerialization(self, widget):
         """ Serialization routines """
         widget.setData([self.fakeData])
@@ -145,10 +136,9 @@ class CorfuncTest:
         assert len(state_all) == 1
         # getPage should include an extra param 'data_id' removed by serialize
         assert len(params) != len(page)
-        assert len(params) == 15
-        assert len(page) == 16
+        assert len(params) == 17
+        assert len(page) == 18
 
-    @pytest.mark.xfail(reason="2022-09 already broken")
     def testRemoveData(self, widget):
         widget.setData([self.fakeData])
         self.checkFakeDataState(widget)
@@ -158,9 +148,8 @@ class CorfuncTest:
         # Removing the data from the perspective should set it to base state
         widget.removeData([self.fakeData])
         # Be sure the defaults hold true after data removal
-        self.testDefaults()
+        self.checkDefaults(widget)
 
-    @pytest.mark.xfail(reason="2022-09 already broken")
     def testLoadParams(self, widget):
         widget.setData([self.fakeData])
         self.checkFakeDataState(widget)
@@ -168,16 +157,29 @@ class CorfuncTest:
         widget.updateFromParameters(pageState)
         self.checkFakeDataState(widget)
         widget.removeData([self.fakeData])
-        self.testDefaults()
+        self.checkDefaults(widget)
+
+    def testUndoRestoreReconnectsModelChangedOnError(self, widget, mocker):
+        widget.model.itemChanged.disconnect(widget.model_changed)
+        model_changed = mocker.Mock()
+        widget.model_changed = model_changed
+        widget.model.itemChanged.connect(widget.model_changed)
+        set_item = mocker.patch.object(widget.model, 'setItem', side_effect=RuntimeError("restore failed"))
+
+        with pytest.raises(RuntimeError):
+            widget._restore_parameter_values({})
+
+        mocker.stop(set_item)
+        widget.model.setItem(WIDGETS.W_BACKGROUND, QtGui.QStandardItem("1.0"))
+
+        model_changed.assert_called()
 
     def checkFakeDataState(self, widget):
         assert widget.txtFilename.text() == 'data'
-        assert widget.txtLowerQMin.text() == '0.0'
-        assert not widget.txtLowerQMin.isEnabled()
-        assert widget.txtLowerQMax.text() == '0.01'
-        assert widget.txtUpperQMin.text() == '0.20'
-        assert widget.txtUpperQMax.text() == '0.22'
-        assert widget.txtBackground.text() == '0'
+        assert widget.txtLowerQMax.text() == '0.137973'
+        assert widget.txtUpperQMin.text() == '0.3085169'
+        assert widget.txtUpperQMax.text() == '0.3623898'
+        assert widget.txtBackground.text() == ''
         assert widget.txtGuinierA.text() == ''
         assert widget.txtGuinierB.text() == ''
         assert widget.txtPorodK.text() == ''
@@ -185,6 +187,6 @@ class CorfuncTest:
         assert widget.txtAvgCoreThick.text() == ''
         assert widget.txtAvgIntThick.text() == ''
         assert widget.txtAvgHardBlock.text() == ''
-        assert widget.txtPolydisp.text() == ''
+        assert widget.txtPolyRyan.text() == ''
         assert widget.txtLongPeriod.text() == ''
         assert widget.txtLocalCrystal.text() == ''

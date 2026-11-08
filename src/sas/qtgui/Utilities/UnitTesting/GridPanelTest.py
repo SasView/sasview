@@ -27,9 +27,7 @@ class BatchOutputPanelTest:
         class dummy_manager:
             _parent = QtWidgets.QWidget()
             def communicator(self):
-                return GuiUtils.Communicate()
-            def communicate(self):
-                return GuiUtils.Communicate()
+                return GuiUtils.communicator
         w = BatchOutputPanel(parent=dummy_manager(), output_data=self.output_for_test())
         test_table = {"p1":[1,2,3],
                       "p2":[4,5,None],
@@ -88,8 +86,7 @@ Chi2,Data,scale,background,radius_equat_core,x_core,thick_shell,x_polar_shell,sl
         mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[""])
         widget.actionLoadData()
         # Assure parser wasn't called and logging got a message
-        assert logger.info.called_once()
-        assert "No data" in logger.info.call_args[0][0]
+        logger.info.assert_not_called()
 
         # Filename given
         mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value="test")
@@ -103,8 +100,8 @@ Chi2,Data,scale,background,radius_equat_core,x_core,thick_shell,x_polar_shell,sl
     def notestPlotFits(self, widget):
         '''Test plot generation from selected table rows'''
         # mock tested calls
-        #GuiUtils.Communicate.plot
-        spy_plot_signal = QtSignalSpy(widget.communicate, widget.communicate().plotFromNameSignal)
+        #GuiUtils.communicator.plot
+        spy_plot_signal = QtSignalSpy(widget.communicator, widget.communicator.plotFromNameSignal)
         # Select row #1
         widget.tblParams.selectRow(0)
         QtWidgets.QApplication.processEvents()
@@ -113,13 +110,12 @@ Chi2,Data,scale,background,radius_equat_core,x_core,thick_shell,x_polar_shell,sl
         assert spy_plot_signal.count() == 1
         assert "ddd" in str(spy_plot_signal.called()[0]['args'][0])
 
-    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testDataFromTable(self, widget):
         '''Test dictionary generation from data'''
         params = widget.dataFromTable(widget.tblParams)
         assert len(params) == 13
         assert params['Chi2'][0] == '9000'
-        assert params['Data'][1] == ''
+        assert params['Data'][1] == 'data'
         assert params['sld_solvent'][1] == '0.02'
 
     def testActionSendToExcel(self, widget, mocker):

@@ -1,3 +1,5 @@
+import logging
+
 import numpy
 from PySide6 import QtGui
 
@@ -5,6 +7,8 @@ from sasdata.data_util.manipulations import Boxavg, Boxsum
 
 from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
 from sas.qtgui.Utilities.GuiUtils import formatNumber, toDouble
+
+logger = logging.getLogger(__name__)
 
 
 class BoxSumCalculator(BaseInteractor):
@@ -27,29 +31,27 @@ class BoxSumCalculator(BaseInteractor):
     @param y_max: the maximum value of the y coordinate
 
     """
-    def __init__(self, base, axes, color='black', zorder=3):
+
+    def __init__(self, base, axes, color="black", zorder=3):
         BaseInteractor.__init__(self, base, axes, color=color)
 
         # list of Boxsmun markers
         self.markers = []
         self.axes = axes
         self._model = None
-        self.update_model = False
         # connect the artist for the motion
         self.connect = self.base.connect
+        # Reference to the widget (if any)
+        self.widget = None
 
         # when qmax is reached the selected line is reset the its previous value
         self.qmax = min(self.data.xmax, self.data.xmin)
 
         # Define the boxsum limits
-        self.xmin = -1 * 0.5 * min(numpy.fabs(self.data.xmax),
-                                   numpy.fabs(self.data.xmin))
-        self.ymin = -1 * 0.5 * min(numpy.fabs(self.data.xmax),
-                                   numpy.fabs(self.data.xmin))
-        self.xmax = 0.5 * min(numpy.fabs(self.data.xmax),
-                              numpy.fabs(self.data.xmin))
-        self.ymax = 0.5 * min(numpy.fabs(self.data.xmax),
-                              numpy.fabs(self.data.xmin))
+        self.xmin = -1 * 0.5 * min(numpy.fabs(self.data.xmax), numpy.fabs(self.data.xmin))
+        self.ymin = -1 * 0.5 * min(numpy.fabs(self.data.xmax), numpy.fabs(self.data.xmin))
+        self.xmax = 0.5 * min(numpy.fabs(self.data.xmax), numpy.fabs(self.data.xmin))
+        self.ymax = 0.5 * min(numpy.fabs(self.data.xmax), numpy.fabs(self.data.xmin))
         # center of the boxSum
         self.center_x = 0.0002
         self.center_y = 0.0003
@@ -65,42 +67,42 @@ class BoxSumCalculator(BaseInteractor):
         # set to False == no motion , set to True== motion
         self.has_move = False
         # Create Boxsum edges
-        self.horizontal_lines = HorizontalDoubleLine(self,
-                                                     self.axes,
-                                                     color='blue',
-                                                     zorder=zorder,
-                                                     y=self.ymax,
-                                                     x=self.xmax,
-                                                     center_x=self.center_x,
-                                                     center_y=self.center_y)
+        self.horizontal_lines = HorizontalDoubleLine(
+            self,
+            self.axes,
+            color=color,
+            zorder=zorder,
+            y=self.ymax,
+            x=self.xmax,
+            center_x=self.center_x,
+            center_y=self.center_y,
+        )
         self.horizontal_lines.qmax = self.qmax
 
-        self.vertical_lines = VerticalDoubleLine(self,
-                                                 self.axes,
-                                                 color='black',
-                                                 zorder=zorder,
-                                                 y=self.ymax,
-                                                 x=self.xmax,
-                                                 center_x=self.center_x,
-                                                 center_y=self.center_y)
+        self.vertical_lines = VerticalDoubleLine(
+            self,
+            self.axes,
+            color=color,
+            zorder=zorder,
+            y=self.ymax,
+            x=self.xmax,
+            center_x=self.center_x,
+            center_y=self.center_y,
+        )
         self.vertical_lines.qmax = self.qmax
 
-        self.center = PointInteractor(self,
-                                      self.axes, color='grey',
-                                      zorder=zorder,
-                                      center_x=self.center_x,
-                                      center_y=self.center_y)
+        self.center = PointInteractor(
+            self, self.axes, color=color, zorder=zorder, center_x=self.center_x, center_y=self.center_y
+        )
         # Save the name of the slicer panel associate with this slicer
         self.panel_name = ""
         # Update and post slicer parameters
-        self.update_model = False
         self.update()
         self.postData()
 
         # set up the model
         self._model = QtGui.QStandardItemModel(1, 9)
         self.setModelFromParams()
-        self.update_model = True
         self._model.itemChanged.connect(self.setParamsFromModel)
 
     def validate(self, param_name, param_value):
@@ -115,15 +117,15 @@ class BoxSumCalculator(BaseInteractor):
         """
         parameters = self.getParams()
         # Crete/overwrite model items
-        self._model.setData(self._model.index(0, 0), formatNumber(parameters['Height']))
-        self._model.setData(self._model.index(0, 1), formatNumber(parameters['Width']))
-        self._model.setData(self._model.index(0, 2), formatNumber(parameters['center_x']))
-        self._model.setData(self._model.index(0, 3), formatNumber(parameters['center_y']))
+        self._model.setData(self._model.index(0, 0), formatNumber(parameters["Height"]))
+        self._model.setData(self._model.index(0, 1), formatNumber(parameters["Width"]))
+        self._model.setData(self._model.index(0, 2), formatNumber(parameters["center_x"]))
+        self._model.setData(self._model.index(0, 3), formatNumber(parameters["center_y"]))
 
         self.setReadOnlyParametersFromModel()
 
     def model(self):
-        ''' model accessor '''
+        """model accessor"""
         return self._model
 
     def setReadOnlyParametersFromModel(self):
@@ -131,11 +133,11 @@ class BoxSumCalculator(BaseInteractor):
         Cast model content onto "read-only" subset of parameters
         """
         parameters = self.getParams()
-        self._model.setData(self._model.index(0, 4), formatNumber(parameters['avg']))
-        self._model.setData(self._model.index(0, 5), formatNumber(parameters['avg_error']))
-        self._model.setData(self._model.index(0, 6), formatNumber(parameters['sum']))
-        self._model.setData(self._model.index(0, 7), formatNumber(parameters['sum_error']))
-        self._model.setData(self._model.index(0, 8), formatNumber(parameters['num_points']))
+        self._model.setData(self._model.index(0, 4), formatNumber(parameters["avg"]))
+        self._model.setData(self._model.index(0, 5), formatNumber(parameters["avg_error"]))
+        self._model.setData(self._model.index(0, 6), formatNumber(parameters["sum"]))
+        self._model.setData(self._model.index(0, 7), formatNumber(parameters["sum_error"]))
+        self._model.setData(self._model.index(0, 8), formatNumber(parameters["num_points"]))
 
     def setParamsFromModel(self):
         """
@@ -146,10 +148,12 @@ class BoxSumCalculator(BaseInteractor):
         params["Width"] = toDouble(self.model().item(0, 1).text())
         params["center_x"] = toDouble(self.model().item(0, 2).text())
         params["center_y"] = toDouble(self.model().item(0, 3).text())
-        self.update_model = False
-        self.setParams(params)
-        self.setReadOnlyParametersFromModel()
-        self.update_model = True
+        blocked = self._model.blockSignals(True)
+        try:
+            self.setParams(params)
+            self.setReadOnlyParametersFromModel()
+        finally:
+            self._model.blockSignals(blocked)
 
     def setPanelName(self, name):
         """
@@ -171,10 +175,13 @@ class BoxSumCalculator(BaseInteractor):
         Clear the slicer and all connected events related to this slicer
         """
         self.clear_markers()
-        self.horizontal_lines.clear()
-        self.vertical_lines.clear()
-        self.center.clear()
-        self.base.connect.clearall()
+        for lines in (self.horizontal_lines, self.vertical_lines, self.center):
+            if getattr(lines, "axes", None) is not None:
+                lines.clear()
+        # Close the associated widget if it exists. Closing it notifies its owner.
+        if self.widget is not None:
+            self.widget.close()
+            self.widget = None
 
     def update(self):
         """
@@ -190,16 +197,16 @@ class BoxSumCalculator(BaseInteractor):
         # update the figure accordingly
         if self.horizontal_lines.has_move:
             self.horizontal_lines.update()
-            self.vertical_lines.update(y1=self.horizontal_lines.y1,
-                                       y2=self.horizontal_lines.y2,
-                                       height=self.horizontal_lines.half_height)
+            self.vertical_lines.update(
+                y1=self.horizontal_lines.y1, y2=self.horizontal_lines.y2, height=self.horizontal_lines.half_height
+            )
         # check if the vertical lines have moved and
         # update the figure accordingly
         if self.vertical_lines.has_move:
             self.vertical_lines.update()
-            self.horizontal_lines.update(x1=self.vertical_lines.x1,
-                                         x2=self.vertical_lines.x2,
-                                         width=self.vertical_lines.half_width)
+            self.horizontal_lines.update(
+                x1=self.vertical_lines.x1, x2=self.vertical_lines.x2, width=self.vertical_lines.half_width
+            )
 
     def save(self, ev):
         """
@@ -220,13 +227,13 @@ class BoxSumCalculator(BaseInteractor):
         x_max = self.horizontal_lines.x1
         y_min = self.vertical_lines.y2
         y_max = self.vertical_lines.y1
-        #computation of the sum and its error
+        # computation of the sum and its error
         box = Boxavg(x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
         self.count, self.error = box(self.data)
         # Dig out number of points summed, SMK & PDB, 04/03/2013
         boxtotal = Boxsum(x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
         self.total, self.totalerror, self.points = boxtotal(self.data)
-        if self.update_model:
+        if self._model is not None:
             self.setModelFromParams()
 
     def moveend(self, ev):
@@ -288,17 +295,15 @@ class BoxSumCalculator(BaseInteractor):
         self.center_y = params["center_y"]
         # update the slicer given values of params
         self.center.update(center_x=self.center_x, center_y=self.center_y)
-        self.horizontal_lines.update(center=self.center,
-                                     width=x_max, height=y_max)
-        self.vertical_lines.update(center=self.center,
-                                   width=x_max, height=y_max)
+        self.horizontal_lines.update(center=self.center, width=x_max, height=y_max)
+        self.vertical_lines.update(center=self.center, width=x_max, height=y_max)
         # compute the new error and sum given values of params
         self.postData()
+        self.draw()
 
     def draw(self):
-        """ Redraw canvas"""
+        """Redraw canvas"""
         self.base.draw()
-
 
 
 class PointInteractor(BaseInteractor):
@@ -306,8 +311,8 @@ class PointInteractor(BaseInteractor):
     Draw a point that can be dragged with the marker.
     this class controls the motion the center of the BoxSum
     """
-    def __init__(self, base, axes, color='black', zorder=5, center_x=0.0,
-                 center_y=0.0):
+
+    def __init__(self, base, axes, color="black", zorder=5, center_x=0.0, center_y=0.0):
         BaseInteractor.__init__(self, base, axes, color=color)
         # Initialization the class
         self.markers = []
@@ -319,17 +324,21 @@ class PointInteractor(BaseInteractor):
         self.save_x = center_x
         self.save_y = center_y
         # Create a marker
-        self.center_marker = self.axes.plot([self.x], [self.y], linestyle='',
-                                            marker='s', markersize=10,
-                                            color=self.color, alpha=0.6,
-                                            pickradius=5, label="pick",
-                                            zorder=zorder,
-                                            visible=True)[0]
+        self.center_marker = self.axes.plot(
+            [self.x],
+            [self.y],
+            linestyle="",
+            marker="s",
+            markersize=10,
+            color=self.color,
+            alpha=0.6,
+            pickradius=5,
+            label="pick",
+            zorder=zorder,
+            visible=True,
+        )[0]
         # Draw a point
-        self.center = self.axes.plot([self.x], [self.y],
-                                     linestyle='-', marker='',
-                                     color=self.color,
-                                     visible=True)[0]
+        self.center = self.axes.plot([self.x], [self.y], linestyle="-", marker="", color=self.color, visible=True)[0]
         # Flag to determine the motion this point
         self.has_move = False
         # connecting the marker to allow them to move
@@ -350,8 +359,6 @@ class PointInteractor(BaseInteractor):
         Clear this figure and its markers
         """
         self.clear_markers()
-        self.center.remove()
-        self.center_marker.remove()
 
     def update(self, center_x=None, center_y=None):
         """
@@ -373,8 +380,7 @@ class PointInteractor(BaseInteractor):
         self.save_y = self.y
 
     def moveend(self, ev):
-        """
-        """
+        """ """
         self.has_move = False
         self.base.moveend(ev)
 
@@ -396,18 +402,18 @@ class PointInteractor(BaseInteractor):
         self.base.draw()
 
     def setCursor(self, x, y):
-        """
-        """
+        """ """
         self.move(x, y, None)
         self.update()
+
 
 class VerticalDoubleLine(BaseInteractor):
     """
     Draw 2 vertical lines moving in opposite direction and centered on
     a point (PointInteractor)
     """
-    def __init__(self, base, axes, color='black', zorder=5, x=0.5, y=0.5,
-                 center_x=0.0, center_y=0.0):
+
+    def __init__(self, base, axes, color="black", zorder=5, x=0.5, y=0.5, center_x=0.0, center_y=0.0):
         BaseInteractor.__init__(self, base, axes, color=color)
         # Initialization the class
         self.markers = []
@@ -438,19 +444,27 @@ class VerticalDoubleLine(BaseInteractor):
         self.half_width = numpy.fabs(self.x1 - self.x2) / 2
         self.save_half_width = numpy.fabs(self.x1 - self.x2) / 2
         # Create marker
-        self.right_marker = self.axes.plot([self.x1], [0], linestyle='',
-                                           marker='s', markersize=10,
-                                           color=self.color, alpha=0.6,
-                                           pickradius=5, label="pick",
-                                           zorder=zorder, visible=True)[0]
+        self.right_marker = self.axes.plot(
+            [self.x1],
+            [0],
+            linestyle="",
+            marker="s",
+            markersize=10,
+            color=self.color,
+            alpha=0.6,
+            pickradius=5,
+            label="pick",
+            zorder=zorder,
+            visible=True,
+        )[0]
 
         # Define the left and right lines of the rectangle
-        self.right_line = self.axes.plot([self.x1, self.x1], [self.y1, self.y2],
-                                         linestyle='-', marker='',
-                                         color=self.color, visible=True)[0]
-        self.left_line = self.axes.plot([self.x2, self.x2], [self.y1, self.y2],
-                                        linestyle='-', marker='',
-                                        color=self.color, visible=True)[0]
+        self.right_line = self.axes.plot(
+            [self.x1, self.x1], [self.y1, self.y2], linestyle="-", marker="", color=self.color, visible=True
+        )[0]
+        self.left_line = self.axes.plot(
+            [self.x2, self.x2], [self.y1, self.y2], linestyle="-", marker="", color=self.color, visible=True
+        )[0]
         # Flag to determine if the lines have moved
         self.has_move = False
         # Connection the marker and draw the pictures
@@ -470,12 +484,11 @@ class VerticalDoubleLine(BaseInteractor):
         Clear this slicer  and its markers
         """
         self.clear_markers()
-        self.right_marker.remove()
-        self.right_line.remove()
-        self.left_line.remove()
+        for line in (self.right_line, self.left_line):
+            if hasattr(line, "remove") and line in getattr(self.axes, "lines", []):
+                line.remove()
 
-    def update(self, x1=None, x2=None, y1=None, y2=None, width=None,
-               height=None, center=None):
+    def update(self, x1=None, x2=None, y1=None, y2=None, width=None, height=None, center=None):
         """
         Draw the new roughness on the graph.
         :param x1: new maximum value of x coordinates
@@ -502,10 +515,8 @@ class VerticalDoubleLine(BaseInteractor):
             self.y2 = -self.half_height + self.center_y
 
             self.right_marker.set(xdata=[self.x1], ydata=[self.center_y])
-            self.right_line.set(xdata=[self.x1, self.x1],
-                                ydata=[self.y1, self.y2])
-            self.left_line.set(xdata=[self.x2, self.x2],
-                               ydata=[self.y1, self.y2])
+            self.right_line.set(xdata=[self.x1, self.x1], ydata=[self.y1, self.y2])
+            self.left_line.set(xdata=[self.x2, self.x2], ydata=[self.y1, self.y2])
             return
         # if x1, y1, y2, y3 are given draw the rectangle with this value
         if x1 is not None:
@@ -570,14 +581,14 @@ class VerticalDoubleLine(BaseInteractor):
         self.move(x, y, None)
         self.update()
 
+
 class HorizontalDoubleLine(BaseInteractor):
     """
     Draw 2 horizontal lines moving in opposite direction and centered on
     a point (PointInteractor)
     """
-    def __init__(self, base, axes, color='black', zorder=5, x=0.5, y=0.5,
-                 center_x=0.0, center_y=0.0):
 
+    def __init__(self, base, axes, color="black", zorder=5, x=0.5, y=0.5, center_x=0.0, center_y=0.0):
         BaseInteractor.__init__(self, base, axes, color=color)
         # Initialization the class
         self.markers = []
@@ -600,20 +611,27 @@ class HorizontalDoubleLine(BaseInteractor):
         self.save_half_height = numpy.fabs(y)
         self.half_width = numpy.fabs(x)
         self.save_half_width = numpy.fabs(x)
-        self.top_marker = self.axes.plot([0], [self.y1], linestyle='',
-                                         marker='s', markersize=10,
-                                         color=self.color, alpha=0.6,
-                                         pickradius=5, label="pick",
-                                         zorder=zorder, visible=True)[0]
+        self.top_marker = self.axes.plot(
+            [0],
+            [self.y1],
+            linestyle="",
+            marker="s",
+            markersize=10,
+            color=self.color,
+            alpha=0.6,
+            pickradius=5,
+            label="pick",
+            zorder=zorder,
+            visible=True,
+        )[0]
 
         # Define 2 horizotnal lines
-        self.top_line = self.axes.plot([self.x1, -self.x1], [self.y1, self.y1],
-                                       linestyle='-', marker='',
-                                       color=self.color, visible=True)[0]
-        self.bottom_line = self.axes.plot([self.x1, -self.x1],
-                                          [self.y2, self.y2],
-                                          linestyle='-', marker='',
-                                          color=self.color, visible=True)[0]
+        self.top_line = self.axes.plot(
+            [self.x1, -self.x1], [self.y1, self.y1], linestyle="-", marker="", color=self.color, visible=True
+        )[0]
+        self.bottom_line = self.axes.plot(
+            [self.x1, -self.x1], [self.y2, self.y2], linestyle="-", marker="", color=self.color, visible=True
+        )[0]
         # Flag to determine if the lines have moved
         self.has_move = False
         # connection the marker and draw the pictures
@@ -633,12 +651,11 @@ class HorizontalDoubleLine(BaseInteractor):
         Clear this figure and its markers
         """
         self.clear_markers()
-        self.top_marker.remove()
-        self.bottom_line.remove()
-        self.top_line.remove()
+        for line in (self.bottom_line, self.top_line):
+            if hasattr(line, "remove") and line in getattr(self.axes, "lines", []):
+                line.remove()
 
-    def update(self, x1=None, x2=None, y1=None, y2=None,
-               width=None, height=None, center=None):
+    def update(self, x1=None, x2=None, y1=None, y2=None, width=None, height=None, center=None):
         """
         Draw the new roughness on the graph.
         :param x1: new maximum value of x coordinates
@@ -666,10 +683,8 @@ class HorizontalDoubleLine(BaseInteractor):
             self.y2 = -self.half_height + self.center_y
 
             self.top_marker.set(xdata=[self.center_x], ydata=[self.y1])
-            self.top_line.set(xdata=[self.x1, self.x2],
-                              ydata=[self.y1, self.y1])
-            self.bottom_line.set(xdata=[self.x1, self.x2],
-                                 ydata=[self.y2, self.y2])
+            self.top_line.set(xdata=[self.x1, self.x2], ydata=[self.y1, self.y1])
+            self.bottom_line.set(xdata=[self.x1, self.x2], ydata=[self.y2, self.y2])
             return
         # if x1, y1, y2, y3 are given draw the rectangle with this value
         if x1 is not None:

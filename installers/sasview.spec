@@ -15,7 +15,9 @@ datas = []
 datas.append((os.path.join(PYTHON_PACKAGES, 'debugpy'), 'debugpy'))
 datas.append((os.path.join(PYTHON_PACKAGES, 'jedi'), 'jedi'))
 datas.append((os.path.join(PYTHON_PACKAGES, 'zmq'), 'zmq'))
-datas.append(('../src/sas/example_data', './example_data'))
+
+# clobber the minimal file with the full one for the installer bundle
+datas.append(('credits.html', 'sas/system/'))
 
 def add_data(data):
     for component in data:
@@ -54,6 +56,17 @@ hiddenimports = [
     'tccbox',
 ]
 
+hooksconfig = {
+    "matplotlib": {
+        "backends": [
+            # interactive - just the one sasview uses
+            "QtAgg",
+            # static - all of them
+            "AGG", "PDF", "PS", "SVG", "PGF"
+        ],
+    },
+}
+
 if platform.system() == 'Windows':
     # Need win32 to run sasview from the command line.
     hiddenimports.extend([
@@ -67,6 +80,7 @@ a = Analysis(
     binaries=[],
     datas=datas,
     hiddenimports=hiddenimports,
+    hooksconfig=hooksconfig,
     hookspath=[],
     runtime_hooks=[],
     excludes=[],

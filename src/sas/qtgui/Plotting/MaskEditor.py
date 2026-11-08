@@ -122,10 +122,13 @@ class MaskEditor(QtWidgets.QDialog, Ui_MaskEditorUI):
         self.figure.canvas.draw()
         self.current_slicer.update()
 
-    def onMask(self, slicer=None, inside=True):
+    def onMask(self, checked, slicer=None, inside=True):
         """
         Clear the previous mask and create a new one.
         """
+        # Note that the "checked" argument is required because it is
+        # emitted by the radio button "toggled" signal.
+
         self.clearSlicer()
         # modifying data in-place
         self.slicer_z += 1

@@ -11,6 +11,7 @@ from pathlib import Path
 from PySide6 import QtCore, QtGui, QtWidgets
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Utilities.BackgroundColor import BG_DEFAULT, BG_ERROR
 from sas.qtgui.Utilities.CustomGUI.CodeEditor import QCodeEditor
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.ModelEditor import ModelEditor
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.PluginDefinition import PluginDefinition
@@ -54,6 +55,11 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.addWidgets()
 
         self.addSignals()
+        # Install an application-level event filter so pressing Esc
+        # doesn't accidentally close the dialog while editing table cells.
+        app = QtWidgets.QApplication.instance()
+        if app is not None:
+            app.installEventFilter(self)
 
         if self.load_file is not None:
             self.onLoad(at_launch=True)
@@ -136,7 +142,22 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         """
         if self.is_modified and self.saveClose():
             return
+        app = QtWidgets.QApplication.instance()
+        if app is not None:
+            app.removeEventFilter(self)
         event.accept()
+
+    def eventFilter(self, obj: QtCore.QObject, event: QtCore.QEvent) -> bool:
+        """Intercept Escape key press.
+        Escape is captured to prevent closing the dialog.
+        """
+        if event.type() != QtCore.QEvent.KeyPress or event.key() != QtCore.Qt.Key_Escape:
+            return super(TabbedModelEditor, self).eventFilter(obj, event)
+        # The filter is application-wide, so only swallow Escape for widgets
+        # belonging to this editor.
+        if isinstance(obj, QtWidgets.QDialog) and (obj is self or self.isAncestorOf(obj)):
+            return True
+        return super(TabbedModelEditor, self).eventFilter(obj, event)
 
     def onLoad(self, at_launch: bool = False):
         """
@@ -205,7 +226,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.tabWidget.setTabText(0, display_name)
 
         # In case previous model was incorrect, change the frame colours back
-        self.editor_widget.txtEditor.setStyleSheet("")
+        self.editor_widget.txtEditor.setStyleSheet(BG_DEFAULT)
         self.editor_widget.txtEditor.setToolTip("")
 
         # Check the validity of loaded model if the model is python
@@ -270,7 +291,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         Disable the plugin editor and show that the model is changed.
         """
         self.setTabEdited(True)
-        self.plugin_widget.txtFunction.setStyleSheet("")
+        self.plugin_widget.txtFunction.setStyleSheet(BG_DEFAULT)
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).setEnabled(True)
         self.is_modified = True
 
@@ -393,11 +414,11 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.setTabEdited(False)
 
         # Notify listeners
-        self.parent.communicate.customModelDirectoryChanged.emit()
+        GuiUtils.communicator.customModelDirectoryChanged.emit()
 
         # Notify the user
         msg = "Custom model " + filename + " successfully created."
-        self.parent.communicate.statusBarUpdateSignal.emit(msg)
+        GuiUtils.communicator.statusBarUpdateSignal.emit(msg)
         logger.info(msg)
 
     def createOrUpdateTab(self, filename: str | Path, widget: QtWidgets.QWidget):
@@ -448,14 +469,12 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             logger.error(msg)
             # print four last lines of the stack trace
             # this will point out the exact line failing
-            all_lines = traceback.format_exc().split("\n")
+            all_lines = traceback.format_exc().strip().split("\n")
             last_lines = all_lines[-4:]
-            traceback_to_show = "\n".join(last_lines)
-            logger.error(traceback_to_show)
 
             # Set the status bar message
-            # GuiUtils.Communicate.statusBarUpdateSignal.emit("Model check failed")
-            self.parent.communicate.statusBarUpdateSignal.emit("Model check failed")
+            # GuiUtils.communicator.statusBarUpdateSignal.emit("Model check failed")
+            GuiUtils.communicator.statusBarUpdateSignal.emit("Model check failed")
 
             # Find all QTextBrowser and QCodeEditor children
             text_browsers = self.tabWidget.currentWidget().findChildren(QtWidgets.QTextBrowser)
@@ -463,7 +482,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
 
             # Combine the lists and apply the stylesheet
             for child in text_browsers + code_editors:
-                child.setStyleSheet("border: 5px solid red")
+                child.setStyleSheet(BG_ERROR)
                 traceback_to_show = "\n".join(last_lines)
                 child.setToolTip(traceback_to_show)
 
@@ -519,18 +538,18 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         if clear_error_formatting:
             # change the frame colours back, if errors were fixed
             try:
-                self.c_editor_widget.txtEditor.setStyleSheet("")
+                self.c_editor_widget.txtEditor.setStyleSheet(BG_DEFAULT)
                 self.c_editor_widget.txtEditor.setToolTip("")
             except AttributeError:
                 pass
-            self.editor_widget.txtEditor.setStyleSheet("")
+            self.editor_widget.txtEditor.setStyleSheet(BG_DEFAULT)
             self.editor_widget.txtEditor.setToolTip("")
 
         # Update the tab title
         self.setTabEdited(False)
 
         # Notify listeners, since the plugin name might have changed
-        self.parent.communicate.customModelDirectoryChanged.emit()
+        GuiUtils.communicator.customModelDirectoryChanged.emit()
 
         if self.isWidgetInTab(self.tabWidget, self.plugin_widget):
             # Attempt to update the plugin widget with updated model information
@@ -538,7 +557,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
 
         # notify the user
         msg = f"{str(filename)} successfully saved."
-        self.parent.communicate.statusBarUpdateSignal.emit(msg)
+        GuiUtils.communicator.statusBarUpdateSignal.emit(msg)
         logger.info(msg)
 
     def noModelCheckWarning(self):

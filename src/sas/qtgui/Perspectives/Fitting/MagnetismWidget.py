@@ -12,6 +12,10 @@ from sas.qtgui.Perspectives.Fitting import FittingUtilities
 
 # Local UI
 from sas.qtgui.Perspectives.Fitting.UI.MagnetismWidget import Ui_MagnetismWidgetUI
+from sas.qtgui.Perspectives.Fitting.UndoRedo import (
+    ParameterMinMaxCommand,
+    ParameterValueCommand,
+)
 from sas.qtgui.Perspectives.Fitting.ViewDelegate import MagnetismViewDelegate
 
 logger = logging.getLogger(__name__)
@@ -21,6 +25,7 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
     cmdFitSignal = QtCore.Signal()
     updateDataSignal = QtCore.Signal()
     iterateOverModelSignal = QtCore.Signal()
+    toggledSignal = QtCore.Signal(bool)  # Signal when magnetism is enabled/disabled
 
     def __init__(self, parent: QtWidgets.QWidget | None = None, logic: Any | None = None) -> None:
         super(MagnetismWidget, self).__init__()
@@ -30,6 +35,7 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
         self._magnet_model = FittingUtilities.ToolTippedItemModel()
         self.is2D = False
         self.isActive = False
+        self._fitting_widget = parent
         self.logic = parent.logic
         self.magnet_params = {}
         self.has_magnet_error_column = False
@@ -74,19 +80,24 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
         if not self.logic.model_parameters:
             return
         self._magnet_model.clear()
-        # default initial value
-        m0 = 0.5
+        # Add the magnetic parameters to the table.
+        # 2026-08-13 PAK: Initialize M0 values with defaults from the model (typically zero).
+        # The previous code initialized them to 0.5, 1.0, 1.5, etc., though this was
+        # not obvious since magnetic theta defaulted to zero.
         for param in self.logic.model_parameters.call_parameters:
-            if param.type != 'magnetic':
-                continue
-            if "M0" in param.name:
-                m0 += 0.5
-                value = m0
-            else:
-                value = param.default
-            self.addCheckedMagneticListToModel(param, value)
+            if param.type == 'magnetic':
+                self.addCheckedMagneticListToModel(param, param.default)
 
         FittingUtilities.addHeadersToModel(self._magnet_model)
+
+        # Reset delegate column indices to standard (no error column)
+        delegate = self.lstMagnetic.itemDelegate()
+        delegate.mag_parameter = 0
+        delegate.mag_value = 1
+        delegate.mag_min = 2
+        delegate.mag_max = 3
+        delegate.mag_unit = 4
+        delegate.mag_error = -1
 
     def getParamNamesMagnet(self) -> list[str]:
         """
@@ -128,26 +139,52 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
         if model_column > 1:
             if model_column == delegate.mag_min:
                 pos = 1
+                bound = "min"
             elif model_column == delegate.mag_max:
                 pos = 2
+                bound = "max"
             elif model_column == delegate.mag_unit:
                 pos = 0
+                bound = None
             else:
                 # For all other values sent here (e.g. the error column, do nothing)
                 return
             # min/max to be changed in self.logic.kernel_module.details[parameter_name] = ['Ang', 0.0, inf]
+            old_val = self.logic.kernel_module.details[parameter_name][pos]
             self.logic.kernel_module.details[parameter_name][pos] = value
+            if bound is not None:
+                self._fitting_widget.undo_stack.push(
+                    ParameterMinMaxCommand(parameter_name, bound, old_val, value)
+                )
         else:
+            old_val = self.logic.kernel_module.getParam(parameter_name)
             self.magnet_params[parameter_name] = value
             self.logic.kernel_module.setParam(parameter_name, value)
+            self._fitting_widget.undo_stack.push(
+                ParameterValueCommand(parameter_name, old_val, value)
+            )
             # Update plot
             self.updateDataSignal.emit()
 
     def updateModel(self, model: Any | None = None) -> None:
-        # add magnetic parameters if asked
-        if self.isActive and self._magnet_model.rowCount() > 0:
+        """
+        Set model magnetism parameters from widget if magnetism is active, otherwise zero them.
+        """
+        if self._magnet_model.rowCount() > 0:
             for key, value in self.magnet_params.items():
-                model.setParam(key, value)
+                model.setParam(key, value if self.isActive else 0.)
+
+    def toggleMagnetism(self, isChecked: bool) -> None:
+        """
+        Toggle magnetism.
+
+        Args:
+            isChecked: Whether magnetism is enabled
+        """
+        self.isActive = isChecked
+
+        # Emit signal to notify parent that state changed
+        self.toggledSignal.emit(isChecked)
 
     def iterateOverMagnetModel(self, func: Any) -> None:
         """
@@ -291,6 +328,9 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
                         param.units]
 
         self.magnet_params[param.name] = value
+        # Also update the kernel_module to keep values in sync
+        if self.logic.kernel_module is not None:
+            self.logic.kernel_module.setParam(param.name, value)
 
         FittingUtilities.addCheckedListToModel(self._magnet_model, checked_list)
         all_items = self._magnet_model.rowCount()

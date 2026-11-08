@@ -1,9 +1,6 @@
 """
 Widget for parameter constraints.
 """
-import os
-import webbrowser
-
 # numpy methods required for the validator! Don't remove.
 # pylint: disable=unused-import,unused-wildcard-import,redefined-builtin
 from numpy import *
@@ -13,6 +10,7 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # Local UI
 from sas.qtgui.Perspectives.Fitting.UI.MultiConstraintUI import Ui_MultiConstraintUI
+from sas.qtgui.Utilities.BackgroundColor import BG_DEFAULT, BG_ERROR
 
 
 class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
@@ -112,10 +110,10 @@ class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
         formula_is_valid = self.validateConstraint(self.txtConstraint.text())
         if not formula_is_valid:
             self.cmdOK.setEnabled(False)
-            self.txtConstraint.setStyleSheet("QLineEdit {background-color: red;}")
+            self.txtConstraint.setStyleSheet(BG_ERROR)
         else:
             self.cmdOK.setEnabled(True)
-            self.txtConstraint.setStyleSheet("QLineEdit {background-color: white;}")
+            self.txtConstraint.setStyleSheet(BG_DEFAULT)
 
     def validateConstraint(self, constraint_text):
         """
@@ -165,9 +163,8 @@ class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
         Display related help section
         """
         try:
-            help_location = (GuiUtils.HELP_SYSTEM.path /
-            "/user/qtgui/Perspectives/Fitting/fitting_help.html#simultaneous-fits-with-constraints")
-            webbrowser.open('file://' + os.path.realpath(help_location))
+            help_location = "/user/qtgui/Perspectives/Fitting/fitting_help.html#simultaneous-fits-with-constraints"
+            GuiUtils.showHelp(help_location)
         except AttributeError:
             # No manager defined - testing and standalone runs
             pass

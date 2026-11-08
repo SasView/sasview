@@ -15,6 +15,10 @@ from sas.qtgui.Perspectives.Fitting import FittingUtilities
 
 # Local UI
 from sas.qtgui.Perspectives.Fitting.UI.PolydispersityWidget import Ui_PolydispersityWidgetUI
+from sas.qtgui.Perspectives.Fitting.UndoRedo import (
+    ParameterMinMaxCommand,
+    ParameterValueCommand,
+)
 from sas.qtgui.Perspectives.Fitting.ViewDelegate import PolyViewDelegate
 
 DEFAULT_POLYDISP_FUNCTION = 'gaussian'
@@ -24,6 +28,8 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
     cmdFitSignal = QtCore.Signal()
     updateDataSignal = QtCore.Signal()
     iterateOverModelSignal = QtCore.Signal()
+    deletePlotSignal = QtCore.Signal(str)
+    toggledSignal = QtCore.Signal(bool)  # Signal when polydispersity is enabled/disabled
 
     def __init__(self, parent: QtWidgets.QWidget | None = None) -> None:
         super(PolydispersityWidget, self).__init__()
@@ -33,6 +39,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         self.poly_model = FittingUtilities.ToolTippedItemModel()
         self.is2D = False
         self.isActive = False
+        self._fitting_widget = parent
         self.logic = parent.logic
         self.poly_params = {}
         self.has_poly_error_column = False
@@ -68,9 +75,24 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         self.poly_model.clear()
         self.poly_params = {}
 
-        parameters = self.logic.model_parameters.form_volume_parameters
+        # Copy: '+=' would append the orientation parameters to the sasmodels
+        # ParameterTable itself, duplicating rows on every subsequent call.
+        parameters = list(self.logic.model_parameters.form_volume_parameters)
         if self.is2D:
             parameters += self.logic.model_parameters.orientation_parameters
+
+        # Reset delegate column indices to standard (no error column) BEFORE creating parameters
+        # This ensures comboboxes are created at the correct column positions
+        delegate = self.lstPoly.itemDelegate()
+        delegate.poly_parameter = 0
+        delegate.poly_pd = 1
+        delegate.poly_error = None
+        delegate.poly_min = 2
+        delegate.poly_max = 3
+        delegate.poly_npts = 4
+        delegate.poly_nsigs = 5
+        delegate.poly_function = 6
+        delegate.poly_filename = 7
 
         [self.setPolyModelParameters(i, param) for i, param in \
             enumerate(parameters) if param.polydisperse]
@@ -125,7 +147,6 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
                 if parameter_name_w in self.poly_params_to_fit:
                     self.poly_params_to_fit.remove(parameter_name_w)
             self.cmdFitSignal.emit()
-            # self.updateUndo()
 
         elif model_column in [delegate.poly_min, delegate.poly_max]:
             try:
@@ -137,9 +158,15 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
             current_details = self.logic.kernel_module.details[parameter_name_w]
             if self.has_poly_error_column:
                 # err column changes the indexing
-                current_details[model_column-2] = value
+                pos = model_column - 2
             else:
-                current_details[model_column-1] = value
+                pos = model_column - 1
+            old_val = current_details[pos]
+            current_details[pos] = value
+            bound = "min" if pos == 1 else "max"
+            self._fitting_widget.undo_stack.push(
+                ParameterMinMaxCommand(parameter_name_w, bound, old_val, value)
+            )
 
         elif model_column == delegate.poly_function:
             # name of the function - just pass
@@ -152,14 +179,25 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
                 # Can't be converted properly, bring back the old value and exit
                 return
 
+            # If the polydispersity is changed to zero, prepare to delete an existing plot
+            if (model_column == delegate.poly_pd and
+                self.poly_params[f"{parameter_name}.width"] != 0.0 and
+                value == 0.0
+                ):
+                self.deletePlotSignal.emit(parameter_name)
+
             # Update the sasmodel
             # PD[ratio] -> width, npts -> npts, nsigs -> nsigmas
             if model_column in delegate.columnDict():
                 # Map the column to the poly param that was changed
                 associations = {1: "width", delegate.poly_npts: "npts", delegate.poly_nsigs: "nsigmas"}
                 p_name = f"{parameter_name}.{associations.get(model_column, 'width')}"
+                old_val = self.logic.kernel_module.getParam(p_name)
                 self.poly_params[p_name] = value
                 self.logic.kernel_module.setParam(p_name, value)
+                self._fitting_widget.undo_stack.push(
+                    ParameterValueCommand(p_name, old_val, value)
+                )
 
                 # Update plot
                 self.updateDataSignal.emit()
@@ -188,6 +226,9 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
             for key, value in self.poly_params.items():
                 if key[-6:] == '.width':
                     self.logic.kernel_module.setParam(key, (value if isChecked else 0))
+
+        # Emit signal to notify parent that state changed
+        self.toggledSignal.emit(isChecked)
 
     def updateModel(self, model: Any | None = None) -> None:
         # add polydisperse parameters if asked
@@ -236,7 +277,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         # Note: last argument needs extra space padding for decent display of the control
         checked_list = ["Distribution of " + param_name, str(width),
                         str(min), str(max),
-                        str(npts), str(nsigs), "gaussian      ",'']
+                        str(npts), str(nsigs), "",'']
         FittingUtilities.addCheckedListToModel(self.poly_model, checked_list)
 
         all_items = self.poly_model.rowCount()
@@ -244,7 +285,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
 
         # All possible polydisp. functions as strings in combobox
         func = QtWidgets.QComboBox()
-        func.addItems([str(name_disp) for name_disp in POLYDISPERSITY_MODELS.keys()])
+        func.addItems([str(name_disp) for name_disp in POLYDISPERSITY_MODELS])
         # Set the default index
         func.setCurrentIndex(func.findText(DEFAULT_POLYDISP_FUNCTION))
         ind = self.poly_model.index(all_items-1,self.lstPoly.itemDelegate().poly_function)
@@ -275,7 +316,23 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         Modify polydisp. defaults on function choice
         """
         # Get npts/nsigs for current selection
-        param = self.logic.model_parameters.form_volume_parameters[row_index]
+
+
+        # Determine the parameter base name from the polydisp model row label.
+        # This ensures we use the expanded shell name (e.g. 'thickness2') instead of a template like 'thickness[n]'.
+        try:
+            display_text = str(self.poly_model.item(row_index, 0).text())
+            param_base = display_text.replace('Distribution of ', '').strip()
+        except Exception:
+            # Fallback to the model_parameters list if something unexpected happens
+            try:
+                param = self.logic.model_parameters.form_volume_parameters[row_index]
+                param_base = param.name
+            except Exception:
+                logger.exception("Could not determine parameter name for polydisp row %r", row_index)
+                return
+
+
         file_index = self.poly_model.index(row_index, self.lstPoly.itemDelegate().poly_function)
         combo_box = self.lstPoly.indexWidget(file_index)
         try:
@@ -286,13 +343,15 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
 
         if combo_string == 'array':
             try:
+                 # assure the combo is at the right index
+                if combo_box is not None:
                 # assure the combo is at the right index
-                combo_box.blockSignals(True)
-                combo_box.setCurrentIndex(combo_box.findText(combo_string))
-                combo_box.blockSignals(False)
+                    combo_box.blockSignals(True)
+                    combo_box.setCurrentIndex(combo_box.findText(combo_string))
+                    combo_box.blockSignals(False)
                 # Load the file
                 self.loadPolydispArray(row_index)
-                self.logic.kernel_module.set_dispersion(param.name, self.disp_model)
+                self.logic.kernel_module.set_dispersion(param_base, self.disp_model)
                 # uncheck the parameter
                 self.poly_model.item(row_index, 0).setCheckState(QtCore.Qt.Unchecked)
                 # disable the row
@@ -303,11 +362,12 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
                 self.poly_model.blockSignals(False)
                 return
             except OSError:
-                combo_box.setCurrentIndex(self.orig_poly_index)
+                if combo_box is not None:
+                    combo_box.setCurrentIndex(self.orig_poly_index)
                 # Pass for cancel/bad read
                 pass
         else:
-            self.logic.kernel_module.set_dispersion(param.name, self.disp_model)
+            self.logic.kernel_module.set_dispersion(param_base, self.disp_model)
 
         # Enable the row in case it was disabled by Array
         self.poly_model.blockSignals(True)
@@ -376,7 +436,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         Update the polydispersity model with new parameters, create the errors column
         """
         assert isinstance(param_dict, dict)
-        if not dict:
+        if not param_dict:
             return
 
         def updateFittedValues(row_i: int) -> None:
@@ -441,7 +501,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         Update the polydispersity model with new parameters, create the errors column
         """
         assert isinstance(param_dict, dict)
-        if not dict:
+        if not param_dict:
             return
 
         def updateFittedValues(row: int) -> None:
@@ -479,14 +539,17 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
             # Nsigs
             param_repr = GuiUtils.formatNumber(param_dict[param_name][5+ioffset], high=True)
             self.poly_model.item(row, 5+joffset).setText(param_repr)
-            # Function
+            # Function: the combobox index widget is the only source of truth.
+            # Never write the name into the underlying item - the delegate
+            # paints it under the combobox and it bleeds through on some
+            # platforms/styles (#4105).
             param_repr = param_dict[param_name][6+ioffset]
-            self.poly_model.item(row, 6+joffset).setText(param_repr)
             index = self.poly_model.index(row, 6+joffset)
             widget = self.lstPoly.indexWidget(index)
             if widget is not None and isinstance(widget, QtWidgets.QComboBox):
                 func_index = widget.findText(param_repr)
-                widget.setCurrentIndex(func_index)
+                if func_index >= 0:
+                    widget.setCurrentIndex(func_index)
 
             self.setFocus()
 

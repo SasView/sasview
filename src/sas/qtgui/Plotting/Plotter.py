@@ -1,5 +1,6 @@
 import copy
 import functools
+import logging
 import math
 import textwrap
 
@@ -21,6 +22,9 @@ from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
 from sas.qtgui.Plotting.QRangeSlider import QRangeSlider
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
 from sas.qtgui.Plotting.SetGraphRange import SetGraphRange
+from sas.qtgui.Plotting.TrustBar import TrustBar
+
+logger = logging.getLogger(__name__)
 
 
 class PlotterWidget(PlotterBase):
@@ -38,6 +42,8 @@ class PlotterWidget(PlotterBase):
         self.plot_lines = {}
         # Dictionary of slider interactors {plot_id:interactor}
         self.sliders = {}
+
+        self.trust_bar = TrustBar(self.ax, self.canvas)
 
         # Window for text add
         self.addText = AddText(self)
@@ -57,11 +63,11 @@ class PlotterWidget(PlotterBase):
 
         # Connections used to prevent conflict between built in mpl toolbar actions and SasView context menu actions.
         # Toolbar actions only needed in 1D plots. 2D plots have no such conflicts.
-        self.toolbar._actions['home'].triggered.connect(self._home)
-        self.toolbar._actions['back'].triggered.connect(self._back)
-        self.toolbar._actions['forward'].triggered.connect(self._forward)
-        self.toolbar._actions['pan'].triggered.connect(self._pan)
-        self.toolbar._actions['zoom'].triggered.connect(self._zoom)
+        self.toolbar._actions["home"].triggered.connect(self._home)
+        self.toolbar._actions["back"].triggered.connect(self._back)
+        self.toolbar._actions["forward"].triggered.connect(self._forward)
+        self.toolbar._actions["pan"].triggered.connect(self._pan)
+        self.toolbar._actions["zoom"].triggered.connect(self._zoom)
 
         self.legendVisible = True
 
@@ -75,21 +81,12 @@ class PlotterWidget(PlotterBase):
     @data.setter
     def data(self, value):
         """ data setter """
-        #self._data = value
-        self._data.append(value)
-        if value._xunit:
-            self.xLabel = "%s(%s)"%(value._xaxis, value._xunit)
+        data_names = [item.name for item in self._data]
+        if value.name in data_names:
+            data_index = data_names.index(value.name)
+            self._data[data_index] = value
         else:
-            self.xLabel = "%s"%(value._xaxis)
-        if value._yunit:
-            self.yLabel = "%s(%s)"%(value._yaxis, value._yunit)
-        else:
-            self.yLabel = "%s"%(value._yaxis)
-
-        if value.scale == 'linear' or value.isSesans:
-            self.xscale = 'linear'
-            self.yscale = 'linear'
-        self.title(title=value.name)
+            self._data.append(value)
 
     def plot(self, data=None, color=None, marker=None, hide_error=False, transform=True):
         """
@@ -102,7 +99,7 @@ class PlotterWidget(PlotterBase):
 
         # Data1D
         if isinstance(data, Data1D):
-            self.data.append(data)
+            self.data = data
 
         is_fit = (data.id=="fit")
 
@@ -302,8 +299,14 @@ class PlotterWidget(PlotterBase):
         self.setRange.defaultXRange = default_x_range
         self.setRange.defaultYRange = default_y_range
         # Go to expected range
-        self.ax.set_xbound(x_range[0], x_range[1])
-        self.ax.set_ybound(y_range[0], y_range[1])
+        try:
+            self.ax.set_xbound(x_range[0], x_range[1])
+            self.ax.set_ybound(y_range[0], y_range[1])
+        except ValueError:
+            logger.error(
+                "The axis ranges cannot be set for this plot. "
+                "It may be possible to plot the data on differently scaled axes."
+            )
 
         # Add q-range sliders
         if data.show_q_range_sliders:
@@ -314,6 +317,10 @@ class PlotterWidget(PlotterBase):
             if existing_slider is not None and not existing_slider.is_visible:
                 sliders.toggle()
             self.sliders[data.name] = sliders
+
+        # Draw size-distribution trust bar if requested.
+        if data.show_trust_bar:
+            self.trust_bar.draw(data)
 
         # refresh canvas
         self.canvas.draw_idle()
@@ -467,6 +474,8 @@ class PlotterWidget(PlotterBase):
             self.actionToggleLegend.triggered.connect(self.onToggleLegend)
         self.actionCustomizeLabel.triggered.connect(self.onCusotmizeLabel)
 
+        self.addHelpToContextMenu()
+
     def addPlotsToContextMenu(self):
         """
         Adds operations on all plotted sets of data to the context menu
@@ -541,6 +550,8 @@ class PlotterWidget(PlotterBase):
         if self.show_legend:
             self.actionToggleLegend = self.contextMenu.addAction("Toggle Legend")
             self.actionToggleLegend.triggered.connect(self.onToggleLegend)
+
+        self.addHelpToContextMenu()
 
     def onScaleChange(self):
         """
@@ -733,6 +744,8 @@ class PlotterWidget(PlotterBase):
         new_plot.custom_color = selected_plot.custom_color
         new_plot.markersize = selected_plot.markersize
         new_plot.symbol = selected_plot.symbol
+        new_plot.xtransform = selected_plot.xtransform
+        new_plot.ytransform = selected_plot.ytransform
         self.removePlot(id)
         self.plot(data=new_plot)
         # Apply user-defined plot range
@@ -784,6 +797,21 @@ class PlotterWidget(PlotterBase):
         if id in self.sliders.keys():
             slider = self.sliders.get(id)
             slider.toggle()
+
+    def update_slider_positions(self, plot_name: str, state=None) -> None:
+        """Update slider artist positions for a given plot in-place and redraw the canvas."""
+        slider = self.sliders[plot_name]
+
+        if state is not None and getattr(state, "dragging_line_position", None) is not None:
+            if state.working_line_id == 0:
+                slider.line_min.update(x=state.dragging_line_position, draw=False)
+            else:
+                slider.line_max.update(x=state.dragging_line_position, draw=False)
+        else:
+            slider.line_min.inputChanged()
+            slider.line_max.inputChanged()
+
+        self.canvas.draw_idle()
 
     def onFreeze(self, id):
         """
@@ -991,7 +1019,7 @@ class PlotterWidget(PlotterBase):
         x_str = GuiUtils.formatNumber(self.x_click)
         y_str = GuiUtils.formatNumber(self.y_click)
         coord_str = f"x: {x_str}, y: {y_str}"
-        self.manager.communicator.statusBarUpdateSignal.emit(coord_str)
+        GuiUtils.communicator.statusBarUpdateSignal.emit(coord_str)
 
     def onMplMouseUp(self, event):
         """
@@ -1138,7 +1166,7 @@ class PlotterWidget(PlotterBase):
         self.canvas.draw_idle()
 
 
-class Plotter(QtWidgets.QDialog, PlotterWidget):
+class Plotter(PlotterWidget):
     def __init__(self, parent=None, quickplot=False):
 
         PlotterWidget.__init__(self, parent=None, manager=parent, quickplot=quickplot)

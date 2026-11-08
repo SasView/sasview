@@ -1,9 +1,21 @@
 import logging
 
 from PySide6.QtGui import QDoubleValidator, QIntValidator, QValidator
-from PySide6.QtWidgets import QCheckBox, QComboBox, QFrame, QHBoxLayout, QLabel, QLineEdit, QVBoxLayout, QWidget
+from PySide6.QtWidgets import (
+    QCheckBox,
+    QComboBox,
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QSpinBox,
+    QVBoxLayout,
+    QWidget,
+)
 
 from sas.system import config
+
+from ..BackgroundColor import BG_DEFAULT, BG_WARNING
 
 ConfigType = str | bool | float | int | list[str | float | int]
 logger = logging.getLogger(__name__)
@@ -208,7 +220,7 @@ class PreferencesWidget(QWidget):
         :param key: The string representation of the key the QLineEdit value is stored as in the configuration system.
         :return: None
         """
-        edit.setStyleSheet("background-color: white")
+        edit.setStyleSheet(BG_DEFAULT)
         validator = edit.validator()
         text = edit.text()
         (state, val, pos) = validator.validate(str(text), 0) if validator else (0, text, 0)
@@ -216,7 +228,7 @@ class PreferencesWidget(QWidget):
         if state == QValidator.Acceptable or not validator:
             self._stageChange(key, text)
         else:
-            edit.setStyleSheet("background-color: yellow")
+            edit.setStyleSheet(BG_WARNING)
             self._unStageChange(key)
             self._setInvalid(key)
 
@@ -246,6 +258,24 @@ class PreferencesWidget(QWidget):
         layout.addWidget(check_box)
         self.verticalLayout.addLayout(layout)
         return check_box
+
+    def addSpinBox(self, title: str, minimum: int = 0, maximum: int = 1000, default: int | None = None) -> QSpinBox:
+        """Add a title and integer spin box within the widget.
+        :param title: The title of the spin box to be added to the preferences panel.
+        :param minimum: The smallest value the spin box will accept.
+        :param maximum: The largest value the spin box will accept.
+        :param default: An optional value to initialise the spin box with. Defaults to the minimum if None.
+        :return: QSpinBox instance to allow subclasses to assign instance name
+        """
+        layout = self._createLayoutAndTitle(title)
+        spinner = QSpinBox(self)
+        spinner.setMinimum(minimum)
+        spinner.setMaximum(maximum)
+        if default is not None:
+            spinner.setValue(default)
+        layout.addWidget(spinner)
+        self.verticalLayout.addLayout(layout)
+        return spinner
 
     def addHorizontalLine(self):
         """Add a horizontal line as a divider."""

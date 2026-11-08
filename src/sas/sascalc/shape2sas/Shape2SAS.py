@@ -2,167 +2,21 @@ import argparse
 import re
 import time
 import warnings
-from dataclasses import dataclass, field
 
 import numpy as np
 
-from sas.sascalc.shape2sas.helpfunctions import (
-    GenerateAllPoints,
-    IExperimental,
+from sas.sascalc.shape2sas.ExperimentalScattering import SimulateScattering, getSimulatedScattering
+from sas.sascalc.shape2sas.HelperFunctions import generate_pdb, plot_2D, plot_results
+from sas.sascalc.shape2sas.Models import ModelProfile, Qsampling, SimulationParameters, getPointDistribution
+from sas.sascalc.shape2sas.StructureFactor import StructureFactor
+from sas.sascalc.shape2sas.TheoreticalScattering import (
     ITheoretical,
-    Qsampling,
-    StructureFactor,
+    ModelSystem,
+    TheoreticalScatteringCalculation,
     WeightedPairDistribution,
-    generate_pdb,
-    plot_2D,
-    plot_results,
+    getTheoreticalHistogram,
+    getTheoreticalScattering,
 )
-
-Vectors = list[list[float]]
-
-
-@dataclass
-class ModelProfile:
-    """Class containing parameters for
-    creating a particle
-
-    NOTE: Default values create a sphere with a
-    radius of 50 Å at the origin.
-    """
-
-    subunits: list[str] = field(default_factory=lambda: ['sphere'])
-    p_s: list[float] = field(default_factory=lambda: [1.0]) # scattering length density
-    dimensions: Vectors = field(default_factory=lambda: [[50]])
-    com: Vectors = field(default_factory=lambda: [[0, 0, 0]])
-    rotation_points: Vectors = field(default_factory=lambda: [[0, 0, 0]])
-    rotation: Vectors = field(default_factory=lambda: [[0, 0, 0]])
-    exclude_overlap: bool | None = field(default_factory=lambda: True)
-
-
-@dataclass
-class ModelPointDistribution:
-    """Point distribution of a model"""
-
-    x: np.ndarray
-    y: np.ndarray
-    z: np.ndarray
-    p: np.ndarray #scattering length density for each point
-    volume_total: float
-
-
-@dataclass
-class SimulationParameters:
-    """Class containing parameters for
-    the simulation itself"""
-
-    q: np.ndarray | None = field(default_factory=lambda: Qsampling.onQsampling(0.001, 0.5, 400))
-    prpoints: int | None = field(default_factory=lambda: 100)
-    Npoints: int | None = field(default_factory=lambda: 3000)
-    #seed: Optional[int] #TODO:Add for future projects
-    #method: Optional[str] #generation of point method #TODO: Add for future projects
-    model_name: list[str] | None = field(default_factory=lambda: ['Model_1'])
-
-
-@dataclass
-class ModelSystem:
-    """Class containing parameters for
-    the system"""
-
-    PointDistribution: ModelPointDistribution
-    Stype: str = field(default_factory=lambda: "None") #structure factor
-    par: list[float] = field(default_factory=lambda: np.array([]))#parameters for structure factor
-    polydispersity: float = field(default_factory=lambda: 0.0)#polydispersity
-    conc: float = field(default_factory=lambda: 0.02) #concentration
-    sigma_r: float = field(default_factory=lambda: 0.0) #interface roughness
-
-
-@dataclass
-class TheoreticalScatteringCalculation:
-    """Class containing parameters for simulating
-    scattering for a given model system"""
-
-    System: ModelSystem
-    Calculation: SimulationParameters
-
-
-@dataclass
-class TheoreticalScattering:
-    """Class containing parameters for
-    theoretical scattering"""
-
-    q: np.ndarray
-    I0: np.ndarray
-    I: np.ndarray
-    S_eff: np.ndarray
-    r: np.ndarray #pair distance distribution
-    pr: np.ndarray #pair distance distribution
-    pr_norm: np.ndarray #normalized pair distance distribution
-
-
-@dataclass
-class SimulateScattering:
-    """Class containing parameters for
-    simulating scattering"""
-
-    q: np.ndarray
-    I0: np.ndarray
-    I: np.ndarray
-    exposure: float | None = field(default_factory=lambda:500.0)
-
-
-@dataclass
-class SimulatedScattering:
-    """Class containing parameters for
-    simulated scattering"""
-
-    I_sim: np.ndarray
-    q: np.ndarray
-    I_err: np.ndarray
-
-
-################################ Shape2SAS functions ################################
-def getPointDistribution(prof: ModelProfile, Npoints):
-    """Generate points for a given model profile."""
-    x_new, y_new, z_new, p_new, volume_total = GenerateAllPoints(Npoints, prof.com, prof.subunits,
-                                                  prof.dimensions, prof.rotation, prof.rotation_points,
-                                                  prof.p_s, prof.exclude_overlap).onGeneratingAllPointsSeparately()
-
-    return ModelPointDistribution(x=x_new, y=y_new, z=z_new, p=p_new, volume_total=volume_total)
-
-
-def getTheoreticalScattering(scalc: TheoreticalScatteringCalculation) -> TheoreticalScattering:
-    """Calculate theoretical scattering for a given model profile."""
-    sys = scalc.System
-    prof = sys.PointDistribution
-    calc = scalc.Calculation
-    x = np.concatenate(prof.x)
-    y = np.concatenate(prof.y)
-    z = np.concatenate(prof.z)
-    p = np.concatenate(prof.p)
-
-    r, pr, pr_norm = WeightedPairDistribution(x, y, z, p).calc_pr(calc.prpoints, sys.polydispersity)
-
-    q = calc.q
-    I_theory = ITheoretical(q)
-    I0, Pq = I_theory.calc_Pq(r, pr, sys.conc, prof.volume_total)
-
-    S_class = StructureFactor(q, x, y, z, p, sys.Stype, sys.par)
-
-    S_eff = S_class.getStructureFactorClass().structure_eff(Pq)
-
-    I = I_theory.calc_Iq(Pq, S_eff, sys.sigma_r)
-
-    return TheoreticalScattering(q=q, I=I, I0=I0, S_eff=S_eff, r=r, pr=pr, pr_norm=pr_norm)
-
-
-def getSimulatedScattering(scalc: SimulateScattering) -> SimulatedScattering:
-    """Simulate scattering for a given theoretical scattering."""
-
-    Isim_class = IExperimental(scalc.q, scalc.I0, scalc.I, scalc.exposure)
-    I_sim, I_err = Isim_class.simulate_data()
-
-    return SimulatedScattering(I_sim=I_sim, q=scalc.q, I_err=I_err)
-
 
 ################################ Shape2SAS batch version ################################
 if __name__ == "__main__":
@@ -422,16 +276,26 @@ if __name__ == "__main__":
         sigma_r = check_input(args.sigma_r, 0.0, "sigma_r", i)
 
         #calculate theoretical scattering
-        Theo_calc = TheoreticalScatteringCalculation(System=ModelSystem(PointDistribution=Distr,
-                                                                        Stype=Stype, par=par,
-                                                                        polydispersity=pd, conc=conc,
-                                                                        sigma_r=sigma_r),
-                                                                        Calculation=Sim_par)
-        Theo_I = getTheoreticalScattering(Theo_calc)
+        model = ModelSystem(
+            PointDistribution=Distr,
+            Stype=Stype, par=par,
+            polydispersity=pd, conc=conc,
+            sigma_r=sigma_r
+        )
+
+        Theo_I = getTheoreticalScattering(
+            TheoreticalScatteringCalculation(
+                System=model,
+                Calculation=Sim_par
+            )
+        )
+
+        # calculate pair distance distribution function p(r) for plotting
+        r, pr, pr_norm = getTheoreticalHistogram(model, Sim_par)
 
         #save models
         Model = f'{i}'
-        WeightedPairDistribution.save_pr(Nbins, Theo_I.r, Theo_I.pr, Model)
+        WeightedPairDistribution.save_pr(Nbins, r, pr, Model)
         StructureFactor.save_S(Theo_I.q, Theo_I.S_eff, Model)
         ITheoretical(Theo_I.q).save_I(Theo_I.I, Model)
 
@@ -451,7 +315,7 @@ if __name__ == "__main__":
         p_list.append(np.concatenate(Distr.p))
 
         r_list.append(Theo_I.r)
-        pr_norm_list.append(Theo_I.pr_norm)
+        pr_norm_list.append(pr_norm)
         I_list.append(Theo_I.I)
         S_eff_list.append(Theo_I.S_eff)
 

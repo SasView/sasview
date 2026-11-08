@@ -15,7 +15,7 @@ import sas.qtgui.Plotting.PlotterBase as PlotterBase
 from sas.qtgui.MainWindow.UnitTesting.DataExplorerTest import MyPerspective
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
 from sas.qtgui.Plotting.WindowTitle import WindowTitle
-from sas.qtgui.Utilities.GuiUtils import Communicate
+from sas.qtgui.Utilities.GuiUtils import communicator
 
 
 class PlotterBaseTest:
@@ -26,7 +26,7 @@ class PlotterBaseTest:
         '''Create/Destroy the AboutBox'''
         class dummy_manager:
             def communicator(self):
-                return Communicate()
+                return communicator
             def perspective(self):
                 return MyPerspective()
 
@@ -71,11 +71,21 @@ class PlotterBaseTest:
         with pytest.raises(NotImplementedError):
             plotter.plot()
 
-    def notestOnCloseEvent(self, plotter, mocker):
-        ''' test the plotter close behaviour '''
+    def testOnCloseEventRemovesOwnedSlicerPlot(self, plotter, mocker):
+        """ Test that closing a 1D plot asks its owner to remove the matching slicer. """
+        owner = mocker.Mock()
+        data = mocker.Mock()
+        data.slicerOwner = mocker.Mock(return_value=owner)
+        plotter._data = [data]
+        event = mocker.Mock()
+
         mocker.patch.object(PlotHelper, 'deletePlot')
-        plotter.closeEvent(None)
-        assert PlotHelper.deletePlot.called
+
+        plotter.closeEvent(event)
+
+        owner.removeSlicersForPlotWindow.assert_called_once_with(plotter)
+        PlotHelper.deletePlot.assert_called()
+        event.accept.assert_called_once()
 
     def notestOnImagePrint(self, plotter, mocker):
         ''' test the workspace print '''
@@ -85,20 +95,20 @@ class PlotterBaseTest:
         # First, let's cancel printing
         mocker.patch.object(QtPrintSupport.QPrintDialog, 'exec_', return_value=QtWidgets.QDialog.Rejected)
         plotter.onImagePrint()
-        assert not QtGui.QPainter.end.called
-        assert not QtWidgets.QLabel.render.called
+        QtGui.QPainter.end.assert_not_called()
+        QtWidgets.QLabel.render.assert_not_called()
 
         # Let's print now
         mocker.patch.object(QtPrintSupport.QPrintDialog, 'exec_', return_value=QtWidgets.QDialog.Accepted)
         plotter.onImagePrint()
-        assert QtGui.QPainter.end.called
-        assert QtWidgets.QLabel.render.called
+        QtGui.QPainter.end.assert_called()
+        QtWidgets.QLabel.render.assert_called()
 
     def testOnClipboardCopy(self, plotter, mocker):
         ''' test the workspace screen copy '''
         mocker.patch.object(QtGui.QClipboard, 'setPixmap')
         plotter.onClipboardCopy()
-        assert QtGui.QClipboard.setPixmap.called
+        QtGui.QClipboard.setPixmap.assert_called()
 
     def testOnGridToggle(self, plotter, mocker):
         ''' test toggling the grid lines '''
@@ -108,7 +118,7 @@ class PlotterBaseTest:
         mocker.patch.object(FigureCanvas, 'draw_idle')
         plotter.onGridToggle()
 
-        assert FigureCanvas.draw_idle.called
+        FigureCanvas.draw_idle.assert_called()
         assert plotter.grid_on != orig_toggle
 
     def testDefaultContextMenu(self, plotter, mocker):
@@ -123,7 +133,7 @@ class PlotterBaseTest:
         assert actions[1].text() == "Print Image"
         mocker.patch.object(QtPrintSupport.QPrintDialog, 'exec_', return_value=QtWidgets.QDialog.Rejected)
         actions[1].trigger()
-        assert QtPrintSupport.QPrintDialog.exec_.called
+        QtPrintSupport.QPrintDialog.exec_.assert_called()
 
         # Trigger Copy to Clipboard and make sure the method is called
         assert actions[2].text() == "Copy to Clipboard"
@@ -134,9 +144,9 @@ class PlotterBaseTest:
         self.clipboard_called = False
         def done():
             self.clipboard_called = True
-        QtCore.QObject.connect(QtWidgets.qApp.clipboard(), QtCore.SIGNAL("dataChanged()"), done)
+        QtCore.QObject.connect(QtWidgets.QApplication.clipboard(), QtCore.SIGNAL("dataChanged()"), done)
         actions[2].trigger()
-        QtWidgets.qApp.processEvents()
+        QtWidgets.QApplication.processEvents()
         # Make sure clipboard got updated.
         assert self.clipboard_called
 

@@ -1,0 +1,123 @@
+{
+  "rule_sets" : [ {
+    "thresholds" : [ {
+      "name" : "constructor_max_arguments",
+      "value" : "7"
+    }, {
+      "name" : "file_lines_of_code_for_critical_alert",
+      "value" : "5000"
+    }, {
+      "name" : "file_lines_of_code_for_alert",
+      "value" : "2500"
+    }, {
+      "name" : "file_lines_of_code_for_warning",
+      "value" : "1000"
+    }, {
+      "name" : "file_mean_cyclomatic_complexity_warning",
+      "value" : "8"
+    }, {
+      "name" : "function_bumpy_road_bumps_for_warning",
+      "value" : "8"
+    }, {
+      "name" : "function_bumpy_road_nesting_level_depth",
+      "value" : "25"
+    }, {
+      "name" : "function_complex_conditional_branches_alert",
+      "value" : "25"
+    }, {
+      "name" : "function_complex_conditional_branches_warning",
+      "value" : "10"
+    }, {
+      "name" : "function_cyclomatic_complexity_alert",
+      "value" : "25"
+    }, {
+      "name" : "function_cyclomatic_complexity_warning",
+      "value" : "5"
+    }, {
+      "name" : "function_lines_of_code_alert",
+      "value" : "2500"
+    }, {
+      "name" : "function_lines_of_code_warning",
+      "value" : "1000"
+    }, {
+      "name" : "function_max_arguments",
+      "value" : "7"
+    }, {
+      "name" : "function_nesting_depth_warning",
+      "value" : "10"
+    }
+    ],
+    "matching_content_path" : "**/*",
+    "matching_content_path_doc" : "**/*",
+    "rules" : [ {
+      "name" : "Brain Method",
+      "weight" : 0.5
+    }, {
+      "name" : "Bumpy Road Ahead",
+      "weight" : 0.5
+    }, {
+      "name" : "Code Duplication",
+      "weight" : 0.0
+    }, {
+      "name" : "Complex Conditional",
+      "weight" : 0.0
+    }, {
+      "name" : "Complex Method",
+      "weight" : 0.0
+    }, {
+      "name" : "Constructor Over-Injection",
+      "weight" : 0.0
+    }, {
+      "name" : "Deep, Global Nested Complexity",
+      "weight" : 0.0
+    }, {
+      "name" : "Deep, Nested Complexity",
+      "weight" : 0.0
+    }, {
+      "name" : "Duplicated Assertion Blocks",
+      "weight" : 0.0
+    }, {
+      "name" : "Excess Number of Function Arguments",
+      "weight" : 0.0
+    }, {
+      "name" : "Global Conditionals",
+      "weight" : 0.0
+    }, {
+      "name" : "Large Assertion Blocks",
+      "weight" : 0.0
+    }, {
+      "name" : "Large Embedded Code Block",
+      "weight" : 0.0
+    }, {
+      "name" : "Large Method",
+      "weight" : 0.0
+    }, {
+      "name" : "Lines of Code in a Single File",
+      "weight" : 0.0
+    }, {
+      "name" : "Lines of Declarations in a Single File",
+      "weight" : 0.0
+    }, {
+      "name" : "Low Cohesion",
+      "weight" : 0.5
+    }, {
+      "name" : "Missing Arguments Abstractions",
+      "weight" : 0.0
+    }, {
+      "name" : "Number of Functions in a Single Module",
+      "weight" : 0.0
+    }, {
+      "name" : "Overall Code Complexity",
+      "weight" : 0.0
+    }, {
+      "name" : "Overall Function Size",
+      "weight" : 0.0
+    }, {
+      "name" : "Primitive Obsession",
+      "weight" : 0.0
+    }, {
+      "name" : "String Heavy Function Arguments",
+      "weight" : 0.0
+    } ]
+  } ]
+}

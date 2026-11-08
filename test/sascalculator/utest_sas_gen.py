@@ -8,6 +8,7 @@ import unittest
 import warnings
 
 import numpy as np
+import scipy.stats as stats
 from scipy.spatial.transform import Rotation
 
 from sas.sascalc.calculator import sas_gen
@@ -225,15 +226,15 @@ class sas_gen_test(unittest.TestCase):
         """
         Test that the Debye algorithm supplied by the external AUSAXS library agrees with the default implementation.
         """
-        from pyausaxs import AUSAXS
+        import pyausaxs as ausaxs
 
         from sas.sascalc.calculator.ausaxs import ausaxs_sans_debye, sasview_sans_debye
 
         rng = np.random.default_rng(1984)
-        ausaxs = AUSAXS()
 
         # ensure the library is available and ready to run on all CI systems
-        assert ausaxs.ready(), "AUSAXS library not available, test cannot be run."
+        # this awkward syntax will be improved in a future version of pyausaxs ...
+        assert ausaxs.wrapper.AUSAXS.AUSAXS().ready(), "AUSAXS library not available, test cannot be run."
 
         # get all pdb files in the data folder
         import glob
@@ -315,7 +316,34 @@ class sas_gen_test(unittest.TestCase):
         for val in np.abs(errs):
             self.assertLessEqual(val, 1e-3)
 
+    def test_euler_angle_consistency(self):
+        """
+        Test that the euler angle implementation in Models.py is consistent with the scipy Rotation module
+        """
+        from sas.sascalc.shape2sas.HelperFunctions import euler_rotation_matrix
+        def rotation(theta, phi, psi): # from sasmodels/explore/realspace.py
+            def Ry(a):
+                R = [[+np.cos(a), 0, +np.sin(a)],
+                    [0, 1, 0],
+                    [-np.sin(a), 0, +np.cos(a)]]
+                return np.array(R)
 
+            def Rz(a):
+                R = [[+np.cos(a), -np.sin(a), 0],
+                    [+np.sin(a), +np.cos(a), 0],
+                    [0, 0, 1]]
+                return np.array(R)
+            return Rz(phi) @ Ry(theta) @ Rz(psi)
+
+        np.random.seed(seed=1984)
+        angles = stats.uniform(0, 2*np.pi).rvs([100, 3])
+        for alpha, beta, gamma in angles:
+            R_s2s = euler_rotation_matrix(alpha, beta, gamma)
+            R_scipy_XYZ = Rotation.from_euler('ZYX', [gamma, beta, alpha]).as_matrix()
+            R_sasview = rotation(alpha, beta, gamma)
+            R_scipy_zyz = Rotation.from_euler('ZYZ', [beta, alpha, gamma]).as_matrix()
+            self.assertTrue(np.allclose(R_s2s, R_scipy_XYZ))
+            self.assertTrue(np.allclose(R_sasview, R_scipy_zyz))
 
 if __name__ == '__main__':
     unittest.main()

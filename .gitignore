@@ -71,6 +71,7 @@ venv
 /test/fileconverter/data/export2d.h5
 **/logs
 tests.log
+/.coverage
 
 # Test reports
 /src/sas/qtgui/Utilities/Reports/report_test*
@@ -80,3 +81,7 @@ tests.log
 /installers/build
 /installers/dist
 *.exe
+installers/credits.html
+
+# Local Cursor IDE config
+.cursor/

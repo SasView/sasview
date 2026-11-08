@@ -24,7 +24,7 @@
      <x>0</x>
      <y>0</y>
      <width>915</width>
-     <height>20</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -33,6 +33,7 @@
     </property>
     <addaction name="actionLoadData"/>
     <addaction name="actionLoad_Data_Folder"/>
+    <addaction name="actionLoad_SASBDB"/>
     <addaction name="separator"/>
     <addaction name="actionOpen_Project"/>
     <addaction name="actionOpen_Analysis"/>
@@ -41,6 +42,8 @@
     <addaction name="actionSave_Analysis"/>
     <addaction name="separator"/>
     <addaction name="actionPreferences"/>
+    <addaction name="separator"/>
+    <addaction name="actionClose_Project"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
@@ -134,6 +137,8 @@
     <addaction name="actionNext"/>
     <addaction name="actionPrevious"/>
     <addaction name="separator"/>
+    <addaction name="actionDetachWindow"/>
+    <addaction name="separator"/>
     <addaction name="actionMinimizePlots"/>
     <addaction name="actionClosePlots"/>
    </widget>
@@ -159,6 +164,7 @@
     <addaction name="actionAcknowledge"/>
     <addaction name="separator"/>
     <addaction name="actionAbout"/>
+    <addaction name="actionCredits"/>
     <addaction name="actionWelcomeWidget"/>
     <addaction name="separator"/>
     <addaction name="actionCheck_for_update"/>
@@ -247,6 +253,12 @@
    <property name="text">
     <string>Undo</string>
    </property>
+   <property name="toolTip">
+    <string>Undo</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Z</string>
+   </property>
   </action>
   <action name="actionRedo">
    <property name="icon">
@@ -259,6 +271,9 @@
    <property name="toolTip">
     <string>Redo</string>
    </property>
+  <property name="shortcut">
+   <string>Ctrl+Y</string>
+  </property>
   </action>
   <action name="actionCopy">
    <property name="icon">
@@ -305,6 +320,14 @@
   <action name="actionLoad_Data_Folder">
    <property name="text">
     <string>Load Data Folder</string>
+   </property>
+  </action>
+  <action name="actionLoad_SASBDB">
+   <property name="text">
+    <string>Load from SASBDB...</string>
+   </property>
+   <property name="toolTip">
+    <string>Download and load dataset from SASBDB</string>
    </property>
   </action>
   <action name="actionOpen_Project">
@@ -431,10 +454,30 @@
    <property name="text">
     <string>Cascade</string>
    </property>
+   <property name="toolTip">
+    <string>Cascade workspace windows. Detached windows are not affected.</string>
+   </property>
   </action>
   <action name="actionTile">
    <property name="text">
     <string>Tile</string>
+   </property>
+   <property name="toolTip">
+    <string>Tile workspace windows. Detached windows are not affected.</string>
+   </property>
+  </action>
+  <action name="actionDetachWindow">
+   <property name="text">
+    <string>Detach Window from Workspace</string>
+   </property>
+   <property name="toolTip">
+    <string>Move the active window out of the workspace into its own window, or put it back</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+D</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionTile_Vertically">
@@ -515,6 +558,11 @@
   <action name="actionAbout">
    <property name="text">
     <string>About</string>
+   </property>
+  </action>
+  <action name="actionCredits">
+   <property name="text">
+    <string>Credits and licenses</string>
    </property>
   </action>
   <action name="actionCheck_for_update">
@@ -632,11 +680,16 @@
   <action name="actionMuMag_Fitter">
    <property name="text">
     <string>MuMag Fitter (Experimental)</string>
-      </property>
+   </property>
   </action>
   <action name="actionWhat_s_New">
    <property name="text">
     <string>What's New</string>
+   </property>
+  </action>
+  <action name="actionClose_Project">
+   <property name="text">
+    <string>Close Project</string>
    </property>
   </action>
  </widget>
