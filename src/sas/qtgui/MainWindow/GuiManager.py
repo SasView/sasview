@@ -22,7 +22,7 @@ from shiboken6 import isValid
 from twisted.internet import reactor
 
 from sasdata.data import SasData
-from sasdata.data_io.importers.import_ascii import load_data
+from sasdata.data_io.importers.import_ascii import AsciiImporter
 
 import sas
 
@@ -1801,6 +1801,6 @@ class GuiManager:
         dialog = AsciiDialog()
         status = dialog.exec()
         if status == 1:
-            loaded = load_data(dialog.params)
+            loaded = AsciiImporter.load_data(dialog.params)
             for datum in loaded:
                 logger.info(datum.summary())
