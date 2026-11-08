@@ -14,11 +14,6 @@ from sasmodels.sasview_model import SasviewModelType, load_custom_model, load_st
 
 from sas.system.user import get_plugin_dir
 
-# Explicitly import from the pluginmodel module so that py2exe
-# places it in the distribution. The Model1DPlugin class is used
-# as the base class of plug-in models.
-from .pluginmodel import Model1DPlugin
-
 logger = logging.getLogger(__name__)
 
 
@@ -47,11 +42,6 @@ def _check_plugin(model, name):
     :return model: model if valid model or None if not valid
 
     """
-    #Check if the plugin is of type Model1DPlugin
-    if not issubclass(model, Model1DPlugin):
-        msg = "Plugin %s must be of type Model1DPlugin \n" % str(name)
-        plugin_log(msg)
-        return None
     if model.__name__ != "Model":
         msg = "Plugin %s class name must be Model \n" % str(name)
         plugin_log(msg)
