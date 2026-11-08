@@ -2638,8 +2638,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Wrapper for Calc1D/2D calls.
 
-        With *live_generation* set (slider drag), the page stays interactive and
-        completion or failure is reported through LiveCalcFinishedSignal.
         """
         if data is None:
             data = self.data
@@ -2737,8 +2735,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Plot the current 1D data
         """
-        # Bring the GUI to normal state. A live (slider) calculation never
-        # disabled it, and must not re-enable it during a fit.
+        # Bring the GUI to normal state.
         if not live:
             self.enableInteractiveElements()
         if return_data is None:
@@ -3198,8 +3195,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Set button caption on fitting/calculate start
         Disable the param table(s)
         """
-        # A normal calculation (Compute/Plot, undo/redo, option changes) supersedes
-        # any slider calculation: a slower live result must not overwrite its plot.
         self._invalidateLiveCalc()
         # Notify the user that fitting is being run
         # Allow for stopping the job
@@ -3352,9 +3347,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if self.rowHasActiveConstraint(row):
             return f"{name} is constrained; remove the constraint to use the slider."
         value_index = self._model_model.index(row, self.lstParams.itemDelegate().param_value)
-        # Fixed-choice parameters and the shell count are shown as combo boxes set with
-        # setIndexWidget, i.e. persistent editors. indexWidget() alone would also return
-        # the transient editor opened by clicking the value cell.
         if self.lstParams.isPersistentEditorOpen(value_index):
             return f"{name} is a fixed-choice parameter and cannot be controlled by the slider."
         value_item = self._model_model.itemFromIndex(value_index)
