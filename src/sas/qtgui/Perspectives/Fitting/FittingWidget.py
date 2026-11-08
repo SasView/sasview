@@ -953,6 +953,14 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         self.constraint_manager.addConstraintToRow(constraint, row, model_key)
 
+    def addSimpleConstraintToRow(self, constraint: Constraint, row: int, model_key: str = "standard") -> None:
+        """
+        Restore a constraint fixing a parameter to its current value.
+
+        Delegated to ConstraintManager.
+        """
+        self.constraint_manager.addSimpleConstraintToRow(constraint, row, model_key)
+
     def addSimpleConstraint(self) -> None:
         """
         Add a constraint on a single parameter.

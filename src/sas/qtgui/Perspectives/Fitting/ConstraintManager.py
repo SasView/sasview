@@ -248,6 +248,39 @@ class ConstraintManager:
 
         self.widget.communicator.statusBarUpdateSignal.emit('Constraint added')
 
+    def addSimpleConstraintToRow(self, constraint: Constraint, row: int, model_key: str = "standard") -> None:
+        """
+        Restore a constraint fixing a parameter to its current value, e.g. when loading a project.
+
+        Unlike addConstraintToRow, there is no expression to check. The narrow min/max range set by
+        addSimpleConstraint is saved with the parameter, so it isn't changed here.
+
+        Parameters
+        ----------
+        constraint : Constraint
+            The constraint object to add, with no function
+        row : int
+            The row number to add the constraint to
+        model_key : str
+            The model key ('standard', 'poly', or 'magnet')
+        """
+        assert isinstance(constraint, Constraint)
+        model = self.model_dict[model_key]
+        assert 0 <= row < model.rowCount()
+
+        # As in addSimpleConstraint, the constraint is applied through the min/max range, not as an expression.
+        constraint.active = False
+        item = QtGui.QStandardItem()
+        item.setData(constraint)
+        model.item(row, 1).setChild(0, item)
+        self.widget.constraintAddedSignal.emit([row], model_key)
+
+        # Show visual hints for the constraint
+        font = QtGui.QFont()
+        font.setItalic(True)
+        brush = QtGui.QBrush(QtGui.QColor('blue'))
+        self.widget.modifyViewOnRow(row, font=font, brush=brush, model_key=model_key)
+
     def editConstraint(self) -> None:
         """
         Edit constraints for selected parameters.
