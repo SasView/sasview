@@ -41,6 +41,7 @@ from sas.qtgui.Perspectives.Fitting.FittingConstants import (  # noqa: F401 (re-
 from sas.qtgui.Perspectives.Fitting.FittingController import FittingController
 from sas.qtgui.Perspectives.Fitting.FittingLogic import FittingLogic
 from sas.qtgui.Perspectives.Fitting.FittingState import FittingState
+from sas.qtgui.Perspectives.Fitting.LegacyKernelSync import LegacyKernelSync
 from sas.qtgui.Perspectives.Fitting.MagnetismWidget import MagnetismWidget
 from sas.qtgui.Perspectives.Fitting.model import serializer
 from sas.qtgui.Perspectives.Fitting.model.document import FitPageDocument
@@ -62,6 +63,7 @@ from sas.qtgui.Perspectives.Fitting.UndoRedo import (
     ParameterValueCommand,
     SmearingOptionsCommand,
 )
+from sas.qtgui.Perspectives.Fitting.view.ParameterTableAdapter import ParameterTableAdapter
 from sas.qtgui.Perspectives.Fitting.ViewDelegate import ModelViewDelegate
 from sas.qtgui.Perspectives.UndoRedo import UndoStack
 from sas.qtgui.Plotting.Plotter import PlotterWidget
@@ -180,6 +182,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.label_17.setStyleSheet(new_font)
         self.label_19.setStyleSheet(new_font)
 
+        # Document-first changes reach the legacy stores: the kernel first, then the tables (Phase 4)
+        self.kernel_sync = LegacyKernelSync(self)
+        self.table_adapters = [ParameterTableAdapter(self, table) for table in Table]
         # Every legacy writer from here on is mirrored into the document
         self.shadow.start()
 
@@ -3480,36 +3485,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Safe to call when no error column is present (each section is guarded
         by its ``has_*_error_column`` flag).
         """
-        # --- main model (and its polydispersity sub-rows) ---
-        if self.has_error_column:
-            def deletePolyErrorColumn(row):
-                item = self._model_model.item(row, 0)
-                if item is None or not item.hasChildren():
-                    return
-                poly_item = item.child(0)
-                if poly_item is None or not poly_item.hasChildren():
-                    return
-                poly_item.removeColumn(2)
-
-            self._model_model.removeColumn(2)
-            self.iterateOverModel(deletePolyErrorColumn)
-            self.lstParams.itemDelegate().removeErrorColumn()
-            FittingUtilities.addHeadersToModel(self._model_model)
-            self.has_error_column = False
-
-        # --- polydispersity model ---
-        if self.polydispersity_widget.has_poly_error_column:
-            self.polydispersity_widget.poly_model.removeColumn(2)
-            self.polydispersity_widget.lstPoly.itemDelegate().removeErrorColumn()
-            FittingUtilities.addPolyHeadersToModel(self.polydispersity_widget.poly_model)
-            self.polydispersity_widget.has_poly_error_column = False
-
-        # --- magnetism model ---
-        if self.magnetism_widget.has_magnet_error_column:
-            self.magnetism_widget._magnet_model.removeColumn(2)
-            self.magnetism_widget.lstMagnetic.itemDelegate().removeErrorColumn()
-            FittingUtilities.addHeadersToModel(self.magnetism_widget._magnet_model)
-            self.magnetism_widget.has_magnet_error_column = False
+        for adapter in self.table_adapters:
+            adapter.set_error_column(False)
 
     def _get_parameter_dict(self, kernel_module=None) -> dict:
         """Return ``{param_name: float_value}`` for all current kernel params.

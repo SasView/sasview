@@ -21,6 +21,13 @@ document while it is in step with the page (``shadow.in_sync``). Inside a
 mirrored operation the document does not hold the writer's change yet, and after
 a failed read-back it is stale; then the legacy reader answers.
 
+Reverse synchronization (Phase 4): ``subscribe_reverse(fn)`` subscribes the
+document-to-legacy syncs (``ParameterTableAdapter``, ``LegacyKernelSync``). They
+see only document-first changes, never the shadow's own read-backs (the legacy
+stores already hold those). While they run, every ``@mirrors`` writer returns at
+once: their writes into the item models fire the legacy edit slots, which would
+otherwise record undo commands and read the change back into a publishing document.
+
 Temporary: removed in Phase 5, when the writers become controller intents.
 """
 from __future__ import annotations
@@ -77,6 +84,8 @@ def mirrors(*sections: str):
             shadow = _shadow_of(self)
             if shadow is None:
                 return method(self, *args, **kwargs)
+            if shadow._applying:
+                return None    # a reverse sync is writing the legacy stores (the re-entrancy guard)
             with shadow.operation(*sections):
                 return method(self, *args, **kwargs)
         return wrapper
@@ -131,6 +140,8 @@ class DocumentShadow:
         self._pending: set[str] = set()
         self.active = False
         self._stale = False            # the last read-back failed; the next one reads every section
+        self._reading_back = False     # the document is publishing the shadow's own read-back
+        self._applying = False         # a reverse sync is writing the legacy stores
         self.errors: list[str] = []    # read-back failures; the tests assert there are none
 
     @property
@@ -142,6 +153,18 @@ class DocumentShadow:
         """Called at the end of FittingWidget.__init__: seed the document from the finished page."""
         self.active = True
         self._sync(set(SECTIONS))
+
+    def subscribe_reverse(self, fn):
+        """Subscribe a document-to-legacy sync: *fn(change)* for document-first changes, legacy writers muted."""
+        def subscriber(change) -> None:
+            if not self.active or self._reading_back:
+                return
+            self._applying = True
+            try:
+                fn(change)
+            finally:
+                self._applying = False
+        return self._page.document.subscribe(subscriber)
 
     @contextlib.contextmanager
     def operation(self, *sections: str):
@@ -164,6 +187,7 @@ class DocumentShadow:
         doc = self._page.document
         if "layout" in sections or self._stale:
             sections = set(SECTIONS)
+        self._reading_back = True
         try:
             with doc.transaction(Origin.USER) as tx:
                 for section in SECTIONS:
@@ -177,6 +201,8 @@ class DocumentShadow:
             # Debug level: while the document is stale the readers use the legacy stores, and the tests check it.
             logger.debug("The fit page document is out of step with the page (sections %s)", sorted(sections),
                          exc_info=True)
+        finally:
+            self._reading_back = False
 
     def _sync_data(self, doc, tx) -> None:
         page = self._page
