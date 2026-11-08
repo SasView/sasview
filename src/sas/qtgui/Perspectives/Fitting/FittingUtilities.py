@@ -17,6 +17,7 @@ from sas.qtgui.Perspectives.Fitting.model.serializer import (  # noqa: F401 (re-
     formatParametersLatex,
 )
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
+from sas.qtgui.Utilities import GuiUtils
 from sas.sascalc.fit.expression import check_constraints
 
 model_header_captions = ['Parameter', 'Value', 'Min', 'Max', 'Units']
@@ -64,6 +65,19 @@ class ToolTippedItemModel(QtGui.QStandardItemModel):
                 return str(self.header_tooltips[section])
 
         return QtGui.QStandardItemModel.headerData(self, section, orientation, role)
+
+def parse_number(text) -> float | None:
+    """A typed number in double precision (register R-12), the locale's spelling as a fallback;
+    None if the text is not a number."""
+    try:
+        return float(text)
+    except (TypeError, ValueError):
+        pass
+    try:
+        return float(GuiUtils.toDouble(text))
+    except TypeError:
+        return None
+
 
 def createFixedChoiceComboBox(param, item_row):
     """

@@ -83,15 +83,19 @@ class UndoStack(QtCore.QObject, History):
 
     stackChanged = QtCore.Signal()
 
-    def __init__(self, widget, parent: QtCore.QObject | None = None) -> None:
+    def __init__(self, widget, parent: QtCore.QObject | None = None, *, target=None,
+                 snapshot_fn=None, restore_fn=None) -> None:
+        """*widget* is the dialog parent. By default the commands replay on it, and the recovery
+        snapshot is its ``_get_parameter_dict`` / ``_restore_parameter_values``. The fit page passes
+        its controller as *target* and the document's snapshot and restore (FW-MVC-DESIGN.md §3.7)."""
         from sas import config as _sas_config
         # Cooperative initialisation: QObject passes the keywords on to History.
         super().__init__(
             parent,
-            target=widget,
+            target=widget if target is None else target,
             max_depth=getattr(_sas_config, "UNDO_STACK_MAX_DEPTH", 200),
-            snapshot_fn=self._widget_state,
-            restore_fn=lambda state: widget._restore_parameter_values(state),
+            snapshot_fn=snapshot_fn or self._widget_state,
+            restore_fn=restore_fn or (lambda state: widget._restore_parameter_values(state)),
             refresh_fn=self._refresh_view,
         )
         self._widget = widget
@@ -99,10 +103,6 @@ class UndoStack(QtCore.QObject, History):
     def push(self, cmd: UndoCommand) -> None:
         """Record *cmd*, whose change has already been applied (see ``History.push_applied``)."""
         self.push_applied(cmd)
-
-    def save_last_good_state(self, state: dict) -> None:
-        """Store a copy of *state* as the recovery snapshot."""
-        super().save_last_good_state(dict(state))
 
     # -- History hooks ----------------------------------------------------
 

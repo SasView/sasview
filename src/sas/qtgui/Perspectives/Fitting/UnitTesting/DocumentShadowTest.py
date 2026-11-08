@@ -164,7 +164,8 @@ def testStaleDocumentFallsBackUntilAReadBackSucceeds(page, monkeypatch):
     def fail(doc, tx):
         raise RuntimeError("cannot read the options")
     monkeypatch.setattr(page.shadow, "_sync_options", fail)
-    page.options_widget.updateMinQ(0.01)                # a mirrored write whose read-back fails
+    with page.shadow.operation("options"):              # a legacy writer whose read-back fails
+        page.q_range_min = 0.01
     assert not page.shadow.in_sync and radius_text(page) == "20"
     page.shadow.errors.clear()
     monkeypatch.undo()

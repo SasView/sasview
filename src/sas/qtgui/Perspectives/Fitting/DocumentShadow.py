@@ -22,13 +22,18 @@ mirrored operation the document does not hold the writer's change yet, and after
 a failed read-back it is stale; then the legacy reader answers.
 
 Reverse synchronization (Phase 4): ``subscribe_reverse(fn)`` subscribes the
-document-to-legacy syncs (``ParameterTableAdapter``, ``LegacyKernelSync``). They
-see only document-first changes, never the shadow's own read-backs (the legacy
-stores already hold those). While they run, every ``@mirrors`` writer returns at
-once: their writes into the item models fire the legacy edit slots, which would
-otherwise record undo commands and read the change back into a publishing document.
+document-to-legacy syncs (``ParameterTableAdapter``, ``LegacyKernelSync``,
+``SettingsSync``). They see only document-first changes, never the shadow's own
+read-backs (the legacy stores already hold those). While they run (``applying``),
+the edit slots their writes fire return at once (they check ``controller.muted``),
+and the legacy writers they call are read back afterwards (``flush``), because the
+document cannot be changed while it publishes.
 
-Temporary: removed in Phase 5, when the writers become controller intents.
+Since Phase 5 the user's edits are controller intents that write the document
+first. The shadow still mirrors the writers that are not intents yet: data load and
+masks, fit completion, batch, SESANS, the constraint tab's writes into other pages,
+and the legacy table builders, after which ``controller.layout_changed`` retains the
+user's settings. Removed when those move (Phases 6 and 7).
 """
 from __future__ import annotations
 
@@ -40,8 +45,9 @@ import logging
 
 from PySide6 import QtCore, QtWidgets
 
+from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.FittingConstants import CATEGORY_CUSTOM, STRUCTURE_DEFAULT
-from sas.qtgui.Perspectives.Fitting.model.events import Origin
+from sas.qtgui.Perspectives.Fitting.model.events import PARAMETER_FIELDS, ChangeSet, Origin, ParametersChanged
 from sas.qtgui.Perspectives.Fitting.model.parameters import (
     ArrayDistribution,
     DataRef,
@@ -84,8 +90,10 @@ def mirrors(*sections: str):
             shadow = _shadow_of(self)
             if shadow is None:
                 return method(self, *args, **kwargs)
-            if shadow._applying:
-                return None    # a reverse sync is writing the legacy stores (the re-entrancy guard)
+            if shadow.applying:
+                # The document is publishing: read the writer back once the change is complete
+                shadow._deferred.update(sections)
+                return method(self, *args, **kwargs)
             with shadow.operation(*sections):
                 return method(self, *args, **kwargs)
         return wrapper
@@ -120,16 +128,7 @@ def _shadow_of(widget):
     return None
 
 
-def _number(text) -> float | None:
-    """A cell's number, or None if the text is not one (the legacy code then ignores the edit too)."""
-    try:
-        return float(text)
-    except (TypeError, ValueError):
-        pass
-    try:
-        return GuiUtils.toDouble(text)
-    except TypeError:
-        return None
+_number = FittingUtilities.parse_number
 
 
 class DocumentShadow:
@@ -142,6 +141,9 @@ class DocumentShadow:
         self._stale = False            # the last read-back failed; the next one reads every section
         self._reading_back = False     # the document is publishing the shadow's own read-back
         self._applying = False         # a reverse sync is writing the legacy stores
+        self._deferred: set[str] = set()   # sections of legacy writers run while applying
+        self._layout_before = None     # the document before the current layout operation
+        self._reverse: list = []       # the reverse syncs, for resync
         self.errors: list[str] = []    # read-back failures; the tests assert there are none
 
     @property
@@ -154,20 +156,54 @@ class DocumentShadow:
         self.active = True
         self._sync(set(SECTIONS))
 
+    @property
+    def applying(self) -> bool:
+        """A reverse sync is writing the legacy stores from the document."""
+        return self._applying
+
+    @property
+    def depth(self) -> int:
+        return self._depth
+
+    @property
+    def building(self) -> bool:
+        """A legacy table builder is running: cell edits are part of the rebuild, not the user's."""
+        return self._depth > 0 and "layout" in self._pending
+
     def subscribe_reverse(self, fn):
-        """Subscribe a document-to-legacy sync: *fn(change)* for document-first changes, legacy writers muted."""
+        """Subscribe a document-to-legacy sync: *fn(change)* for document-first changes."""
         def subscriber(change) -> None:
             if not self.active or self._reading_back:
                 return
-            self._applying = True
-            try:
-                fn(change)
-            finally:
-                self._applying = False
+            self._apply(fn, change)
+        self._reverse.append(fn)
         return self._page.document.subscribe(subscriber)
+
+    def _apply(self, fn, change) -> None:
+        self._applying = True
+        try:
+            fn(change)
+        finally:
+            self._applying = False
+
+    def resync(self, keys: set[str]) -> None:
+        """Write the parameters *keys* to the legacy stores again (after a rejected edit)."""
+        doc = self._page.document
+        change = ChangeSet(Origin.SYSTEM, doc.revision, (ParametersChanged(frozenset(keys), PARAMETER_FIELDS),))
+        for fn in self._reverse:
+            self._apply(fn, change)
+        self.flush()
+
+    def flush(self) -> None:
+        """Read back the legacy writers that the reverse syncs ran."""
+        if self._deferred and not self._applying and self._depth == 0:
+            sections, self._deferred = self._deferred, set()
+            self._sync(sections)
 
     @contextlib.contextmanager
     def operation(self, *sections: str):
+        if self.active and "layout" in sections and self._layout_before is None:
+            self._layout_before = self._page.document.snapshot()
         self._depth += 1
         self._pending.update(sections)
         try:
@@ -176,8 +212,11 @@ class DocumentShadow:
             self._depth -= 1
             if self._depth == 0:
                 pending, self._pending = self._pending, set()
+                before, self._layout_before = self._layout_before, None
                 if self.active:
                     self._sync(pending)
+                if before is not None and self.active and not self._stale:
+                    self._page.controller.layout_changed(before)
 
     # ------------------------------------------------------------------
 

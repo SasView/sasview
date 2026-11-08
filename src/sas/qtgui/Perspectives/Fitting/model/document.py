@@ -74,6 +74,11 @@ class Transaction:
         self.origin = origin
         self.events: list[Event] = []
 
+    @property
+    def document(self) -> FitPageDocument:
+        """The document being changed (read it; change it only through this transaction)."""
+        return self._doc
+
     # -- parameters -----------------------------------------------------
 
     def set_parameter(self, key: str, **fields) -> None:

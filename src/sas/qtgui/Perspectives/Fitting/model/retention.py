@@ -41,9 +41,10 @@ def retain(old: ParameterSet, new: ParameterSet, symbols: set[str] | None = None
     Returns the new set and the keys whose constraints were dropped.
     """
     dropped = []
+    shells = new.multiplicity()
     for p in new:
-        if p.key not in old:
-            continue
+        if p.key not in old or (shells is not None and p.key == shells.key):
+            continue    # new, or the shell count (part of the layout)
         previous = old[p.key]
         if _value_fits(previous, p):
             p.value = previous.value

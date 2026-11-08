@@ -1,36 +1,40 @@
-"""Unit tests for UndoRedo.py — UndoCommand subclasses and UndoStack.
+"""Unit tests for the undo/redo history and the fit page's document commands.
 
-Tests focus on single-tab fitting scenarios.  The FittingWidget dependency
-is fully mocked; no real fitting window is opened.
+The document commands (``model/commands.py``) are tested on a Qt-free document;
+the shared ``UndoStack`` on a mock widget.
 
 Test organisation:
     TestUndoCommand              — abstract base behaviour
-    TestParameterValueCommand    — value change, coalescing
-    TestParameterMinMaxCommand   — bound change
-    TestModelSelectionCommand    — model triple + param restore
-    TestFitOptionsCommand        — options dict round-trip
-    TestSmearingOptionsCommand   — smearing state round-trip
-    TestCheckboxToggleCommand    — checkbox flip
-    TestFitResultCommand         — pre/post fit snapshot
+    TestSetParameterCommand      — value / bound / dispersion change, coalescing
+    TestSettingCommands          — options, smearing, flags
+    TestSnapshotCommand          — whole-state change, unrecorded fields carried over
+    TestApplyFitResultCommand    — fit values, errors cleared (R-2)
+    TestHistoryExecute           — apply-then-record
     TestCompoundCommand          — atomic group, ordering
     TestUndoStack                — push / undo / redo / depth / suppression
     TestUndoStackFailure         — failure dialog, reset_to_last_good
 """
+import contextlib
+import copy
 import logging
 import time
 from unittest.mock import MagicMock
 
 import pytest
 
-from sas.qtgui.Perspectives.Fitting.UndoRedo import (
-    CheckboxToggleCommand,
-    FitOptionsCommand,
-    FitResultCommand,
-    ModelSelectionCommand,
-    ParameterMinMaxCommand,
-    ParameterValueCommand,
-    SmearingOptionsCommand,
+from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
+from sas.qtgui.Perspectives.Fitting.model.commands import (
+    ApplyFitResultCommand,
+    SetFlagCommand,
+    SetOptionsCommand,
+    SetParameterCommand,
+    SetSmearingCommand,
+    SnapshotCommand,
 )
+from sas.qtgui.Perspectives.Fitting.model.events import Origin
+from sas.qtgui.Perspectives.Fitting.model.history import History
+from sas.qtgui.Perspectives.Fitting.model.parameters import Smearing
+from sas.qtgui.Perspectives.Fitting.UnitTesting.document_fixtures import d1, edit, page
 from sas.qtgui.Perspectives.UndoRedo import (
     CompoundCommand,
     UndoCommand,
@@ -108,265 +112,182 @@ class TestUndoCommand:
 
 
 # ---------------------------------------------------------------------------
-# ParameterValueCommand
+# Document commands (model/commands.py, Phase 5)
 # ---------------------------------------------------------------------------
 
-class TestParameterValueCommand:
+class _Target:
+    """The part of FitPageController a command uses, over a Qt-free document."""
 
-    def test_undo_sets_old_value(self, widget):
-        cmd = ParameterValueCommand("radius", 5.0, 10.0)
-        cmd.undo(widget)
-        widget.logic.kernel_module.setParam.assert_called_once_with("radius", 5.0)
-        widget._update_model_param_value.assert_called_once_with("radius", 5.0)
+    def __init__(self, doc):
+        self.document = doc
+        self.replaying = False
+        self.origins = []
+        self.theory = 0
+        self.restored = []
 
-    def test_redo_sets_new_value(self, widget):
-        cmd = ParameterValueCommand("radius", 5.0, 10.0)
-        cmd.redo(widget)
-        widget.logic.kernel_module.setParam.assert_called_once_with("radius", 10.0)
-        widget._update_model_param_value.assert_called_once_with("radius", 10.0)
+    @contextlib.contextmanager
+    def transaction(self, origin, recalculate=False):
+        self.origins.append(origin)
+        with self.document.transaction(origin) as tx:
+            yield tx
+        self.theory += recalculate and origin in (Origin.UNDO, Origin.REDO)
 
-    def test_can_merge_same_param(self):
-        cmd1 = ParameterValueCommand("radius", 1.0, 2.0)
-        cmd2 = ParameterValueCommand("radius", 2.0, 3.0)
-        assert cmd1.can_merge(cmd2) is True
+    def redo_origin(self):
+        return Origin.REDO if self.replaying else Origin.USER
 
-    def test_cannot_merge_different_param(self):
-        cmd1 = ParameterValueCommand("radius", 1.0, 2.0)
-        cmd2 = ParameterValueCommand("length", 1.0, 2.0)
-        assert cmd1.can_merge(cmd2) is False
-
-    def test_cannot_merge_different_type(self):
-        cmd1 = ParameterValueCommand("radius", 1.0, 2.0)
-        assert cmd1.can_merge(UndoCommand("other")) is False
-
-    def test_merge_spans_full_range(self):
-        cmd1 = ParameterValueCommand("radius", 1.0, 2.0)
-        cmd2 = ParameterValueCommand("radius", 2.0, 3.0)
-        merged = cmd1.merge(cmd2)
-        assert merged._old_val == 1.0
-        assert merged._new_val == 3.0
-        assert merged.param_name == "radius"
-
-    def test_merge_carries_latest_timestamp(self):
-        # The coalescing window is measured from the most recent edit, so the
-        # merged command must carry the later command's timestamp.
-        cmd1 = ParameterValueCommand("r", 1.0, 2.0)
-        cmd2 = ParameterValueCommand("r", 2.0, 3.0)
-        cmd2.timestamp = cmd1.timestamp + 1.0
-        merged = cmd1.merge(cmd2)
-        assert merged.timestamp == cmd2.timestamp
-
-    def test_param_name_property(self):
-        cmd = ParameterValueCommand("scale", 1.0, 2.0)
-        assert cmd.param_name == "scale"
-
-    def test_cannot_merge_stale_same_param_command(self):
-        """Edits to the same parameter outside the coalescing window must not merge."""
-        cmd1 = ParameterValueCommand("radius", 1.0, 2.0)
-        cmd2 = ParameterValueCommand("radius", 2.0, 3.0)
-        # Backdate cmd1 so the gap exceeds the coalescing window
-        cmd1.timestamp = (
-            cmd2.timestamp - ParameterValueCommand._COALESCE_WINDOW_SECONDS - 1.0
-        )
-        assert cmd1.can_merge(cmd2) is False
+    def restore(self, snapshot, origin):
+        self.restored.append(origin)
+        self.document.restore_undo_state(snapshot, origin)
 
 
-# ---------------------------------------------------------------------------
-# ParameterMinMaxCommand
-# ---------------------------------------------------------------------------
-
-class TestParameterMinMaxCommand:
-
-    def test_undo_restores_min(self, widget):
-        widget.logic.kernel_module.details = {"radius": [None, 0.0, 100.0]}
-        cmd = ParameterMinMaxCommand("radius", "min", 0.0, 5.0)
-        cmd.undo(widget)
-        assert widget.logic.kernel_module.details["radius"][1] == 0.0
-        widget._update_model_param_limit.assert_called_once_with(
-            "radius", "min", 0.0
-        )
-
-    def test_redo_applies_new_min(self, widget):
-        widget.logic.kernel_module.details = {"radius": [None, 0.0, 100.0]}
-        cmd = ParameterMinMaxCommand("radius", "min", 0.0, 5.0)
-        cmd.redo(widget)
-        assert widget.logic.kernel_module.details["radius"][1] == 5.0
-        widget._update_model_param_limit.assert_called_once_with(
-            "radius", "min", 5.0
-        )
-
-    def test_undo_restores_max(self, widget):
-        widget.logic.kernel_module.details = {"length": [None, 0.0, 100.0]}
-        cmd = ParameterMinMaxCommand("length", "max", 100.0, 200.0)
-        cmd.undo(widget)
-        assert widget.logic.kernel_module.details["length"][2] == 100.0
-
-    def test_redo_applies_new_max(self, widget):
-        widget.logic.kernel_module.details = {"length": [None, 0.0, 100.0]}
-        cmd = ParameterMinMaxCommand("length", "max", 100.0, 200.0)
-        cmd.redo(widget)
-        assert widget.logic.kernel_module.details["length"][2] == 200.0
-
-    def test_invalid_bound_raises(self):
-        with pytest.raises(AssertionError):
-            ParameterMinMaxCommand("r", "middle", 1.0, 2.0)
+@pytest.fixture
+def target():
+    return _Target(page("Cylinder", "cylinder", data=[d1()]))
 
 
-# ---------------------------------------------------------------------------
-# ModelSelectionCommand
-# ---------------------------------------------------------------------------
+class TestSetParameterCommand:
 
-class TestModelSelectionCommand:
+    def test_redo_applies_and_undo_restores(self, target):
+        cmd = SetParameterCommand("radius", {"value": 20.0}, {"value": 33.0})
+        cmd.redo(target)
+        assert target.document.parameters["radius"].value == 33.0
+        cmd.undo(target)
+        assert target.document.parameters["radius"].value == 20.0
+        assert target.origins == [Origin.USER, Origin.UNDO]
 
-    def test_undo_restores_old_triple_and_params(self, widget):
-        old_triple = ("Shape", "sphere", "None")
-        new_triple = ("Shape", "cylinder", "None")
-        cmd = ModelSelectionCommand(
-            old_triple, new_triple, {"radius": 1.0}, {"length": 5.0}
-        )
-        cmd.undo(widget)
-        widget._restore_model_selection.assert_called_once_with(
-            old_triple, {"radius": 1.0}
-        )
+    def test_replayed_redo_has_the_redo_origin_and_recalculates(self, target):
+        cmd = SetParameterCommand("radius", {"value": 20.0}, {"value": 33.0})
+        cmd.redo(target)
+        assert target.theory == 0          # a value edit does not recalculate (R-1)
+        target.replaying = True
+        cmd.undo(target)
+        cmd.redo(target)
+        assert target.origins[-1] is Origin.REDO and target.theory == 2
 
-    def test_redo_restores_new_triple_and_params(self, widget):
-        old_triple = ("Shape", "sphere", "None")
-        new_triple = ("Shape", "cylinder", "None")
-        cmd = ModelSelectionCommand(
-            old_triple, new_triple, {"radius": 1.0}, {"length": 5.0}
-        )
-        cmd.redo(widget)
-        widget._restore_model_selection.assert_called_once_with(
-            new_triple, {"length": 5.0}
-        )
+    def test_bounds_and_dispersion_with_fit(self, target):
+        cmd = SetParameterCommand("radius", {"min": 0.0, "max": float("inf")}, {"min": 1.0, "max": 50.0})
+        cmd.redo(target)
+        p = target.document.parameters["radius"]
+        assert (p.min, p.max) == (1.0, 50.0)
+        cmd.undo(target)
+        assert (p.min, p.max) == (0.0, float("inf"))
 
-    def test_params_are_deep_copied(self):
-        params = {"radius": 5.0}
-        cmd = ModelSelectionCommand(
-            ("A", "B", "C"), ("D", "E", "F"), params, {}
-        )
-        params["radius"] = 999.0  # mutate original
-        assert cmd._old_params["radius"] == 5.0  # snapshot unchanged
+    def test_merges_later_edit_of_the_same_fields(self):
+        first = SetParameterCommand("radius", {"value": 1.0}, {"value": 2.0})
+        second = SetParameterCommand("radius", {"value": 2.0}, {"value": 3.0})
+        assert first.can_merge(second)
+        merged = first.merge(second)
+        assert (merged.old, merged.new, merged.timestamp) == ({"value": 1.0}, {"value": 3.0}, second.timestamp)
 
-    def test_description_includes_new_model_name(self):
-        cmd = ModelSelectionCommand(
-            ("A", "sphere", "C"), ("A", "cylinder", "C"), {}, {}
-        )
-        assert "cylinder" in cmd.description
+    def test_does_not_merge_other_fields_keys_or_stale_edits(self):
+        first = SetParameterCommand("radius", {"value": 1.0}, {"value": 2.0})
+        assert not first.can_merge(SetParameterCommand("radius", {"min": 0.0}, {"min": 1.0}))
+        assert not first.can_merge(SetParameterCommand("length", {"value": 1.0}, {"value": 2.0}))
+        stale = SetParameterCommand("radius", {"value": 2.0}, {"value": 3.0})
+        stale.timestamp = first.timestamp + SetParameterCommand.COALESCE_WINDOW_SECONDS + 1
+        assert not first.can_merge(stale)
 
-
-# ---------------------------------------------------------------------------
-# FitOptionsCommand
-# ---------------------------------------------------------------------------
-
-class TestFitOptionsCommand:
-
-    def test_undo_applies_old_options(self, widget):
-        old = {"q_min": 0.01, "q_max": 0.5}
-        new = {"q_min": 0.05, "q_max": 1.0}
-        cmd = FitOptionsCommand(old, new)
-        cmd.undo(widget)
-        widget._apply_fit_options.assert_called_once_with(old)
-
-    def test_redo_applies_new_options(self, widget):
-        old = {"q_min": 0.01, "q_max": 0.5}
-        new = {"q_min": 0.05, "q_max": 1.0}
-        cmd = FitOptionsCommand(old, new)
-        cmd.redo(widget)
-        widget._apply_fit_options.assert_called_once_with(new)
-
-    def test_options_are_deep_copied(self):
-        opts = {"q_min": 0.01}
-        cmd = FitOptionsCommand(opts, {})
-        opts["q_min"] = 999.0
-        assert cmd._old_options["q_min"] == 0.01
+    def test_old_and_new_are_copies(self):
+        new = {"value": 2.0}
+        cmd = SetParameterCommand("radius", {"value": 1.0}, new)
+        new["value"] = 9.0
+        assert cmd.new == {"value": 2.0}
 
 
-# ---------------------------------------------------------------------------
-# SmearingOptionsCommand
-# ---------------------------------------------------------------------------
+class TestSettingCommands:
 
-class TestSmearingOptionsCommand:
+    def test_options_round_trip_and_recalculate_on_undo(self, target):
+        old = copy.copy(target.document.options)
+        new = copy.copy(old)
+        new.qmin = 0.01
+        cmd = SetOptionsCommand(old, new)
+        cmd.redo(target)
+        assert target.document.options.qmin == 0.01
+        cmd.undo(target)
+        assert target.document.options == old and target.theory == 1
 
-    def test_undo_applies_old_state(self, widget):
-        cmd = SmearingOptionsCommand({"type": "none"}, {"type": "pinhole"})
-        cmd.undo(widget)
-        widget._apply_smearing_state.assert_called_once_with({"type": "none"})
+    def test_smearing_round_trip(self, target):
+        old = copy.copy(target.document.smearing)
+        cmd = SetSmearingCommand(old, Smearing("Custom Pinhole Smear", "Low", 1.0, 2.0))
+        cmd.redo(target)
+        assert target.document.smearing.d_up == 2.0
+        cmd.undo(target)
+        assert target.document.smearing == old
 
-    def test_redo_applies_new_state(self, widget):
-        cmd = SmearingOptionsCommand({"type": "none"}, {"type": "pinhole"})
-        cmd.redo(widget)
-        widget._apply_smearing_state.assert_called_once_with({"type": "pinhole"})
-
-    def test_state_is_deep_copied(self):
-        state = {"type": "none"}
-        cmd = SmearingOptionsCommand(state, {})
-        state["type"] = "changed"
-        assert cmd._old_state["type"] == "none"
-
-
-# ---------------------------------------------------------------------------
-# CheckboxToggleCommand
-# ---------------------------------------------------------------------------
-
-class TestCheckboxToggleCommand:
-
-    def test_undo_sets_old_bool(self, widget):
-        widget.chkPolydispersity = MagicMock()
-        cmd = CheckboxToggleCommand("chkPolydispersity", False, True)
-        cmd.undo(widget)
-        widget.chkPolydispersity.setChecked.assert_called_once_with(False)
-
-    def test_redo_sets_new_bool(self, widget):
-        widget.chkPolydispersity = MagicMock()
-        cmd = CheckboxToggleCommand("chkPolydispersity", False, True)
-        cmd.redo(widget)
-        widget.chkPolydispersity.setChecked.assert_called_once_with(True)
-
-    def test_description_includes_checkbox_id(self):
-        cmd = CheckboxToggleCommand("chkMagnetism", False, True)
-        assert "chkMagnetism" in cmd.description
+    def test_flag_round_trip_does_not_request_theory(self, target):
+        cmd = SetFlagCommand("polydispersity", False, True)
+        cmd.redo(target)
+        assert target.document.flags.polydispersity
+        cmd.undo(target)
+        assert not target.document.flags.polydispersity and target.theory == 0
+        assert cmd.description == "Toggle polydispersity"
 
 
-# ---------------------------------------------------------------------------
-# FitResultCommand
-# ---------------------------------------------------------------------------
+class TestSnapshotCommand:
 
-class TestFitResultCommand:
+    def test_undo_and_redo_restore_the_snapshots(self, target):
+        doc = target.document
+        old = doc.snapshot()
+        edit(doc, "radius", value=33.0)
+        cmd = SnapshotCommand("Select model", old, doc.snapshot())
+        cmd.undo(target)
+        assert doc.parameters["radius"].value == 20.0
+        cmd.redo(target)
+        assert doc.parameters["radius"].value == 33.0
+        assert target.restored == [Origin.UNDO, Origin.USER]
 
-    @staticmethod
-    def _snapshot(main, poly=None, magnet=None):
-        return {"main": main, "poly": poly or {}, "magnet": magnet or {}}
+    def test_fit_flags_and_constraints_set_after_the_command_survive_undo_and_redo(self, target):
+        """They have no commands, so redo re-applies them on top of the new state (§3.7)."""
+        doc = target.document
+        old = doc.snapshot()
+        edit(doc, "radius", value=33.0)
+        cmd = SnapshotCommand("Paste", old, doc.snapshot())
+        with doc.transaction(Origin.USER) as tx:
+            tx.set_parameter("length", fit=True)
+            tx.set_constraint("length", Constraint(param="length", func="2*M1.radius"))
+        cmd.undo(target)
+        assert not doc.parameters["length"].fit
+        cmd.redo(target)
+        assert doc.parameters["length"].fit and doc.parameters["length"].constraint.func == "2*M1.radius"
 
-    def test_undo_restores_pre_fit_params(self, widget):
-        old = self._snapshot({"radius": 1.0})
-        cmd = FitResultCommand(old, self._snapshot({"radius": 2.5}))
-        cmd.undo(widget)
-        widget._restore_fit_result_snapshot.assert_called_once_with(old)
 
-    def test_redo_restores_post_fit_params(self, widget):
-        new = self._snapshot({"radius": 2.5})
-        cmd = FitResultCommand(self._snapshot({"radius": 1.0}), new)
-        cmd.redo(widget)
-        widget._restore_fit_result_snapshot.assert_called_once_with(new)
+class TestApplyFitResultCommand:
 
-    def test_undo_restores_poly_and_magnet(self, widget):
-        old = self._snapshot(
-            {"radius": 1.0}, poly={"radius.width": 0.1}, magnet={"up_frac_i": 0.5}
-        )
-        cmd = FitResultCommand(old, self._snapshot({"radius": 2.5}))
-        cmd.undo(widget)
-        widget._restore_fit_result_snapshot.assert_called_once_with(old)
+    def test_undo_and_redo_set_the_values_and_clear_the_errors(self, target):
+        """Register R-2."""
+        doc = target.document
+        edit(doc, "radius", value=25.5, error=0.75)
+        cmd = ApplyFitResultCommand({"radius": 20.0}, {"radius": 25.5})
+        cmd.undo(target)
+        assert (doc.parameters["radius"].value, doc.parameters["radius"].error) == (20.0, None)
+        edit(doc, "radius", error=0.75)
+        cmd.redo(target)
+        assert (doc.parameters["radius"].value, doc.parameters["radius"].error) == (25.5, None)
 
-    def test_params_are_deep_copied(self):
-        old = self._snapshot({"radius": 1.0})
-        cmd = FitResultCommand(old, self._snapshot({}))
-        old["main"]["radius"] = 999.0
-        assert cmd._old_snapshot["main"]["radius"] == 1.0
 
-    def test_description_is_fit_result(self):
-        cmd = FitResultCommand(self._snapshot({}), self._snapshot({}))
-        assert cmd.description == "Fit result"
+class TestHistoryExecute:
+
+    def test_execute_applies_then_records_once(self, target):
+        history = History(target=target)
+        history.execute(SetParameterCommand("radius", {"value": 20.0}, {"value": 33.0}))
+        assert target.document.parameters["radius"].value == 33.0
+        assert len(history._undo_stack) == 1
+        history.undo()
+        assert target.document.parameters["radius"].value == 20.0
+
+    def test_execute_during_replay_raises(self, target):
+        history = History(target=target)
+
+        class Reentrant(UndoCommand):
+            def undo(self, t):
+                history.execute(SetParameterCommand("radius", {"value": 1.0}, {"value": 2.0}))
+
+            def redo(self, t):
+                pass
+
+        history.push_applied(Reentrant("bad"))
+        history.undo()          # the failure is reported, the command stays
+        assert history.can_undo()
 
 
 # ---------------------------------------------------------------------------
@@ -606,18 +527,15 @@ class TestUndoStack:
         inner.undo.assert_not_called()
 
     def test_coalescing_merges_same_param_commands(self, stack):
-        cmd1 = ParameterValueCommand("radius", 1.0, 2.0)
-        cmd2 = ParameterValueCommand("radius", 2.0, 3.0)
-        stack.push(cmd1)
-        stack.push(cmd2)
+        stack.push(SetParameterCommand("radius", {"value": 1.0}, {"value": 2.0}))
+        stack.push(SetParameterCommand("radius", {"value": 2.0}, {"value": 3.0}))
         assert len(stack._undo_stack) == 1
         merged = stack._undo_stack[0]
-        assert merged._old_val == 1.0
-        assert merged._new_val == 3.0
+        assert (merged.old, merged.new) == ({"value": 1.0}, {"value": 3.0})
 
     def test_no_coalescing_for_different_params(self, stack):
-        stack.push(ParameterValueCommand("radius", 1.0, 2.0))
-        stack.push(ParameterValueCommand("length", 1.0, 2.0))
+        stack.push(SetParameterCommand("radius", {"value": 1.0}, {"value": 2.0}))
+        stack.push(SetParameterCommand("length", {"value": 1.0}, {"value": 2.0}))
         assert len(stack._undo_stack) == 2
 
     def test_undo_text_includes_description(self, stack):

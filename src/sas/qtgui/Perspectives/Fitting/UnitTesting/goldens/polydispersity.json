@@ -972,7 +972,7 @@
      "type": "array",
      "npts": 35,
      "width": 0,
-     "nsigmas": 3,
+     "nsigmas": 3.0,
      "values": [
       10.0,
       20.0,
@@ -985,7 +985,7 @@
      ]
     },
     "length": {
-     "width": 0.10000000149011612,
+     "width": 0.1,
      "npts": 35,
      "nsigmas": 3,
      "type": "gaussian"
@@ -1146,7 +1146,7 @@
        "type": "array",
        "npts": 35,
        "width": 0,
-       "nsigmas": 3,
+       "nsigmas": 3.0,
        "values": [
         10.0,
         20.0,
@@ -1159,7 +1159,7 @@
        ]
       },
       "length": {
-       "width": 0.10000000149011612,
+       "width": 0.1,
        "npts": 35,
        "nsigmas": 3,
        "type": "gaussian"

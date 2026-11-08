@@ -8,8 +8,7 @@ that the legacy readers still use:
 - ``logic.kernel_module``: values, bounds (``details``), dispersions, the name;
 - the polydispersity and magnetism widgets' value dicts (``poly_params``,
   ``magnet_params``), which ``updateKernelModelWithExtraParams`` applies;
-- the lists of parameters to fit, ``page_parameters`` (model-switch retention)
-  and the Fit button.
+- the lists of parameters to fit and the Fit button.
 
 Subscribed before the table adapters, which read the kernel's dispersion
 (``updateFunctionCaption``). Like them, it runs through
@@ -45,14 +44,13 @@ class LegacyKernelSync:
         for key in parameters.keys:
             if key in doc.parameters:
                 self._push(kernel, doc.parameters[key], parameters.fields)
-        if "fit" in parameters.fields:
+        if parameters.fields & {"fit", "fittable"}:
             params = doc.parameters
-            page.main_params_to_fit = [params.legacy_key(p.key) for p in params.by_table(Table.MAIN) if p.fit]
-            page.polydispersity_widget.poly_params_to_fit = [p.key for p in params.by_table(Table.POLY) if p.fit]
-            page.magnetism_widget.magnet_params_to_fit = [p.key for p in params.by_table(Table.MAGNET) if p.fit]
+            fitted = lambda table: [p for p in params.by_table(table) if p.fit and p.fittable]  # noqa: E731
+            page.main_params_to_fit = [params.legacy_key(p.key) for p in fitted(Table.MAIN)]
+            page.polydispersity_widget.poly_params_to_fit = [p.key for p in fitted(Table.POLY)]
+            page.magnetism_widget.magnet_params_to_fit = [p.key for p in fitted(Table.MAGNET)]
             page.cmdFit.setEnabled(page.haveParamsToFit())
-        if parameters.fields & {"value", "dispersion"}:
-            page.page_parameters = page.getParameterDict()
 
     def _push(self, kernel, p, fields) -> None:
         if p.kind is ValueKind.INT:

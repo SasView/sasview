@@ -95,7 +95,8 @@ def check_projection(page) -> None:
         where = f"main {p.key}"
         _expect(name.text() == p.label, f"{where}: label {name.text()!r}")
         _expect(name.isCheckable() == p.fittable, f"{where}: checkable {name.isCheckable()}, fittable {p.fittable}")
-        _expect((name.checkState() == QtCore.Qt.Checked) == p.fit, f"{where}: check state, fit {p.fit}")
+        # A disabled row keeps the user's fit choice (§2.5), but its checkbox is gone (unchecked)
+        _expect((name.checkState() == QtCore.Qt.Checked) == (p.fit and p.fittable), f"{where}: check state, fit {p.fit}")
         value = table.item(row, 1)
         if entry.kind is RowKind.PARAMETER:
             expected = p.value if p.kind is ValueKind.CHOICE else float(p.value)

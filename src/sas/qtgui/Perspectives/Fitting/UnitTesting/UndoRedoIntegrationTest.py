@@ -1,4 +1,4 @@
-"""Integration tests for undo/redo wiring in FittingWidget (Phase 2).
+"""Integration tests for undo/redo wiring in FittingWidget (document commands, Phase 5).
 
 These tests verify that FittingWidget handlers push the correct undo
 commands to the UndoStack in response to user-initiated state changes.
@@ -27,15 +27,15 @@ from PySide6 import QtCore, QtGui, QtWidgets
 
 from sas.qtgui.Perspectives.Fitting import FittingUtilities, FittingWidget
 from sas.qtgui.Perspectives.Fitting.FitThread import FitThread
-from sas.qtgui.Perspectives.Fitting.UndoRedo import (
-    CheckboxToggleCommand,
-    FitOptionsCommand,
-    FitResultCommand,
-    ModelSelectionCommand,
-    ParameterMinMaxCommand,
-    ParameterValueCommand,
-    SmearingOptionsCommand,
+from sas.qtgui.Perspectives.Fitting.model.commands import (
+    ApplyFitResultCommand,
+    SetFlagCommand,
+    SetOptionsCommand,
+    SetParameterCommand,
+    SetSmearingCommand,
+    SnapshotCommand,
 )
+from sas.qtgui.Perspectives.Fitting.model.parameters import Table, ValueKind
 from sas.qtgui.Perspectives.Fitting.UnitTesting.fitting_test_support import FittingWidgetMod, dummy_manager
 from sas.qtgui.Perspectives.UndoRedo import UndoStack
 from sas.qtgui.Plotting.PlotterData import Data1D
@@ -67,6 +67,11 @@ def widget(qapp, monkeypatch, request):
     w.shadow_checker.assert_ok(request)
     w.close()
     del w
+
+
+def main_values(w) -> dict:
+    """The page's main float values from the document, by key."""
+    return {p.key: p.value for p in w.document.parameters.by_table(Table.MAIN) if p.kind is ValueKind.FLOAT}
 
 
 @pytest.fixture
@@ -124,10 +129,10 @@ class TestParameterValueUndo:
 
         assert w.undo_stack.can_undo()
         top_cmd = w.undo_stack._undo_stack[-1]
-        assert isinstance(top_cmd, ParameterValueCommand)
-        assert top_cmd.param_name == "radius"
-        assert top_cmd._new_val == 99.0
-        assert top_cmd._old_val == old_val
+        assert isinstance(top_cmd, SetParameterCommand)
+        assert top_cmd.key == "radius"
+        assert top_cmd.new == {"value": 99.0}
+        assert top_cmd.old == {"value": old_val}
 
     def test_main_param_undo_restores_value(self, widget_with_model):
         """Undo should restore the original kernel parameter value."""
@@ -153,7 +158,7 @@ class TestParameterValueUndo:
         stale, because ParameterValueCommand did not recompute (unlike every
         snapshot-based restore path)."""
         w = widget_with_model
-        w.undo_stack.push(ParameterValueCommand("radius", 10.0, 99.0))
+        w.undo_stack.push(SetParameterCommand("radius", {"value": 10.0}, {"value": 99.0}))
         spy = mocker.patch.object(w, "calculateQGridForModel")
 
         w.undo_stack.undo()
@@ -184,7 +189,7 @@ class TestDatasetUndoHistory:
     def test_data_load_clears_existing_undo_history(self, widget_with_model, monkeypatch):
         """Loading replacement data must drop undo commands from the previous data."""
         w = widget_with_model
-        w.undo_stack.push(ParameterValueCommand("radius", 1.0, 2.0))
+        w.undo_stack.push(SetParameterCommand("radius", {"value": 1.0}, {"value": 2.0}))
         assert w.undo_stack.can_undo()
 
         data = Data1D(x=[0.01, 0.02], y=[1.0, 2.0])
@@ -199,7 +204,7 @@ class TestDatasetUndoHistory:
     def test_batch_file_switch_clears_existing_undo_history(self, widget_with_model, monkeypatch):
         """Batch file selection changes the active logic, so undo history must reset."""
         w = widget_with_model
-        w.undo_stack.push(ParameterValueCommand("radius", 1.0, 2.0))
+        w.undo_stack.push(SetParameterCommand("radius", {"value": 1.0}, {"value": 2.0}))
         assert w.undo_stack.can_undo()
 
         monkeypatch.setattr(w, 'updateQRange', lambda *a, **kw: None)
@@ -228,10 +233,9 @@ class TestParameterMinMaxUndo:
                 break
 
         top_cmd = w.undo_stack._undo_stack[-1]
-        assert isinstance(top_cmd, ParameterMinMaxCommand)
-        assert top_cmd._param_name == "radius"
-        assert top_cmd._bound == "min"
-        assert top_cmd._new_val == 1.0
+        assert isinstance(top_cmd, SetParameterCommand)
+        assert top_cmd.key == "radius"
+        assert top_cmd.new == {"min": 1.0}
 
     def test_max_change_pushes_minmax_command(self, widget_with_model):
         """Editing a max bound should push a ParameterMinMaxCommand."""
@@ -244,16 +248,15 @@ class TestParameterMinMaxUndo:
                 break
 
         top_cmd = w.undo_stack._undo_stack[-1]
-        assert isinstance(top_cmd, ParameterMinMaxCommand)
-        assert top_cmd._bound == "max"
-        assert top_cmd._new_val == 500.0
+        assert isinstance(top_cmd, SetParameterCommand)
+        assert top_cmd.new == {"max": 500.0}
 
     def test_minmax_undo_redo_recomputes_plot(self, widget_with_model, mocker):
         """Undo/redo of a bound change must recompute the theory, keeping the
         plot in sync with the parameter table (see
         TestParameterValueUndo.test_value_undo_redo_recomputes_plot)."""
         w = widget_with_model
-        w.undo_stack.push(ParameterMinMaxCommand("radius", "min", 1.0, 5.0))
+        w.undo_stack.push(SetParameterCommand("radius", {"min": 1.0}, {"min": 5.0}))
         spy = mocker.patch.object(w, "calculateQGridForModel")
 
         w.undo_stack.undo()
@@ -271,7 +274,7 @@ class TestParameterMinMaxUndo:
 class TestModelSelectionUndo:
 
     def test_model_switch_pushes_model_selection_command(self, widget_with_model):
-        """Changing cbModel should push a ModelSelectionCommand."""
+        """Changing cbModel should record one SnapshotCommand."""
         w = widget_with_model
         # Switch to a different model in the same category
         model_index = w.cbModel.findText("barbell")
@@ -282,8 +285,9 @@ class TestModelSelectionUndo:
 
         assert w.undo_stack.can_undo()
         top_cmd = w.undo_stack._undo_stack[-1]
-        assert isinstance(top_cmd, ModelSelectionCommand)
-        assert "barbell" in top_cmd._new_triple[1]
+        assert isinstance(top_cmd, SnapshotCommand)
+        assert top_cmd.new.selection.model == "barbell"
+        assert top_cmd.old.selection.model == "cylinder"
 
     def test_model_selection_undo_restores_previous_model(self, widget_with_model):
         """Undoing a model switch should restore the previous model type."""
@@ -322,21 +326,22 @@ class TestModelSelectionUndo:
 class TestFitOptionsUndo:
 
     def test_options_update_pushes_fit_options_command(self, widget_with_model):
-        """Changing Q-range or npts should push a FitOptionsCommand."""
+        """Changing Q-range or npts should record a SetOptionsCommand."""
         w = widget_with_model
 
         # Modify the Q range via the options widget's model
         from sas.qtgui.Perspectives.Fitting.OptionsWidget import OptionsWidget
-        w._get_fit_options_dict()
         # Directly change the widget's model value to simulate user edit
         w.options_widget.model.item(
             OptionsWidget.MODEL.index('MIN_RANGE')
         ).setText("0.01")
         QtWidgets.QApplication.processEvents()
 
-        if w.undo_stack.can_undo():
-            top_cmd = w.undo_stack._undo_stack[-1]
-            assert isinstance(top_cmd, FitOptionsCommand)
+        top_cmd = w.undo_stack._undo_stack[-1]
+        assert isinstance(top_cmd, SetOptionsCommand)
+        assert (top_cmd.old.qmin, top_cmd.new.qmin) != (0.01, 0.01) and top_cmd.new.qmin == 0.01
+        w.undo_stack.undo()
+        assert w.q_range_min == top_cmd.old.qmin and w.document.options == top_cmd.old
 
     def test_options_widget_setState_round_trip(self, widget_with_model):
         """OptionsWidget.setState must restore values consistently."""
@@ -368,38 +373,28 @@ class TestFitOptionsUndo:
 
 class TestSmearingOptionsUndo:
 
-    def test_initial_smearing_state_is_none(self, widget):
-        """_last_smearing_state should be None until first update."""
-        assert widget._last_smearing_state is None
+    def test_document_holds_the_widget_smearing(self, widget):
+        assert widget.document.smearing.mode == widget.smearing_widget.state()[0]
 
-    def test_first_smearing_update_no_command(self, widget_with_model):
-        """First smearing update should NOT push a command (no prior state)."""
+    def test_unchanged_smearing_update_no_command(self, widget_with_model):
+        """An update that changes nothing records nothing."""
         w = widget_with_model
-        w._last_smearing_state = None
         initial_count = len(w.undo_stack._undo_stack)
         w.onSmearingOptionsUpdate()
-        # No command pushed because old_state was None
         assert len(w.undo_stack._undo_stack) == initial_count
-        # But _last_smearing_state should now be populated
-        assert w._last_smearing_state is not None
 
-    def test_second_smearing_update_pushes_command(self, widget_with_model):
-        """A smearing change after the first should push SmearingOptionsCommand."""
+    def test_smearing_change_pushes_command_and_undo_restores_it(self, widget_with_model):
         w = widget_with_model
-        # Prime the initial state
-        w.onSmearingOptionsUpdate()
-        w.undo_stack.clear()
-
-        # Change smearing — simulate by altering the stored state
-        old_state = dict(w._last_smearing_state)
-        # Trigger another update (even if values are the same, verify logic)
-        w.onSmearingOptionsUpdate()
-        new_state = w._last_smearing_state
-
-        if old_state != new_state:
-            assert w.undo_stack.can_undo()
-            top_cmd = w.undo_stack._undo_stack[-1]
-            assert isinstance(top_cmd, SmearingOptionsCommand)
+        combo = w.smearing_widget.cbSmearing
+        index = combo.findText("Custom Pinhole Smear")
+        if index < 0:
+            pytest.skip("no custom smearing for this page")
+        combo.setCurrentIndex(index)
+        top_cmd = w.undo_stack._undo_stack[-1]
+        assert isinstance(top_cmd, SetSmearingCommand)
+        assert top_cmd.new.mode == "Custom Pinhole Smear"
+        w.undo_stack.undo()
+        assert combo.currentText() == top_cmd.old.mode == w.document.smearing.mode
 
 
 # ---------------------------------------------------------------------------
@@ -409,7 +404,7 @@ class TestSmearingOptionsUndo:
 class TestCheckboxToggleUndo:
 
     def test_toggle_poly_pushes_checkbox_command(self, widget_with_model):
-        """Toggling polydispersity should push a CheckboxToggleCommand."""
+        """Toggling polydispersity should record a SetFlagCommand."""
         w = widget_with_model
         w.undo_stack.clear()
 
@@ -419,9 +414,9 @@ class TestCheckboxToggleUndo:
 
         assert w.undo_stack.can_undo()
         top_cmd = w.undo_stack._undo_stack[-1]
-        assert isinstance(top_cmd, CheckboxToggleCommand)
-        assert top_cmd._checkbox_id == "chkPolydispersity"
-        assert top_cmd._new_bool is True
+        assert isinstance(top_cmd, SetFlagCommand)
+        assert top_cmd.flag == "polydispersity"
+        assert top_cmd.new is True
 
     def test_toggle_poly_undo_unchecks(self, widget_with_model):
         """Undoing poly toggle should uncheck the checkbox."""
@@ -436,7 +431,7 @@ class TestCheckboxToggleUndo:
         assert not w.chkPolydispersity.isChecked()
 
     def test_toggle_magnetism_pushes_checkbox_command(self, widget_with_model):
-        """Toggling magnetism should push a CheckboxToggleCommand."""
+        """Toggling magnetism should record a SetFlagCommand."""
         w = widget_with_model
         w.undo_stack.clear()
 
@@ -446,11 +441,13 @@ class TestCheckboxToggleUndo:
 
         assert w.undo_stack.can_undo()
         top_cmd = w.undo_stack._undo_stack[-1]
-        assert isinstance(top_cmd, CheckboxToggleCommand)
-        assert top_cmd._checkbox_id == "chkMagnetism"
+        assert isinstance(top_cmd, SetFlagCommand)
+        assert top_cmd.flag == "magnetism"
+        w.undo_stack.undo()
+        assert not w.chkMagnetism.isChecked() and not w.magnetism_widget.isActive
 
     def test_toggle_2d_pushes_checkbox_command(self, widget_with_model):
-        """Toggling 2D view should push a CheckboxToggleCommand."""
+        """Toggling 2D view (a layout change) should record a SnapshotCommand."""
         w = widget_with_model
         w.undo_stack.clear()
 
@@ -460,8 +457,10 @@ class TestCheckboxToggleUndo:
 
         assert w.undo_stack.can_undo()
         top_cmd = w.undo_stack._undo_stack[-1]
-        assert isinstance(top_cmd, CheckboxToggleCommand)
-        assert top_cmd._checkbox_id == "chk2DView"
+        assert isinstance(top_cmd, SnapshotCommand)
+        assert top_cmd.new.flags.view_2d and not top_cmd.old.flags.view_2d
+        w.undo_stack.undo()
+        assert not w.chk2DView.isChecked() and not w.is2D
 
     def test_toggle_2d_does_not_push_model_selection(self, widget_with_model):
         """toggle2D calls onSelectModel internally — it must be suppressed."""
@@ -472,18 +471,8 @@ class TestCheckboxToggleUndo:
         w.chk2DView.setChecked(True)
         QtWidgets.QApplication.processEvents()
 
-        # Should have exactly one command (CheckboxToggle), not two
-        # (i.e. the inner onSelectModel must not push its own ModelSelection)
-        checkbox_cmds = [
-            c for c in w.undo_stack._undo_stack
-            if isinstance(c, CheckboxToggleCommand)
-        ]
-        model_cmds = [
-            c for c in w.undo_stack._undo_stack
-            if isinstance(c, ModelSelectionCommand)
-        ]
-        assert len(checkbox_cmds) == 1
-        assert len(model_cmds) == 0
+        # Exactly one command: the inner onSelectModel records nothing of its own
+        assert [c.description for c in w.undo_stack._undo_stack] == ["Toggle 2D view"]
 
 
 # ---------------------------------------------------------------------------
@@ -507,7 +496,7 @@ class TestFitResultUndo:
 
     @pytest.mark.shadow_exempt("mocks the writers that apply the fit result to the tables")
     def test_fit_complete_pushes_fit_result_command(self, widget_with_model, monkeypatch):
-        """fitComplete should push a FitResultCommand."""
+        """fitComplete should record an ApplyFitResultCommand."""
         import copy
         w = widget_with_model
         w.undo_stack.clear()
@@ -520,7 +509,7 @@ class TestFitResultUndo:
         monkeypatch.setattr(w, 'onPlot', lambda *a, **kw: None)
 
         # Create a result that paramDictFromResults can handle
-        old_params = w._get_parameter_dict()
+        old_params = main_values(w)
         param_dict = {n: (v + 1.0, 0.01) for n, v in old_params.items()}
         monkeypatch.setattr(
             w.fitting_controller, 'paramDictFromResults', lambda *a, **kw: param_dict
@@ -540,7 +529,8 @@ class TestFitResultUndo:
 
         assert w.undo_stack.can_undo()
         top_cmd = w.undo_stack._undo_stack[-1]
-        assert isinstance(top_cmd, FitResultCommand)
+        assert isinstance(top_cmd, ApplyFitResultCommand)
+        assert top_cmd.old == old_params and top_cmd.new == {n: v for n, (v, _) in param_dict.items()}
 
     def test_fit_complete_keeps_undo_stack_enabled(self, widget_with_model, monkeypatch):
         """fitComplete should leave the undo stack enabled."""
@@ -554,7 +544,7 @@ class TestFitResultUndo:
         monkeypatch.setattr(w, 'onPlot', lambda *a, **kw: None)
         monkeypatch.setattr(
             w.fitting_controller, 'paramDictFromResults',
-            lambda *a, **kw: {n: (v, 0.01) for n, v in w._get_parameter_dict().items()}
+            lambda *a, **kw: {n: (v, 0.01) for n, v in main_values(w).items()}
         )
 
         result = self._make_fit_result(w)
@@ -587,7 +577,7 @@ class TestFitResultUndo:
         monkeypatch.setattr(w.magnetism_widget, 'updateMagnetModelFromList', lambda *a, **kw: None)
         monkeypatch.setattr(w, 'onPlot', lambda *a, **kw: None)
 
-        old_params = w._get_parameter_dict()
+        old_params = main_values(w)
         param_dict = {n: (v + 1.0, 0.01) for n, v in old_params.items()}
         monkeypatch.setattr(w.fitting_controller, 'paramDictFromResults', lambda *a, **kw: param_dict)
 
@@ -671,7 +661,7 @@ class TestGuiManagerUndoHookSignalChain:
         monkeypatch.setattr(w.magnetism_widget, 'updateMagnetModelFromList', lambda *a, **kw: None)
         monkeypatch.setattr(w, 'onPlot', lambda *a, **kw: None)
 
-        old_params = w._get_parameter_dict()
+        old_params = main_values(w)
         param_dict = {n: (v + 1.0, 0.01) for n, v in old_params.items()}
         monkeypatch.setattr(w.fitting_controller, 'paramDictFromResults', lambda *a, **kw: param_dict)
 
@@ -686,7 +676,7 @@ class TestGuiManagerUndoHookSignalChain:
         w = widget_with_model
         handler_calls = []
         w.undo_stack.stackChanged.connect(lambda: handler_calls.append(True))
-        w.undo_stack.push(ParameterValueCommand("scale", 1.0, 2.0))
+        w.undo_stack.push(SetParameterCommand("scale", {"value": 1.0}, {"value": 2.0}))
         assert len(handler_calls) >= 1
 
     @pytest.mark.shadow_exempt("mocks the writers that apply the fit result to the tables")

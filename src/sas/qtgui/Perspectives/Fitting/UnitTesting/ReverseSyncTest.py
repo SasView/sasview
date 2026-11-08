@@ -1,6 +1,7 @@
 """
-Reverse synchronization (FW-MVC-DESIGN.md §6, Phase 4): a change written to the document first
-reaches the legacy item models (ParameterTableAdapter) and the legacy kernel (LegacyKernelSync).
+Reverse synchronization (FW-MVC-DESIGN.md §6, Phases 4 and 5): a change written to the document
+first reaches the legacy item models (ParameterTableAdapter), the legacy kernel (LegacyKernelSync)
+and the settings widgets (SettingsSync).
 
 Each test writes the document directly, as the Phase 5 intents will. The shadow invariant
 (``ShadowChecker``, after every commit and at teardown) is the oracle: the legacy rows, the
@@ -154,13 +155,24 @@ def testRestoringASnapshotPatchesEveryRow(case):
 
 
 @pytest.mark.parametrize("case", ["cylinder"], indirect=True)
-def testLegacyEditsAreNotSyncedBack(case, monkeypatch):
+def testLegacyWritersAreNotSyncedBack(case, monkeypatch):
+    """A legacy writer's change reaches the document through the shadow's read-back only."""
     patched = []
     monkeypatch.setattr(ParameterTableAdapter, "_patch", lambda self, *a: patched.append(a))
-    g.set_cell(case._model_model, "radius", 1, "36")
-    case.undo_depth = len(case.undo_stack._undo_stack)
+    with case.shadow.operation("parameters"):
+        case._model_model.item(g.find_row(case._model_model, "radius"), 1).setText("37")
     assert patched == []
+    assert case.document.parameters["radius"].value == 37.0 == case.logic.kernel_module.getParam("radius")
+
+
+@pytest.mark.parametrize("case", ["cylinder"], indirect=True)
+def testUserEditIsDocumentFirstAndKeepsItsSpelling(case):
+    """Phase 5: a cell edit is an intent; the cell keeps what was typed."""
+    g.set_cell(case._model_model, "radius", 1, "36")
+    assert case.document.parameters["radius"].value == 36.0 == case.logic.kernel_module.getParam("radius")
     assert cell(case._model_model, "radius", 1) == "36"
+    assert case.undo_stack._undo_stack[-1].new == {"value": 36.0}
+    case.undo_depth += 1
 
 
 @pytest.mark.parametrize("case", sorted(g.CASES), indirect=True)

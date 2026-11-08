@@ -17,10 +17,13 @@ import copy
 from dataclasses import dataclass, field
 
 from sas.qtgui.Perspectives.Fitting.model.parameters import (
+    Dispersion,
     PageMode,
     Parameter,
     RowKind,
+    Smearing,
     Table,
+    ValueKind,
 )
 from sas.qtgui.Perspectives.Fitting.model.rules import smearing_options
 
@@ -444,6 +447,61 @@ def decode(rows: dict[str, list]) -> PagePayload:
     return payload
 
 
+def apply_payload(tx, payload: PagePayload) -> None:
+    """Apply a decoded paste or project page to the document of *tx*, onto its current layout.
+
+    As the legacy ``updatePageWithParameters`` did: flags, Q range and weighting, smearing, then
+    the fit flag, value and bounds of every row (matched by legacy key), with npts, nsigmas
+    and the distribution of poly rows. Errors and constraints are not applied (a project load
+    applies the constraints afterwards). The layout (model, shell count, 2D view) is the
+    caller's. A pasted 'array' distribution has no samples (R-5), so the current one is kept.
+    """
+    doc = tx.document
+    flags = {name: value for name, value in payload.flags.items()
+             if name != "view_2d" and getattr(doc.flags, name) != value}
+    if flags:
+        tx.set_flags(**flags)
+    options = copy.copy(doc.options)
+    if payload.qmin is not None and payload.qmax is not None:
+        options.qmin, options.qmax = payload.qmin, payload.qmax
+    if payload.fit_weighting is not None:
+        # The weighting radio sets both (onWeightingChoice -> onOptionsUpdate)
+        options.fit_weighting = options.theory_weighting = payload.fit_weighting
+    if options != doc.options:
+        tx.set_options(options)
+    if payload.smearing_index is not None:
+        modes = smearing_options(doc)
+        if 0 <= payload.smearing_index < len(modes):
+            mode = modes[payload.smearing_index]
+            smearing = (Smearing(mode) if mode == "None" else
+                        Smearing(mode, doc.smearing.accuracy, payload.smearing_min, payload.smearing_max))
+            if smearing != doc.smearing:
+                tx.set_smearing(smearing)
+    params = doc.parameters
+    for legacy_key, row in payload.parameters.items():
+        key = params.key_for_legacy(legacy_key)
+        if key is None or params[key].kind is ValueKind.INT:
+            continue      # unknown here, or the shell count (part of the layout)
+        p = params[key]
+        fields = {}
+        if row.fit is not None and p.fittable:
+            fields["fit"] = row.fit
+        if row.value is not None:
+            if p.kind is not ValueKind.CHOICE:
+                fields["value"] = row.value
+            elif row.value.is_integer() and 0 <= row.value < len(p.choices or ()):
+                fields["value"] = int(row.value)
+        if p.min is not None:
+            fields.update({bound: getattr(row, bound) for bound in ("min", "max") if getattr(row, bound) is not None})
+        if p.dispersion is not None and row.function is not None and row.function != "array":
+            fields["dispersion"] = Dispersion(row.npts if row.npts is not None else p.dispersion.npts,
+                                              row.nsigmas if row.nsigmas is not None else p.dispersion.nsigmas,
+                                              row.function)
+        changed = {name: value for name, value in fields.items() if getattr(p, name) != value}
+        if changed:
+            tx.set_parameter(key, **changed)
+
+
 def parse_clipboard(text: str) -> dict[str, list] | None:
     """The line dict of clipboard text, or None if it is not fit page text. ``tab_name`` is dropped."""
     lines = text.split(':')
@@ -458,7 +516,7 @@ def parse_clipboard(text: str) -> dict[str, list] | None:
 
 
 __all__ = [
-    "PagePayload", "RowValues", "clipboard_text", "decode", "excel_text", "fit_model_rows",
+    "PagePayload", "RowValues", "apply_payload", "clipboard_text", "decode", "excel_text", "fit_model_rows",
     "fit_page_rows", "fit_parameter_rows", "formatParameters", "formatParametersExcel",
     "formatParametersLatex", "format_number", "latex_text", "legacy_rows", "line_dict",
     "page_state", "parse_clipboard", "project_dict", "report_parameters", "standard_parameters",

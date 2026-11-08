@@ -583,7 +583,7 @@
     [
      true,
      "scale",
-     1.0,
+     1,
      "",
      [
       false,
@@ -849,7 +849,7 @@
     [
      true,
      "radius_effective_mode",
-     0.0,
+     0,
      "",
      [
       false,
@@ -956,7 +956,7 @@
   "theory_inputs": {
    "name": "M1",
    "params": {
-    "scale": 1.0,
+    "scale": 1,
     "background": 0.001,
     "sld": 1,
     "sld_M0": 0.0,
@@ -970,7 +970,7 @@
     "radius_effective": 45.0,
     "volfraction": 0.2,
     "structure_factor_mode": 0,
-    "radius_effective_mode": 0.0,
+    "radius_effective_mode": 0,
     "up_frac_i": 0.0,
     "up_frac_f": 0.0,
     "up_theta": 0.0,

@@ -619,7 +619,7 @@
     [
      true,
      "scale",
-     1.0,
+     1,
      "",
      [
       false,
@@ -1011,7 +1011,7 @@
   "theory_inputs": {
    "name": "M1",
    "params": {
-    "scale": 1.0,
+    "scale": 1,
     "background": 0.001,
     "sld": 0.5,
     "sld_M0": 0.0,

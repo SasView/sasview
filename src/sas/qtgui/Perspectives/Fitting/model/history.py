@@ -179,6 +179,11 @@ class History:
 
     # -- state ----------------------------------------------------------
 
+    @property
+    def replaying(self) -> bool:
+        """An undo or redo is being applied."""
+        return self._replaying
+
     def can_undo(self) -> bool:
         """True if undo is possible (enabled and the stack is not empty)."""
         return self._enabled and bool(self._undo_stack)

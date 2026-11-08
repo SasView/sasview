@@ -890,7 +890,7 @@
     [
      true,
      "sld1",
-     1.7000000476837158,
+     1.7,
      "",
      [
       false,
@@ -985,7 +985,7 @@
     [
      true,
      "sld2",
-     1.7000000476837158,
+     1.7,
      "",
      [
       false,
@@ -1080,7 +1080,7 @@
     [
      true,
      "sld3",
-     1.7000000476837158,
+     1.7,
      "",
      [
       false,
@@ -1944,17 +1944,17 @@
     "sld_solvent_M0": 0.0,
     "sld_solvent_mtheta": 0.0,
     "sld_solvent_mphi": 0.0,
-    "sld1": 1.7000000476837158,
+    "sld1": 1.7,
     "sld1_M0": 0.0,
     "sld1_mtheta": 0.0,
     "sld1_mphi": 0.0,
     "thickness1": 40.0,
-    "sld2": 1.7000000476837158,
+    "sld2": 1.7,
     "sld2_M0": 0.0,
     "sld2_mtheta": 0.0,
     "sld2_mphi": 0.0,
     "thickness2": 12.0,
-    "sld3": 1.7000000476837158,
+    "sld3": 1.7,
     "sld3_M0": 0.0,
     "sld3_mtheta": 0.0,
     "sld3_mphi": 0.0,
@@ -2390,25 +2390,25 @@
     "radius": {
      "width": 0,
      "npts": 35,
-     "nsigmas": 3,
+     "nsigmas": 3.0,
      "type": "gaussian"
     },
     "thickness1": {
      "width": 0,
      "npts": 35,
-     "nsigmas": 3,
+     "nsigmas": 3.0,
      "type": "gaussian"
     },
     "thickness2": {
      "width": 0,
      "npts": 35,
-     "nsigmas": 3,
+     "nsigmas": 3.0,
      "type": "gaussian"
     },
     "thickness3": {
      "width": 0,
      "npts": 35,
-     "nsigmas": 3,
+     "nsigmas": 3.0,
      "type": "gaussian"
     },
     "thickness4": {
@@ -2473,17 +2473,17 @@
       "sld_solvent_M0": 0.0,
       "sld_solvent_mtheta": 0.0,
       "sld_solvent_mphi": 0.0,
-      "sld1": 1.7000000476837158,
+      "sld1": 1.7,
       "sld1_M0": 0.0,
       "sld1_mtheta": 0.0,
       "sld1_mphi": 0.0,
       "thickness1": 40.0,
-      "sld2": 1.7000000476837158,
+      "sld2": 1.7,
       "sld2_M0": 0.0,
       "sld2_mtheta": 0.0,
       "sld2_mphi": 0.0,
       "thickness2": 12.0,
-      "sld3": 1.7000000476837158,
+      "sld3": 1.7,
       "sld3_M0": 0.0,
       "sld3_mtheta": 0.0,
       "sld3_mphi": 0.0,
@@ -2919,25 +2919,25 @@
       "radius": {
        "width": 0,
        "npts": 35,
-       "nsigmas": 3,
+       "nsigmas": 3.0,
        "type": "gaussian"
       },
       "thickness1": {
        "width": 0,
        "npts": 35,
-       "nsigmas": 3,
+       "nsigmas": 3.0,
        "type": "gaussian"
       },
       "thickness2": {
        "width": 0,
        "npts": 35,
-       "nsigmas": 3,
+       "nsigmas": 3.0,
        "type": "gaussian"
       },
       "thickness3": {
        "width": 0,
        "npts": 35,
-       "nsigmas": 3,
+       "nsigmas": 3.0,
        "type": "gaussian"
       },
       "thickness4": {

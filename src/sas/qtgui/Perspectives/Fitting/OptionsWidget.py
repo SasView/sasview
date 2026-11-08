@@ -273,8 +273,7 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
     @mirrors('options')
     def setState(self, q_range_min, q_range_max, npts, log_points, weighting):
         """
-        Set the state of controls from provided values.
-        Used by undo/redo to restore fit options.
+        Set the state of controls from provided values (SettingsSync).
         """
         self.model.blockSignals(True)
         self.updateQRange(q_range_min, q_range_max, npts)

@@ -326,17 +326,17 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
 
         return (smearing, accuracy, d_down, d_up)
 
-    def setState(self, smearing, accuracy, d_down, d_up):
+    def setState(self, accuracy, d_down, d_up):
         """
-        Sets new values for the controls
+        Sets new values for the controls, as state() reads them (SettingsSync)
         """
-        # Update the model -> controls update automatically
+        # Update the model -> controls update automatically. txtSmearDown shows PINHOLE_MAX.
         if accuracy is not None:
             self.model.item(MODEL.index('ACCURACY')).setText(accuracy)
         if d_down is not None:
-            self.model.item(MODEL.index('PINHOLE_MIN')).setText(str(d_down))
+            self.model.item(MODEL.index('PINHOLE_MAX')).setText(str(d_down))
         if d_up is not None:
-            self.model.item(MODEL.index('PINHOLE_MAX')).setText(str(d_up))
+            self.model.item(MODEL.index('PINHOLE_MIN')).setText(str(d_up))
 
     def onDQSmear(self):
         """

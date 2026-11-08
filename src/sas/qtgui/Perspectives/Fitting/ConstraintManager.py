@@ -8,7 +8,7 @@ managing constraint creation, validation, editing, and deletion.
 import logging
 
 import numpy as np
-from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtWidgets
 
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
@@ -168,22 +168,10 @@ class ConstraintManager:
                 constraint_tab.constraint_accepted = False
             return
 
-        item = QtGui.QStandardItem()
-        item.setData(constraint)
-        model.item(row, 1).setChild(0, item)
-
-        # Set min/max to the value constrained
+        # The constrained parameter is fitted (it is computed from the others while fitting).
+        # The table adapter stores it on the row and shows the row as constrained.
+        self.widget.controller.set_constraint(self.widget.keyAt(row, model_key), constraint, fit=True)
         self.widget.constraintAddedSignal.emit([row], model_key)
-
-        # Show visual hints for the constraint
-        font = QtGui.QFont()
-        font.setItalic(True)
-        brush = QtGui.QBrush(QtGui.QColor('blue'))
-        self.widget.modifyViewOnRow(row, font=font, brush=brush, model_key=model_key)
-
-        # update the main parameter list so the constrained parameter gets
-        # updated when fitting
-        self.widget.checkboxSelected(model.item(row, 0), model_key=model_key)
         self.widget.communicator.statusBarUpdateSignal.emit('Constraint added')
 
         if constraint_tab:
@@ -220,14 +208,9 @@ class ConstraintManager:
             min_t = model.item(row, min_col).text()
             max_t = model.item(row, max_col).text()
 
-            # Create a Constraint object
+            # Create a Constraint object; it keeps the bounds to restore when it is deleted
             constraint = Constraint(param=param, value=value, min=min_t, max=max_t)
             constraint.active = False
-
-            # Create a new item and add the Constraint object as a child
-            item = QtGui.QStandardItem()
-            item.setData(constraint)
-            model.item(row, 1).setChild(0, item)
 
             # Assumed correctness from the validator
             value_float = float(value)
@@ -235,16 +218,10 @@ class ConstraintManager:
             min_v = value_float - (value_float / 10000.0)
             max_v = value_float + (value_float / 10000.0)
 
-            # Set min/max to the value constrained
-            model.item(row, min_col).setText(str(min_v))
-            model.item(row, max_col).setText(str(max_v))
+            # Fix the bounds around the value
+            self.widget.controller.set_constraint(self.widget.keyAt(row, model_key), constraint,
+                                                  min=min_v, max=max_v)
             self.widget.constraintAddedSignal.emit([row], model_key)
-
-            # Show visual hints for the constraint
-            font = QtGui.QFont()
-            font.setItalic(True)
-            brush = QtGui.QBrush(QtGui.QColor('blue'))
-            self.widget.modifyViewOnRow(row, font=font, brush=brush, model_key=model_key)
 
         self.widget.communicator.statusBarUpdateSignal.emit('Constraint added')
 
@@ -325,29 +302,13 @@ class ConstraintManager:
         model_key : str
             The model key ('standard', 'poly', or 'magnet')
         """
-        param_list = self.lst_dict[model_key]
         model = self.model_dict[model_key]
-        delegate = param_list.itemDelegate()
-
-        # Get correct min/max column indices based on model type
-        if model_key == 'poly':
-            min_col = delegate.poly_min
-            max_col = delegate.poly_max
-        elif model_key == 'magnet':
-            min_col = delegate.mag_min
-            max_col = delegate.mag_max
-        else:
-            min_col = delegate.param_min
-            max_col = delegate.param_max
-
         for row in range(model.rowCount()):
             if not self.widget.isCheckable(row, model_key=model_key):
                 continue
             if not self.rowHasConstraint(row, model_key=model_key):
                 continue
 
-            # Get the Constraint object from of the model item
-            item = model.item(row, 1)
             constraint = self.getConstraintForRow(row, model_key=model_key)
 
             if constraint is None:
@@ -357,18 +318,11 @@ class ConstraintManager:
             if param and constraint.param != param:
                 continue
 
-            # Now we got the right row. Delete the constraint and clean up
-            # Retrieve old values and put them on the model
-            if constraint.min is not None:
-                model.item(row, min_col).setText(constraint.min)
-
-            if constraint.max is not None:
-                model.item(row, max_col).setText(constraint.max)
-
-            # Remove constraint item
-            item.removeRow(0)
+            # Now we got the right row. Delete the constraint, restoring the bounds it kept
+            bounds = {bound: FittingUtilities.parse_number(getattr(constraint, bound)) for bound in ("min", "max")}
+            self.widget.controller.set_constraint(self.widget.keyAt(row, model_key), None,
+                                                  **{b: v for b, v in bounds.items() if v is not None})
             self.widget.constraintAddedSignal.emit([row], model_key)
-            self.widget.modifyViewOnRow(row, model_key=model_key)
 
         self.widget.communicator.statusBarUpdateSignal.emit('Constraint removed')
 

@@ -11,6 +11,7 @@ from twisted.internet import threads
 from sas import config
 from sas.qtgui.Perspectives.Fitting import FittingUtilities, FittingWidget
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
+from sas.qtgui.Perspectives.Fitting.model.parameters import ArrayDistribution
 from sas.qtgui.Perspectives.Fitting.ModelThread import Calc2D
 from sas.qtgui.Perspectives.Fitting.UnitTesting.fitting_test_support import FittingWidgetMod, dummy_manager
 from sas.qtgui.Perspectives.UndoRedo import UndoStack
@@ -516,8 +517,8 @@ class FittingWidgetTest:
         assert widget.polydispersity_widget.poly_params['radius_bell.width'] == 0.0
         widget.polydispersity_widget.poly_model.item(0,1).setText("0.8")
         assert widget.polydispersity_widget.poly_params['radius_bell.width'] == pytest.approx(0.8, abs=1e-7)
-        # Test that sasmodel is updated with the new value
-        assert widget.logic.kernel_module.getParam('radius_bell.width') == pytest.approx(0.8, abs=1e-7)
+        # Polydispersity is off: the kernel keeps the width at 0, as togglePoly leaves it (Phase 5)
+        assert widget.logic.kernel_module.getParam('radius_bell.width') == 0.0
 
         # Uncheck pd in the fitting widget
         widget.chkPolydispersity.setCheckState(QtCore.Qt.CheckState.Checked)
@@ -575,7 +576,8 @@ class FittingWidgetTest:
         assert widget.polydispersity_widget.poly_params['radius_bell.nsigmas'] == 8
 
         # mock up file load
-        mocker.patch.object(widget.polydispersity_widget, 'loadPolydispArray')
+        mocker.patch.object(widget.polydispersity_widget, 'loadPolydispArray',
+                            return_value=ArrayDistribution((10.0, 20.0), (0.5, 0.5), "weights.txt"))
         # Change to 'array'
         widget.polydispersity_widget.onPolyComboIndexChange('array', 0)
         # See the mock fire
@@ -1291,8 +1293,8 @@ class FittingWidgetTest:
         # Check the argument value - should be row 'row'
         assert spy.called()[0]['args'][0] == [row]
 
-        # Assure the row has the constraint
-        assert widget.getConstraintForRow(row) == const
+        # Assure the row has the constraint (the table holds the document's copy)
+        assert vars(widget.getConstraintForRow(row)) == vars(const)
         assert widget.rowHasConstraint(row)
 
         # Check that the constraint tab flag is set to True
@@ -1311,7 +1313,7 @@ class FittingWidgetTest:
         assert spy.called()[1]['args'][0] == [row]
 
         # Assure the row has the constraint
-        assert widget.getConstraintForRow(row) == const
+        assert vars(widget.getConstraintForRow(row)) == vars(const)
         # and it is a complex constraint
         assert widget.rowHasConstraint(row)
 
@@ -1606,7 +1608,7 @@ class FittingWidgetTest:
 
         # see if radius is the same as set
         row = widget.getRowFromName("radius")
-        assert widget._model_model.item(row, 1).text() == "333"
+        assert float(widget._model_model.item(row, 1).text()) == 333
 
         # Now, change not just model but a category as well
         # cylinder / cylinder
@@ -1618,14 +1620,15 @@ class FittingWidgetTest:
 
         # see if radius is still the same
         row = widget.getRowFromName("radius")
-        assert int(widget._model_model.item(row, 1).text()) == 333
+        assert float(widget._model_model.item(row, 1).text()) == 333
 
     def testOnParameterPaste(self, widget, mocker):
         """
         Test response of the widget to clipboard content
         paste request
         """
-        mocker.patch.object(widget, 'updatePageWithParameters')
+        mocker.patch.object(widget.controller, 'paste')
+        mocker.patch.object(widget, '_confirmModelMismatch', return_value=True)
         mocker.patch.object(QtWidgets.QMessageBox, 'exec_')
         cb = QtWidgets.QApplication.clipboard()
 
@@ -1633,12 +1636,12 @@ class FittingWidgetTest:
         cb.setText("bad clipboard")
         widget.clipboard_paste()
         QtWidgets.QMessageBox.exec_.assert_called_once()
-        widget.updatePageWithParameters.assert_not_called()
+        widget.controller.paste.assert_not_called()
 
         # Test correct clipboard
         cb.setText("sasview_parameter_values:model_name,core_shell_bicelle:scale,False,1.0,None,0.0,inf,()")
         widget.clipboard_paste()
-        widget.updatePageWithParameters.assert_called_once()
+        widget.controller.paste.assert_called_once()
 
     @pytest.mark.shadow_exempt("mocks getConstraintForRow")
     def testGetConstraintsForFitting(self, widget, mocker):

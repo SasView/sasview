@@ -21,6 +21,7 @@ from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.ConsoleUpdate import ConsoleUpdate
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 from sas.qtgui.Perspectives.Fitting.ConstraintManager import ConstraintManager
+from sas.qtgui.Perspectives.Fitting.controller import FitPageController, structural
 from sas.qtgui.Perspectives.Fitting.DocumentShadow import DocumentShadow, mirrors, reads
 from sas.qtgui.Perspectives.Fitting.FitPage import FitPage
 from sas.qtgui.Perspectives.Fitting.FitThread import FitThread
@@ -44,9 +45,11 @@ from sas.qtgui.Perspectives.Fitting.FittingState import FittingState
 from sas.qtgui.Perspectives.Fitting.LegacyKernelSync import LegacyKernelSync
 from sas.qtgui.Perspectives.Fitting.MagnetismWidget import MagnetismWidget
 from sas.qtgui.Perspectives.Fitting.model import serializer
+from sas.qtgui.Perspectives.Fitting.model.commands import ApplyFitResultCommand
 from sas.qtgui.Perspectives.Fitting.model.document import FitPageDocument
+from sas.qtgui.Perspectives.Fitting.model.events import Origin
 from sas.qtgui.Perspectives.Fitting.model.kernel import KernelBuilder
-from sas.qtgui.Perspectives.Fitting.model.parameters import PageIdentity, Table
+from sas.qtgui.Perspectives.Fitting.model.parameters import FitOptions, PageIdentity, Smearing, Table, ValueKind
 from sas.qtgui.Perspectives.Fitting.ModelThread import Calc1D, Calc2D
 from sas.qtgui.Perspectives.Fitting.OptionsWidget import OptionsWidget
 from sas.qtgui.Perspectives.Fitting.OrderWidget import OrderWidget
@@ -54,16 +57,8 @@ from sas.qtgui.Perspectives.Fitting.PolydispersityWidget import PolydispersityWi
 from sas.qtgui.Perspectives.Fitting.ReportPageLogic import ReportPageLogic
 from sas.qtgui.Perspectives.Fitting.SmearingWidget import SmearingWidget
 from sas.qtgui.Perspectives.Fitting.UI.FittingWidgetUI import Ui_FittingWidgetUI
-from sas.qtgui.Perspectives.Fitting.UndoRedo import (
-    CheckboxToggleCommand,
-    FitOptionsCommand,
-    FitResultCommand,
-    ModelSelectionCommand,
-    ParameterMinMaxCommand,
-    ParameterValueCommand,
-    SmearingOptionsCommand,
-)
 from sas.qtgui.Perspectives.Fitting.view.ParameterTableAdapter import ParameterTableAdapter
+from sas.qtgui.Perspectives.Fitting.view.SettingsSync import SettingsSync
 from sas.qtgui.Perspectives.Fitting.ViewDelegate import ModelViewDelegate
 from sas.qtgui.Perspectives.UndoRedo import UndoStack
 from sas.qtgui.Plotting.Plotter import PlotterWidget
@@ -128,6 +123,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.document = FitPageDocument(PageIdentity(page_id=tab_id, tab_id=tab_id))
         self.kernel_builder = KernelBuilder(self.models)
         self.shadow = DocumentShadow(self)
+        # The intents (Phase 5); undo and redo replay document commands on the controller
+        self.controller = FitPageController(self)
+        self.undo_stack = UndoStack(self, target=self.controller, snapshot_fn=self.document.snapshot,
+                                    restore_fn=lambda snapshot: self.controller.restore(snapshot, Origin.UNDO))
 
         # data index for the batch set
         self.data_index = 0
@@ -185,6 +184,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Document-first changes reach the legacy stores: the kernel first, then the tables (Phase 4)
         self.kernel_sync = LegacyKernelSync(self)
         self.table_adapters = [ParameterTableAdapter(self, table) for table in Table]
+        self.settings_sync = SettingsSync(self)
         # Every legacy writer from here on is mirrored into the document
         self.shadow.start()
 
@@ -300,10 +300,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.weighting = 0
         self.chi2 = None
 
-        # Undo/redo stack (per-tab, incremental command pattern)
-        self.undo_stack = UndoStack(self)
-        self._last_smearing_state = None
-        self._last_model_triple = None  # (category, model, structure) for undo capture
         self.all_data = []
         # custom plugin models
         # {model.name:model}
@@ -343,7 +339,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.fitResults = False
 
         # Current parameters
-        self.page_parameters = None
 
         # signal communicator
         self.communicator = GuiUtils.communicator
@@ -570,16 +565,16 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.lblStructure.setEnabled(True)
         self.enabled_sfmodel = True
 
-    @mirrors('flags')
     def togglePoly(self, isChecked: bool) -> None:
-        """ Enable/disable the polydispersity tab """
+        """ The polydispersity checkbox: an intent """
+        self.controller.set_flag("polydispersity", isChecked)
+
+    def applyPolydispersity(self, isChecked: bool) -> None:
+        """ Enable/disable the polydispersity tab (SettingsSync) """
         self.tabFitting.setTabEnabled(TAB_POLY, isChecked)
         # Check if any parameters are ready for fitting
         self.cmdFit.setEnabled(self.haveParamsToFit())
         self.polydispersity_widget.togglePoly(isChecked)
-        self.undo_stack.push(
-            CheckboxToggleCommand('chkPolydispersity', not isChecked, isChecked)
-        )
         self.updateData()
 
     def onPolyToggled(self, isChecked: bool) -> None:
@@ -592,16 +587,16 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.tabFitting.setTabEnabled(TAB_POLY, isChecked)
         self.cmdFit.setEnabled(self.haveParamsToFit())
 
-    @mirrors('flags')
     def toggleMagnetism(self, isChecked: bool) -> None:
-        """ Enable/disable the magnetism tab """
+        """ The magnetism checkbox: an intent """
+        self.controller.set_flag("magnetism", isChecked)
+
+    def applyMagnetism(self, isChecked: bool) -> None:
+        """ Enable/disable the magnetism tab (SettingsSync) """
         self.tabFitting.setTabEnabled(TAB_MAGNETISM, isChecked)
         # Check if any parameters are ready for fitting
         self.cmdFit.setEnabled(self.haveParamsToFit())
         self.magnetism_widget.isActive = isChecked
-        self.undo_stack.push(
-            CheckboxToggleCommand('chkMagnetism', not isChecked, isChecked)
-        )
 
     def onMagnetismToggled(self, isChecked: bool) -> None:
         """
@@ -613,9 +608,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.tabFitting.setTabEnabled(TAB_MAGNETISM, isChecked)
         self.cmdFit.setEnabled(self.haveParamsToFit())
 
-    @mirrors('flags')
     def toggleChainFit(self, isChecked: bool) -> None:
-        """ Enable/disable chain fitting """
+        """ The chain-fit checkbox: an intent """
+        self.controller.set_flag("chain_fit", isChecked)
+
+    def applyChainFit(self, isChecked: bool) -> None:
+        """ Enable/disable chain fitting (SettingsSync) """
         self.is_chain_fitting = isChecked
         # show/hide the ordering tab
         if isChecked:
@@ -623,19 +621,50 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         else:
             self.tabFitting.removeTab(TAB_ORDERING)
 
+    @structural("Toggle 2D view")
     @mirrors('layout')
     def toggle2D(self, isChecked: bool) -> None:
         """ Enable/disable the controls dependent on 1D/2D data instance """
         self.chkMagnetism.setEnabled(isChecked)
         self.is2D = isChecked
-        # Reload the current model — suppress so the inner onSelectModel
-        # doesn't push its own command; toggle2D is one atomic undo step.
-        with self.undo_stack.suppressed():
-            if self.logic.kernel_module:
-                self.onSelectModel()
-        self.undo_stack.push(
-            CheckboxToggleCommand('chk2DView', not isChecked, isChecked)
-        )
+        # Reload the current model
+        if self.logic.kernel_module:
+            self.onSelectModel()
+
+    @mirrors('layout')
+    def rebuildForSelection(self, selection, view_2d: bool) -> None:
+        """Build the tables for *selection* with the legacy builders (FitPageController.restore, paste)."""
+        if self.chk2DView.isChecked() != view_2d:
+            self.chk2DView.blockSignals(True)
+            self.chk2DView.setChecked(view_2d)
+            self.chk2DView.blockSignals(False)
+            self.chkMagnetism.setEnabled(view_2d)
+            self.is2D = view_2d
+        # Changing the category repopulates the model combo; the model is selected below
+        self.cbModel.blockSignals(True)
+        self.cbCategory.setCurrentIndex(self.cbCategory.findText(selection.category))
+        self.cbModel.setCurrentIndex(max(self.cbModel.findText(selection.model), 0))
+        self.cbModel.blockSignals(False)
+        self.cbStructureFactor.blockSignals(True)
+        self.cbStructureFactor.setCurrentIndex(max(self.cbStructureFactor.findText(selection.structure), 0))
+        self.cbStructureFactor.blockSignals(False)
+        if selection.category == CATEGORY_STRUCTURE:
+            self.onSelectStructureFactor()
+        else:
+            self.onSelectModel()
+        if selection.multiplicity is not None and selection.multiplicity != self.logic.current_shell_displayed:
+            self.updateMultiplicityCombo(selection.multiplicity)
+
+    def otherSymbols(self) -> set[str]:
+        """The constraint symbols of the other fit pages (retention keeps constraints that resolve)."""
+        if self.parent is None:
+            return set()
+        return {symbol for tab in self.parent.perspective().getFitTabs() if tab is not self
+                for symbol in tab.document.symbol_table()}
+
+    def keyAt(self, row: int, model_key: str = "standard") -> str | None:
+        """The document key of the parameter in *row* of the table *model_key*."""
+        return self.table_adapters[list(self.model_dict).index(model_key)].key_at(row)
 
     @classmethod
     def customModels(cls) -> dict[str, Any]:
@@ -708,12 +737,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Signals from other widgets
         self.communicator.customModelDirectoryChanged.connect(self.onCustomModelChange)
         self.smearing_widget.smearingChangedSignal.connect(self.onSmearingOptionsUpdate)
-        self.polydispersity_widget.cmdFitSignal.connect(lambda: self.cmdFit.setEnabled(self.haveParamsToFit()))
         self.polydispersity_widget.updateDataSignal.connect(lambda: self.updateData())
-        self.polydispersity_widget.iterateOverModelSignal.connect(lambda: self.iterateOverModel(self.updateFunctionCaption))
         self.polydispersity_widget.deletePlotSignal.connect(self.setPlotDeletable)
         self.polydispersity_widget.toggledSignal.connect(self.onPolyToggled)
-        self.magnetism_widget.cmdFitSignal.connect(lambda: self.cmdFit.setEnabled(self.haveParamsToFit()))
         self.magnetism_widget.updateDataSignal.connect(lambda: self.updateData())
         self.magnetism_widget.toggledSignal.connect(self.onMagnetismToggled)
 
@@ -837,7 +863,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.actionDeselect.triggered.connect(self.deselectParameters)
         return menu
 
-    @mirrors('parameters')
     def showMultiConstraint(self, current_list: QtWidgets.QTreeView | None = None) -> None:
         """
         Show the constraint widget and receive the expression.
@@ -945,7 +970,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         else:
             return None
 
-    @mirrors('parameters')
     def addConstraintToRow(self, constraint: Constraint | None = None, row: int = 0, model_key: str = "standard") -> None:
         """
         Add the constraint object to the requested row.
@@ -954,7 +978,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         self.constraint_manager.addConstraintToRow(constraint, row, model_key)
 
-    @mirrors('parameters')
     def addSimpleConstraint(self) -> None:
         """
         Add a constraint on a single parameter.
@@ -963,7 +986,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         self.constraint_manager.addSimpleConstraint()
 
-    @mirrors('parameters')
     def editConstraint(self) -> None:
         """
         Edit constraints for selected parameters.
@@ -972,7 +994,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         self.constraint_manager.editConstraint()
 
-    @mirrors('parameters')
     def deleteConstraint(self) -> None:
         """
         Delete constraints from selected parameters.
@@ -981,7 +1002,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         self.constraint_manager.deleteConstraint()
 
-    @mirrors('parameters')
     def deleteConstraintOnParameter(self, param: str | None = None, model_key: str = "standard") -> None:
         """
         Delete the constraint on model parameter 'param'.
@@ -1045,7 +1065,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         return self.constraint_manager.rowHasActiveComplexConstraint(row, model_key)
 
-    @mirrors('parameters')
     def selectParameters(self) -> None:
         """
         Selected parameter is chosen for fitting
@@ -1057,7 +1076,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         item = model.itemFromIndex(current_list.currentIndex())
         self.setParameterSelection(status, item=item, model_key=model_key)
 
-    @mirrors('parameters')
     def deselectParameters(self) -> None:
         """
         Selected parameters are removed for fitting
@@ -1191,6 +1209,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             has_mag_params = len(self.logic.kernel_module.magnetic_params) > 0
         return self.is2D and has_mag_params
 
+    @structural("Select model")
     @mirrors('layout')
     def onSelectModel(self) -> None:
         """
@@ -1208,14 +1227,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 self.cbModel.blockSignals(False)
             return
 
-        # Capture old state for undo before anything changes
-        old_triple = self._last_model_triple
-        old_params = self._get_parameter_dict()
-
-        if self.model_data is not None:
-            # Store any old parameters before switching to a new model
-            self.page_parameters = self.getParameterDict()
-
         # Assure the control is active
         if not self.cbModel.isEnabled():
             return
@@ -1223,46 +1234,26 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if not model:
             return
 
-        # Suppress undo capture during the model rebuild
-        with self.undo_stack.suppressed():
-            self.chkMagnetism.setEnabled(self.canHaveMagnetism())
-            self.tabFitting.setTabEnabled(TAB_MAGNETISM, self.chkMagnetism.isChecked() and self.canHaveMagnetism())
-            self._previous_model_index = self.cbModel.currentIndex()
+        self.chkMagnetism.setEnabled(self.canHaveMagnetism())
+        self.tabFitting.setTabEnabled(TAB_MAGNETISM, self.chkMagnetism.isChecked() and self.canHaveMagnetism())
+        self._previous_model_index = self.cbModel.currentIndex()
 
-            # Reset parameters to fit
-            self.resetParametersToFit()
-            self.has_error_column = False
-            self.polydispersity_widget.is2D = self.is2D
-            self.polydispersity_widget.has_poly_error_column = False
-            self.magnetism_widget.has_magnet_error_column = False
+        # Reset parameters to fit
+        self.resetParametersToFit()
+        self.has_error_column = False
+        self.polydispersity_widget.is2D = self.is2D
+        self.polydispersity_widget.has_poly_error_column = False
+        self.magnetism_widget.has_magnet_error_column = False
 
-            structure = None
-            if self.cbStructureFactor.isEnabled():
-                structure = str(self.cbStructureFactor.currentText())
-            self.respondToModelStructure(model=model, structure_factor=structure)
+        structure = None
+        if self.cbStructureFactor.isEnabled():
+            structure = str(self.cbStructureFactor.currentText())
+        # The user's settings are carried over afterwards (FitPageController.layout_changed)
+        self.respondToModelStructure(model=model, structure_factor=structure)
 
-            # paste parameters from previous state
-            if self.page_parameters:
-                self.updatePageWithParameters(self.page_parameters, warn_user=False)
-
-            # disable polydispersity if the model does not support it
-            has_poly = self.polydispersity_widget.poly_model.rowCount() != 0
-            self.chkPolydispersity.setEnabled(has_poly)
-            # self.tabFitting.setTabEnabled(TAB_POLY, has_poly)
-
-        # Capture new state after model change
-        new_triple = (
-            str(self.cbCategory.currentText()),
-            str(self.cbModel.currentText()),
-            str(self.cbStructureFactor.currentText()) if self.cbStructureFactor.isEnabled() else '',
-        )
-        new_params = self._get_parameter_dict()
-        self._last_model_triple = new_triple
-
-        if old_triple is not None and (old_triple != new_triple or old_params != new_params):
-            self.undo_stack.push(
-                ModelSelectionCommand(old_triple, new_triple, old_params, new_params)
-            )
+        # disable polydispersity if the model does not support it
+        has_poly = self.polydispersity_widget.poly_model.rowCount() != 0
+        self.chkPolydispersity.setEnabled(has_poly)
 
         # set focus so it doesn't move up
         self.cbModel.setFocus()
@@ -1277,6 +1268,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.data_index = data_index
         self.updateQRange()
 
+    @structural("Select structure factor")
     @mirrors('layout')
     def onSelectStructureFactor(self) -> None:
         """
@@ -1287,11 +1279,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         structure = str(self.cbStructureFactor.currentText())
         if category == CATEGORY_STRUCTURE:
             model = None
-        # copy original clipboard
-        cb = QtWidgets.QApplication.clipboard()
-        cb_text = cb.text()
-        # get the screenshot of the current param state
-        self.clipboard_copy()
 
         # Reset parameters to fit
         self.resetParametersToFit()
@@ -1299,11 +1286,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.polydispersity_widget.has_poly_error_column = False
         self.magnetism_widget.has_magnet_error_column = False
 
+        # The user's settings are carried over afterwards (FitPageController.layout_changed)
         self.respondToModelStructure(model=model, structure_factor=structure)
-        # recast the original parameters into the model
-        self.clipboard_paste()
-        # revert to the original clipboard
-        cb.setText(cb_text)
 
     def resetParametersToFit(self) -> None:
         """
@@ -1481,19 +1465,14 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self._model_model.clear()
             return
 
-        if self.model_data is not None:
-            # Store any old parameters before switching to a new category
-            self.page_parameters = self.getParameterDict()
         # Wipe out the parameter model and related sub-models
         self._model_model.clear()
-        # Clear polydispersity state
+        # Clear polydispersity and magnetism state, and the lists of parameters to fit
         self.polydispersity_widget.poly_model.clear()
         self.polydispersity_widget.poly_params = {}
-        self.polydispersity_widget.poly_params_to_fit = []
-        # Clear magnetism state
         self.magnetism_widget._magnet_model.clear()
         self.magnetism_widget.magnet_params = {}
-        self.magnetism_widget.magnet_params_to_fit = []
+        self.resetParametersToFit()
         # Safely clear and enable the model combo
         self.cbModel.blockSignals(True)
         self.cbModel.clear()
@@ -1748,12 +1727,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.logic.kernel_module = copy.deepcopy(self.kernel_module_copy)
             return
 
-        # Capture parameter snapshot BEFORE fit results are applied
-        # (main + polydispersity + magnetism, since a fit can modify all three).
-        # The fit mutates the live kernel module in place, so capture the
-        # pre-fit values from kernel_module_copy (the deepcopy made in onFit).
-        old_snapshot = self._get_fit_result_snapshot(self.kernel_module_copy)
-
         # Don't recalculate chi2 - it's in res.fitness already
         self.fitResults = True
         if result is None or len(result) == 0 or len(result[0]) == 0:
@@ -1797,10 +1770,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         chi2_repr = GuiUtils.formatNumber(self.chi2, high=True)
         self.lblChi2Value.setText(chi2_repr)
 
-        # Push a single FitResultCommand for the entire fit
-        new_snapshot = self._get_fit_result_snapshot()
-        if old_snapshot != new_snapshot:
-            self.undo_stack.push(FitResultCommand(old_snapshot, new_snapshot))
+        # One undoable step for the fit. The document still holds the values from before it:
+        # it reads the tables back when this writer ends.
+        params = self.document.parameters
+        after = {key: value for key, (value, _) in param_dict.items() if key in params}
+        before = {key: params[key].value for key in after}
+        if before != after:
+            self.undo_stack.push(ApplyFitResultCommand(before, after))
 
         # Ensure undo/redo action state is refreshed in the GUI manager.
         # The push above emits stackChanged, but if the per-stack signal
@@ -1892,22 +1868,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         QtWidgets.QApplication.processEvents()
         self.recalculatePlotData()  # recalc+plot theory again (2nd)
 
-    @mirrors('smearing')
     def onSmearingOptionsUpdate(self) -> None:
         """
-        React to changes in the smearing widget
+        React to changes in the smearing widget: an intent
         """
-        old_state = self._last_smearing_state
-
-        # update display
-        smearing, accuracy, smearing_min, smearing_max = self.smearing_widget.state()
+        if self.controller.muted:
+            return
+        smearing, accuracy, d_down, d_up = self.smearing_widget.state()
         self.lblCurrentSmearing.setText(smearing)
-        self.calculateQGridForModel()
-
-        new_state = self._get_smearing_state_dict()
-        if old_state is not None and old_state != new_state:
-            self.undo_stack.push(SmearingOptionsCommand(old_state, new_state))
-        self._last_smearing_state = new_state
+        self.controller.set_smearing(Smearing(smearing, accuracy, d_down, d_up))
 
     def onKey(self, event: QtGui.QKeyEvent) -> None:
         if event.key() in [QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return] and self.cmdPlot.isEnabled():
@@ -1961,23 +1930,18 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # return the last data item seen, if nothing was plotted; supposed to be just data)
         return None if data_shown else item
 
-    @mirrors('options')
     def onOptionsUpdate(self) -> None:
         """
-        Update local option values and replot
+        A change in the options tab: an intent
         """
-        old_opts = self._get_fit_options_dict()
-
-        self.q_range_min, self.q_range_max, self.npts, self.log_points, self.weighting = \
-            self.options_widget.state()
+        if self.controller.muted:
+            return
+        self.q_range_min, self.q_range_max, self.npts, self.log_points, self.weighting =             self.options_widget.state()
         # set Q range labels on the main tab
         self.lblMinRangeDef.setText(GuiUtils.formatNumber(self.q_range_min, high=True))
         self.lblMaxRangeDef.setText(GuiUtils.formatNumber(self.q_range_max, high=True))
-        self.recalculatePlotData()
-
-        new_opts = self._get_fit_options_dict()
-        if old_opts != new_opts:
-            self.undo_stack.push(FitOptionsCommand(old_opts, new_opts))
+        self.controller.set_options(FitOptions(self.q_range_min, self.q_range_max, self.npts, self.log_points,
+                                               self.weighting, self.options_widget.weighting))
 
     def setDefaultStructureCombo(self) -> None:
         """
@@ -2356,66 +2320,50 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return True
         return False
 
-    @mirrors('parameters')
     def onMainParamsChange(self, top: QtCore.QModelIndex, bottom: QtCore.QModelIndex) -> None:
         """
-        Callback method for updating the sasmodel parameters with the GUI values
+        An edit in the main table: a controller intent (fit flag, value or bound)
         """
+        if self.controller.muted:
+            return
         item = self._model_model.itemFromIndex(top)
-
-        model_column = item.column()
-
-        if model_column == 0:
+        column = item.column()
+        if column == 0:
             self.checkboxSelected(item, model_key="standard")
-            self.cmdFit.setEnabled(self.haveParamsToFit())
-            # Fit-checkbox toggles intentionally excluded from undo stack
+        if self.shadow.depth > 0:
+            # A cell written by a legacy writer (a table builder, SESANS, a fit): the shadow reads it
+            # back when the writer ends; the kernel and the editability follow the cell, as before
+            self._cellIntoKernel(item)
             return
-
-        model_row = item.row()
-        name_index = self._model_model.index(model_row, 0)
-        name_item = self._model_model.itemFromIndex(name_index)
-
-        # Extract changed value.
-        try:
-            value = GuiUtils.toDouble(item.text())
-        except TypeError:
-            # Unparsable field
+        key = self.keyAt(item.row())
+        if key is None:
             return
-
-        # if the item has user data, this is the actual parameter name (e.g. to handle duplicate names)
-        if name_item.data(QtCore.Qt.UserRole):
-            parameter_name = str(name_item.data(QtCore.Qt.UserRole))
-        else:
-            parameter_name = str(self._model_model.data(name_index))
-
-        # Update the parameter value - note: this supports +/-inf as well
-        param_column = self.lstParams.itemDelegate().param_value
-        min_column = self.lstParams.itemDelegate().param_min
-        max_column = self.lstParams.itemDelegate().param_max
-        if model_column == param_column:
-            old_val = self.logic.kernel_module.getParam(parameter_name)
-            self.logic.kernel_module.setParam(parameter_name, value)
-            self.undo_stack.push(ParameterValueCommand(parameter_name, old_val, value))
-
-        elif model_column == min_column:
-            old_val = self.logic.kernel_module.details[parameter_name][1]
-            self.logic.kernel_module.details[parameter_name][1] = value
-            self.undo_stack.push(ParameterMinMaxCommand(parameter_name, "min", old_val, value))
-        elif model_column == max_column:
-            old_val = self.logic.kernel_module.details[parameter_name][2]
-            self.logic.kernel_module.details[parameter_name][2] = value
-            self.undo_stack.push(ParameterMinMaxCommand(parameter_name, "max", old_val, value))
-        else:
-            # don't update the chart
+        if column == 0:
+            self.controller.set_fit_flag(key, item.checkState() == QtCore.Qt.Checked)
             return
+        delegate = self.lstParams.itemDelegate()
+        fields = {delegate.param_value: "value", delegate.param_min: "min", delegate.param_max: "max"}
+        value = FittingUtilities.parse_number(item.text())
+        kind = self.document.parameters[key].kind
+        if column not in fields or value is None or kind is ValueKind.INT:
+            return    # not a number, or the shell count (modifyShellsInList)
+        if kind is ValueKind.CHOICE:
+            value = int(value)
+        self.controller.set_parameter(key, **{fields[column]: value})
 
-        # handle display of effective radius parameter according to radius_effective_mode; pass ER into model if
-        # necessary
+    def _cellIntoKernel(self, item: QtGui.QStandardItem) -> None:
+        """The legacy kernel write of a main-table cell (inside a legacy writer)."""
+        name_item = self._model_model.item(item.row(), 0)
+        name = str(name_item.data(QtCore.Qt.UserRole) or name_item.text())
+        delegate = self.lstParams.itemDelegate()
+        value = FittingUtilities.parse_number(item.text())
+        kernel = self.logic.kernel_module
+        if value is not None and kernel is not None and item.row() != self._n_shells_row:
+            if item.column() == delegate.param_value and name in kernel.params:
+                kernel.setParam(name, value)
+            elif item.column() in (delegate.param_min, delegate.param_max) and name in kernel.details:
+                kernel.details[name][1 if item.column() == delegate.param_min else 2] = value
         self.processEffectiveRadius()
-
-        # Keep page_parameters up-to-date so parameter retention across
-        # model switches works even when no plot has been computed yet.
-        self.page_parameters = self.getParameterDict()
 
     def processEffectiveRadius(self) -> None:
         """
@@ -2508,8 +2456,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Careful with `item` NOT being selected. This means we only want to
         # select that one item.
         self.setParameterSelection(status, item=item, model_key=model_key)
+        self.refreshFitLists()
 
-        # update the list of parameters to fit
+    def refreshFitLists(self) -> None:
+        """The lists of parameters to fit, from the check states (LegacyKernelSync keeps them for document changes)."""
         self.main_params_to_fit = self.checkedListFromModel("standard")
         self.polydispersity_widget.poly_params_to_fit = self.checkedListFromModel("poly")
         self.magnetism_widget.magnet_params_to_fit = self.checkedListFromModel("magnet")
@@ -3036,6 +2986,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         func.setCurrentText(str(default_shell_count))
         self.modifyShellsInList(str(default_shell_count))
 
+    @structural("Change the number of shells")
     @mirrors('layout')
     def modifyShellsInList(self, text: str) -> None:
         """
@@ -3051,8 +3002,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             index = 0
             logger.error("Multiplicity incorrect! Setting to 0")
         self.logic.kernel_module.multiplicity = index
-        # Copy existing param values before removing rows to retain param values when changing n-shells
-        self.clipboard_copy()
+        # The values of the remaining shells are carried over afterwards (FitPageController.layout_changed)
         if remove_rows > 1:
             self._model_model.removeRows(first_row, remove_rows)
 
@@ -3076,8 +3026,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # always matches the layout (it is only shown in 2D).
         self.polydispersity_widget.setPolyModel()
         self.magnetism_widget.setMagneticModel()
-
-        self.clipboard_paste()
 
     def onShowSLDProfile(self) -> None:
         """
@@ -3271,259 +3219,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     # Undo/redo helper methods (called by UndoCommand subclasses)
     # ------------------------------------------------------------------
 
-    @mirrors('parameters')
-    def _update_model_param_value(self, param_name: str, value: float) -> None:
-        """Update the UI model item for a parameter value (called by undo/redo)."""
-        for row in range(self._model_model.rowCount()):
-            name_item = self._model_model.item(row, 0)
-            if name_item is None:
-                continue
-            row_name = str(name_item.data(QtCore.Qt.UserRole) or name_item.text())
-            if row_name == param_name:
-                col = self.lstParams.itemDelegate().param_value
-                value_item = self._model_model.item(row, col)
-                if value_item:
-                    value_item.setText(GuiUtils.formatNumber(value, high=True))
-                return
-
-    @mirrors('parameters')
-    def _update_model_param_limit(self, param_name: str, bound: str, value: float) -> None:
-        """Update min or max bound in the UI model (called by undo/redo)."""
-        col = self.lstParams.itemDelegate().param_min if bound == "min" else self.lstParams.itemDelegate().param_max
-        for row in range(self._model_model.rowCount()):
-            name_item = self._model_model.item(row, 0)
-            if name_item is None:
-                continue
-            row_name = str(name_item.data(QtCore.Qt.UserRole) or name_item.text())
-            if row_name == param_name:
-                item = self._model_model.item(row, col)
-                if item:
-                    item.setText(GuiUtils.formatNumber(value, high=True))
-                return
-
-    @mirrors('layout')
-    def _restore_model_selection(self, triple: tuple, params: dict) -> None:
-        """Restore model selection and parameter values (called by undo/redo).
-
-        ``triple`` is ``(category, model, structure_factor)``.
-        """
-        with self.undo_stack.suppressed():
-            category, model, structure = triple
-            # Block cbModel signals while changing category to prevent
-            # onSelectModel firing with the wrong model during repopulation.
-            self.cbModel.blockSignals(True)
-            self.cbCategory.setCurrentIndex(self.cbCategory.findText(category))
-            self.cbModel.blockSignals(False)
-            self.cbModel.setCurrentIndex(self.cbModel.findText(model))
-            if structure:
-                self.cbStructureFactor.setCurrentIndex(
-                    self.cbStructureFactor.findText(structure)
-                )
-            else:
-                self.cbStructureFactor.setCurrentIndex(0)
-            # Apply saved parameter values
-            self._restore_parameter_values(params)
-
-    @mirrors('options')
-    def _apply_fit_options(self, options: dict) -> None:
-        """Apply fit options dict (called by undo/redo)."""
-        with self.undo_stack.suppressed():
-            self.q_range_min = options.get('q_range_min', self.q_range_min)
-            self.q_range_max = options.get('q_range_max', self.q_range_max)
-            self.npts = options.get('npts', self.npts)
-            self.log_points = options.get('log_points', self.log_points)
-            self.weighting = options.get('weighting', self.weighting)
-            self.options_widget.setState(
-                self.q_range_min, self.q_range_max,
-                self.npts, self.log_points, self.weighting,
-            )
-            self.lblMinRangeDef.setText(GuiUtils.formatNumber(self.q_range_min, high=True))
-            self.lblMaxRangeDef.setText(GuiUtils.formatNumber(self.q_range_max, high=True))
-            self.recalculatePlotData()
-
-    @mirrors('smearing')
-    def _apply_smearing_state(self, state: dict) -> None:
-        """Apply smearing options from a dict (called by undo/redo)."""
-        with self.undo_stack.suppressed():
-            self.smearing_widget.setState(
-                state.get('smearing'), state.get('accuracy'),
-                state.get('d_down'), state.get('d_up'),
-            )
-            self.calculateQGridForModel()
-
-    @mirrors('parameters')
-    def _restore_parameter_values(self, params: dict) -> None:
-        """Restore all kernel parameter values from a ``{name: value}`` dict."""
-        with self.undo_stack.suppressed():
-            for name, value in params.items():
-                self.logic.kernel_module.setParam(name, value)
-                self._update_model_param_value(name, value)
-            self.calculateQGridForModel()
-
-    @mirrors('parameters')
-    def _update_poly_param_value(self, param_name: str, value: float) -> None:
-        """Update the polydispersity UI model item for *param_name* (``<name>.width``)."""
-        poly_model = self.polydispersity_widget.poly_model
-        for row in range(poly_model.rowCount()):
-            name_item = poly_model.item(row, 0)
-            if name_item is None:
-                continue
-            row_name = str(name_item.text()).rsplit()[-1] + '.width'
-            if row_name == param_name:
-                value_item = poly_model.item(row, 1)
-                if value_item:
-                    value_item.setText(GuiUtils.formatNumber(value, high=True))
-                return
-
-    @mirrors('parameters')
-    def _update_magnet_param_value(self, param_name: str, value: float) -> None:
-        """Update the magnetism UI model item for *param_name*."""
-        magnet_model = self.magnetism_widget._magnet_model
-        for row in range(magnet_model.rowCount()):
-            name_item = magnet_model.item(row, 0)
-            if name_item is None:
-                continue
-            if str(name_item.text()) == param_name:
-                value_item = magnet_model.item(row, 1)
-                if value_item:
-                    value_item.setText(GuiUtils.formatNumber(value, high=True))
-                return
-
-    def _get_poly_param_dict(self, kernel_module=None) -> dict:
-        """Return ``{<name>.width: value}`` for all polydisperse parameters.
-
-        Parameter *names* are taken from the polydispersity UI model (stable
-        across a fit); *values* are read from ``kernel_module`` so a pre-fit
-        snapshot can be captured from ``kernel_module_copy`` (defaults to the
-        live kernel module).
-        """
-        if kernel_module is None:
-            kernel_module = self.logic.kernel_module
-        if kernel_module is None:
-            return {}
-        poly_model = self.polydispersity_widget.poly_model
-        result = {}
-        for row in range(poly_model.rowCount()):
-            name_item = poly_model.item(row, 0)
-            if name_item is None:
-                continue
-            param_name = str(name_item.text()).rsplit()[-1] + '.width'
-            try:
-                result[param_name] = kernel_module.getParam(param_name)
-            except (KeyError, ValueError):
-                continue
-        return result
-
-    def _get_magnet_param_dict(self, kernel_module=None) -> dict:
-        """Return ``{param_name: value}`` for all magnetism parameters.
-
-        As with :meth:`_get_poly_param_dict`, *values* are read from
-        ``kernel_module`` (defaults to the live kernel module) so a pre-fit
-        snapshot can be captured from ``kernel_module_copy``.
-        """
-        if kernel_module is None:
-            kernel_module = self.logic.kernel_module
-        if kernel_module is None:
-            return {}
-        magnet_model = self.magnetism_widget._magnet_model
-        result = {}
-        for row in range(magnet_model.rowCount()):
-            name_item = magnet_model.item(row, 0)
-            if name_item is None:
-                continue
-            param_name = str(name_item.text())
-            try:
-                result[param_name] = kernel_module.getParam(param_name)
-            except (KeyError, ValueError):
-                continue
-        return result
-
-    def _get_fit_result_snapshot(self, kernel_module=None) -> dict:
-        """Capture main, polydispersity and magnetism parameter values.
-
-        Reads values from ``kernel_module`` (defaults to the live kernel
-        module). The pre-fit snapshot in ``fitComplete`` MUST be captured
-        from ``self.kernel_module_copy``, since the fit mutates the live
-        kernel module in place.
-
-        Returns a structured dict consumed by ``FitResultCommand``::
-
-            {"main": {...}, "poly": {...}, "magnet": {...}}
-        """
-        return {
-            "main": self._get_parameter_dict(kernel_module),
-            "poly": self._get_poly_param_dict(kernel_module),
-            "magnet": self._get_magnet_param_dict(kernel_module),
-        }
-
-    @mirrors('parameters')
-    def _restore_fit_result_snapshot(self, snapshot: dict) -> None:
-        """Restore main, polydispersity and magnetism values from a snapshot.
-
-        A FitResultCommand snapshot only carries parameter *values*, not the
-        fitted uncertainties, so any error column shown in the tables is no
-        longer valid once the values are restored. Remove it.
-        """
-        with self.undo_stack.suppressed():
-            self._remove_error_columns()
-            for name, value in snapshot.get("main", {}).items():
-                self.logic.kernel_module.setParam(name, value)
-                self._update_model_param_value(name, value)
-            for name, value in snapshot.get("poly", {}).items():
-                self.logic.kernel_module.setParam(name, value)
-                self._update_poly_param_value(name, value)
-            for name, value in snapshot.get("magnet", {}).items():
-                self.logic.kernel_module.setParam(name, value)
-                self._update_magnet_param_value(name, value)
-            self.calculateQGridForModel()
-
-    @mirrors('parameters')
-    def _remove_error_columns(self) -> None:
-        """Remove the fitted-uncertainty (error) column from the main,
-        polydispersity and magnetism tables, restoring the no-error layout.
-
-        Safe to call when no error column is present (each section is guarded
-        by its ``has_*_error_column`` flag).
-        """
-        for adapter in self.table_adapters:
-            adapter.set_error_column(False)
-
-    def _get_parameter_dict(self, kernel_module=None) -> dict:
-        """Return ``{param_name: float_value}`` for all current kernel params.
-
-        Values are read from ``kernel_module`` (defaults to the live kernel
-        module) so a pre-fit snapshot can be captured from
-        ``kernel_module_copy``.
-        """
-        if kernel_module is None:
-            kernel_module = self.logic.kernel_module
-        if kernel_module is None:
-            return {}
-        # Use the expanded parameter dict rather than kernel_parameters:
-        # vector parameters of multiplicity models are listed there under
-        # their unexpanded names (e.g. "sld[n]"), which getParam rejects.
-        return dict(kernel_module.params)
-
-    def _get_fit_options_dict(self) -> dict:
-        """Return current fit options as a dict (for undo command capture)."""
-        return {
-            'q_range_min': self.q_range_min,
-            'q_range_max': self.q_range_max,
-            'npts': self.npts,
-            'log_points': self.log_points,
-            'weighting': self.weighting,
-        }
-
-    def _get_smearing_state_dict(self) -> dict:
-        """Return current smearing state as a dict (for undo command capture)."""
-        smearing, accuracy, d_down, d_up = self.smearing_widget.state()
-        return {
-            'smearing': smearing,
-            'accuracy': accuracy,
-            'd_down': d_down,
-            'd_up': d_up,
-        }
-
     def getReport(self) -> list[str]:
         """
         Create and return HTML report with parameters and charts
@@ -3621,8 +3316,21 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             msgbox.setWindowTitle("Clipboard")
             msgbox.exec_()
             return
+        if self._confirmModelMismatch(line_dict):
+            self.controller.paste(line_dict)
 
-        self.updatePageWithParameters(line_dict)
+    def _confirmModelMismatch(self, line_dict: dict[str, list[str]]) -> bool:
+        """Before anything changes: ask whether to apply parameters of another model (§2.3)."""
+        if 'model_name' not in line_dict:
+            return False
+        if str(self.cbModel.currentText()) == str(line_dict['model_name'][0]):
+            return True
+        msg = QtWidgets.QMessageBox()
+        msg.setIcon(QtWidgets.QMessageBox.Information)
+        msg.setText("The model in the clipboard is not the same as the currently loaded model. \
+                     Not all parameters saved may paste correctly.")
+        msg.setStandardButtons(QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel)
+        return msg.exec_() == QtWidgets.QMessageBox.Ok
 
     def clipboard_copy_excel(self) -> None:
         self.set_clipboard(self.excel_copy_data())
@@ -3823,107 +3531,28 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         return param_list
 
-    @mirrors('layout')
     def createPageForParameters(self, line_dict: dict[str, list[str]]) -> None:
         """
         Sets up page with requested model/str factor
-        and fills it up with sent parameters
+        and fills it up with sent parameters (a project load: the history is cleared)
         """
-        if 'fitpage_category' in line_dict:
-            self.cbCategory.setCurrentIndex(self.cbCategory.findText(line_dict['fitpage_category'][0]))
-        if 'fitpage_model' in line_dict:
-            self.cbModel.setCurrentIndex(self.cbModel.findText(line_dict['fitpage_model'][0]))
-        if 'fitpage_structure' in line_dict:
-            self.cbStructureFactor.setCurrentIndex(self.cbStructureFactor.findText(line_dict['fitpage_structure'][0]))
-
-        # Now that the page is ready for parameters, fill it up
-        self.updatePageWithParameters(line_dict)
-
-    @mirrors('layout')
-    def updatePageWithParameters(self, line_dict: dict[str, list[str]], warn_user: bool = True) -> None:
-        """
-        Update FitPage with parameters in line_dict
-        """
-        if 'model_name' not in line_dict:
+        with self.controller.rebuilding():
+            if 'fitpage_category' in line_dict:
+                self.cbCategory.setCurrentIndex(self.cbCategory.findText(line_dict['fitpage_category'][0]))
+            if 'fitpage_model' in line_dict:
+                self.cbModel.setCurrentIndex(self.cbModel.findText(line_dict['fitpage_model'][0]))
+            if 'fitpage_structure' in line_dict:
+                self.cbStructureFactor.setCurrentIndex(
+                    self.cbStructureFactor.findText(line_dict['fitpage_structure'][0]))
+        if not self._confirmModelMismatch(line_dict):
             return
-        model = line_dict['model_name'][0]
-        structure_factor = line_dict['fitpage_structure'][0]
-        context = {}
-
-        if 'multiplicity' in line_dict:
-            multip = int(line_dict['multiplicity'][0], 0)
-            # reset the model with multiplicity, so further updates are saved
-            if self.logic.kernel_module.is_multiplicity_model:
-                self.logic.kernel_module.multiplicity=multip
-                self.updateMultiplicityCombo(multip)
-
+        mnemonic = None
         if 'tab_name' in line_dict and self.logic.kernel_module is not None:
-            self.logic.kernel_module.name = self._loadedMnemonic(line_dict['tab_name'][0])
+            mnemonic = self._loadedMnemonic(line_dict['tab_name'][0])
+        self.controller.load_page(line_dict, mnemonic)
+        if mnemonic is not None:
             # The constraint tab lists the pages by mnemonic
             self.newModelSignal.emit()
-        if 'polydisperse_params' in line_dict:
-            self.chkPolydispersity.setChecked(line_dict['polydisperse_params'][0]=='True')
-        if 'magnetic_params' in line_dict:
-            self.chkMagnetism.setChecked(line_dict['magnetic_params'][0]=='True')
-        if 'chainfit_params' in line_dict:
-            self.chkChainFit.setChecked(line_dict['chainfit_params'][0]=='True')
-        if '2D_params' in line_dict:
-            self.chk2DView.setChecked(line_dict['2D_params'][0]=='True')
-
-        # Create the context dictionary for parameters
-        # Exclude multiplicity and number of shells params from context
-        context = {k: v for (k, v) in line_dict.items() if len(v) > 3 and k not in [model, structure_factor]}
-        context['model_name'] = model
-
-        if warn_user and str(self.cbModel.currentText()) != str(context['model_name']):
-            msg = QtWidgets.QMessageBox()
-            msg.setIcon(QtWidgets.QMessageBox.Information)
-            msg.setText("The model in the clipboard is not the same as the currently loaded model. \
-                         Not all parameters saved may paste correctly.")
-            msg.setStandardButtons(QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel)
-            result = msg.exec_()
-            if result == QtWidgets.QMessageBox.Ok:
-                pass
-            else:
-                return
-
-        if 'smearing' in line_dict:
-            try:
-                index = int(line_dict['smearing'][0])
-                self.smearing_widget.cbSmearing.setCurrentIndex(index)
-            except ValueError:
-                pass
-        if 'smearing_min' in line_dict:
-            try:
-                self.smearing_widget.dq_r = float(line_dict['smearing_min'][0])
-            except ValueError:
-                pass
-        if 'smearing_max' in line_dict:
-            try:
-                self.smearing_widget.dq_l = float(line_dict['smearing_max'][0])
-            except ValueError:
-                pass
-
-        if 'q_range_max' in line_dict:
-            try:
-                self.q_range_min = float(line_dict['q_range_min'][0])
-                self.q_range_max = float(line_dict['q_range_max'][0])
-            except ValueError:
-                pass
-        self.options_widget.updateQRange(self.q_range_min, self.q_range_max, self.npts)
-        try:
-            if 'weighting' in line_dict:
-                button_id = int(line_dict['weighting'][0])
-                for button in self.options_widget.weightingGroup.buttons():
-                    if abs(self.options_widget.weightingGroup.id(button)) == button_id+2:
-                        button.setChecked(True)
-                        break
-        except ValueError:
-            pass
-
-        self.updateFullModel(context)
-        self.polydispersity_widget.updateFullPolyModel(context)
-        self.magnetism_widget.updateFullMagnetModel(context)
 
     def _loadedMnemonic(self, name: str) -> str:
         """The saved page name, or M<tab#> if another open page already uses it (R-3)."""
@@ -3943,57 +3572,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if widget is not None and isinstance(widget, QtWidgets.QComboBox):
             widget.setCurrentIndex(widget.findText(str(multip)))
         self.logic.current_shell_displayed = multip
-
-    @mirrors('parameters')
-    def updateFullModel(self, param_dict: dict[str, list[str]]) -> None:
-        """
-        Update the model with new parameters
-        """
-        assert isinstance(param_dict, dict)
-
-        def updateFittedValues(row):
-            # Utility function for main model update
-            # internal so can use closure for param_dict
-            param_name = str(self._model_model.item(row, 0).text())
-            if param_name not in list(param_dict) or row == self._n_shells_row:
-                # Skip magnetic, polydisperse (.pd), and shell parameters - they are handled elsewhere
-                return
-            # checkbox state - None means no checkbox present so don't modify
-            if param_dict[param_name][0] != "None":
-                param_checked = QtCore.Qt.Checked if param_dict[param_name][0] == "True" else QtCore.Qt.Unchecked
-                self._model_model.item(row, 0).setCheckState(param_checked)
-
-            # parameter value can be either just a value or text on the combobox
-            param_text = param_dict[param_name][1]
-            index = self._model_model.index(row, 1)
-            widget = self.lstParams.indexWidget(index)
-            if widget is not None and isinstance(widget, QtWidgets.QComboBox):
-                # Find the right index based on text
-                combo_index = int(param_text, 0)
-                widget.setCurrentIndex(combo_index)
-            else:
-                # modify the param value
-                param_repr = GuiUtils.formatNumber(param_text, high=True)
-                self._model_model.item(row, 1).setText(param_repr)
-
-            # Potentially the error column
-            ioffset = 0
-            joffset = 0
-            if len(param_dict[param_name])>5:
-                # error values are not editable - no need to update
-                ioffset = 1
-            if self.has_error_column:
-                joffset = 1
-            # min/max
-            try:
-                self._model_model.item(row, 2+joffset).setText(param_dict[param_name][2+ioffset])
-                self._model_model.item(row, 3+joffset).setText(param_dict[param_name][3+ioffset])
-            except: # noqa: E722
-                pass
-
-            self.setFocus()
-
-        self.iterateOverModel(updateFittedValues)
 
     @mirrors('data', 'options')
     def onMaskedData(self) -> None:

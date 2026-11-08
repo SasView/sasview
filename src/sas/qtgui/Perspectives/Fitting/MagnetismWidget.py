@@ -13,19 +13,13 @@ from sas.qtgui.Perspectives.Fitting.DocumentShadow import mirrors
 
 # Local UI
 from sas.qtgui.Perspectives.Fitting.UI.MagnetismWidget import Ui_MagnetismWidgetUI
-from sas.qtgui.Perspectives.Fitting.UndoRedo import (
-    ParameterMinMaxCommand,
-    ParameterValueCommand,
-)
 from sas.qtgui.Perspectives.Fitting.ViewDelegate import MagnetismViewDelegate
 
 logger = logging.getLogger(__name__)
 
 
 class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
-    cmdFitSignal = QtCore.Signal()
     updateDataSignal = QtCore.Signal()
-    iterateOverModelSignal = QtCore.Signal()
     toggledSignal = QtCore.Signal(bool)  # Signal when magnetism is enabled/disabled
 
     def __init__(self, parent: QtWidgets.QWidget | None = None, logic: Any | None = None) -> None:
@@ -110,62 +104,33 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
                             if self._magnet_model.item(row, 0).isCheckable()]
         return magnetic_model_params
 
-    @mirrors('parameters')
     def onMagnetModelChange(self, top: QtCore.QModelIndex, bottom: QtCore.QModelIndex) -> None:
         """
-        Callback method for updating the sasmodel magnetic parameters with the GUI values
+        An edit in the magnetism table: a controller intent
         """
-        item = self._magnet_model.itemFromIndex(top)
-        model_column = item.column()
-        model_row = item.row()
-        name_index = self._magnet_model.index(model_row, 0)
-        parameter_name = str(self._magnet_model.data(name_index))
-
-        if model_column == 0:
-            value = item.checkState()
-            if value == QtCore.Qt.Checked:
-                self.magnet_params_to_fit.append(parameter_name)
-            else:
-                if parameter_name in self.magnet_params_to_fit:
-                    self.magnet_params_to_fit.remove(parameter_name)
-            self.cmdFitSignal.emit()
+        page = self._fitting_widget
+        if page.controller.muted:
             return
-
-        # Extract changed value
-        try:
-            value = GuiUtils.toDouble(item.text())
-        except TypeError:
-            # Unparsable field
+        item = self._magnet_model.itemFromIndex(top)
+        if page.shadow.depth > 0:
+            # A legacy writer: the shadow reads it back when it ends
+            page.refreshFitLists()
+            return
+        key = page.keyAt(item.row(), "magnet")
+        if key is None:
+            return
+        column = item.column()
+        if column == 0:
+            page.controller.set_fit_flag(key, item.checkState() == QtCore.Qt.Checked)
             return
         delegate = self.lstMagnetic.itemDelegate()
-
-        if model_column > 1:
-            if model_column == delegate.mag_min:
-                pos = 1
-                bound = "min"
-            elif model_column == delegate.mag_max:
-                pos = 2
-                bound = "max"
-            elif model_column == delegate.mag_unit:
-                pos = 0
-                bound = None
-            else:
-                # For all other values sent here (e.g. the error column, do nothing)
-                return
-            # min/max to be changed in self.logic.kernel_module.details[parameter_name] = ['Ang', 0.0, inf]
-            old_val = self.logic.kernel_module.details[parameter_name][pos]
-            self.logic.kernel_module.details[parameter_name][pos] = value
-            if bound is not None:
-                self._fitting_widget.undo_stack.push(
-                    ParameterMinMaxCommand(parameter_name, bound, old_val, value)
-                )
-        else:
-            old_val = self.logic.kernel_module.getParam(parameter_name)
-            self.magnet_params[parameter_name] = value
-            self.logic.kernel_module.setParam(parameter_name, value)
-            self._fitting_widget.undo_stack.push(
-                ParameterValueCommand(parameter_name, old_val, value)
-            )
+        value = FittingUtilities.parse_number(item.text())
+        if value is None:
+            return
+        if column in (delegate.mag_min, delegate.mag_max):
+            page.controller.set_parameter(key, **{"min" if column == delegate.mag_min else "max": value})
+        elif column == 1:
+            page.controller.set_parameter(key, value=value)
             # Update plot
             self.updateDataSignal.emit()
 
@@ -195,45 +160,6 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
         """
         for row_i in range(self._magnet_model.rowCount()):
             func(row_i)
-
-    @mirrors('parameters')
-    def updateFullMagnetModel(self, param_dict: dict[str, list[str]]) -> None:
-        """
-        Update the magnetism model with new parameters, create the errors column
-        """
-        assert isinstance(param_dict, dict)
-
-        def updateFittedValues(row):
-            # Utility function for main model update
-            # internal so can use closure for param_dict
-            if row >= self._magnet_model.rowCount():
-                return
-            param_name = str(self._magnet_model.item(row, 0).text()).rsplit()[-1]
-            if param_name not in list(param_dict.keys()):
-                return
-            # checkbox state
-            param_checked = QtCore.Qt.Checked if param_dict[param_name][0] == "True" else QtCore.Qt.Unchecked
-            self._magnet_model.item(row,0).setCheckState(param_checked)
-
-            # modify the param value
-            param_repr = GuiUtils.formatNumber(param_dict[param_name][1], high=True)
-            self._magnet_model.item(row, 1).setText(param_repr)
-
-            # Potentially the error column
-            ioffset = 0
-            joffset = 0
-            if len(param_dict[param_name])>4:
-                ioffset = 1
-            if self.has_magnet_error_column:
-                joffset = 1
-            # min
-            param_repr = GuiUtils.formatNumber(param_dict[param_name][2+ioffset], high=True)
-            self._magnet_model.item(row, 2+joffset).setText(param_repr)
-            # max
-            param_repr = GuiUtils.formatNumber(param_dict[param_name][3+ioffset], high=True)
-            self._magnet_model.item(row, 3+joffset).setText(param_repr)
-
-        self.iterateOverMagnetModel(updateFittedValues)
 
     @mirrors('parameters')
     def updateMagnetModelFromList(self, param_dict: dict[str, tuple[float, float]]) -> None:

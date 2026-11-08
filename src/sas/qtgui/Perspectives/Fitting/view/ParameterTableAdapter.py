@@ -84,6 +84,11 @@ class ParameterTableAdapter:
             return None
         return rows
 
+    def key_at(self, row: int) -> str | None:
+        """The key of the parameter in *row*, or None (a heading, or a table being rebuilt)."""
+        rows = self.rows()
+        return next((key for key, r in (rows or {}).items() if r == row), None)
+
     # -- the error column -----------------------------------------------
 
     def set_error_column(self, shown: bool) -> None:
@@ -153,6 +158,14 @@ class ParameterTableAdapter:
             combo = self.view.indexWidget(model.index(row, 6 + offset))
             if isinstance(combo, QtWidgets.QComboBox):
                 combo.setCurrentIndex(combo.findText(p.dispersion.type))
+            # An array distribution disables the row and names its file (onPolyComboIndexChange)
+            array = p.dispersion.array
+            for column in range(6 + offset):
+                if model.item(row, column).isEnabled() != (array is None):
+                    model.item(row, column).setEnabled(array is None)
+            filename = model.item(row, 7 + offset)
+            if filename is not None:
+                self._set_text(filename, array.filename if array is not None else "")
         if "constraint" in fields:
             self._set_constraint(p, row)
         name = model.item(row, 0)
@@ -164,7 +177,7 @@ class ParameterTableAdapter:
             if p.fittable == p.editable and not locked and current != (p.fittable, p.editable):
                 self._page.setParamEditableByRow(row, p.editable)
         if name.isCheckable() and fields & {"fit", "fittable", "editable", "constraint"}:
-            state = QtCore.Qt.Checked if p.fit else QtCore.Qt.Unchecked
+            state = QtCore.Qt.Checked if p.fit and p.fittable else QtCore.Qt.Unchecked
             if name.checkState() != state:
                 name.setCheckState(state)
 
@@ -202,5 +215,4 @@ class ParameterTableAdapter:
         style = {}
         if p.constraint is not None and p.constraint.active:
             style = dict(font=_CONSTRAINED_FONT, brush=QtGui.QBrush(QtGui.QColor("blue")))
-        # The legacy styling itself, not its mirrored wrapper (which the guard mutes)
-        type(page).modifyViewOnRow.__wrapped__(page, row, model_key=self.model_key, **style)
+        page.modifyViewOnRow(row, model_key=self.model_key, **style)

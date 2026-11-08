@@ -14,7 +14,7 @@ import pytest
 from PySide6 import QtCore, QtWidgets
 
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
-from sas.qtgui.Perspectives.Fitting.UndoRedo import ParameterValueCommand
+from sas.qtgui.Perspectives.Fitting.model.commands import SnapshotCommand
 from sas.qtgui.Perspectives.Fitting.UnitTesting import golden_support as g
 
 
@@ -141,16 +141,30 @@ class RetentionTest:
         assert rows(page)["radius.width"][1:3] == ["True", "0.2"]
         assert page.logic.kernel_module.getParam("radius.width") == pytest.approx(0.2)
 
-    def testWithoutTheoryOnlyTheLastValueEditIsRetained(self, page):
-        """No model_data: page_parameters is the snapshot taken at the last main-table value edit."""
+    def testWithoutTheoryEverythingIsRetained(self, page):
+        """Register R-9, changed in Phase 5: retention reads the document's current state, so
+        fit-flag and polydispersity edits are kept also before any theory has been computed
+        (before, only the snapshot taken at the last main-table value edit was)."""
         g.set_cell(page._model_model, "radius", 1, "33.0")
-        g.set_checked(page._model_model, "length")  # fit-flag and poly edits do not refresh it
+        g.set_checked(page._model_model, "length")
         page.chkPolydispersity.setChecked(True)
         g.set_cell(page.polydispersity_widget.poly_model, "Distribution of radius", 1, "0.2")
         g.select_model(page, "Cylinder", "hollow_cylinder")
         assert rows(page)["radius"][2] == "33.0"
-        assert rows(page)["length"][1] == "False"
-        assert page.logic.kernel_module.getParam("radius.width") == 0
+        assert rows(page)["length"][1] == "True"
+        assert page.logic.kernel_module.getParam("radius.width") == pytest.approx(0.2)
+
+    def testUndoOfAModelSwitchRestoresTheModelAndItsValues(self, page):
+        g.set_cell(page._model_model, "radius", 1, "33.0")
+        g.select_model(page, "Cylinder", "hollow_cylinder")
+        g.set_cell(page._model_model, "radius", 1, "44.0")
+        page.undo_stack.undo()          # the value edit
+        page.undo_stack.undo()          # the model switch
+        assert page.cbModel.currentText() == "cylinder"
+        assert rows(page)["radius"][2] == "33.0"
+        page.undo_stack.redo()
+        assert page.cbModel.currentText() == "hollow_cylinder"
+        assert rows(page)["radius"][2] == "33.0"
 
     def testModelSwitchClearsErrors(self, computed):
         page = computed
@@ -209,17 +223,19 @@ class PasteAndLoadTest:
         assert message_box.called
         assert rows(sphere_page) == before
 
-    def testPasteKeepsCurrentModelAndRecordsOneCommandPerValue(self, cylinder_text, message_box, sphere_page):
-        """Today a paste pushes one ParameterValueCommand per changed main value, not one command."""
+    def testPasteKeepsCurrentModelAndRecordsOneCommand(self, cylinder_text, message_box, sphere_page):
+        """Register R-7, changed in Phase 5: a paste is one undoable step (§2.3)."""
         message_box.return_value.exec_.return_value = QtWidgets.QMessageBox.Ok
         depth = len(sphere_page.undo_stack._undo_stack)
+        before = rows(sphere_page)
         QtWidgets.QApplication.clipboard().setText(cylinder_text)
         sphere_page.clipboard_paste()
         assert sphere_page.cbModel.currentText() == "sphere"
         assert rows(sphere_page)["radius"][2] == "44.0"
         pushed = sphere_page.undo_stack._undo_stack[depth:]
-        assert len(pushed) > 1
-        assert all(isinstance(cmd, ParameterValueCommand) for cmd in pushed)
+        assert [type(cmd) for cmd in pushed] == [SnapshotCommand]
+        sphere_page.undo_stack.undo()
+        assert rows(sphere_page) == before
 
     def testProjectLoadSelectsModelAndKeepsTabName(self, cylinder_text):
         line_dict = {}
@@ -234,8 +250,8 @@ class PasteAndLoadTest:
         # The page takes the saved name, and saves it again (R-3, changed in Phase 3a)
         assert p.logic.kernel_module.name == "renamed"
         assert rows(p)["tab_name"] == ["tab_name", "renamed"]
-        # Today the load leaves value commands on the stack (§2.3 targets a cleared stack)
-        assert p.undo_stack.can_undo()
+        # Register R-8, changed in Phase 5: a project load clears the history (§2.3)
+        assert not p.undo_stack.can_undo()
         p.close()
 
 
