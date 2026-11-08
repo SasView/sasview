@@ -37,7 +37,7 @@ ADJUST_EPS = 1e-7
 logger = logging.getLogger(__name__)
 
 
-class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
+class InvariantWindow(Perspective, QtWidgets.QDialog, Ui_tabbedInvariantUI):
     """The controller responsible for managing signal slots connections for the gui and providing an interface to the data model."""
 
     name = "Invariant"
@@ -396,14 +396,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
     def isSerializable(self) -> bool:
         """Tell the caller that this perspective writes its state."""
         return True
-
-    def reject(self) -> None:
-        """Ignore QDialog's Esc-to-reject behaviour.
-
-        This perspective lives inside the MDI area, so the default reject()
-        would hide the widget without going through closeEvent(), leaving an
-        empty subwindow frame behind (see issue #4001).
-        """
 
     def closeEvent(self, event) -> None:
         """Overwrite QDialog close method to allow for custom widget close."""

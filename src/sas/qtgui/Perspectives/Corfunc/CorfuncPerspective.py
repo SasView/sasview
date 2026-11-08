@@ -41,7 +41,7 @@ logger = logging.getLogger(__name__)
 ADJUST_EPS = 1e-7
 
 
-class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
+class CorfuncWindow(Perspective, QtWidgets.QDialog, Ui_CorfuncDialog):
     """Displays the correlation function analysis of sas data."""
 
     name = "Corfunc"
@@ -815,15 +815,6 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         assert isinstance(value, bool)
 
         self._allow_close = value
-
-    def reject(self):
-        """
-        Ignore QDialog's Esc-to-reject behaviour
-
-        This perspective lives inside the MDI area, so the default reject()
-        would hide the widget without going through closeEvent(), leaving an
-        empty subwindow frame behind (see issue #4001).
-        """
 
     def closeEvent(self, event):
         """
