@@ -82,9 +82,9 @@ class ColumnUnit(QWidget):
     def onOptionChange(self):
         # If the new option is empty string, its probably because the current
         # options have been removed. Can safely ignore this.
-        self.column_changed.emit()
         new_option = self.col_widget.currentText()
         if new_option == '':
+            self.column_changed.emit()
             return
         try:
             self.updateUnits(self.unit_widget, new_option)
@@ -93,6 +93,9 @@ class ColumnUnit(QWidget):
             # the case in the real version so for now we'll just clear the unit
             # widget.
             self.unit_widget.clear()
+        # Only signal the change once the units match the new column. Otherwise the column editor synchronises the
+        # units of paired columns (e.g. I and dI) using the unit of the previous column.
+        self.column_changed.emit()
 
     @Slot()
     def onUnitChange(self):
