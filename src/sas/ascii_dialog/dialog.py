@@ -23,7 +23,7 @@ from PySide6.QtWidgets import (
 )
 
 from sasdata.ascii_reader_metadata import AsciiReaderMetadata
-from sasdata.data_io.importers.import_ascii import AsciiReaderParams, load_data, split_line
+from sasdata.data_io.importers.import_ascii import AsciiReaderParams, split_line
 from sasdata.dataset_types import DatasetType, angle_dim, dataset_types, one_dim, sesans, two_dim
 from sasdata.guess import guess_column_count, guess_columns, guess_starting_position
 
@@ -496,17 +496,3 @@ This could potentially be because the file {basename} an ASCII format.""")
         status = dialog.exec()
         if status == 1:
             self.internal_metadata = dialog.internal_metadata
-
-
-if __name__ == "__main__":
-    app = QApplication([])
-
-    dialog = AsciiDialog()
-    status = dialog.exec()
-    # 1 means the dialog was accepted.
-    if status == 1:
-        loaded = load_data(dialog.params)
-        for datum in loaded:
-            print(datum.summary())
-
-    exit()
