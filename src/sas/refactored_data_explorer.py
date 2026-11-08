@@ -133,6 +133,7 @@ class NewDataExplorer(QWidget):
         # use an empty tree view.
         self.tree_view = DataExplorerTree(self._data_manager, self)
         self.tree_view.current_datum_removed.connect(self.onRemove)
+        self.tree_view.load_requested.connect(self.onLoadFile)
 
         # While the tree is empty, show a hint that files can be loaded or dropped.
         self.drop_hint = DropHint(self)
@@ -165,7 +166,7 @@ class NewDataExplorer(QWidget):
 
     @Slot()
     def updateDropHint(self):
-        empty = self.tree_view.topLevelItemCount() == 0
+        empty = self.tree_view.dataItemCount() == 0
         self.tree_stack.setCurrentWidget(self.drop_hint if empty else self.tree_view)
 
     @Slot()
@@ -274,7 +275,7 @@ class NewDataExplorer(QWidget):
         if self._hasSupportedFiles(event):
             event.setDropAction(Qt.DropAction.CopyAction)
             event.accept()
-            self.drop_hint.setActive(True)
+            self._setDropActive(True)
         else:
             event.ignore()
 
@@ -285,11 +286,15 @@ class NewDataExplorer(QWidget):
         else:
             event.ignore()
 
+    def _setDropActive(self, active: bool):
+        self.drop_hint.setActive(active)
+        self.tree_view.setDropActive(active)
+
     def dragLeaveEvent(self, event: QDragLeaveEvent):
-        self.drop_hint.setActive(False)
+        self._setDropActive(False)
 
     def dropEvent(self, event: QDropEvent):
-        self.drop_hint.setActive(False)
+        self._setDropActive(False)
         filenames = list(self._droppedFiles(event))
         if not filenames:
             event.ignore()
