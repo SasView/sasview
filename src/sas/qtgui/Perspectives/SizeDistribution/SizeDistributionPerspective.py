@@ -144,6 +144,8 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         Overrides ``Perspective.undo_stack`` (which returns ``None``).
         """
         return self._undo_stack_obj
+
+    @property
     def supports_reports(self) -> bool:
         """Tell the caller that this perspective can generate reports."""
         return True
