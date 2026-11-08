@@ -583,7 +583,7 @@
     [
      true,
      "scale",
-     1,
+     1.0,
      "",
      [
       false,
@@ -621,7 +621,7 @@
     [
      true,
      "sld",
-     1,
+     1.0,
      "",
      [
       false,
@@ -697,7 +697,7 @@
     [
      true,
      "sld_solvent",
-     6,
+     6.0,
      "",
      [
       false,
@@ -773,7 +773,7 @@
     [
      true,
      "radius",
-     50,
+     50.0,
      "",
      [
       false,
@@ -906,7 +906,7 @@
     [
      true,
      "up_theta",
-     90.0,
+     0.0,
      "",
      [
       false,
@@ -955,17 +955,17 @@
   "theory_inputs": {
    "name": "M1",
    "params": {
-    "scale": 1,
+    "scale": 1.0,
     "background": 0.001,
-    "sld": 1,
+    "sld": 1.0,
     "sld_M0": 0.0,
     "sld_mtheta": 0.0,
     "sld_mphi": 0.0,
-    "sld_solvent": 6,
+    "sld_solvent": 6.0,
     "sld_solvent_M0": 0.0,
     "sld_solvent_mtheta": 0.0,
     "sld_solvent_mphi": 0.0,
-    "radius": 50,
+    "radius": 50.0,
     "radius_effective": 50.0,
     "volfraction": 0.3,
     "structure_factor_mode": 0,
@@ -1079,9 +1079,9 @@
    },
    "dispersion": {
     "radius": {
-     "width": 0,
+     "width": 0.0,
      "npts": 35,
-     "nsigmas": 3,
+     "nsigmas": 3.0,
      "type": "gaussian"
     }
    },
@@ -1092,17 +1092,17 @@
     "model": {
      "name": "M1",
      "params": {
-      "scale": 1,
+      "scale": 1.0,
       "background": 0.001,
-      "sld": 1,
+      "sld": 1.0,
       "sld_M0": 0.0,
       "sld_mtheta": 0.0,
       "sld_mphi": 0.0,
-      "sld_solvent": 6,
+      "sld_solvent": 6.0,
       "sld_solvent_M0": 0.0,
       "sld_solvent_mtheta": 0.0,
       "sld_solvent_mphi": 0.0,
-      "radius": 50,
+      "radius": 50.0,
       "radius_effective": 50.0,
       "volfraction": 0.3,
       "structure_factor_mode": 0,
@@ -1216,9 +1216,9 @@
      },
      "dispersion": {
       "radius": {
-       "width": 0,
+       "width": 0.0,
        "npts": 35,
-       "nsigmas": 3,
+       "nsigmas": 3.0,
        "type": "gaussian"
       }
      }

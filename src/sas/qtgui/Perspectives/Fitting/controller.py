@@ -1,26 +1,28 @@
 """
-FitPageController: the intents of a fit page (FW-MVC-DESIGN.md §3.1, Phase 5).
+FitPageController: the intents of a fit page (FW-MVC-DESIGN.md §3.1, Phases 5 and 6).
 
 Every user edit is an intent here: it writes the document first, and records an
-undoable command (``model/commands.py``) where the change is undoable. The views
-and the legacy kernel follow through the reverse syncs (``DocumentShadow.subscribe_reverse``).
+undoable command (``model/commands.py``) where the change is undoable. The views,
+the tables and the legacy kernel follow the document (``ParameterTableAdapter``,
+``SettingsSync``, ``LegacyKernelSync``).
 
-Until Phase 6 the legacy code still builds the tables, so a layout change (model,
-S(Q), category, shell count, 2D view) is built by the legacy builders. The shadow
-reads the new layout back, ``layout_changed`` then carries the user's settings over
-(§2.6) and ``record`` stores a ``SnapshotCommand``. Undo restores a snapshot,
-rebuilding the tables for its selection first.
+A layout change (model, S(Q), category, shell count, 2D view, a data load that changes
+is2D) takes the new layout from ``KernelBuilder.layout``, carries the user's settings
+over (§2.6) and records one ``SnapshotCommand``. Undo restores a snapshot, which carries
+its own layout.
 
-The page is the presenter: it builds tables, computes theory and shows messages.
+The page is the presenter: it computes theory, asks questions and shows messages.
 """
 from __future__ import annotations
 
 import contextlib
+import copy
 import dataclasses
-import functools
 
-from sas.qtgui.Perspectives.Fitting.model import retention, serializer
+from sas.qtgui.Perspectives.Fitting.FittingConstants import CATEGORY_CUSTOM, STRUCTURE_DEFAULT
+from sas.qtgui.Perspectives.Fitting.model import retention, rules, serializer
 from sas.qtgui.Perspectives.Fitting.model.commands import (
+    ApplyFitResultCommand,
     SetFlagCommand,
     SetOptionsCommand,
     SetParameterCommand,
@@ -28,30 +30,9 @@ from sas.qtgui.Perspectives.Fitting.model.commands import (
     SnapshotCommand,
 )
 from sas.qtgui.Perspectives.Fitting.model.events import Origin
+from sas.qtgui.Perspectives.Fitting.model.parameters import ModelSelection
 
 _APPLY_FLAG = {"polydispersity": "applyPolydispersity", "magnetism": "applyMagnetism", "chain_fit": "applyChainFit"}
-
-
-def structural(description: str):
-    """Decorator for the page's layout slots (model, S(Q), category, shells, 2D view).
-
-    When the user runs one, it is built by the legacy code with history suppressed,
-    and the result is recorded as one ``SnapshotCommand``. Nested calls, rebuilds for
-    undo or load, and calls before the page is set up just run.
-    """
-    def decorator(method):
-        @functools.wraps(method)
-        def wrapper(page, *args):
-            controller = getattr(page, "controller", None)
-            if controller is None or not controller.records_layout():
-                return method(page, *args)
-            controller.layout_seen = False
-            with page.undo_stack.suppressed():
-                result = method(page, *args)
-            controller.record(description)
-            return result
-        return wrapper
-    return decorator
 
 
 class FitPageController:
@@ -59,9 +40,7 @@ class FitPageController:
     def __init__(self, page) -> None:
         self._page = page
         self.document = page.document
-        self._rebuilding = False
         self._anchor = None          # the last state with a model: what a layout change retains from
-        self.layout_seen = False     # a layout read-back happened in the current structural slot
 
     @property
     def history(self):
@@ -76,6 +55,9 @@ class FitPageController:
         """A legacy writer is running: the shadow reads its whole change back when it ends, so an
         edit it fires is not written to the document on its own (that would publish a half-done state)."""
         return self._page.shadow.depth > 0
+
+    def _status(self, message: str) -> None:
+        self._page.communicator.statusBarUpdateSignal.emit(message)
 
     # -- for the commands -------------------------------------------------
 
@@ -93,11 +75,7 @@ class FitPageController:
         return Origin.REDO if self.history.replaying else Origin.USER
 
     def restore(self, snapshot, origin: Origin) -> None:
-        """Bring the page to *snapshot*: rebuild the tables if its layout differs, then restore it."""
-        doc = self.document
-        if snapshot.selection != doc.selection or snapshot.flags.view_2d != doc.flags.view_2d:
-            with self.rebuilding():
-                self._page.rebuildForSelection(snapshot.selection, snapshot.flags.view_2d)
+        """Bring the page to *snapshot*, layout included."""
         with self.transaction(origin, recalculate=True) as tx:
             tx.restore(snapshot)
 
@@ -122,7 +100,7 @@ class FitPageController:
         try:
             self.history.execute(SetParameterCommand(key, old, new))
         except ValueError as error:
-            self._page.communicator.statusBarUpdateSignal.emit(str(error))
+            self._status(str(error))
             self._page.shadow.resync({key})
 
     def set_fit_flag(self, key: str, fit: bool) -> None:
@@ -140,6 +118,35 @@ class FitPageController:
             tx.set_constraint(key, constraint)
             if fields:
                 tx.set_parameter(key, **fields)
+
+    def set_constraint_active(self, key: str, active: bool) -> None:
+        """Activate or deactivate the constraint on *key* (the constraint tab, or a single-page fit)."""
+        current = self.document.parameters[key].constraint
+        if current is None or current.active == active:
+            return
+        constraint = copy.deepcopy(current)
+        constraint.active = active
+        self.set_constraint(key, constraint)
+
+    def rename(self, mnemonic: str, old: str) -> None:
+        """The page's new name, and every constraint expression of this page that used the old one.
+        Not undoable, as before (the constraint tab checks the name)."""
+        with self.transaction(Origin.SYSTEM) as tx:
+            if mnemonic != self.document.identity.mnemonic:
+                tx.set_mnemonic(mnemonic)
+            self._replace_in_constraints(tx, old, mnemonic)
+
+    def replace_page_name(self, old: str, new: str) -> None:
+        """Another page was renamed: the constraint expressions that refer to it follow."""
+        with self.transaction(Origin.SYSTEM) as tx:
+            self._replace_in_constraints(tx, old, new)
+
+    def _replace_in_constraints(self, tx, old: str, new: str) -> None:
+        for p in self.document.constrained():
+            if p.constraint.func and old in p.constraint.func:
+                constraint = copy.deepcopy(p.constraint)
+                constraint.func = constraint.func.replace(old, new)
+                tx.set_constraint(p.key, constraint)
 
     # -- page settings --------------------------------------------------------
 
@@ -176,54 +183,81 @@ class FitPageController:
         try:
             self.history.execute(command(old, new))
         except ValueError as error:
-            self._page.communicator.statusBarUpdateSignal.emit(str(error))
+            self._status(str(error))
 
-    # -- layout changes, built by the legacy code -----------------------------
+    # -- layout changes (§2.6) ----------------------------------------------------
 
-    @contextlib.contextmanager
-    def rebuilding(self):
-        """The legacy builders run for an undo, a load or a paste: no retention, nothing recorded."""
-        was, self._rebuilding = self._rebuilding, True
+    def select_model(self, category: str, model: str = "", structure: str = "",
+                     description: str = "Select model") -> None:
+        """Category, model and structure factor, as the combo boxes give them ("" for none)."""
+        structure = "" if structure == STRUCTURE_DEFAULT else structure
+        self._change_layout(description, ModelSelection(category, model, structure, category == CATEGORY_CUSTOM))
+
+    def set_multiplicity(self, shells: int) -> None:
+        selection = dataclasses.replace(self.document.selection, multiplicity=shells)
+        self._change_layout("Change the number of shells", selection)
+
+    def set_view_2d(self, view_2d: bool) -> None:
+        self._change_layout("Toggle 2D view", self.document.selection, view_2d)
+
+    def relayout(self) -> None:
+        """The data changed (a load clears the history): the layout follows is2D."""
+        self._change_layout(None, self.document.selection)
+
+    def _change_layout(self, description: str | None, selection: ModelSelection,
+                       view_2d: bool | None = None) -> bool:
+        """The layout of *selection*, with the user's settings carried over from the last state that
+        had a model (so that a category switch, which empties the table, still retains them).
+        Recorded as one undoable step if *description* is given."""
+        if self.muted or self._in_legacy_writer():
+            return False
+        doc = self.document
+        view_2d = doc.flags.view_2d if view_2d is None else view_2d
         try:
-            with self.history.suppressed():
-                yield
-        finally:
-            self._rebuilding = was
-
-    def records_layout(self) -> bool:
-        shadow = self._page.shadow
-        return shadow.active and not shadow.applying and shadow.depth == 0 and not self._rebuilding
-
-    def layout_changed(self, before) -> None:
-        """Called by the shadow after it read a rebuilt layout back: carry the settings over (§2.6).
-
-        The source is the last state that had a model, so that a category switch (which empties
-        the table until a model is chosen) still retains, as before.
-        """
-        self.layout_seen = True
-        if self._rebuilding:
-            return
+            layout = self._page.kernel_builder.layout(selection, rules.is_2d(doc, view_2d))
+        except KeyError as error:
+            self._status(f"Model {error} is not available.")
+            return False
+        shells = layout.multiplicity()
+        selection = dataclasses.replace(selection, multiplicity=None if shells is None else int(shells.value))
+        before = doc.snapshot()
         if len(before.parameters):
             self._anchor = before
-        doc = self.document
-        if self._anchor is None or not len(doc.parameters):
-            return
-        symbols = set(doc.symbol_table()) | self._page.otherSymbols()
-        retained, dropped = retention.retain(self._anchor.parameters, doc.parameters.copy(), symbols)
-        if retained != doc.parameters:
-            with self.transaction(Origin.USER) as tx:
-                tx.set_parameters(retained)
+        dropped = []
+        if self._anchor is not None:
+            symbols = set(doc.symbol_table(layout)) | self._page.otherSymbols()
+            layout, dropped = retention.retain(self._anchor.parameters, layout, symbols)
+        if (selection, view_2d) == (doc.selection, doc.flags.view_2d) and layout == doc.parameters:
+            return False
+        with self.transaction(Origin.USER) as tx:
+            tx.set_selection(selection)
+            if view_2d != doc.flags.view_2d:
+                tx.set_flags(view_2d=view_2d)
+            tx.set_parameters(layout)
         if dropped:
-            self._page.communicator.statusBarUpdateSignal.emit(
-                f"Constraints on {', '.join(dropped)} removed: they refer to parameters that no longer exist.")
+            self._status(f"Constraints on {', '.join(dropped)} removed: they refer to parameters that no longer exist.")
+        if description is not None and self._anchor is not None and len(doc.parameters):
+            new = doc.snapshot()
+            if new != self._anchor:
+                self.history.push_applied(SnapshotCommand(description, self._anchor, new))
+        self._page.updateData()
+        return True
 
-    def record(self, description: str) -> None:
-        """After a structural slot: one undoable step from the state before it."""
-        if not self.layout_seen or self._anchor is None or not len(self.document.parameters):
-            return
-        new = self.document.snapshot()
-        if new != self._anchor:
-            self.history.push_applied(SnapshotCommand(description, self._anchor, new))
+    # -- fit results ----------------------------------------------------------------
+
+    def apply_fit(self, param_dict: dict) -> None:
+        """A single fit's values and errors ({key: (value, error)}): one undoable step (R-2)."""
+        params = self.document.parameters
+        after = {key: value for key, (value, _) in param_dict.items() if key in params}
+        before = {key: params[key].value for key in after}
+        with self.transaction(Origin.JOB) as tx:
+            for p in params:
+                if p.key in after:
+                    tx.set_parameter(p.key, value=after[p.key], error=param_dict[p.key][1])
+                elif p.error is not None:
+                    tx.set_parameter(p.key, error=None)
+        if before != after:
+            self.history.push_applied(ApplyFitResultCommand(before, after))
 
     # -- paste and project load (§2.3) -------------------------------------------
 
@@ -236,8 +270,17 @@ class FitPageController:
                 self.history.push_applied(SnapshotCommand("Paste parameters", before, new))
             self.request_theory()
 
+    def load_selection(self, line_dict: dict) -> None:
+        """The model, S(Q) and category of a project page (before the view asks about a mismatch)."""
+        payload = serializer.decode(line_dict)
+        if payload.category:
+            self._change_layout(None, ModelSelection(
+                payload.category, payload.model or "",
+                "" if payload.structure in (None, STRUCTURE_DEFAULT) else payload.structure,
+                payload.category == CATEGORY_CUSTOM))
+
     def load_page(self, line_dict: dict, mnemonic: str | None = None) -> None:
-        """A project page, onto the model the view has selected for it. Clears the history (R-8)."""
+        """A project page, onto the model selected for it (``load_selection``). Clears the history (R-8)."""
         if self._apply_page(serializer.decode(line_dict), mnemonic):
             self.request_theory()
         self.history.clear()
@@ -248,15 +291,14 @@ class FitPageController:
         if selection.multiplicity is not None and payload.multiplicity is not None:
             selection = dataclasses.replace(selection, multiplicity=payload.multiplicity)
         view_2d = payload.flags.get("view_2d", doc.flags.view_2d)
-        if selection != doc.selection or (view_2d != doc.flags.view_2d and not doc.is_loaded()):
-            with self.rebuilding():
-                self._page.rebuildForSelection(selection, view_2d)
+        if selection != doc.selection or view_2d != doc.flags.view_2d:
+            self._change_layout(None, selection, view_2d)
         try:
             with self.transaction(Origin.USER) as tx:
                 serializer.apply_payload(tx, payload)
                 if mnemonic is not None and mnemonic != doc.identity.mnemonic:
                     tx.set_mnemonic(mnemonic)
         except ValueError as error:
-            self._page.communicator.statusBarUpdateSignal.emit(f"The parameters could not be applied: {error}")
+            self._status(f"The parameters could not be applied: {error}")
             return False
         return True

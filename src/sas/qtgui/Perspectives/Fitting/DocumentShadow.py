@@ -1,39 +1,27 @@
 """
-Phase 2 shadow: keeps ``FittingWidget.document`` in step with the legacy stores (FW-MVC-DESIGN.md §6).
+The shadow (FW-MVC-DESIGN.md §6, Phases 2 to 6): reads the changes of the legacy writers
+that are not controller intents yet back into ``FittingWidget.document``.
 
-The legacy stores (item models, kernel, widget fields) stay authoritative.
-Every legacy writer runs inside ``shadow.operation(*sections)``, usually via
-the ``@mirrors`` decorator. When the outermost operation ends, the named
-sections are read back from the legacy stores into the document, in one
-transaction:
+Since Phase 6 the document owns the layout and the user's edits are intents. What is
+left are the legacy writers of data and cells: data load and masks, SESANS, the
+computed effective radius, batch completion, and the constraint tab's cell edits.
+Each runs inside ``shadow.operation(*sections)``, usually via ``@mirrors``. When the
+outermost operation ends, the named sections are read back from the legacy stores in
+one transaction, writing only the fields that differ:
 
-- ``layout``: the selection or the tables were rebuilt. The document gets a
-  fresh ``KernelBuilder.layout`` (only if it differs) and every other section.
-- ``parameters``: values, bounds, fit flags, errors, dispersions, constraints.
-- ``data``, ``options``, ``smearing``, ``flags``, ``identity``.
+- ``parameters``: values, bounds, fit flags, errors, dispersions, constraints (from the tables);
+- ``data``, ``options``, ``smearing``, ``flags`` (from the widgets).
 
-Only fields that differ are written, so each ChangeSet names what changed.
-If the legacy stores cannot be read back, the error is logged (debug) and kept in
-``shadow.errors`` (the tests assert it stays empty); the application goes on.
+A read-back that fails never raises (writers run in Qt slots): the error is logged at
+debug level and kept in ``shadow.errors``, and the next read-back reads every section.
 
-Readers (Phase 3) are decorated with ``@reads(doc_reader)``: they answer from the
-document while it is in step with the page (``shadow.in_sync``). Inside a
-mirrored operation the document does not hold the writer's change yet, and after
-a failed read-back it is stale; then the legacy reader answers.
+The document-to-legacy syncs (``ParameterTableAdapter``, ``SettingsSync``) subscribe through
+``subscribe_reverse``: they see only document-first changes, never the shadow's own
+read-backs. While they run (``applying``), the edits their writes fire are ignored
+(``controller.muted``), and a legacy writer they call is read back afterwards (``flush``),
+because the document cannot be changed while it publishes.
 
-Reverse synchronization (Phase 4): ``subscribe_reverse(fn)`` subscribes the
-document-to-legacy syncs (``ParameterTableAdapter``, ``LegacyKernelSync``,
-``SettingsSync``). They see only document-first changes, never the shadow's own
-read-backs (the legacy stores already hold those). While they run (``applying``),
-the edit slots their writes fire return at once (they check ``controller.muted``),
-and the legacy writers they call are read back afterwards (``flush``), because the
-document cannot be changed while it publishes.
-
-Since Phase 5 the user's edits are controller intents that write the document
-first. The shadow still mirrors the writers that are not intents yet: data load and
-masks, fit completion, batch, SESANS, the constraint tab's writes into other pages,
-and the legacy table builders, after which ``controller.layout_changed`` retains the
-user's settings. Removed when those move (Phases 6 and 7).
+Removed when the last legacy writers move (Phase 7).
 """
 from __future__ import annotations
 
@@ -46,14 +34,12 @@ import logging
 from PySide6 import QtCore, QtWidgets
 
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
-from sas.qtgui.Perspectives.Fitting.FittingConstants import CATEGORY_CUSTOM, STRUCTURE_DEFAULT
 from sas.qtgui.Perspectives.Fitting.model.events import PARAMETER_FIELDS, ChangeSet, Origin, ParametersChanged
 from sas.qtgui.Perspectives.Fitting.model.parameters import (
     ArrayDistribution,
     DataRef,
     Dispersion,
     FitOptions,
-    ModelSelection,
     PageMode,
     RowKind,
     Smearing,
@@ -65,7 +51,7 @@ from sas.qtgui.Utilities import GuiUtils
 
 logger = logging.getLogger(__name__)
 
-SECTIONS = ("data", "flags", "options", "layout", "parameters", "smearing", "identity")
+SECTIONS = ("data", "flags", "options", "parameters", "smearing")
 
 
 class ShadowError(RuntimeError):
@@ -100,25 +86,6 @@ def mirrors(*sections: str):
     return decorator
 
 
-def reads(doc_reader):
-    """Decorator for legacy readers: return ``doc_reader(self, *args)`` while the page's document is in sync.
-
-    Otherwise (inside a mirrored operation, after a failed read-back, outside a page) the legacy
-    reader runs. The tests compare the two: ``wrapper.from_document`` is *doc_reader*, and inside
-    ``shadow.operation()`` the wrapper answers from the legacy stores.
-    """
-    def decorator(method):
-        @functools.wraps(method)
-        def wrapper(self, *args, **kwargs):
-            shadow = _shadow_of(self)
-            if shadow is not None and shadow.in_sync:
-                return doc_reader(self, *args, **kwargs)
-            return method(self, *args, **kwargs)
-        wrapper.from_document = doc_reader
-        return wrapper
-    return decorator
-
-
 def _shadow_of(widget):
     """The DocumentShadow of the page that *widget* is, or belongs to; None outside a page."""
     for owner in (widget, getattr(widget, "_fitting_widget", None), getattr(widget, "parent", None)):
@@ -142,14 +109,8 @@ class DocumentShadow:
         self._reading_back = False     # the document is publishing the shadow's own read-back
         self._applying = False         # a reverse sync is writing the legacy stores
         self._deferred: set[str] = set()   # sections of legacy writers run while applying
-        self._layout_before = None     # the document before the current layout operation
         self._reverse: list = []       # the reverse syncs, for resync
         self.errors: list[str] = []    # read-back failures; the tests assert there are none
-
-    @property
-    def in_sync(self) -> bool:
-        """The document holds the page's current state, so readers may use it."""
-        return self.active and self._depth == 0 and not self._stale
 
     def start(self) -> None:
         """Called at the end of FittingWidget.__init__: seed the document from the finished page."""
@@ -164,11 +125,6 @@ class DocumentShadow:
     @property
     def depth(self) -> int:
         return self._depth
-
-    @property
-    def building(self) -> bool:
-        """A legacy table builder is running: cell edits are part of the rebuild, not the user's."""
-        return self._depth > 0 and "layout" in self._pending
 
     def subscribe_reverse(self, fn):
         """Subscribe a document-to-legacy sync: *fn(change)* for document-first changes."""
@@ -202,8 +158,6 @@ class DocumentShadow:
 
     @contextlib.contextmanager
     def operation(self, *sections: str):
-        if self.active and "layout" in sections and self._layout_before is None:
-            self._layout_before = self._page.document.snapshot()
         self._depth += 1
         self._pending.update(sections)
         try:
@@ -212,11 +166,8 @@ class DocumentShadow:
             self._depth -= 1
             if self._depth == 0:
                 pending, self._pending = self._pending, set()
-                before, self._layout_before = self._layout_before, None
                 if self.active:
                     self._sync(pending)
-                if before is not None and self.active and not self._stale:
-                    self._page.controller.layout_changed(before)
 
     # ------------------------------------------------------------------
 
@@ -224,7 +175,7 @@ class DocumentShadow:
         if not sections:
             return
         doc = self._page.document
-        if "layout" in sections or self._stale:
+        if self._stale:
             sections = set(SECTIONS)
         self._reading_back = True
         try:
@@ -237,7 +188,7 @@ class DocumentShadow:
             # Never raise: writers run in Qt slots, where an exception would be lost anyway.
             self._stale = True
             self.errors.append(f"{type(error).__name__}: {error} (sections {sorted(sections)})")
-            # Debug level: while the document is stale the readers use the legacy stores, and the tests check it.
+            # Debug level: the next read-back reads every section, and the tests check the errors.
             logger.debug("The fit page document is out of step with the page (sections %s)", sorted(sections),
                          exc_info=True)
         finally:
@@ -289,28 +240,6 @@ class DocumentShadow:
         smearing = Smearing(mode, accuracy, d_down, d_up)
         if smearing != doc.smearing:
             tx.set_smearing(smearing)
-
-    def _sync_identity(self, doc, tx) -> None:
-        kernel = self._page.logic.kernel_module
-        if kernel is not None and kernel.name and kernel.name != doc.identity.mnemonic:
-            tx.set_mnemonic(kernel.name)
-
-    def _sync_layout(self, doc, tx) -> None:
-        selection = self._selection()
-        layout = self._page.kernel_builder.layout(selection, doc.is2D())
-        tx.set_selection(selection)
-        if not layout.same_layout(doc.parameters):
-            tx.set_parameters(layout)
-
-    def _selection(self) -> ModelSelection:
-        page = self._page
-        category = page.cbCategory.currentText()
-        model = page.cbModel.currentText()
-        structure = page.cbStructureFactor.currentText()
-        structure = "" if structure in ("", STRUCTURE_DEFAULT) else structure
-        kernel = page.logic.kernel_module
-        shells = page.logic.current_shell_displayed if kernel is not None and kernel.is_multiplicity_model else None
-        return ModelSelection(category, model, structure, category == CATEGORY_CUSTOM, shells)
 
     # -- parameters -----------------------------------------------------
 

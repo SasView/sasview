@@ -1,19 +1,15 @@
 """
-The shadow invariant (FW-MVC-DESIGN.md §6, Phases 2 and 3), test-only.
+The page invariant (FW-MVC-DESIGN.md §6, Phases 2 to 6), test-only.
 
-``check_shadow(page)`` asserts that ``page.document`` agrees with the legacy stores:
+``check_shadow(page)`` asserts that the views and the legacy kernel show ``page.document``:
 
-- rows: the serializer's legacy rows equal the legacy ``getFitPage() + getFitModel()``;
-- projection: the document, as the Phase 4 adapters will show it, equals the
-  three live item models (row order, text, check state, checkability,
-  editability, error column);
-- kernel: the document's effective engine inputs equal the legacy kernel's
-  (``updateKernelModelWithExtraParams`` applied to a copy, as theory does);
-- readers: every reader that answers from the document (``@reads``) gives the
-  legacy reader's answer, and so does ``prepareFitters``' choice of parameters.
+- projection: the three item models (row order, text, check state, checkability,
+  editability, error column), as the table adapters build and patch them;
+- kernel: ``logic.kernel_module`` holds the document's effective engine state
+  (``LegacyKernelSync``), as theory and fitting see it.
 
-The legacy answers are read inside ``page.shadow.operation()``, where the
-``@reads`` readers fall back to the legacy stores.
+(Until Phase 5 it also compared the legacy rows and readers with the document; since
+Phase 6 they are read from the document.)
 
 ``ShadowChecker`` runs the check on every committed ChangeSet of a page and
 collects failures, so that a failure inside a Qt slot is not lost; tests
@@ -21,15 +17,12 @@ call ``assert_ok()`` at teardown.
 """
 from __future__ import annotations
 
-import copy
 import math
 
 from PySide6 import QtCore, QtWidgets
 
 from sas.qtgui.Perspectives.Fitting.FittingUtilities import header_error_caption
-from sas.qtgui.Perspectives.Fitting.model import serializer
 from sas.qtgui.Perspectives.Fitting.model.parameters import RowKind, Table, ValueKind
-from sas.qtgui.Perspectives.Fitting.UnitTesting.document_fixtures import jsonable, same
 
 
 def _number(text):
@@ -47,23 +40,6 @@ def _close(a, b) -> bool:
 
 def _expect(condition: bool, message: str) -> None:
     assert condition, message
-
-
-def _register_r11(page) -> bool:
-    """Register R-11: the legacy readers see parameters when the current FittingLogic has a kernel,
-    the document when it has parameters. They disagree with a category but no model chosen (stale
-    kernel) and on a batch page showing a dataset other than the first (no kernel)."""
-    return (page.logic.kernel_module is None) != (not len(page.document.parameters))
-
-
-def check_rows(page) -> None:
-    with page.shadow.operation():
-        legacy = jsonable(page.getFitPage() + page.getFitModel())
-    rows = jsonable(serializer.legacy_rows(page.document))
-    if _register_r11(page):
-        # Only the page rows are compared
-        legacy, rows = (r[next(i for i, row in enumerate(r) if row[0] == "is_data"):] for r in (legacy, rows))
-    same(rows, legacy, "rows")
 
 
 def _check_table_errors(where: str, has_column: bool, doc, header_model) -> None:
@@ -144,13 +120,12 @@ def check_projection(page) -> None:
 
 
 def check_kernel(page) -> None:
-    """The document's effective engine state equals the legacy kernel's, as theory sees it."""
+    """The live kernel holds the document's effective engine state, as theory and fitting see it."""
     kernel = page.logic.kernel_module
     doc = page.document
     if kernel is None or not len(doc.parameters):
         return
-    effective = copy.deepcopy(kernel)
-    page.updateKernelModelWithExtraParams(effective)
+    effective = kernel
     _expect(effective.name == doc.identity.mnemonic, f"kernel name {effective.name!r}, mnemonic "
                                                      f"{doc.identity.mnemonic!r}")
     for p in doc.parameters.by_table(Table.MAIN):
@@ -176,30 +151,9 @@ def check_kernel(page) -> None:
         _expect(_close(float(effective.getParam(p.key)), float(p.value) if magnet_on else 0.0), f"kernel {p.key}")
 
 
-READERS = ["haveParamsToFit", "getConstraintsForAllModels", "getComplexConstraintsForAllModels",
-           "_report_parameters"]
-KERNEL_READERS = ["canHaveMagnetism", "getSymbolDict"]          # R-11: the legacy ones need a kernel
-MODEL_READERS = ["getComplexConstraintsForModel", "getFullConstraintNameListForModel"]
-
-
-def check_readers(page) -> None:
-    readers = READERS + ([] if _register_r11(page) else KERNEL_READERS)
-    calls = [(name, ()) for name in readers]
-    calls += [(name, (key,)) for name in MODEL_READERS for key in ("standard", "poly", "magnet")]
-    with page.shadow.operation():
-        legacy = [getattr(page, name)(*args) for name, args in calls]
-        legacy_fit = page.fitting_controller.legacy_fit_inputs()
-    for (name, args), expected in zip(calls, legacy):
-        same(jsonable(getattr(type(page), name).from_document(page, *args)), jsonable(expected), f"{name}{args}")
-    if page.data_is_loaded:
-        same(list(page.fitting_controller.document_fit_inputs()), list(legacy_fit), "prepareFitters inputs")
-
-
 def check_shadow(page) -> None:
-    check_rows(page)
     check_projection(page)
     check_kernel(page)
-    check_readers(page)
 
 
 class ShadowChecker:

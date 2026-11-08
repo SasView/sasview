@@ -40,8 +40,8 @@ def page():
 
 def testSeededAtConstruction():
     page = g.new_page()
-    assert page.document.revision > 0 and page.document.identity.mnemonic == "M1"
-    assert not page.document.is_loaded()
+    assert page.document.identity.mnemonic == "M1"
+    assert not page.document.is_loaded() and not len(page.document.parameters)
     page.close()
 
 
@@ -82,10 +82,9 @@ def testOptionsAndConstraint(page):
     assert page.changes[-1].get(ConstraintsChanged).keys == {"radius"}
 
 
-def testRenameReachesIdentity(page):
-    with page.shadow.operation("identity"):
-        page.logic.kernel_module.name = "sample"
-    assert page.document.identity.mnemonic == "sample"
+def testRenameReachesIdentityAndTheKernel(page):
+    page.controller.rename("sample", "M1")
+    assert page.document.identity.mnemonic == "sample" == page.logic.kernel_module.name
     assert "sample.radius" in page.document.symbol_table()
 
 
@@ -149,29 +148,18 @@ def testReadBackFailureIsRecordedNotRaised(page):
     page._model_model.removeRow(page._model_model.rowCount() - 1)
 
 
-def radius_text(page) -> str:
-    return next(row for row in page.getFitPage() if row[0] == "radius")[2]
-
-
-def testReadersAnswerFromTheDocumentOutsideOperations(page):
-    """Phase 3: the document writes numbers canonically (R-6), the table cell says "20"."""
-    assert page.shadow.in_sync and radius_text(page) == "20.0"
-    with page.shadow.operation():
-        assert not page.shadow.in_sync and radius_text(page) == "20"
-
-
-def testStaleDocumentFallsBackUntilAReadBackSucceeds(page, monkeypatch):
+def testAFailedReadBackRereadsEverySectionNextTime(page, monkeypatch):
     def fail(doc, tx):
         raise RuntimeError("cannot read the options")
     monkeypatch.setattr(page.shadow, "_sync_options", fail)
     with page.shadow.operation("options"):              # a legacy writer whose read-back fails
         page.q_range_min = 0.01
-    assert not page.shadow.in_sync and radius_text(page) == "20"
+    assert page.shadow.errors and page.document.options.qmin != 0.01
     page.shadow.errors.clear()
     monkeypatch.undo()
     with page.shadow.operation("flags"):                # the next read-back re-reads every section
         pass
-    assert page.shadow.in_sync and page.document.options.qmin == 0.01
+    assert page.document.options.qmin == 0.01
 
 
 def testDecoratorPassesOnlyAcceptedSignalArguments():

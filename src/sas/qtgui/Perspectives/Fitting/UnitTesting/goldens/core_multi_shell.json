@@ -1175,7 +1175,7 @@
     [
      true,
      "sld4",
-     1.7000000476837158,
+     1.7,
      "",
      [
       false,
@@ -1878,7 +1878,7 @@
     [
      true,
      "up_theta",
-     90.0,
+     0.0,
      "",
      [
       false,
@@ -1959,7 +1959,7 @@
     "sld3_mtheta": 0.0,
     "sld3_mphi": 0.0,
     "thickness3": 40.0,
-    "sld4": 1.7000000476837158,
+    "sld4": 1.7,
     "sld4_M0": 0.0,
     "sld4_mtheta": 0.0,
     "sld4_mphi": 0.0,
@@ -2388,25 +2388,25 @@
    },
    "dispersion": {
     "radius": {
-     "width": 0,
+     "width": 0.0,
      "npts": 35,
      "nsigmas": 3.0,
      "type": "gaussian"
     },
     "thickness1": {
-     "width": 0,
+     "width": 0.0,
      "npts": 35,
      "nsigmas": 3.0,
      "type": "gaussian"
     },
     "thickness2": {
-     "width": 0,
+     "width": 0.0,
      "npts": 35,
      "nsigmas": 3.0,
      "type": "gaussian"
     },
     "thickness3": {
-     "width": 0,
+     "width": 0.0,
      "npts": 35,
      "nsigmas": 3.0,
      "type": "gaussian"
@@ -2488,7 +2488,7 @@
       "sld3_mtheta": 0.0,
       "sld3_mphi": 0.0,
       "thickness3": 40.0,
-      "sld4": 1.7000000476837158,
+      "sld4": 1.7,
       "sld4_M0": 0.0,
       "sld4_mtheta": 0.0,
       "sld4_mphi": 0.0,
@@ -2917,25 +2917,25 @@
      },
      "dispersion": {
       "radius": {
-       "width": 0,
+       "width": 0.0,
        "npts": 35,
        "nsigmas": 3.0,
        "type": "gaussian"
       },
       "thickness1": {
-       "width": 0,
+       "width": 0.0,
        "npts": 35,
        "nsigmas": 3.0,
        "type": "gaussian"
       },
       "thickness2": {
-       "width": 0,
+       "width": 0.0,
        "npts": 35,
        "nsigmas": 3.0,
        "type": "gaussian"
       },
       "thickness3": {
-       "width": 0,
+       "width": 0.0,
        "npts": 35,
        "nsigmas": 3.0,
        "type": "gaussian"

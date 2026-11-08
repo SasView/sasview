@@ -169,9 +169,8 @@ def _kernel_state(kernel) -> dict:
 def _theory_inputs(page) -> dict | None:
     if page.logic.kernel_module is None:
         return None
-    model = copy.deepcopy(page.logic.kernel_module)
-    page.updateKernelModelWithExtraParams(model)
-    result = _kernel_state(model)
+    # The kernel holds the effective state theory uses (KernelBuilder.build)
+    result = _kernel_state(page.logic.kernel_module)
     result["smearer"] = type(page.smearing_widget.smearer()).__name__
     return result
 
@@ -385,9 +384,7 @@ def case_two_pages():
     second = new_page(tab_id=2, data=make_data1d("d2", "data2"))
     select_model(second, "Cylinder", "cylinder")
     # What ConstraintWidget.onTabCellEdit does on a rename
-    with first.shadow.operation("identity"):
-        first.logic.kernel_module.name = "sample"
-    first.replaceConstraintName("M1", "sample")
+    first.controller.rename("sample", "M1")
     second.replaceConstraintName("M1", "sample")
     constraint = Constraint(param="radius", func="sample.radius", value_ex="sample.radius")
     second.addConstraintToRow(constraint, find_row(second._model_model, "radius"))

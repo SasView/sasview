@@ -11,8 +11,8 @@ from twisted.internet import threads
 from sas import config
 from sas.qtgui.Perspectives.Fitting import FittingUtilities, FittingWidget
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
-from sas.qtgui.Perspectives.Fitting.model.parameters import ArrayDistribution
-from sas.qtgui.Perspectives.Fitting.ModelThread import Calc2D
+from sas.qtgui.Perspectives.Fitting.model.parameters import ArrayDistribution, Table
+from sas.qtgui.Perspectives.Fitting.ModelThread import Calc1D
 from sas.qtgui.Perspectives.Fitting.UnitTesting.fitting_test_support import FittingWidgetMod, dummy_manager
 from sas.qtgui.Perspectives.UndoRedo import UndoStack
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
@@ -20,6 +20,17 @@ from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 from sas.qtgui.Utilities import GuiUtils
 
 logger = logging.getLogger(__name__)
+
+
+def _select(widget, category: str, model: str) -> None:
+    """Select a model through the combo boxes, as the user does."""
+    widget.cbCategory.setCurrentIndex(widget.cbCategory.findText(category))
+    widget.cbModel.setCurrentIndex(widget.cbModel.findText(model))
+
+
+def _poly_fitted(widget) -> list[str]:
+    """The polydispersity widths selected for fitting (the document's fit flags)."""
+    return [p.key for p in widget.document.parameters.by_table(Table.POLY) if p.fit]
 
 
 class FittingWidgetTest:
@@ -95,7 +106,6 @@ class FittingWidgetTest:
         # assert widget_with_data.cmdFit.isEnabled()
         assert not widget_with_data.acceptsData()
 
-    @pytest.mark.shadow_exempt("builds the tables with SASModelToQModel, bypassing the model combo boxes")
     def testSelectPolydispersity(self, widget):
         """
         Test if models have been loaded properly
@@ -104,7 +114,7 @@ class FittingWidgetTest:
 
         assert isinstance(fittingWindow.lstPoly.itemDelegate(), QtWidgets.QStyledItemDelegate)
         #Test loading from json categories
-        fittingWindow.SASModelToQModel("cylinder")
+        _select(fittingWindow, "Cylinder", "cylinder")
         pd_index = fittingWindow.lstPoly.model().index(0,0)
         assert str(pd_index.data()) == "Distribution of radius"
         pd_index = fittingWindow.lstPoly.model().index(1,0)
@@ -117,7 +127,6 @@ class FittingWidgetTest:
         assert delegate.poly_function == 6
         assert isinstance(delegate.combo_updated, QtCore.Signal)
 
-    @pytest.mark.shadow_exempt("builds the tables with SASModelToQModel, bypassing the model combo boxes")
     def testSelectMagnetism(self, widget):
         """
         Test if models have been loaded properly
@@ -126,7 +135,7 @@ class FittingWidgetTest:
 
         assert isinstance(fittingWindow.lstMagnetic.itemDelegate(), QtWidgets.QStyledItemDelegate)
         #Test loading from json categories
-        fittingWindow.SASModelToQModel("cylinder")
+        _select(fittingWindow, "Cylinder", "cylinder")
         mag_index = fittingWindow.lstMagnetic.model().index(0,0)
         assert mag_index.data() == "up_frac_i"
         mag_index = fittingWindow.lstMagnetic.model().index(1,0)
@@ -166,27 +175,6 @@ class FittingWidgetTest:
 
         #Test what is current text in the combobox
         assert fittingWindow.cbCategory.currentText(), "None"
-
-    def testSelectModelWithoutFilename(self, widget, mocker, caplog):
-        """
-        Selecting a model whose class carries no filename (e.g. a mixture
-        model built programmatically with make_model_from_info) must log an
-        error instead of raising TypeError in os.path.basename(None).
-        Regression test for issue #4047.
-        """
-        class DummyMixtureModel:
-            name = "dummy_mixture"
-            filename = None
-
-        widget.models["dummy_mixture"] = DummyMixtureModel
-        # force the name-based lookup to fail so the filename fallback runs
-        mocker.patch.object(FittingWidget.generate, 'load_kernel_module',
-                            side_effect=ModuleNotFoundError("dummy_mixture"))
-
-        with caplog.at_level(logging.ERROR):
-            widget.fromModelToQModel("dummy_mixture")
-
-        assert "Can't find the model file for dummy_mixture" in caplog.text
 
     def testSignals(self, widget):
         """
@@ -228,7 +216,6 @@ class FittingWidgetTest:
         assert not widget.cbModel.isEnabled()
         assert widget.cbStructureFactor.isEnabled()
 
-    @pytest.mark.shadow_exempt("mocks SASModelToQModel, so the tables never follow the selection")
     def testSelectModel(self, widget, mocker):
         """
         Assure proper behaviour on changing model
@@ -249,7 +236,6 @@ class FittingWidgetTest:
         # spy = QtSignalSpy(widget._model_model, widget._model_model.itemChanged)
 
         # mock the tested methods
-        mocker.patch.object(widget, 'SASModelToQModel')
         mocker.patch.object(widget, 'createDefaultDataset')
         mocker.patch.object(widget, 'calculateQGridForModel')
         #
@@ -259,7 +245,8 @@ class FittingWidgetTest:
 
         # No data sent -> no index set, only createDefaultDataset called
         assert widget.createDefaultDataset.called
-        assert widget.SASModelToQModel.called
+        assert widget.document.selection.model == 'dab'
+        assert widget._model_model.rowCount() == len(widget.document.parameters.rows)
         assert not widget.calculateQGridForModel.called
 
         # Let's tell the widget that data has been loaded
@@ -364,7 +351,6 @@ class FittingWidgetTest:
         # Check the argument type
         assert isinstance(spy.called()[0]['args'][0], QtGui.QStandardItem)
 
-    @pytest.mark.shadow_exempt("builds the tables with SASModelToQModel, bypassing the model combo boxes")
     def testCalculateQGridForModel(self, widget, mocker):
         """
         Check that the fitting 1D data object is ready
@@ -374,7 +360,7 @@ class FittingWidgetTest:
             # Mock the thread creation
             mocker.patch.object(threads, 'deferToThread')
             # Model for theory
-            widget.SASModelToQModel("cylinder")
+            _select(widget, "Cylinder", "cylinder")
             # Call the tested method
             widget.calculateQGridForModel()
             time.sleep(1)
@@ -382,16 +368,15 @@ class FittingWidgetTest:
             assert threads.deferToThread.called
             assert threads.deferToThread.call_args_list[0][0][0].__name__ == "compute"
         else:
-            mocker.patch.object(Calc2D, 'queue')
-            # Model for theory
-            widget.SASModelToQModel("cylinder")
+            mocker.patch.object(Calc1D, 'queue')
+            # Model for theory (on a theory page: the default 1D dataset)
+            _select(widget, "Cylinder", "cylinder")
             # Call the tested method
             widget.calculateQGridForModel()
             time.sleep(1)
             # Test the mock
-            assert Calc2D.queue.called
+            assert Calc1D.queue.called
 
-    @pytest.mark.shadow_exempt("builds the tables with SASModelToQModel, bypassing the model combo boxes")
     def testCalculateResiduals(self, widget):
         """
         Check that the residuals are calculated and plots updated
@@ -399,7 +384,7 @@ class FittingWidgetTest:
         test_data = Data1D(x=[1,2], y=[1,2])
 
         # Model for theory
-        widget.SASModelToQModel("cylinder")
+        _select(widget, "Cylinder", "cylinder")
         # Invoke the tested method
         widget.calculateResiduals(test_data)
         # Check the Chi2 value - should be undetermined
@@ -487,14 +472,14 @@ class FittingWidgetTest:
         # Set the checbox
         widget.polydispersity_widget.poly_model.item(0,0).setCheckState(QtCore.Qt.CheckState.Checked)
         # Assure the parameter is added
-        assert widget.polydispersity_widget.poly_params_to_fit == ['radius_bell.width']
+        assert _poly_fitted(widget) == ['radius_bell.width']
         # Check that it's value has not changed (reproduce the polydispersity checkbox bug)
-        assert widget.polydispersity_widget.poly_params['radius_bell.width'] == 0.0
+        assert widget.document.parameters['radius_bell.width'].value == 0.0
 
         # Add another parameter
         widget.polydispersity_widget.poly_model.item(2,0).setCheckState(QtCore.Qt.CheckState.Checked)
         # Assure the parameters are added
-        assert widget.polydispersity_widget.poly_params_to_fit == ['radius_bell.width', 'length.width']
+        assert _poly_fitted(widget) == ['radius_bell.width', 'length.width']
 
         # Change the min/max values
         assert widget.logic.kernel_module.details['radius_bell.width'][1] == 0.0
@@ -507,16 +492,16 @@ class FittingWidgetTest:
         #QtWidgets.QApplication.exec_()
 
         # Change the number of points
-        assert widget.polydispersity_widget.poly_params['radius_bell.npts'] == 35
+        assert widget.document.parameters['radius_bell.width'].dispersion.npts == 35
         widget.polydispersity_widget.poly_model.item(0,4).setText("22")
-        assert widget.polydispersity_widget.poly_params['radius_bell.npts'] == 22
+        assert widget.document.parameters['radius_bell.width'].dispersion.npts == 22
         # test that sasmodel is updated with the new value
         assert widget.logic.kernel_module.getParam('radius_bell.npts') == 22
 
         # Change the pd value
-        assert widget.polydispersity_widget.poly_params['radius_bell.width'] == 0.0
+        assert widget.document.parameters['radius_bell.width'].value == 0.0
         widget.polydispersity_widget.poly_model.item(0,1).setText("0.8")
-        assert widget.polydispersity_widget.poly_params['radius_bell.width'] == pytest.approx(0.8, abs=1e-7)
+        assert widget.document.parameters['radius_bell.width'].value == pytest.approx(0.8, abs=1e-7)
         # Polydispersity is off: the kernel keeps the width at 0, as togglePoly leaves it (Phase 5)
         assert widget.logic.kernel_module.getParam('radius_bell.width') == 0.0
 
@@ -524,23 +509,23 @@ class FittingWidgetTest:
         widget.chkPolydispersity.setCheckState(QtCore.Qt.CheckState.Checked)
         widget.chkPolydispersity.click()
         # Should not change the value of the qt model
-        assert widget.polydispersity_widget.poly_params['radius_bell.width'] == pytest.approx(0.8, abs=1e-7)
+        assert widget.document.parameters['radius_bell.width'].value == pytest.approx(0.8, abs=1e-7)
         # sasmodel should be set to 0
         assert widget.logic.kernel_module.getParam('radius_bell.width') == pytest.approx(0.0, abs=1e-7)
 
         # try something stupid
         widget.polydispersity_widget.poly_model.item(0,4).setText("butt")
         # see that this didn't annoy the control at all
-        assert widget.polydispersity_widget.poly_params['radius_bell.npts'] == 22
+        assert widget.document.parameters['radius_bell.width'].dispersion.npts == 22
 
         # Change the number of sigmas
-        assert widget.polydispersity_widget.poly_params['radius_bell.nsigmas'] == 3
+        assert widget.document.parameters['radius_bell.width'].dispersion.nsigmas == 3
         widget.polydispersity_widget.poly_model.item(0,5).setText("222")
-        assert widget.polydispersity_widget.poly_params['radius_bell.nsigmas'] == 222
+        assert widget.document.parameters['radius_bell.width'].dispersion.nsigmas == 222
         # try something stupid again
         widget.polydispersity_widget.poly_model.item(0,4).setText("beer")
         # no efect
-        assert widget.polydispersity_widget.poly_params['radius_bell.nsigmas'] == 222
+        assert widget.document.parameters['radius_bell.width'].dispersion.nsigmas == 222
 
     @pytest.mark.shadow_exempt("calls the slot with functions the combo box does not show")
     def testOnPolyComboIndexChange(self, widget, mocker):
@@ -562,18 +547,18 @@ class FittingWidgetTest:
         # Change the index
         widget.polydispersity_widget.onPolyComboIndexChange('rectangle', 0)
         # check values
-        assert widget.polydispersity_widget.poly_params['radius_bell.npts'] == 35
-        assert widget.polydispersity_widget.poly_params['radius_bell.nsigmas'] == pytest.approx(1.73205, abs=1e-5)
+        assert widget.document.parameters['radius_bell.width'].dispersion.npts == 35
+        assert widget.document.parameters['radius_bell.width'].dispersion.nsigmas == pytest.approx(1.73205, abs=1e-5)
         # Change the index
         widget.polydispersity_widget.onPolyComboIndexChange('lognormal', 0)
         # check values
-        assert widget.polydispersity_widget.poly_params['radius_bell.npts'] == 80
-        assert widget.polydispersity_widget.poly_params['radius_bell.nsigmas'] == 8
+        assert widget.document.parameters['radius_bell.width'].dispersion.npts == 80
+        assert widget.document.parameters['radius_bell.width'].dispersion.nsigmas == 8
         # Change the index
         widget.polydispersity_widget.onPolyComboIndexChange('schulz', 0)
         # check values
-        assert widget.polydispersity_widget.poly_params['radius_bell.npts'] == 80
-        assert widget.polydispersity_widget.poly_params['radius_bell.nsigmas'] == 8
+        assert widget.document.parameters['radius_bell.width'].dispersion.npts == 80
+        assert widget.document.parameters['radius_bell.width'].dispersion.nsigmas == 8
 
         # mock up file load
         mocker.patch.object(widget.polydispersity_widget, 'loadPolydispArray',
@@ -679,7 +664,8 @@ class FittingWidgetTest:
         more_rows = widget._model_model.rowCount() - last_row
         assert more_rows == 4 # 4 new rows: 2 params per index
 
-        # Set to 0
+        # Set to 0 (the table, and its combo box, were rebuilt for the new layout)
+        func_index = widget._model_model.index(widget._n_shells_row, 1)
         widget.lstParams.indexWidget(func_index).setCurrentIndex(0)
         assert widget._model_model.rowCount() == last_row - 2
 

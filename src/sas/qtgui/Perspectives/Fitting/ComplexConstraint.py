@@ -100,10 +100,10 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         # Populate the left combobox parameter arbitrarily with the parameters
         # from the first tab if `All` option is selected
         if self.cbModel1.currentText() == "All":
-            items1 = self.tabs[1].main_params_to_fit + self.tabs[1].polydispersity_widget.poly_params_to_fit
+            items1 = self.tabs[1].paramsToFit()
         else:
             tab_index1 = self.cbModel1.currentIndex()
-            items1 = self.tabs[tab_index1].main_params_to_fit + self.tabs[tab_index1].polydispersity_widget.poly_params_to_fit
+            items1 = self.tabs[tab_index1].paramsToFit()
         self.cbParam1.addItems(items1)
         # Show the previously selected parameter if available
         if previous_param1 in items1:
@@ -333,9 +333,7 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         """
         for tab in tabs:
             if hasattr(tab, "kernel_module"):
-                if (param in tab.logic.kernel_module.params or
-                    param in tab.poly_params or
-                    param in tab.magnet_params):
+                if param in tab.logic.kernel_module.params or param in tab.document.parameters:
                     value_ex = tab.logic.kernel_module.name + "." +param
                     constraint = Constraint(param=param,
                                             value=param,
@@ -352,8 +350,8 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         # loop over parameters in constrained model
         index1 = self.cbModel1.currentIndex()
         index2 = self.cbModel2.currentIndex()
-        items1 = self.tabs[index1].main_params_to_fit + self.tabs[index1].polydispersity_widget.poly_params_to_fit
-        items2 = self.tabs[index2].main_params_to_fit + self.tabs[index2].polydispersity_widget.poly_params_to_fit
+        items1 = self.tabs[index1].paramsToFit()
+        items2 = self.tabs[index2].paramsToFit()
         # create an empty list to store redefined constraints
         redefined_constraints = []
         for item in items1:

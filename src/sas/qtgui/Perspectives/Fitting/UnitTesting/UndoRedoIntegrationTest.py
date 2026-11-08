@@ -504,8 +504,6 @@ class TestFitResultUndo:
         w.kernel_module_copy = copy.deepcopy(w.logic.kernel_module)
 
         # Mock methods that would crash without real fit data
-        monkeypatch.setattr(w.polydispersity_widget, 'updatePolyModelFromList', lambda *a, **kw: None)
-        monkeypatch.setattr(w.magnetism_widget, 'updateMagnetModelFromList', lambda *a, **kw: None)
         monkeypatch.setattr(w, 'onPlot', lambda *a, **kw: None)
 
         # Create a result that paramDictFromResults can handle
@@ -513,15 +511,6 @@ class TestFitResultUndo:
         param_dict = {n: (v + 1.0, 0.01) for n, v in old_params.items()}
         monkeypatch.setattr(
             w.fitting_controller, 'paramDictFromResults', lambda *a, **kw: param_dict
-        )
-
-        # Make updateModelFromList actually modify the kernel so new_params != old_params
-        def fake_update(pd):
-            for name, (val, _err) in pd.items():
-                w.logic.kernel_module.setParam(name, val)
-
-        monkeypatch.setattr(
-            w.fitting_controller, 'updateModelFromList', fake_update
         )
 
         result = self._make_fit_result(w)
@@ -538,9 +527,6 @@ class TestFitResultUndo:
         w = widget_with_model
         w.kernel_module_copy = copy.deepcopy(w.logic.kernel_module)
 
-        monkeypatch.setattr(w.fitting_controller, 'updateModelFromList', lambda *a, **kw: None)
-        monkeypatch.setattr(w.polydispersity_widget, 'updatePolyModelFromList', lambda *a, **kw: None)
-        monkeypatch.setattr(w.magnetism_widget, 'updateMagnetModelFromList', lambda *a, **kw: None)
         monkeypatch.setattr(w, 'onPlot', lambda *a, **kw: None)
         monkeypatch.setattr(
             w.fitting_controller, 'paramDictFromResults',
@@ -572,9 +558,7 @@ class TestFitResultUndo:
         w.undo_stack.clear()
         w.kernel_module_copy = copy.deepcopy(w.logic.kernel_module)
 
-        # Let the real updateModelFromList run so the error column is added.
-        monkeypatch.setattr(w.polydispersity_widget, 'updatePolyModelFromList', lambda *a, **kw: None)
-        monkeypatch.setattr(w.magnetism_widget, 'updateMagnetModelFromList', lambda *a, **kw: None)
+        # The fit result is applied to the document; the table adapters add the error column.
         monkeypatch.setattr(w, 'onPlot', lambda *a, **kw: None)
 
         old_params = main_values(w)
@@ -657,19 +641,12 @@ class TestGuiManagerUndoHookSignalChain:
         w.undo_stack.clear()
         w.kernel_module_copy = copy.deepcopy(w.logic.kernel_module)
 
-        monkeypatch.setattr(w.polydispersity_widget, 'updatePolyModelFromList', lambda *a, **kw: None)
-        monkeypatch.setattr(w.magnetism_widget, 'updateMagnetModelFromList', lambda *a, **kw: None)
         monkeypatch.setattr(w, 'onPlot', lambda *a, **kw: None)
 
         old_params = main_values(w)
         param_dict = {n: (v + 1.0, 0.01) for n, v in old_params.items()}
         monkeypatch.setattr(w.fitting_controller, 'paramDictFromResults', lambda *a, **kw: param_dict)
 
-        def fake_update(pd):
-            for name, (val, _err) in pd.items():
-                w.logic.kernel_module.setParam(name, val)
-
-        monkeypatch.setattr(w.fitting_controller, 'updateModelFromList', fake_update)
 
     def test_stack_changed_calls_handler_on_push(self, widget_with_model):
         """stackChanged should fire when push() is called."""

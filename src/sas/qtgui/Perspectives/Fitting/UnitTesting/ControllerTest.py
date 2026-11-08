@@ -1,15 +1,16 @@
 """
-The fit page intents (FitPageController, FW-MVC-DESIGN.md §3.1, Phase 5) as the user reaches them:
+The fit page intents (FitPageController, FW-MVC-DESIGN.md §3.1, Phases 5 and 6) as the user reaches them:
 an edit in a table or a tab writes the document first, records an undoable command where the
 change is undoable, and the tables, the kernel and the widgets follow.
 
 The shadow invariant (``ShadowChecker``) checks the legacy stores against the document after
 every commit and at teardown.
 """
+from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
-from PySide6 import QtCore
+from PySide6 import QtCore, QtWidgets
 
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
@@ -166,3 +167,76 @@ def test_value_edits_of_one_parameter_coalesce(page):
     assert [type(c) for c in page.undo_stack._undo_stack] == [SetParameterCommand]
     page.undo_stack.undo()
     assert page.document.parameters["radius"].value == 20.0
+
+
+# -- the tables the adapters build (Phase 6) ------------------------------------------------
+
+def _index_widget(page, name, column=1):
+    return page.lstParams.indexWidget(page._model_model.index(g.find_row(page._model_model, name), column))
+
+
+def test_the_shell_row_has_its_combo_and_the_sld_profile_button():
+    p = g.new_page(data=g.make_data1d("d1", "data1"))
+    g.select_model(p, "Sphere", "core_multi_shell")
+    combo = _index_widget(p, "n")
+    assert [combo.itemText(i) for i in range(combo.count())][:3] == ["0", "1", "2"]
+    assert isinstance(_index_widget(p, "n", 4), QtWidgets.QPushButton)
+    combo.setCurrentText("2")
+    assert "thickness2" in p.document.parameters and g.find_row(p._model_model, "thickness2")
+    p.undo_stack.undo()
+    assert "thickness2" not in p.document.parameters and _index_widget(p, "n").currentText() == "1"
+    p.shadow_checker.assert_ok()
+    p.close()
+
+
+def test_a_fixed_choice_is_a_combo_box_and_undoable():
+    p = g.new_page(data=g.make_data1d("d1", "data1"))
+    g.select_model(p, "Sphere", "sphere", "hardsphere")
+    combo = _index_widget(p, "radius_effective_mode")
+    combo.setCurrentIndex(0)
+    assert p.document.parameters["radius_effective_mode"].value == 0
+    assert p.document.parameters["radius_effective"].editable
+    p.undo_stack.undo()
+    assert _index_widget(p, "radius_effective_mode").currentIndex() == 1
+    assert not p.document.parameters["radius_effective"].editable
+    p.shadow_checker.assert_ok()
+    p.close()
+
+
+def test_undoing_a_model_switch_brings_back_the_fit_errors_and_their_column(page):
+    page.kernel_module_copy = None
+    page.fitting_controller.paramDictFromResults = lambda res: {"radius": (25.5, 0.75)}
+    page.onPlot = lambda: None
+    g.set_checked(page._model_model, "radius")
+    page.fitComplete(([[SimpleNamespace(fitness=1.0)]], 0.5))
+    assert page.has_error_column
+    g.select_model(page, "Cylinder", "hollow_cylinder")
+    assert not page.has_error_column
+    page.undo_stack.undo()
+    assert page.cbModel.currentText() == "cylinder" and page.has_error_column
+    assert cell(page._model_model, "radius", 2) == "0.75"
+
+
+def test_the_2d_view_adds_the_orientation_rows_and_undo_removes_them():
+    p = g.new_page()
+    g.select_model(p, "Cylinder", "cylinder")
+    p.chk2DView.setChecked(True)
+    assert "theta" in p.document.parameters and p.is2D
+    p.undo_stack.undo()
+    assert "theta" not in p.document.parameters and not p.chk2DView.isChecked()
+    p.shadow_checker.assert_ok()
+    p.close()
+
+
+def test_loading_2d_data_lays_the_page_out_again_and_keeps_the_values():
+    p = g.new_page()
+    g.select_model(p, "Cylinder", "cylinder")
+    g.set_cell(p._model_model, "radius", 1, "33.0")
+    model, items = g.data_items([g.make_data2d("d2", "data2d")])
+    p.explorer_model = model
+    p.dataFromItems(items[0])
+    assert "theta" in p.document.parameters and g.find_row(p._model_model, "theta")
+    assert p.document.parameters["radius"].value == 33.0
+    assert not p.undo_stack.can_undo()
+    p.shadow_checker.assert_ok()
+    p.close()

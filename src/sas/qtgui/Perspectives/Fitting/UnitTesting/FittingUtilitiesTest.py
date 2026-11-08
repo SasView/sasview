@@ -3,7 +3,6 @@ import pytest
 from PySide6 import QtCore, QtGui
 
 from sasmodels import generate, modelinfo
-from sasmodels.sasview_model import load_standard_models
 
 # Tested module
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
@@ -77,115 +76,6 @@ class FittingUtilitiesTest:
 
         assert param_name == "n"
         assert param_length == 10
-
-    def testAddParametersToModel(self):
-        """
-        Checks the QModel update from Sasmodel parameters
-        """
-        # Use a single-shell parameter
-        model_name = "barbell"
-        models = load_standard_models()
-
-        kernel_module = generate.load_kernel_module(model_name)
-        kernel_module_o = None
-        for model in models:
-            if model.name == model_name:
-                kernel_module_o = model()
-        assert kernel_module_o is not None
-        info = modelinfo.make_model_info(kernel_module)
-
-        params = FittingUtilities.addParametersToModel(info.parameters, kernel_module_o, True)
-
-        # Test the resulting model
-        assert len(params) == 7
-        assert len(params[0]) == 5
-        assert params[0][0].isCheckable()
-        assert params[0][0].text() == "sld"
-        assert params[1][0].text() == "sld_solvent"
-
-        # Use a multi-shell parameter to see that the method includes shell params
-        model_name = "core_multi_shell"
-        kernel_module = generate.load_kernel_module(model_name)
-        kernel_module_o = None
-        for model in models:
-            if model.name == model_name:
-                kernel_module_o = model()
-        assert kernel_module_o is not None
-        info = modelinfo.make_model_info(kernel_module)
-
-        params = FittingUtilities.addParametersToModel(info.parameters, kernel_module_o, False)
-
-        # Test the resulting model
-        assert len(params) == 3
-        assert len(params[0]) == 5
-        assert params[0][0].isCheckable()
-        assert params[0][0].text() == "sld_core"
-        assert params[1][0].text() == "radius"
-
-    def testAddSimpleParametersToModel(self):
-        """
-        Checks the QModel update from Sasmodel parameters - no polydisp
-        """
-        # Use a multi-shell parameter to see that the method doesn't include shells
-        model_name = "core_multi_shell"
-        kernel_module = generate.load_kernel_module(model_name)
-        models = load_standard_models()
-        kernel_module_o = None
-        for model in models:
-            if model.name == model_name:
-                kernel_module_o = model()
-        assert kernel_module_o is not None
-        info = modelinfo.make_model_info(kernel_module)
-
-        params = FittingUtilities.addParametersToModel(info.parameters, kernel_module_o, True)
-
-        # Test the resulting model
-        assert len(params) == 3
-        assert len(params[0]) == 5
-        assert params[0][0].isCheckable()
-        assert params[0][0].text() == "sld_core"
-        assert params[1][0].text() == "radius"
-
-    def testAddCheckedListToModel(self):
-        """
-        Test for inserting a checkboxed item into a QModel
-        """
-        model = QtGui.QStandardItemModel()
-        params = ["row1", "row2", "row3"]
-
-        FittingUtilities.addCheckedListToModel(model, params)
-
-        # Check the model
-        assert model.rowCount() == 1
-        assert model.item(0).isCheckable()
-        assert model.item(0, 0).text() == params[0]
-        assert model.item(0, 1).text() == params[1]
-        assert model.item(0, 2).text() == params[2]
-
-    def testAddShellsToModel(self):
-        """
-        Test for inserting a list of QItems into a model
-        """
-        # Use a multi-shell parameter to see that the method doesn't include shells
-        model_name = "core_multi_shell"
-        kernel_module = generate.load_kernel_module(model_name)
-        info = modelinfo.make_model_info(kernel_module)
-
-        model = QtGui.QStandardItemModel()
-
-        index = 2
-        FittingUtilities.addShellsToModel(info.parameters, model, index)
-        # There should be index*len(multi_parameters) new rows
-        assert model.rowCount() == 4
-
-        model = QtGui.QStandardItemModel()
-        index = 5
-        FittingUtilities.addShellsToModel(info.parameters, model, index)
-        assert model.rowCount() == 10
-
-        assert model.item(1).child(0).text() == "Polydispersity"
-        assert model.item(1).child(0).child(0).text() == "Distribution"
-        assert model.item(1).child(0).child(0,1).text() == "40.0"
 
     def testCalculate1DChi2(self):
         """

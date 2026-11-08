@@ -5,15 +5,12 @@ This module separates fitting-related business logic from the FittingWidget UI,
 making the code more maintainable and testable.
 """
 
-import copy
 import logging
 from typing import Any
 
 import numpy as np
-from PySide6 import QtGui
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.model import rules
 from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
 
@@ -79,18 +76,9 @@ class FittingController:
         ValueError
             If no parameters are selected for fitting or if model setup fails
         """
-        # Data going in
-        model = self.logic.kernel_module
-
-        # Update the model with extra parameters (polydispersity, magnetism)
-        # This ensures that values from the PolydispersityWidget and MagnetismWidget
-        # are applied to the kernel_module before fitting
-        self.widget.updateKernelModelWithExtraParams(model)
-
-        if self.widget.shadow.in_sync:
-            qmin, qmax, params_to_fit = self.document_fit_inputs()
-        else:
-            qmin, qmax, params_to_fit = self.legacy_fit_inputs()
+        # Data going in: an engine instance of its own, with the document's effective state
+        model = self.widget.kernel_builder.build(self.widget.document)
+        qmin, qmax, params_to_fit = self.document_fit_inputs()
 
         if not params_to_fit:
             raise ValueError('Fitting requires at least one parameter to optimize.')
@@ -146,23 +134,6 @@ class FittingController:
         doc = self.widget.document
         return doc.options.qmin, doc.options.qmax, [doc.parameters.legacy_key(k) for k in rules.keys_to_fit(doc)]
 
-    def legacy_fit_inputs(self) -> tuple[float, float, list[str]]:
-        """Q range and parameters to fit from the widget, when its document is not in sync."""
-        params_to_fit = copy.deepcopy(self.widget.main_params_to_fit)
-
-        # Add polydispersity parameters if enabled
-        if self.widget.chkPolydispersity.isChecked():
-            for p in self.widget.polydispersity_widget.poly_params_to_fit:
-                if "Distribution of" in p:
-                    params_to_fit += [self.widget.polydispersity_widget.polyNameToParam(p)]
-                else:
-                    params_to_fit += [p]
-
-        # Add magnetism parameters if enabled
-        if self.widget.chkMagnetism.isChecked() and self.widget.canHaveMagnetism():
-            params_to_fit += self.widget.magnetism_widget.magnet_params_to_fit
-        return self.widget.q_range_min, self.widget.q_range_max, params_to_fit
-
     def paramDictFromResults(self, results: Any) -> dict[str, tuple[float, float]] | None:
         """
         Extract optimized parameters from fit results.
@@ -199,103 +170,3 @@ class FittingController:
         param_dict = dict(zip(param_list, params_and_errors))
 
         return param_dict
-
-    def updateModelFromList(self, param_dict: dict[str, tuple[float, float]]) -> None:
-        """
-        Update the model with new parameters and create the errors column.
-
-        Parameters
-        ----------
-        param_dict : dict[str, tuple[float, float]]
-            Dictionary mapping parameter names to (value, error) tuples
-        """
-        assert isinstance(param_dict, dict)
-
-        def updateFittedValues(row):
-            """Update fitted values in the main model."""
-            param_name = str(self.widget._model_model.item(row, 0).text())
-            if not self.widget.isCheckable(row) or param_name not in list(param_dict.keys()):
-                return
-            # Modify the param value
-            param_repr = GuiUtils.formatNumber(param_dict[param_name][0], high=True)
-            self.widget._model_model.item(row, 1).setText(param_repr)
-            self.logic.kernel_module.setParam(param_name, param_dict[param_name][0])
-            if self.widget.has_error_column:
-                error_repr = GuiUtils.formatNumber(param_dict[param_name][1], high=True)
-                self.widget._model_model.item(row, 2).setText(error_repr)
-
-        def updatePolyValues(row):
-            """Update polydispersity values in the main model."""
-            param_name = str(self.widget._model_model.item(row, 0).text()) + '.width'
-            if not self.widget.isCheckable(row) or param_name not in list(param_dict.keys()):
-                return
-            # Modify the param value
-            param_repr = GuiUtils.formatNumber(param_dict[param_name][0], high=True)
-            self.widget._model_model.item(row, 0).child(0).child(0, 1).setText(param_repr)
-            # Modify the param error
-            if self.widget.has_error_column:
-                error_repr = GuiUtils.formatNumber(param_dict[param_name][1], high=True)
-                self.widget._model_model.item(row, 0).child(0).child(0, 2).setText(error_repr)
-
-        def createErrorColumn(row):
-            """Create error column items for the main model."""
-            item = QtGui.QStandardItem()
-
-            def createItem(param_name):
-                if param_name not in self.widget.main_params_to_fit:
-                    error_repr = ""
-                else:
-                    error_repr = GuiUtils.formatNumber(param_dict[param_name][1], high=True)
-                item.setText(error_repr)
-
-            def curr_param():
-                return str(self.widget._model_model.item(row, 0).text())
-
-            [createItem(param_name) for param_name in list(param_dict.keys()) if curr_param() == param_name]
-
-            error_column.append(item)
-
-        def createPolyErrorColumn(row):
-            """Create error column in polydispersity sub-rows."""
-            item = self.widget._model_model.item(row, 0)
-            if not item.hasChildren():
-                return
-            poly_item = item.child(0)
-            if not poly_item.hasChildren():
-                return
-            poly_item.insertColumn(2, [QtGui.QStandardItem("")])
-
-        def deletePolyErrorColumn(row):
-            """Remove error column from polydispersity sub-rows."""
-            item = self.widget._model_model.item(row, 0)
-            if not item.hasChildren():
-                return
-            poly_item = item.child(0)
-            if not poly_item.hasChildren():
-                return
-            poly_item.removeColumn(2)
-
-        if self.widget.has_error_column:
-            # Remove previous entries
-            self.widget._model_model.removeColumn(2)
-            self.widget.iterateOverModel(deletePolyErrorColumn)
-
-        # Create top-level error column
-        error_column = []
-        self.widget.lstParams.itemDelegate().addErrorColumn()
-        self.widget.iterateOverModel(createErrorColumn)
-
-        self.widget._model_model.insertColumn(2, error_column)
-
-        FittingUtilities.addErrorHeadersToModel(self.widget._model_model)
-
-        # Create error column in polydispersity sub-rows
-        self.widget.iterateOverModel(createPolyErrorColumn)
-
-        self.widget.has_error_column = True
-
-        # Block signals temporarily so we don't update charts with every model change
-        self.widget._model_model.dataChanged.disconnect()
-        self.widget.iterateOverModel(updateFittedValues)
-        self.widget.iterateOverModel(updatePolyValues)
-        self.widget._model_model.dataChanged.connect(self.widget.onMainParamsChange)

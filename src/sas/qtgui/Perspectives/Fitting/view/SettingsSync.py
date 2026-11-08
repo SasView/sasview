@@ -1,15 +1,16 @@
 """
-Document to the page settings widgets (FW-MVC-DESIGN.md §4.3, Phase 5): fit options,
+Document to the page settings widgets (FW-MVC-DESIGN.md §4.3, Phases 5 and 6): the model
+selection (category, model and structure-factor combo boxes, the 2D view), fit options,
 smearing, and the polydispersity, magnetism and chain-fit toggles.
 
 The widgets keep their .ui files. On a document-first change the sync writes the
 widget, and the page fields the legacy readers use, and applies a toggle's side
-effects (``FittingWidget.apply*``). The 2D view is a layout change, built by the
-legacy code (``FitPageController.restore``). Runs through ``DocumentShadow.subscribe_reverse``.
+effects (``FittingWidget.apply*``). After a layout change the page refreshes what
+depends on it (``FittingWidget.onLayoutChanged``). Runs through ``DocumentShadow.subscribe_reverse``.
 """
 from __future__ import annotations
 
-from sas.qtgui.Perspectives.Fitting.model.events import FlagsChanged, OptionsChanged, SmearingChanged
+from sas.qtgui.Perspectives.Fitting.model.events import FlagsChanged, ModelChanged, OptionsChanged, SmearingChanged
 from sas.qtgui.Utilities import GuiUtils
 
 
@@ -20,6 +21,9 @@ class SettingsSync:
         self.subscription = page.shadow.subscribe_reverse(self._on_change)
 
     def _on_change(self, change) -> None:
+        if change.get(ModelChanged) is not None:
+            self._page.showSelection(self._page.document.selection, self._page.document.flags.view_2d)
+            self._page.onLayoutChanged()
         if change.get(OptionsChanged) is not None:
             self._options()
         if change.get(SmearingChanged) is not None:

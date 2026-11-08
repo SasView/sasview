@@ -69,7 +69,7 @@ def testFitFlagReachesCheckboxAndFitLists(case):
     write(case, "length", fit=True)
     row = g.find_row(case._model_model, "length")
     assert case._model_model.item(row, 0).checkState() == QtCore.Qt.Checked
-    assert case.main_params_to_fit == ["scale", "radius", "length"]
+    assert case.paramsToFit() == ["scale", "radius", "length"]
     assert case.cmdFit.isEnabled()
 
 
@@ -94,7 +94,7 @@ def testDispersionReachesPolyTableKernelAndMainSubRow(case):
     kernel = case.logic.kernel_module
     assert kernel.dispersion["length"]["type"] == "rectangle"
     assert (kernel.getParam("length.npts"), kernel.getParam("length.nsigmas")) == (21, 2.5)
-    assert poly.poly_params["length.width"] == 0.2
+    assert kernel.getParam("length.width") == 0.2
     # The width is also shown under 'length' in the main table
     sub = case._model_model.item(g.find_row(case._model_model, "length"), 0).child(0)
     assert (sub.child(0, 1).text(), sub.child(0, 4).text()) == ("0.200", "rectangle")
@@ -104,8 +104,7 @@ def testDispersionReachesPolyTableKernelAndMainSubRow(case):
 def testMagnetValueReachesTableAndDict(case):
     write(case, "sld_M0", value=3.5, fit=False)
     assert cell(case.magnetism_widget._magnet_model, "sld_M0", 1) == "3.5"
-    assert case.magnetism_widget.magnet_params["sld_M0"] == 3.5
-    assert case.magnetism_widget.magnet_params_to_fit == []
+    assert case.logic.kernel_module.getParam("sld_M0") == 3.5
 
 
 @pytest.mark.parametrize("case", ["fixed_choice"], indirect=True)
@@ -125,7 +124,7 @@ def testConstraintBecomesTheHiddenChildItem(case):
         tx.set_constraint("length", constraint)
         tx.set_parameter("length", fit=True)
     row = g.find_row(case._model_model, "length")
-    stored = case.getConstraintForRow(row)
+    stored = case._model_model.item(row, 1).child(0).data()
     assert stored is not constraint and stored.func == "2*M1.radius"
     assert not case._model_model.item(row, 1).isEditable()
     assert case.getComplexConstraintsForModel("standard") == [("length", "2*M1.radius")]
@@ -151,7 +150,7 @@ def testRestoringASnapshotPatchesEveryRow(case):
     case.document.restore_undo_state(before)
     assert cell(case._model_model, "radius", 1) == "35.5"
     assert case.logic.kernel_module.getParam("radius") == 35.5
-    assert "length" not in case.main_params_to_fit
+    assert "length" not in case.paramsToFit()
 
 
 @pytest.mark.parametrize("case", ["cylinder"], indirect=True)

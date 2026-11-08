@@ -13,7 +13,7 @@ from unittest.mock import MagicMock
 import pytest
 from PySide6 import QtCore, QtWidgets
 
-from sas.qtgui.Perspectives.Fitting import FittingUtilities
+from sas.qtgui.Perspectives.Fitting import FittingController, FittingUtilities
 from sas.qtgui.Perspectives.Fitting.model.commands import SnapshotCommand
 from sas.qtgui.Perspectives.Fitting.UnitTesting import golden_support as g
 
@@ -291,9 +291,10 @@ class BatchCompletionTest:
         assert table_text(p._model_model) == before
         assert p._logic[0].kernel_module.getParam("radius") == 20.0
         assert not p.undo_stack.can_undo()
-        # Quirk: the page is left pointing at the last dataset, whose logic has no kernel
+        # Quirk (B-4): the page is left pointing at the last dataset. Since Phase 6 its logic
+        # holds the page's kernel too (LegacyKernelSync follows the active dataset)
         assert p.data_index == 1
-        assert p.logic.kernel_module is None
+        assert p.logic.kernel_module.getParam("radius") == 20.0
         # One theory per dataset, each from that dataset's fitted kernel
         batch_requests = p.theory_requests[-2:]
         assert [kw["model"].getParam("radius") for _, kw in batch_requests] == [31.0, 31.0]
@@ -308,9 +309,21 @@ class LiveDefectRegressionTest:
         for view in (page.lstParams, page.lstPoly, page.lstMagnetic):
             assert view.receivers(signal) == 1
 
-    def testFailedFitRestoresTheLiveKernel(self, page):
-        page.kernel_module_copy = copy.deepcopy(page.logic.kernel_module)
-        page.logic.kernel_module.setParam("radius", 12.0)     # the failed fit corrupted the kernel
+    def testAFitRunsOnItsOwnKernel(self, page, monkeypatch):
+        """Since Phase 6 the fitter gets a new engine instance built from the document, so a failed
+        fit cannot leave the live kernel corrupted (the Phase 0 fix restored a copy)."""
+        models = []
+
+        class Recording(g._RecordingFit):
+            def set_model(self, model, *args, **kwargs):
+                models.append(model)
+                super().set_model(model, *args, **kwargs)
+
+        monkeypatch.setattr(FittingController, "Fit", Recording)
+        g.set_checked(page._model_model, "radius")
+        page.prepareFitters()
+        assert models and models[0] is not page.logic.kernel_module
+        assert models[0].getParam("radius") == page.logic.kernel_module.getParam("radius") == 20.0
         page.fitComplete(None)
         assert page.logic.kernel_module.getParam("radius") == 20.0
         assert not hasattr(page, "kernel_module")

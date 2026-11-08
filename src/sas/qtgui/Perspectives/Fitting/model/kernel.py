@@ -8,16 +8,20 @@ part of ``fromModelToQModel``, ``fromStructureFactorToQModel``,
 ``addExtraShells``, ``FittingUtilities.add*ToModel`` and the poly/magnet
 ``set*Model`` methods.
 
-``KernelBuilder.build`` (a new engine instance per job) follows in Phase 7.
+``KernelBuilder.build(doc)`` returns a new engine instance with the document's
+effective state (since Phase 6: the legacy table builders that made the kernel are gone).
 """
 from __future__ import annotations
 
 import math
 from collections.abc import Mapping
 
+import numpy as np
+
 from sasmodels import modelinfo
 from sasmodels.product import RADIUS_MODE_ID, STRUCTURE_MODE_ID, VOLFRAC_ID
 from sasmodels.sasview_model import MultiplicationModel
+from sasmodels.weights import MODELS as DISTRIBUTIONS
 
 from sas.qtgui.Perspectives.Fitting.FittingConstants import CATEGORY_STRUCTURE, DEFAULT_POLYDISP_FUNCTION, MODEL_DEFAULT
 from sas.qtgui.Perspectives.Fitting.model.parameters import (
@@ -89,16 +93,71 @@ def _table_parameters(table, is2D: bool) -> list:
     return list(table.iq_parameters)
 
 
+def _structure_only(selection: ModelSelection) -> bool:
+    """A placeholder model text, or the Structure Factor category, means no form factor."""
+    return selection.category == CATEGORY_STRUCTURE or selection.model in ("", MODEL_DEFAULT)
+
+
 class KernelBuilder:
-    """Builds parameter layouts (and, from Phase 7, engine instances) for model selections."""
+    """Builds parameter layouts and engine instances for model selections."""
 
     def __init__(self, models: Mapping[str, type]) -> None:
         self._models = models     # model name -> SasviewModel class
 
+    def build(self, doc):
+        """A new engine instance for *doc* (§3.2), or None if the page has no parameters.
+
+        It carries the document's effective state (``apply``) and the mnemonic as its name.
+        """
+        params, selection = doc.parameters, doc.selection
+        if not len(params):
+            return None
+        if _structure_only(selection):
+            kernel = self._models[selection.structure]()
+        else:
+            kernel = self._models[selection.model]()
+            if selection.structure and params.capabilities.structure_factor:
+                # As the legacy builder did: the product is made with the most shells
+                if kernel.is_multiplicity_model:
+                    kernel.multiplicity = kernel.multiplicity_info.number
+                kernel = MultiplicationModel(kernel, self._models[selection.structure]())
+            if selection.multiplicity is not None:
+                kernel.multiplicity = selection.multiplicity
+        self.apply(kernel, doc)
+        return kernel
+
+    def apply(self, kernel, doc) -> None:
+        """Push the document's effective state into *kernel*, an instance for the same selection:
+        values (a fixed choice as its index), bounds, dispersions (array weights included), the
+        name, poly widths at 0 while polydispersity is off, magnetic values at 0 while magnetism is off."""
+        kernel.name = doc.identity.mnemonic
+        flags = doc.flags
+        names = set(kernel.getParamList())
+        for p in doc.parameters:
+            if p.kind is ValueKind.INT or p.key not in names:
+                continue
+            if p.dispersion is not None:
+                # First: a new distribution resets the width
+                self._set_dispersion(kernel, p.key[:-len(".width")], p.dispersion)
+            off = (p.table is Table.POLY and not flags.polydispersity) or                   (p.table is Table.MAGNET and not flags.magnetism)
+            kernel.setParam(p.key, 0.0 if off else p.value)
+            if p.min is not None and p.kind is ValueKind.FLOAT and p.key in kernel.details:
+                kernel.details[p.key][1:3] = [p.min, p.max]
+
+    @staticmethod
+    def _set_dispersion(kernel, name: str, d) -> None:
+        if d.array is not None or kernel.dispersion[name]["type"] != d.type:
+            distribution = DISTRIBUTIONS[d.type]()
+            if d.array is not None:
+                distribution.set_weights(np.array(d.array.x), np.array(d.array.w))
+            kernel.set_dispersion(name, distribution)
+        kernel.setParam(f"{name}.npts", d.npts)
+        kernel.setParam(f"{name}.nsigmas", d.nsigmas)
+
     def layout(self, selection: ModelSelection, is2D: bool) -> ParameterSet:
         """The parameter layout of *selection*. A placeholder model text, or the Structure Factor
         category, means no form factor (the combo boxes may show either)."""
-        if selection.category == CATEGORY_STRUCTURE or selection.model in ("", MODEL_DEFAULT):
+        if _structure_only(selection):
             if not selection.structure:
                 return ParameterSet()
             return self._structure_only(selection.structure, is2D)

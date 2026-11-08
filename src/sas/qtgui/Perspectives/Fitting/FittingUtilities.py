@@ -1,10 +1,8 @@
 import copy
-from collections.abc import Sequence
 
 import numpy
 from PySide6 import QtCore, QtGui, QtWidgets
 
-from sas.qtgui.Perspectives.Fitting.AssociatedComboBox import AssociatedComboBox
 from sas.qtgui.Perspectives.Fitting.model.kernel import (  # noqa: F401 (re-exported)
     fixed_choices,
     getIterParams,
@@ -16,9 +14,11 @@ from sas.qtgui.Perspectives.Fitting.model.serializer import (  # noqa: F401 (re-
     formatParametersExcel,
     formatParametersLatex,
 )
+from sas.qtgui.Perspectives.Fitting.services.constraints import (
+    validate as checkConstraints,  # noqa: F401 (re-exported; the tests patch it)
+)
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
 from sas.qtgui.Utilities import GuiUtils
-from sas.sascalc.fit.expression import check_constraints
 
 model_header_captions = ['Parameter', 'Value', 'Min', 'Max', 'Units']
 
@@ -78,221 +78,6 @@ def parse_number(text) -> float | None:
     except TypeError:
         return None
 
-
-def createFixedChoiceComboBox(param, item_row):
-    """
-    Determines whether param is a fixed-choice parameter, modifies items in item_row appropriately and returns a combo
-    box containing the fixed choices. Returns None if param is not fixed-choice.
-
-    item_row is a list of QStandardItem objects for insertion into the parameter table.
-    """
-
-    # Determine whether this is a fixed-choice parameter. There are lots of conditionals, simply because the
-    # implementation is not yet concrete; there are several possible indicators that the parameter is fixed-choice.
-    # TODO: (when the sasmodels implementation is concrete, clean this up)
-    choices = fixed_choices(param)
-
-    cbox = None
-    if choices is not None:
-        # Use combo box for input, if it is fixed-choice
-        cbox = AssociatedComboBox(item_row[1], idx_as_value=True)
-        cbox.addItems(choices)
-        if param.default is not None and param.default <= len(choices):
-            # set the param default value in the combobox
-            cbox.setCurrentIndex(param.default)
-        item_row[2].setEditable(False)
-        item_row[3].setEditable(False)
-
-    return cbox
-
-def addParametersToModel(parameters, kernel_module, is2D, model=None, view=None):
-    """
-    Update local ModelModel with sasmodel parameters.
-    Actually appends to model, if model and view params are not None.
-    Always returns list of lists of QStandardItems.
-    """
-    multishell_parameters = getIterParams(parameters)
-    multishell_param_name, _ = getMultiplicity(parameters)
-
-    if is2D:
-        params = [p for p in parameters.kernel_parameters if p.type != 'magnetic']
-    else:
-        params = parameters.iq_parameters
-
-    rows = []
-    for param in params:
-        # don't include shell parameters
-        if param.name == multishell_param_name:
-            continue
-
-        # Modify parameter name from <param>[n] to <param>1
-        item_name = param.name
-        if param in multishell_parameters:
-            continue
-
-        item1 = QtGui.QStandardItem(item_name)
-        item1.setCheckable(True)
-        item1.setEditable(False)
-
-        # check for polydisp params
-        if param.polydisperse:
-            poly_item = QtGui.QStandardItem("Polydispersity")
-            poly_item.setEditable(False)
-            poly_item.setSelectable(False)
-            item1_1 = QtGui.QStandardItem("Distribution")
-            item1_1.setEditable(False)
-            item1_1.setSelectable(False)
-
-            # Find param in volume_params
-            poly_pars = copy.deepcopy(parameters.form_volume_parameters)
-            if is2D:
-                poly_pars += parameters.orientation_parameters
-            for p in poly_pars:
-                if p.name != param.name:
-                    continue
-                width = kernel_module.getParam(p.name+'.width')
-                ptype = kernel_module.getParam(p.name+'.type')
-                item1_2 = QtGui.QStandardItem(str(width))
-                item1_2.setEditable(False)
-                item1_2.setSelectable(False)
-                item1_3 = QtGui.QStandardItem()
-                item1_3.setEditable(False)
-                item1_3.setSelectable(False)
-                item1_4 = QtGui.QStandardItem()
-                item1_4.setEditable(False)
-                item1_4.setSelectable(False)
-                item1_5 = QtGui.QStandardItem(ptype)
-                item1_5.setEditable(False)
-                item1_5.setSelectable(False)
-                poly_item.appendRow([item1_1, item1_2, item1_3, item1_4, item1_5])
-                break
-
-            # Add the polydisp item as a child
-            item1.appendRow([poly_item])
-
-        # Param values
-        item2 = QtGui.QStandardItem(str(param.default))
-        item3 = QtGui.QStandardItem(str(param.limits[0]))
-        item4 = QtGui.QStandardItem(str(param.limits[1]))
-        item5 = QtGui.QStandardItem(str(param.units))
-        item5.setEditable(False)
-
-        # Check if fixed-choice (returns combobox, if so, also makes some items uneditable)
-        row = [item1, item2, item3, item4, item5]
-        cbox = createFixedChoiceComboBox(param, row)
-
-        # Append to the model and use the combobox, if required
-        if None not in (model, view):
-            model.appendRow(row)
-            if cbox:
-                view.setIndexWidget(item2.index(), cbox)
-
-        rows.append(row)
-
-    return rows
-
-def addSimpleParametersToModel(parameters, is2D, parameters_original=None, model=None, view=None, row_num=None):
-    """
-    Update local ModelModel with sasmodel parameters (non-dispersed, non-magnetic)
-    Actually appends to model, if model and view params are not None.
-    Always returns list of lists of QStandardItems.
-
-    parameters_original: list of parameters before any tagging on their IDs,
-    e.g. for product model (so that those are the display names; see below)
-    """
-    if is2D:
-        params = [p for p in parameters.kernel_parameters if p.type != 'magnetic']
-    else:
-        params = parameters.iq_parameters
-
-    if parameters_original:
-        # 'parameters_original' contains the parameters as they are to be DISPLAYED,
-        # while 'parameters' contains the parameters as they were renamed;
-        # this is for handling name collisions in product model.
-        # The 'real name' of the parameter will be stored in the item's user data.
-        if is2D:
-            params_orig = [p for p in parameters_original.kernel_parameters if p.type != 'magnetic']
-        else:
-            params_orig = parameters_original.iq_parameters
-    else:
-        # no difference in names anyway
-        params_orig = params
-
-    rows = []
-    for param, param_orig in zip(params, params_orig):
-        # Create the top level, checkable item
-        item_name = param_orig.name
-        item1 = QtGui.QStandardItem(item_name)
-        item1.setData(param.name, QtCore.Qt.UserRole)
-        item1.setCheckable(False)
-        item1.setEditable(False)
-
-        # Param values
-        # TODO: add delegate for validation of cells
-        item2 = QtGui.QStandardItem(str(param.default))
-        item3 = QtGui.QStandardItem(str(param.limits[0]))
-        item4 = QtGui.QStandardItem(str(param.limits[1]))
-        item5 = QtGui.QStandardItem(str(param.units))
-        item5.setEditable(False)
-
-        # Check if fixed-choice (returns combobox, if so, also makes some items uneditable)
-        row = [item1, item2, item3, item4, item5]
-        cbox = createFixedChoiceComboBox(param, row)
-
-        # Append to the model and use the combobox, if required
-        if None not in (model, view):
-
-            if row_num is None:
-                model.appendRow(row)
-            else:
-                model.insertRow(row_num, row)
-                row_num += 1
-            if cbox:
-                item1.setCheckable(False)
-                item3.setText("")
-                item4.setText("")
-                item3.setEditable(False)
-                item4.setEditable(False)
-                view.setIndexWidget(item2.index(), cbox)
-            else:
-                item1.setCheckable(True)
-
-        rows.append(row)
-
-    return rows
-
-def markParameterDisabled(model, row):
-    """Given the QModel row number, format to show it is not available for fitting"""
-
-    # If an error column is present, there are a total of 6 columns.
-    items = [model.item(row, c) for c in range(6)]
-
-    model.blockSignals(True)
-
-    for item in items:
-        if item is None:
-            continue
-        item.setEditable(False)
-        item.setCheckable(False)
-
-    item = items[0]
-
-    font = QtGui.QFont()
-    font.setItalic(True)
-    item.setFont(font)
-    item.setForeground(QtGui.QBrush(QtGui.QColor(100, 100, 100)))
-    item.setToolTip("This parameter cannot be fitted.")
-
-    model.blockSignals(False)
-
-def addCheckedListToModel(model, param_list):
-    """
-    Add a QItem to model. Makes the QItem checkable
-    """
-    assert isinstance(model, QtGui.QStandardItemModel)
-    item_list = [QtGui.QStandardItem(item) for item in param_list]
-    item_list[0].setCheckable(True)
-    model.appendRow(item_list)
 
 def addHeadingRowToModel(model, name):
     """adds a non-interactive top-level row to the model"""
@@ -354,68 +139,6 @@ def addErrorPolyHeadersToModel(model):
     poly_header_error_tooltips = copy.copy(poly_header_tooltips)
     poly_header_error_tooltips.insert(2, error_tooltip)
     model.header_tooltips = copy.copy(poly_header_error_tooltips)
-
-def addShellsToModel(parameters, model, index, row_num=None, view=None):
-    """
-    Find out multishell parameters and update the model with the requested number of them.
-    Inserts them after the row at row_num, if not None; otherwise, appends to end.
-    If view param is not None, supports fixed-choice params.
-    Returns a list of lists of QStandardItem objects.
-    """
-    multishell_parameters = getIterParams(parameters)
-
-    rows = []
-    for i in range(index):
-        for par in multishell_parameters:
-            # Create the name: <param>[<i>], e.g. "sld1" for parameter "sld[n]"
-            param_name = replaceShellName(par.name, i+1)
-            item1 = QtGui.QStandardItem(param_name)
-            item1.setCheckable(True)
-            # check for polydisp params
-            if par.polydisperse:
-                poly_item = QtGui.QStandardItem("Polydispersity")
-                item1_1 = QtGui.QStandardItem("Distribution")
-                # Find param in volume_params
-                for p in parameters.form_volume_parameters:
-                    if p.name != par.name:
-                        continue
-                    item1_2 = QtGui.QStandardItem(str(p.default))
-                    item1_3 = QtGui.QStandardItem(str(p.limits[0]))
-                    item1_4 = QtGui.QStandardItem(str(p.limits[1]))
-                    item1_5 = QtGui.QStandardItem(str(p.units))
-                    poly_item.appendRow([item1_1, item1_2, item1_3, item1_4, item1_5])
-                    break
-                item1.appendRow([poly_item])
-
-            item2 = QtGui.QStandardItem(str(par.default))
-            item3 = QtGui.QStandardItem(str(par.limits[0]))
-            item4 = QtGui.QStandardItem(str(par.limits[1]))
-            item5 = QtGui.QStandardItem(str(par.units))
-            item5.setEditable(False)
-
-            # Check if fixed-choice (returns combobox, if so, also makes some items uneditable)
-            row = [item1, item2, item3, item4, item5]
-            cbox = createFixedChoiceComboBox(par, row)
-
-            # Apply combobox if required
-            if None not in (view, cbox):
-                # set the min/max cell to be empty
-                item3.setText("")
-                item4.setText("")
-
-            # Always add to the model
-            if row_num is None:
-                model.appendRow(row)
-            else:
-                model.insertRow(row_num, row)
-                row_num += 1
-
-            if cbox is not None:
-                view.setIndexWidget(item2.index(), cbox)
-
-            rows.append(row)
-
-    return rows
 
 def calculateChi2(reference_data, current_data, weight):
     """
@@ -795,43 +518,6 @@ def updateKernelWithResults(kernel, results):
 
     return local_kernel
 
-def getStandardParam(model=None):
-    """
-    Returns a list with standard parameters for the current model
-    """
-    param = []
-    num_rows = model.rowCount()
-    if num_rows < 1:
-        return param
-
-    for row in range(num_rows):
-        param_name = model.item(row, 0).text()
-        checkbox_state = model.item(row, 0).checkState() == QtCore.Qt.Checked
-        value = model.item(row, 1).text()
-        column_shift = 0
-        if model.columnCount() == 5: # no error column
-            error_state = False
-            error_value = 0.0
-        else:
-            error_state = True
-            error_value = model.item(row, 2).text()
-            column_shift = 1
-        min_state = True
-        max_state = True
-        min_value = model.item(row, 2+column_shift).text()
-        max_value = model.item(row, 3+column_shift).text()
-        unit = ""
-        if model.item(row, 4+column_shift) is not None:
-            u = model.item(row, 4+column_shift).text()
-            # This isn't a unit if it is a number (polyd./magn.)
-            unit = "" if isNumber(u) else u
-        param.append([checkbox_state, param_name, value, "",
-                     [error_state, error_value],
-                     [min_state, min_value],
-                     [max_state, max_value], unit])
-
-    return param
-
 def isNumber(s):
     """
     Checks if string 's' is an int/float
@@ -846,29 +532,6 @@ def isNumber(s):
         except ValueError:
             return False
     return True
-
-def getOrientationParam(kernel_module=None):
-    """
-    Get the dictionary with orientation parameters
-    """
-    param = []
-    if kernel_module is None:
-        return None
-    for param_name in list(kernel_module.params.keys()):
-        name = param_name
-        value = kernel_module.params[param_name]
-        min_state = True
-        max_state = True
-        error_state = False
-        error_value = 0.0
-        checkbox_state = True #??
-        details = kernel_module.details[param_name] #[unit, mix, max]
-        param.append([checkbox_state, name, value, "",
-                     [error_state, error_value],
-                     [min_state, details[1]],
-                     [max_state, details[2]], details[0]])
-
-    return param
 
 def isParamPolydisperse(param_name, kernel_params, is2D=False):
     """
@@ -889,34 +552,6 @@ def isParamPolydisperse(param_name, kernel_params, is2D=False):
             has_poly = True
             break
     return has_poly
-
-def checkConstraints(symtab: dict[str, float], constraints: Sequence[tuple[str, str]]) -> str:
-    """
-    Compile and evaluate the constraints in the context of the initial values
-    and return the list of errors.
-
-    Errors are returned as an html string where errors are tagged with <b>
-    markups:
-    Unknown symbol: tags unknown symbols in *constraints*
-    Syntax error: tags the beginning of a syntax error in *constraints*
-    Cyclic dependency: tags comma separated parameters that have
-    cyclic dependency
-
-    The errors are wrapped in a <div class = "error"> and a style header is
-    added
-    """
-    # Note: dict(constraints) will choose the latest definition if
-    # there are duplicates.
-    errors = "<br>".join(check_constraints(symtab, dict(constraints),
-                                           html=True))
-    # wrap everything in <div class = "error">
-    if errors:
-        errors = "<div class = \"error\">" + errors + "</div>"
-        header = "<style type=\"text/css\"> div.error b { "\
-                 "font-weight: normal; color:red;}</style>"
-        return header + errors
-    else:
-        return []
 
 def setTableProperties(table):
     """

@@ -28,11 +28,12 @@ def is_loaded(doc: FitPageDocument) -> bool:
     return any(not d.synthetic for d in doc.datasets.values())
 
 
-def is_2d(doc: FitPageDocument) -> bool:
-    """The active data is 2D when data is loaded; otherwise the user's 2D-view toggle."""
+def is_2d(doc: FitPageDocument, view_2d: bool | None = None) -> bool:
+    """The active data is 2D when data is loaded; otherwise the user's 2D-view toggle
+    (or *view_2d*, the toggle about to be set)."""
     if is_loaded(doc):
         return isinstance(doc.data(), Data2D)
-    return doc.flags.view_2d
+    return doc.flags.view_2d if view_2d is None else view_2d
 
 
 def is_sesans(doc: FitPageDocument) -> bool:

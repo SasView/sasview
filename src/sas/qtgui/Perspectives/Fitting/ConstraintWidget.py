@@ -480,12 +480,8 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             temp_tab = self.available_tabs[self.current_cell]
             # Remove the key from the dictionaries
             self.available_tabs.pop(self.current_cell, None)
-            # Change the model name
-            with temp_tab.shadow.operation("identity"):
-                model = temp_tab.logic.kernel_module
-                model.name = new_moniker
-            # Replace constraint name
-            temp_tab.replaceConstraintName(self.current_cell, new_moniker)
+            # Rename the page, and the references to it in its own constraints
+            temp_tab.controller.rename(new_moniker, self.current_cell)
             # Replace constraint name in the remaining tabs
             for tab in self.available_tabs.values():
                 tab.replaceConstraintName(self.current_cell, new_moniker)
@@ -608,18 +604,8 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             self.initializeFitList()
             return
         # activate/deactivate constraint if the user has changed the checkbox
-        # state
-        constraint.active = (item.checkState() == QtCore.Qt.Checked)
-        # Update the fitting widget whenever a constraint is
-        # activated/deactivated
-        if item.checkState() == QtCore.Qt.Checked:
-            font = QtGui.QFont()
-            font.setItalic(True)
-            brush = QtGui.QBrush(QtGui.QColor('blue'))
-            tab.modifyViewOnRow(tab.getRowFromName(new_param), font=font,
-                                brush=brush, model_key=model_key)
-        else:
-            tab.modifyViewOnRow(tab.getRowFromName(new_param), model_key=model_key)
+        # state (the page shows the row accordingly)
+        tab.setConstraintActive(new_param, item.checkState() == QtCore.Qt.Checked)
         # reload the view so the user gets a consistent feedback on the
         # constraints
         self.initializeFitList()
@@ -1262,7 +1248,4 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                 self.tblConstraints.item(row, 0).setCheckState(QtCore.Qt.Unchecked)
                 # deactivate the constraint
                 tab = self.parent.getTabByMnemonic(name[:name.index(":")])
-                row = tab.getRowFromName(name[name.index(":") + 1:])
-                model_key = tab.getModelKeyFromName(constraint)
-                with tab.shadow.operation("parameters"):
-                    tab.getConstraintForRow(row, model_key=model_key).active = False
+                tab.setConstraintActive(name[name.index(":") + 1:], False)

@@ -366,7 +366,7 @@
     [
      true,
      "scale",
-     1,
+     1.0,
      "",
      [
       false,
@@ -404,7 +404,7 @@
     [
      true,
      "m",
-     2,
+     2.0,
      "",
      [
       false,
@@ -423,7 +423,7 @@
     [
      true,
      "b",
-     1,
+     1.0,
      "",
      [
       false,
@@ -451,10 +451,10 @@
   "theory_inputs": {
    "name": "M1",
    "params": {
-    "scale": 1,
+    "scale": 1.0,
     "background": 0.001,
-    "m": 2,
-    "b": 1
+    "m": 2.0,
+    "b": 1.0
    },
    "details": {
     "scale": [
@@ -486,10 +486,10 @@
     "model": {
      "name": "M1",
      "params": {
-      "scale": 1,
+      "scale": 1.0,
       "background": 0.001,
-      "m": 2,
-      "b": 1
+      "m": 2.0,
+      "b": 1.0
      },
      "details": {
       "scale": [

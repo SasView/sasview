@@ -13,6 +13,7 @@ from sasmodels.sesans import SesansTransform
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # Local UI
+from sas.qtgui.Perspectives.Fitting.DocumentShadow import mirrors
 from sas.qtgui.Perspectives.Fitting.UI.SmearingWidgetUI import Ui_SmearingWidgetUI
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
 from sas.sascalc.fit.qsmearing import PySmear, PySmear2D, smear_selection
@@ -134,6 +135,7 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         model = self.kernel_model
         self.updateKernelModel(model, keep_order=True, old_index=old_index)
 
+    @mirrors('smearing')
     def updateKernelModel(self, kernel_model=None, keep_order=False, old_index=None):
         """
         Update the model

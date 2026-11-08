@@ -350,11 +350,12 @@ class FitPageDocument:
         tables = list(Table) if table is None else [table]
         return [p for t in tables for p in self.parameters.by_table(t) if p.fittable and p.constraint is not None]
 
-    def symbol_table(self) -> dict[str, float]:
-        """{f"{mnemonic}.{name}": value} for constraints: fittable main rows, plus poly widths when active."""
+    def symbol_table(self, parameters: ParameterSet | None = None) -> dict[str, float]:
+        """{f"{mnemonic}.{name}": value} for constraints: fittable main rows, plus poly widths when active.
+        Of *parameters* if given (a layout about to be committed), else of the document's."""
+        params = self.parameters if parameters is None else parameters
         prefix = self.identity.mnemonic
-        symbols = {f"{prefix}.{p.label}": float(p.value)
-                   for p in self.parameters.by_table(Table.MAIN) if p.fittable}
+        symbols = {f"{prefix}.{p.label}": float(p.value) for p in params.by_table(Table.MAIN) if p.fittable}
         if self.flags.polydispersity:
-            symbols.update({f"{prefix}.{p.key}": float(p.value) for p in self.parameters.by_table(Table.POLY)})
+            symbols.update({f"{prefix}.{p.key}": float(p.value) for p in params.by_table(Table.POLY)})
         return symbols

@@ -477,7 +477,7 @@
     [
      true,
      "sld",
-     4,
+     4.0,
      "",
      [
       false,
@@ -553,7 +553,7 @@
     [
      true,
      "sld_solvent",
-     1,
+     1.0,
      "",
      [
       false,
@@ -648,7 +648,7 @@
     [
      true,
      "length",
-     400,
+     400.0,
      "",
      [
       false,
@@ -743,7 +743,7 @@
     [
      true,
      "up_theta",
-     90.0,
+     0.0,
      "",
      [
       false,
@@ -794,16 +794,16 @@
    "params": {
     "scale": 0.95,
     "background": 0.001,
-    "sld": 4,
+    "sld": 4.0,
     "sld_M0": 0.0,
     "sld_mtheta": 0.0,
     "sld_mphi": 0.0,
-    "sld_solvent": 1,
+    "sld_solvent": 1.0,
     "sld_solvent_M0": 0.0,
     "sld_solvent_mtheta": 0.0,
     "sld_solvent_mphi": 0.0,
     "radius": 25.5,
-    "length": 400,
+    "length": 400.0,
     "theta": 60,
     "phi": 60,
     "up_frac_i": 0.0,
@@ -925,15 +925,15 @@
    },
    "dispersion": {
     "radius": {
-     "width": 0,
+     "width": 0.0,
      "npts": 35,
-     "nsigmas": 3,
+     "nsigmas": 3.0,
      "type": "gaussian"
     },
     "length": {
-     "width": 0,
+     "width": 0.0,
      "npts": 35,
-     "nsigmas": 3,
+     "nsigmas": 3.0,
      "type": "gaussian"
     },
     "theta": {
@@ -958,16 +958,16 @@
      "params": {
       "scale": 0.95,
       "background": 0.001,
-      "sld": 4,
+      "sld": 4.0,
       "sld_M0": 0.0,
       "sld_mtheta": 0.0,
       "sld_mphi": 0.0,
-      "sld_solvent": 1,
+      "sld_solvent": 1.0,
       "sld_solvent_M0": 0.0,
       "sld_solvent_mtheta": 0.0,
       "sld_solvent_mphi": 0.0,
       "radius": 25.5,
-      "length": 400,
+      "length": 400.0,
       "theta": 60,
       "phi": 60,
       "up_frac_i": 0.0,
@@ -1089,15 +1089,15 @@
      },
      "dispersion": {
       "radius": {
-       "width": 0,
+       "width": 0.0,
        "npts": 35,
-       "nsigmas": 3,
+       "nsigmas": 3.0,
        "type": "gaussian"
       },
       "length": {
-       "width": 0,
+       "width": 0.0,
        "npts": 35,
-       "nsigmas": 3,
+       "nsigmas": 3.0,
        "type": "gaussian"
       },
       "theta": {
