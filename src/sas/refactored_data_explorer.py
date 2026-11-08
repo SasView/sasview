@@ -15,6 +15,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from sasdata.data import SasData
 from sasdata.data_io.importers.import_ascii import load_data as load_advanced_ascii_data
 from sasdata.data_io.importers.import_ascii import load_data_default_params as load_ascii_data
 from sasdata.data_io.importers.import_hdf5 import load_data as load_hdf5_data
