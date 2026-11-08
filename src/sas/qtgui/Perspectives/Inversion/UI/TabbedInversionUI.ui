@@ -45,6 +45,9 @@
        <property name="text">
         <string>Calculate</string>
        </property>
+                <property name="toolTip">
+                 <string>Calculate P(r) for the selected data.</string>
+                </property>
       </widget>
      </item>
      <item>
@@ -61,6 +64,9 @@
        <property name="text">
         <string>Calculate All</string>
        </property>
+        <property name="toolTip">
+         <string>Calculate P(r) for all datasets.</string>
+        </property>
       </widget>
      </item>
      <item>
@@ -68,6 +74,9 @@
        <property name="text">
         <string>Stop</string>
        </property>
+        <property name="toolTip">
+         <string>Stop the current calculation.</string>
+        </property>
       </widget>
      </item>
      <item>
@@ -75,6 +84,9 @@
        <property name="text">
         <string>Show Results</string>
        </property>
+        <property name="toolTip">
+         <string>Show results for the last calculation.</string>
+        </property>
       </widget>
      </item>
      <item>
@@ -104,6 +116,9 @@
        <property name="text">
         <string>Help</string>
        </property>
+    <property name="toolTip">
+     <string>Open help documentation for the P(r) inversion perspective.</string>
+    </property>
       </widget>
      </item>
     </layout>
@@ -176,6 +191,9 @@ p, li { white-space: pre-wrap; }
               <height>0</height>
              </size>
             </property>
+            <property name="toolTip">
+             <string>Number of basis functions used in the inversion.</string>
+            </property>
            </widget>
           </item>
           <item row="0" column="2">
@@ -221,6 +239,9 @@ p, li { white-space: pre-wrap; }
               <height>0</height>
              </size>
             </property>
+            <property name="toolTip">
+             <string>Regularization constant controlling P(r) smoothness.</string>
+            </property>
            </widget>
           </item>
           <item row="1" column="2">
@@ -259,6 +280,9 @@ p, li { white-space: pre-wrap; }
               <width>40</width>
               <height>0</height>
              </size>
+            </property>
+            <property name="toolTip">
+             <string>Maximum distance for P(r) (Angstroms).</string>
             </property>
            </widget>
           </item>
@@ -326,6 +350,9 @@ p, li { white-space: pre-wrap; }
             <property name="readOnly">
              <bool>true</bool>
             </property>
+            <property name="toolTip">
+             <string>Positive fraction of P(r).</string>
+            </property>
            </widget>
           </item>
           <item row="3" column="4">
@@ -370,6 +397,9 @@ p, li { white-space: pre-wrap; }
             <property name="readOnly">
              <bool>true</bool>
             </property>
+            <property name="toolTip">
+             <string>Number of oscillations detected in P(r).</string>
+            </property>
            </widget>
           </item>
           <item row="2" column="0">
@@ -407,6 +437,9 @@ p, li { white-space: pre-wrap; }
             <property name="readOnly">
              <bool>true</bool>
             </property>
+            <property name="toolTip">
+             <string>Uncertainty in the positive fraction.</string>
+            </property>
            </widget>
           </item>
           <item row="0" column="5">
@@ -422,6 +455,9 @@ p, li { white-space: pre-wrap; }
             </property>
             <property name="readOnly">
              <bool>true</bool>
+            </property>
+            <property name="toolTip">
+             <string>Chi-squared per degree of freedom.</string>
             </property>
            </widget>
           </item>
@@ -460,6 +496,9 @@ p, li { white-space: pre-wrap; }
             <property name="readOnly">
              <bool>true</bool>
             </property>
+            <property name="toolTip">
+             <string>Radius of gyration (Angstroms).</string>
+            </property>
            </widget>
           </item>
           <item row="1" column="0">
@@ -490,6 +529,9 @@ p, li { white-space: pre-wrap; }
             <property name="readOnly">
              <bool>true</bool>
             </property>
+            <property name="toolTip">
+             <string>Extrapolated intensity at Q=0 (1/cm).</string>
+            </property>
            </widget>
           </item>
           <item row="3" column="1">
@@ -506,6 +548,9 @@ p, li { white-space: pre-wrap; }
             <property name="readOnly">
              <bool>true</bool>
             </property>
+            <property name="toolTip">
+             <string>Calculation time (seconds).</string>
+            </property>
            </widget>
           </item>
           <item row="2" column="1">
@@ -521,6 +566,9 @@ p, li { white-space: pre-wrap; }
             </property>
             <property name="readOnly">
              <bool>true</bool>
+            </property>
+            <property name="toolTip">
+             <string>Estimated background level (1/cm).</string>
             </property>
            </widget>
           </item>
@@ -556,6 +604,9 @@ p, li { white-space: pre-wrap; }
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
+              <property name="toolTip">
+               <string>Select the I(q) data file to invert.</string>
+              </property>
              </widget>
             </item>
             <item>
@@ -572,6 +623,9 @@ p, li { white-space: pre-wrap; }
               <property name="text">
                <string>Remove</string>
               </property>
+             <property name="toolTip">
+              <string>Remove the selected data file from the list.</string>
+             </property>
              </widget>
             </item>
            </layout>
@@ -618,6 +672,9 @@ p, li { white-space: pre-wrap; }
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
+                   <property name="toolTip">
+                    <string>Minimum Q for the inversion (1/Angstrom).</string>
+                   </property>
                 </widget>
                </item>
                <item>
@@ -645,6 +702,9 @@ p, li { white-space: pre-wrap; }
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
+                   <property name="toolTip">
+                    <string>Maximum Q for the inversion (1/Angstrom).</string>
+                   </property>
                 </widget>
                </item>
                <item>
@@ -685,7 +745,10 @@ p, li { white-space: pre-wrap; }
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
-                </widget>
+                  <property name="toolTip">
+                   <string>Slit height (Angstroms).</string>
+                  </property>
+                  </widget>
                </item>
                <item>
                 <widget class="QLabel" name="label_6">
@@ -712,7 +775,10 @@ p, li { white-space: pre-wrap; }
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
-                </widget>
+                  <property name="toolTip">
+                   <string>Slit width (Angstroms).</string>
+                  </property>
+                  </widget>
                </item>
                <item>
                 <widget class="QLabel" name="label_2">
@@ -743,6 +809,9 @@ p, li { white-space: pre-wrap; }
               <property name="text">
                <string>0.0</string>
               </property>
+              <property name="toolTip">
+               <string>Background level; used if Manual Input is selected.</string>
+              </property>
              </widget>
             </item>
             <item>
@@ -757,12 +826,18 @@ p, li { white-space: pre-wrap; }
               <property name="text">
                <string>Estimate</string>
               </property>
+              <property name="toolTip">
+               <string>Estimate background from the data.</string>
+              </property>
              </widget>
             </item>
             <item>
              <widget class="QRadioButton" name="manualBgd">
               <property name="text">
                <string>Manual Input</string>
+              </property>
+              <property name="toolTip">
+               <string>Use the value in Background Level as the background.</string>
               </property>
              </widget>
             </item>

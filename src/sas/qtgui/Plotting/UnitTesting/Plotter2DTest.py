@@ -9,12 +9,14 @@ mpl.use("Qt5Agg")
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from mpl_toolkits.mplot3d import Axes3D
 from PySide6 import QtCore, QtGui, QtPrintSupport, QtWidgets
+from PySide6.QtTest import QTest
+from shiboken6 import isValid
 
 # Tested module
 import sas.qtgui.Plotting.Plotter2D as Plotter2D
 from sas.qtgui.MainWindow.UnitTesting.DataExplorerTest import MyPerspective
 from sas.qtgui.Plotting.PlotterData import Data2D
-from sas.qtgui.Utilities.GuiUtils import Communicate
+from sas.qtgui.Utilities.GuiUtils import communicator
 
 
 class Plotter2DTest:
@@ -25,7 +27,7 @@ class Plotter2DTest:
 
         class dummy_manager:
             def communicator(self):
-                return Communicate()
+                return communicator
             def perspective(self):
                 return MyPerspective()
             def workspace(self):
@@ -44,6 +46,13 @@ class Plotter2DTest:
                       zmin=1.0, zmax=20.0,
                       )
 
+        data.xmin = 1.0
+        data.xmax = 5.0
+        data.ymin = 1.0
+        data.ymax = 15.0
+        data.zmin = 1.0
+        data.zmax = 20.0
+
         data.title = "Test data"
         data.id = 1
         data.ndim = 2
@@ -53,7 +62,9 @@ class Plotter2DTest:
         yield p
 
         '''destroy'''
-        p.figure.clf()
+        # Some tests close the plot through its window, which deletes it
+        if isValid(p):
+            p.figure.clf()
 
     def testDataProperty(self, plotter):
         """ Adding data """
@@ -65,27 +76,23 @@ class Plotter2DTest:
         """ Look at the plotting """
         mocker.patch.object(plotter, 'plot')
         plotter.plot()
-        assert plotter.plot.called_once()
+        plotter.plot.assert_called_once()
 
-    @pytest.mark.skip(reason="2022-09 already broken")
     def testCalculateDepth(self, plotter):
         ''' Test the depth calculator '''
-        plotter.data = self.data
 
         # Default, log scale
         depth = plotter.calculateDepth()
-        assert depth == (0.1, 1.e20)
+        assert depth == (10.0, 1.e20)
 
         # Change the scale to linear
         plotter.scale = 'linear'
         depth = plotter.calculateDepth()
-        assert depth[0] == -32.
+        assert depth[0] == 0.0
         assert depth[1] == pytest.approx(1.30103, abs=1e-5)
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testOnColorMap(self, plotter, mocker):
         ''' Respond to the color map event '''
-        plotter.data = self.data
         plotter.plot()
         plotter.show()
 
@@ -95,22 +102,20 @@ class Plotter2DTest:
         plotter.onColorMap()
 
         # Check that exec_ got called
-        assert QtWidgets.QDialog.exec_.called
+        QtWidgets.QDialog.exec_.assert_called()
 
         assert plotter.cmap == "jet"
-        assert plotter.vmin == pytest.approx(0.1, abs=1e-6)
+        assert plotter.vmin == pytest.approx(10.0, abs=1e-6)
         assert plotter.vmax == pytest.approx(1e+20, abs=1e-6)
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testOnToggleScale(self, plotter, mocker):
         """ Respond to the event by replotting """
-        plotter.data = self.data
         plotter.show()
         mocker.patch.object(FigureCanvas, 'draw_idle')
 
         plotter.onToggleScale(None)
 
-        assert FigureCanvas.draw_idle.called
+        FigureCanvas.draw_idle.assert_called()
 
     def testOnToggleMaskedPoints(self, plotter, mocker):
         """ Respond to the masked data event by replotting """
@@ -131,16 +136,16 @@ class Plotter2DTest:
         mocker.patch.object(plotter, 'plot')
         plotter.onToggleMaskedData(None)
         assert plotter._show_masked_data
-        assert plotter.plot.called_once()
+        plotter.plot.assert_called_once()
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testOnBoxSum(self, plotter, mocker):
         """ Test the box sum display and functionality """
 
         # hacky way to make things work in manipulations._sum
-        self.data.detector = [1]
-        self.data.err_data = numpy.array([0.0, 0.0, 0.1, 0.0])
-        plotter.data = self.data
+        data = plotter.data0
+        data.detector = [1]
+        data.err_data = numpy.array([[1.0, 2.0, 3.0, 4.0]]*4)
+        plotter.data = data
         plotter.show()
 
         # Mock the main window
@@ -154,13 +159,173 @@ class Plotter2DTest:
         assert plotter.boxwidget.isVisible()
         assert isinstance(plotter.boxwidget.model, QtGui.QStandardItemModel)
 
-    @pytest.mark.skip(reason="2022-09 already broken")
+    def testRemoveSlicersForPlotWindowIgnoresDeletedCanvas(self, plotter, mocker):
+        """ Cleanup should not crash if the canvas is already gone """
+        slicer_window = object()
+        slicer = mocker.MagicMock()
+        slicer._plot_window = slicer_window
+        plotter.slicers = {"slicer": slicer}
+        plotter.slicer = slicer
+        plotter.slicer_plots_dict = {"plot_one": mocker.MagicMock()}
+        mocker.patch.object(plotter.canvas, "draw", side_effect=RuntimeError("deleted"))
+
+        plotter.removeSlicersForPlotWindow(slicer_window)
+
+        slicer.clear.assert_called_once()
+        assert plotter.slicer is None
+
+    def testRemoveSlicersForPlotWindowRemovesMatchingEntry(self, plotter, mocker):
+        """ Closing a 1D slicer plot should remove the matching slicer from the owner """
+        slicer_window = mocker.MagicMock()
+        slicer = mocker.MagicMock()
+        slicer._plot_window = slicer_window
+        plotter.slicers = {"slicer": slicer}
+        plotter.slicer = slicer
+        plotter.slicer_plots_dict = {"plot_one": slicer_window}
+        mocker.patch.object(plotter.canvas, "draw")
+
+        plotter.removeSlicersForPlotWindow(slicer_window)
+
+        slicer.clear.assert_called_once()
+        assert plotter.slicers == {}
+        assert plotter.slicer is None
+        assert plotter.slicer_plots_dict == {}
+
+    @pytest.fixture
+    def workspace(self, plotter):
+        '''Host the plotter in a real workspace, as in the application'''
+        from types import SimpleNamespace
+
+        from sas.qtgui.MainWindow.WorkspaceManager import WorkspaceManager
+        window = QtWidgets.QMainWindow()
+        mdi = QtWidgets.QMdiArea()
+        window.setCentralWidget(mdi)
+        window.show()
+        manager = WorkspaceManager(mdi, window)
+        plotter.manager.parent = SimpleNamespace(workspace_manager=manager)
+        manager.add(plotter)
+        yield manager
+        window.close()
+        window.deleteLater()
+        QtWidgets.QApplication.processEvents()
+
+    @staticmethod
+    def _prepareBoxSum(plotter):
+        data = plotter.data0
+        data.detector = [1]
+        data.err_data = numpy.array([[1.0, 2.0, 3.0, 4.0]]*4)
+        plotter.data = data
+
+    @staticmethod
+    def _flush():
+        for _ in range(3):
+            QtWidgets.QApplication.processEvents()
+            QtCore.QCoreApplication.sendPostedEvents(None, QtCore.QEvent.DeferredDelete)
+
+    @pytest.mark.parametrize("detached", [False, True], ids=["attached", "detached"])
+    @pytest.mark.parametrize("route", ["container", "button", "escape"])
+    def testBoxSumWindowClosedByEveryRoute(self, plotter, workspace, detached, route):
+        '''The box sum panel can be closed any way, attached or detached, and reopened'''
+        self._prepareBoxSum(plotter)
+        plotter.onBoxSum()
+        box = plotter.boxwidget
+        assert workspace.is_hosted(box)
+        if detached:
+            workspace.detach(box)
+            self._flush()
+
+        if route == "container":
+            workspace.container_of(box).close()
+        elif route == "button":
+            box.buttonBox.button(QtWidgets.QDialogButtonBox.Close).click()
+        else:
+            box.reject()
+        self._flush()
+
+        assert plotter.boxwidget is None
+        # Closing the panel also removes its box sum slicer
+        assert plotter.slicer is None
+        assert not workspace.is_hosted(box)
+
+        # It can be opened again
+        plotter.onClearSlicer()
+        plotter.onBoxSum()
+        assert workspace.is_hosted(plotter.boxwidget)
+
+    @pytest.mark.parametrize("detached", [False, True], ids=["attached", "detached"])
+    @pytest.mark.parametrize("route", ["container", "button", "escape"])
+    def testSlicerParametersClosedByEveryRoute(self, plotter, workspace, detached, route):
+        '''The slicer parameter panel notifies its owner exactly once, however it is closed'''
+        # The panel is parented to the plot's manager and uses what the Data Explorer provides
+        from types import SimpleNamespace
+        explorer = QtWidgets.QWidget()
+        explorer.active_plots = {}
+        explorer.communicator = communicator
+        explorer.parent = SimpleNamespace(workspace_manager=workspace)
+        plotter.manager = explorer
+        plotter.onEditSlicer()
+        panel = plotter.slicer_widget
+        notifications = []
+        panel.closeWidgetSignal.connect(lambda: notifications.append(1))
+        assert workspace.is_hosted(panel)
+        if detached:
+            workspace.detach(panel)
+            self._flush()
+
+        if route == "container":
+            workspace.container_of(panel).close()
+        elif route == "button":
+            panel.cmdClose.click()
+        else:
+            QTest.keyClick(panel, QtCore.Qt.Key_Escape)
+        self._flush()
+
+        assert notifications == [1]
+        assert plotter.slicer_widget is None
+        assert not workspace.is_hosted(panel)
+
+        # It can be opened again
+        plotter.onEditSlicer()
+        assert workspace.is_hosted(plotter.slicer_widget)
+
+    @pytest.mark.parametrize("detached", [False, True], ids=["attached", "detached"])
+    def testHelperPanelsFollowPlotPlacement(self, plotter, workspace, detached):
+        '''Helper panels open attached or detached, matching their plot'''
+        from types import SimpleNamespace
+        if detached:
+            workspace.detach(plotter)
+            self._flush()
+
+        self._prepareBoxSum(plotter)
+        plotter.onBoxSum()
+        assert workspace.is_detached(plotter.boxwidget) == detached
+
+        explorer = QtWidgets.QWidget()
+        explorer.active_plots = {}
+        explorer.communicator = communicator
+        explorer.parent = SimpleNamespace(workspace_manager=workspace)
+        plotter.manager = explorer
+        plotter.onEditSlicer()
+        assert workspace.is_detached(plotter.slicer_widget) == detached
+
+    def testClosingPlotClosesDetachedHelper(self, plotter, workspace):
+        '''Closing a 2D plot closes its helper panel, wherever the helper lives'''
+        self._prepareBoxSum(plotter)
+        plotter.onBoxSum()
+        box = plotter.boxwidget
+        workspace.detach(box)
+        self._flush()
+
+        assert workspace.close(plotter)
+        self._flush()
+        assert not workspace.is_hosted(box)
+        assert not workspace.is_hosted(plotter)
+
     def testContextMenuQuickPlot(self, plotter, mocker):
         """ Test the right click menu """
-        plotter.data = self.data
         plotter.createContextMenuQuick()
         actions = plotter.contextMenu.actions()
-        assert len(actions) == 7
+        assert len(actions) == 9
 
         # Trigger Print Image and make sure the method is called
         assert actions[1].text() == "Print Image"
@@ -189,13 +354,12 @@ class Plotter2DTest:
         self.clipboard_called = False
         def done():
             self.clipboard_called = True
-        QtCore.QObject.connect(QtWidgets.qApp.clipboard(), QtCore.SIGNAL("dataChanged()"), done)
+        QtCore.QObject.connect(QtWidgets.QApplication.clipboard(), QtCore.SIGNAL("dataChanged()"), done)
         actions[2].trigger()
-        QtWidgets.qApp.processEvents()
+        QtWidgets.QApplication.processEvents()
         # Make sure clipboard got updated.
         assert self.clipboard_called
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testShowNoPlot(self, plotter, mocker):
         """ Test the plot rendering and generation """
 
@@ -204,18 +368,18 @@ class Plotter2DTest:
 
         # Test early return on no data
         plotter.showPlot(data=None,
-                              qx_data=self.data.qx_data,
-                              qy_data=self.data.qy_data,
-                              xmin=self.data.xmin,
-                              xmax=self.data.xmax,
-                              ymin=self.data.ymin, ymax=self.data.ymax,
-                              cmap=None, zmin=None,
+                              qx_data=plotter.data0.qx_data,
+                              qy_data=plotter.data0.qy_data,
+                              xmin=plotter.data0.xmin,
+                              xmax=plotter.data0.xmax,
+                              ymin=plotter.data0.ymin,
+                              ymax=plotter.data0.ymax,
+                              cmap=None, zmin=0.0,
                               zmax=None)
 
-        assert not FigureCanvas.draw_idle.called
-        assert not FigureCanvas.draw.called
+        FigureCanvas.draw_idle.assert_not_called()
+        FigureCanvas.draw.assert_not_called()
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testShow3DPlot(self, plotter, mocker):
         """ Test the 3Dplot rendering and generation """
         # Test 3D printout
@@ -223,20 +387,20 @@ class Plotter2DTest:
         mocker.patch.object(Axes3D, 'plot_surface')
         mocker.patch.object(plotter.figure, 'colorbar')
 
+        data = plotter.data0
         plotter.dimension = 3
-        plotter.data = self.data
-        plotter.showPlot(data=plotter.data0.data,
-                              qx_data=self.data.qx_data,
-                              qy_data=self.data.qy_data,
-                              xmin=self.data.xmin,
-                              xmax=self.data.xmax,
-                              ymin=self.data.ymin, ymax=self.data.ymax,
-                              cmap=None, zmin=None,
+        plotter.showPlot(data=data.data,
+                              qx_data=data.qx_data,
+                              qy_data=data.qy_data,
+                              xmin=data.xmin,
+                              xmax=data.xmax,
+                              ymin=data.ymin,
+                              ymax=data.ymax,
+                              cmap=None, zmin=0.0,
                               zmax=None)
-        assert Axes3D.plot_surface.called
-        assert FigureCanvas.draw.called
+        Axes3D.plot_surface.assert_called()
+        FigureCanvas.draw.assert_called()
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testShow2DPlot(self, plotter, mocker):
         """ Test the 2Dplot rendering and generation """
         # Test 2D printout
@@ -244,13 +408,13 @@ class Plotter2DTest:
         mocker.patch.object(plotter.figure, 'colorbar')
 
         plotter.dimension = 2
-        plotter.data = self.data
-        plotter.showPlot(data=self.data.data,
-                              qx_data=self.data.qx_data,
-                              qy_data=self.data.qy_data,
-                              xmin=self.data.xmin,
-                              xmax=self.data.xmax,
-                              ymin=self.data.ymin, ymax=self.data.ymax,
-                              cmap=None, zmin=None,
+        plotter.showPlot(data=plotter.data0.data,
+                              qx_data=plotter.data0.qx_data,
+                              qy_data=plotter.data0.qy_data,
+                              xmin=plotter.data0.xmin,
+                              xmax=plotter.data0.xmax,
+                              ymin=plotter.data0.ymin,
+                              ymax=plotter.data0.ymax,
+                              cmap=None, zmin=0.0,
                               zmax=None)
-        assert FigureCanvas.draw_idle.called
+        FigureCanvas.draw_idle.assert_called()

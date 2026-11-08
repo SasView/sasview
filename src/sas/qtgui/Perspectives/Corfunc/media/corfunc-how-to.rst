@@ -75,7 +75,9 @@ Finally, you can see the interface distribution function in the `IDF` tab
     :align: center
 
 The export buttons allow you to produce CSV files containing either the extrapolated
-Q-space data, or the transformed data.
+Q-space data, or the transformed data. 'Export Extrapolated' will save two CSV files,
+one containing the uncorrected extrapolated data, and one containing the corrected data
+(minus background).
 
 The structure of the transformed data file is shown below (note that as this is a 4 column .csv file,
 SasView will interpret this as a :math:`I(q)` vs :math:`q` curve if you try to load it from the main

@@ -12,7 +12,6 @@ import urllib.parse
 import warnings
 import webbrowser
 from io import BytesIO
-from pathlib import Path
 
 import numpy
 import numpy as np
@@ -39,7 +38,8 @@ from sas.qtgui.Plotting import DataTransform
 from sas.qtgui.Plotting.ConvertUnits import convertUnit
 from sas.qtgui.Plotting.Plottables import Chisq, Plottable, PlottableFit1D, PlottableTheory1D, Text, View
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
-from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
+from sas.qtgui.Utilities.BackgroundColor import BG_DEFAULT, BG_WARNING
+from sas.qtgui.Utilities.SASBDB.sasbdb_display import append_sasbdb_data_summary
 from sas.sascalc.fit.AbstractFitEngine import FitData1D, FitData2D, FResult
 from sas.system import HELP_SYSTEM
 from sas.system.user import PATH_LIKE
@@ -79,6 +79,9 @@ class Communicate(QtCore.QObject):
     """
     Utility class for tracking of the Qt signals
     """
+    # File was passed as an argument on the command line, dropped on the executable, or double clicked
+    fileTriggerSignal = QtCore.Signal(str)
+
     # File got successfully read
     fileReadSignal = QtCore.Signal(list)
 
@@ -177,8 +180,13 @@ class Communicate(QtCore.QObject):
     # Global close to help kill active threads
     closeSignal = QtCore.Signal()
 
+    # Notify about a data name to be frozen and send to fitting perspective
+    freezeDataNameSignal = QtCore.Signal(str)
 
-communicate = Communicate()
+    # Request refresh of undo/redo action enabled state
+    undoRedoUpdateSignal = QtCore.Signal()
+
+communicator = Communicate()
 
 
 def updateModelItemWithPlot(item, update_data, name="", checkbox_state=None):
@@ -545,7 +553,8 @@ def retrieveData1d(data):
         #logger.error(msg)
         raise ValueError(msg)
 
-    text = data.__str__()
+    text = append_sasbdb_data_summary(data.__str__(), data)
+
     text += 'Data Min Max:\n'
     text += 'X_min = %s:  X_max = %s\n' % (xmin, max(data.x))
     text += 'Y_min = %s:  Y_max = %s\n' % (ymin, max(data.y))
@@ -589,7 +598,8 @@ def retrieveData2d(data):
         msg = "Incorrect type passed to retrieveData2d"
         raise AttributeError(msg)
 
-    text = data.__str__()
+    text = append_sasbdb_data_summary(data.__str__(), data)
+
     text += 'Data Min Max:\n'
     text += 'I_min = %s\n' % min(data.data)
     text += 'I_max = %s\n\n' % max(data.data)
@@ -738,15 +748,15 @@ class FormulaValidator(QtGui.QValidator):
 
     def validate(self, input, pos):
 
-        self._setStyleSheet("")
+        self._setStyleSheet(BG_DEFAULT)
 
         try:
             Formula(str(input))
-            self._setStyleSheet("")
+            self._setStyleSheet(BG_DEFAULT)
             return QtGui.QValidator.Acceptable
 
         except Exception:
-            self._setStyleSheet("background-color:pink;")
+            self._setStyleSheet(BG_WARNING)
             return QtGui.QValidator.Intermediate
 
     def _setStyleSheet(self, value):
@@ -1450,18 +1460,7 @@ def enum(*sequential, **named):
     enums = dict(zip(sequential, range(len(sequential))), **named)
     return type('Enum', (), enums)
 
-def showHelp(url: PATH_LIKE):
-    if isinstance(url, str):
-        url = url.lstrip("//")
-    url = Path(url)
-    url_abs = HELP_SYSTEM.path / url if str(HELP_SYSTEM.path.resolve()) not in str(url.absolute()) else url
 
-    try:
-        help_window = DocViewWindow(source=url_abs)
-        help_window.show()
-        help_window.activateWindow()
-        help_window.setFocus()
-        # Return the window so the caller can keep it in scope to prevent garbage collection
-        return help_window
-    except Exception as ex:
-        logger.warning(f"Cannot display help: {ex}")
+def showHelp(url: PATH_LIKE):
+    """Open documentation in the system's default web browser."""
+    HELP_SYSTEM.show_help(url)

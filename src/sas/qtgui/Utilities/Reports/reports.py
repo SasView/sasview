@@ -1,6 +1,5 @@
 import base64
 import datetime
-import importlib.resources as pkg_resources
 import logging
 import os
 import sys
@@ -20,8 +19,21 @@ import sas.system.version
 from sas.qtgui.Plotting.PlotterBase import Data1D
 from sas.qtgui.Utilities import GuiUtils
 from sas.qtgui.Utilities.Reports.reportdata import ReportData
+from sas.system import SAS_RESOURCES
 
 logger = logging.getLogger(__name__)
+
+
+def format_report_parameters(parameters: dict[str, Any], empty_value: str = "-") -> dict[str, Any]:
+    """Return a report-friendly copy of a parameter dictionary."""
+    formatted_parameters: dict[str, Any] = {}
+    for key, value in parameters.items():
+        nice_key = " ".join(part.capitalize() for part in key.split("_"))
+        if isinstance(value, str) and value.strip() == "":
+            formatted_parameters[nice_key] = empty_value
+        else:
+            formatted_parameters[nice_key] = value
+    return formatted_parameters
 
 
 #
@@ -100,8 +112,8 @@ class ReportBase:
                 tags.link(rel="stylesheet", href=style_link)
 
             else:
-                style_data = pkg_resources.read_text("sas.qtgui.Utilities.Reports", "report_style.css")
-                tags.style(style_data)
+                with SAS_RESOURCES.resource("qtgui/Utilities/Reports/report_style.css") as res_path:
+                    tags.style(res_path.read_text())
 
         with self._html_doc.body:
             with tags.div(id="main"):

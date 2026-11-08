@@ -3,12 +3,12 @@ import os
 import sys
 import traceback
 import webbrowser
-from pathlib import Path
 
 from packaging.version import Version
 from PySide6.QtCore import QLocale, Qt
-from PySide6.QtGui import QStandardItem
-from PySide6.QtWidgets import QDockWidget, QLabel, QProgressBar, QTextBrowser
+from PySide6.QtGui import QStandardItem, QTextCursor
+from PySide6.QtWidgets import QDockWidget, QLabel, QMessageBox, QProgressBar, QTextBrowser
+from shiboken6 import isValid
 from twisted.internet import reactor
 
 import sas
@@ -40,8 +40,7 @@ from sas.qtgui.Perspectives.Inversion.InversionPerspective import InversionWindo
 from sas.qtgui.Perspectives.perspective import Perspective
 from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionPerspective import SizeDistributionWindow
 from sas.qtgui.Utilities.About.About import About
-
-# from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
+from sas.qtgui.Utilities.About.Credits import Credits
 from sas.qtgui.Utilities.FileConverter import FileConverterWidget
 from sas.qtgui.Utilities.GridPanel import BatchOutputPanel
 from sas.qtgui.Utilities.HidableDialog import hidable_dialog
@@ -56,6 +55,8 @@ from sas.qtgui.Utilities.PluginManager import PluginManager
 from sas.qtgui.Utilities.Preferences.PreferencesPanel import PreferencesPanel
 from sas.qtgui.Utilities.Reports.ReportDialog import ReportDialog
 from sas.qtgui.Utilities.ResultPanel import ResultPanel
+from sas.qtgui.Utilities.SASBDB.sasbdb_loader import load_downloaded_dataset
+from sas.qtgui.Utilities.SASBDB.SASBDBDownloadDialog import SASBDBDownloadDialog
 
 # General SAS imports
 from sas.qtgui.Utilities.SasviewLogger import setup_qt_logging
@@ -82,9 +83,6 @@ class GuiManager:
         # Decide on a locale
         QLocale.setDefault(QLocale('en_US'))
 
-        # Redefine exception hook to not explicitly crash the app.
-        sys.excepthook = self.info
-
         # Ensure the user directory has all required layout and files
         create_user_files_if_needed()
 
@@ -104,6 +102,8 @@ class GuiManager:
         # Currently displayed perspective
         self._current_perspective: Perspective | None = None
         self.loadedPerspectives: dict[str, Perspective] = {}
+        self._connected_undo_stack = None
+        self._connected_tabbed_perspective = None
 
         # Populate the main window with stuff
         self.addWidgets()
@@ -126,9 +126,6 @@ class GuiManager:
         if self.WhatsNew.has_new_messages(): # Not a static method
             self.WhatsNew.show()
 
-    def info(self, type, value, tb):
-        logger.error("".join(traceback.format_exception(type, value, tb)))
-
     def addWidgets(self):
         """
         Populate the main window with widgets
@@ -141,11 +138,13 @@ class GuiManager:
         self.logDockWidget.setVisible(False)
 
         self.listWidget = QTextBrowser()
+        # We could put error log styling here:
+        # self.listWidget.setStyleSheet("QTextBrowser { line-height: 1.0; }")
         self.logDockWidget.setWidget(self.listWidget)
         self._workspace.addDockWidget(Qt.BottomDockWidgetArea, self.logDockWidget)
 
-        # Preferences Panel must exist before perspectives are loaded
-        self.preferences = PreferencesPanel(self._parent)
+        # Preferences Panel initialized in loadAllPerspectives()
+        self.preferences = None
 
         # Load all perspectives - Preferences panel must exist
         self.loadAllPerspectives()
@@ -171,14 +170,14 @@ class GuiManager:
         self.grid_window = BatchOutputPanel(parent=self)
         if sys.platform == "darwin":
             self.grid_window.menubar.setNativeMenuBar(False)
-        self.grid_subwindow = self._workspace.workspace.addSubWindow(self.grid_window)
-        self.grid_subwindow.setVisible(False)
-        self.grid_window.windowClosedSignal.connect(lambda: self.grid_subwindow.setVisible(False))
+        self.workspace_manager.add(self.grid_window, visible=False)
+        self.grid_window.windowClosedSignal.connect(
+            lambda: self.workspace_manager.set_visible(self.grid_window, False))
 
         self.results_panel = ResultPanel(parent=self._parent, manager=self)
-        self.results_frame = self._workspace.workspace.addSubWindow(self.results_panel)
-        self.results_frame.setVisible(False)
-        self.results_panel.windowClosedSignal.connect(lambda: self.results_frame.setVisible(False))
+        self.workspace_manager.add(self.results_panel, visible=False)
+        self.results_panel.windowClosedSignal.connect(
+            lambda: self.workspace_manager.set_visible(self.results_panel, False))
 
         self._workspace.toolBar.setVisible(config.TOOLBAR_SHOW)
 
@@ -199,6 +198,7 @@ class GuiManager:
         """ Load all the perspectives"""
         # Close any existing perspectives to prevent multiple open instances
         self.closeAllPerspectives()
+        self.preferences = PreferencesPanel(self._parent)
         # Load all perspectives
         loaded_dict = {} # dictionary that will ultimately keep track of all perspective instances
         for name, perspective in Perspectives.PERSPECTIVES.items():
@@ -225,11 +225,13 @@ class GuiManager:
             for name, perspective in self.loadedPerspectives.items():
                 try:
                     perspective.setClosable(True)
-                    if self.subwindow in self._workspace.workspace.subWindowList():
-                        self._workspace.workspace.removeSubWindow(self.subwindow)
+                    # Take the perspective out of its window and drop its placement record,
+                    # so the old instance is not kept alive by the workspace manager
+                    self.workspace_manager.forget(perspective)
                     perspective.close()
                 except Exception as e:
                     logger.warning(f"Unable to close {name} perspective\n{e}")
+        self.preferences = None
         self.loadedPerspectives = {}
         self._current_perspective = None
 
@@ -244,7 +246,6 @@ class GuiManager:
             model_list = ModelManager().cat_model_list()
             CategoryInstaller.check_install(model_list=model_list)
         except Exception:
-            import traceback
             logger.error("Category manager: could not load SasView models")
             logger.error(traceback.format_exc())
 
@@ -266,6 +267,7 @@ class GuiManager:
         """
         if not plot:
             return
+
         name = plot[1].name
         for action in self._workspace.menuWindow.actions():
             if action.text() == name:
@@ -287,11 +289,8 @@ class GuiManager:
         for plot in PlotHelper.currentPlotIds():
             # take last plot
             if PlotHelper.plotById(plot).data[-1].name == plot_name:
-                # set focus on the plot
-                # Note: none of the StackOverflow recommended solutions work here!
-                # neither raise_(), nor showNormal() nor setWindowState(Qt.WindowActive)
-                PlotHelper.plotById(plot).showNormal()
-                PlotHelper.plotById(plot).setFocus()
+                # restore, raise and focus the plot, attached or detached
+                self.workspace_manager.activate(PlotHelper.plotById(plot))
                 return
 
     def removePlotItemsInWindowsMenu(self, plot):
@@ -354,39 +353,8 @@ class GuiManager:
 
     @classmethod
     def showHelp(cls, url):
-        """
-        Open a local url in the default browser
-        """
-        if not HELP_SYSTEM.path:
-            logger.error("Help documentation was not found.")
-            return
-
-        counter = 1
-        window_name = "help_window"
-        # Remove leading forward slashes from relative paths to allow easy Path building
-        if isinstance(url, str):
-            url = url.lstrip("//")
-        url = Path(url)
-        if str(HELP_SYSTEM.path.resolve()) not in str(url.absolute()):
-            url_abs = HELP_SYSTEM.path / url
-        else:
-            url_abs = Path(url)
-        try:
-            # In order to have multiple help windows open simultaneously, we need to create a new class variable
-            # If we just reassign the old one, the old window will be destroyed
-
-            # Have we found a name not assigned to a window?
-            potential_help_window = getattr(cls, window_name, None)
-            while potential_help_window and potential_help_window.isVisible():
-                window_name = f"help_window_{counter}"
-                potential_help_window = getattr(cls, window_name, None)
-                counter += 1
-
-            # Assign new variable to the GuiManager
-            setattr(cls, window_name, GuiUtils.showHelp(url_abs))
-
-        except Exception as ex:
-            logger.warning("Cannot display help. %s" % ex)
+        """Open documentation in the default browser."""
+        HELP_SYSTEM.show_help(url)
 
     def workspace(self):
         """
@@ -394,10 +362,19 @@ class GuiManager:
         """
         return self._workspace.workspace
 
+    @property
+    def workspace_manager(self):
+        """
+        The WorkspaceManager that owns all workspace windows, attached or detached
+        """
+        return self._workspace.workspace_manager
+
     def perspectiveChanged(self, new_perspective_name: str):
         """
         Respond to change of the perspective signal
         """
+
+        self._disconnect_undo_redo_hooks()
 
         if new_perspective_name not in self.loadedPerspectives:
             keylist = ', '.join(self.loadedPerspectives.keys())
@@ -419,8 +396,8 @@ class GuiManager:
             # Remove perspective and store in Perspective dictionary
             self.loadedPerspectives[self._current_perspective.name] = self._current_perspective
 
-            self._workspace.workspace.removeSubWindow(self._current_perspective)
-            self._workspace.workspace.removeSubWindow(self.subwindow)
+            # Take it out of its window without closing it. Its placement is remembered.
+            self.workspace_manager.remove(self._current_perspective)
 
         # Get new perspective - note that _current_perspective is of type Optional[Perspective],
         # but new_perspective is of type Perspective, thus call to Perspective members are safe
@@ -478,17 +455,25 @@ class GuiManager:
         #
         # Set up the window
         #
-        self.subwindow = self._workspace.workspace.addSubWindow(new_perspective)
+        # The preference decides where a perspective is first shown in a session.
+        # After that, the perspective returns to wherever the user last left it.
+        placement = self.workspace_manager.last_placement(new_perspective)
+        if placement is None:
+            detached = bool(config.OPEN_PERSPECTIVE_DETACHED)
+            first_geometry = True
+        else:
+            detached = placement.detached
+            first_geometry = (placement.floating_geometry if detached else placement.mdi_geometry) is None
 
-        # Resize to the workspace height
-        workspace_height = self._workspace.workspace.sizeHint().height()
-        perspective_size = new_perspective.sizeHint()
-        perspective_width = perspective_size.width()
-        new_perspective.resize(perspective_width, workspace_height-10)
+        if detached and first_geometry:
+            # Size the content before the floating window is built around it.
+            # In the workspace, the window takes the perspective's size hint.
+            workspace_height = self._workspace.workspace.sizeHint().height()
+            new_perspective.resize(new_perspective.sizeHint().width(), workspace_height-10)
 
-        # Set the current perspective to new one and show
         self._current_perspective = new_perspective
-        self._current_perspective.show()
+        self.workspace_manager.add(new_perspective, detached=detached)
+        self._connect_undo_redo_hooks()
 
     def updatePerspective(self, data):
         """
@@ -500,10 +485,6 @@ class GuiManager:
         else:
             msg = "No perspective is currently active."
             logger.info(msg)
-
-    def communicator(self):
-        """ Accessor for the communicator """
-        return self.communicate
 
     def perspective(self):
         """ Accessor for the perspective """
@@ -534,7 +515,18 @@ class GuiManager:
         """Appends a message to the list widget in the Log Explorer. Use this
         instead of listWidget.insertPlainText() to facilitate auto-scrolling"""
         (message, record) = signal
-        self.listWidget.append(message.strip())
+
+        # Move cursor to the end of text and append the next log message;
+        # Don't use append() to add the block since it messes up the formatting
+        # we do is SasviewLogger. Instead put a <br> between every entry.
+        # Scroll the text so that it is visible.
+        cursor = self.listWidget.textCursor()
+        cursor.movePosition(QTextCursor.End)
+        cursor.insertHtml(f"\n<br>\n{message.strip()}")
+        self.listWidget.ensureCursorVisible()
+
+        # Show the mess inside the log widget. Qt is doing too much!
+        # print("\n\n===log contains: ", self.listWidget.toHtml())
 
         # Display log if message is warning (30) or higher
         # 10: Debug
@@ -583,9 +575,12 @@ class GuiManager:
             # never be able to leave SasView (@butlerpd might prefer this behaviour though)
             config.SHOW_EXIT_MESSAGE = answer.ask_again
 
+            # Close detached windows explicitly; owning them does not close them
+            self.workspace_manager.close_all_floating()
+
             # save the paths etc.
             self.saveCustomConfig()
-            self.communicate.closeSignal.emit()
+            self.communicator.closeSignal.emit()
             reactor.callFromThread(reactor.stop)
             return True
 
@@ -633,23 +628,22 @@ class GuiManager:
                     webbrowser.open(version_info["download_url"])
                 else:
                     webbrowser.open(web.download_url)
-                self.communicate.statusBarUpdateSignal.emit(msg)
+                self.communicator.statusBarUpdateSignal.emit(msg)
             else:
                 msg = "You have the latest version"
-                self.communicate.statusBarUpdateSignal.emit(msg)
+                self.communicator.statusBarUpdateSignal.emit(msg)
         except:
             msg = "guiframe: could not get latest application"
             msg += " version number\n  %s" % sys.exc_info()[1]
             logger.error(msg)
             msg = "Could not connect to the application server."
             msg += " Please try again later."
-            self.communicate.statusBarUpdateSignal.emit(msg)
+            self.communicator.statusBarUpdateSignal.emit(msg)
 
     def actionWelcome(self):
         """ Show the Welcome panel """
         self.welcomePanel = WelcomePanel()
-        self._workspace.workspace.addSubWindow(self.welcomePanel)
-        self.welcomePanel.show()
+        self.workspace_manager.add(self.welcomePanel)
 
     def actionWhatsNew(self):
         self.WhatsNew = WhatsNewWidget(self._parent, only_recent=False)
@@ -657,9 +651,6 @@ class GuiManager:
 
     def showWelcomeMessage(self):
         """ Show the Welcome panel, when required """
-        # Assure the welcome screen is requested
-        show_welcome_widget = True
-
         if config.SHOW_WELCOME_PANEL:
             self.actionWelcome()
 
@@ -667,18 +658,19 @@ class GuiManager:
         """
         Method defining all signal connections for the gui manager
         """
-        self.communicate = GuiUtils.communicate
-        self.communicate.fileDataReceivedSignal.connect(self.fileWasRead)
-        self.communicate.statusBarUpdateSignal.connect(self.updateStatusBar)
-        self.communicate.updatePerspectiveWithDataSignal.connect(self.updatePerspective)
-        self.communicate.progressBarUpdateSignal.connect(self.updateProgressBar)
-        self.communicate.perspectiveChangedSignal.connect(self.perspectiveChanged)
-        self.communicate.updateTheoryFromPerspectiveSignal.connect(self.updateTheoryFromPerspective)
-        self.communicate.deleteIntermediateTheoryPlotsSignal.connect(self.deleteIntermediateTheoryPlotsByTabId)
-        self.communicate.plotRequestedSignal.connect(self.showPlot)
-        self.communicate.plotFromNameSignal.connect(self.showPlotFromName)
-        self.communicate.updateModelFromDataOperationPanelSignal.connect(self.updateModelFromDataOperationPanel)
-        self.communicate.activeGraphsSignal.connect(self.updatePlotItems)
+        self.communicator = GuiUtils.communicator
+        self.communicator.fileDataReceivedSignal.connect(self.fileWasRead)
+        self.communicator.statusBarUpdateSignal.connect(self.updateStatusBar)
+        self.communicator.updatePerspectiveWithDataSignal.connect(self.updatePerspective)
+        self.communicator.progressBarUpdateSignal.connect(self.updateProgressBar)
+        self.communicator.perspectiveChangedSignal.connect(self.perspectiveChanged)
+        self.communicator.updateTheoryFromPerspectiveSignal.connect(self.updateTheoryFromPerspective)
+        self.communicator.deleteIntermediateTheoryPlotsSignal.connect(self.deleteIntermediateTheoryPlotsByTabId)
+        self.communicator.plotRequestedSignal.connect(self.showPlot)
+        self.communicator.plotFromNameSignal.connect(self.showPlotFromName)
+        self.communicator.updateModelFromDataOperationPanelSignal.connect(self.updateModelFromDataOperationPanel)
+        self.communicator.activeGraphsSignal.connect(self.updatePlotItems)
+        self.communicator.undoRedoUpdateSignal.connect(self._update_undo_redo_actions)
 
 
     def addTriggers(self):
@@ -686,8 +678,8 @@ class GuiManager:
         Trigger definitions for all menu/toolbar actions.
         """
         # disable not yet fully implemented actions
-        self._workspace.actionUndo.setVisible(False)
-        self._workspace.actionRedo.setVisible(False)
+        self._workspace.actionUndo.setEnabled(False)
+        self._workspace.actionRedo.setEnabled(False)
         self._workspace.actionReset.setVisible(False)
         self._workspace.actionStartup_Settings.setVisible(False)
         #self._workspace.actionImage_Viewer.setVisible(False)
@@ -702,10 +694,12 @@ class GuiManager:
         # File
         self._workspace.actionLoadData.triggered.connect(self.actionLoadData)
         self._workspace.actionLoad_Data_Folder.triggered.connect(self.actionLoad_Data_Folder)
+        self._workspace.actionLoad_SASBDB.triggered.connect(self.actionLoad_SASBDB)
         self._workspace.actionOpen_Project.triggered.connect(self.actionOpen_Project)
         self._workspace.actionOpen_Analysis.triggered.connect(self.actionOpen_Analysis)
         self._workspace.actionSave.triggered.connect(self.actionSave_Project)
         self._workspace.actionSave_Analysis.triggered.connect(self.actionSave_Analysis)
+        self._workspace.actionClose_Project.triggered.connect(self.actionClose_Project)
         self._workspace.actionPreferences.triggered.connect(self.actionOpen_Preferences)
         self._workspace.actionQuit.triggered.connect(self.actionQuit)
         # Edit
@@ -764,6 +758,15 @@ class GuiManager:
         self._workspace.actionPrevious.triggered.connect(self.actionPrevious)
         self._workspace.actionMinimizePlots.triggered.connect(self.actionMinimizePlots)
         self._workspace.actionClosePlots.triggered.connect(self.actionClosePlots)
+        self._workspace.actionDetachWindow.triggered.connect(self.actionDetachWindow)
+        # Keep the Detach/Attach menu entry in step with the active window
+        workspace_manager = self.workspace_manager
+        workspace_manager.activeWidgetChanged.connect(self.updateDetachWindowAction)
+        workspace_manager.widgetDetached.connect(self.updateDetachWindowAction)
+        workspace_manager.widgetAttached.connect(self.updateDetachWindowAction)
+        workspace_manager.widgetClosed.connect(self.updateDetachWindowAction)
+        self._workspace.menuWindow.aboutToShow.connect(self.updateDetachWindowAction)
+        self.updateDetachWindowAction()
         # Analysis
         self._workspace.actionFitting.triggered.connect(self.actionFitting)
         self._workspace.actionInversion.triggered.connect(self.actionInversion)
@@ -776,12 +779,13 @@ class GuiManager:
         self._workspace.actionModel_Marketplace.triggered.connect(self.actionMarketplace)
         self._workspace.actionAcknowledge.triggered.connect(self.actionAcknowledge)
         self._workspace.actionAbout.triggered.connect(self.actionAbout)
+        self._workspace.actionCredits.triggered.connect(self.actionCredits)
         self._workspace.actionWelcomeWidget.triggered.connect(self.actionWelcome)
         self._workspace.actionCheck_for_update.triggered.connect(self.actionCheck_for_update)
         self._workspace.actionWhat_s_New.triggered.connect(self.actionWhatsNew)
 
-        self.communicate.sendDataToGridSignal.connect(self.showBatchOutput)
-        self.communicate.resultPlotUpdateSignal.connect(self.showFitResults)
+        self.communicator.sendDataToGridSignal.connect(self.showBatchOutput)
+        self.communicator.resultPlotUpdateSignal.connect(self.showFitResults)
 
 
     #============ FILE =================
@@ -797,6 +801,21 @@ class GuiManager:
         """
         self.filesWidget.loadFolder()
 
+    def actionLoad_SASBDB(self):
+        """
+        Menu File/Load from SASBDB
+
+        Opens a dialog to download and load a dataset from SASBDB.
+        """
+        dialog = SASBDBDownloadDialog(parent=self._workspace)
+        if dialog.exec():
+            load_downloaded_dataset(
+                self.filesWidget,
+                self._workspace,
+                dialog.getDownloadedFilepath(),
+                dialog.getDatasetInfo(),
+            )
+
     def actionOpen_Project(self):
         """
         Menu Open Project
@@ -809,13 +828,14 @@ class GuiManager:
         self.filesWidget.loadAnalysis()
 
 
-    def actionSave_Project(self):
+    def actionSave_Project(self) -> bool:
         """
         Menu Save Project
+        return: True if save was successful, False otherwise
         """
         filename = self.filesWidget.saveProject()
         if not filename:
-            return
+            return False
 
         # datasets
         all_data = self.filesWidget.getSerializedData()
@@ -840,6 +860,7 @@ class GuiManager:
 
         with open(filename, 'w') as outfile:
             GuiUtils.saveData(outfile, final_data)
+        return True
 
     def actionSave_Analysis(self):
         """
@@ -876,12 +897,87 @@ class GuiManager:
     def actionUndo(self):
         """
         """
-        print("actionUndo TRIGGERED")
+        stack = self._active_undo_stack()
+        if stack is not None:
+            stack.undo()
 
     def actionRedo(self):
         """
         """
-        print("actionRedo TRIGGERED")
+        stack = self._active_undo_stack()
+        if stack is not None:
+            stack.redo()
+
+    def _active_undo_stack(self):
+        """Return the undo stack for the active perspective, if available."""
+        if self._current_perspective is None:
+            return None
+        return getattr(self._current_perspective, "undo_stack", None)
+
+    def _disconnect_undo_redo_hooks(self):
+        """Disconnect temporary undo/redo signal hooks."""
+        if self._connected_undo_stack is not None:
+            try:
+                self._connected_undo_stack.stackChanged.disconnect(
+                    self._update_undo_redo_actions
+                )
+            except (RuntimeError, TypeError):
+                pass
+            self._connected_undo_stack = None
+
+        if self._connected_tabbed_perspective is not None:
+            try:
+                self._connected_tabbed_perspective.currentChanged.disconnect(
+                    self._on_perspective_tab_changed
+                )
+            except (RuntimeError, TypeError):
+                pass
+            self._connected_tabbed_perspective = None
+
+    def _connect_undo_redo_hooks(self):
+        """Connect action refresh hooks for active perspective and stack."""
+        perspective = self._current_perspective
+        if perspective is None:
+            self._update_undo_redo_actions()
+            return
+
+        if hasattr(perspective, "currentChanged"):
+            try:
+                perspective.currentChanged.connect(self._on_perspective_tab_changed)
+                self._connected_tabbed_perspective = perspective
+            except (RuntimeError, TypeError):
+                self._connected_tabbed_perspective = None
+
+        stack = self._active_undo_stack()
+        if stack is not None and hasattr(stack, "stackChanged"):
+            try:
+                stack.stackChanged.connect(self._update_undo_redo_actions)
+                self._connected_undo_stack = stack
+            except (RuntimeError, TypeError):
+                self._connected_undo_stack = None
+
+        self._update_undo_redo_actions()
+
+    def _on_perspective_tab_changed(self, *_):
+        """Rewire undo hooks when active tab changes (e.g., fitting tabs)."""
+        self._disconnect_undo_redo_hooks()
+        self._connect_undo_redo_hooks()
+
+    def _update_undo_redo_actions(self):
+        """Refresh undo/redo enabled state and action tooltips."""
+        stack = self._active_undo_stack()
+
+        if stack is None:
+            self._workspace.actionUndo.setEnabled(False)
+            self._workspace.actionRedo.setEnabled(False)
+            self._workspace.actionUndo.setToolTip("Undo")
+            self._workspace.actionRedo.setToolTip("Redo")
+            return
+
+        self._workspace.actionUndo.setEnabled(stack.can_undo())
+        self._workspace.actionRedo.setEnabled(stack.can_redo())
+        self._workspace.actionUndo.setToolTip(stack.undo_text())
+        self._workspace.actionRedo.setToolTip(stack.redo_text())
 
     def actionCopy(self):
         """
@@ -953,8 +1049,8 @@ class GuiManager:
         """
         Display/redisplay the batch fit viewer
         """
-        self.grid_subwindow.setVisible(True)
-        self.grid_subwindow.raise_()
+        self.workspace_manager.set_visible(self.grid_window, True)
+        self.workspace_manager.activate(self.grid_window)
         if output_data:
             self.grid_window.addFitResults(output_data)
 
@@ -1002,7 +1098,7 @@ class GuiManager:
         """
         """
         data, theory = self.filesWidget.getAllFlatData()
-        self.communicate.sendDataToPanelSignal.emit(dict(data, **theory))
+        self.communicator.sendDataToPanelSignal.emit(dict(data, **theory))
 
         self.DataOperation.show()
 
@@ -1160,7 +1256,7 @@ class GuiManager:
         """
         Show bumps convergence plots
         """
-        self.results_frame.setVisible(True)
+        self.workspace_manager.set_visible(self.results_panel, True)
         if output_data and len(output_data) > 0 and len(output_data[0]) > 0:
             self.results_panel.onPlotResults(output_data, optimizer=self.perspective().optimizer)
 
@@ -1197,7 +1293,7 @@ class GuiManager:
 
     def actionEditMask(self):
 
-        self.communicate.extMaskEditorSignal.emit()
+        self.communicator.extMaskEditorSignal.emit()
 
     #============ ANALYSIS =================
     def actionFitting(self):
@@ -1240,12 +1336,13 @@ class GuiManager:
     def actionCascade(self):
         """
         Arranges all the child windows in a cascade pattern.
+        Detached windows are not affected.
         """
         self._workspace.workspace.cascadeSubWindows()
 
     def actionTile(self):
         """
-        Tile workspace windows
+        Tile workspace windows. Detached windows are not affected.
         """
         self._workspace.workspace.tileSubWindows()
 
@@ -1258,14 +1355,57 @@ class GuiManager:
     def actionNext(self):
         """
         Gives the input focus to the next window in the list of child windows.
+        Includes detached windows; hidden panels are skipped.
         """
-        self._workspace.workspace.activateNextSubWindow()
+        self._cycleWindows(1)
 
     def actionPrevious(self):
         """
         Gives the input focus to the previous window in the list of child windows.
+        Includes detached windows; hidden panels are skipped.
         """
-        self._workspace.workspace.activatePreviousSubWindow()
+        self._cycleWindows(-1)
+
+    def _cycleWindows(self, step):
+        """
+        Activate the window `step` places away from the active one
+        """
+        workspace_manager = self.workspace_manager
+        widgets = workspace_manager.hosted_widgets()
+        if not widgets:
+            return
+        current = workspace_manager.active_widget()
+        if current in widgets:
+            target = widgets[(widgets.index(current) + step) % len(widgets)]
+        else:
+            target = widgets[0] if step > 0 else widgets[-1]
+        workspace_manager.activate(target)
+
+    def actionDetachWindow(self):
+        """
+        Detach the active window from the workspace, or attach it back
+        """
+        workspace_manager = self.workspace_manager
+        if (widget := workspace_manager.active_widget()) is None:
+            return
+        workspace_manager.toggle(widget)
+        self.updateDetachWindowAction()
+
+    def updateDetachWindowAction(self, *args):
+        """
+        Update the text and enabled state of the Window/Detach menu entry
+        """
+        action = self._workspace.actionDetachWindow
+        # Workspace notifications can still arrive while the main window is being destroyed
+        if not isValid(action):
+            return
+        workspace_manager = self.workspace_manager
+        widget = workspace_manager.active_widget()
+        action.setEnabled(widget is not None)
+        if widget is not None and workspace_manager.is_detached(widget):
+            action.setText("Attach Window to Workspace")
+        else:
+            action.setText("Detach Window from Workspace")
 
     def actionClosePlots(self):
         """
@@ -1275,7 +1415,7 @@ class GuiManager:
 
     def actionMinimizePlots(self):
         """
-        Minimizes all Plotters and Plotter2Ds.
+        Minimizes all Plotters and Plotter2Ds, attached or detached.
         """
         self.filesWidget.minimizeAllPlots()
 
@@ -1318,6 +1458,32 @@ class GuiManager:
         # TODO: proper sizing
         about = About()
         about.exec()
+
+    def actionCredits(self):
+        """
+        Open the Credits/Licenses box
+        """
+        # TODO: proper sizing
+        credits = Credits()
+        credits.exec()
+
+    def actionClose_Project(self):
+        """
+        Menu File/Close Project
+        """
+        # Make sure this is what the user really wants
+        reply = QMessageBox.question(self._parent, 'Close Project',
+                                    "Do you want to save the project before closing?\n"
+                                    "All unsaved changes will be lost if you don't save.",
+                                    QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel,
+                                    QMessageBox.Cancel)
+        if reply == QMessageBox.Save:
+            saved = self.actionSave_Project()
+            if saved:
+                self.resetProject()
+        elif reply == QMessageBox.Discard:
+            self.resetProject()
+        # else Cancel, do nothing
 
     def actionCheck_for_update(self):
         """
@@ -1396,3 +1562,14 @@ class GuiManager:
         Save the config file based on current session values
         """
         config.save()
+
+    def resetProject(self):
+        """
+        Reset the project to an empty state
+        """
+        # perspectives
+        for per in self.loadedPerspectives.values():
+            if hasattr(per, 'reset'):
+                per.reset()
+        # file manager
+        self.filesWidget.reset()

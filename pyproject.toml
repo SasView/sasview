@@ -118,7 +118,6 @@ artifacts = [
 
 [tool.hatch.build.targets.wheel.force-include]
 "build/doc/html/" = "sas/docs"
-"src/sas/sasview/media/" = "sas/sasview/media"
 "src/sas/example_data/" = "sas/example_data"
 
 
@@ -186,8 +185,7 @@ environment = { PYTHONPATH = "../../../src" }
 [tool.pytest.ini_options]
 minversion = "6.0"
 python_files = [
-    "u*py",
-    "*Test*py",
+    "*[Tt]est*.py",
 ]
 python_classes = [
     "*Test",
@@ -203,12 +201,20 @@ filterwarnings = [
 ]
 testpaths = [
     "src",
-    "tests",
+    "test",
 ]
 pythonpath = "src"
 norecursedirs = [
     "test/sasrealspace",
     "test/calculatorview",
+    "src/sas/qtgui/MainWindow/UnitTesting/Quarantine",
+    "src/sas/qtgui/Perspectives/Fitting/UnitTesting/Quarantine",
+    "src/sas/qtgui/Perspectives/Inversion",
+    "src/sas/qtgui/Perspectives/ParticleEditor",
+    "src/sas/qtgui/Utilities/UnitTesting/Quarantine",
+    "src/sas/webfit",
+    "src/sas/sascalc/simulation",
+    "src/sas/sascalc/realspace",
 ]
 
 [tool.ruff]

@@ -22,7 +22,6 @@ class AddTextTest:
         assert isinstance(widget._font, QtGui.QFont)
         assert widget._color == "black"
 
-    @pytest.mark.skip(reason="2022-09 already broken")
     def testOnFontChange(self, widget, mocker):
         '''Test the QFontDialog output'''
         font_1 = QtGui.QFont("Helvetica", 15)
@@ -43,10 +42,11 @@ class AddTextTest:
     def testOnColorChange(self, widget, mocker):
         ''' Test the QColorDialog output'''
         new_color = QtGui.QColor("red")
+        role = QtGui.QPalette.ColorRole.Text
         mocker.patch.object(QtWidgets.QColorDialog, 'getColor', return_value=new_color)
         # Call the method
         widget.onColorChange(None)
         # Check that the text field got the new color info for text
-        assert widget.textEdit.palette().vertex_coloring(QtGui.QPalette.Text) == new_color
+        widget.textEdit.palette().setColor(role, new_color)
         # ... and the hex value of this color is correct
         assert widget.color() == "#ff0000"

@@ -26,79 +26,68 @@ class SizeDistributionLogic:
     No QStandardModelIndex here.
     """
 
-    def __init__(self, data=None):
-        self._data = data
-        self.data_is_loaded = False
+    def __init__(self, data: LoadData1D | None = None) -> None:
+        self._data: LoadData1D | None = data
+        self.data_is_loaded: bool = False
         # di data presence in the dataset
-        self.di_flag = False
-        self.background = None
-        self.data_fit = None
+        self.di_flag: bool = False
+        self.background: LoadData1D | None = None
+        self.data_fit: LoadData1D | None = None
         if data is not None:
             self.data_is_loaded = True
             self.setDataProperties()
 
     @property
-    def data(self):
+    def data(self) -> LoadData1D | None:
+        """Return the data."""
         return self._data
 
     @data.setter
-    def data(self, value):
-        """data setter"""
+    def data(self, value: LoadData1D | None) -> None:
+        """Set the data and update the properties accordingly."""
         self._data = value
         self.data_is_loaded = self._data is not None
         if self._data is not None:
             self.setDataProperties()
 
-    def isLoadedData(self):
-        """accessor"""
+    def isLoadedData(self) -> bool:
+        """Return whether data is loaded."""
         return self.data_is_loaded
 
-    def setDataProperties(self):
-        """
-        Analyze data and set up some properties important for
-        the Presentation layer
-        """
+    def setDataProperties(self) -> None:
+        """Analyze data and set up some properties important for the presentation layer."""
         if self._data.dy is not None and np.any(self._data.dy):
             self.di_flag = True
         else:
             self.di_flag = False
 
-    def computeDataRange(self):
-        """
-        Compute the minimum and the maximum range of the data
-        """
+    def computeDataRange(self) -> tuple[float, float]:
+        """Compute the minimum and the maximum range of the data."""
         try:
-            qmin = min(self.data.x)
-            qmax = max(self.data.x)
+            qmin: float = min(self.data.x)
+            qmax: float = max(self.data.x)
         except (ValueError, TypeError):
-            msg = (
-                "Unable to find min/max/length of \n data named %s" % self.data.filename
-            )
+            msg = f"Unable to find min/max/length of \n data named {self.data.filename}"
             raise ValueError(msg)
         return qmin, qmax
 
-    def computeBackground(self, constant: float, scale: float, power: float):
-        x = self.data.x
+    def computeBackground(self, constant: float, scale: float, power: float) -> None:
+        x: np.ndarray = self.data.x
         # calculate a*x^m + b
-        y_back = scale * x**power + constant
+        y_back: np.ndarray = scale * x**power + constant
         # TODO: the dy is the same as in TestSizeDistribution.py, but is it needed?
-        self.background = LoadData1D(
-            x, y_back, dy=0.0001 * y_back, lam=None, dlam=None, isSesans=False
-        )
+        self.background = LoadData1D(x, y_back, dy=0.0001 * y_back, lam=None, dlam=None, isSesans=False)
 
-    def computeTrustRange(self, qmin: float, qmax: float):
-        """
-        Compute the trusted range (green area in Irena)
-        """
-        d_trust_min = 1.8 * np.pi / qmax
-        d_trust_max = 0.95 * np.pi / qmin
+    def computeTrustRange(self, qmin: float, qmax: float) -> list[float]:
+        """Compute the trusted range (green area in Irena)."""
+        d_trust_min: float = 1.8 * np.pi / qmax
+        d_trust_max: float = 0.95 * np.pi / qmin
         return [d_trust_min, d_trust_max]
 
-    def fitBackground(
-        self, power: float | None, qmin: float, qmax: float
-    ) -> list[float]:
+    def fitBackground(self, power: float | None, qmin: float, qmax: float) -> list[float] | None:
         """
-        Estimate the background power law, scale * q^(power)
+        Estimate the background power law, given by: scale * q^(power).
+
         :param power: if a float is given, the power is fixed; if None, the power is fitted
         :return: fit parameters; [scale] if power is fixed, or [scale, power] if power is fitted
         """
@@ -109,10 +98,8 @@ class SizeDistributionLogic:
             return None
         return background
 
-    def newDataPlot(self):
-        """
-        Create a new 1D data instance
-        """
+    def newDataPlot(self) -> tuple[Data1D, Data1D, Data1D | None]:
+        """Create a new 1D data instance."""
         # Background plot
         backgd_plot = Data1D(self.background.x, self.background.y)
         backgd_plot.is_data = False
@@ -153,7 +140,7 @@ class SizeDistributionLogic:
         backgd_subtr_plot.slider_high_q_input = ["txtMaxRange"]
 
         # Fit plot
-        fit_plot = None
+        fit_plot: Data1D | None = None
         if self.data_fit is not None:
             fit_plot = Data1D(self.data_fit.x, self.data_fit.y, dy=self.data_fit.dy)
             fit_plot.is_data = False
@@ -172,12 +159,10 @@ class SizeDistributionLogic:
 
         return backgd_plot, backgd_subtr_plot, fit_plot
 
-    def newSizeDistrPlot(self, result: MaxEntResult, qmin: float, qmax: float):
-        """
-        Create a new 1D data instance based on fitting results
-        """
+    def newSizeDistrPlot(self, result: MaxEntResult, qmin: float, qmax: float) -> Data1D:
+        """Create a new 1D data instance based on fitting results."""
         # Create the new plot
-        # bins are radius but plot is in diameter
+        # Bins are radius but plot is in diameter
         x = 2 * result.bins
         y = result.bin_mag
         dy = result.bin_err
@@ -195,19 +180,4 @@ class SizeDistributionLogic:
         new_plot.xaxis("\\rm{Diameter}", "A")
         new_plot.yaxis("\\rm{VolumeDistribution}", "")
 
-        # Create vertical lines for trusted range
-        x_trust = self.computeTrustRange(qmin, qmax)
-        y_max_trust = np.full_like(x_trust, max(y))  # lines start at 0.0 and end at y
-        trust_plot = Data1D(x=x_trust, y=y_max_trust)
-        trust_plot.is_data = False
-        trust_plot.symbol = "Vline"
-        trust_plot.custom_color = "Red"
-        trust_plot.xaxis("\\rm{Diameter}", "A")
-        trust_plot.yaxis("\\rm{VolumeDistribution}", "")
-        trust_plot.plot_role = DataRole.ROLE_SIZE_DISTRIBUTION
-
-        trust_plot.id = TRUST_RANGE_LABEL
-        trust_plot.group_id = GROUP_ID_SIZE_DISTR_FIT
-        trust_plot.name = TRUST_RANGE_LABEL + f"[{self._data.name}]"
-
-        return new_plot, trust_plot
+        return new_plot

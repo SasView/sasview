@@ -3,6 +3,7 @@ Adapters for fitting module
 """
 import copy
 import math
+import weakref
 from enum import Enum, auto
 
 import numpy
@@ -69,6 +70,7 @@ class Data1D(PlottableData1D, LoadData1D):
         # Q-range slider definitions
         self.show_q_range_sliders = False  # Should sliders be shown?
         self.slider_update_on_move = True  # Should the gui update during the move?
+        self.slider_draggable = True  # Should the q-range slider lines respond to direct dragging?
         self.slider_perspective_name = ""  # Name of the perspective that this slider is associated with
         self.slider_tab_name = ""          # Name of the tab where the data set is
         # The following q-range slider variables are optional but help tie
@@ -81,6 +83,22 @@ class Data1D(PlottableData1D, LoadData1D):
         self.slider_low_q_getter = []  # List of attributes that lead to a getter to tie a low Q method to the slider
         self.slider_high_q_setter = []  # List of attributes that lead to a setter to tie a high Q method to the slider
         self.slider_high_q_getter = []  # List of attributes that lead to a getter to tie a high Q method to the slider
+
+        # Trust bar for size distribution perspective
+        self.show_trust_bar = False  # Should the trust bar be shown?
+
+    def setSlicerOwner(self, owner):
+        """
+        Store the 2D plot window that owns a slicer-generated 1D plot.
+        """
+        self._slicer_owner_ref = weakref.ref(owner) if owner is not None else None
+
+    def slicerOwner(self):
+        """
+        Return the 2D plot window that owns this slicer plot, if it still exists.
+        """
+        owner_ref = getattr(self, "_slicer_owner_ref", None)
+        return owner_ref() if owner_ref is not None else None
 
     def copy_from_datainfo(self, data1d):
         """

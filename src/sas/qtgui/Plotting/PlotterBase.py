@@ -10,12 +10,37 @@ from PySide6 import QtCore, QtGui, QtPrintSupport, QtWidgets
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas import config
+from sas.qtgui.MainWindow.WorkspaceManager import ATTACH_TEXT, DETACH_TEXT, workspace_manager_for
 from sas.qtgui.Plotting.Binder import BindArtist
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
 from sas.qtgui.Plotting.WindowTitle import WindowTitle
 
 DEFAULT_CMAP = mpl.cm.jet
+
+class CustomToolbar(NavigationToolbar):
+    """
+    Adding custom Actions to the NavigationToolbar, which are visible in 1D/2D plots.
+    
+    Currently added actions:
+    - "Freeze Datasets":
+    :param canvas: Matplotlib canvas
+    :param parent: Parent Qt widget
+    :emit: <class 'str'> name of 1D/2D plot 
+
+    """
+    def __init__(self, canvas, parent=None):
+        super().__init__(canvas, parent)
+        self.parent = parent
+        custom_icon = QtGui.QIcon()  # You can load an icon here if you want e.g., QtGui.QIcon("path/to/icon.png")
+        custom_action = QtGui.QAction(custom_icon, "Freeze Datasets", self)
+        custom_action.setToolTip("Send all datasets to the Data Explorer")
+        custom_action.triggered.connect(self.freezeDatasets)
+        self.insertAction(self.actions()[-1], custom_action)
+
+    def freezeDatasets(self):
+        for dataset in self.parent.data:
+            GuiUtils.communicator.freezeDataNameSignal.emit(dataset.name)
 
 class PlotterBase(QtWidgets.QWidget):
     #TODO: Describe what this class is
@@ -45,7 +70,7 @@ class PlotterBase(QtWidgets.QWidget):
         # Set the layout and place the canvas widget in it.
         layout = QtWidgets.QVBoxLayout()
         # FIXME setMargin -> setContentsMargins in qt5 with 4 args
-        #layout.setContentsMargins(0)
+        layout.setSpacing(0)
         layout.addWidget(self.canvas)
 
         # 1D plotter defaults
@@ -109,7 +134,8 @@ class PlotterBase(QtWidgets.QWidget):
         self.canvas.mpl_connect('scroll_event', self.onMplWheel)
 
         self.contextMenu = QtWidgets.QMenu(self)
-        self.toolbar = NavigationToolbar(self.canvas, self)
+        self.toolbar = CustomToolbar(self.canvas, self)
+
         self.canvas.mpl_connect('resize_event', self.onResize)
         self.canvas.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.canvas.customContextMenuRequested.connect(self.showContextMenu)
@@ -226,7 +252,7 @@ class PlotterBase(QtWidgets.QWidget):
         # Notify the helper
         PlotHelper.addPlot(self)
         # Notify the listeners about a new graph
-        self.manager.communicator.activeGraphsSignal.emit([self, False])
+        GuiUtils.communicator.activeGraphsSignal.emit([self, False])
 
     def defaultContextMenu(self):
         """
@@ -244,6 +270,36 @@ class PlotterBase(QtWidgets.QWidget):
         self.actionSaveImage.triggered.connect(self.onImageSave)
         self.actionPrintImage.triggered.connect(self.onImagePrint)
         self.actionCopyToClipboard.triggered.connect(self.onClipboardCopy)
+
+    def addHelpToContextMenu(self):
+        """
+        Add Help option at the end of the context menu
+        """
+        self.contextMenu.addSeparator()
+        self.actionHelp = self.contextMenu.addAction("Help")
+        self.actionHelp.triggered.connect(self.onHelp)
+
+    def addWorkspaceActionsToContextMenu(self):
+        """
+        Offer detaching from / attaching to the workspace, for plots hosted by the workspace manager.
+        Embedded plots and quick plots that are not hosted keep their menu unchanged.
+        """
+        workspace_manager = workspace_manager_for(self)
+        if workspace_manager is None or not workspace_manager.is_hosted(self):
+            return
+        text = ATTACH_TEXT if workspace_manager.is_detached(self) else DETACH_TEXT
+        self.actionToggleDetach = QtGui.QAction(text, self.contextMenu)
+        # Defer the move until the context menu has finished executing
+        self.actionToggleDetach.triggered.connect(
+            lambda: QtCore.QTimer.singleShot(0, workspace_manager, lambda: workspace_manager.toggle(self)))
+        help_action = getattr(self, "actionHelp", None)
+        actions = self.contextMenu.actions()
+        if help_action is not None and help_action in actions:
+            self.contextMenu.insertAction(help_action, self.actionToggleDetach)
+            self.contextMenu.insertSeparator(help_action)
+        else:
+            self.contextMenu.addSeparator()
+            self.contextMenu.addAction(self.actionToggleDetach)
 
     def createContextMenu(self):
         """
@@ -268,6 +324,7 @@ class PlotterBase(QtWidgets.QWidget):
             self.createContextMenu()
         else:
             self.createContextMenuQuick()
+        self.addWorkspaceActionsToContextMenu()
         # show the context menu at the specified point
         self.contextMenu.exec_(self.mapToGlobal(point))
 
@@ -319,12 +376,21 @@ class PlotterBase(QtWidgets.QWidget):
         """
         Overwrite the close event adding helper notification
         """
+        data_list = self.data if isinstance(self.data, list) else [self.data]
+
+        # Clear the associated slicers, if any
+        for data in data_list:
+            if callable(slicer_owner := getattr(data, "slicerOwner", None)):
+                if owner := slicer_owner():
+                    owner.removeSlicersForPlotWindow(self)
+                    break
+
         self.clearQRangeSliders()
         # Please remove me from your database.
         PlotHelper.deletePlot(PlotHelper.idOfPlot(self))
 
         # Notify the listeners
-        self.manager.communicator.activeGraphsSignal.emit([self, True])
+        GuiUtils.communicator.activeGraphsSignal.emit([self, True])
 
         event.accept()
 
@@ -378,6 +444,13 @@ class PlotterBase(QtWidgets.QWidget):
         self.canvas.render(pixmap)
         bmp.setPixmap(pixmap)
 
+    def onHelp(self):
+        """
+        Display plotting help documentation
+        """
+        location = "/user/qtgui/MainWindow/graph_help.html"
+        self._help_window = GuiUtils.showHelp(location)
+
     def onGridToggle(self):
         """
         Add/remove grid lines from MPL plot
@@ -399,7 +472,7 @@ class PlotterBase(QtWidgets.QWidget):
         title = titleWidget.title()
         self.setWindowTitle(title)
         # Notify the listeners about a new graph title
-        self.manager.communicator.activeGraphName.emit((current_title, title))
+        GuiUtils.communicator.activeGraphName.emit((current_title, title))
 
     def onToggleMenu(self):
         """

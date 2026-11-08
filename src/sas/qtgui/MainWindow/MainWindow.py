@@ -1,6 +1,6 @@
 import logging
-import os
 import sys
+import traceback
 from importlib import resources
 
 from PySide6.QtCore import Qt, QTimer
@@ -15,8 +15,12 @@ from sas.system.version import __version__
 
 from ..Utilities.NewVersion.NewVersionAvailable import maybe_prompt_new_version_download
 from .UI.MainWindowUI import Ui_SasView
+from .WorkspaceManager import WorkspaceManager
 
 logger = logging.getLogger(__name__)
+def log_uncaught_exception(type, value, tb):
+    formatted_tb = "".join(traceback.format_exception(type, value, tb))
+    logger.error(f"--- Uncaught exception ---\n{formatted_tb.strip()}")
 
 class MainSasViewWindow(QMainWindow, Ui_SasView):
     # Main window of the application
@@ -34,6 +38,8 @@ class MainSasViewWindow(QMainWindow, Ui_SasView):
         self.workspace.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.workspace.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.setCentralWidget(self.workspace)
+        # Owner of all workspace windows, attached to the MDI area or detached
+        self.workspace_manager = WorkspaceManager(self.workspace, self)
         QTimer.singleShot(100, self.showMaximized)
         # Temporary solution for problem with menubar on Mac
         if sys.platform == "darwin":  # Mac
@@ -72,12 +78,7 @@ def SplashScreen():
 def get_highdpi_scaling():
     return 1.0
 
-def run_sasview():
-    # Disable GPU. This is a workaround for the issue with the QtWebEngine on some Win 10 systems
-    # https://github.com/SasView/sasview/issues/3384
-    # TODO: remove when the issue is fixed in QtWebEngine
-    os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu"
-
+def run_sasview(file_list: list[str] | None = None):
     # Check for updates
     maybe_prompt_new_version_download()
     config.save()
@@ -119,11 +120,19 @@ def run_sasview():
     # Show the main SV window
     mainwindow = MainSasViewWindow()
 
+    # Redirect uncaught exceptions to logger
+    sys.excepthook = log_uncaught_exception
+
     # no more splash screen
     splash.finish(mainwindow)
 
     # Time for the welcome window
     mainwindow.guiManager.showWelcomeMessage()
+
+    # Trigger an event to pass the filepath(s) to the GUI without requiring an API change
+    if file_list:
+        for file in file_list:
+            mainwindow.guiManager.communicator.fileTriggerSignal.emit(file)
 
     timer = QTimer()
     timer.timeout.connect(lambda: None)

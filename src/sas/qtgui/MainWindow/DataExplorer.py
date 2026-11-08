@@ -5,6 +5,8 @@ import logging
 import os
 import sys
 import time
+from contextlib import suppress
+from pathlib import Path
 
 from PySide6 import QtCore, QtGui, QtWidgets
 from twisted.internet import threads
@@ -21,6 +23,7 @@ from sas import config
 from sas.qtgui.MainWindow.DataManager import DataManager
 from sas.qtgui.MainWindow.DroppableDataLoadWidget import DroppableDataLoadWidget
 from sas.qtgui.MainWindow.NameChanger import ChangeName
+from sas.qtgui.MainWindow.WorkspaceManager import workspace_manager_for
 from sas.qtgui.Plotting.MaskEditor import MaskEditor
 
 # DO NOT REMOVE THE IMPORT BELOW - used in dynamic plotter creation
@@ -61,7 +64,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Be careful with twisted threads.
         self.mutex = QtCore.QMutex()
 
-        # Plot widgets {name:widget}, required to keep track of plots shown as MDI subwindows
+        # Plot widgets {plot id: plot widget}, for plots hosted by the workspace manager
         self.plot_widgets = {}
 
         # Active plots {id:Plotter1D/2D}, required to keep track of currently displayed plots
@@ -97,7 +100,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.cbSelect.activated.connect(self.selectData)
 
         self.currentChanged.connect(self.onTabSwitch)
-        self.communicator = self.parent.communicator()
+        self.communicator = GuiUtils.communicator
+        self.communicator.fileTriggerSignal.connect(self.loadFromArbitraryPath)
         self.communicator.fileReadSignal.connect(self.loadFromURL)
         self.communicator.activeGraphsSignal.connect(self.updateGraphCount)
         self.communicator.activeGraphName.connect(self.updatePlotName)
@@ -107,9 +111,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.communicator.changeDataExplorerTabSignal.connect(self.changeTabs)
         self.communicator.forcePlotDisplaySignal.connect(self.displayData)
         self.communicator.updateModelFromPerspectiveSignal.connect(self.updateModelFromPerspective)
-
-        # fixing silly naming clash in other managers
-        self.communicate = self.communicator
+        self.communicator.freezeDataNameSignal.connect(self.freezeFromName)
 
         self.cbgraph.editTextChanged.connect(self.enableGraphCombo)
         self.cbgraph.currentIndexChanged.connect(self.enableGraphCombo)
@@ -165,6 +167,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.actionReplace.setText("... replacing data in the current page")
         self.send_menu = QtWidgets.QMenu(self)
         self.send_menu.addAction(self.actionReplace)
+        self.actionReplace.triggered.connect(self.onDataReplaced)
 
     def closeEvent(self, event):
         """
@@ -316,6 +319,35 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         filename = QtWidgets.QFileDialog.getOpenFileName(**kwargs)[0]
         if filename:
             self.readProject(filename)
+
+    def loadFromArbitraryPath(self, filepath: str | Path | None = None):
+        """Logic to load any file, regardless of path, and pass it to the appropriate method for loading."""
+        if not filepath:
+            # Early return is no file path is given
+            return
+        file = Path(filepath)
+        if filepath and file.exists():
+            ext = file.suffix
+            # If the file extension is an analysis file type, the logic path is the same as project files
+            if ext in config.PLUGIN_STATE_EXTENSIONS:
+                ext = '.json'
+            # Get absolute path string in case downstream logic is not compatible with pathlib.Path objects
+            abs_path = str(file.absolute()).replace('\n', '').replace('\r', '')
+            match ext:
+                case ".json":
+                    # Matches analysis files and project files
+                    self.readProject(abs_path)
+                case _:
+                    # All other cases fall through here
+                    if file.is_dir():
+                        # If a directory is given as an argument, gather all files
+                        path_list = [os.path.join(os.path.abspath(file), filename) for filename in os.listdir(file)]
+                    else:
+                        # If a single file is given, load it individually
+                        path_list = [abs_path]
+                    self.readData(path_list)
+        elif not file.exists():
+            logger.warning(f"The path, {filepath}, does not exist. No files were loaded.")
 
     def saveProject(self):
         """
@@ -813,6 +845,33 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
             _ = msgbox.exec_()
 
+    def freezeFromName(self, search_name: str = None):
+        """
+        Convert target_plot-data into a separate dataset (CustomNavigation-Button: "freezeDatasets").
+        It searches the target_plot-data in the model and creates a new dataset in the Data Explorer. 
+
+        :param search_name: <class 'str'>
+        """
+        def findName(model, target_name: str, column: int=0)-> tuple:
+            for row in range(model.rowCount()):
+                if model.item(row, column).text() == target_name:
+                    return row, -1
+                for item_row in range(model.item(row, column).rowCount()):
+                    tmp = model.item(row, column).child(item_row, column)
+                    if tmp.text() == target_name:
+                            return row, item_row
+            return -1, -1
+
+        model = self.model
+        row_index_parent, row_index_child = findName(model, search_name)
+        new_item = model.item(row_index_parent)
+        if row_index_child != -1:
+            data = new_item.child(row_index_child)
+            new_item = self.cloneTheory(data)
+            model.beginResetModel()
+            model.appendRow(new_item)
+            model.endResetModel()
+
     def sendData(self, event=None):
         """
         Send selected item data to the current perspective and set the relevant notifiers
@@ -874,7 +933,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         Convert checked results (fitted model, residuals) into separate dataset.
         """
         outer_index = -1
-        theories_copied = 0
+        items_copied = 0
         orig_model_size = self.model.rowCount()
         while outer_index < orig_model_size:
             outer_index += 1
@@ -895,20 +954,20 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 if inner_item.checkState() != QtCore.Qt.Checked:
                     continue
                 self.model.beginResetModel()
-                theories_copied += 1
+                items_copied += 1
                 new_item = self.cloneTheory(inner_item)
                 self.model.appendRow(new_item)
                 self.model.endResetModel()
 
         freeze_msg = ""
-        if theories_copied == 0:
+        if items_copied == 0:
             return
-        elif theories_copied == 1:
-            freeze_msg = "1 theory copied to a separate data set"
-        elif theories_copied > 1:
-            freeze_msg = "%i theories copied to separate data sets" % theories_copied
+        elif items_copied == 1:
+            freeze_msg = "1 item copied to a separate data set"
+        elif items_copied > 1:
+            freeze_msg = f"{items_copied} items copied to separate data sets"
         else:
-            freeze_msg = "Unexpected number of theories copied: %i" % theories_copied
+            freeze_msg = f"Unexpected number of items copied: {items_copied}"
             raise AttributeError(freeze_msg)
         self.communicator.statusBarUpdateSignal.emit(freeze_msg)
 
@@ -941,9 +1000,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         elif theories_copied == 1:
             freeze_msg = "1 theory copied from the Theory tab as a data set"
         elif theories_copied > 1:
-            freeze_msg = "%i theories copied from the Theory tab as data sets" % theories_copied
+            freeze_msg = f"{theories_copied} theories copied from the Theory tab as data sets"
         else:
-            freeze_msg = "Unexpected number of theories copied: %i" % theories_copied
+            freeze_msg = f"Unexpected number of theories copied: {theories_copied}"
             raise AttributeError(freeze_msg)
         self.communicator.statusBarUpdateSignal.emit(freeze_msg)
         # Actively switch tabs
@@ -968,13 +1027,18 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         new_name = new_item.text() + '_@' + time_bit
         new_item.setText(new_name)
         # Change the underlying data so it is no longer a theory
-        try:
+        with suppress(AttributeError):
             new_item.child(0).data().is_data = True
             new_item.child(0).data().symbol = 'Circle'
             new_item.child(0).data().id = new_name
-        except AttributeError:
-            # no data here, pass
-            pass
+            new_item.child(0).data().name = f"Frozen{orig_data.name}"
+            new_item.child(0).data().title = f"Frozen{orig_data.title}"
+        # Ensure data from slicer plots will not be identified as
+        # a slicer plot when replotted
+        with suppress(AttributeError):
+            delattr(new_item.child(0).data(), "type_id")
+            delattr(new_item.child(0).data(), "custom_color")
+
         return new_item
 
     def recursivelyCloneItem(self, item):
@@ -1017,6 +1081,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         if not self.active_plots:
             return
+        # Forget plots that are no longer registered, however they were closed
+        for plot_id in list(self.plot_widgets.keys()):
+            if plot_id not in graph_list:
+                self.plot_widgets.pop(plot_id, None)
+
         new_plots = [PlotHelper.plotById(plot) for plot in graph_list]
         active_plots_copy = list(self.active_plots.keys())
         for plot in active_plots_copy:
@@ -1040,12 +1109,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
     def sendToMenu(self, hasSubmenu=False):
         # add menu to cmdSendTO
+        self.cmdSendTo.setMenu(None)
         if hasSubmenu:
             self.createSendToMenu()
             self.cmdSendTo.setMenu(self.send_menu)
             self.cmdSendTo.setPopupMode(QtWidgets.QToolButton.MenuButtonPopup)
         else:
-            self.cmdSendTo.setMenu(None)
             self.cmdSendTo.setPopupMode(QtWidgets.QToolButton.InstantPopup)
 
     def updatePerspectiveCombo(self, index):
@@ -1135,7 +1204,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if main_data is not None:
             if isinstance(main_data, Data2D):
                 if self.isPlotShown(main_data):
-                    self.active_plots[main_data.name].showNormal()
+                    self.activatePlot(self.active_plots[main_data.name])
                 else:
                     self.plotData([(plot_item, main_data)])
 
@@ -1291,19 +1360,21 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Set the object name to satisfy the Squish object picker
         new_plot.setObjectName(title)
 
-        # Add the plot to the workspace
-        plot_widget = self.parent.workspace().addSubWindow(new_plot)
-        if sys.platform == 'darwin':
-            workspace_height = int(float(self.parent.workspace().sizeHint().height()) / 2)
-            workspace_width = int(float(self.parent.workspace().sizeHint().width()) / 2)
-            plot_widget.resize(workspace_width, workspace_height)
-
-        # Show the plot
-        new_plot.show()
+        # Add the plot to the workspace, or to its own window if the user prefers
+        workspace_manager = self.workspaceManager()
+        if workspace_manager is not None:
+            detached = bool(config.OPEN_PLOTS_DETACHED)
+            container = workspace_manager.add(new_plot, detached=detached)
+            if sys.platform == 'darwin' and not detached:
+                workspace_height = int(float(workspace_manager.mdi().sizeHint().height()) / 2)
+                workspace_width = int(float(workspace_manager.mdi().sizeHint().width()) / 2)
+                container.resize(workspace_width, workspace_height)
+        else:
+            new_plot.show()
         new_plot.canvas.draw()
 
         # Update the plot widgets dict
-        self.plot_widgets[title] = plot_widget
+        self.plot_widgets[title] = new_plot
 
         # Update the active chart list
         self.active_plots[new_plot.data[0].name] = new_plot
@@ -1347,28 +1418,31 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         Modify existing plot for immediate response and returns True.
         Returns false, if the plot does not exist already.
         """
-        try:  # there might be a list or a single value being passed
+        if isinstance(data, (list, tuple)):
+            if not data:
+                return False
             data = data[0]
-        except TypeError:
-            pass
-        assert type(data).__name__ in ['Data1D', 'Data2D']
+
+        if not isinstance(data, (Data1D, Data2D)):
+            logger.warning("updatePlot received unexpected type: %s", type(data).__name__)
+            return False
 
         ids_keys = list(self.active_plots.keys())
-        #ids_vals = [val.data.name for val in self.active_plots.values()]
 
+        # We test for whether the data_id starts with any of the plot_ids
+        # to account for additional slicers with an "_#" label
         data_id = data.name
-        if data_id in ids_keys:
+        plot_ids = [id for id in ids_keys if data_id.startswith(id)]
+
+        # if exactly one plot matches, update that plot
+        if len(plot_ids) == 1:
+            plot_id = plot_ids[0]
             # We have data, let's replace data that needs replacing
             if data.plot_role != DataRole.ROLE_DATA:
-                self.active_plots[data_id].replacePlot(data_id, data)
+                self.active_plots[plot_id].replacePlot(data_id, data)
                 # restore minimized window, if applicable
-                self.active_plots[data_id].showNormal()
+                self.activatePlot(self.active_plots[plot_id])
             return True
-        #elif data_id in ids_vals:
-        #    if data.plot_role != DataRole.ROLE_DATA:
-        #        list(self.active_plots.values())[ids_vals.index(data_id)].replacePlot(data_id, data)
-        #        self.active_plots[data_id].showNormal()
-        #    return True
         return False
 
     def chooseFiles(self):
@@ -1607,7 +1681,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.actionEditMask.triggered.connect(self.showEditDataMask)
         self.actionDelete.triggered.connect(self.deleteFile)
         self.actionFreezeResults.triggered.connect(self.freezeSelectedItems)
-        self.actionReplace.triggered.connect(self.onDataReplaced)
 
     def onCustomContextMenu(self, position):
         """
@@ -1918,25 +1991,58 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Close all currently displayed plots
         """
+        workspace_manager = self.workspaceManager()
         # results panel
-        self.parent.results_frame.setVisible(False)
+        if workspace_manager is not None:
+            workspace_manager.set_visible(self.parent.results_panel, False)
         # plots
         for plot_id in PlotHelper.currentPlotIds():
             try:
-                plotter = PlotHelper.plotById(plot_id)
-                plotter.close()
-                self.plot_widgets[plot_id].close()
-                self.plot_widgets.pop(plot_id, None)
-            except AttributeError as ex:
+                self.closePlot(PlotHelper.plotById(plot_id))
+            except (AttributeError, RuntimeError) as ex:
                 logger.error("Closing of %s failed:\n %s" % (plot_id, str(ex)))
 
     def minimizeAllPlots(self):
         """
         Minimize all currently displayed plots
         """
+        workspace_manager = self.workspaceManager()
         for plot_id in PlotHelper.currentPlotIds():
             plotter = PlotHelper.plotById(plot_id)
-            plotter.showMinimized()
+            if plotter is None:
+                continue
+            if workspace_manager is not None:
+                workspace_manager.minimize(plotter)
+            else:
+                plotter.showMinimized()
+
+    def workspaceManager(self):
+        """
+        The application's WorkspaceManager, or None when running without a main window
+        """
+        return workspace_manager_for(self.parent)
+
+    def closePlot(self, plotter):
+        """
+        Close a plot through its window, so the window is disposed of as well.
+        Plot bookkeeping is updated by the plot's close notification.
+        """
+        if plotter is None:
+            return False
+        workspace_manager = self.workspaceManager()
+        if workspace_manager is not None:
+            return workspace_manager.close(plotter)
+        return plotter.close()
+
+    def activatePlot(self, plotter):
+        """
+        Restore, raise and focus a plot, whether attached or detached
+        """
+        workspace_manager = self.workspaceManager()
+        if workspace_manager is not None and workspace_manager.is_hosted(plotter):
+            workspace_manager.activate(plotter)
+        else:
+            plotter.showNormal()
 
     def closePlotsForItem(self, item):
         """
@@ -1968,10 +2074,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     plotter = PlotHelper.plotById(plot_name)
                     # try to delete the plot
                     try:
-                        plotter.close()
-                        self.plot_widgets[plot_name].close()
-                        self.plot_widgets.pop(plot_name, None)
-                    except AttributeError as ex:
+                        self.closePlot(plotter)
+                    except (AttributeError, RuntimeError) as ex:
                         logger.error("Closing of %s failed:\n %s" % (plot_name, str(ex)))
 
         pass  # debugger anchor
@@ -2150,3 +2254,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             if item.isCheckable():
                 item.setCheckState(status)
         model.blockSignals(False)
+
+    def reset(self):
+        """
+        Reset the data explorer to an empty state
+        """
+        self.closeAllPlots()
+        self.model.clear()
+        self.theory_model.clear()
+
