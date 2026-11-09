@@ -206,6 +206,12 @@ class NewDataExplorer(QWidget):
         )
         self.loadPaths(filenames)
 
+    @Slot()
+    def onLoadFolder(self):
+        folder = QFileDialog.getExistingDirectory(self, "Open Data Folder")
+        if folder:
+            self.loadPaths([folder])
+
     def loadPaths(self, paths: list[str]):
         """Load files and folders into the data manager. Anything that can't be
         loaded is reported together at the end."""
