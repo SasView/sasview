@@ -200,6 +200,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.label_17.setStyleSheet(new_font)
         self.label_19.setStyleSheet(new_font)
 
+        #Interactive View
+        self.cmdInView.setText("Interactive View")
+        self.updateInViewButton()
+
     @property
     def logic(self) -> FittingLogic:
         # make sure the logic contains at least one element
@@ -535,6 +539,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.smearing_widget.updateData(self.data)
             # Check if a model was already loaded when data is sent to the tab
             self.cmdFit.setEnabled(self.haveParamsToFit())
+            self.updateInViewButton()
 
     def acceptsData(self) -> bool:
         """ Tells the caller this widget can accept new dataset """
@@ -586,6 +591,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Check if any parameters are ready for fitting
         self.cmdFit.setEnabled(self.haveParamsToFit())
         self.polydispersity_widget.togglePoly(isChecked)
+        self.updateInViewButton()
         self.undo_stack.push(
             CheckboxToggleCommand('chkPolydispersity', not isChecked, isChecked)
         )
@@ -607,6 +613,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Check if any parameters are ready for fitting
         self.cmdFit.setEnabled(self.haveParamsToFit())
         self.magnetism_widget.isActive = isChecked
+        self.updateInViewButton()
         self.undo_stack.push(
             CheckboxToggleCommand('chkMagnetism', not isChecked, isChecked)
         )
@@ -638,14 +645,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if isChecked:
             # 2D view is toggled on, therefore disable InView button,
             # and close InView widget if opened
-            self.cmdInView.setEnabled(False)
+            #self.cmdInView.setEnabled(False)
             if getattr(self, '_in_view_widget', None):
                 self._in_view_widget.close()
-        else:
+       # else:
             # 2D view is toggled off, therefore enable InView button
-            self.cmdInView.setEnabled(True)
+            #self.cmdInView.setEnabled(True)
         # Reload the current model — suppress so the inner onSelectModel
         # doesn't push its own command; toggle2D is one atomic undo step.
+        self.updateInViewButton()
         with self.undo_stack.suppressed():
             if self.logic.kernel_module:
                 self.onSelectModel()
@@ -669,6 +677,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.cbFileNames.setVisible(False)
         self.cmdFit.setEnabled(False)
         self.cmdPlot.setEnabled(False)
+        self.cmdInView.setText("Interactive View")
+        self.updateInViewButton()
         self.chkPolydispersity.setEnabled(False)
         self.chkPolydispersity.setChecked(False)
         self.chk2DView.setEnabled(True)
@@ -726,11 +736,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.communicator.customModelDirectoryChanged.connect(self.onCustomModelChange)
         self.smearing_widget.smearingChangedSignal.connect(self.onSmearingOptionsUpdate)
         self.polydispersity_widget.cmdFitSignal.connect(lambda: self.cmdFit.setEnabled(self.haveParamsToFit()))
+        self.polydispersity_widget.cmdFitSignal.connect(self.updateInViewButton)
         self.polydispersity_widget.updateDataSignal.connect(lambda: self.updateData())
         self.polydispersity_widget.iterateOverModelSignal.connect(lambda: self.iterateOverModel(self.updateFunctionCaption))
         self.polydispersity_widget.deletePlotSignal.connect(self.setPlotDeletable)
         self.polydispersity_widget.toggledSignal.connect(self.onPolyToggled)
         self.magnetism_widget.cmdFitSignal.connect(lambda: self.cmdFit.setEnabled(self.haveParamsToFit()))
+        self.magnetism_widget.cmdFitSignal.connect(self.updateInViewButton)
         self.magnetism_widget.updateDataSignal.connect(lambda: self.updateData())
         self.magnetism_widget.toggledSignal.connect(self.onMagnetismToggled)
 
@@ -1449,6 +1461,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Let others know
         self.newModelSignal.emit()
+        self.updateInViewButton()
 
     def onSelectCategory(self) -> None:
         """
@@ -1554,6 +1567,26 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self._in_view_widget.raise_()
         self._in_view_widget.activateWindow()
 
+    def updateInViewButton(self):
+        tooltip = ("Interactive view: opens window with slider paramere that is checked\n"
+        "moving a slider updates the model curve on the top of your data.")
+        params = list(self.main_params_to_fit)
+        if self.chkPolydispersity.isChecked():
+            params += list(self.polydispersity_widget.poly_params_to_fit)
+        reason = None
+        if not self.data_is_loaded:
+            reason = "Load 1D data into this Fit page first"
+        elif self.logic.kernel_module is None: 
+            reason = "Interactive View is not available for batch fitting"
+        elif self.fit_started:
+            reason = "Wait until fit has finished"
+        elif not params:
+            reason = "Check the box of at least one parameter in the table \n to get slider for it."
+        self.cmdInView.setEnabled(reason is None)
+        if reason is not None:
+            tooltip += "\n\nCurrently disabled: " + reason
+        self.cmdInView.setToolTip(tooltip)
+ 
     def onHelp(self):
         """
         Show the "Fitting" section of help
@@ -2401,6 +2434,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if model_column == 0:
             self.checkboxSelected(item, model_key="standard")
             self.cmdFit.setEnabled(self.haveParamsToFit())
+            self.updateInViewButton()
             # Fit-checkbox toggles intentionally excluded from undo stack
             return
 
@@ -3181,8 +3215,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.setInteractiveElements(True)
 
         # Re-enable InView button for 1D data
-        if not getattr(self, 'is2D', False):
-            self.cmdInView.setEnabled(True)
+        self.updateInViewButton()
+       # if not getattr(self, 'is2D', False):
+       #     self.cmdInView.setEnabled(True)
 
     def disableInteractiveElements(self) -> None:
         """
