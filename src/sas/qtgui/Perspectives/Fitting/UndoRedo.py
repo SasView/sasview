@@ -94,6 +94,9 @@ class ParameterValueCommand(UndoCommand):
         merged.timestamp = other.timestamp
         return merged
 
+    def is_noop(self) -> bool:
+        return self._old_val == self._new_val
+
 
 class ParameterMinMaxCommand(UndoCommand):
     """Parameter min or max bound change.
