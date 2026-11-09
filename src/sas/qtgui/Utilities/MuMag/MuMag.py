@@ -35,6 +35,7 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
         self.SimpleFitButton.clicked.connect(self.onFit)
         self.SaveResultsButton.clicked.connect(self.onSave)
         self.helpButton.clicked.connect(self.onHelp)
+        self.closeButton.clicked.connect(self.close)
 
         #
         # Data
@@ -155,6 +156,9 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
         a_min = self.aMinSpinBox.value()
         a_max = self.aMaxSpinBox.value()
 
+        if a_min < 0:
+            raise ValueError("minimum A must be greater than zero")
+
         if a_max <= a_min:
             raise ValueError("minimum A must be less than maximum A")
 
@@ -197,7 +201,7 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
             log.error("Fitting failed - are the parameters correct? "+repr(ff))
             return
 
-
+        log.info("Fit completed; updating result plots")
         self.show_fit_results()
 
 
@@ -267,6 +271,7 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
         self.residual_axes.set_visible(True)
         self.s_h_axes.set_visible(True)
         self.longitudinal_scattering_axes.set_visible(True)
+        self.fit_results_figure.canvas.draw_idle()
 
         #
         # Comparison Tab
@@ -299,7 +304,7 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
         self.comparison_axes.set_xlim(qlim)
         self.comparison_axes.set_ylim(ilim)
         self.comparison_figure.tight_layout()
-        self.comparison_figure.canvas.draw()
+        self.comparison_figure.canvas.draw_idle()
 
 
         #
