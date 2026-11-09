@@ -40,8 +40,8 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         self.cbOperator.currentIndexChanged.connect(self.onSelectOperator)
 
         # edit Coefficient text edit
-        self.txtNumber.textChanged.connect(self.onInputCoefficient)
-        self.txtOutputData.textChanged.connect(self.onCheckOutputName)
+        self.txtNumber.textChanged.connect(self.resetNumberBackground)
+        self.txtOutputData.textChanged.connect(self.resetOutputBackground)
 
         # push buttons
         self.cmdClose.clicked.connect(self.onClose)
@@ -127,7 +127,13 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         # set operator to be applied
         operator = self.cbOperator.currentText()
         # calculate and send data to DataExplorer
-        output = None
+        self.output = None
+
+        if not self.onCheckInputCoefficient():
+            return
+        if not self.onCheckOutputName():
+            return
+
         try:
             data1 = self.data1
             data2 = self.data2
@@ -140,17 +146,16 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
 
         # if outputname was unused, write output result to it
         # and display plot
-        if self.onCheckOutputName():
-            # plot result
-            self.updatePlot(self.graphOutput, self.layoutOutput, self.output)
+        self.updatePlot(self.graphOutput, self.layoutOutput, self.output)
 
     def onSaveData(self):
         """ Save current output in data file and add it to the DataExplorer """
         # If output is empty, then compute it first
         if self.output is None:
             self.onCompute()
-        # if outputname was unused, proceed to save files
-        if self.onCheckOutputName():
+        # if outputname was unused and compute was successful,
+        # proceed to save files
+        if self.output is not None and self.onCheckOutputName():
             # add outputname to self.filenames
             self.list_data_items.append(str(self.txtOutputData.text()))
             # send result to DataExplorer
@@ -191,6 +196,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         """
         self.txtNumber.setText('1.0')
         self.txtOutputData.setText('MyNewDataName')
+        self.resetOutputBackground()
 
         self.txtNumber.setEnabled(False)
         self.cmdCompute.setEnabled(False)
@@ -244,6 +250,8 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         """ Plot for selection of Data2 """
         choice_data2 = str(self.cbData2.currentText())
         wrong_choices = ['No Data Available', 'Select Data', '']
+        # Initialize text field backgroung
+        self.resetNumberBackground()
         # Initialize output
         self.output = None
 
@@ -259,7 +267,11 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         elif choice_data2 == 'Number':
             self.data2OK = True
             self.txtNumber.setEnabled(True)
-            self.data2 = float(self.txtNumber.text())
+            try:
+                self.data2 = float(self.txtNumber.text())
+            except Exception:
+                logger.error("Invalid number input: %s" % self.txtNumber.text())
+                self.txtNumber.setStyleSheet(BG_ERROR)
 
             # Enable Compute and SaveData buttons only if Data1 defined and compatible data
             self.cmdCompute.setEnabled(self.onCheckChosenData())
@@ -283,27 +295,39 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             # plot default for output graph
             self.newPlot(self.graphOutput, self.layoutOutput)
 
-    def onInputCoefficient(self):
+    def onCheckInputCoefficient(self):
         """ Check input of number when a coefficient is required
         for operation """
         if self.txtNumber.isModified():
             input_to_check = str(self.txtNumber.text())
 
+            try:
+                float(self.txtNumber.text())
+            except:
+                logger.error("Invalid number input: %s" % self.txtNumber.text())
+                self.txtNumber.setStyleSheet(BG_ERROR)
+                return False
+
             if input_to_check is None or input_to_check == '':
                 msg = 'DataOperation: Number requires a float number'
                 logger.warning(msg)
                 self.txtNumber.setStyleSheet(BG_ERROR)
+                return False
 
             elif float(self.txtNumber.text()) == 0.:
                 # should be check that 0 is not chosen
                 msg = 'DataOperation: Number requires a non zero number'
                 logger.warning(msg)
                 self.txtNumber.setStyleSheet(BG_ERROR)
+                return False
 
             else:
                 self.txtNumber.setStyleSheet(BG_DEFAULT)
                 self.data2 = float(self.txtNumber.text())
                 self.updatePlot(self.graphData2, self.layoutData2, self.data2)
+                return True
+        else:
+            return True
 
     def onCheckChosenData(self):
         """ check that data1 and data2 are compatible """
@@ -349,10 +373,18 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
                 self.cbData2.setStyleSheet(BG_DEFAULT)
                 return True
 
+    def resetOutputBackground(self):
+        """ Reset background color of output name text field """
+        self.txtOutputData.setStyleSheet(BG_DEFAULT)
+
+    def resetNumberBackground(self):
+        """ Reset background color of coefficient text field """
+        self.txtNumber.setStyleSheet(BG_DEFAULT)
+
     def onCheckOutputName(self):
         """ Check that name of output does not already exist """
         name_to_check = str(self.txtOutputData.text())
-        self.txtOutputData.setStyleSheet(BG_DEFAULT)
+        self.resetOutputBackground()
 
         if name_to_check is None or name_to_check == '':
             self.txtOutputData.setStyleSheet(BG_ERROR)
@@ -365,7 +397,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             return False
 
         else:
-            self.txtOutputData.setStyleSheet(BG_DEFAULT)
+            self.resetOutputBackground()
             return True
 
     # ########
