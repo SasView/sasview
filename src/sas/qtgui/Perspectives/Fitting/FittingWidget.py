@@ -1576,7 +1576,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         reason = None
         if not self.data_is_loaded:
             reason = "Load 1D data into this Fit page first"
-        elif self.logic.kernel_module is None: 
+        elif self.logic.kernel_module is None:
             reason = "Interactive View is not available for batch fitting"
         elif self.fit_started:
             reason = "Wait until fit has finished"
@@ -1586,7 +1586,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if reason is not None:
             tooltip += "\n\nCurrently disabled: " + reason
         self.cmdInView.setToolTip(tooltip)
- 
+
     def onHelp(self):
         """
         Show the "Fitting" section of help
