@@ -368,9 +368,8 @@ class PlotterTest:
         # Call the method
         mocker.patch.object(plotter, 'plot', return_value=('', ''))
         plotter.onFitDisplay(fit_data[0], fit_data[1])
-        plotter.plot.assert_called_once()
         # Look at arguments passed to .plot()
-        plotter.plot.assert_called_with(data=plotter.fit_result,
+        plotter.plot.assert_called_once_with(data=plotter.fit_result,
                                              hide_error=True, marker='-')
         plotter.figure.clf()
 
