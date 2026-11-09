@@ -347,6 +347,24 @@ class FittingPerspectiveTest:
         assert tab1_call_dict['row'] == 0
         assert tab2_call_dict['row'] == 1
 
+    def testUpdateFromConstraintsCurrentValue(self, widget, mocker):
+        '''tests that a parameter constrained to its current value, which has
+        no function, is restored without checking an expression (#2735)'''
+        constraint_dict = {'M1': [['20.0', 'radius', None, True, None]]}
+        tab = widget.tabs[0]
+        mocker.patch.object(tab, 'getRowFromName', return_value=2)
+        mocker.patch.object(tab, 'getModelKey', return_value='standard')
+        mocker.patch.object(tab, 'addConstraintToRow')
+        mocker.patch.object(tab, 'addSimpleConstraintToRow')
+
+        widget.updateFromConstraints(constraint_dict)
+
+        tab.addConstraintToRow.assert_not_called()
+        call_dict = tab.addSimpleConstraintToRow.call_args[1]
+        assert vars(call_dict['constraint']) == vars(Constraint(param='radius', value='20.0'))
+        assert call_dict['row'] == 2
+        assert call_dict['model_key'] == 'standard'
+
     def testGetTabByName(self, widget):
         '''test getting a tab by its name'''
         # add a second tab
