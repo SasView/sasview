@@ -27,7 +27,7 @@ class DataExplorerMenu(QMenu):
         if send_to:
             send_to_menu = self.addMenu("Send To")
 
-            for perspective in data_manager.all_perspectives:
+            for perspective in data_manager.data_of_type(Perspective):
                 new_action = QAction(perspective.formatName, parent)
                 new_action.setData(DataExplorerMenuAction("send_to", perspective))
                 send_to_menu.addAction(new_action)

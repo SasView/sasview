@@ -21,7 +21,6 @@ from PySide6.QtWidgets import (
 from shiboken6 import isValid
 from twisted.internet import reactor
 
-from sasdata.data import SasData
 from sasdata.data_io.importers.import_ascii import load_data
 
 import sas
@@ -33,7 +32,7 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 import sas.system.version
 from sas import config
-from sas.data_manager import NewDataManager, TrackedData
+from sas.data_manager import NewDataManager
 from sas.qtgui.Calculators.DataOperationUtilityPanel import DataOperationUtilityPanel
 from sas.qtgui.Calculators.DensityPanel import DensityPanel
 from sas.qtgui.Calculators.KiessigPanel import KiessigPanel
@@ -74,10 +73,12 @@ from sas.qtgui.Utilities.SASBDB.SASBDBDownloadDialog import SASBDBDownloadDialog
 from sas.qtgui.Utilities.SasviewLogger import setup_qt_logging
 from sas.qtgui.Utilities.WhatsNew.WhatsNew import WhatsNewWidget
 from sas.refactored import Perspective as NewPerspective
+from sas.refactored_plotting.PlotWindow import PlotWindow
 from sas.refactored_data_explorer import NewDataExplorer
 from sas.system import HELP_SYSTEM, web
 from sas.system.user import create_user_files_if_needed
 from sas.system.version import __release_date__ as SASVIEW_RELEASE_DATE
+from sas.tracked_objects import TrackedPlot
 from sas.system.version import __version__ as SASVIEW_VERSION
 
 logger = logging.getLogger(__name__)
@@ -110,12 +111,11 @@ class GuiManager:
         # TODO: pull out all required methods from DataManager and reimplement
         # self._data_manager = DataManager()
         self._data_manager = NewDataManager()
-        self._data_manager.new_association.connect(self.handleNewAssociation)
-        self._data_manager.removed_perspective.connect(self.removed_perspective)
-        self._data_manager.new_perspective.connect(self.new_perspective)
-        self._data_manager.new_plot.connect(self.new_plot_window)
-        self._data_manager.removed_plot.connect(self.removed_plot)
-        self._data_manager.replace_plot.connect(self.replace_plot)
+        self._data_manager.data_added.connect(self.handleDataAdded)
+        self._data_manager.data_destroyed.connect(self.handleDataDestroyed)
+        self._data_manager.data_changed.connect(self.handleDataChanged)
+        # The window currently showing each tracked plot.
+        self._plot_windows: dict[TrackedPlot, PlotWindow] = {}
 
         # Create action triggers
         self.addTriggers()
@@ -147,18 +147,34 @@ class GuiManager:
         if self.WhatsNew.has_new_messages():
             self.actionWhatsNew()
 
-    def handleNewAssociation(self, datum1: TrackedData, datum2: TrackedData):
-        # If any perspectives have new data/lost data, then they need to be notified.
+    def handleDataAdded(self, datum: object):
+        if isinstance(datum, NewPerspective):
+            self.new_perspective(datum)
 
-        new_association_tuple = (datum1, datum2)
-        for perspective in self._data_manager.all_perspectives:
-            if perspective in new_association_tuple:
-                if isinstance(datum2, SasData):
-                    perspective.newData()
-                else:
-                    perspective.newAssocation()
+    def handleDataDestroyed(self, datum: object):
+        if isinstance(datum, NewPerspective):
+            self.removed_perspective(datum)
+        elif isinstance(datum, TrackedPlot):
+            plot_window = self._plot_windows.pop(datum, None)
+            if plot_window is not None:
+                self.removed_plot(plot_window)
 
-        self.filesWidget.tree_view.addAssociation(datum1, datum2)
+    def handleDataChanged(self, datum: object):
+        if isinstance(datum, TrackedPlot):
+            self.showTrackedPlot(datum)
+
+    def showTrackedPlot(self, plot: TrackedPlot):
+        """Show plot in a new window, replacing the window previously showing it."""
+        if not plot.data:
+            return
+        # TODO: Check the old window, and remove it if necessary.
+        new_plot_window = PlotWindow(plot)
+        old_plot_window = self._plot_windows.get(plot)
+        if old_plot_window is not None:
+            self.replace_plot(old_plot_window, new_plot_window)
+        else:
+            self.new_plot_window(new_plot_window)
+        self._plot_windows[plot] = new_plot_window
 
 
     def info(self, type, value, tb):

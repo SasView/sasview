@@ -19,8 +19,9 @@ from sas.qtgui.Utilities.GridPanel import BatchInversionOutputPanel
 from sas.qtgui.Utilities.GuiUtils import (
     DoubleValidator,
 )
-from sas.refactored import FitModelParameters, Perspective, TrackedFit, TrackedPlot
+from sas.refactored import Perspective
 from sas.sascalc.pr.invertor import Invertor
+from sas.tracked_objects import FitModelParameters, TrackedFit, TrackedPlot
 
 
 class InversionFitModelParameters(FitModelParameters):
@@ -101,6 +102,7 @@ class InversionWidget(Perspective, Ui_PrInversion):
     estimationComplete = Signal()
     changeBackgroundMode = Signal()
     showPlotsEvent = Signal()
+    fitDataReady = Signal(object, object)
 
     def __init__(self, data_manager: NewDataManager, parent: QWidget | None = None):
         super().__init__(data_manager, parent)
@@ -178,6 +180,7 @@ class InversionWidget(Perspective, Ui_PrInversion):
         self.helpButton.clicked.connect(self.onHelp)
         self.showResultsButton.clicked.connect(self.handleShowResults)
         self.showPlotsEvent.connect(self.showPlots)
+        self.fitDataReady.connect(self.makePlots)
 
         for input_box in self.input_boxes:
             input_box.editingFinished.connect(self.startEstimateParameters)
@@ -343,23 +346,26 @@ class InversionWidget(Perspective, Ui_PrInversion):
         # Previously called these events directly without a signal but it led to
         # QT segfaulting.
         self.calculationComplete.emit()
-        self.makePlots(self.currentResult.logic.generateFitData(pr), pr)
+        # This runs in the calculation thread, but the data manager must only be
+        # modified from the GUI thread, so the plots are made via a signal.
+        self.fitDataReady.emit(self.currentResult.logic.generateFitData(pr), pr)
 
     def makePlots(self, fit_data: SasMeasurement, pr):
         fit_parameters = InversionFitModelParameters(pr.out)
-        tracked_fit = TrackedFit(self._data_manager, fit_parameters, fit_data)
+        measurement = self.associatedSasMeasurement
+        tracked_fit = TrackedFit(fit_parameters, fit_data)
         self._data_manager.add_data(tracked_fit)
-        plot = TrackedPlot(self._data_manager)
+        tracked_fit.data = self._data_manager.reference(tracked_fit, measurement)
+        plot = TrackedPlot()
         self._data_manager.add_data(plot)
-        self._data_manager.make_association(plot, self.associatedSasMeasurement)
-        self._data_manager.make_association(plot, tracked_fit)
-        self._data_manager.make_association(self, plot)
-        self._data_manager.make_association(tracked_fit, self.associatedSasMeasurement)
+        plot.data = self._data_manager.reference(plot, measurement)
+        plot.fit = self._data_manager.reference(plot, tracked_fit)
+        self.addPlot(plot)
         self.showPlotsEvent.emit()
 
     def showPlots(self):
         for plot in self.associatedPlots:
-            plot.update_plot()
+            self._data_manager.notify_changed(plot)
 
     def updateMinQ(self, new_q_min: float):
         calculator = self.currentResult.calculator

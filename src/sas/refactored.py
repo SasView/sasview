@@ -1,5 +1,5 @@
 import logging
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 
 # This is ugly but necessary to avoid a cyclic dependency
 from typing import TYPE_CHECKING, cast
@@ -8,12 +8,11 @@ from PySide6.QtWidgets import QDialog, QWidget
 
 from sasdata.data import SasData, SasMeasurement
 
-from sas.refactored_plotting.PlotModifiers import PlotModifier
-from sas.refactored_plotting.PlotWindow import PlotWindow
+from sas.tracked_objects import TrackedPlot
 
 if TYPE_CHECKING:
+    from sas.data_manager import DataReference, TrackedData
     from sas.data_manager import NewDataManager as DataManager
-    from sas.data_manager import TrackedData, TrackedPlot
 
 # TODO: None of these classes belong in here. This is a temporary location of
 # them so I can sketch out what they should look like.
@@ -24,7 +23,10 @@ class Perspective(QDialog):
     def __init__(self, data_manager: "DataManager", parent : QWidget | None) -> None:
         super().__init__(parent)
         self._data_manager = data_manager
-        self.perspective_number: int = -1 # This gets reassigned by the data manager.
+        self.perspective_number: int = -1 # Assigned by number_perspective.
+        # The data sent to this perspective, and the plots it shows.
+        self._data_references: list["DataReference[TrackedData]"] = []
+        self._plot_references: list["DataReference[TrackedPlot]"] = []
         self.finished.connect(self.onDone)
 
     @property
@@ -73,7 +75,8 @@ class Perspective(QDialog):
         return False
 
     def onDone(self):
-        self._data_manager.remove_data(self)
+        if self._data_manager.is_tracked(self):
+            self._data_manager.remove_data(self)
         logging.info(f'Perspective {self.title} done.')
 
     # TODO: Maybe we want to pass the new association. I was thinking that
@@ -87,11 +90,24 @@ class Perspective(QDialog):
     def newData(self):
         pass
 
+    def acceptData(self, datum: "TrackedData"):
+        """Send datum to this perspective. Raises a ValueError if it can't
+        accept it (see `checkCanAccept`)."""
+        self.checkCanAccept(datum)
+        self._data_references.append(self._data_manager.reference(self, datum))
+        if isinstance(datum, SasData):
+            self.newData()
+        else:
+            self.newAssocation()
+
+    def addPlot(self, plot: TrackedPlot):
+        """Show plot as one of this perspective's plots."""
+        self._plot_references.append(self._data_manager.reference(self, plot))
+
     @property
     def associatedData(self) -> list["TrackedData"]:
-        """Only returns data which is specified in `supported_data`."""
-        return [data for data in self._data_manager.get_all_associations(self)
-                if any(isinstance(data, t) for t in self.supported_data)]
+        """The data sent to this perspective."""
+        return [ref.get() for ref in self._data_references if ref]
 
     def _singleAssociatedItemOfType(self, expected_type: type) -> "TrackedData | None":
         if self.supported_data != {expected_type} or self.supports_multiple_data:
@@ -108,10 +124,16 @@ class Perspective(QDialog):
     def associatedSasMeasurement(self) -> SasMeasurement | None:
         return cast(SasMeasurement | None, self._singleAssociatedItemOfType(SasMeasurement))
 
+    def checkCanAccept(self, datum: object):
+        """Raise a ValueError if datum can't be sent to this perspective."""
+        if not any(isinstance(datum, supported_type) for supported_type in self.supported_data):
+            raise ValueError(f"{self.title} does not support this data.")
+        if not self.supports_multiple_data and len(self.associatedData) > 0:
+            raise ValueError(f"{self.title} doesn't support multiple data being sent to it.")
+
     @property
-    def associatedPlots(self) -> list["TrackedPlot"]:
-        return [data for data in self._data_manager.get_all_associations(self)
-                if isinstance(data, TrackedPlot)]
+    def associatedPlots(self) -> list[TrackedPlot]:
+        return [ref.get() for ref in self._plot_references if ref]
 
 class Theory:
     # TODO: Need to put stuff here that is unique to Theory. Right now, looking
@@ -120,70 +142,13 @@ class Theory:
     pass
 
 
-class FitModelParameters(ABC):
-    pass
-
-class TrackedFit:
-    _data_manager: "DataManager"
-    model_parameters: FitModelParameters
-    fit: SasMeasurement
-
-    @property
-    def data_being_fitted(self) -> SasData | None:
-        return self._data_manager.get_association_of_type(self, SasData)
-
-    @property
-    def formatName(self) -> str:
-        if self.data_being_fitted:
-            return f"Fit of {self.data_being_fitted.name}"
-        else:
-            # TODO: Could potentially return a more elaborate name of what the
-            # theory object is about.
-            return "Theory"
-
-    def __init__(self, data_manager: "DataManager", model_parameters: FitModelParameters, fit_data: SasMeasurement):
-        self._data_manager = data_manager
-        self.model_parameters = model_parameters
-        self.fit = fit_data
-
-
-class TrackedPlot:
-    _data_manager: "DataManager"
-    plot_widget: PlotWindow | None
-
-    def __init__(self, data_manager: "DataManager"):
-        self._data_manager = data_manager
-        self.plot_widget = None
-
-
-    @property
-    def to_plot(self) -> SasMeasurement | None:
-        return self._data_manager.get_association_of_type(self, SasMeasurement)
-
-    @property
-    def fit(self) -> TrackedFit | None:
-        return self._data_manager.get_association_of_type(self, TrackedFit)
-
-    @property
-    def modifiers(self) -> list[PlotModifier]:
-        return [assoc for assoc in self._data_manager.get_all_associations(self) if isinstance(assoc, PlotModifier)]
-
-    @property
-    def formatName(self) -> str:
-        if self.to_plot:
-            return f"Plot of {self.to_plot.name}"
-        else:
-            return "Empty Plot"
-
-    def update_plot(self):
-        # TODO: Check the old window, and remove it if necessary.
-        if self.to_plot:
-            new_plot_widget = PlotWindow(self)
-            if self.plot_widget:
-                self._data_manager.replace_plot.emit(self.plot_widget, new_plot_widget)
-            else:
-                self._data_manager.new_plot.emit(new_plot_widget)
-            self.plot_widget = new_plot_widget
-
-
-
+def number_perspective(to_number: Perspective, existing: list[Perspective]):
+    """Give to_number the lowest number not used by an existing perspective of
+    the same kind. Must be called before the perspective is added to the data
+    manager, as its name depends on the number."""
+    number = 1
+    # TODO: Comparing titles might not be the best way to do this.
+    relevant_perspective_numbers = [p.perspective_number for p in existing if p.title == to_number.title]
+    while number in relevant_perspective_numbers:
+        number += 1
+    to_number.perspective_number = number

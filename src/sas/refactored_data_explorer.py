@@ -28,7 +28,8 @@ from sas.data_manager import NewDataManager as DataManager
 from sas.dummy_perspective import DummyPerspective
 from sas.qtgui.Perspectives.Inversion.InversionWidget import InversionWidget
 from sas.qtgui.Utilities.MuMag.MuMag import MuMag
-from sas.refactored import Perspective, TrackedPlot
+from sas.refactored import Perspective, number_perspective
+from sas.tracked_objects import TrackedPlot
 
 # TODO: Eventually, the values (should) never be None.
 # FIXME: Linter is complaining about DummyPew
@@ -115,6 +116,7 @@ class NewDataExplorer(QWidget):
             return
         # TODO: Placeholder
         new_perspective_dialog = perspectives[to_add](self._data_manager)
+        number_perspective(new_perspective_dialog, self._data_manager.data_of_type(Perspective))
         self._data_manager.add_data(new_perspective_dialog)
         logging.info(to_add)
         self.add_perspective_button.setCurrentIndex(0)
@@ -139,10 +141,10 @@ class NewDataExplorer(QWidget):
     def onPlot(self):
         to_plot = self.tree_view.currentTrackedDatum
         if isinstance(to_plot, SasData):
-            plot_object = TrackedPlot(self._data_manager)
+            plot_object = TrackedPlot()
             self._data_manager.add_data(plot_object)
-            self._data_manager.make_association(plot_object, to_plot)
-            plot_object.update_plot()
+            plot_object.data = self._data_manager.reference(plot_object, to_plot)
+            self._data_manager.notify_changed(plot_object)
         else:
             QMessageBox.critical(
                 self, "Plotting Error", "The selected item is not a data object. Only data objects can be plotted."

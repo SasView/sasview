@@ -56,22 +56,22 @@ class PlotWindow(QTabWidget):
 
     @cached_property
     def tabCount(self) -> int:
-        if self.plot_object.to_plot and self.plot_object.fit:
+        if self.plot_object.data and self.plot_object.fit:
             # This may become 3 later if residuals are involved.
             return 2
-        elif self.plot_object.to_plot:
+        elif self.plot_object.data:
             return 1
         else:
             raise ValueError("There is nothing to plot!")
 
     def tabsForPlottable(self, tab: int) -> list[Plottable]:
-        assert self.plot_object.to_plot is not None
+        assert self.plot_object.data
         match tab:
             case 0:
-                return [self.plot_object.to_plot]
+                return [self.plot_object.data.get()]
             case 1:
-                assert self.plot_object.fit is not None
-                return [self.plot_object.to_plot, self.plot_object.fit]
+                assert self.plot_object.fit
+                return [self.plot_object.data.get(), self.plot_object.fit.get()]
             case _:
                 raise ValueError(f"The objects to be drawn in tab {tab} are not defined.")
 
@@ -98,7 +98,7 @@ class PlotWindow(QTabWidget):
         if fit:
             axis.plot(fit.fit.abscissae.axes[0].value, fit.fit.ordinate.value)
         for modifier in self.plot_object.modifiers:
-            modifier.modify_axes(axis)
+            modifier.get().modify_axes(axis)
 
     def drawTab(self, plottables: list[Plottable], figure: Figure):
         if len(plottables) <= 2:
