@@ -426,12 +426,18 @@ This could potentially be because the file {basename} is not in an ASCII format.
     @Slot()
     def changeDatasetType(self) -> None:
         """Triggered when the selected dataset type has changed."""
-        options = self.datasetOptions()
-        self.col_editor.replaceOptions(options)
+        # Every column changes here, so update the table and warnings once at the end, rather than for every change.
+        self.col_editor.blockSignals(True)
+        try:
+            options = self.datasetOptions()
+            self.col_editor.replaceOptions(options)
 
-        # Update columns as they'll be different now.
-        columns = guess_columns(self.colcount_entry.value(), self.currentDatasetType())
-        self.col_editor.setColOrder(columns)
+            # Update columns as they'll be different now.
+            columns = guess_columns(self.colcount_entry.value(), self.currentDatasetType())
+            self.col_editor.setColOrder(columns)
+        finally:
+            self.col_editor.blockSignals(False)
+        self.updateColumn()
 
     @Slot()
     def updateRowStatus(self, row: int) -> None:
