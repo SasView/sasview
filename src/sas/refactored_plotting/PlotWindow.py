@@ -28,6 +28,19 @@ _axis_names = {
 _mathtext_parser = MathTextParser("path")
 
 
+def _is_valid_math_text(text: str) -> bool:
+    """Whether matplotlib can draw the text as a math expression.
+
+    The text itself isn't changed: parsing it is only a check, so that an invalid label (e.g. with a character such
+    as '{' or '\\' coming from the data) doesn't stop the plot from being drawn.
+    """
+    try:
+        _mathtext_parser.parse(text)
+    except ValueError:
+        return False
+    return True
+
+
 def unit_label(symbol: str) -> str:
     """Format a unit symbol from sasdata (e.g. 'Ang^-1') as in the current SasView plots (e.g. 'A^{-1}')."""
     if symbol in ("", "none"):
@@ -61,9 +74,8 @@ def axis_label(quantity: Quantity) -> str:
         # A plain space is ignored in a math expression, so use an explicit one
         label += rf"\ ({unit})" if label else f"({unit})"
     label = f"${label}$"
-    try:
-        _mathtext_parser.parse(label)
-    except ValueError:
+    if not _is_valid_math_text(label):
+        # Fall back to plain text
         return f"{name} ({symbol})" if name and unit else name or symbol
     return label
 
