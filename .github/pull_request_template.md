@@ -23,6 +23,13 @@ Please describe the tests that you ran to verify your changes. Provide instructi
   - [ ] **MacOSX** installer (GH artifact) has been tested (installed and worked)
   - [ ] **Wheels** installer (GH artifact) has been tested (installed and worked)
 
+**AI Usage** (check all that apply)
+- [ ] An AI agent was used in the process of submitting this pull request.
+  - [ ] AI was used in the generation of the code in this pull request.
+  - [ ] AI was used to better understand the problem before writing this pull request.
+  - [ ] AI was used to review the code prior to submission.
+- AI Agent(s) used in this pull request: [ ] ChatGPT, [ ] Claude, [ ] Copilot, [ ] Cursor, [ ] Gemini, [ ] RChat, [ ] Other (Please Specify)
+
 **Licensing** (untick if necessary)
 - [x] The introduced changes comply with SasView license (BSD 3-Clause)
 
