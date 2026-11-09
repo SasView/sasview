@@ -42,8 +42,8 @@ def _load_ascii(filename: str) -> dict:
 # for all file extensions, and ultimately this logic probably needs to be moved
 # into sasdata.
 # The file formats SasView can load: name -> (extensions, loader). The file
-# dialog filters and drag and drop are both derived from this, so only files
-# with these extensions can be picked or dropped.
+# dialog filters and the files picked from dropped folders are both derived
+# from this.
 SUPPORTED_FORMATS: dict[str, tuple[tuple[str, ...], Callable[[str], dict]]] = {
     "XML": ((".xml", ".cor", ".pdh"), load_xml_data),
     "HDF5": ((".h5", ".hdf", ".nxs", ".nx", ".hdf5"), load_hdf5_data),
@@ -204,26 +204,17 @@ class NewDataExplorer(QWidget):
             "Open Data File",
             filter=_file_dialog_filters(),
         )
-        self.loadFiles(filenames)
+        self.loadPaths(filenames)
 
-    def loadFiles(self, filenames: list[str]):
-        """Load each file into the data manager. Files in an unsupported format
-        are skipped; files that fail to load are skipped and reported together
-        at the end."""
+    def loadPaths(self, paths: list[str]):
+        """Load files and folders into the data manager. Anything that can't be
+        loaded is reported together at the end."""
         failures: list[str] = []
-        for filename in filenames:
-            loader = _loader_for(filename)
-            if loader is None:
-                continue
-            try:
-                loaded_data = loader(filename)
-            except Exception as err:
-                logging.exception(f"Error loading {filename}")
-                failures.append(f"{basename(filename)}: {err}")
-                continue
-
-            for _, datum in loaded_data.items():
-                self._data_manager.add_data(datum)
+        for path in paths:
+            if os.path.isdir(path):
+                failures.extend(self._loadFolder(path))
+            elif failure := self._loadFile(path):
+                failures.append(failure)
 
         if failures:
             QMessageBox.critical(
@@ -232,30 +223,65 @@ class NewDataExplorer(QWidget):
                 "The following files could not be loaded:\n\n" + "\n".join(failures),
             )
 
+    def _loadFile(self, filename: str) -> str | None:
+        """Load a file into the data manager. Returns why it failed, if it did."""
+        loader = _loader_for(filename)
+        if loader is None:
+            return f"{basename(filename)}: unsupported file format"
+        try:
+            loaded_data = loader(filename)
+        except Exception as err:
+            logging.exception(f"Error loading {filename}")
+            return f"{basename(filename)}: {err}"
+
+        for datum in loaded_data.values():
+            self._data_manager.add_data(datum)
+        return None
+
+    def _loadFolder(self, folder: str) -> list[str]:
+        """Load the supported files directly inside a folder (not recursive).
+        Unsupported files are skipped with a warning, which brings up the log
+        window. Returns why anything failed."""
+        try:
+            supported, unsupported = self._expandFolder(folder)
+        except OSError as err:
+            return [f"{basename(folder)}: {err}"]
+
+        if not supported:
+            return [f"{basename(folder)}: no supported files"]
+        if unsupported:
+            extensions = sorted({os.path.splitext(file)[1].lower() or "no extension" for file in unsupported})
+            logging.warning(f"Skipped {len(unsupported)} unsupported file(s) in {folder} ({', '.join(extensions)})")
+
+        return [failure for file in supported if (failure := self._loadFile(file))]
+
     @staticmethod
-    def _droppedFiles(event: QDragEnterEvent | QDragMoveEvent | QDropEvent) -> Iterator[str]:
-        """Local files in a supported format in a drag, with folders expanded
-        to the files directly inside them (not recursive)."""
+    def _expandFolder(folder: str) -> tuple[list[str], list[str]]:
+        """The visible files directly inside a folder (not recursive), sorted by
+        name and split into (supported, unsupported) by format. Raises OSError
+        if the folder can't be read."""
+        with os.scandir(folder) as entries:
+            files = sorted(entry.path for entry in entries if entry.is_file() and not entry.name.startswith("."))
+        supported = [file for file in files if _loader_for(file)]
+        unsupported = [file for file in files if not _loader_for(file)]
+        return supported, unsupported
+
+    @staticmethod
+    def _droppedPaths(event: QDragEnterEvent | QDragMoveEvent | QDropEvent) -> Iterator[str]:
+        """Local files and folders in a drag. Nothing is checked or opened here;
+        whatever the user drops is attempted, and problems are reported on load."""
         for url in event.mimeData().urls():
-            path = url.toLocalFile()
-            if not path:
-                continue
-            if os.path.isdir(path):
-                candidates = (os.path.join(path, name) for name in sorted(os.listdir(path)))
-            else:
-                candidates = (path,)
-            for candidate in candidates:
-                if _loader_for(candidate) is not None and os.path.isfile(candidate):
-                    yield candidate
+            if path := url.toLocalFile():
+                yield path
 
     @classmethod
-    def _hasSupportedFiles(cls, event: QDragEnterEvent | QDragMoveEvent) -> bool:
-        return any(cls._droppedFiles(event))
+    def _hasDroppablePaths(cls, event: QDragEnterEvent | QDragMoveEvent) -> bool:
+        return any(cls._droppedPaths(event))
 
     def dragEnterEvent(self, event: QDragEnterEvent):
-        # Only accept drags carrying something we can load, so the cursor shows
-        # the drop isn't allowed otherwise.
-        if self._hasSupportedFiles(event):
+        # Accept any drag carrying local files or folders. Only drags without
+        # any (e.g. text or web links) show the drop isn't allowed.
+        if self._hasDroppablePaths(event):
             event.setDropAction(Qt.DropAction.CopyAction)
             event.accept()
             self.drop_hint.setActive(True)
@@ -263,7 +289,7 @@ class NewDataExplorer(QWidget):
             event.ignore()
 
     def dragMoveEvent(self, event: QDragMoveEvent):
-        if self._hasSupportedFiles(event):
+        if self._hasDroppablePaths(event):
             event.setDropAction(Qt.DropAction.CopyAction)
             event.accept()
         else:
@@ -274,13 +300,13 @@ class NewDataExplorer(QWidget):
 
     def dropEvent(self, event: QDropEvent):
         self.drop_hint.setActive(False)
-        filenames = list(self._droppedFiles(event))
+        filenames = list(self._droppedPaths(event))
         if not filenames:
             event.ignore()
             return
         event.setDropAction(Qt.DropAction.CopyAction)
         event.accept()
-        self.loadFiles(filenames)
+        self.loadPaths(filenames)
 
     @Slot()
     def onAdvancedLoad(self):
