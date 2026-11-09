@@ -5,9 +5,9 @@ from PySide6 import QtWidgets
 
 import sasdata.file_converter.FileConverterUtilities as Utilities
 
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.UnitTesting import base_path
 from sas.qtgui.Utilities.FileConverter import FileConverterWidget
-from sas.qtgui.Utilities.GuiUtils import communicator
 
 
 class FileConverterTest:
@@ -16,11 +16,7 @@ class FileConverterTest:
     @pytest.fixture(autouse=True)
     def widget(self, qapp):
         '''Create/Destroy the FileConverter'''
-        class dummy_manager:
-            communicator = communicator
-            _parent = QtWidgets.QDialog()
-
-        w = FileConverterWidget(dummy_manager())
+        w = FileConverterWidget(None)
         yield w
         w.close()
 
@@ -51,9 +47,10 @@ class FileConverterTest:
     def testOnHelp(self, widget, mocker):
         """ Test the default help renderer """
 
-        mocker.patch.object(widget.parent, 'showHelp', create=True)
+        show_help = mocker.patch.object(GuiUtils, 'showHelp')
         widget.onHelp()
-        widget.parent.showHelp.assert_called_once()
+        show_help.assert_called_once()
+        assert 'file_converter_help.html' in show_help.call_args[0][0]
 
     def testOnIFileOpen(self, widget, mocker):
         """

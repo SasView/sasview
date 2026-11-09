@@ -81,6 +81,7 @@ class GuiManagerWorkspaceTest:
         gui.loadedPerspectives = {}
         gui._connected_undo_stack = None
         gui._connected_tabbed_perspective = None
+        gui._data_manager = None  # used by the Tools-menu registry in addTriggers()
         gui.addTriggers()
         flush()
         yield gui
@@ -92,6 +93,21 @@ class GuiManagerWorkspaceTest:
     def perspectives(gui, *names):
         gui.loadedPerspectives = {name: FakePerspective(name) for name in names}
         return [gui.loadedPerspectives[name] for name in names]
+
+    def testToolsMenu(self, gui):
+        """Data Operation is disabled; the registered tools follow it, in today's order."""
+        assert not gui._workspace.actionData_Operation.isEnabled()
+        texts = [action.text() for action in gui._workspace.menuTool.actions() if not action.isSeparator()]
+        assert texts[:8] == [
+            "Data Operation",
+            "File Converter",
+            "SLD Calculator",
+            "Density/Volume Calculator",
+            "Slit Size Calculator",
+            "Kiessig Thickness Calculator",
+            "Q Resolution Estimator",
+            "Shape2SAS Calculator (Experimental)",
+        ]
 
     def testPerspectivePreferenceAppliesOnFirstPresentationOnly(self, gui, monkeypatch):
         manager = gui.workspace_manager

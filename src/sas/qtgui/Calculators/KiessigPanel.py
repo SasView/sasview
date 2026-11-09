@@ -1,20 +1,21 @@
 from PySide6 import QtCore, QtGui, QtWidgets
 
-from sas.qtgui.UI import main_resources_rc  # noqa: F401
-
 # sas-global
+from sas.qtgui.Calculators.calculator_tool import CalculatorTool
+from sas.qtgui.UI import main_resources_rc  # noqa: F401
 from sas.sascalc.calculator.kiessig_calculator import KiessigThicknessCalculator
 
 from .UI.KiessigPanel import Ui_KiessigPanel
 
 
-class KiessigPanel(QtWidgets.QDialog, Ui_KiessigPanel):
-    def __init__(self, parent=None):
-        super(KiessigPanel, self).__init__()
+class KiessigPanel(CalculatorTool, QtWidgets.QDialog, Ui_KiessigPanel):
+    help_url = "/user/qtgui/Calculators/kiessig_calculator_help.html"
+
+    def __init__(self, parent=None, **kwargs):
+        super().__init__(parent, **kwargs)
         self.setupUi(self)
         self.setWindowTitle("Kiessig Thickness Calculator")
 
-        self.manager = parent
         self.thickness = KiessigThicknessCalculator()
 
         rx = QtCore.QRegularExpression(r"[+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?")
@@ -28,16 +29,6 @@ class KiessigPanel(QtWidgets.QDialog, Ui_KiessigPanel):
 
         # no reason to have this widget resizable
         self.setFixedSize(self.minimumSizeHint())
-
-    def onHelp(self):
-        """
-        Bring up the Kiessig fringe calculator Documentation whenever
-        the HELP button is clicked.
-        Calls DocumentationWindow with the path of the location within the
-        documentation tree (after /doc/ ....".
-        """
-        location = "/user/qtgui/Calculators/kiessig_calculator_help.html"
-        self.manager.showHelp(location)
 
     def onCompute(self):
         """

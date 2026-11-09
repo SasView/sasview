@@ -17,15 +17,19 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from sasdata.data import SasMeasurement
+from sasdata.dataset_types import one_dim
+from sasdata.quantities import units
+from sasdata.quantities.quantity import Quantity
+
+from sas.qtgui.Calculators.calculator_tool import CalculatorTool
 from sas.qtgui.Calculators.Shape2SAS.ButtonOptions import ButtonOptions
 from sas.qtgui.Calculators.Shape2SAS.Constraints import Constraints, logger
 from sas.qtgui.Calculators.Shape2SAS.PlotAspects.plotAspects import Canvas, ViewerPlotDesign
 from sas.qtgui.Calculators.Shape2SAS.Tables.subunitTable import OptionLayout, SubunitTable
 from sas.qtgui.Calculators.Shape2SAS.UI.DesignWindowUI import Ui_Shape2SAS
 from sas.qtgui.Calculators.Shape2SAS.ViewerModel import ViewerModel
-from sas.qtgui.Perspectives.perspective import Perspective
-from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Utilities.GuiUtils import communicator, createModelItemWithPlot
+from sas.qtgui.Utilities.GuiUtils import communicator
 
 # Local SasView
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor
@@ -43,24 +47,16 @@ from sas.sascalc.shape2sas.Shape2SAS import (
 )
 
 
-class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
+class DesignWindow(CalculatorTool, QDialog, Ui_Shape2SAS):
     """Main window for the Shape2SAS fitting tool"""
 
-    name = "Shape2SAS"
-    ext = "data_file"
+    help_url = "/user/qtgui/Calculators/shape_2_sas_help.html"
 
-    @property
-    def title(self) -> str:
-        """Window title"""
-        return "Shape2SAS"
-
-    def __init__(self, parent=None):
-        super().__init__()
+    def __init__(self, parent=None, **kwargs):
+        super().__init__(parent, **kwargs)
         self.setupUi(self)
         self.setWindowTitle("Shape2SAS (Experimental)")
-        self.parent = parent
 
-        self._manager = parent
         self.communicator = communicator
 
         self.setMinimumSize(1200, 650)
@@ -804,11 +800,6 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         self.close()
         self.constraint.onClosingConstraints()
 
-    def onHelp(self):
-        """Opening the help window"""
-        location = "/user/qtgui/Calculators/shape_2_sas_help.html"
-        self.parent.showHelp(location)
-
     @staticmethod
     def ifNoCondition(name: str, names: list[str], **kwargs):
         """Condition method. Append without any condition."""
@@ -958,7 +949,8 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         if not self.subunitTable.model.item(1, columns - 1):
             return
 
-        self.sendSimToSasView.setEnabled(True)
+        # Sending needs somewhere to send to; there's no data manager in tests.
+        self.sendSimToSasView.setEnabled(self.data_manager is not None)
 
         # Clear layout for last plot
         if self.scatteringScene.count():
@@ -991,13 +983,30 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
     def sendSimulatedSAXSToDataExplorer(self):
         """Send simulated data to the Data Explorer in SasView."""
 
+        if self.data_manager is None:
+            logger.warning("Shape2SAS has no data manager to send the simulated SAXS data to.")
+            return
+
         name = self.onCheckingInput(self.modelName, "Model_1")
         sim = self.getSimulatedSAXSData()
         if sim is not None:
-            dataClass = Data1D(x=sim.q, y=sim.I_sim, dy=sim.I_err)
-
-            # Send data to SasView Data Explorer
-            data = createModelItemWithPlot(dataClass, name)
-            self.communicator.updateModelFromPerspectiveSignal.emit(data)
+            self.data_manager.add_data(simulatedSAXSToSasData(name, sim.q, sim.I_sim, sim.I_err))
         else:
             logger.warning("No SAXS data has been generated in the Shape2SAS window.")
+
+
+def simulatedSAXSToSasData(name: str, q, intensity, intensity_error) -> SasMeasurement:
+    """Wrap simulated SAXS arrays as 1D sasdata.
+
+    Q is in 1/Å: Shape2SAS takes subunit sizes in Å and its q range defaults to
+    0.001-0.5. The simulated intensity is the normalised scattering scaled by an
+    exposure in arbitrary units, so it has no physical unit.
+    """
+    return SasMeasurement(
+        name,
+        {
+            "Q": Quantity(q, units.per_angstrom),
+            "I": Quantity(intensity, units.none, standard_error=intensity_error),
+        },
+        one_dim,
+    )

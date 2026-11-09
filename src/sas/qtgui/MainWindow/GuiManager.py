@@ -35,15 +35,10 @@ import sas.system.version
 from sas import config
 from sas.data_manager import NewDataManager, TrackedData
 from sas.qtgui.Calculators.DataOperationUtilityPanel import DataOperationUtilityPanel
-from sas.qtgui.Calculators.DensityPanel import DensityPanel
-from sas.qtgui.Calculators.KiessigPanel import KiessigPanel
-from sas.qtgui.Calculators.ResolutionCalculatorPanel import ResolutionCalculatorPanel
-from sas.qtgui.Calculators.Shape2SAS.DesignWindow import DesignWindow as Shape2SAS
-from sas.qtgui.Calculators.SldPanel import SldPanel
-from sas.qtgui.Calculators.SlitSizeCalculator import SlitSizeCalculator
 from sas.qtgui.MainWindow.Acknowledgements import Acknowledgements
 from sas.qtgui.MainWindow.CategoryManager import CategoryManager
 from sas.qtgui.MainWindow.PackageGatherer import PackageGatherer
+from sas.qtgui.MainWindow.tools import ToolWindows, build_tools_menu
 from sas.qtgui.MainWindow.WelcomePanel import WelcomePanel
 from sas.qtgui.Perspectives.Corfunc.CorfuncPerspective import CorfuncWindow
 from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
@@ -53,7 +48,6 @@ from sas.qtgui.Perspectives.perspective import Perspective
 from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionPerspective import SizeDistributionWindow
 from sas.qtgui.Utilities.About.About import About
 from sas.qtgui.Utilities.About.Credits import Credits
-from sas.qtgui.Utilities.FileConverter import FileConverterWidget
 from sas.qtgui.Utilities.GridPanel import BatchOutputPanel
 from sas.qtgui.Utilities.HidableDialog import hidable_dialog
 from sas.qtgui.Utilities.ImageViewer import ImageViewer
@@ -225,17 +219,11 @@ class GuiManager:
 
         self._workspace.toolBar.setVisible(config.TOOLBAR_SHOW)
 
-        # Add calculators - floating for usability
-        self.SLDCalculator = SldPanel(self)
-        self.DVCalculator = DensityPanel(self)
-        self.KIESSIGCalculator = KiessigPanel(self)
+        # Tools not yet in the tools registry (sas.qtgui.MainWindow.tools).
+        # The registered ones are created on first use by self.tools.
         self.MuMag_Fitter = MuMag(self)
-        self.SlitSizeCalculator = SlitSizeCalculator(self)
-        self.ResolutionCalculator = ResolutionCalculatorPanel(self)
-        self.Shape2SASCalculator =  Shape2SAS(self)
         self.GENSASCalculator = None
         self.DataOperation = DataOperationUtilityPanel(self)
-        self.FileConverter = FileConverterWidget(self)
         self.WhatsNew = WhatsNewWidget(self._parent)
 
 
@@ -855,19 +843,21 @@ class GuiManager:
         self._workspace.actionHide_DataExplorer.triggered.connect(self.actionHide_DataExplorer)
         self._workspace.actionHide_LogExplorer.triggered.connect(self.actionHide_LogExplorer)
         # Tools
+        # Calculator dialogs come from the registry in sas.qtgui.MainWindow.tools,
+        # inserted after Data Operation. The rest are still .ui actions.
+        self.tools = ToolWindows(self._parent, self._data_manager)
+        build_tools_menu(self._workspace.menuTool, self._workspace.actionData_Operation, self.tools.open)
         self._workspace.actionData_Operation.triggered.connect(self.actionData_Operation)
-        self._workspace.actionSLD_Calculator.triggered.connect(self.actionSLD_Calculator)
-        self._workspace.actionDensity_Volume_Calculator.triggered.connect(self.actionDensity_Volume_Calculator)
-        self._workspace.actionKeissig_Calculator.triggered.connect(self.actionKiessig_Calculator)
+        # Data Operation reads and writes data through the legacy DataExplorer
+        # (getAllFlatData, model.appendRow), which this version no longer builds,
+        # so opening it raises. Disabled until it is moved to the new data manager.
+        self._workspace.actionData_Operation.setEnabled(False)
+        self._workspace.actionData_Operation.setStatusTip(
+            "Data Operation is unavailable until it is moved to the new data handling.")
         self._workspace.actionMuMag_Fitter.triggered.connect(self.actionMuMag_Fitter)
-        #self._workspace.actionKIESSING_Calculator.triggered.connect(self.actionKIESSING_Calculator)
-        self._workspace.actionSlit_Size_Calculator.triggered.connect(self.actionSlit_Size_Calculator)
-        self._workspace.actionSAS_Resolution_Estimator.triggered.connect(self.actionSAS_Resolution_Estimator)
         self._workspace.actionGeneric_Scattering_Calculator.triggered.connect(self.actionGeneric_Scattering_Calculator)
-        self._workspace.actionShape2SAS_Calculator.triggered.connect(self.actionShape2SAS_Calculator)
         self._workspace.actionPython_Shell_Editor.triggered.connect(self.actionPython_Shell_Editor)
         self._workspace.actionImage_Viewer.triggered.connect(self.actionImage_Viewer)
-        self._workspace.actionFile_Converter.triggered.connect(self.actionFile_Converter)
         self._workspace.actionOrientation_Viewer.triggered.connect(self.actionOrientation_Viewer)
         self._workspace.actionFreeze_Theory.triggered.connect(self.actionFreeze_Theory)
         # Fitting
@@ -1264,44 +1254,10 @@ class GuiManager:
         self.DataOperation.show()
 
 
-    def actionSLD_Calculator(self):
-        """
-        """
-        self.SLDCalculator.show()
-
-
-    def actionDensity_Volume_Calculator(self):
-        """
-        """
-        self.DVCalculator.show()
-
-
-    def actionKiessig_Calculator(self):
-        """
-        """
-        self.KIESSIGCalculator.show()
-
-
     def actionMuMag_Fitter(self):
         """
         """
         self.MuMag_Fitter.show()
-
-
-    def actionSlit_Size_Calculator(self):
-        """
-        """
-        self.SlitSizeCalculator.show()
-
-
-    def actionSAS_Resolution_Estimator(self):
-        """
-        """
-        try:
-            self.ResolutionCalculator.show()
-        except Exception as ex:
-            logger.error(str(ex))
-            return
 
 
     def actionGeneric_Scattering_Calculator(self):
@@ -1315,14 +1271,6 @@ class GuiManager:
             self.GENSASCalculator.show()
             self.updateStatusBar("The Generic Scattering Calculator is open, but it sometimes opens behind the main "
                                  "window.")
-        except Exception as ex:
-            logger.error(str(ex))
-            return
-
-
-    def actionShape2SAS_Calculator(self):
-        try:
-            self.Shape2SASCalculator.show()
         except Exception as ex:
             logger.error(str(ex))
             return
@@ -1365,17 +1313,6 @@ class GuiManager:
             if sys.platform == "darwin":
                 self.image_viewer.menubar.setNativeMenuBar(False)
             self.image_viewer.show()
-        except Exception as ex:
-            logger.error(str(ex))
-            return
-
-
-    def actionFile_Converter(self):
-        """
-        Shows the File Converter widget.
-        """
-        try:
-            self.FileConverter.show()
         except Exception as ex:
             logger.error(str(ex))
             return

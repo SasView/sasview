@@ -3,6 +3,7 @@ from PySide6 import QtCore, QtWidgets
 from PySide6.QtTest import QTest
 
 # Local
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Calculators.DensityPanel import MODEL, DensityPanel, toMolarMass
 
 
@@ -148,9 +149,7 @@ class DensityCalculatorTest:
 
     def testHelp(self, widget, mocker):
         """ Assure help file is shown """
-        widget.manager = QtWidgets.QWidget()
-        mocker.patch.object(widget.manager, 'showHelp', create=True)
-        widget.displayHelp()
-        widget.manager.showHelp.assert_called_once()
-        args = widget.manager.showHelp.call_args
-        assert 'density_calculator_help.html' in args[0][0]
+        show_help = mocker.patch.object(GuiUtils, 'showHelp')
+        widget.onHelp()
+        show_help.assert_called_once()
+        assert 'density_calculator_help.html' in show_help.call_args[0][0]

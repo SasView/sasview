@@ -13,9 +13,14 @@ import numpy
 from PySide6 import QtWidgets
 from twisted.internet import threads
 
+from sasdata.data import SasMeasurement
+from sasdata.dataset_types import two_dim
+from sasdata.quantities import units
+from sasdata.quantities.quantity import Quantity
+
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Calculators.calculator_tool import CalculatorTool
 from sas.qtgui.Plotting.Plotter2D import Plotter2DWidget
-from sas.qtgui.Plotting.PlotterData import Data2D
 from sas.qtgui.Utilities.BackgroundColor import BG_DEFAULT, BG_ERROR
 from sas.sascalc.calculator.resolution_calculator import ResolutionCalculator
 
@@ -31,16 +36,38 @@ _SOURCE_MASS = {'Alpha': 6.64465620E-24,
 logger = logging.getLogger(__name__)
 
 
-class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel):
+def resolutionImageToSasData(image, qx_min: float, qx_max: float, qy_min: float, qy_max: float) -> SasMeasurement:
+    """Wrap a resolution image as gridded 2D sasdata.
+
+    The calculator builds the image with ``meshgrid(qx, qy)`` where qy runs from
+    ``qy_max`` down to ``qy_min``, so rows are qy (top row = qy_max) and columns
+    are qx. sasdata grids need increasing axes and are indexed ``[x, y]``, so the
+    rows are flipped and the array transposed. The intensity is a normalised
+    resolution kernel and has no unit.
+    """
+    image = numpy.asarray(image, dtype=float)
+    n_qy, n_qx = image.shape
+    return SasMeasurement(
+        "",
+        {
+            "Qx": Quantity(numpy.linspace(qx_min, qx_max, n_qx), units.per_angstrom, name=r"\rm{Q_{x}}"),
+            "Qy": Quantity(numpy.linspace(qy_min, qy_max, n_qy), units.per_angstrom, name=r"\rm{Q_{y}}"),
+            "I": Quantity(image[::-1, :].T, units.none),
+        },
+        two_dim,
+    )
+
+
+class ResolutionCalculatorPanel(CalculatorTool, QtWidgets.QDialog, Ui_ResolutionCalculatorPanel):
     """
     compute resolution in 2D
     """
-    def __init__(self, parent=None):
-        super(ResolutionCalculatorPanel, self).__init__()
+    help_url = "/user/qtgui/Calculators/resolution_calculator_help.html"
+
+    def __init__(self, parent=None, **kwargs):
+        super().__init__(parent, **kwargs)
         self.setupUi(self)
         self.setFixedSize(self.minimumSizeHint())
-
-        self.manager = parent
 
         # New font to display angstrom symbol
         new_font = 'font-family: -apple-system, "Helvetica Neue", "Ubuntu";'
@@ -352,16 +379,6 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
     # Slots associated with signals from push buttons
     # #################################
 
-    def onHelp(self):
-        """
-        Bring up the Resolution Calculator Documentation whenever
-        the HELP button is clicked.
-        Calls Documentation Window with the path of the location within the
-        documentation tree (after /doc/ ....".
-        """
-        location = "/user/qtgui/Calculators/resolution_calculator_help.html"
-        self.manager.showHelp(location)
-
     def onReset(self):
         # by default Spectrum label and cbCustomSpectrum are not visible
         self.cbCustomSpectrum.setVisible(False)
@@ -573,12 +590,14 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
         except :
             raise ValueError
 
-        # calculate 2D resolution distribution image
-        image = self.resolution.compute_and_plot(qx_value, qy_value,
-                                                 qx_min, qx_max, qy_min,
-                                                 qy_max,
-                                                 self.det_coordinate)
-        return image
+        # calculate 2D resolution distribution image.
+        # compute_and_plot() returns the pyplot module it drew on, not the image,
+        # so take the accumulated image array from the calculator instead.
+        self.resolution.compute_and_plot(qx_value, qy_value,
+                                         qx_min, qx_max, qy_min,
+                                         qy_max,
+                                         self.det_coordinate)
+        return numpy.asarray(self.resolution.image)
 
     # #################################
     # Legacy validators
@@ -705,7 +724,8 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
         """
         Create a template for 2D data
         """
-        self.plotter = Plotter2DWidget(self, manager=self.manager, quickplot=True)
+        # No manager: this is an embedded preview, not a workspace plot.
+        self.plotter = Plotter2DWidget(self, manager=None, quickplot=True)
         self.plotter.scale = 'linear'
         self.plotter.cmap = None
         layout = QtWidgets.QHBoxLayout()
@@ -719,21 +739,12 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
         """
         qx_min, qx_max, qy_min, qy_max = self.resolution.get_detector_qrange()
 
-        dx_size = (qx_max - qx_min) / (1000 - 1)
-        dy_size = (qy_max - qy_min) / (1000 - 1)
-        x_val = numpy.arange(qx_min, qx_max, dx_size)
-        y_val = numpy.arange(qy_max, qy_min, -dy_size)
-
         if len(self.plotter.ax.patches):
             self.plotter.ax.patches[0].remove()
 
         self.drawLines()
 
-        self.plotter.data = Data2D(image=self.image,
-                      qx_data=x_val,
-                      qy_data=y_val,
-                      xmin=qx_min, xmax=qx_max,
-                      ymin=qy_min, ymax=qy_max)
+        self.plotter.data = resolutionImageToSasData(self.image, qx_min, qx_max, qy_min, qy_max)
 
         self.plotter.plot()
         self.plotter.show()

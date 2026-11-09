@@ -104,8 +104,9 @@ class Plotter2DTest:
     def testDataProperty(self, plotter):
         """ Adding data """
         assert plotter._title == "Test data"
-        assert plotter.xLabel == "$(per_angstrom)$"
-        assert plotter.yLabel == "$(per_angstrom)$"
+        # sasdata units are shown in the legacy mathtext style ("Ang^-1" -> "A^{-1}")
+        assert plotter.xLabel == "$(A^{-1})$"
+        assert plotter.yLabel == "$(A^{-1})$"
 
     def testPlot(self, plotter, mocker):
         """ Look at the plotting """
