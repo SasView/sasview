@@ -245,7 +245,8 @@ class NewDataExplorer(QWidget):
         try:
             supported, unsupported = self._expandFolder(folder)
         except OSError as err:
-            return [f"{basename(folder)}: {err}"]
+            logging.error(f"Could not read folder {folder}: {err}")
+            return [f"{basename(folder)}: {err.strerror or err}"]
 
         if not supported:
             return [f"{basename(folder)}: no supported files"]
