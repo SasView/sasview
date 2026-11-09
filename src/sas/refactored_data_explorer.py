@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from sasdata.data import SasData
 from sasdata.data_io.importer import Importer
 from sasdata.data_io.importers import AsciiImporter
 

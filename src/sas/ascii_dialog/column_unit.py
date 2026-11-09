@@ -65,6 +65,8 @@ class ColumnUnit(QWidget):
             for option in option_symbols[:5]:
                 unit_box.addItem(option)
             unit_box.addItem('Select More')
+        # Remember the selected unit, to go back to it if the user cancels 'Select More'.
+        self.previous_unit_symbol = unit_box.currentText()
 
 
     def replaceOptions(self, new_options) -> None:
@@ -82,9 +84,9 @@ class ColumnUnit(QWidget):
     def onOptionChange(self):
         # If the new option is empty string, its probably because the current
         # options have been removed. Can safely ignore this.
-        self.column_changed.emit()
         new_option = self.col_widget.currentText()
         if new_option == '':
+            self.column_changed.emit()
             return
         try:
             self.updateUnits(self.unit_widget, new_option)
@@ -93,19 +95,31 @@ class ColumnUnit(QWidget):
             # the case in the real version so for now we'll just clear the unit
             # widget.
             self.unit_widget.clear()
+        # Only signal the change once the units match the new column. Otherwise the column editor synchronises the
+        # units of paired columns (e.g. I and dI) using the unit of the previous column.
+        self.column_changed.emit()
 
     @Slot()
     def onUnitChange(self):
         new_text = self.unit_widget.currentText()
         if new_text == 'Select More':
-            selector = UnitSelector(unit_kinds[self.col_widget.currentText()].name, False)
-            selector.exec()
-            # We need the selection unit in the list of options, or else QT has some dodgy behaviour.
-            self.unit_widget.insertItem(-1, selector.selected_unit.symbol)
-            self.unit_widget.setCurrentText(selector.selected_unit.symbol)
+            column = self.col_widget.currentText()
+            selector = UnitSelector(unit_kinds[column].name, False, quantity_name=column)
+            # exec() returns 1 if the user selected a unit, and 0 if they closed the window.
+            if selector.exec() and selector.selected_unit is not None:
+                symbol = selector.selected_unit.symbol
+                # We need the selection unit in the list of options, or else QT has some dodgy behaviour. Add it just
+                # before 'Select More', unless it's already there.
+                if self.unit_widget.findText(symbol) == -1:
+                    self.unit_widget.insertItem(self.unit_widget.count() - 1, symbol)
+                self.unit_widget.setCurrentText(symbol)
+            else:
+                # Cancelled: go back to the unit that was selected before.
+                self.unit_widget.setCurrentText(self.previous_unit_symbol)
         # This event could get triggered when the units have just been cleared, and not actually updated. We don't want
         # to trigger it in this case.
         elif not new_text == '':
+            self.previous_unit_symbol = new_text
             self.column_changed.emit()
 
     @property

@@ -5,9 +5,11 @@ from matplotlib.axes import Axes
 from matplotlib.backends.backend_qt import NavigationToolbar2QT
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
+from matplotlib.mathtext import MathTextParser
 from PySide6.QtWidgets import QDockWidget, QMainWindow, QTabWidget, QVBoxLayout, QWidget
 
 from sasdata.data import SasMeasurement
+from sasdata.quantities.quantity import Quantity
 
 if TYPE_CHECKING:
     from sas.refactored import TrackedFit, TrackedPlot
@@ -15,6 +17,67 @@ if TYPE_CHECKING:
 type Plottable = "SasMeasurement | TrackedFit"
 
 tab_name_dict = {0: "Data", 1: "Fit"}
+
+
+# Axis names, as written in the axis labels by the data loaders of the current (non-refactored) SasView.
+_axis_names = {
+    "I": "Intensity",
+    "Qx": "Q_{x}",
+    "Qy": "Q_{y}",
+}
+_mathtext_parser = MathTextParser("path")
+
+
+def _is_valid_math_text(text: str) -> bool:
+    """Whether matplotlib can draw the text as a math expression.
+
+    The text itself isn't changed: parsing it is only a check, so that an invalid label (e.g. with a character such
+    as '{' or '\\' coming from the data) doesn't stop the plot from being drawn.
+    """
+    try:
+        _mathtext_parser.parse(text)
+    except ValueError:
+        return False
+    return True
+
+
+def unit_label(symbol: str) -> str:
+    """Format a unit symbol from sasdata (e.g. 'Ang^-1') as in the current SasView plots (e.g. 'A^{-1}')."""
+    if symbol in ("", "none"):
+        return ""
+    parts = []
+    for part in symbol.split():
+        base, _, exponent = part.partition("^")
+        if base == "Ang":
+            base = "A"
+        parts.append(f"{base}^{{{exponent}}}" if exponent else base)
+    return r"\ ".join(parts)
+
+
+def axis_label(quantity: Quantity) -> str:
+    """Axis label from the name and unit of a quantity, written as in the current SasView plots but with a space
+    before the unit, e.g. '$\\rm{Q}\\ (A^{-1})$'.
+
+    Names stored as paths (e.g. '/sasentry01/sasdata01/I' from HDF5 files) are shortened to their last part.
+    If the label can't be written as a matplotlib math expression, it is returned as plain text, e.g. 'Q (A^-1)'.
+    """
+    name = getattr(quantity, "name", "") or ""
+    name = name.rstrip("/").split("/")[-1]
+    units = getattr(quantity, "units", None)
+    symbol = units.ascii_symbol if units is not None else ""
+    unit = unit_label(symbol)
+    if not name and not unit:
+        return ""
+
+    label = rf"\rm{{{_axis_names.get(name, name)}}}" if name else ""
+    if unit:
+        # A plain space is ignored in a math expression, so use an explicit one
+        label += rf"\ ({unit})" if label else f"({unit})"
+    label = f"${label}$"
+    if not _is_valid_math_text(label):
+        # Fall back to plain text
+        return f"{name} ({symbol})" if name and unit else name or symbol
+    return label
 
 
 def tab_name(i: int) -> str:
@@ -93,6 +156,8 @@ class PlotWindow(QTabWidget):
     def plot1d(self, data: SasMeasurement, axis: Axes, fit: "TrackedFit | None" = None):
         axis.set_title(data.name)
         axis.plot(data.abscissae.axes[0].value, data.ordinate.value, marker="o", linestyle="")
+        axis.set_xlabel(axis_label(data.abscissae.axes[0]))
+        axis.set_ylabel(axis_label(data.ordinate))
         axis.set_yscale("log")
         axis.set_xscale("log")
         if fit:

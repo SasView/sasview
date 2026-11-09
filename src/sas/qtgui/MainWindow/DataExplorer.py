@@ -84,9 +84,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.cmdHelp_2.clicked.connect(self.displayHelp)
         self.chkSwap.setVisible(False)
 
-        # Fill in the perspectives combo
-        self.initPerspectives()
-
         # Custom context menu
         self.treeView.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.treeView.customContextMenuRequested.connect(self.onCustomContextMenu)
@@ -204,24 +201,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         self.cbgraph.setEnabled(len(PlotHelper.currentPlotIds()) > 0)
         self.cmdAppend.setEnabled(len(PlotHelper.currentPlotIds()) > 0)
-
-    def initPerspectives(self):
-        """
-        Populate the Perspective combobox and define callbacks
-        """
-        available_perspectives = sorted([p for p in list(Perspectives.PERSPECTIVES.keys())])
-        if available_perspectives:
-            self.cbFitting.clear()
-            self.cbFitting.addItems(available_perspectives)
-        self.cbFitting.currentIndexChanged.connect(self.updatePerspectiveCombo)
-        # Set the index so we see the default (Fitting)
-        self.cbFitting.setCurrentIndex(self.cbFitting.findText(config.DEFAULT_PERSPECTIVE))
-
-    def _perspective(self):
-        """
-        Returns the current perspective
-        """
-        return self.parent.perspective()
 
     def loadFromURL(self, url):
         """

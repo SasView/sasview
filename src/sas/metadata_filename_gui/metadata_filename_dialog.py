@@ -60,7 +60,7 @@ class MetadataFilenameDialog(QDialog):
         if not any([char.isupper() for char in self.filename]):
             self.casing_radio.setDisabled(True)
 
-        self.seperator_chars_label = QLabel('Seperators')
+        self.seperator_chars_label = QLabel('Separators')
         if isinstance(initial_separator_text, str):
             self.separator_chars = QLineEdit(initial_separator_text)
         else:
