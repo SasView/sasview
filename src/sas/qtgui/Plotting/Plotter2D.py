@@ -1,6 +1,7 @@
 import copy
 import functools
 import logging
+import re
 
 import matplotlib as mpl
 import numpy
@@ -48,6 +49,20 @@ SLICER_COLORS = [
     '#B15928',  # brown
     '#FDBF6F'   # light orange
 ]
+
+
+def _sasdata_axis_label(axis) -> str:
+    """Axis label for a sasdata Quantity, in the mathtext style of the Data2D labels.
+
+    The label is wrapped in $...$ by PlotterBase. "Ang^-1" becomes "A^{-1}", as
+    in the legacy labels; unitless axes get no unit.
+    """
+    unit = getattr(axis.units, "ascii_symbol", str(axis.units))
+    if unit in ("", "none"):
+        return axis.name
+    unit = re.sub(r"\bAng\b", "A", unit)
+    unit = re.sub(r"\^(-?\d+)", r"^{\1}", unit)
+    return f"{axis.name}({unit})"
 
 
 class Plotter2DWidget(PlotterBase):
@@ -99,7 +114,9 @@ class Plotter2DWidget(PlotterBase):
     @data.setter
     def data(self, data=None):
         """ data setter """
-        if hasattr(data, 'mask') and not data.mask.all():
+        # Masking below works on the legacy Data2D attributes only. SasData may
+        # have no mask at all (mask is None).
+        if isinstance(data, Data2D) and getattr(data, 'mask', None) is not None and not data.mask.all():
             # Create a copy of the data set to only be used in this context
             # Remove all masked points from the copy
             masked_data = copy.deepcopy(data)
@@ -149,8 +166,8 @@ class Plotter2DWidget(PlotterBase):
             self.zmin = data.ordinate.value.min()
             self.zmax = data.ordinate.value.max()
             self.label = data.name
-            self.xLabel = "%s(%s)"%(data.abscissae.axes[0].name, data.abscissae.axes[0].units)
-            self.yLabel = "%s(%s)"%(data.abscissae.axes[1].name, data.abscissae.axes[1].units)
+            self.xLabel = _sasdata_axis_label(data.abscissae.axes[0])
+            self.yLabel = _sasdata_axis_label(data.abscissae.axes[1])
             self.title(title=data.name)
 
 
@@ -167,7 +184,13 @@ class Plotter2DWidget(PlotterBase):
         if not self._data:
             return
 
-        plot_data = self.data0.data if isinstance(self.data0, Data2D) else self.data0.ordinate.value
+        if isinstance(self.data0, Data2D):
+            plot_data = self.data0.data
+        else:
+            plot_data = numpy.asarray(self.data0.ordinate.value)
+            if plot_data.ndim == 2 and self.data0.abscissae.is_grid:
+                # sasdata grids are indexed [x, y]; imshow draws rows of constant y.
+                plot_data = plot_data.T
         # Toggle the scale
         zmin_2D_temp, zmax_2D_temp = self.calculateDepth()
 

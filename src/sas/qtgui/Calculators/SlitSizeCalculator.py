@@ -9,6 +9,7 @@ from PySide6 import QtWidgets
 
 from sasdata.dataloader.loader import Loader
 
+from sas.qtgui.Calculators.calculator_tool import CalculatorTool
 from sas.qtgui.UI import main_resources_rc  # noqa: F401
 from sas.sascalc.calculator.slit_length_calculator import SlitlengthCalculator
 
@@ -17,16 +18,17 @@ from .UI.SlitSizeCalculator import Ui_SlitSizeCalculator
 logger = logging.getLogger(__name__)
 
 
-class SlitSizeCalculator(QtWidgets.QDialog, Ui_SlitSizeCalculator):
+class SlitSizeCalculator(CalculatorTool, QtWidgets.QDialog, Ui_SlitSizeCalculator):
     """
     Provides the slit length calculator GUI.
     """
-    def __init__(self, parent=None):
-        super(SlitSizeCalculator, self).__init__()
+    help_url = "/user/qtgui/Calculators/slit_calculator_help.html"
+
+    def __init__(self, parent=None, **kwargs):
+        super().__init__(parent, **kwargs)
         self.setupUi(self)
 
         self.setWindowTitle("Slit Size Calculator")
-        self._parent = parent
 
         self.thickness = SlitlengthCalculator()
 
@@ -38,16 +40,6 @@ class SlitSizeCalculator(QtWidgets.QDialog, Ui_SlitSizeCalculator):
         # no reason to have this widget resizable
         self.setFixedSize(self.minimumSizeHint())
 
-
-    def onHelp(self):
-        """
-        Bring up the Slit Size Calculator calculator Documentation whenever
-        the HELP button is clicked.
-        Calls DocumentationWindow with the path of the location within the
-        documentation tree (after /doc/ ....".
-        """
-        location = "/user/qtgui/Calculators/slit_calculator_help.html"
-        self._parent.showHelp(location)
 
     def onBrowse(self):
         """

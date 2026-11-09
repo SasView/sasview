@@ -9,10 +9,13 @@ from PySide6.QtTest import QTest
 
 mpl.use("Qt5Agg")
 
-from twisted.internet import threads
+import numpy as np
+from twisted.internet import defer, threads
 
-from sas.qtgui.Calculators.ResolutionCalculatorPanel import ResolutionCalculatorPanel
-from sas.qtgui.Utilities.GuiUtils import communicator
+from sasdata.dataset_types import two_dim
+
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Calculators.ResolutionCalculatorPanel import ResolutionCalculatorPanel, resolutionImageToSasData
 
 BG_COLOR_ERR = 'background-color: rgb(244, 170, 164);'
 
@@ -24,11 +27,7 @@ class ResolutionCalculatorPanelTest:
     @pytest.fixture(autouse=True)
     def widget(self, qapp):
         """Create/Destroy the ResolutionCalculatorPanel"""
-        class dummy_manager:
-            def communicator(widget):
-                return communicator
-
-        w = ResolutionCalculatorPanel(dummy_manager())
+        w = ResolutionCalculatorPanel(None)
 
         yield w
 
@@ -231,13 +230,29 @@ class ResolutionCalculatorPanelTest:
 
     def testHelp(self, widget, mocker):
         """ Assure help file is shown """
-        # this should not rise
-        widget.manager = QtWidgets.QWidget()
-        mocker.patch.object(widget.manager, 'showHelp', create=True)
+        show_help = mocker.patch.object(GuiUtils, 'showHelp')
         widget.onHelp()
-        widget.manager.showHelp.assert_called_once()
-        args = widget.manager.showHelp.call_args
-        assert 'resolution_calculator_help.html' in args[0][0]
+        show_help.assert_called_once()
+        assert 'resolution_calculator_help.html' in show_help.call_args[0][0]
+
+    def testComputedImageIsPlotted(self, widget, mocker):
+        """ The computed image reaches the plot, with the spot where it was asked for """
+        # Run the computation synchronously instead of in a thread.
+        mocker.patch.object(threads, 'deferToThread', side_effect=lambda f, *a: defer.succeed(f(*a)))
+        widget.txtQx.setText('0.02')
+        widget.txtQy.setText('-0.01')
+        widget.onCompute()
+
+        assert isinstance(widget.image, np.ndarray)
+        image = widget.plotter.im
+        assert image is not None
+        shown = np.asarray(image.get_array())
+        xmin, xmax, ymin, ymax = image.get_extent()
+        row, col = np.unravel_index(np.nanargmax(shown), shown.shape)
+        drawn_qx = xmin + (col + 0.5) / shown.shape[1] * (xmax - xmin)
+        drawn_qy = ymin + (row + 0.5) / shown.shape[0] * (ymax - ymin)  # origin='lower'
+        assert drawn_qx == pytest.approx(0.02, abs=5e-4)
+        assert drawn_qy == pytest.approx(-0.01, abs=5e-4)
 
     def testOnReset(self, widget):
         """ Test onReset function"""
@@ -270,3 +285,23 @@ class ResolutionCalculatorPanelTest:
         # the Compute button changed caption and got disabled
         assert widget.cmdCompute.text() == 'Wait...'
         assert not widget.cmdCompute.isEnabled()
+
+
+class ResolutionImageToSasDataTest:
+    """Conversion of the resolution image into gridded sasdata"""
+
+    def testGridOrientation(self):
+        # Rows run from qy_max down to qy_min, columns from qx_min to qx_max,
+        # as the calculator builds them.
+        image = np.array([[1.0, 2.0, 3.0],
+                          [4.0, 5.0, 6.0]])
+        data = resolutionImageToSasData(image, qx_min=-1.0, qx_max=1.0, qy_min=-0.5, qy_max=0.5)
+
+        assert data.dataset_type is two_dim
+        assert data.abscissae.is_grid
+        qx, qy = (axis.value for axis in data.abscissae.axes)
+        assert qx == pytest.approx([-1.0, 0.0, 1.0])
+        assert qy == pytest.approx([-0.5, 0.5])
+        # Indexed [x, y] with increasing y: the bottom row (qy_min) comes first.
+        assert data.ordinate.value[0, 0] == 4.0   # (qx_min, qy_min)
+        assert data.ordinate.value[2, 1] == 3.0   # (qx_max, qy_max)

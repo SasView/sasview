@@ -7,6 +7,7 @@ from PySide6.QtTest import QTest
 
 from sasdata.dataloader.loader import Loader
 
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Calculators.SlitSizeCalculator import SlitSizeCalculator
 from sas.qtgui.UnitTesting import base_path
 
@@ -35,12 +36,10 @@ class SlitSizeCalculatorTest:
 
     def testHelp(self, widget, mocker):
         """ Assure help file is shown """
-        widget._parent = QtWidgets.QWidget()
-        mocker.patch.object(widget._parent, 'showHelp', create=True)
+        show_help = mocker.patch.object(GuiUtils, 'showHelp')
         widget.onHelp()
-        widget._parent.showHelp.assert_called_once()
-        args = widget._parent.showHelp.call_args
-        assert 'slit_calculator_help.html' in args[0][0]
+        show_help.assert_called_once()
+        assert 'slit_calculator_help.html' in show_help.call_args[0][0]
 
     def testBrowseButton(self, widget, mocker):
         browseButton = widget.browseButton

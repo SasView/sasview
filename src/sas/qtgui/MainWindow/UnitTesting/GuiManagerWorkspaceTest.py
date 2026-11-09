@@ -81,6 +81,7 @@ class GuiManagerWorkspaceTest:
         gui.loadedPerspectives = {}
         gui._connected_undo_stack = None
         gui._connected_tabbed_perspective = None
+        gui._data_manager = None  # used by the Tools-menu registry in addTriggers()
         gui.addTriggers()
         flush()
         yield gui
