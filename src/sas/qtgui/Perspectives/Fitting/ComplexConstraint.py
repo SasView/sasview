@@ -48,7 +48,7 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         """
         Digs into self.tabs and pulls out relevant info
         """
-        self.tab_names = [tab.logic.kernel_module.name for tab in self.tabs]
+        self.tab_names = [tab.document.identity.mnemonic for tab in self.tabs]
         self.params = [tab.getParamNames() for tab in self.tabs]
 
     def setupSignals(self):
@@ -175,7 +175,7 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
             self.txtConstraint.setText(self.cbModel2.currentText() + "." + param2)
         # Check if any of the parameters are polydisperse
         params_list = [param1, param2]
-        all_pars = [tab.logic.model_parameters for tab in self.tabs]
+        all_pars = [tab.modelParameters() for tab in self.tabs]
         is2Ds = [tab.is2D for tab in self.tabs]
         txt = self.redefining_warning
         for pars, is2D in zip(all_pars, is2Ds):
@@ -304,7 +304,7 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         if self.cbModel1.currentText() == "All":
             # exclude the tab on the lhs
             tabs = [tab for tab in self.tabs if
-                    tab.logic.kernel_module.name != self.cbModel2.currentText()]
+                    tab.document.identity.mnemonic != self.cbModel2.currentText()]
             self.applyAcrossTabs(tabs, self.cbParam1.currentText(),
                                  self.txtConstraint.text())
             self.setupParamWidgets()
@@ -332,16 +332,15 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         *expr* string.
         """
         for tab in tabs:
-            if hasattr(tab, "kernel_module"):
-                if param in tab.logic.kernel_module.params or param in tab.document.parameters:
-                    value_ex = tab.logic.kernel_module.name + "." +param
-                    constraint = Constraint(param=param,
-                                            value=param,
-                                            func=expr,
-                                            value_ex=value_ex,
-                                            operator="=")
-                    self.constraintReadySignal.emit((tab.logic.kernel_module.name,
-                                                     constraint))
+            kernel = tab.kernel()
+            if kernel is not None and (param in kernel.params or param in tab.document.parameters):
+                mnemonic = tab.document.identity.mnemonic
+                constraint = Constraint(param=param,
+                                        value=param,
+                                        func=expr,
+                                        value_ex=mnemonic + "." + param,
+                                        operator="=")
+                self.constraintReadySignal.emit((mnemonic, constraint))
 
     def onSetAll(self):
         """

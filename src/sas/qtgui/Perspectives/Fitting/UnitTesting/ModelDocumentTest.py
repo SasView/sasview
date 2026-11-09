@@ -52,7 +52,8 @@ class ImportBoundaryTest:
     def testModelPackageDoesNotLoadQt(self):
         """Goal 1: importing the model and services packages loads no Qt, directly or transitively (§7)."""
         modules = ", ".join([f"sas.qtgui.Perspectives.Fitting.model.{m}" for m in
-                             ("document", "serializer", "history", "kernel", "retention", "rules", "commands")]
+                             ("document", "serializer", "history", "kernel", "retention", "rules", "commands",
+                              "results", "catalog")]
                             + ["sas.qtgui.Perspectives.Fitting.services.constraints"])
         code = (f"import sys\nimport {modules}\n"
                 "loaded = [m for m in sys.modules if m.startswith(('PySide6', 'matplotlib'))]\n"

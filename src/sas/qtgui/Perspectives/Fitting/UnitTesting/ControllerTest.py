@@ -52,7 +52,7 @@ def test_typed_values_keep_double_precision(page):
     """Register R-12, changed in Phase 5: no longer rounded to single precision."""
     g.set_cell(page._model_model, "radius", 1, "20.123456789")
     assert page.document.parameters["radius"].value == 20.123456789
-    assert page.logic.kernel_module.getParam("radius") == 20.123456789
+    assert page.kernel().getParam("radius") == 20.123456789
 
 
 def test_a_rejected_edit_is_reported_and_the_cell_shows_the_document_again(page, messages):
@@ -67,15 +67,15 @@ def test_npts_and_distribution_edits_are_undoable(page):
     page.chkPolydispersity.setChecked(True)
     poly = page.polydispersity_widget
     g.set_cell(poly.poly_model, "Distribution of radius", 4, "21")
-    assert page.logic.kernel_module.getParam("radius.npts") == 21
+    assert page.kernel().getParam("radius.npts") == 21
     poly.onPolyComboIndexChange("rectangle", g.find_row(poly.poly_model, "Distribution of radius"))
-    assert page.logic.kernel_module.dispersion["radius"]["type"] == "rectangle"
+    assert page.kernel().dispersion["radius"]["type"] == "rectangle"
     assert page.document.parameters["radius.width"].dispersion.npts == 35   # the distribution's default
     page.undo_stack.undo()
-    assert page.logic.kernel_module.dispersion["radius"]["type"] == "gaussian"
+    assert page.kernel().dispersion["radius"]["type"] == "gaussian"
     assert cell(poly.poly_model, "Distribution of radius", 4) == "21"
     page.undo_stack.undo()
-    assert page.logic.kernel_module.getParam("radius.npts") == 35
+    assert page.kernel().getParam("radius.npts") == 35
 
 
 def test_an_array_distribution_unfits_and_disables_the_row_and_undo_restores_it(page, monkeypatch):
@@ -88,7 +88,7 @@ def test_an_array_distribution_unfits_and_disables_the_row_and_undo_restores_it(
     p = page.document.parameters["radius.width"]
     assert (p.dispersion.type, p.fit) == ("array", False)
     assert not poly.poly_model.item(row, 1).isEnabled() and poly.poly_model.item(row, 7).text() == "w.txt"
-    assert list(page.logic.kernel_module.dispersion["radius"]["values"]) == [10.0, 20.0]
+    assert list(page.kernel().dispersion["radius"]["values"]) == [10.0, 20.0]
     page.undo_stack.undo()
     assert page.document.parameters["radius.width"].fit
     assert poly.poly_model.item(row, 1).isEnabled() and poly.poly_model.item(row, 7).text() == ""
@@ -204,8 +204,7 @@ def test_a_fixed_choice_is_a_combo_box_and_undoable():
 
 
 def test_undoing_a_model_switch_brings_back_the_fit_errors_and_their_column(page):
-    page.kernel_module_copy = None
-    page.fitting_controller.paramDictFromResults = lambda res: {"radius": (25.5, 0.75)}
+    page.fit_service.outcome = lambda res: {"radius": (25.5, 0.75)}
     page.onPlot = lambda: None
     g.set_checked(page._model_model, "radius")
     page.fitComplete(([[SimpleNamespace(fitness=1.0)]], 0.5))

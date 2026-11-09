@@ -8,9 +8,11 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 from sas.qtgui.Perspectives.Fitting.ConstraintWidget import ConstraintWidget
+from sas.qtgui.Perspectives.Fitting.coordinator import FitPerspectiveCoordinator
 from sas.qtgui.Perspectives.Fitting.FittingOptions import FittingOptions
 from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
 from sas.qtgui.Perspectives.Fitting.GPUOptions import GPUOptions
+from sas.qtgui.Perspectives.Fitting.model.catalog import ModelCatalog
 from sas.qtgui.Perspectives.perspective import Perspective
 from sas.qtgui.Utilities.Reports.reportdata import ReportData
 from sas.system.config import config
@@ -58,6 +60,15 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         self.installEventFilter(self)
 
         self.communicator = GuiUtils.communicator
+
+        # The models the pages choose from (refreshed before the pages hear of a change),
+        # and the operations across pages
+        self.catalog = ModelCatalog(FittingWidget.customModels)
+        self.communicator.customModelDirectoryChanged.connect(self.catalog.reload_plugins)
+        self.communicator.updateModelCategoriesSignal.connect(self.catalog.refresh)
+        self.coordinator = FitPerspectiveCoordinator(
+            self.getFitTabs, lambda message: self.communicator.statusBarUpdateSignal.emit(message),
+            self.tabsModifiedSignal.emit)
 
         # Initialize the first tab
         self.addFit(None)
@@ -254,8 +265,9 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
             tab_index = self.maxIndex
         else:
             self.maxIndex = tab_index
-        tab	= FittingWidget(parent=self.parent, data=data, tab_id=tab_index)
+        tab	= FittingWidget(parent=self.parent, data=data, tab_id=tab_index, catalog=self.catalog)
         tab.is_batch_fitting = is_batch
+        self.coordinator.add_page(tab)
 
         # Add this tab to the object library so it can be retrieved by scripting/jupyter
         tab_name = self.getTabName(is_batch=is_batch)
@@ -296,6 +308,7 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         tab_name = "FitPage" + str(tab.tab_id)
         ObjectLibrary.addObject(tab_name, tab)
         self.addTab(tab, icon, tab_name)
+        self.coordinator.add_page(tab)
         # Update the list of tabs
         self.tabs.append(tab)
         # Show the new tab
@@ -357,6 +370,9 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         No checks on validity of the index.
         """
         try:
+            if isinstance(self.tabs[index], FittingWidget):
+                # Its jobs are cancelled, and constraints on it deactivated
+                self.coordinator.remove_page(self.tabs[index])
             ObjectLibrary.deleteObjectByRef(self.tabs[index])
             self.removeTab(index)
             # can't just delete the tab, since we still hold a reference to it

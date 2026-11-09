@@ -46,7 +46,7 @@ from sas.system.user import PATH_LIKE
 
 warnings.simplefilter("ignore")
 
-# This matches the ID of a plot created using FittingLogic._create1DPlot, e.g.
+# This matches the ID of a plot created by Fitting services.plots._plot_1d, e.g.
 # "5 [P(Q)] modelname"
 # or
 # "4 modelname".

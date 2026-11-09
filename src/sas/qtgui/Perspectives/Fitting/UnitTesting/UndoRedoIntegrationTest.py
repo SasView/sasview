@@ -145,9 +145,9 @@ class TestParameterValueUndo:
                 w._model_model.item(row, param_col).setText("99.0")
                 break
 
-        assert w.logic.kernel_module.getParam("radius") == 99.0
+        assert w.kernel().getParam("radius") == 99.0
         w.undo_stack.undo()
-        assert w.logic.kernel_module.getParam("radius") == old_val
+        assert w.kernel().getParam("radius") == old_val
 
     def test_value_undo_redo_recomputes_plot(self, widget_with_model, mocker):
         """Undo/redo of a value change must recompute the theory so the plot
@@ -200,18 +200,21 @@ class TestDatasetUndoHistory:
         assert not w.undo_stack.can_undo()
         assert not w.undo_stack.can_redo()
 
-    @pytest.mark.shadow_exempt("selects batch dataset 1 on a page without data")
     def test_batch_file_switch_clears_existing_undo_history(self, widget_with_model, monkeypatch):
-        """Batch file selection changes the active logic, so undo history must reset."""
+        """Showing another file of a batch (its Q range) resets the undo history."""
         w = widget_with_model
+        datasets = {name: Data1D(x=[0.01, q], y=[1.0, 2.0]) for name, q in (("a", 0.02), ("b", 0.03))}
+        for name, data in datasets.items():
+            data.id = data.name = name
+        monkeypatch.setattr(GuiUtils, 'dataFromItem', lambda item: datasets[item.text()])
+        w.dataFromItems([QtGui.QStandardItem("a"), QtGui.QStandardItem("b")])
         w.undo_stack.push(SetParameterCommand("radius", {"value": 1.0}, {"value": 2.0}))
         assert w.undo_stack.can_undo()
-
-        monkeypatch.setattr(w, 'updateQRange', lambda *a, **kw: None)
 
         w.onSelectBatchFilename(1)
 
         assert w.data_index == 1
+        assert w.document.options.qmax == 0.03
         assert not w.undo_stack.can_undo()
         assert not w.undo_stack.can_redo()
 
@@ -292,7 +295,7 @@ class TestModelSelectionUndo:
     def test_model_selection_undo_restores_previous_model(self, widget_with_model):
         """Undoing a model switch should restore the previous model type."""
         w = widget_with_model
-        original_model_type = type(w.logic.kernel_module)
+        original_model_type = type(w.kernel())
 
         # Switch to a different model
         model_index = w.cbModel.findText("barbell")
@@ -301,11 +304,11 @@ class TestModelSelectionUndo:
         w.cbModel.setCurrentIndex(model_index)
         QtWidgets.QApplication.processEvents()
 
-        assert type(w.logic.kernel_module) is not original_model_type
+        assert type(w.kernel()) is not original_model_type
         w.undo_stack.undo()
         QtWidgets.QApplication.processEvents()
         # Verify the kernel module type was restored
-        assert type(w.logic.kernel_module) is original_model_type
+        assert type(w.kernel()) is original_model_type
 
     def test_select_default_model_no_command(self, widget_with_model):
         """Selecting MODEL_DEFAULT should not push a command."""
@@ -489,7 +492,7 @@ class TestFitResultUndo:
         res.stderr = [0.1, 0.2, 0.3]
         # Build param_dict that paramDictFromResults would return
         param_names = [
-            p.name for p in widget.logic.kernel_module._model_info.parameters.kernel_parameters
+            p.name for p in widget.kernel()._model_info.parameters.kernel_parameters
         ]
         res.pname = param_names[:len(res.pvec)]
         return ([[res]], 0.5)
@@ -497,11 +500,9 @@ class TestFitResultUndo:
     @pytest.mark.shadow_exempt("mocks the writers that apply the fit result to the tables")
     def test_fit_complete_pushes_fit_result_command(self, widget_with_model, monkeypatch):
         """fitComplete should record an ApplyFitResultCommand."""
-        import copy
         w = widget_with_model
         w.undo_stack.clear()
         # The pre-fit snapshot is captured from kernel_module_copy (set in onFit).
-        w.kernel_module_copy = copy.deepcopy(w.logic.kernel_module)
 
         # Mock methods that would crash without real fit data
         monkeypatch.setattr(w, 'onPlot', lambda *a, **kw: None)
@@ -509,8 +510,7 @@ class TestFitResultUndo:
         # Create a result that paramDictFromResults can handle
         old_params = main_values(w)
         param_dict = {n: (v + 1.0, 0.01) for n, v in old_params.items()}
-        monkeypatch.setattr(
-            w.fitting_controller, 'paramDictFromResults', lambda *a, **kw: param_dict
+        monkeypatch.setattr(w.fit_service, 'outcome', lambda *a, **kw: param_dict
         )
 
         result = self._make_fit_result(w)
@@ -523,13 +523,10 @@ class TestFitResultUndo:
 
     def test_fit_complete_keeps_undo_stack_enabled(self, widget_with_model, monkeypatch):
         """fitComplete should leave the undo stack enabled."""
-        import copy
         w = widget_with_model
-        w.kernel_module_copy = copy.deepcopy(w.logic.kernel_module)
 
         monkeypatch.setattr(w, 'onPlot', lambda *a, **kw: None)
-        monkeypatch.setattr(
-            w.fitting_controller, 'paramDictFromResults',
+        monkeypatch.setattr(w.fit_service, 'outcome',
             lambda *a, **kw: {n: (v, 0.01) for n, v in main_values(w).items()}
         )
 
@@ -544,7 +541,6 @@ class TestFitResultUndo:
         w.undo_stack.clear()
 
         monkeypatch.setattr(w, 'enableInteractiveElements', lambda *a, **kw: None)
-        w.kernel_module_copy = MagicMock()
 
         # Simulate failed fit
         w.fitComplete(None)
@@ -553,17 +549,15 @@ class TestFitResultUndo:
     @pytest.mark.shadow_exempt("mocks the writers that apply the fit result to the tables")
     def test_undo_fit_removes_error_column(self, widget_with_model, monkeypatch):
         """Undoing a fit must remove the now-stale error column from the table."""
-        import copy
         w = widget_with_model
         w.undo_stack.clear()
-        w.kernel_module_copy = copy.deepcopy(w.logic.kernel_module)
 
         # The fit result is applied to the document; the table adapters add the error column.
         monkeypatch.setattr(w, 'onPlot', lambda *a, **kw: None)
 
         old_params = main_values(w)
         param_dict = {n: (v + 1.0, 0.01) for n, v in old_params.items()}
-        monkeypatch.setattr(w.fitting_controller, 'paramDictFromResults', lambda *a, **kw: param_dict)
+        monkeypatch.setattr(w.fit_service, 'outcome', lambda *a, **kw: param_dict)
 
         assert not w.has_error_column
         cols_before = w._model_model.columnCount()
@@ -591,7 +585,7 @@ class TestUndoStackDuringFit:
         """onFit should leave the undo stack enabled (suppressed() handles blocking)."""
         w = widget_with_model
 
-        monkeypatch.setattr(w.fitting_controller, 'prepareFitters', lambda *a, **kw: ([MagicMock()], 0))
+        monkeypatch.setattr(w.controller, 'prepare_fitters', lambda *a, **kw: ([MagicMock()], 0))
         monkeypatch.setattr(w, 'disableInteractiveElements', lambda *a, **kw: None)
         monkeypatch.setattr('twisted.internet.threads.deferToThread', lambda *a, **kw: MagicMock())
         # Non-twisted path: prevent a real FitThread from running in the
@@ -629,7 +623,7 @@ class TestGuiManagerUndoHookSignalChain:
         res.pvec = [1.0, 2.0, 3.0]
         res.stderr = [0.1, 0.2, 0.3]
         param_names = [
-            p.name for p in widget.logic.kernel_module._model_info.parameters.kernel_parameters
+            p.name for p in widget.kernel()._model_info.parameters.kernel_parameters
         ]
         res.pname = param_names[:len(res.pvec)]
         return ([[res]], 0.5)
@@ -637,15 +631,13 @@ class TestGuiManagerUndoHookSignalChain:
     def _prepare_fit_complete(self, w, monkeypatch):
         """Common fitComplete boilerplate: stub side effects, mutate the live
         kernel so new_snapshot differs from the pre-fit snapshot."""
-        import copy
         w.undo_stack.clear()
-        w.kernel_module_copy = copy.deepcopy(w.logic.kernel_module)
 
         monkeypatch.setattr(w, 'onPlot', lambda *a, **kw: None)
 
         old_params = main_values(w)
         param_dict = {n: (v + 1.0, 0.01) for n, v in old_params.items()}
-        monkeypatch.setattr(w.fitting_controller, 'paramDictFromResults', lambda *a, **kw: param_dict)
+        monkeypatch.setattr(w.fit_service, 'outcome', lambda *a, **kw: param_dict)
 
 
     def test_stack_changed_calls_handler_on_push(self, widget_with_model):
@@ -752,15 +744,15 @@ class TestUndoRedoRoundTrip:
         param_col = w.lstParams.itemDelegate().param_value
         for row in range(w._model_model.rowCount()):
             if w._model_model.item(row, 0).text() == "radius":
-                original = w.logic.kernel_module.getParam("radius")
+                original = w.kernel().getParam("radius")
                 w._model_model.item(row, param_col).setText("42.0")
                 break
 
-        assert w.logic.kernel_module.getParam("radius") == 42.0
+        assert w.kernel().getParam("radius") == 42.0
         w.undo_stack.undo()
-        assert w.logic.kernel_module.getParam("radius") == original
+        assert w.kernel().getParam("radius") == original
         w.undo_stack.redo()
-        assert w.logic.kernel_module.getParam("radius") == 42.0
+        assert w.kernel().getParam("radius") == 42.0
 
     def test_multiple_undo_redo(self, widget_with_model):
         """Multiple parameter edits: undo all, then redo all."""
@@ -779,32 +771,32 @@ class TestUndoRedoRoundTrip:
         if radius_row is None or length_row is None:
             pytest.skip("Could not find both radius and length parameters")
 
-        original_radius = w.logic.kernel_module.getParam("radius")
-        original_length = w.logic.kernel_module.getParam("length")
+        original_radius = w.kernel().getParam("radius")
+        original_length = w.kernel().getParam("length")
 
         # Edit radius then length
         w._model_model.item(radius_row, param_col).setText("11.0")
         w._model_model.item(length_row, param_col).setText("22.0")
 
-        assert w.logic.kernel_module.getParam("radius") == 11.0
-        assert w.logic.kernel_module.getParam("length") == 22.0
+        assert w.kernel().getParam("radius") == 11.0
+        assert w.kernel().getParam("length") == 22.0
 
         # Undo length
         w.undo_stack.undo()
-        assert w.logic.kernel_module.getParam("length") == original_length
-        assert w.logic.kernel_module.getParam("radius") == 11.0
+        assert w.kernel().getParam("length") == original_length
+        assert w.kernel().getParam("radius") == 11.0
 
         # Undo radius
         w.undo_stack.undo()
-        assert w.logic.kernel_module.getParam("radius") == original_radius
+        assert w.kernel().getParam("radius") == original_radius
 
         # Redo radius
         w.undo_stack.redo()
-        assert w.logic.kernel_module.getParam("radius") == 11.0
+        assert w.kernel().getParam("radius") == 11.0
 
         # Redo length
         w.undo_stack.redo()
-        assert w.logic.kernel_module.getParam("length") == 22.0
+        assert w.kernel().getParam("length") == 22.0
 
     def test_suppressed_context_prevents_push(self, widget_with_model):
         """Changes inside suppressed() must not appear on the stack."""

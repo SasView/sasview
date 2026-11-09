@@ -302,11 +302,6 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         fitter = Fit()
         fitter.fitter_id = self.page_id
 
-        # prepare fitting problems for each tab
-        page_ids = []
-        fitter_id = 0
-        sim_fitter_list=[fitter]
-
         # Determine weights for each data-set
         # Need to determine if it is best to use (1/sigma) or (1/relative_error) for this
         weights = {}
@@ -323,19 +318,20 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         for item in weight_increase_dict.items():
             logger.info(item)
 
-        # Prepare the fitter object
+        # Prepare the fit problems of each page in the shared fitter (the coordinator routes the results back)
+        pages = []
+        for tab in tabs_to_fit:
+            if not self.isTabImportable(tab):
+                continue
+            tab_object = ObjectLibrary.getObject(tab)
+            if tab_object is None:
+                # No such tab!
+                return
+            pages.append((tab_object, weight_increase_dict[tab]))
+        coordinator = self.parent.coordinator
         try:
-            for tab in tabs_to_fit:
-                if not self.isTabImportable(tab):
-                    continue
-                tab_object = ObjectLibrary.getObject(tab)
-                if tab_object is None:
-                    # No such tab!
-                    return
-                weight_increase = weight_increase_dict[tab]
-                sim_fitter_list, fitter_id = tab_object.prepareFitters(fitter=sim_fitter_list[0], fit_id=fitter_id,
-                                                                       weight_increase=weight_increase)
-                page_ids.append([tab_object.page_id])
+            sim_fitter_list = coordinator.prepare_simultaneous_fit(fitter, pages)
+            page_ids = coordinator.fit_pages()
         except ValueError:
             # No parameters selected in one of the tabs
             no_params_msg = "Fitting cannot be performed.\n" +\
@@ -480,11 +476,8 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             temp_tab = self.available_tabs[self.current_cell]
             # Remove the key from the dictionaries
             self.available_tabs.pop(self.current_cell, None)
-            # Rename the page, and the references to it in its own constraints
-            temp_tab.controller.rename(new_moniker, self.current_cell)
-            # Replace constraint name in the remaining tabs
-            for tab in self.available_tabs.values():
-                tab.replaceConstraintName(self.current_cell, new_moniker)
+            # Rename the page, and the references to it in every page's constraints
+            self.parent.coordinator.rename(temp_tab, new_moniker)
 
         elif column == self.sim_fit_labels.index('Weighting'):
             new_weighting = item.data(0)
@@ -670,18 +663,8 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # get the elapsed time
         elapsed = result[1]
 
-        # Find out all tabs to fit
-        tabs_to_fit = [tab for tab in self.tabs_for_fitting if self.tabs_for_fitting[tab]]
-
-        # update all involved tabs
-        for i, tab in enumerate(tabs_to_fit):
-            tab_object = ObjectLibrary.getObject(tab)
-            if tab_object is None:
-                # No such tab. removed while job was running
-                return
-            # Make sure result and target objects are the same (same model moniker)
-            if tab_object.logic.kernel_module.name == results[i].model.name:
-                tab_object.fitComplete(([[results[i]]], elapsed))
+        # update all involved pages: each gets its result, by page id
+        self.parent.coordinator.route_fit_results(results, elapsed)
 
         msg = "Fitting completed successfully in: %s s.\n" % GuiUtils.formatNumber(elapsed)
         self.parent.communicator.statusBarUpdateSignal.emit(msg)
@@ -925,7 +908,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         Update a single line of the table widget with tab info
         """
         fit_page = ObjectLibrary.getObject(tab)
-        model = fit_page.logic.kernel_module
+        model = fit_page.kernel()
 
         if model is None:
             logger.warning("No model selected")
@@ -1017,7 +1000,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         objects = ObjectLibrary.listObjects()
 
         # Tab dict
-        # moniker -> (kernel_module, data)
+        # moniker -> fit page
         self.available_tabs = {}
         # Constraint dict
         # moniker -> [constraints]
@@ -1091,12 +1074,9 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         for object_name in ObjectLibrary.listObjects():
             object = ObjectLibrary.getObject(object_name)
             if isinstance(object, FittingWidget):
-                try:
-                    if object.logic.kernel_module.name == name:
-                        return object
-                except AttributeError:
-                    # Disregard atribute errors - empty fit widgets
-                    continue
+                # Disregard empty fit widgets
+                if len(object.document.parameters) and object.document.identity.mnemonic == name:
+                    return object
         return None
 
     def onAcceptConstraint(self, con_tuple):

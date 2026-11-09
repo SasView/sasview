@@ -1,22 +1,18 @@
 """
-Widget/logic for smearing data.
+The smearing tab: the smearing option offered for the data and the model, and its values.
+The smearer itself is built per calculation from the document (``services.theory.build_smearer``).
 """
-import copy
 import logging
 
 import numpy as np
 from PySide6 import QtCore, QtGui, QtWidgets
 
-from sasmodels.resolution import Pinhole1D, Slit1D
-from sasmodels.sesans import SesansTransform
-
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Perspectives.Fitting.services.theory import resolution_of
 
 # Local UI
-from sas.qtgui.Perspectives.Fitting.DocumentShadow import mirrors
 from sas.qtgui.Perspectives.Fitting.UI.SmearingWidgetUI import Ui_SmearingWidgetUI
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
-from sas.sascalc.fit.qsmearing import PySmear, PySmear2D, smear_selection
 
 logger = logging.getLogger(__name__)
 
@@ -69,8 +65,8 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         self.mapper = None
         # Data from the widget
         self.data = None
-        self.current_smearer = None
-        self.kernel_model = None
+        # A model is selected: the custom smearing options are offered
+        self.has_model = False
         # dQ data variables
         self.smear_type = None
         self.dq_l = None
@@ -132,15 +128,13 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         self.data = data
         if data is None:
             self.setElementsVisibility(False)
-        model = self.kernel_model
-        self.updateKernelModel(model, keep_order=True, old_index=old_index)
+        self.updateModel(self.has_model, keep_order=True, old_index=old_index)
 
-    @mirrors('smearing')
-    def updateKernelModel(self, kernel_model=None, keep_order=False, old_index=None):
+    def updateModel(self, has_model=False, keep_order=False, old_index=None):
         """
-        Update the model
+        The options for the data and whether a model is selected
         """
-        self.kernel_model = kernel_model
+        self.has_model = has_model
         # keep the original cbSmearing value, if already set
         index_to_show = self.cbSmearing.currentIndex()
         if old_index is not None:
@@ -152,7 +146,6 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         if self.data is None:
             self.setElementsVisibility(False)
         # Find out if data has dQ or is SESANS
-        self.current_smearer = smear_selection(self.data, self.kernel_model)
         self.setSmearInfo()
         if self.smear_type == "Hankel Transform":
             self.cbSmearing.addItem(SMEARING_SESANS)
@@ -161,7 +154,7 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
             self.cbSmearing.addItem(SMEARING_QD)
             index_to_show = 1 if keep_order else index_to_show
 
-        if self.kernel_model is not None:
+        if self.has_model:
             # Only give custom smearing options after the model is defined, but always offer them
             #  regardless of the data state
             if isinstance(self.data, Data1D) or not self.parent.is2D:
@@ -174,38 +167,29 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         self.cbSmearing.blockSignals(False)
         self.cbSmearing.setCurrentIndex(index_to_show if index_to_show >= 0 else 0)
 
-    def smearer(self):
-        """ Returns the current smearer """
-        return self.current_smearer
-
     def onIndexChange(self, index):
         """
         Callback for smearing combobox index change
         """
         text = self.cbSmearing.currentText()
-        smear = None
         # Ensure smearing selector is enabled initially in case swapped data from SESANS
         self.cbSmearing.setEnabled(True)
         if text == 'None':
             self.setElementsVisibility(False)
-            self.current_smearer = None
         elif text == "Use dQ Data":
             self.setElementsVisibility(True)
             self.setDQLabels()
-            smear = self.onDQSmear
         elif text == "Custom Pinhole Smear":
             self.setElementsVisibility(True)
             self.setPinholeLabels()
-            smear = self.onPinholeSmear
         elif text == "Custom Slit Smear":
             self.setElementsVisibility(True)
             self.setSlitLabels()
-            smear = self.onSlitSmear
+            if self.data:
+                self.onSlitSmear()
         elif text == "Hankel Transform":
             self.setElementsVisibility(False)
             self.cbSmearing.setEnabled(False)  # turn off ability to change smearing; no other options for sesans
-        if self.data and callable(smear):
-            smear()
         self.smearingChangedSignal.emit()
 
     def onModelChange(self):
@@ -340,62 +324,9 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         if d_up is not None:
             self.model.item(MODEL.index('PINHOLE_MIN')).setText(str(d_up))
 
-    def onDQSmear(self):
-        """
-        Create a custom dQ smear object that will change the way residuals
-        are compute when fitting
-        """
-        # resolution information already in data.dx (if 1D) or
-        # data.dqx_data & data.dqy_data (if 2D),
-        # so only need to set accuracy for 2D
-        _, accuracy, _, _ = self.state()
-        self.current_smearer = smear_selection(self.data, self.kernel_model)
-        if isinstance(self.data, Data2D):
-            backend_accuracy = ACCURACY_DICT.get(accuracy)
-            if backend_accuracy:
-                self.current_smearer.set_accuracy(accuracy=backend_accuracy)
-            else:
-                self.current_smearer.set_accuracy(accuracy='low')
-
-    def onPinholeSmear(self):
-        """
-        Create a custom pinhole smear object that will change the way residuals
-        are compute when fitting
-        """
-        _, accuracy, _, d_percent = self.state()
-        self.pinhole = d_percent
-        if d_percent is None or d_percent == 0.0:
-            self.current_smearer = None
-            return
-        percent = d_percent/100.0
-        # copy data
-        data = copy.deepcopy(self.data)
-        if isinstance(self.data, Data2D):
-            len_data = len(data.data)
-            data.dqx_data = np.zeros(len_data)
-            data.dqy_data = np.zeros(len_data)
-            q = np.sqrt(data.qx_data**2 + data.qy_data**2)
-            data.dqx_data = data.dqy_data = percent*q
-        else:
-            len_data = len(data.x)
-            data.dx = np.zeros(len_data)
-            data.dx = percent * data.x
-            data.dxl = None
-            data.dxw = None
-
-        self.current_smearer = smear_selection(data, self.kernel_model)
-        # need to set accuracy for 2D
-        if isinstance(self.data, Data2D):
-            backend_accuracy = ACCURACY_DICT.get(accuracy)
-            if backend_accuracy:
-                self.current_smearer.set_accuracy(accuracy=backend_accuracy)
-            else:
-                self.current_smearer.set_accuracy(accuracy='low')
-
     def onSlitSmear(self):
         """
-        Create a custom slit smear object that will change the way residuals
-        are compute when fitting
+        Warn about slit values that are not slit smearing (build_smearer swaps them if needed)
         """
         _, accuracy, d_width, d_length = self.state()
 
@@ -412,9 +343,7 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
                   'I am internally using the smaller parameter as the width and larger as the length. \n' \
                   'This is the only mathematically valid version of this.'
             smearing_error_flag = True
-            temp = d_length
-            d_length = d_width
-            d_width = temp
+            d_length, d_width = d_width, d_length
         elif d_length < 10 * d_width:
             msg = 'Slit length specified which is less than 10 x slit width. ' \
                   'This is not slit-smearing (at least not in the form we implement). \n' \
@@ -440,31 +369,6 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         self.slit_width = d_width
         self.slit_length = d_length
 
-        if isinstance(self.data, Data2D):
-            self.current_smearer = smear_selection(self.data, self.kernel_model)
-            return
-        # make sure once more if it is smearer
-        data = copy.deepcopy(self.data)
-        data_len = len(data.x)
-        data.dx = None
-        data.dxl = None
-        data.dxw = None
-
-        try:
-            self.dxl = d_length
-            data.dxl = self.dxl * np.ones(data_len)
-        except:
-            self.dxl = None
-            data.dxl = np.zeros(data_len)
-        try:
-            self.dxw = d_width
-            data.dxw = self.dxw * np.ones(data_len)
-        except:
-            self.dxw = None
-            data.dxw = np.zeros(data_len)
-
-        self.current_smearer = smear_selection(data, self.kernel_model)
-
     def setSmearInfo(self):
         """
         Set default smear_type, dq_l, and dq_r based on the q-resolution information found in the data.
@@ -474,35 +378,21 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         self.dq_l = None
         self.dq_r = None
         data = self.data
-        if self.data is None:
-            return
-        # First check if data is 2D - If so check that data set has smearing info.
-        elif isinstance(data, Data2D):
-            if isinstance(self.smearer(), PySmear2D):
-                self.smear_type = "Pinhole2d"
-                self.dq_l = GuiUtils.formatNumber(np.average(data.dqx_data/np.abs(data.qx_data))*100., high=True)
-                self.dq_r = GuiUtils.formatNumber(np.average(data.dqy_data/np.abs(data.qy_data))*100., high=True)
-        # Check for SESANS data - currently no resolution functions are available for SESANS data
-        # The Hankel transform is treated like other resolution functions.
-        elif (isinstance(self.smearer(), PySmear)
-              and isinstance(self.smearer().resolution, SesansTransform)):
-            self.smear_type = "Hankel Transform"
-        # Check for pinhole smearing and get min max if it is.
-        elif (isinstance(self.smearer(), PySmear)
-              and isinstance(self.smearer().resolution, Pinhole1D)):
-            self.smear_type = "Pinhole"
+        # The Hankel transform of SESANS data is treated like other resolution functions
+        self.smear_type = resolution_of(data)
+        if self.smear_type == "Pinhole2d":
+            self.dq_l = GuiUtils.formatNumber(np.average(data.dqx_data/np.abs(data.qx_data))*100., high=True)
+            self.dq_r = GuiUtils.formatNumber(np.average(data.dqy_data/np.abs(data.qy_data))*100., high=True)
+        elif self.smear_type == "Pinhole":
             self.dq_r = GuiUtils.formatNumber(data.dx[0]/data.x[0] *100., high=True)
             self.dq_l = GuiUtils.formatNumber(data.dx[-1]/data.x[-1] *100., high=True)
-        # Check for slit smearing and get min max if it is.
-        elif isinstance(self.smearer(), PySmear) and isinstance(self.smearer().resolution, Slit1D):
-            self.smear_type = "Slit"
+        elif self.smear_type == "Slit":
             if data.dxl is not None and np.all(data.dxl, 0):
                 self.dq_l = GuiUtils.formatNumber(data.dxl[0])
             if data.dxw is not None and np.all(data.dxw, 0):
                 self.dq_r = GuiUtils.formatNumber(data.dxw[0])
 
     def resetSmearer(self):
-        self.current_smearer = None
         self.cbSmearing.blockSignals(True)
         self.cbSmearing.clear()
         self.cbSmearing.blockSignals(False)

@@ -18,7 +18,6 @@ and data ids, and ``capture`` records every legacy output of a page:
 ``GoldenFilesTest`` compares these against ``goldens/<case>.json``. The
 goldens are regenerated with ``SASVIEW_UPDATE_GOLDENS=1``.
 """
-import copy
 import json
 import math
 import re
@@ -29,10 +28,11 @@ from types import SimpleNamespace
 import numpy as np
 from PySide6 import QtCore, QtGui, QtWidgets
 
-from sas.qtgui.Perspectives.Fitting import FittingController, FittingUtilities
+from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
 from sas.qtgui.Perspectives.Fitting.ReportPageLogic import ReportPageLogic
+from sas.qtgui.Perspectives.Fitting.services import fit as fit_service
 from sas.qtgui.Perspectives.Fitting.UnitTesting.fitting_test_support import FittingWidgetMod, dummy_manager
 from sas.qtgui.Perspectives.Fitting.UnitTesting.golden_data import (  # noqa: F401 (re-exported)
     GOLDEN_DIR,
@@ -61,10 +61,15 @@ def data_items(datasets: list) -> tuple[QtGui.QStandardItemModel, list[QtGui.QSt
 # ---------------------------------------------------------------------------
 
 def new_page(tab_id: int = 1, data=None):
-    """A FittingWidget whose theory requests are recorded instead of computed."""
+    """A FittingWidget whose theory requests are recorded instead of computed (each completes at
+    once, without a result)."""
     page = FittingWidgetMod(dummy_manager(), tab_id=tab_id)
     page.theory_requests = []
-    page.calculateQGridForModelExt = lambda *a, **kw: page.theory_requests.append((a, kw))
+
+    def record(request, complete, use_threads=True):
+        page.theory_requests.append(request)
+        complete(None)
+    page.theory_service.runner = record
     if data is not None:
         page.explorer_model, items = data_items(data if isinstance(data, list) else [data])
         page.dataFromItems(items if isinstance(data, list) else items[0])
@@ -167,11 +172,12 @@ def _kernel_state(kernel) -> dict:
 
 
 def _theory_inputs(page) -> dict | None:
-    if page.logic.kernel_module is None:
+    if not len(page.document.parameters) or page.document.active_id is None:
         return None
-    # The kernel holds the effective state theory uses (KernelBuilder.build)
-    result = _kernel_state(page.logic.kernel_module)
-    result["smearer"] = type(page.smearing_widget.smearer()).__name__
+    # A theory request holds the effective state (KernelBuilder.build) and its own smearer
+    request = page.controller.prepare_theory()
+    result = _kernel_state(request.kernel)
+    result["smearer"] = type(request.smearer).__name__
     return result
 
 
@@ -202,13 +208,13 @@ def _fit_inputs(page) -> list | None:
     """Run prepareFitters with a recording Fit. Last capture: it pushes poly/magnet values into the kernel."""
     if not page.data_is_loaded or not page.haveParamsToFit():
         return None
-    original = FittingController.Fit
-    FittingController.Fit = _RecordingFit
+    original = fit_service.Fit
+    fit_service.Fit = _RecordingFit
     _RecordingFit.calls = []
     try:
         page.prepareFitters()
     finally:
-        FittingController.Fit = original
+        fit_service.Fit = original
     return _RecordingFit.calls
 
 
@@ -339,9 +345,8 @@ def case_fit_errors():
     select_model(page, "Cylinder", "cylinder")
     set_checked(page._model_model, "radius")
     set_checked(page._model_model, "scale")
-    page.kernel_module_copy = copy.deepcopy(page.logic.kernel_module)
     fitted = {"radius": (25.5, 0.75), "scale": (0.95, 0.02)}
-    page.fitting_controller.paramDictFromResults = lambda res: fitted
+    page.fit_service.outcome = lambda res: fitted
     page.onPlot = lambda: None
     res = SimpleNamespace(fitness=1.234)
     page.fitComplete(([[res]], 0.5))

@@ -1,16 +1,23 @@
 """
 Document to the page settings widgets (FW-MVC-DESIGN.md §4.3, Phases 5 and 6): the model
 selection (category, model and structure-factor combo boxes, the 2D view), fit options,
-smearing, and the polydispersity, magnetism and chain-fit toggles.
+smearing, the polydispersity, magnetism and chain-fit toggles, and the Fit button.
 
 The widgets keep their .ui files. On a document-first change the sync writes the
 widget, and the page fields the legacy readers use, and applies a toggle's side
 effects (``FittingWidget.apply*``). After a layout change the page refreshes what
-depends on it (``FittingWidget.onLayoutChanged``). Runs through ``DocumentShadow.subscribe_reverse``.
+depends on it (``FittingWidget.onLayoutChanged``). Runs through ``controller.subscribe_view``.
 """
 from __future__ import annotations
 
-from sas.qtgui.Perspectives.Fitting.model.events import FlagsChanged, ModelChanged, OptionsChanged, SmearingChanged
+from sas.qtgui.Perspectives.Fitting.model.events import (
+    DataChanged,
+    FlagsChanged,
+    ModelChanged,
+    OptionsChanged,
+    ParametersChanged,
+    SmearingChanged,
+)
 from sas.qtgui.Utilities import GuiUtils
 
 
@@ -18,7 +25,7 @@ class SettingsSync:
 
     def __init__(self, page) -> None:
         self._page = page
-        self.subscription = page.shadow.subscribe_reverse(self._on_change)
+        self.subscription = page.controller.subscribe_view(self._on_change)
 
     def _on_change(self, change) -> None:
         if change.get(ModelChanged) is not None:
@@ -30,6 +37,10 @@ class SettingsSync:
             self._smearing()
         if change.get(FlagsChanged) is not None:
             self._flags()
+        parameters = change.get(ParametersChanged)
+        if (any(change.get(e) is not None for e in (ModelChanged, FlagsChanged, DataChanged))
+                or (parameters is not None and parameters.fields & {"fit", "fittable"})):
+            self._page.cmdFit.setEnabled(self._page.haveParamsToFit())
 
     def _options(self) -> None:
         page, o = self._page, self._page.document.options

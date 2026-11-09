@@ -11,7 +11,6 @@ from PySide6 import QtCore, QtWidgets
 from sasmodels.weights import MODELS as POLYDISPERSITY_MODELS
 
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
-from sas.qtgui.Perspectives.Fitting.DocumentShadow import mirrors
 from sas.qtgui.Perspectives.Fitting.model.parameters import ArrayDistribution, Dispersion
 
 # Local UI
@@ -34,7 +33,6 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         self.is2D = False
         self.isActive = False
         self._fitting_widget = parent
-        self.logic = parent.logic
         self.has_poly_error_column = False
         FittingUtilities.setTableProperties(self.lstPoly)
         self.lstPoly.setItemDelegate(PolyViewDelegate(self))
@@ -73,7 +71,6 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         # Emit signal to notify parent that state changed
         self.toggledSignal.emit(isChecked)
 
-    @mirrors('parameters')
     def onPolyFilenameChange(self, row_index: int) -> None:
         """
         Respond to filename_updated signal from the delegate
@@ -102,7 +99,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         if page.controller.muted:
             return
         key = page.keyAt(row_index, "poly")
-        if key is None or page.shadow.depth > 0:
+        if key is None:
             return
         current = page.document.parameters[key].dispersion
         if combo_string == "array":

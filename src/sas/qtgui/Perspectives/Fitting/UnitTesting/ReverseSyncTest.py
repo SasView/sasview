@@ -1,11 +1,11 @@
 """
-Reverse synchronization (FW-MVC-DESIGN.md §6, Phases 4 and 5): a change written to the document
-first reaches the legacy item models (ParameterTableAdapter), the legacy kernel (LegacyKernelSync)
-and the settings widgets (SettingsSync).
+Document to view (FW-MVC-DESIGN.md §6, Phases 4 to 7): a change written to the document reaches
+the item models (ParameterTableAdapter) and the settings widgets (SettingsSync), and every
+engine instance built from it (KernelBuilder.build) has the document's effective state.
 
-Each test writes the document directly, as the Phase 5 intents will. The shadow invariant
-(``ShadowChecker``, after every commit and at teardown) is the oracle: the legacy rows, the
-three item models, the kernel and the legacy readers must all agree with the document.
+Each test writes the document directly, as the intents do. The page invariant
+(``ShadowChecker``, after every commit and at teardown) is the oracle: the three item
+models must agree with the document.
 """
 from unittest.mock import MagicMock
 
@@ -16,7 +16,6 @@ from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.model.events import Origin
 from sas.qtgui.Perspectives.Fitting.model.parameters import Constraint, Dispersion, ValueKind
 from sas.qtgui.Perspectives.Fitting.UnitTesting import golden_support as g
-from sas.qtgui.Perspectives.Fitting.view.ParameterTableAdapter import ParameterTableAdapter
 
 
 @pytest.fixture(autouse=True)
@@ -52,8 +51,8 @@ def cell(item_model, name, column):
 def testValueAndBoundsReachTableAndKernel(case):
     write(case, "radius", value=33.25, min=1.0, max=500.0)
     assert [cell(case._model_model, "radius", c) for c in (1, 2, 3)] == ["33.25", "1.0", "500.0"]
-    assert case.logic.kernel_module.getParam("radius") == 33.25
-    assert case.logic.kernel_module.details["radius"][1:] == [1.0, 500.0]
+    assert case.kernel().getParam("radius") == 33.25
+    assert case.kernel().details["radius"][1:] == [1.0, 500.0]
 
 
 @pytest.mark.parametrize("case", ["cylinder"], indirect=True)
@@ -91,7 +90,7 @@ def testDispersionReachesPolyTableKernelAndMainSubRow(case):
     write(case, "length.width", value=0.2, dispersion=Dispersion(npts=21, nsigmas=2.5, type="rectangle"))
     poly = case.polydispersity_widget
     assert [cell(poly.poly_model, "Distribution of length", c) for c in (1, 4, 5)] == ["0.2", "21", "2.5"]
-    kernel = case.logic.kernel_module
+    kernel = case.kernel()
     assert kernel.dispersion["length"]["type"] == "rectangle"
     assert (kernel.getParam("length.npts"), kernel.getParam("length.nsigmas")) == (21, 2.5)
     assert kernel.getParam("length.width") == 0.2
@@ -104,7 +103,7 @@ def testDispersionReachesPolyTableKernelAndMainSubRow(case):
 def testMagnetValueReachesTableAndDict(case):
     write(case, "sld_M0", value=3.5, fit=False)
     assert cell(case.magnetism_widget._magnet_model, "sld_M0", 1) == "3.5"
-    assert case.logic.kernel_module.getParam("sld_M0") == 3.5
+    assert case.kernel().getParam("sld_M0") == 3.5
 
 
 @pytest.mark.parametrize("case", ["fixed_choice"], indirect=True)
@@ -138,7 +137,7 @@ def testConstraintBecomesTheHiddenChildItem(case):
 def testMnemonicNamesTheKernel(case):
     with case.document.transaction(Origin.USER) as tx:
         tx.set_mnemonic("sample")
-    assert case.logic.kernel_module.name == "sample"
+    assert case.kernel().name == "sample"
 
 
 @pytest.mark.parametrize("case", ["cylinder"], indirect=True)
@@ -149,26 +148,15 @@ def testRestoringASnapshotPatchesEveryRow(case):
     case.undo_depth = len(case.undo_stack._undo_stack)
     case.document.restore_undo_state(before)
     assert cell(case._model_model, "radius", 1) == "35.5"
-    assert case.logic.kernel_module.getParam("radius") == 35.5
+    assert case.kernel().getParam("radius") == 35.5
     assert "length" not in case.paramsToFit()
-
-
-@pytest.mark.parametrize("case", ["cylinder"], indirect=True)
-def testLegacyWritersAreNotSyncedBack(case, monkeypatch):
-    """A legacy writer's change reaches the document through the shadow's read-back only."""
-    patched = []
-    monkeypatch.setattr(ParameterTableAdapter, "_patch", lambda self, *a: patched.append(a))
-    with case.shadow.operation("parameters"):
-        case._model_model.item(g.find_row(case._model_model, "radius"), 1).setText("37")
-    assert patched == []
-    assert case.document.parameters["radius"].value == 37.0 == case.logic.kernel_module.getParam("radius")
 
 
 @pytest.mark.parametrize("case", ["cylinder"], indirect=True)
 def testUserEditIsDocumentFirstAndKeepsItsSpelling(case):
     """Phase 5: a cell edit is an intent; the cell keeps what was typed."""
     g.set_cell(case._model_model, "radius", 1, "36")
-    assert case.document.parameters["radius"].value == 36.0 == case.logic.kernel_module.getParam("radius")
+    assert case.document.parameters["radius"].value == 36.0 == case.kernel().getParam("radius")
     assert cell(case._model_model, "radius", 1) == "36"
     assert case.undo_stack._undo_stack[-1].new == {"value": 36.0}
     case.undo_depth += 1

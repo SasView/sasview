@@ -251,6 +251,7 @@ class FitPageDocument:
         self._subscriptions: list[Subscription] = []
         self._in_transaction = False
         self._publishing = False
+        self._after: list[Callable[[], None]] = []
         self._owner = threading.get_ident()
 
     # -- mutation -------------------------------------------------------
@@ -307,6 +308,14 @@ class FitPageDocument:
         """The page is closing: drop every subscription."""
         self._subscriptions.clear()
 
+    def after_publish(self, fn: Callable[[], None]) -> None:
+        """Run *fn* once the current publish has ended, or now if none is running: for a change
+        that a subscriber asks for (a subscriber may not change the document itself)."""
+        if self._publishing:
+            self._after.append(fn)
+        else:
+            fn()
+
     def _publish(self, change: ChangeSet) -> None:
         self._publishing = True
         try:
@@ -321,6 +330,9 @@ class FitPageDocument:
                     logger.exception("FitPageDocument subscriber %r failed", subscription.fn)
         finally:
             self._publishing = False
+        pending, self._after = self._after, []
+        for fn in pending:
+            fn()
 
     # -- queries --------------------------------------------------------
 

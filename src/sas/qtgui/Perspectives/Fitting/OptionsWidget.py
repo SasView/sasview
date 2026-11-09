@@ -5,9 +5,9 @@ import numpy as np
 from PySide6 import QtCore, QtGui, QtWidgets
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Perspectives.Fitting.services import plots
 
 # Local UI
-from sas.qtgui.Perspectives.Fitting.DocumentShadow import mirrors
 from sas.qtgui.Perspectives.Fitting.UI.OptionsWidgetUI import Ui_tabOptions
 from sas.qtgui.Plotting.PlotterData import Data2D
 
@@ -42,13 +42,12 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         'NPTS',
         'NPTS_FIT']
 
-    def __init__(self, parent=None, logic=None):
+    def __init__(self, parent=None):
         super(OptionsWidget, self).__init__()
 
         self.setupUi(self)
 
-        # Logic component
-        self.logic = logic
+        # The fit page: its data
         self.parent = parent
 
         # Weight radio box group
@@ -84,9 +83,6 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         self.qmax = self.QMAX_DEFAULT
         self.npts = self.NPTS_DEFAULT
         self.npts_fit = self.NPTS_DEFAULT
-        if self.logic.data_is_loaded:
-            self.qmin, self.qmax, self.npts = self.logic.computeDataRange()
-            self.npts_fit = self.npts2fit(data=self.logic.data)
         self.initModel()
         self.initMapper()
         self.model.blockSignals(True)
@@ -127,6 +123,10 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
 
         self.mapper.toFirst()
 
+    def _data(self):
+        """The page's active dataset (its theory grid without data), or None."""
+        return None if self.parent is None else self.parent.data
+
     def setLogScale(self, log_scale):
         self.chkLogData.setChecked(log_scale)
 
@@ -138,15 +138,15 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         """
         Callback for running the mask editor
         """
-        if isinstance(self.logic.data, Data2D):
-            GuiUtils.communicator.maskEditorSignal.emit(self.logic.data)
+        if isinstance(self._data(), Data2D):
+            GuiUtils.communicator.maskEditorSignal.emit(self._data())
 
     def onRangeReset(self):
         """
         Callback for resetting qmin/qmax
         """
-        if self.logic.data_is_loaded:
-            self.qmin, self.qmax, self.npts = self.logic.computeDataRange()
+        if self.parent is not None and self.parent.data_is_loaded:
+            self.qmin, self.qmax, self.npts = plots.data_range(self._data())
         else:
             self.qmin, self.qmax, self.npts = (self.QMIN_DEFAULT,
                                                self.QMAX_DEFAULT,
@@ -180,13 +180,13 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
                 if qmin >= qmax:
                     qmin = self.qmin
                     self.model.item(self.MODEL.index('MIN_RANGE')).setText(str(self.qmin))
-                self.npts_fit = self.npts2fit(data=self.logic.data, qmin=qmin, qmax=qmax, npts=npts)
+                self.npts_fit = self.npts2fit(data=self._data(), qmin=qmin, qmax=qmax, npts=npts)
             elif top.row() == 1:
                 qmax = value
                 if qmax <= qmin:
                     qmax = self.qmax
                     self.model.item(self.MODEL.index('MAX_RANGE')).setText(str(self.qmax))
-                self.npts_fit = self.npts2fit(data=self.logic.data, qmin=qmin, qmax=qmax, npts=npts)
+                self.npts_fit = self.npts2fit(data=self._data(), qmin=qmin, qmax=qmax, npts=npts)
             else:
                 # This is only possible for theories. Just post the number to the field, if valid
                 npts = int(value)
@@ -200,18 +200,18 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         self.plot_signal.emit()
 
 
-    def setEnablementOnDataLoad(self):
+    def setEnablementOnDataLoad(self, data):
         """
-        Enable/disable various UI elements based on data loaded
+        Enable/disable various UI elements based on the data loaded
         """
-        is2Ddata = isinstance(self.logic.data, Data2D)
+        is2Ddata = isinstance(data, Data2D)
         self.boxWeighting.setEnabled(True)
         self.cmdMaskEdit.setEnabled(is2Ddata)
         # Switch off txtNpts related controls
         self.txtNpts.setEnabled(False)
         self.chkLogData.setEnabled(False)
         # Weighting controls
-        if self.logic.di_flag:
+        if plots.has_errors(data):
             self.rbWeighting2.setEnabled(True)
             self.rbWeighting2.setChecked(True)
             self.onWeightingChoice(self.rbWeighting2)
@@ -252,7 +252,7 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
             self.model.item(self.MODEL.index('MAX_RANGE')).setText(qmax)
             self.model.item(self.MODEL.index('NPTS')).setText(str(npts))
             self.qmin, self.qmax, self.npts = q_range_min, q_range_max, npts
-            npts_fit = self.npts2fit(self.logic.data, self.qmin, self.qmax, self.npts)
+            npts_fit = self.npts2fit(self._data(), self.qmin, self.qmax, self.npts)
             self.model.item(self.MODEL.index('NPTS_FIT')).setText(str(npts_fit))
         finally:
             self.model.blockSignals(False)
@@ -270,7 +270,6 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         log_points = self.chkLogData.isChecked()
         return (q_range_min, q_range_max, npts, log_points, self.weighting)
 
-    @mirrors('options')
     def setState(self, q_range_min, q_range_max, npts, log_points, weighting):
         """
         Set the state of controls from provided values (SettingsSync).
@@ -299,7 +298,7 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         if data is None:
             return npts2fit
 
-        qmin_c, qmax_c, npts_c = self.logic.computeDataRange()
+        qmin_c, qmax_c, npts_c = plots.data_range(data)
         if qmin is None:
             qmin = qmin_c
         if qmax is None:

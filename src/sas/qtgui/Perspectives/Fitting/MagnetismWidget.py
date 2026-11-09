@@ -3,7 +3,6 @@ Widget/logic for magnetism.
 """
 import logging
 from importlib import resources
-from typing import Any
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
@@ -20,7 +19,7 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
     updateDataSignal = QtCore.Signal()
     toggledSignal = QtCore.Signal(bool)  # Signal when magnetism is enabled/disabled
 
-    def __init__(self, parent: QtWidgets.QWidget | None = None, logic: Any | None = None) -> None:
+    def __init__(self, parent: QtWidgets.QWidget | None = None) -> None:
         super(MagnetismWidget, self).__init__()
 
         self.setupUi(self)
@@ -29,7 +28,6 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
         self.is2D = False
         self.isActive = False
         self._fitting_widget = parent
-        self.logic = parent.logic
         self.has_magnet_error_column = False
         # Magnetism widget table default index for function combobox
         # self.orig_poly_index = 4

@@ -1,15 +1,12 @@
 """
-The page invariant (FW-MVC-DESIGN.md §6, Phases 2 to 6), test-only.
+The page invariant (FW-MVC-DESIGN.md §6, Phases 2 to 7), test-only.
 
-``check_shadow(page)`` asserts that the views and the legacy kernel show ``page.document``:
+``check_shadow(page)`` asserts that the views show ``page.document``: the three item models
+(row order, text, check state, checkability, editability, error column), as the table
+adapters build and patch them.
 
-- projection: the three item models (row order, text, check state, checkability,
-  editability, error column), as the table adapters build and patch them;
-- kernel: ``logic.kernel_module`` holds the document's effective engine state
-  (``LegacyKernelSync``), as theory and fitting see it.
-
-(Until Phase 5 it also compared the legacy rows and readers with the document; since
-Phase 6 they are read from the document.)
+(Until Phase 5 it also compared the legacy rows and readers with the document, and until
+Phase 6 the live kernel; since Phase 7 there is no live kernel: every job builds its own.)
 
 ``ShadowChecker`` runs the check on every committed ChangeSet of a page and
 collects failures, so that a failure inside a Qt slot is not lost; tests
@@ -119,41 +116,8 @@ def check_projection(page) -> None:
         _expect(_close(_number(table.item(row, 1).text()), p.value), f"{where}: value")
 
 
-def check_kernel(page) -> None:
-    """The live kernel holds the document's effective engine state, as theory and fitting see it."""
-    kernel = page.logic.kernel_module
-    doc = page.document
-    if kernel is None or not len(doc.parameters):
-        return
-    effective = kernel
-    _expect(effective.name == doc.identity.mnemonic, f"kernel name {effective.name!r}, mnemonic "
-                                                     f"{doc.identity.mnemonic!r}")
-    for p in doc.parameters.by_table(Table.MAIN):
-        if p.kind is ValueKind.INT:
-            continue
-        where = f"kernel {p.key}"
-        _expect(_close(float(effective.getParam(p.key)), float(p.value)),
-                f"{where}: {effective.getParam(p.key)} != {p.value}")
-        if p.min is not None and p.kind is ValueKind.FLOAT:
-            _, low, high = effective.details[p.key]
-            _expect(_close(float(low), p.min) and _close(float(high), p.max), f"{where}: bounds {low}, {high}")
-    poly_on = doc.flags.polydispersity
-    for p in doc.parameters.by_table(Table.POLY):
-        name = p.key[:-len(".width")]
-        _expect(_close(float(effective.getParam(p.key)), float(p.value) if poly_on else 0.0), f"kernel {p.key}")
-        if p.dispersion.type != "array":
-            _expect(_close(float(effective.getParam(name + ".npts")), p.dispersion.npts), f"kernel {name}.npts")
-            _expect(_close(float(effective.getParam(name + ".nsigmas")), p.dispersion.nsigmas),
-                    f"kernel {name}.nsigmas")
-        _expect(effective.dispersion[name]["type"] == p.dispersion.type, f"kernel {name} type")
-    magnet_on = doc.flags.magnetism
-    for p in doc.parameters.by_table(Table.MAGNET):
-        _expect(_close(float(effective.getParam(p.key)), float(p.value) if magnet_on else 0.0), f"kernel {p.key}")
-
-
 def check_shadow(page) -> None:
     check_projection(page)
-    check_kernel(page)
 
 
 class ShadowChecker:
@@ -179,6 +143,5 @@ class ShadowChecker:
         """
         if request is not None and request.node.get_closest_marker("shadow_exempt"):
             return
-        assert not self.page.shadow.errors, self.page.shadow.errors[0]
         assert not self.failures, self.failures[0]
         check_shadow(self.page)

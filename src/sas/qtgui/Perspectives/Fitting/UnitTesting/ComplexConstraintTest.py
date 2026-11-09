@@ -52,14 +52,14 @@ class ComplexConstraintTest:
         model_index = tab2.cbModel.findText("barbell")
         tab2.cbModel.setCurrentIndex(model_index)
         # set tab2 model name to M2
-        tab2.logic.kernel_module.name = "M2"
+        tab2.controller.rename("M2", "M1")
 
         category_index = tab3.cbCategory.findText("Cylinder")
         tab3.cbCategory.setCurrentIndex(category_index)
         model_index = tab3.cbModel.findText("barbell")
         tab3.cbModel.setCurrentIndex(model_index)
         # set tab2 model name to M2
-        tab3.logic.kernel_module.name = "M3"
+        tab3.controller.rename("M3", "M1")
 
         tabs = [tab1, tab2, tab3]
         w = ComplexConstraint(parent=None, tabs=tabs)
@@ -241,5 +241,5 @@ class ComplexConstraintTest:
         param = "scale"
         expr = "M3.scale"
         widget.applyAcrossTabs(tabs, param, expr)
-        # We should have two calls
-        assert spy.count() == 0
+        # One constraint per page (until Phase 7 the check for a page kernel was never true: none)
+        assert spy.count() == 2

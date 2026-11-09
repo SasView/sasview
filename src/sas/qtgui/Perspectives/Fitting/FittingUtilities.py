@@ -367,7 +367,7 @@ def plotPolydispersities(model):
         if len(xarr) <= 1: # param name not found or no polydisp.
             continue
         # create Data1D as in residualsData1D() and fill x/y members
-        # similar to FittingLogic._create1DPlot() but different data/axes
+        # similar to services.plots._plot_1d() but different data/axes
         data1d = Data1D(x=xarr, y=yarr)
         xunit = model.details[name][0]
         data1d.xtransform = 'x'

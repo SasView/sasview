@@ -12,6 +12,7 @@ from sas import config
 from sas.qtgui.Perspectives.Fitting import FittingUtilities, FittingWidget
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 from sas.qtgui.Perspectives.Fitting.model.parameters import ArrayDistribution, Table
+from sas.qtgui.Perspectives.Fitting.model.results import DatasetResult, Provenance
 from sas.qtgui.Perspectives.Fitting.ModelThread import Calc1D
 from sas.qtgui.Perspectives.Fitting.UnitTesting.fitting_test_support import FittingWidgetMod, dummy_manager
 from sas.qtgui.Perspectives.UndoRedo import UndoStack
@@ -85,7 +86,7 @@ class FittingWidgetTest:
         default_cat = "Cylinder"
         test_model = "capped_anything"
         widget.master_category_dict[default_cat].append([test_model, True])
-        widget.regenerateModelDict()
+        widget.catalog.regenerate()
         new_index = widget.cbCategory.findText(default_cat)
         if new_index != -1:
             widget.cbCategory.setCurrentIndex(new_index)
@@ -342,8 +343,9 @@ class FittingWidgetTest:
         # Change the category index so we have some models
         widget.cbCategory.setCurrentIndex(1)
 
-        # Create the index
-        widget.createTheoryIndex(Data1D(x=[1,2], y=[1,2]))
+        # Publish a theory curve of the page (no data: a theory item)
+        result = DatasetResult(Provenance(1, 0, 0, "theory", 0), Data1D(x=[1,2], y=[1,2]))
+        widget.plot_publisher.publish(result)
 
         # Make sure the signal has been emitted
         assert spy.count() == 1
@@ -376,32 +378,6 @@ class FittingWidgetTest:
             time.sleep(1)
             # Test the mock
             assert Calc1D.queue.called
-
-    def testCalculateResiduals(self, widget):
-        """
-        Check that the residuals are calculated and plots updated
-        """
-        test_data = Data1D(x=[1,2], y=[1,2])
-
-        # Model for theory
-        _select(widget, "Cylinder", "cylinder")
-        # Invoke the tested method
-        widget.calculateResiduals(test_data)
-        # Check the Chi2 value - should be undetermined
-        assert widget.lblChi2Value.text() == '---'
-
-        # Force same data into logic
-        widget.logic.data = test_data
-        widget.calculateResiduals(test_data)
-        # Now, the difference is 0, as data is the same
-        assert widget.lblChi2Value.text() == '---'
-
-        # Change data
-        test_data_2 = Data1D(x=[1,2], y=[2.1,3.49])
-        widget.logic.data = test_data_2
-        widget.calculateResiduals(test_data)
-        # Now, the difference is non-zero
-        assert widget.lblChi2Value.text() == '---'
 
     def testSetPolyModel(self, widget):
         """
@@ -482,11 +458,11 @@ class FittingWidgetTest:
         assert _poly_fitted(widget) == ['radius_bell.width', 'length.width']
 
         # Change the min/max values
-        assert widget.logic.kernel_module.details['radius_bell.width'][1] == 0.0
+        assert widget.kernel().details['radius_bell.width'][1] == 0.0
         widget.polydispersity_widget.poly_model.item(0,2).setText("1.0")
-        assert widget.logic.kernel_module.details['radius_bell.width'][1] == 1.0
+        assert widget.kernel().details['radius_bell.width'][1] == 1.0
         # Check that changing the polydispersity min/max value doesn't affect the paramer min/max
-        assert widget.logic.kernel_module.details['radius_bell'][1] == 0.0
+        assert widget.kernel().details['radius_bell'][1] == 0.0
 
         #widget.show()
         #QtWidgets.QApplication.exec_()
@@ -496,14 +472,14 @@ class FittingWidgetTest:
         widget.polydispersity_widget.poly_model.item(0,4).setText("22")
         assert widget.document.parameters['radius_bell.width'].dispersion.npts == 22
         # test that sasmodel is updated with the new value
-        assert widget.logic.kernel_module.getParam('radius_bell.npts') == 22
+        assert widget.kernel().getParam('radius_bell.npts') == 22
 
         # Change the pd value
         assert widget.document.parameters['radius_bell.width'].value == 0.0
         widget.polydispersity_widget.poly_model.item(0,1).setText("0.8")
         assert widget.document.parameters['radius_bell.width'].value == pytest.approx(0.8, abs=1e-7)
         # Polydispersity is off: the kernel keeps the width at 0, as togglePoly leaves it (Phase 5)
-        assert widget.logic.kernel_module.getParam('radius_bell.width') == 0.0
+        assert widget.kernel().getParam('radius_bell.width') == 0.0
 
         # Uncheck pd in the fitting widget
         widget.chkPolydispersity.setCheckState(QtCore.Qt.CheckState.Checked)
@@ -511,7 +487,7 @@ class FittingWidgetTest:
         # Should not change the value of the qt model
         assert widget.document.parameters['radius_bell.width'].value == pytest.approx(0.8, abs=1e-7)
         # sasmodel should be set to 0
-        assert widget.logic.kernel_module.getParam('radius_bell.width') == pytest.approx(0.0, abs=1e-7)
+        assert widget.kernel().getParam('radius_bell.width') == pytest.approx(0.0, abs=1e-7)
 
         # try something stupid
         widget.polydispersity_widget.poly_model.item(0,4).setText("butt")
@@ -542,8 +518,8 @@ class FittingWidgetTest:
         # call method with default settings
         widget.polydispersity_widget.onPolyComboIndexChange('gaussian', 0)
         # check values
-        assert widget.logic.kernel_module.getParam('radius_bell.npts') == 35
-        assert widget.logic.kernel_module.getParam('radius_bell.nsigmas') == 3
+        assert widget.kernel().getParam('radius_bell.npts') == 35
+        assert widget.kernel().getParam('radius_bell.nsigmas') == 3
         # Change the index
         widget.polydispersity_widget.onPolyComboIndexChange('rectangle', 0)
         # check values
@@ -926,97 +902,6 @@ class FittingWidgetTest:
         assert "magnetism.html" in str(widget.parent.showHelp.call_args[0][0].absolute())
 
     @pytest.mark.xfail(reason="2026-02 Data property is broken for the mock fitting widget")
-    def testReadFitPage(self, widget):
-        """
-        Read in the fitpage object and restore state
-        """
-        # Set data
-        test_data = Data1D(x=[1,2], y=[1,2])
-        item = QtGui.QStandardItem()
-        GuiUtils.updateModelItem(item, test_data, "test")
-        # Force same data into logic
-        widget.data = item
-
-        # Force same data into logic
-        category_index = widget.cbCategory.findText('Sphere')
-
-        widget.cbCategory.setCurrentIndex(category_index)
-        widget.main_params_to_fit = ['scale']
-        # Invoke the tested method
-        fp = widget.currentState()
-
-        # Prepare modified fit page
-        fp.current_model = 'onion'
-        fp.is_polydisperse = True
-
-        # Read in modified state
-        widget.readFitPage(fp)
-
-        # Check if the widget got updated accordingly
-        assert widget.cbModel.currentText() == 'onion'
-        assert widget.chkPolydispersity.isChecked()
-        #Check if polidispersity tab is available
-        assert widget.tabFitting.isTabEnabled(3)
-
-        #Check if magnetism box and tab are disabled when 1D data is loaded
-        assert not widget.chkMagnetism.isEnabled()
-        assert not widget.tabFitting.isTabEnabled(4)
-
-    # to be fixed after functionality is ready
-    def notestReadFitPage2D(self, widget):
-        """
-        Read in the fitpage object and restore state
-        """
-        # Set data
-
-        test_data = Data2D(image=[1.0, 2.0, 3.0],
-                           err_image=[0.01, 0.02, 0.03],
-                           qx_data=[0.1, 0.2, 0.3],
-                           qy_data=[0.1, 0.2, 0.3],
-                           xmin=0.1, xmax=0.3, ymin=0.1, ymax=0.3,
-                           mask=[True, True, True])
-
-        # Force same data into logic
-        widget.logic.data = test_data
-        widget.data_is_loaded = True
-
-        #item = QtGui.QStandardItem()
-        #GuiUtils.updateModelItem(item, [test_data], "test")
-        # Force same data into logic
-        #widget.logic.data = item
-        #widget.data_is_loaded = True
-
-        category_index = widget.cbCategory.findText("Cylinder")
-        widget.cbCategory.setCurrentIndex(category_index)
-
-        # Test no fitting params
-        widget.main_params_to_fit = ['scale']
-
-        # Invoke the tested method
-        fp = widget.currentState()
-
-        # Prepare modified fit page
-        fp.current_model = 'cylinder'
-        fp.is_polydisperse = True
-        fp.is_magnetic = True
-        fp.is2D = True
-
-        # Read in modified state
-        widget.readFitPage(fp)
-
-        # Check if the widget got updated accordingly
-        assert widget.cbModel.currentText() == 'cylinder'
-        assert widget.chkPolydispersity.isChecked()
-        assert widget.chkPolydispersity.isEnabled()
-        #Check if polidispersity tab is available
-        assert widget.tabFitting.isTabEnabled(3)
-
-        #Check if magnetism box and tab are disabled when 1D data is loaded
-        assert widget.chkMagnetism.isChecked()
-        assert widget.chkMagnetism.isEnabled()
-        assert widget.tabFitting.isTabEnabled(4)
-
-    @pytest.mark.xfail(reason="2026-02 Data property is broken for the mock fitting widget")
     def testCurrentState(self, widget):
         """
         Set up the fitpage with current state
@@ -1085,10 +970,10 @@ class FittingWidgetTest:
 
         # check that the value has been modified in kernel_module
         assert new_value == \
-                         str(widget.logic.kernel_module.params[name_modified_param])
+                         str(widget.kernel().params[name_modified_param])
 
         # check that range of variation for this parameter has NOT been changed
-        assert new_value not in widget.logic.kernel_module.details[name_modified_param]
+        assert new_value not in widget.kernel().details[name_modified_param]
 
     @pytest.mark.xfail(reason="2026-02: pytest.raises check succeeds when it should fail")
     def testModelContextMenu(self, widget):
@@ -1750,12 +1635,12 @@ class FittingWidgetUndoRedoTest:
         # Verify undo restores original
         assert widget.undo_stack.can_undo()
         widget.undo_stack.undo()
-        assert widget.logic.kernel_module.getParam("radius") == old_val
+        assert widget.kernel().getParam("radius") == old_val
 
         # Verify redo re-applies the edit
         assert widget.undo_stack.can_redo()
         widget.undo_stack.redo()
-        assert widget.logic.kernel_module.getParam("radius") == 99.0
+        assert widget.kernel().getParam("radius") == 99.0
 
     def testUndoStackClearedOnModelChange(self, widget):
         """Selecting a new model should not carry stale undo entries."""

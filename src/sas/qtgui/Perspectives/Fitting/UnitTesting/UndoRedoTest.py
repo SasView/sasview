@@ -59,8 +59,8 @@ def mock_message_box(monkeypatch):
 def widget():
     """Minimal mock that satisfies the widget protocol used by commands."""
     w = MagicMock()
-    # kernel_module.details must support real dict operations for MinMax tests
-    w.logic.kernel_module.details = {}
+    # the kernel's details must support real dict operations for MinMax tests
+    w.kernel().details = {}
     return w
 
 

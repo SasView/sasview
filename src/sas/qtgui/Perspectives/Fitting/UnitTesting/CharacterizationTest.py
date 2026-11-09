@@ -6,15 +6,15 @@ so that the refactor can show it changes nothing by accident. Each test names
 the design section it characterizes. A deliberate change of behaviour updates
 the test in the same PR as the decision-register entry.
 """
-import copy
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
 from PySide6 import QtCore, QtWidgets
 
-from sas.qtgui.Perspectives.Fitting import FittingController, FittingUtilities
+from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.model.commands import SnapshotCommand
+from sas.qtgui.Perspectives.Fitting.services import fit as fit_service
 from sas.qtgui.Perspectives.Fitting.UnitTesting import golden_support as g
 
 
@@ -52,8 +52,7 @@ def requests_during(page, action) -> int:
 
 def fake_fit(page, fitted: dict, chi2: float = 1.5):
     """Complete a single fit with *fitted* = {name: (value, error)}, as fitComplete sees it."""
-    page.kernel_module_copy = copy.deepcopy(page.logic.kernel_module)
-    page.fitting_controller.paramDictFromResults = lambda res: fitted
+    page.fit_service.outcome = lambda res: fitted
     page.onPlot = lambda: None
     page.fitComplete(([[SimpleNamespace(fitness=chi2)]], 0.5))
 
@@ -97,8 +96,7 @@ class TheoryTriggerTest:
     def testComputeAndFitCompletionRecalculate(self, page):
         assert requests_during(page, page.onPlot) > 0
         g.set_checked(page._model_model, "radius")
-        page.kernel_module_copy = copy.deepcopy(page.logic.kernel_module)
-        page.fitting_controller.paramDictFromResults = lambda res: {"radius": (25.0, 0.5)}
+        page.fit_service.outcome = lambda res: {"radius": (25.0, 0.5)}
         fit = lambda: page.fitComplete(([[SimpleNamespace(fitness=1.0)]], 0.5))  # noqa: E731
         assert requests_during(page, fit) > 0
 
@@ -128,7 +126,7 @@ class RetentionTest:
         assert rows(page)["radius"][:6] == ["radius", "True", "33.0", None, "5.0", "90.0"]
         assert rows(page)["sld"][2] == "2.5"
         assert rows(page)["length"][1] == "True"
-        assert page.logic.kernel_module.details["radius"][1:] == [5.0, 90.0]
+        assert page.kernel().details["radius"][1:] == [5.0, 90.0]
 
     def testModelSwitchKeepsPolydispersity(self, computed):
         page = computed
@@ -139,7 +137,7 @@ class RetentionTest:
         g.select_model(page, "Cylinder", "hollow_cylinder")
         assert page.chkPolydispersity.isChecked()
         assert rows(page)["radius.width"][1:3] == ["True", "0.2"]
-        assert page.logic.kernel_module.getParam("radius.width") == pytest.approx(0.2)
+        assert page.kernel().getParam("radius.width") == pytest.approx(0.2)
 
     def testWithoutTheoryEverythingIsRetained(self, page):
         """Register R-9, changed in Phase 5: retention reads the document's current state, so
@@ -152,7 +150,7 @@ class RetentionTest:
         g.select_model(page, "Cylinder", "hollow_cylinder")
         assert rows(page)["radius"][2] == "33.0"
         assert rows(page)["length"][1] == "True"
-        assert page.logic.kernel_module.getParam("radius.width") == pytest.approx(0.2)
+        assert page.kernel().getParam("radius.width") == pytest.approx(0.2)
 
     def testUndoOfAModelSwitchRestoresTheModelAndItsValues(self, page):
         g.set_cell(page._model_model, "radius", 1, "33.0")
@@ -179,7 +177,7 @@ class RetentionTest:
         g.set_cell(page._model_model, "radius", 1, "33.0")
         page.cbStructureFactor.setCurrentIndex(page.cbStructureFactor.findText("hardsphere"))
         assert rows(page)["radius"][2] == "33.0"
-        assert page.logic.kernel_module.getParam("radius") == 33.0
+        assert page.kernel().getParam("radius") == 33.0
 
     def testShrunkShellsComeBackWithDefaults(self):
         p = g.new_page(data=g.make_data1d("d1", "data1"))
@@ -248,7 +246,7 @@ class PasteAndLoadTest:
         assert p.cbModel.currentText() == "cylinder"
         assert rows(p)["radius"][2] == "44.0"
         # The page takes the saved name, and saves it again (R-3, changed in Phase 3a)
-        assert p.logic.kernel_module.name == "renamed"
+        assert p.kernel().name == "renamed"
         assert rows(p)["tab_name"] == ["tab_name", "renamed"]
         # Register R-8, changed in Phase 5: a project load clears the history (§2.3)
         assert not p.undo_stack.can_undo()
@@ -276,7 +274,8 @@ class FitUndoTest:
 
 
 class BatchCompletionTest:
-    """Register B-1: a batch fit does not change the page and is not undoable."""
+    """Register B-1: a batch fit does not change the page and is not undoable. B-4: its outcomes are
+    routed by dataset id."""
 
     def testBatchCompletionLeavesParametersUnchanged(self):
         p = g.new_page(data=[g.make_data1d("b1", "same"), g.make_data1d("b2", "same")])
@@ -284,20 +283,19 @@ class BatchCompletionTest:
         g.set_checked(p._model_model, "radius")
         p.undo_stack.clear()
         before = table_text(p._model_model)
-        p.kernel_module_copy = copy.deepcopy(p.logic.kernel_module)
-        p.fitting_controller.paramDictFromResults = lambda res: {"radius": (31.0, 0.5)}
+        p.fit_service.outcome = lambda res: {"radius": (31.0, 0.5)}
         results = [[SimpleNamespace(fitness=1.0)], [SimpleNamespace(fitness=2.0)]]
         p.batchFitComplete((results, 0.5))
         assert table_text(p._model_model) == before
-        assert p._logic[0].kernel_module.getParam("radius") == 20.0
+        assert p.kernel().getParam("radius") == 20.0
         assert not p.undo_stack.can_undo()
-        # Quirk (B-4): the page is left pointing at the last dataset. Since Phase 6 its logic
-        # holds the page's kernel too (LegacyKernelSync follows the active dataset)
-        assert p.data_index == 1
-        assert p.logic.kernel_module.getParam("radius") == 20.0
-        # One theory per dataset, each from that dataset's fitted kernel
+        # Fixed in Phase 7 (B-4): the page stays on its dataset
+        assert p.data_index == 0
+        # One theory per dataset, each from that dataset's fitted kernel, routed by its id
         batch_requests = p.theory_requests[-2:]
-        assert [kw["model"].getParam("radius") for _, kw in batch_requests] == [31.0, 31.0]
+        assert [r.kernel.getParam("radius") for r in batch_requests] == [31.0, 31.0]
+        assert [r.dataset_id for r in batch_requests] == p.document.dataset_order
+        assert [r.data for r in batch_requests] == [p.document.datasets[i].data for i in p.document.dataset_order]
         p.close()
 
 
@@ -319,11 +317,11 @@ class LiveDefectRegressionTest:
                 models.append(model)
                 super().set_model(model, *args, **kwargs)
 
-        monkeypatch.setattr(FittingController, "Fit", Recording)
+        monkeypatch.setattr(fit_service, "Fit", Recording)
         g.set_checked(page._model_model, "radius")
         page.prepareFitters()
-        assert models and models[0] is not page.logic.kernel_module
-        assert models[0].getParam("radius") == page.logic.kernel_module.getParam("radius") == 20.0
+        assert models and models[0] is not page.kernel()
+        assert models[0].getParam("radius") == page.kernel().getParam("radius") == 20.0
         page.fitComplete(None)
-        assert page.logic.kernel_module.getParam("radius") == 20.0
+        assert page.kernel().getParam("radius") == 20.0
         assert not hasattr(page, "kernel_module")

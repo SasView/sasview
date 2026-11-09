@@ -85,7 +85,7 @@ def testRenameSaveReloadFit(renamed, opened):
     assert [p["fit_params"][0]["tab_name"] for p in project.values()] == [["sample"], ["M2"]]
 
     first, second = load(project, dummy_manager(), opened)
-    assert (first.logic.kernel_module.name, first.document.identity.mnemonic) == ("sample", "sample")
+    assert (first.kernel().name, first.document.identity.mnemonic) == ("sample", "sample")
     assert second.getConstraintsForAllModels() == [("radius", "sample.radius")]
 
     fit = simultaneous_fit([first, second])
@@ -102,7 +102,7 @@ def testRenameSurvivesModelSwitch(renamed, switch):
     switch(first)
     g.set_cell(first._model_model, "radius", 1, "33.0")
     g.set_checked(first._model_model, "scale")
-    assert (first.logic.kernel_module.name, first.document.identity.mnemonic) == ("sample", "sample")
+    assert (first.kernel().name, first.document.identity.mnemonic) == ("sample", "sample")
     assert simultaneous_fit([first, second])["M2"].parameters()["radius"].value == 33.0
 
 
@@ -112,7 +112,7 @@ def testLoadedNameRefreshesTheConstraintTab(renamed, opened):
     opened.append(page)
     join(manager, page)
     names = []
-    page.newModelSignal.connect(lambda: names.append(page.logic.kernel_module.name))
+    page.newModelSignal.connect(lambda: names.append(page.kernel().name))
     page.createPageForParameters(save(renamed[:1])["d1"]["fit_params"][0])
     assert names[-1] == "sample"
 
@@ -127,6 +127,6 @@ def testLoadingANameInUseFallsBackToTheDefault(renamed, opened):
         (page,) = load(save([first]), manager, opened)
     finally:
         GuiUtils.communicator.statusBarUpdateSignal.disconnect(messages.append)
-    assert (page.logic.kernel_module.name, page.document.identity.mnemonic) == ("M3", "M3")
+    assert (page.kernel().name, page.document.identity.mnemonic) == ("M3", "M3")
     assert first.document.identity.mnemonic == "sample"
     assert "Fit page name sample is already in use, so this page is named M3." in messages

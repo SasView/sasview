@@ -10,8 +10,8 @@ Document to item model, for one parameter table (FW-MVC-DESIGN.md §4.2, Phases 
   already shows the value keeps its spelling.
 - **Forwards** the user's edits to the controller (value, bound, npts, nsigmas, fit flag).
 
-Document changes reach it through ``DocumentShadow.subscribe_reverse``: never the
-shadow's own read-backs, and the edits its writes fire are ignored (``controller.muted``).
+Document changes reach it through ``controller.subscribe_view``: the edits its own writes
+fire are ignored (``controller.muted``).
 """
 from __future__ import annotations
 
@@ -69,7 +69,7 @@ class ParameterTableAdapter:
         owner, model, view, self._flag, self.model_key, self._headers, self._error_headers = _LEGACY[table]
         self._owner = lambda: owner(page)
         self._model_name, self._view_name = model, view
-        self.subscription = page.shadow.subscribe_reverse(self._on_change)
+        self.subscription = page.controller.subscribe_view(self._on_change)
         self.item_model.dataChanged.connect(self._on_edit)
 
     # -- the table --------------------------------------------------------
@@ -193,7 +193,7 @@ class ParameterTableAdapter:
         combo.setCurrentText(str(int(p.value)))
         combo.currentTextChanged.connect(page.modifyShellsInList)
         self.view.setIndexWidget(items[1].index(), combo)
-        kernel = page.logic.kernel_module
+        kernel = page.kernel()
         if kernel is not None and any(_SLD_SHELL.search(name) for name in kernel.params):
             button = QtWidgets.QPushButton("Show SLD Profile")
             button.clicked.connect(page.onShowSLDProfile)
@@ -298,7 +298,7 @@ class ParameterTableAdapter:
             item.setText(text)
 
     def _set_constraint(self, p, row: int) -> None:
-        """The constraint child item of the value cell (the constraint tab and the shadow read it)."""
+        """The constraint child item of the value cell (the constraint tab reads it)."""
         item = self.item_model.item(row, 1)
         if item.hasChildren():
             item.removeRow(0)
@@ -382,8 +382,8 @@ class ParameterTableAdapter:
     def _on_edit(self, top: QtCore.QModelIndex, bottom: QtCore.QModelIndex | None = None) -> None:
         """A cell the user changed: a controller intent."""
         page = self._page
-        if page.controller.muted or page.shadow.depth > 0:
-            return    # written from the document, or by a legacy writer (read back when it ends)
+        if page.controller.muted:
+            return    # written from the document
         item = self.item_model.itemFromIndex(top)
         if item is None:
             return
