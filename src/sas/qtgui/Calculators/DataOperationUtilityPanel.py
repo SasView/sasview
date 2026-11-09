@@ -153,7 +153,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         # If output is empty, then compute it first
         if self.output is None:
             self.onCompute()
-        # if outputname was unused and compute was successful, 
+        # if outputname was unused and compute was successful,
         # proceed to save files
         if self.output is not None and self.onCheckOutputName():
             # add outputname to self.filenames
@@ -269,9 +269,9 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             self.txtNumber.setEnabled(True)
             try:
                 self.data2 = float(self.txtNumber.text())
-            except Exception as ex:
+            except Exception:
                 logger.error("Invalid number input: %s" % self.txtNumber.text())
-                self.txtNumber.setStyleSheet(BG_ERROR) 
+                self.txtNumber.setStyleSheet(BG_ERROR)
 
             # Enable Compute and SaveData buttons only if Data1 defined and compatible data
             self.cmdCompute.setEnabled(self.onCheckChosenData())
@@ -307,7 +307,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
                 logger.error("Invalid number input: %s" % self.txtNumber.text())
                 self.txtNumber.setStyleSheet(BG_ERROR)
                 return False
-            
+
             if input_to_check is None or input_to_check == '':
                 msg = 'DataOperation: Number requires a float number'
                 logger.warning(msg)
@@ -321,7 +321,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
                 self.txtNumber.setStyleSheet(BG_ERROR)
                 return False
 
-            else:       
+            else:
                 self.txtNumber.setStyleSheet(BG_DEFAULT)
                 self.data2 = float(self.txtNumber.text())
                 self.updatePlot(self.graphData2, self.layoutData2, self.data2)
