@@ -63,6 +63,7 @@ from sas.qtgui.Utilities.MuMag.MuMag import MuMag
 from sas.qtgui.Utilities.NewVersion.NewVersionAvailable import get_current_release_version
 from sas.qtgui.Utilities.OrientationViewer.OrientationViewer import show_orientation_viewer
 from sas.qtgui.Utilities.PluginManager import PluginManager
+from sas.qtgui.Utilities.Preferences.PreferencesPanel import PreferencesPanel
 from sas.qtgui.Utilities.Reports.ReportDialog import ReportDialog
 from sas.qtgui.Utilities.ResultPanel import ResultPanel
 from sas.qtgui.Utilities.SASBDB.sasbdb_loader import load_downloaded_dataset
@@ -181,7 +182,7 @@ class GuiManager:
         self._workspace.addDockWidget(Qt.BottomDockWidgetArea, self.logDockWidget)
 
         # Preferences Panel initialized in loadAllPerspectives()
-        self.preferences = None
+        self.preferences = PreferencesPanel(self._parent)
 
         # Add FileDialog widget as docked - Perspectives must be loaded to ensure default perspective is shown
         # self.filesWidget = DataExplorerWindow(self._parent, self, manager=self._data_manager)
