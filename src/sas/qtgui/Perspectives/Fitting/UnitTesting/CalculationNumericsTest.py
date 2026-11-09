@@ -104,8 +104,10 @@ def reference_model(model):
 def reference_1d(model, pars, dq=None, qmin=Q[0], qmax=Q[-1]):
     """I(q) from sasmodels, for the points of Q between *qmin* and *qmax*."""
     data = RefData1D(x=Q, y=np.ones_like(Q), dx=dq, dy=0.1 * np.ones_like(Q))
-    # SasView smears using the measured points on either side of the chosen q range, rather than
-    # extending q past it. So smear over all of the data, then keep the chosen range.
+    # SasView builds the resolution from all of the data's q points, so near qmin/qmax it uses the
+    # model calculated at the data's q values outside the range, rather than extending q past it.
+    # So smear over all of the data, then keep the chosen range. (How much the two conventions
+    # differ depends on point spacing relative to dQ; see SasView/sasmodels#263.)
     data.qmin, data.qmax = Q[0], Q[-1]
     iq = DirectModel(data, reference_model(model))(**pars)
     q = data.x
