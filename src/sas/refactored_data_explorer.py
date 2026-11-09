@@ -45,9 +45,9 @@ def _load_ascii(filename: str) -> dict:
 # dialog filters and drag and drop are both derived from this, so only files
 # with these extensions can be picked or dropped.
 SUPPORTED_FORMATS: dict[str, tuple[tuple[str, ...], Callable[[str], dict]]] = {
-    "XML": ((".xml",), load_xml_data),
-    "HDF5": ((".h5", ".hdf"), load_hdf5_data),
-    "ASCII": ((".txt", ".csv"), _load_ascii),
+    "XML": ((".xml", ".cor", ".pdh"), load_xml_data),
+    "HDF5": ((".h5", ".hdf", ".nxs", ".nx", ".hdf5"), load_hdf5_data),
+    "ASCII": ((".txt", ".csv", ".dat"), _load_ascii),
 }
 
 
