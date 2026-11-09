@@ -1,7 +1,6 @@
 
 
 import logging
-from os.path import basename
 
 from PySide6.QtCore import Signal, Slot
 from PySide6.QtWidgets import (
@@ -16,13 +15,11 @@ from PySide6.QtWidgets import (
 )
 
 from sasdata.data import SasData
-from sasdata.data_io.importers.import_ascii import load_data as load_advanced_ascii_data
-from sasdata.data_io.importers.import_ascii import load_data_default_params as load_ascii_data
-from sasdata.data_io.importers.import_hdf5 import load_data as load_hdf5_data
-from sasdata.data_io.importers.import_xml import load_data as load_xml_data
+from sasdata.data_io.importer import Importer
+from sasdata.data_io.importers import AsciiImporter
 
 from sas.ascii_dialog.dialog import AsciiDialog
-from sas.data_explorer_error_message import DataExplorerErrorMessage
+from sas.data_explorer_error_message import DataExplorerImportMessage, DataExplorerRemoveMessage
 from sas.data_explorer_tree import DataExplorerTree
 from sas.data_manager import NewDataManager as DataManager
 from sas.dummy_perspective import DummyPerspective
@@ -132,7 +129,7 @@ class NewDataExplorer(QWidget):
             except ValueError as err:
                 errors.append(err)
         if len(errors) > 0:
-            box = DataExplorerErrorMessage(self, errors)
+            box = DataExplorerRemoveMessage(self, errors)
             box.show()
 
     @Slot()
@@ -150,46 +147,31 @@ class NewDataExplorer(QWidget):
 
     @Slot()
     def onLoadFile(self):
-        # TODO: Probably want to add filters.
         filenames, _ = QFileDialog.getOpenFileNames(
             self,
             "Open Data File",
         )
         if len(filenames) == 0:
             return
-        for filename in filenames:
-            # FIXME: This would probably break if there isn't an extension.
-
-            # TODO: The logic for deciding which reader to use is temporary. It
-            # won't work for all file extensions, and ultimately this logic probably
-            # needs to be moved in sasdata.
-            file_extension = filename.split(".")[-1].lower()
-            match file_extension:
-                case "xml":
-                    loaded_data = load_xml_data(filename)
-                case "h5" | "hdf":
-                    loaded_data = load_hdf5_data(filename)
-                case "txt" | "csv":
-                    data_list = load_ascii_data(filename)
-                    # Since we're only giving the load function one filename, we can
-                    # assume only one data object is being loaded.
-                    loaded_data = dict([(basename(filename), data_list[0])])
-                case _:
-                    QMessageBox.critical(
-                        self,
-                        "Data Loading Error",
-                        f"Error loading {filename}. Extension not recognised.",
-                    )
-                    return
-
-            for _, datum in loaded_data.items():
-                self._data_manager.add_data(datum)
+        measurements, errors = Importer().import_data(filenames)
+        for measurement in measurements:
+            self._data_manager.add_data(measurement)
+        if errors:
+            DataExplorerImportMessage(self, errors).show()
 
     @Slot()
     def onAdvancedLoad(self):
         dialog = AsciiDialog()
         status = dialog.exec()
         if status == 1:
-            loaded = load_advanced_ascii_data(dialog.params)
+            try:
+                loaded = AsciiImporter(dialog.params).load_data()
+            except Exception as err:
+                # A number of errors can be thrown here, a few examples include:
+                #    TypeError: thrown when the ascii loader doesn't recognize the file
+                #    FileNotFoundError: the file wasn't accessible
+                #    ValueError: Unlikely, but could happen during loading on float() conversion
+                logging.error(err)
+                loaded = []
             for datum in loaded:
                 self._data_manager.add_data(datum)
