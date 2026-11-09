@@ -408,7 +408,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
     @classmethod
     def writeBatchToFile(cls, data, tmpfile, details=""):
         """
-        Helper to write result from batch into cvs file
+        Helper to write result from batch into csv file
         """
         name = tmpfile.name
         if data is None or name is None or name.strip() == "":

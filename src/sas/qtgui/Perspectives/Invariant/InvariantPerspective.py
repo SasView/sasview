@@ -37,7 +37,7 @@ ADJUST_EPS = 1e-7
 logger = logging.getLogger(__name__)
 
 
-class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
+class InvariantWindow(Perspective, QtWidgets.QDialog, Ui_tabbedInvariantUI):
     """The controller responsible for managing signal slots connections for the gui and providing an interface to the data model."""
 
     name = "Invariant"

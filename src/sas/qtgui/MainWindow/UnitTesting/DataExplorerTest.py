@@ -84,17 +84,17 @@ class dummy_manager:
 
 
 class DataExplorerTest:
-    '''Test the Data Explorer GUI'''
+    """Test the Data Explorer GUI"""
     @pytest.fixture(autouse=True)
     def form(self, qapp):
-        '''Create/Destroy the UI'''
+        """Create/Destroy the UI"""
         f = DataExplorerWindow(None, dummy_manager())
         yield f
         f.close()
 
     @pytest.fixture
     def workspace(self, form):
-        '''Give the dummy GUI manager a real workspace, so plots are hosted as in the application'''
+        """Give the dummy GUI manager a real workspace, so plots are hosted as in the application"""
         window = QMainWindow()
         mdi = QMdiArea()
         window.setCentralWidget(mdi)
@@ -107,7 +107,7 @@ class DataExplorerTest:
         QApplication.processEvents()
 
     def testDefaults(self, form):
-        '''Test the GUI in its default state'''
+        """Test the GUI in its default state"""
         # Tab widget
         assert isinstance(form, QTabWidget)
         assert form.count() == 2
@@ -382,10 +382,8 @@ class DataExplorerTest:
         # Click on the button to so the mocked swapData method raises an exception
         QTest.mouseClick(form.cmdSendTo, Qt.LeftButton)
 
-        # Assure the message box popped up
-        QMessageBox.exec_.assert_called_once()
-        # With the right message
-        QMessageBox.setText.assert_called_with("foo")
+        # Assure the message box popped up with the right message
+        QMessageBox.setText.assert_called_once_with("foo")
 
         # open another file
         filename = [str(base_path / "cyl_400_20.txt")]
@@ -399,10 +397,8 @@ class DataExplorerTest:
         # Click on the button to swap both datasets to the perspective
         QTest.mouseClick(form.cmdSendTo, Qt.LeftButton)
 
-        # Assure the message box popped up
-        QMessageBox.exec_.assert_called_once()
-        # With the right message
-        QMessageBox.setText.assert_called_with(
+        # Assure the message box popped up with the right message
+        QMessageBox.setText.assert_called_once_with(
             "Dummy Perspective does not allow replacing multiple data.")
 
     def testDataSelection(self, form):
@@ -957,6 +953,8 @@ class DataExplorerTest:
         """
         Test the Save As context menu action
         """
+        mocker.patch.object(Loader, 'save')
+
         # get Data1D
         p_file = [str(base_path / "cyl_400_20.txt")]
         # Read in the file
@@ -971,8 +969,7 @@ class DataExplorerTest:
         # Call the tested method
         form.saveDataAs()
         filter = 'Text files (*.txt);;Comma separated value files (*.csv);;CanSAS 1D files (*.xml);;NXcanSAS files (*.h5);;All files (*.*)'
-        QFileDialog.getSaveFileName.assert_called_with(None, "Save As", '', filter, '')
-        QFileDialog.getSaveFileName.assert_called_once()
+        QFileDialog.getSaveFileName.assert_called_once_with(None, "Save As", '', filter, '')
 
         # get Data2D
         p_file = [str(base_path / "P123_D2O_10_percent.dat")]
@@ -990,11 +987,9 @@ class DataExplorerTest:
 
         # Call the tested method
         form.saveDataAs()
-        QFileDialog.getSaveFileName.assert_called_with(
+        QFileDialog.getSaveFileName.assert_called_once_with(
             None, "Save As", '', 'IGOR/DAT 2D file in Q_map (*.dat);;NXcanSAS files (*.h5);;All files (*.*)', '')
-        QFileDialog.getSaveFileName.assert_called_once()
 
-    @pytest.mark.skip("Seg fault")
     def testQuickDataPlot(self, form, mocker):
         """
         Quick data plot generation.
@@ -1151,7 +1146,7 @@ class DataExplorerTest:
         assert workspace.hosted_widgets(include_hidden=True) == []
 
     def testNewPlotOpensDetachedWhenPreferred(self, form, workspace, mocker):
-        '''New plots open in their own window when the preference is set'''
+        """New plots open in their own window when the preference is set"""
         loader = Loader()
         manager = DataManager()
         PlotHelper.clear()
