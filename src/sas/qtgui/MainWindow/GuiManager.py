@@ -848,6 +848,12 @@ class GuiManager:
         self.tools = ToolWindows(self._parent, self._data_manager)
         build_tools_menu(self._workspace.menuTool, self._workspace.actionData_Operation, self.tools.open)
         self._workspace.actionData_Operation.triggered.connect(self.actionData_Operation)
+        # Data Operation reads and writes data through the legacy DataExplorer
+        # (getAllFlatData, model.appendRow), which this version no longer builds,
+        # so opening it raises. Disabled until it is moved to the new data manager.
+        self._workspace.actionData_Operation.setEnabled(False)
+        self._workspace.actionData_Operation.setStatusTip(
+            "Data Operation is unavailable until it is moved to the new data handling.")
         self._workspace.actionMuMag_Fitter.triggered.connect(self.actionMuMag_Fitter)
         self._workspace.actionGeneric_Scattering_Calculator.triggered.connect(self.actionGeneric_Scattering_Calculator)
         self._workspace.actionPython_Shell_Editor.triggered.connect(self.actionPython_Shell_Editor)

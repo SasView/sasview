@@ -142,6 +142,7 @@ LEGACY_FREE = [
     "sas.qtgui.Calculators.SldPanel",
     "sas.qtgui.Calculators.DensityPanel",
     "sas.qtgui.Calculators.KiessigPanel",
+    "sas.qtgui.Calculators.SlitSizeCalculator",
     "sas.qtgui.Calculators.ResolutionCalculatorPanel",
     "sas.qtgui.Calculators.Shape2SAS.DesignWindow",
 ]

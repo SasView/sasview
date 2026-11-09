@@ -7,7 +7,9 @@ import sys
 
 from PySide6 import QtWidgets
 
-from sasdata.dataloader.loader import Loader
+from sasdata import dataset_types
+from sasdata.data import SasData
+from sasdata.data_io.importers.import_ascii import load_data_default_params
 
 from sas.qtgui.Calculators.calculator_tool import CalculatorTool
 from sas.qtgui.UI import main_resources_rc  # noqa: F401
@@ -48,10 +50,8 @@ class SlitSizeCalculator(CalculatorTool, QtWidgets.QDialog, Ui_SlitSizeCalculato
         path_str = self.chooseFile()
         if not path_str:
             return
-        loader = Loader()
         try:
-            data = loader.load(path_str)
-            data = data[0]
+            data = self.loadFile(path_str)
         # Can return multiple exceptions - gather them all under one umbrella and complain
         except Exception as ex:
             logger.error(ex)
@@ -59,6 +59,14 @@ class SlitSizeCalculator(CalculatorTool, QtWidgets.QDialog, Ui_SlitSizeCalculato
 
         self.data_file.setText(os.path.basename(path_str))
         self.calculateSlitSize(data)
+
+    @staticmethod
+    def loadFile(path: str) -> SasData:
+        """Load a beam profile (e.g. a SAXSess .DAT/.TXT export) with the sasdata ASCII importer.
+
+        The file's columns, header length and 1D/2D type are guessed by sasdata.
+        """
+        return load_data_default_params(path)[0]
 
     def chooseFile(self):
         """
@@ -85,9 +93,9 @@ class SlitSizeCalculator(CalculatorTool, QtWidgets.QDialog, Ui_SlitSizeCalculato
         self.slit_length_out.setText("ERROR!")
         self.unit_out.clear()
 
-    def calculateSlitSize(self, data=None):
+    def calculateSlitSize(self, data: SasData | None = None):
         """
-        Computes slit lenght from given 1D data
+        Computes slit length from given 1D data
         """
         if data is None:
             self.clearResults()
@@ -95,7 +103,7 @@ class SlitSizeCalculator(CalculatorTool, QtWidgets.QDialog, Ui_SlitSizeCalculato
             logger.error(msg)
             return
 
-        if data.__class__.__name__ == 'Data2D':
+        if data.dataset_type != dataset_types.one_dim:
             self.clearResults()
             msg = "Slit Length cannot be computed for 2D Data"
             logger.error(msg)
@@ -103,9 +111,11 @@ class SlitSizeCalculator(CalculatorTool, QtWidgets.QDialog, Ui_SlitSizeCalculato
 
         #compute the slit size
         try:
-            xdata = data.x
-            ydata = data.y
+            xdata = data.abscissae.axes[0].value
+            ydata = data.ordinate.value
             if xdata is None or len(xdata) == 0 or ydata is None or len(ydata) == 0:
+                # Don't leave the previous file's result on display.
+                self.clearResults()
                 msg = "The current data is empty please check x and y"
                 logger.error(msg)
                 return
@@ -121,6 +131,7 @@ class SlitSizeCalculator(CalculatorTool, QtWidgets.QDialog, Ui_SlitSizeCalculato
         slit_length_str = f"{slit_length:.5f}"
         self.slit_length_out.setText(slit_length_str)
 
-        #Display unit, which most likely needs to be 1/Ang but needs to be confirmed
+        # The file doesn't state its Q unit, and the importer's unit is only its
+        # default guess, so don't claim one.
         self.unit_out.setText("[Unknown]")
 
