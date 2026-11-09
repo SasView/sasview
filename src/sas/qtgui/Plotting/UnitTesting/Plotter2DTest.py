@@ -342,11 +342,6 @@ class Plotter2DTest:
         actions[4].trigger()
         assert plotter.ax.grid.called
 
-        # Trigger Change Scale and make sure the method is called
-        assert actions[6].text() == "Toggle Linear/Log Scale"
-        mocker.patch.object(FigureCanvas, 'draw_idle')
-        actions[6].trigger()
-        assert FigureCanvas.draw_idle.called
 
         # Spy on cliboard's dataChanged() signal
         if not platform.system == "Windows":
@@ -418,3 +413,79 @@ class Plotter2DTest:
                               cmap=None, zmin=0.0,
                               zmax=None)
         FigureCanvas.draw_idle.assert_called()
+
+    def testAdvancedDisplayControlMenu(self, plotter):
+        """ Test Display Control context menu is available by default """
+        plotter.createContextMenu()
+        # Find Display Control menu
+        menus = [action.menu() for action in plotter.contextMenu.actions() if action.menu() is not None]
+        display_control_menus = [m for m in menus if m.title() == "Display Control"]
+        assert len(display_control_menus) == 1
+        dc_menu = display_control_menus[0]
+
+        # Check submenus: Plot Type, Interpolation, Z Scale
+        submenus = {a.menu().title(): a.menu() for a in dc_menu.actions() if a.menu() is not None}
+        assert "Plot Type" in submenus
+        assert "Interpolation" in submenus
+        assert "Z Scale" in submenus
+
+        # Test callbacks
+        plotter.onSetPlotType('contourf')
+        assert plotter._plot_type == 'contourf'
+
+        plotter.onSetInterpolation('gaussian')
+        assert plotter._interpolation == 'gaussian'
+
+        plotter.onSetZScale('symlog')
+        assert plotter.scale == 'symlog'
+
+    def testShow2DPlotAdvancedScales(self, plotter, mocker):
+        """ Test 2D plot rendering with advanced scales (symlog, arcsinh) and LogNorm """
+        mocker.patch.object(FigureCanvas, 'draw_idle')
+
+        plotter.dimension = 2
+        for scale in ['linear', 'log_{10}', 'symlog', 'arcsinh']:
+            plotter.scale = scale
+            plotter.showPlot(data=plotter.data0.data,
+                             qx_data=plotter.data0.qx_data,
+                             qy_data=plotter.data0.qy_data,
+                             xmin=plotter.data0.xmin,
+                             xmax=plotter.data0.xmax,
+                             ymin=plotter.data0.ymin,
+                             ymax=plotter.data0.ymax,
+                             cmap=None, zmin=0.0,
+                             zmax=None)
+            assert plotter.im is not None
+            assert plotter.cb is not None
+
+    def testShow2DPlotContourfAndInterpolation(self, plotter, mocker):
+        """ Test 2D plot rendering with contourf and different interpolations """
+        mocker.patch.object(FigureCanvas, 'draw_idle')
+
+        plotter.dimension = 2
+        # Test contourf
+        plotter._plot_type = 'contourf'
+        plotter.showPlot(data=plotter.data0.data,
+                         qx_data=plotter.data0.qx_data,
+                         qy_data=plotter.data0.qy_data,
+                         xmin=plotter.data0.xmin,
+                         xmax=plotter.data0.xmax,
+                         ymin=plotter.data0.ymin,
+                         ymax=plotter.data0.ymax,
+                         cmap=None, zmin=0.0,
+                         zmax=None)
+        assert plotter.im is not None
+
+        # Test switching back to imshow with gaussian_3x3 interpolation
+        plotter._plot_type = 'imshow'
+        plotter._interpolation = 'gaussian'
+        plotter.showPlot(data=plotter.data0.data,
+                         qx_data=plotter.data0.qx_data,
+                         qy_data=plotter.data0.qy_data,
+                         xmin=plotter.data0.xmin,
+                         xmax=plotter.data0.xmax,
+                         ymin=plotter.data0.ymin,
+                         ymax=plotter.data0.ymax,
+                         cmap=None, zmin=0.0,
+                         zmax=None)
+        assert plotter.im is not None
