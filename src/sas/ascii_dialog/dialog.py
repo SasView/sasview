@@ -1,3 +1,4 @@
+from dataclasses import replace
 from os import path
 
 from PySide6.QtCore import QModelIndex, QPoint, Slot
@@ -350,8 +351,18 @@ This could potentially be because the file {basename} is not in an ASCII format.
 
     @Slot()
     def unload(self) -> None:
-        del self.files[self.current_filename]
-        self.filename_chooser.removeItem(self.filename_chooser.currentIndex())
+        """Remove the current file, so that it isn't loaded."""
+        filename = self.current_filename
+        if filename is None:
+            return
+        # Remove the file from everything used when loading, not just from the file chooser. Otherwise the file is
+        # still loaded when the user clicks Done.
+        del self.files[filename]
+        del self.files_full_path[filename]
+        del self.files_is_included[filename]
+        self.internal_metadata.filename_separator.pop(filename, None)
+        self.internal_metadata.filename_specific_metadata.pop(filename, None)
+        self.filename_chooser.removeItem(self.filename_chooser.findText(filename))
         # Filename chooser should now revert back to a different file.
         self.updateCurrentFile()
 
@@ -485,6 +496,9 @@ This could potentially be because the file {basename} is not in an ASCII format.
             self.startingPos,
             self.excludedLines,
             self.seperators,
+            # Without this, the data would always be loaded as 1D I vs Q, and loading other types would fail.
+            # Take a copy, as AsciiReaderParams does for its default.
+            dataset_type=replace(self.currentDatasetType()),
         )
         self.params = params
         self.accept()
