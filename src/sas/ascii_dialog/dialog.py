@@ -24,7 +24,7 @@ from PySide6.QtWidgets import (
 
 from sasdata.ascii_reader_metadata import AsciiReaderMetadata
 from sasdata.data_io.importers.import_ascii import AsciiReaderParams, load_data, split_line
-from sasdata.dataset_types import DatasetType, angle_dim, one_dim, sesans, two_dim
+from sasdata.dataset_types import DatasetType, dataset_types, one_dim
 from sasdata.guess import guess_column_count, guess_columns, guess_starting_position
 
 from sas.ascii_dialog.col_editor import ColEditor
@@ -34,7 +34,6 @@ from sas.ascii_dialog.selection_menu import SelectionMenu
 from sas.ascii_dialog.warning_label import WarningLabel
 from sas.metadata_filename_gui.metadata_filename_dialog import MetadataFilenameDialog
 
-dataset_dictionary = dict([(dataset.name, dataset) for dataset in [one_dim, two_dim, angle_dim, sesans]])
 
 class AsciiDialog(QDialog):
     """A dialog window allowing the user to adjust various properties regarding
@@ -82,9 +81,9 @@ class AsciiDialog(QDialog):
         self.dataset_layout = QHBoxLayout()
         self.dataset_label = QLabel("Dataset Type")
         self.dataset_combobox = QComboBox()
-        # The options are listed in the order of dataset_dictionary, with 1D I vs Q as the default.
+        # The options are listed in the order of dataset_types, with 1D I vs Q as the default.
         # TODO: SESANS was previously excluded here until SESANS loading was fixed. Check whether it should be offered.
-        self.dataset_combobox.addItems(list(dataset_dictionary))
+        self.dataset_combobox.addItems(list(dataset_types))
         self.dataset_combobox.setCurrentText(one_dim.name)
         self.dataset_layout.addWidget(self.dataset_label)
         self.dataset_layout.addWidget(self.dataset_combobox)
@@ -270,7 +269,7 @@ class AsciiDialog(QDialog):
 
     def currentDatasetType(self) -> DatasetType:
         """Get the dataset type that the user has currently selected."""
-        return dataset_dictionary[self.dataset_combobox.currentText()]
+        return dataset_types[self.dataset_combobox.currentText()]
 
     def setRowTypesetting(self, row: int, item_checked: bool) -> None:
         """Set the typesetting for the given role depending on whether it is to
