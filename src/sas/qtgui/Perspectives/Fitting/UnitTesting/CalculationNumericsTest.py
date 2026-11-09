@@ -24,6 +24,8 @@ from sas.qtgui.Perspectives.Fitting.OptionsWidget import OptionsWidget
 from sas.qtgui.Perspectives.Fitting.UnitTesting.FittingWidgetTest import dummy_manager
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
 from sas.qtgui.Utilities import GuiUtils
+from sas.qtgui.Utilities.CategoryInstaller import USER_FILE, CategoryInstaller
+from sas.sascalc.fit.models import ModelManager
 
 # Both sides run in double precision on the CPU. The measured agreement is about 1e-10 or better,
 # so a relative difference above this is a real difference, not rounding.
@@ -44,6 +46,19 @@ DQ = 0.05 * Q
 def cpu_double_precision(monkeypatch):
     """Run sasmodels on the CPU, as the reference does."""
     monkeypatch.setenv("SAS_OPENCL", "none")
+
+
+@pytest.fixture(autouse=True)
+def model_categories(monkeypatch, tmp_path):
+    """Give the fit page its own freshly built categories.json.
+
+    The fit page cannot be created without one, and a new CI machine has none. Building our own
+    also keeps these tests independent of test order and of the user's own category settings.
+    """
+    CategoryInstaller.check_install(homedir=str(tmp_path),
+                                    model_list=ModelManager().cat_model_list())
+    monkeypatch.setattr(CategoryInstaller, "get_user_file",
+                        staticmethod(lambda: str(tmp_path / USER_FILE)))
 
 
 def fit_page(data, category, model, pars):
