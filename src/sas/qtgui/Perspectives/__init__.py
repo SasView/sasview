@@ -10,7 +10,6 @@ from .SizeDistribution.SizeDistributionPerspective import SizeDistributionWindow
 PERSPECTIVES = {
     FittingWindow.name: FittingWindow,
     InvariantWindow.name: InvariantWindow,
-    InversionWindow.name: InversionWindow,
     CorfuncWindow.name: CorfuncWindow,
     SizeDistributionWindow.name: SizeDistributionWindow,
 }
