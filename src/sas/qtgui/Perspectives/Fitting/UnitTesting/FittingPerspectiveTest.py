@@ -166,9 +166,9 @@ class FittingPerspectiveTest:
         with pytest.raises(AttributeError):
             widget.swapData(item)
 
-        # Create a batch tab
+        # Create a batch tab (a batch page is one with a list of datasets)
         item = QtGui.QStandardItem("test")
-        widget.addFit(None, is_batch=True)
+        widget.addFit([item], is_batch=True)
 
         # It should raise an exception
         with pytest.raises(RuntimeError):

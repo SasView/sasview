@@ -37,7 +37,7 @@ class ComplexConstraintTest:
         tab1.cbModel.setCurrentIndex(model_index)
         # select some parameters so we can populate the combo box
         for i in range(5):
-            tab1._model_model.item(i, 0).setCheckState(QtCore.Qt.CheckState.Checked)
+            tab1._model_model.setData(tab1._model_model.index(i, 0), QtCore.Qt.CheckState.Checked, QtCore.Qt.CheckStateRole)
 
         category_index = tab2.cbCategory.findText("Cylinder")
         tab2.cbCategory.setCurrentIndex(category_index)
@@ -87,7 +87,7 @@ class ComplexConstraintTest:
         assert widget.cbParam1.currentText() == 'scale'
         assert widget.cbParam2.currentText() == 'scale'
         # now select a parameter for fitting (M1.scale)
-        widget.tabs[0]._model_model.item(0, 0).setCheckState(QtCore.Qt.Checked)
+        widget.tabs[0]._model_model.setData(widget.tabs[0]._model_model.index(0, 0), QtCore.Qt.Checked, QtCore.Qt.CheckStateRole)
         # reload widget comboboxes
         widget.setupParamWidgets()
         # M1.scale has been selected for fit, should now appear in left combobox

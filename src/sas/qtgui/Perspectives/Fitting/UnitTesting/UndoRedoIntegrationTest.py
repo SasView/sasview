@@ -63,7 +63,6 @@ def widget(qapp, monkeypatch, request):
     """Create a real FittingWidget for integration testing."""
     w = FittingWidgetMod(dummy_manager())
     yield w
-    w.shadow_checker.assert_ok(request)
     w.close()
     del w
 
@@ -115,13 +114,12 @@ class TestParameterValueUndo:
         """Editing a model parameter value should push a ParameterValueCommand."""
         w = widget_with_model
         # Find the 'radius' row
-        param_col = w.lstParams.itemDelegate().param_value
+        param_col = w._model_model.column("value")
         for row in range(w._model_model.rowCount()):
-            name = w._model_model.item(row, 0).text()
+            name = w._model_model.index(row, 0).data()
             if name == "radius":
-                item = w._model_model.item(row, param_col)
-                old_val = float(item.text())
-                item.setText("99.0")
+                old_val = float(w._model_model.index(row, param_col).data())
+                w._model_model.setData(w._model_model.index(row, param_col), "99.0")
                 break
         else:
             pytest.fail("Could not find 'radius' parameter in the model")
@@ -136,12 +134,12 @@ class TestParameterValueUndo:
     def test_main_param_undo_restores_value(self, widget_with_model):
         """Undo should restore the original kernel parameter value."""
         w = widget_with_model
-        param_col = w.lstParams.itemDelegate().param_value
+        param_col = w._model_model.column("value")
         for row in range(w._model_model.rowCount()):
-            name = w._model_model.item(row, 0).text()
+            name = w._model_model.index(row, 0).data()
             if name == "radius":
-                old_val = float(w._model_model.item(row, param_col).text())
-                w._model_model.item(row, param_col).setText("99.0")
+                old_val = float(w._model_model.index(row, param_col).data())
+                w._model_model.setData(w._model_model.index(row, param_col), "99.0")
                 break
 
         assert w.kernel().getParam("radius") == 99.0
@@ -171,11 +169,9 @@ class TestParameterValueUndo:
         """Toggling the 'fit' checkbox (column 0) must NOT push an undo command."""
         w = widget_with_model
         initial_count = len(w.undo_stack._undo_stack)
-        item = w._model_model.item(0, 0)
-        item.setCheckState(
-            QtCore.Qt.Unchecked if item.checkState() == QtCore.Qt.Checked
-            else QtCore.Qt.Checked
-        )
+        index = w._model_model.index(0, 0)
+        checked = index.data(QtCore.Qt.CheckStateRole) == QtCore.Qt.Checked
+        w._model_model.setData(index, QtCore.Qt.Unchecked if checked else QtCore.Qt.Checked, QtCore.Qt.CheckStateRole)
         assert len(w.undo_stack._undo_stack) == initial_count
 
 
@@ -227,11 +223,11 @@ class TestParameterMinMaxUndo:
     def test_min_change_pushes_minmax_command(self, widget_with_model):
         """Editing a min bound should push a ParameterMinMaxCommand."""
         w = widget_with_model
-        min_col = w.lstParams.itemDelegate().param_min
+        min_col = w._model_model.column("min")
         for row in range(w._model_model.rowCount()):
-            name = w._model_model.item(row, 0).text()
+            name = w._model_model.index(row, 0).data()
             if name == "radius":
-                w._model_model.item(row, min_col).setText("1.0")
+                w._model_model.setData(w._model_model.index(row, min_col), "1.0")
                 break
 
         top_cmd = w.undo_stack._undo_stack[-1]
@@ -242,11 +238,11 @@ class TestParameterMinMaxUndo:
     def test_max_change_pushes_minmax_command(self, widget_with_model):
         """Editing a max bound should push a ParameterMinMaxCommand."""
         w = widget_with_model
-        max_col = w.lstParams.itemDelegate().param_max
+        max_col = w._model_model.column("max")
         for row in range(w._model_model.rowCount()):
-            name = w._model_model.item(row, 0).text()
+            name = w._model_model.index(row, 0).data()
             if name == "radius":
-                w._model_model.item(row, max_col).setText("500.0")
+                w._model_model.setData(w._model_model.index(row, max_col), "500.0")
                 break
 
         top_cmd = w.undo_stack._undo_stack[-1]
@@ -446,7 +442,7 @@ class TestCheckboxToggleUndo:
         assert isinstance(top_cmd, SetFlagCommand)
         assert top_cmd.flag == "magnetism"
         w.undo_stack.undo()
-        assert not w.chkMagnetism.isChecked() and not w.magnetism_widget.isActive
+        assert not w.chkMagnetism.isChecked() and not w.document.flags.magnetism
 
     def test_toggle_2d_pushes_checkbox_command(self, widget_with_model):
         """Toggling 2D view (a layout change) should record a SnapshotCommand."""
@@ -462,7 +458,7 @@ class TestCheckboxToggleUndo:
         assert isinstance(top_cmd, SnapshotCommand)
         assert top_cmd.new.flags.view_2d and not top_cmd.old.flags.view_2d
         w.undo_stack.undo()
-        assert not w.chk2DView.isChecked() and not w.is2D
+        assert not w.chk2DView.isChecked() and not w.document.is2D()
 
     def test_toggle_2d_does_not_push_model_selection(self, widget_with_model):
         """toggle2D calls onSelectModel internally — it must be suppressed."""
@@ -496,7 +492,6 @@ class TestFitResultUndo:
         res.pname = param_names[:len(res.pvec)]
         return ([[res]], 0.5)
 
-    @pytest.mark.shadow_exempt("mocks the writers that apply the fit result to the tables")
     def test_fit_complete_pushes_fit_result_command(self, widget_with_model, monkeypatch):
         """fitComplete should record an ApplyFitResultCommand."""
         w = widget_with_model
@@ -533,7 +528,6 @@ class TestFitResultUndo:
         w.fitComplete(result)
         assert w.undo_stack._enabled
 
-    @pytest.mark.shadow_exempt("uses a MagicMock as the pre-fit kernel")
     def test_fit_complete_failed_no_command(self, widget_with_model, monkeypatch):
         """A failed fit should not push an undo command."""
         w = widget_with_model
@@ -545,7 +539,6 @@ class TestFitResultUndo:
         w.fitComplete(None)
         assert not w.undo_stack.can_undo()
 
-    @pytest.mark.shadow_exempt("mocks the writers that apply the fit result to the tables")
     def test_undo_fit_removes_error_column(self, widget_with_model, monkeypatch):
         """Undoing a fit must remove the now-stale error column from the table."""
         w = widget_with_model
@@ -558,19 +551,19 @@ class TestFitResultUndo:
         param_dict = {n: (v + 1.0, 0.01) for n, v in old_params.items()}
         monkeypatch.setattr(w.fit_service, 'outcome', lambda *a, **kw: param_dict)
 
-        assert not w.has_error_column
+        assert not w._model_model.has_error_column
         cols_before = w._model_model.columnCount()
 
         result = self._make_fit_result(w)
         w.fitComplete(result)
 
         # The fit added an error column.
-        assert w.has_error_column
+        assert w._model_model.has_error_column
         assert w._model_model.columnCount() == cols_before + 1
 
         # Undo removes it again.
         w.undo_stack.undo()
-        assert not w.has_error_column
+        assert not w._model_model.has_error_column
         assert w._model_model.columnCount() == cols_before
 
 
@@ -647,7 +640,6 @@ class TestGuiManagerUndoHookSignalChain:
         w.undo_stack.push(SetParameterCommand("scale", {"value": 1.0}, {"value": 2.0}))
         assert len(handler_calls) >= 1
 
-    @pytest.mark.shadow_exempt("mocks the writers that apply the fit result to the tables")
     def test_fit_complete_triggers_action_enable_via_signal_chain(
         self, widget_with_model, monkeypatch
     ):
@@ -675,7 +667,6 @@ class TestGuiManagerUndoHookSignalChain:
         assert action_undo.setEnabled.call_args_list[-1] == ((True,),)
         assert w.undo_stack.can_undo()
 
-    @pytest.mark.shadow_exempt("mocks the writers that apply the fit result to the tables")
     def test_fit_complete_emits_communicator_fallback(self, widget_with_model, monkeypatch):
         """fitComplete must emit undoRedoUpdateSignal as a reliable fallback
         for refreshing the GUI action state."""
@@ -740,11 +731,11 @@ class TestUndoRedoRoundTrip:
     def test_param_value_round_trip(self, widget_with_model):
         """Change radius → undo → redo should return to changed value."""
         w = widget_with_model
-        param_col = w.lstParams.itemDelegate().param_value
+        param_col = w._model_model.column("value")
         for row in range(w._model_model.rowCount()):
-            if w._model_model.item(row, 0).text() == "radius":
+            if w._model_model.index(row, 0).data() == "radius":
                 original = w.kernel().getParam("radius")
-                w._model_model.item(row, param_col).setText("42.0")
+                w._model_model.setData(w._model_model.index(row, param_col), "42.0")
                 break
 
         assert w.kernel().getParam("radius") == 42.0
@@ -756,12 +747,12 @@ class TestUndoRedoRoundTrip:
     def test_multiple_undo_redo(self, widget_with_model):
         """Multiple parameter edits: undo all, then redo all."""
         w = widget_with_model
-        param_col = w.lstParams.itemDelegate().param_value
+        param_col = w._model_model.column("value")
 
         # Find radius and length rows
         radius_row = length_row = None
         for row in range(w._model_model.rowCount()):
-            name = w._model_model.item(row, 0).text()
+            name = w._model_model.index(row, 0).data()
             if name == "radius":
                 radius_row = row
             elif name == "length":
@@ -774,8 +765,8 @@ class TestUndoRedoRoundTrip:
         original_length = w.kernel().getParam("length")
 
         # Edit radius then length
-        w._model_model.item(radius_row, param_col).setText("11.0")
-        w._model_model.item(length_row, param_col).setText("22.0")
+        w._model_model.setData(w._model_model.index(radius_row, param_col), "11.0")
+        w._model_model.setData(w._model_model.index(length_row, param_col), "22.0")
 
         assert w.kernel().getParam("radius") == 11.0
         assert w.kernel().getParam("length") == 22.0
@@ -800,13 +791,13 @@ class TestUndoRedoRoundTrip:
     def test_suppressed_context_prevents_push(self, widget_with_model):
         """Changes inside suppressed() must not appear on the stack."""
         w = widget_with_model
-        param_col = w.lstParams.itemDelegate().param_value
+        param_col = w._model_model.column("value")
         w.undo_stack.clear()
 
         with w.undo_stack.suppressed():
             for row in range(w._model_model.rowCount()):
-                if w._model_model.item(row, 0).text() == "radius":
-                    w._model_model.item(row, param_col).setText("77.0")
+                if w._model_model.index(row, 0).data() == "radius":
+                    w._model_model.setData(w._model_model.index(row, param_col), "77.0")
                     break
 
         assert not w.undo_stack.can_undo()
@@ -817,10 +808,10 @@ class TestUndoRedoRoundTrip:
         received = []
         w.undo_stack.stackChanged.connect(lambda: received.append(1))
 
-        param_col = w.lstParams.itemDelegate().param_value
+        param_col = w._model_model.column("value")
         for row in range(w._model_model.rowCount()):
-            if w._model_model.item(row, 0).text() == "radius":
-                w._model_model.item(row, param_col).setText("55.0")
+            if w._model_model.index(row, 0).data() == "radius":
+                w._model_model.setData(w._model_model.index(row, param_col), "55.0")
                 break
 
         assert len(received) >= 1

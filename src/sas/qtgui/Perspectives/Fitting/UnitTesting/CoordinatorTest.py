@@ -28,7 +28,6 @@ def pages():
         second.controller.set_constraint(key, Constraint(param=key, func=f"M1.{key}", value_ex=f"M1.{key}"), fit=True)
     yield [first, second]
     for p in (first, second):
-        p.shadow_checker.assert_ok()
         p.close()
 
 

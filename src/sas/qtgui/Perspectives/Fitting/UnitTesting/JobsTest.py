@@ -49,7 +49,6 @@ def page():
     g.select_model(p, "Cylinder", "cylinder")
     p.jobs.complete(p.jobs.requests()[-1])
     yield p
-    p.shadow_checker.assert_ok()
     p.close()
 
 
@@ -83,7 +82,7 @@ class TheoryJobTest:
         g.set_cell(page._model_model, "radius", 1, "33")
         page.jobs.complete(request)
         # Shown, as before, but not current
-        assert page.model_data is result_of(page).theory
+        assert page.plot_publisher.model_data is result_of(page).theory
         assert page.controller.current_result() is None
         page.controller.compute_theory()
         page.jobs.complete(page.jobs.requests()[-1])

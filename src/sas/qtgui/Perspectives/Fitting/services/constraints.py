@@ -12,9 +12,6 @@ from collections.abc import Sequence
 from sas.qtgui.Perspectives.Fitting.model.parameters import Table
 from sas.sascalc.fit.expression import check_constraints
 
-# The legacy model keys of the three tables
-TABLES = {"standard": Table.MAIN, "poly": Table.POLY, "magnet": Table.MAGNET}
-
 
 def validate(symbols: dict[str, float], constraints: Sequence[tuple[str, str]]) -> str | list:
     """The errors of *constraints* evaluated with *symbols*, as html, or an empty list.

@@ -13,7 +13,6 @@ from sasmodels.sasview_model import load_custom_model
 from sas.qtgui.Perspectives.Fitting import FittingWidget
 from sas.qtgui.Perspectives.Fitting.coordinator import FitPerspectiveCoordinator
 from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
-from sas.qtgui.Perspectives.Fitting.UnitTesting.shadow_invariant import ShadowChecker
 from sas.qtgui.Utilities import GuiUtils
 from sas.sascalc.fit.models import ModelManager, ModelManagerBase
 
@@ -97,13 +96,12 @@ class ModelManagerMod(ModelManager):
 class FittingWidgetMod(FittingWidget.FittingWidget):
     """FittingWidget that takes its plugin models from the test plugin directory.
 
-    It also checks the Phase 2 shadow invariant after every document commit;
-    fixtures call ``shadow_checker.assert_ok()`` at teardown.
+    Its document re-raises the errors of its subscribers (the views), so a test sees them.
     """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.shadow_checker = ShadowChecker(self)
+        self.document.strict = True
 
     def customModels(cls):
         manager = ModelManagerMod()

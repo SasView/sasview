@@ -13,6 +13,7 @@ from sas.qtgui.Perspectives.Fitting.FittingOptions import FittingOptions
 from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
 from sas.qtgui.Perspectives.Fitting.GPUOptions import GPUOptions
 from sas.qtgui.Perspectives.Fitting.model.catalog import ModelCatalog
+from sas.qtgui.Perspectives.Fitting.model.parameters import PageMode
 from sas.qtgui.Perspectives.perspective import Perspective
 from sas.qtgui.Utilities.Reports.reportdata import ReportData
 from sas.system.config import config
@@ -262,7 +263,6 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         else:
             self.maxIndex = tab_index
         tab	= FittingWidget(parent=self.parent, data=data, tab_id=tab_index, catalog=self.catalog)
-        tab.is_batch_fitting = is_batch
         self.coordinator.add_page(tab)
 
         # Add this tab to the object library so it can be retrieved by scripting/jupyter
@@ -400,7 +400,7 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         # update the last-tab closed information
         # this should be done only for regular fitting
         if not isinstance(self.tabs[index], ConstraintWidget) and \
-              not self.tabs[index].is_batch_fitting:
+              self.tabs[index].document.mode is not PageMode.BATCH:
             self.lastTabClosed = self.tabs[index]
 
         # don't remove the last tab
@@ -510,7 +510,7 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
             msg = "Incorrect type passed to the Fitting Perspective"
             raise AttributeError(msg)
 
-        if self.currentTab.is_batch_fitting:
+        if self.currentTab.document.mode is PageMode.BATCH:
             msg = "Data in Batch Fitting cannot be swapped"
             raise RuntimeError(msg)
 

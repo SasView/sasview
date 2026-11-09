@@ -21,11 +21,10 @@ def _quiet(qapp, monkeypatch):
 
 @pytest.fixture
 def opened():
-    """Pages a test opens, closed after the shadow checks."""
+    """Pages a test opens, closed at teardown."""
     pages = []
     yield pages
     for page in pages:
-        page.shadow_checker.assert_ok()
         page.close()
 
 

@@ -1,342 +1,111 @@
+"""
+Delegates of the three parameter tables. A delegate asks the table's model for the name of a
+column (``ParameterItemModel.column_name``), so it does not follow the error column itself.
+"""
 from PySide6 import QtCore, QtGui, QtWidgets
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 
-class ModelViewDelegate(QtWidgets.QStyledItemDelegate):
-    """
-    Custom delegate for appearance and behavior control of the model view
-    """
-    def __init__(self, parent=None):
-        """
-        Overwrite generic constructor to allow for some globals
-        """
-        super(ModelViewDelegate, self).__init__()
+def _column(index) -> str | None:
+    return index.model().column_name(index.column())
 
-        # Main parameter table view columns
-        self.param_error=-1
-        self.param_property=0
-        self.param_value=1
-        self.param_min=2
-        self.param_max=3
-        self.param_unit=4
 
-    def fancyColumns(self):
-        return [self.param_value, self.param_min, self.param_max, self.param_unit]
+def _number_editor(widget) -> QtWidgets.QLineEdit:
+    editor = QtWidgets.QLineEdit(widget)
+    editor.setValidator(GuiUtils.DoubleValidator())
+    return editor
 
-    def addErrorColumn(self):
-        """
-        Modify local column pointers
-        """
-        self.param_property=0
-        self.param_value=1
-        self.param_error=2
-        self.param_min=3
-        self.param_max=4
-        self.param_unit=5
 
-    def removeErrorColumn(self):
-        """
-        Restore column pointers to the no-error layout (reverse of addErrorColumn).
-        Used when a fit is undone and the error column is removed.
-        """
-        self.param_error=-1
-        self.param_property=0
-        self.param_value=1
-        self.param_min=2
-        self.param_max=3
-        self.param_unit=4
+class _HtmlDelegate(QtWidgets.QStyledItemDelegate):
+    """Draws the cells of HTML_COLUMNS as HTML (units, superscripts)."""
+    HTML_COLUMNS: tuple = ()
+    OFFSET = (0, 0)              # magic values for rendering a nice display in the table
+    MARGIN = None                # the text document's margin; None: the default
+    PAINTER_FONT = True          # the text document takes the painter's font
 
     def paint(self, painter, option, index):
-        """
-        Overwrite generic painter for certain columns
-        """
-        if index.column() in self.fancyColumns():
-            # Units - present in nice HTML
-            options = QtWidgets.QStyleOptionViewItem(option)
-            self.initStyleOption(options,index)
-
-            style = QtWidgets.QApplication.style() if options.widget is None else options.widget.style()
-
-            # Prepare document for inserting into cell
-            doc = QtGui.QTextDocument()
-
-            # Convert the unit description into HTML
-            text_html = GuiUtils.convertUnitToHTML(str(options.text))
-            doc.setHtml(text_html)
-            doc.setDocumentMargin(1)
-
-            # delete the original content
-            options.text = ""
-            style.drawControl(QtWidgets.QStyle.CE_ItemViewItem, options, painter, options.widget)
-
-            context = QtGui.QAbstractTextDocumentLayout.PaintContext()
-            textRect = style.subElementRect(QtWidgets.QStyle.SE_ItemViewItemText, options)
-
-            painter.save()
-            rect = textRect.topLeft()
-            x = rect.x()
-            y = rect.y()
-            x += 3 # magic value for rendering nice display in the table
-            y += 2 # magic value for rendering nice display in the table
-            rect.setX(x)
-            rect.setY(y)
-            painter.translate(rect)
-            painter.setClipRect(textRect.translated(-rect))
-            # Draw the QTextDocument in the cell
-            doc.documentLayout().draw(painter, context)
-            painter.restore()
-        else:
-            # Just the default paint
+        if _column(index) not in self.HTML_COLUMNS:
             QtWidgets.QStyledItemDelegate.paint(self, painter, option, index)
+            return
+        options = QtWidgets.QStyleOptionViewItem(option)
+        self.initStyleOption(options, index)
+        style = QtWidgets.QApplication.style() if options.widget is None else options.widget.style()
+        doc = QtGui.QTextDocument()
+        if self.PAINTER_FONT:
+            doc.setDefaultFont(painter.font())
+        doc.setHtml(GuiUtils.convertUnitToHTML(str(options.text)))
+        if self.MARGIN is not None:
+            doc.setDocumentMargin(self.MARGIN)
+        # delete the original content
+        options.text = ""
+        style.drawControl(QtWidgets.QStyle.CE_ItemViewItem, options, painter, options.widget)
+        context = QtGui.QAbstractTextDocumentLayout.PaintContext()
+        text_rect = style.subElementRect(QtWidgets.QStyle.SE_ItemViewItemText, options)
+        painter.save()
+        rect = text_rect.topLeft()
+        rect.setX(rect.x() + self.OFFSET[0])
+        rect.setY(rect.y() + self.OFFSET[1])
+        painter.translate(rect)
+        painter.setClipRect(text_rect.translated(-rect))
+        doc.documentLayout().draw(painter, context)
+        painter.restore()
+
+
+class ModelViewDelegate(_HtmlDelegate):
+    """The main parameter table."""
+    HTML_COLUMNS = ("value", "min", "max", "units")
+    OFFSET = (3, 2)
+    MARGIN = 1
+    PAINTER_FONT = False
 
     def createEditor(self, widget, option, index):
-        """
-        Overwrite generic editor for certain columns
-        """
         if not index.isValid():
-            return 0
-        if index.column() == self.param_value: #only in the value column
-            editor = QtWidgets.QLineEdit(widget)
-            validator = GuiUtils.DoubleValidator()
-            editor.setValidator(validator)
-            return editor
-        if index.column() in [self.param_property, self.param_error, self.param_unit]:
-            # Set some columns uneditable
             return None
-        if index.column() in (self.param_min, self.param_max):
-            # Check if the edit role is set
-            if not (index.flags() & QtCore.Qt.ItemIsEditable):
-                return None
-
-        return super(ModelViewDelegate, self).createEditor(widget, option, index)
+        column = _column(index)
+        if column == "value":
+            return _number_editor(widget)
+        if column not in ("min", "max") or not (index.flags() & QtCore.Qt.ItemIsEditable):
+            return None
+        return super().createEditor(widget, option, index)
 
     def setModelData(self, editor, model, index):
-        """
-        Overwrite generic model update method for certain columns
-        """
-        if index.column() in (self.param_min, self.param_max):
+        if _column(index) in ("min", "max"):
             try:
                 float(editor.text())
             except ValueError:
                 # TODO: present the failure to the user
-                # balloon popup? tooltip? cell background colour flash?
                 return
         QtWidgets.QStyledItemDelegate.setModelData(self, editor, model, index)
 
 
-class PolyViewDelegate(QtWidgets.QStyledItemDelegate):
-    """
-    Custom delegate for appearance and behavior control of the polydispersity view
-    """
+class PolyViewDelegate(_HtmlDelegate):
+    """The polydispersity table: a click on the filename asks for an array file."""
     POLYDISPERSE_FUNCTIONS = ['rectangle', 'array', 'lognormal', 'gaussian', 'schulz']
+    EDITED = ("value", "min", "max", "npts", "nsigmas")
+    HTML_COLUMNS = ("value", "min", "max")
+    OFFSET = (0, 5)
 
-    combo_updated = QtCore.Signal(str, int)
     filename_updated = QtCore.Signal(int)
 
-    def __init__(self, parent=None):
-        """
-        Overwrite generic constructor to allow for some globals
-        """
-        super(PolyViewDelegate, self).__init__()
-
-        self.poly_parameter = 0
-        self.poly_pd = 1
-        self.poly_error = None
-        self.poly_min = 2
-        self.poly_max = 3
-        self.poly_npts = 4
-        self.poly_nsigs = 5
-        self.poly_function = 6
-        self.poly_filename = 7
-
-    def editableParameters(self):
-        return [self.poly_pd, self.poly_min, self.poly_max, self.poly_npts, self.poly_nsigs]
-
-    def columnDict(self):
-        return {self.poly_pd:    'width',
-                self.poly_min:   'min',
-                self.poly_max:   'max',
-                self.poly_npts:  'npts',
-                self.poly_nsigs: 'nsigmas'}
-
-    def addErrorColumn(self):
-        """
-        Modify local column pointers
-        """
-        self.poly_parameter = 0
-        self.poly_pd = 1
-        self.poly_error = 2
-        self.poly_min = 3
-        self.poly_max = 4
-        self.poly_npts = 5
-        self.poly_nsigs = 6
-        self.poly_function = 7
-        self.poly_filename = 8
-
-    def removeErrorColumn(self):
-        """
-        Restore column pointers to the no-error layout (reverse of addErrorColumn).
-        Used when a fit is undone and the error column is removed.
-        """
-        self.poly_parameter = 0
-        self.poly_pd = 1
-        self.poly_error = None
-        self.poly_min = 2
-        self.poly_max = 3
-        self.poly_npts = 4
-        self.poly_nsigs = 5
-        self.poly_function = 6
-        self.poly_filename = 7
-
     def createEditor(self, widget, option, index):
-        # Remember the current choice
         if not index.isValid():
-            return 0
-        elif index.column() == self.poly_filename:
+            return None
+        column = _column(index)
+        if column == "filename":
             # Notify the widget that we want to change the filename
             self.filename_updated.emit(index.row())
             return None
-        elif index.column() in self.editableParameters():
-            self.editor = QtWidgets.QLineEdit(widget)
-            validator = GuiUtils.DoubleValidator()
-            self.editor.setValidator(validator)
-            return self.editor
-        else:
-            QtWidgets.QStyledItemDelegate.createEditor(self, widget, option, index)
+        return _number_editor(widget) if column in self.EDITED else None
 
-    def paint(self, painter, option, index):
-        """
-        Overwrite generic painter for certain columns
-        """
-        if index.column() in (self.poly_pd, self.poly_min, self.poly_max):
-            # Units - present in nice HTML
-            options = QtWidgets.QStyleOptionViewItem(option)
-            self.initStyleOption(options,index)
 
-            style = QtWidgets.QApplication.style() if options.widget is None else options.widget.style()
-
-            # Prepare document for inserting into cell
-            doc = QtGui.QTextDocument()
-            current_font = painter.font()
-            doc.setDefaultFont(current_font)
-            # Convert the unit description into HTML
-            text_html = GuiUtils.convertUnitToHTML(str(options.text))
-            doc.setHtml(text_html)
-
-            # delete the original content
-            options.text = ""
-            style.drawControl(QtWidgets.QStyle.CE_ItemViewItem, options, painter, options.widget)
-
-            context = QtGui.QAbstractTextDocumentLayout.PaintContext()
-            textRect = style.subElementRect(QtWidgets.QStyle.SE_ItemViewItemText, options)
-            painter.save()
-
-            rect = textRect.topLeft()
-            y = rect.y()
-            y += 5.0 # magic value for rendering nice display in the table
-            rect.setY(y)
-            painter.translate(rect)
-            painter.setClipRect(textRect.translated(-rect))
-            # Draw the QTextDocument in the cell
-            doc.documentLayout().draw(painter, context)
-            painter.restore()
-        else:
-            # Just the default paint
-            QtWidgets.QStyledItemDelegate.paint(self, painter, option, index)
-
-class MagnetismViewDelegate(QtWidgets.QStyledItemDelegate):
-    """
-    Custom delegate for appearance and behavior control of the magnetism view
-    """
-    def __init__(self, parent=None):
-        """
-        Overwrite generic constructor to allow for some globals
-        """
-        super(MagnetismViewDelegate, self).__init__()
-
-        self.mag_parameter = 0
-        self.mag_value = 1
-        self.mag_min = 2
-        self.mag_max = 3
-        self.mag_unit = 4
-        self.mag_error = -1
-
-    def editableParameters(self):
-        return [self.mag_value, self.mag_min, self.mag_max]
-
-    def addErrorColumn(self):
-        """
-        Modify local column pointers
-        """
-        self.mag_parameter = 0
-        self.mag_value = 1
-        self.mag_error = 2
-        self.mag_min = 3
-        self.mag_max = 4
-        self.mag_unit = 5
-
-    def removeErrorColumn(self):
-        """
-        Restore column pointers to the no-error layout (reverse of addErrorColumn).
-        Used when a fit is undone and the error column is removed.
-        """
-        self.mag_parameter = 0
-        self.mag_value = 1
-        self.mag_min = 2
-        self.mag_max = 3
-        self.mag_unit = 4
-        self.mag_error = -1
+class MagnetismViewDelegate(_HtmlDelegate):
+    """The magnetism table."""
+    EDITED = ("value", "min", "max")
+    HTML_COLUMNS = ("value", "min", "max", "units")
+    OFFSET = (0, 6)
 
     def createEditor(self, widget, option, index):
-        # Remember the current choice
-        current_text = index.data()
         if not index.isValid():
-            return 0
-        if index.column() in self.editableParameters():
-            editor = QtWidgets.QLineEdit(widget)
-            validator = GuiUtils.DoubleValidator()
-            editor.setValidator(validator)
-            return editor
-        else:
-            QtWidgets.QStyledItemDelegate.createEditor(self, widget, option, index)
-
-    def paint(self, painter, option, index):
-        """
-        Overwrite generic painter for certain columns
-        """
-        if index.column() in (self.mag_value, self.mag_min, self.mag_max, self.mag_unit):
-            # Units - present in nice HTML
-            options = QtWidgets.QStyleOptionViewItem(option)
-            self.initStyleOption(options,index)
-
-            style = QtWidgets.QApplication.style() if options.widget is None else options.widget.style()
-
-            # Prepare document for inserting into cell
-            doc = QtGui.QTextDocument()
-            current_font = painter.font()
-            doc.setDefaultFont(current_font)
-            # Convert the unit description into HTML
-            text_html = GuiUtils.convertUnitToHTML(str(options.text))
-            doc.setHtml(text_html)
-
-            # delete the original content
-            options.text = ""
-            style.drawControl(QtWidgets.QStyle.CE_ItemViewItem, options, painter, options.widget)
-
-            context = QtGui.QAbstractTextDocumentLayout.PaintContext()
-            textRect = style.subElementRect(QtWidgets.QStyle.SE_ItemViewItemText, options)
-
-            painter.save()
-            rect = textRect.topLeft()
-            y = rect.y()
-            y += 6.0 # magic value for rendering nice display in the table
-            rect.setY(y)
-            painter.translate(rect)
-            painter.setClipRect(textRect.translated(-rect))
-            # Draw the QTextDocument in the cell
-            doc.documentLayout().draw(painter, context)
-            painter.restore()
-        else:
-            # Just the default paint
-            QtWidgets.QStyledItemDelegate.paint(self, painter, option, index)
+            return None
+        return _number_editor(widget) if _column(index) in self.EDITED else None

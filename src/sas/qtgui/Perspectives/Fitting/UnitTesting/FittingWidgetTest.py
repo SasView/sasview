@@ -2,7 +2,7 @@
 The fit page as a view (FW-MVC-DESIGN.md §4.1, Phase 8): the wiring of its widgets to the
 controller's intents, and the enablement that follows the document.
 
-The tables are tested in ``ParameterTableAdapterTest``, and the document, the serializer and
+The tables are tested in ``ParameterItemModelTest``, and the document, the serializer and
 the constraint service without Qt (``ModelDocumentTest``, ``ModelSerializerTest``,
 ``ModelKernelTest``).
 """
@@ -39,7 +39,6 @@ def widget(qapp, request, mocker):
     w = FittingWidgetMod(dummy_manager())
     w.parent.perspective().fit_tabs.append(w)
     yield w
-    w.shadow_checker.assert_ok(request)
     w.close()
 
 
@@ -53,14 +52,12 @@ class FittingWidgetTest:
         sp = widget.sizePolicy()
         assert sp.horizontalPolicy() == QtWidgets.QSizePolicy.Policy.MinimumExpanding
         assert sp.verticalPolicy() == QtWidgets.QSizePolicy.Policy.Ignored
-        assert isinstance(widget.lstParams.model(), QtGui.QStandardItemModel)
-        assert isinstance(widget.lstPoly.model(), QtGui.QStandardItemModel)
-        assert isinstance(widget.lstMagnetic.model(), QtGui.QStandardItemModel)
+        assert [widget.lstParams.model(), widget.lstPoly.model(), widget.lstMagnetic.model()] == list(widget.tables.values())
         assert not widget.cbModel.isEnabled()
         assert not widget.cbStructureFactor.isEnabled()
         assert not widget.cmdFit.isEnabled()
         assert widget.acceptsData()
-        assert not widget.data_is_loaded
+        assert not widget.document.is_loaded()
 
     def testCategoriesComeFromTheCatalog(self, widget):
         for category in widget.catalog.categories:
@@ -79,7 +76,7 @@ class FittingWidgetTest:
         mocker.patch.object(GuiUtils, 'dataFromItem', return_value=data)
         widget_with_data = FittingWidgetMod(dummy_manager(), data=QtGui.QStandardItem("test"), tab_id=3)
         assert widget_with_data.data == data
-        assert widget_with_data.data_is_loaded
+        assert widget_with_data.document.is_loaded()
         assert not widget_with_data.acceptsData()
 
     def testStructureFactorsCanBeLoaded(self, widget):
@@ -120,10 +117,10 @@ class FittingWidgetTest:
         assert widget._model_model.rowCount() == len(widget.document.parameters.rows)
         assert not widget.controller.compute_theory.called
         # With data, the theory is computed
-        widget.data_is_loaded = True
-        widget.cbModel.setCurrentIndex(2)
-        assert widget.cbModel.currentText() == 'broad_peak'
-        assert widget.controller.compute_theory.called
+        page = g.new_page(data=g.make_data1d("d1", "data1"))
+        g.select_model(page, "Shape Independent", "broad_peak")
+        assert page.theory_requests
+        page.close()
 
     def testSelectFactor(self, widget, mocker):
         widget.show()
@@ -319,10 +316,8 @@ class FittingWidgetUndoRedoTest:
     def testParamEditUndoRedo(self, widget):
         _select(widget, "Cylinder", "cylinder")
         widget.undo_stack.clear()
-        row = widget.table_adapters[0].rows()["radius"]
-        item = widget._model_model.item(row, widget.lstParams.itemDelegate().param_value)
-        old_val = float(item.text())
-        item.setText("99.0")
+        old_val = float(g.cell(widget._model_model, "radius", 1))
+        g.set_cell(widget._model_model, "radius", 1, "99.0")
         assert widget.undo_stack.can_undo()
         widget.undo_stack.undo()
         assert widget.kernel().getParam("radius") == old_val

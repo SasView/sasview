@@ -423,6 +423,14 @@ class FitPageController:
         if result.radius_effective is not None and self.current_result(request.dataset_id) is result:
             self._set_radius_effective(float(result.radius_effective))
 
+    def chi2(self) -> float | None:
+        """The chi2 the page shows: a fit's, until the inputs change, else the current theory's."""
+        fit = self.results.fit_chi2
+        if fit is not None and fit[1] == self.inputs_revision:
+            return fit[0]
+        result = self.current_result()
+        return None if result is None else result.chi2
+
     def current_result(self, dataset_id: str | None = None):
         """The theory result of a dataset (the active one by default), if computed from the current inputs."""
         return self.results.current(dataset_id or self.document.active_id, self.inputs_revision)
@@ -484,8 +492,9 @@ class FitPageController:
             self._status("Fitting did not converge!")
         return param_dict
 
-    def apply_fit(self, param_dict: dict) -> None:
-        """A single fit's values and errors ({key: (value, error)}): one undoable step (R-2)."""
+    def apply_fit(self, param_dict: dict, chi2: float | None = None) -> None:
+        """A single fit's values and errors ({key: (value, error)}): one undoable step (R-2).
+        Its *chi2* is shown until the inputs change."""
         params = self.document.parameters
         after = {key: value for key, (value, _) in param_dict.items() if key in params}
         before = {key: params[key].value for key in after}
@@ -497,6 +506,7 @@ class FitPageController:
                     tx.set_parameter(p.key, error=None)
         if before != after:
             self.history.push_applied(ApplyFitResultCommand(before, after))
+        self.results.fit_chi2 = None if chi2 is None else (chi2, self.inputs_revision)
 
     def apply_batch_fit(self, results: list) -> None:
         """A batch fit: not applied to the page and not recorded. Each dataset's theory is computed

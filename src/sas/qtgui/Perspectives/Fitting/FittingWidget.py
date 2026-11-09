@@ -39,7 +39,7 @@ from sas.qtgui.Perspectives.Fitting.model.catalog import ModelCatalog
 from sas.qtgui.Perspectives.Fitting.model.document import FitPageDocument
 from sas.qtgui.Perspectives.Fitting.model.events import Origin
 from sas.qtgui.Perspectives.Fitting.model.kernel import KernelBuilder
-from sas.qtgui.Perspectives.Fitting.model.parameters import FitOptions, PageIdentity, Smearing, Table
+from sas.qtgui.Perspectives.Fitting.model.parameters import FitOptions, PageIdentity, PageMode, Smearing, Table
 from sas.qtgui.Perspectives.Fitting.model.serializer import format_number
 from sas.qtgui.Perspectives.Fitting.MultiConstraint import MultiConstraint
 from sas.qtgui.Perspectives.Fitting.OptionsWidget import OptionsWidget
@@ -51,7 +51,7 @@ from sas.qtgui.Perspectives.Fitting.services.fit import FitService
 from sas.qtgui.Perspectives.Fitting.services.theory import TheoryService
 from sas.qtgui.Perspectives.Fitting.SmearingWidget import SmearingWidget
 from sas.qtgui.Perspectives.Fitting.UI.FittingWidgetUI import Ui_FittingWidgetUI
-from sas.qtgui.Perspectives.Fitting.view.ParameterTableAdapter import ParameterTableAdapter
+from sas.qtgui.Perspectives.Fitting.view.ParameterItemModel import ParameterItemModel
 from sas.qtgui.Perspectives.Fitting.view.PlotPublisher import PlotPublisher
 from sas.qtgui.Perspectives.Fitting.view.SettingsSync import SettingsSync
 from sas.qtgui.Perspectives.Fitting.ViewDelegate import ModelViewDelegate
@@ -75,6 +75,9 @@ if not hasattr(SasviewModel, 'get_weights'):
     SasviewModel.get_weights = get_weights
 
 logger = logging.getLogger(__name__)
+
+# The parameter table of each tab that shows one
+_TAB_TABLES = {0: Table.MAIN, TAB_POLY: Table.POLY, TAB_MAGNETISM: Table.MAGNET}
 
 
 @contextlib.contextmanager
@@ -161,8 +164,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.label_17.setStyleSheet(new_font)
         self.label_19.setStyleSheet(new_font)
 
-        # The document drives the tables, then the settings widgets
-        self.table_adapters = [ParameterTableAdapter(self, table) for table in Table]
+        # The document drives the settings widgets (the tables read it: initializeModels)
         self.settings_sync = SettingsSync(self)
 
         if data is not None:
@@ -195,9 +197,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def dataFromItems(self, value: QtGui.QStandardItem | list[QtGui.QStandardItem]) -> None:
         """ The data to fit: a list of items for batch fitting, or one item. The layout follows is2D. """
-        if isinstance(value, list):
-            self.is_batch_fitting = True
-        else:
+        batch = isinstance(value, list)
+        if not batch:
             value = [value]
         assert isinstance(value[0], QtGui.QStandardItem)
         # Keep reference to all datasets for batch
@@ -207,17 +208,14 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if len(value) > 1:
             # update the ordering tab
             self.order_widget.updateData(self.all_data)
-        self.is2D = isinstance(data, Data2D)
-        # Let others know we're full of data now
-        self.data_is_loaded = True
         # The tabs offer what the data allows; setting them up is not the user's doing
         with _blocked(self.smearing_widget, self.options_widget, self.cbFileNames):
             self.smearing_widget.resetSmearer()
             if data.isSesans:
                 self.onSesansData()
-            self.setEnablementOnDataLoad(data)
+            self.setEnablementOnDataLoad(data, batch)
         smearing = Smearing(*self.smearing_widget.state())
-        self.controller.set_datasets(datasets, self.is_batch_fitting, smearing)
+        self.controller.set_datasets(datasets, batch, smearing)
         if not self.controller.relayout():
             # Same layout: what depends on the data
             self.onLayoutChanged()
@@ -230,59 +228,26 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Initialize global variables used in this class
         """
-        # SasModel is loaded
-        self.model_is_loaded = False
-        # Data[12]D passed and set
-        self.data_is_loaded = False
-        # Batch/single fitting
-        self.is_batch_fitting = False
-        self.is_chain_fitting = False
         # Is the fit job running?
         self.fit_started = False
         # The current fit thread
         self.calc_fit = None
-        # Current SasModel view dimension
-        self.is2D = False
         # Utility variable to enable unselectable option in category combobox
         self._previous_category_index = 0
-        # The row of the shell-count combo box (the table adapter sets it)
-        self._n_shells_row = -1
-        # Dictionary of QModels
-        self.model_dict = {}
-        self.lst_dict = {}
-        self.tabToList = {} # tab_id -> list widget
-        self.tabToKey = {} # tab_id -> model key
-
-        # The chi² shown
-        self.chi2 = None
 
         self.all_data = []
         # Page id for fitting
         # To keep with previous SasView values, use 200 as the start offset
         self.page_id = 200 + self.tab_id
 
-        # Data for chosen model
-        self.model_data = None
         self._previous_model_index = 0
-
-        # Error column presence in parameter display
-        self.has_error_column = False
-        self.has_magnet_error_column = False
 
         # Enablement of comboboxes
         self.enabled_cbmodel = False
         self.enabled_sfmodel = False
 
-        # If the widget generated theory item, save it
-        self.theory_item = None
-
         # list column widths
         self.lstParamHeaderSizes = {}
-
-        # Fitting just ran - don't recalculate chi2
-        self.fitResults = False
-
-        # Current parameters
 
         # signal communicator
         self.communicator = GuiUtils.communicator
@@ -338,29 +303,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Set up models and views
         """
-        # Set the main models
-        # We can't use a single model here, due to restrictions on flattening
-        # the model tree with subclassed QAbstractProxyModel...
-        self._model_model = FittingUtilities.ToolTippedItemModel()
-
-        self.model_dict["standard"] = self._model_model
-        self.model_dict["poly"] = self.polydispersity_widget.poly_model
-        self.model_dict["magnet"] = self.magnetism_widget._magnet_model
-
-        self.lst_dict["standard"] = self.lstParams
-        self.lst_dict["poly"] = self.lstPoly
-        self.lst_dict["magnet"] = self.lstMagnetic
-
-        self.tabToList[0] = self.lstParams
-        self.tabToList[3] = self.polydispersity_widget.lstPoly
-        self.tabToList[4] = self.magnetism_widget.lstMagnetic
-
-        self.tabToKey[0] = "standard"
-        self.tabToKey[3] = "poly"
-        self.tabToKey[4] = "magnet"
-
-        # Param model displayed in param list
-        self.lstParams.setModel(self._model_model)
+        # The three parameter tables read the document (ParameterItemModel)
+        self.tables = {table: ParameterItemModel(self, table, view) for table, view in
+                       ((Table.MAIN, self.lstParams), (Table.POLY, self.lstPoly), (Table.MAGNET, self.lstMagnetic))}
+        self._model_model = self.tables[Table.MAIN]
+        self.polydispersity_widget.poly_model = self.tables[Table.POLY]
+        self.magnetism_widget._magnet_model = self.tables[Table.MAGNET]
 
         # Delegates for custom editing and display
         self.lstParams.setItemDelegate(ModelViewDelegate(self))
@@ -401,7 +349,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Column resize signals
         self.lstParams.header().sectionResized.connect(self.onColumnWidthUpdate)
 
-        # The poly and magnet tables are built from the document (ParameterTableAdapter)
         self.lstPoly.customContextMenuRequested.connect(self.showModelContextMenu)
         self.lstMagnetic.customContextMenuRequested.connect(self.showModelContextMenu)
 
@@ -416,7 +363,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.cbCategory.addItems(self.catalog.category_names())
         self.cbCategory.setCurrentIndex(0)
 
-    def setEnablementOnDataLoad(self, data: Data1D | Data2D) -> None:
+    def setEnablementOnDataLoad(self, data: Data1D | Data2D, batch: bool = False) -> None:
         """
         Enable/disable various UI elements for the data being loaded
         """
@@ -427,7 +374,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.chk2DView.setEnabled(False)
         self.chk2DView.setVisible(False)
         # Combo box or label for file name"
-        if self.is_batch_fitting:
+        if batch:
             self.lblFilename.setVisible(False)
             for dataitem in self.all_data:
                 name = GuiUtils.dataFromItem(dataitem).name
@@ -444,7 +391,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def acceptsData(self) -> bool:
         """ Tells the caller this widget can accept new dataset """
-        return not self.data_is_loaded
+        return not self.document.is_loaded()
 
     def disableModelCombo(self) -> None:
         """ Disable the combobox """
@@ -479,15 +426,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.tabFitting.setTabEnabled(TAB_POLY, isChecked)
         # Check if any parameters are ready for fitting
         self.cmdFit.setEnabled(self.document.can_fit())
-        self.polydispersity_widget.togglePoly(isChecked)
         self.updateData()
-
-    def onPolyToggled(self, isChecked: bool) -> None:
-        """
-        Handle polydispersity toggle signal from PolydispersityWidget: tab enablement.
-        """
-        self.tabFitting.setTabEnabled(TAB_POLY, isChecked)
-        self.cmdFit.setEnabled(self.document.can_fit())
 
     def toggleMagnetism(self, isChecked: bool) -> None:
         """ The magnetism checkbox: an intent """
@@ -498,23 +437,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.tabFitting.setTabEnabled(TAB_MAGNETISM, isChecked)
         # Check if any parameters are ready for fitting
         self.cmdFit.setEnabled(self.document.can_fit())
-        self.magnetism_widget.isActive = isChecked
-
-    def onMagnetismToggled(self, isChecked: bool) -> None:
-        """
-        Handle magnetism toggle signal from MagnetismWidget: tab enablement.
-        """
-        self.tabFitting.setTabEnabled(TAB_MAGNETISM, isChecked)
-        self.cmdFit.setEnabled(self.document.can_fit())
 
     def toggleChainFit(self, isChecked: bool) -> None:
         """ The chain-fit checkbox: an intent """
         self.controller.set_flag("chain_fit", isChecked)
 
     def applyChainFit(self, isChecked: bool) -> None:
-        """ Enable/disable chain fitting (SettingsSync) """
-        self.is_chain_fitting = isChecked
-        # show/hide the ordering tab
+        """ Show or hide the order tab of a chain fit (SettingsSync) """
         if isChecked:
             self.tabFitting.insertTab(TAB_ORDERING, self.tabOrder, "Order")
         else:
@@ -550,10 +479,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """What depends on the layout, after it changed (SettingsSync) or after a data load."""
         doc = self.document
         params = doc.parameters
-        self.is2D = doc.is2D()
-        self.polydispersity_widget.is2D = self.is2D
-        self.model_is_loaded = len(params) > 0
-        self.cmdPlot.setEnabled(self.model_is_loaded)
+        self.cmdPlot.setEnabled(len(params) > 0)
         self.chkMagnetism.setEnabled(doc.can_have_magnetism())
         self.tabFitting.setTabEnabled(TAB_MAGNETISM, self.chkMagnetism.isChecked() and doc.can_have_magnetism())
         self.chkPolydispersity.setEnabled(bool(params.by_table(Table.POLY)))
@@ -567,7 +493,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         for column, width in self.lstParamHeaderSizes.items():
             self.lstParams.setColumnWidth(column, width)
         self.lstParams.header().setFont(self.boldFont)
-        self.smearing_widget.updateModel(has_model=self.model_is_loaded)
+        self.smearing_widget.updateModel(has_model=len(params) > 0)
         self.newModelSignal.emit()
 
     def _populateCategory(self, category: str) -> None:
@@ -588,9 +514,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """The constraint symbols of the other fit pages (retention keeps constraints that resolve)."""
         return set() if self.parent is None else set(self.coordinator.symbols(exclude=self))
 
-    def keyAt(self, row: int, model_key: str = "standard") -> str | None:
-        """The document key of the parameter in *row* of the table *model_key*."""
-        return self.table_adapters[list(self.model_dict).index(model_key)].key_at(row)
+    def keyAt(self, row: int, table: Table = Table.MAIN) -> str | None:
+        """The document key of the parameter in *row* of *table*."""
+        return self.tables[table].key_at(row)
+
+    def _currentTable(self) -> ParameterItemModel:
+        """The table of the tab shown."""
+        return self.tables[_TAB_TABLES[self.tabFitting.currentIndex()]]
 
     @classmethod
     def customModels(cls) -> dict[str, Any]:
@@ -665,9 +595,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.smearing_widget.smearingChangedSignal.connect(self.onSmearingOptionsUpdate)
         self.polydispersity_widget.updateDataSignal.connect(lambda: self.updateData())
         self.polydispersity_widget.deletePlotSignal.connect(self.setPlotDeletable)
-        self.polydispersity_widget.toggledSignal.connect(self.onPolyToggled)
         self.magnetism_widget.updateDataSignal.connect(lambda: self.updateData())
-        self.magnetism_widget.toggledSignal.connect(self.onMagnetismToggled)
 
         # Communicator signal
         self.communicator.updateModelCategoriesSignal.connect(self.onCategoriesChanged)
@@ -698,7 +626,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Generate name for the current fit
         """
-        if self.is2D:
+        if self.document.is2D():
             name += "2d"
         name = f"{self.modelName()} [{name}]"
         return name
@@ -709,15 +637,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         When clicked on parameter(s): fitting/constraints options
         When clicked on white space: model description
         """
-        # See which model we're dealing with by looking at the tab id
-        current_list = self.tabToList[self.tabFitting.currentIndex()]
-        model_key = self.tabToKey[self.tabFitting.currentIndex()]
-        rows = [s.row() for s in current_list.selectionModel().selectedRows()
-                if self.isCheckable(s.row(), model_key=model_key)]
+        # See which table we're dealing with by looking at the tab
+        model = self._currentTable()
+        rows = self.selectedParameters(model.table)
 
         menu = self.showModelDescription() if not rows else self.modelContextMenu(rows)
         try:
-            menu.exec_(current_list.viewport().mapToGlobal(position))
+            menu.exec_(model.view.viewport().mapToGlobal(position))
         except AttributeError as ex:
             logger.error("Error generating context menu: %s" % ex)
         return
@@ -730,12 +656,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         num_rows = len(rows)
         if num_rows < 1:
             return menu
-        current_list = self.tabToList[self.tabFitting.currentIndex()]
-        model_key = self.tabToKey[self.tabFitting.currentIndex()]
+        model = self._currentTable()
         # Select for fitting
         param_string = "parameter " if num_rows == 1 else "parameters "
         to_string = "to its current value" if num_rows == 1 else "to their current values"
-        constraints = [self.getConstraintForRow(i, model_key) for i in rows]
+        constraints = [self.getConstraintForRow(i, model.table) for i in rows]
         has_constraints = any(c is not None for c in constraints)
         has_real_constraints = any(c is not None and c.active for c in constraints)
 
@@ -785,7 +710,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.actionConstrain.triggered.connect(self.addSimpleConstraint)
         self.actionRemoveConstraint.triggered.connect(self.deleteConstraint)
         self.actionEditConstraint.triggered.connect(self.editConstraint)
-        self.actionMutualMultiConstrain.triggered.connect(lambda: self.showMultiConstraint(current_list=current_list))
+        self.actionMutualMultiConstrain.triggered.connect(lambda: self.showMultiConstraint(current_list=model.view))
         self.actionSelect.triggered.connect(self.selectParameters)
         self.actionDeselect.triggered.connect(self.deselectParameters)
         return menu
@@ -832,10 +757,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Fix each selected parameter to its current value: an inactive constraint that keeps the
         bounds to restore, and bounds narrowed around the value (bumps needs a range).
         """
-        model_key = self.tabToKey[self.tabFitting.currentIndex()]
+        table = self._currentTable().table
         params = self.document.parameters
-        for row in self.selectedParameters(model_key=model_key):
-            key = self.keyAt(row, model_key)
+        for row in self.selectedParameters(table):
+            key = self.keyAt(row, table)
             p = params[key]
             constraint = Constraint(param=params.legacy_key(key), value=format_number(p.value),
                                     min=format_number(p.min), max=format_number(p.max))
@@ -848,13 +773,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Edit the constraint of the selected parameter.
         """
-        current_list = self.tabToList[self.tabFitting.currentIndex()]
-        model_key = self.tabToKey[self.tabFitting.currentIndex()]
-        params_list = [s.data() for s in current_list.selectionModel().selectedRows()
-                       if self.isCheckable(s.row(), model_key=model_key)]
-        assert len(params_list) == 1
-        row = current_list.selectionModel().selectedRows()[0].row()
-        mc_widget = MultiConstraint(self, params=params_list, constraint=self.getConstraintForRow(row, model_key))
+        model = self._currentTable()
+        rows = self.selectedParameters(model.table)
+        assert len(rows) == 1
+        params_list = [model.index(rows[0], 0).data()]
+        mc_widget = MultiConstraint(self, params=params_list, constraint=self.getConstraintForRow(rows[0], model.table))
         if not any(constraint_service.is_polydisperse(self.document, p) for p in params_list):
             mc_widget.lblWarning.setText("")
         if mc_widget.exec_() != QtWidgets.QDialog.Accepted:
@@ -869,63 +792,43 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Delete the constraints of the selected parameters.
         """
-        current_list = self.tabToList[self.tabFitting.currentIndex()]
-        model_key = self.tabToKey[self.tabFitting.currentIndex()]
-        for index in current_list.selectionModel().selectedRows():
-            if self.isCheckable(index.row(), model_key=model_key):
-                self.controller.remove_constraint(self.keyAt(index.row(), model_key))
+        table = self._currentTable().table
+        for row in self.selectedParameters(table):
+            self.controller.remove_constraint(self.keyAt(row, table))
 
-    def getConstraintForRow(self, row: int, model_key: str = "standard") -> Constraint | None:
+    def getConstraintForRow(self, row: int, table: Table = Table.MAIN) -> Constraint | None:
         """
         The constraint of the parameter in *row*, if any
         """
-        key = self.keyAt(row, model_key)
+        key = self.keyAt(row, table)
         if key is None or not self.document.parameters[key].fittable:
             return None
         return self.document.parameters[key].constraint
 
     def selectParameters(self) -> None:
         """
-        Selected parameter is chosen for fitting
+        The selected parameters are fitted (the context menu)
         """
-        status = QtCore.Qt.Checked
-        model_key = self.tabToKey[self.tabFitting.currentIndex()]
-        model = self.model_dict[model_key]
-        current_list = self.lst_dict[model_key]
-        item = model.itemFromIndex(current_list.currentIndex())
-        self.setParameterSelection(status, item=item, model_key=model_key)
+        self.setFitForSelection(True, self._currentTable().table)
 
     def deselectParameters(self) -> None:
         """
-        Selected parameters are removed for fitting
+        The selected parameters are not fitted
         """
-        status = QtCore.Qt.Unchecked
-        model_key = self.tabToKey[self.tabFitting.currentIndex()]
-        model = self.model_dict[model_key]
-        current_list = self.lst_dict[model_key]
-        item = model.itemFromIndex(current_list.currentIndex())
-        self.setParameterSelection(status, item=item, model_key=model_key)
+        self.setFitForSelection(False, self._currentTable().table)
 
-    def selectedParameters(self, model_key: str = "standard") -> list[int]:
+    def selectedParameters(self, table: Table = Table.MAIN) -> list[int]:
         """ Returns list of selected (highlighted) parameters """
-        return [s.row() for s in self.lst_dict[model_key].selectionModel().selectedRows()
-                if self.isCheckable(s.row(), model_key=model_key)]
+        return [s.row() for s in self.tables[table].view.selectionModel().selectedRows()
+                if self.isCheckable(s.row(), table)]
 
-    def setParameterSelection(self, status: QtCore.Qt.CheckState = QtCore.Qt.Unchecked, item: QtGui.QStandardItem | None = None, model_key: str = "standard") -> None:
+    def setFitForSelection(self, fit: bool, table: Table = Table.MAIN) -> None:
         """
-        Selected parameters are chosen for fitting
+        Every selected parameter of *table* is fitted, or not (checking one of several selected
+        rows checks them all, https://github.com/SasView/sasview/issues/1676)
         """
-        # Convert to proper indices and set requested enablement
-        if item is None:
-            return
-        # We only want to select/deselect all items if
-        # `item` is also selected!
-        # Otherwise things get confusing.
-        # https://github.com/SasView/sasview/issues/1676
-        if item.row() not in self.selectedParameters(model_key=model_key):
-            return
-        for row in self.selectedParameters(model_key=model_key):
-            self.model_dict[model_key].item(row, 0).setCheckState(status)
+        for row in self.selectedParameters(table):
+            self.controller.set_fit_flag(self.keyAt(row, table), fit)
 
     def getConstraintsForFitting(self) -> list[tuple[str, str]]:
         """
@@ -1031,15 +934,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         React to parameter selection
         """
-        current_list = self.tabToList[self.tabFitting.currentIndex()]
-        model_key = self.tabToKey[self.tabFitting.currentIndex()]
-
-        rows = current_list.selectionModel().selectedRows()
+        rows = self.lstParams.selectionModel().selectedRows()
         # Clean previous messages
         self.communicator.statusBarUpdateSignal.emit("")
         if len(rows) == 1:
             # Show constraint, if present
-            constr = self.getConstraintForRow(rows[0].row(), model_key=model_key)
+            constr = self.getConstraintForRow(rows[0].row())
             if constr is None:
                 return
             if constr.func is not None:
@@ -1076,14 +976,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Helper function for recalculation of data used in plotting
         """
         # Update the chart
-        if self.data_is_loaded:
+        if self.document.is_loaded():
             self.cmdPlot.setText("Compute/Plot")
             self.controller.compute_theory()
         else:
             self.cmdPlot.setText("Calculate")
             # The theory grid, if no data passed
             self.controller.ensure_default_dataset()
-            self.theory_item = None # ensure theory is recalc. before plot, see showTheoryPlot()
+            # ensure theory is recalc. before plot, see showTheoryPlot()
+            self.plot_publisher.theory_item = None
 
     def onSelectCategory(self) -> None:
         """
@@ -1172,7 +1073,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                                     improvement_delta=0.1)
             updater = handler.update_fit
 
-        if self.is_chain_fitting:
+        chain = self.document.flags.chain_fit
+        if chain:
             order = self.document.dataset_order
             self.controller.set_chain_order([order[self.all_data.index(item)] for item in self.order_widget.ordering()])
 
@@ -1185,7 +1087,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return
 
         # Create the fitting thread, based on the fitter; the completion comes back with its request
-        finished = self.batchFittingFinishedSignal if self.is_batch_fitting else self.fittingFinishedSignal
+        batch = self.document.mode is PageMode.BATCH
+        finished = self.batchFittingFinishedSignal if batch else self.fittingFinishedSignal
         def completefn(result):
             finished.emit(tuple() if result is None else result, request)
 
@@ -1196,7 +1099,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                                   page_id=[[self.page_id]],
                                   updatefn=updater,
                                   completefn=completefn,
-                                  reset_flag=self.is_chain_fitting)
+                                  reset_flag=chain)
 
         if config.USING_TWISTED:
             # start the trhrhread with twisted
@@ -1302,15 +1205,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.communicator.statusBarUpdateSignal.emit(msg)
             return
 
-        # Don't recalculate chi2 - it's in res.fitness already
-        self.fitResults = True
-        if result is None or len(result) == 0 or len(result[0]) == 0:
-            msg = "Fitting failed."
-            self.communicator.statusBarUpdateSignal.emit(msg)
-            return
-        res_list = result[0][0]
-        res = res_list[0]
-        self.chi2 = res.fitness
+        res = result[0][0][0]
         param_dict = self.controller.outcome(res)
 
         if param_dict is None:
@@ -1328,8 +1223,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.communicator.statusBarUpdateSignal.emit(msg)
 
         # Dictionary of fitted parameter: value, error
-        # e.g. param_dic = {"sld":(1.703, 0.0034), "length":(33.455, -0.0983)}: one undoable step
-        self.controller.apply_fit(param_dict)
+        # e.g. param_dic = {"sld":(1.703, 0.0034), "length":(33.455, -0.0983)}: one undoable step.
+        # Its chi2 (in res.fitness) is shown until the parameters change.
+        self.controller.apply_fit(param_dict, res.fitness)
 
         # Clean up polydispersity plots if polydispersity has been disabled
         if not self.chkPolydispersity.isChecked():
@@ -1339,8 +1235,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.onPlot()
 
         # Read only value - we can get away by just printing it here
-        chi2_repr = GuiUtils.formatNumber(self.chi2, high=True)
-        self.lblChi2Value.setText(chi2_repr)
+        self.lblChi2Value.setText(GuiUtils.formatNumber(res.fitness, high=True))
 
         # Ensure undo/redo action state is refreshed in the GUI manager.
         # The push above emits stackChanged, but if the per-stack signal
@@ -1375,7 +1270,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Regardless of previous state, this should now be `plot show` functionality only
         self.cmdPlot.setText("Compute/Plot")
         # Force data recalculation so existing charts are updated
-        if not self.data_is_loaded:
+        if not self.document.is_loaded():
             self.showTheoryPlot()
         else:
             self.showPlot()
@@ -1403,7 +1298,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Generate a new dataset for model
         """
-        if not self.data_is_loaded:
+        if not self.document.is_loaded():
             self.controller.ensure_default_dataset()
             self.smearing_widget.updateData(self.data)
         self.controller.compute_theory()
@@ -1413,10 +1308,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Show the current theory plot in MPL
         """
         # Show the chart if ready
-        if self.theory_item is None:
+        publisher = self.plot_publisher
+        if publisher.theory_item is None:
             self.recalculatePlotData()
-        elif self.model_data:
-            self._requestPlots(self.model_data.name, self.theory_item.model())
+        elif publisher.model_data:
+            self._requestPlots(publisher.model_data.name, publisher.theory_item.model())
 
     def showPlot(self) -> None:
         """
@@ -1466,29 +1362,23 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.cbStructureFactor.clear()
         self.cbStructureFactor.addItems(sorted([STRUCTURE_DEFAULT] + self.catalog.structure_factors()))
 
-    def isCheckable(self, row: int, model_key: str = "standard") -> bool:
-        model = self.model_dict[model_key]
-        if model.item(row,0) is None:
-            return False
-        return model.item(row, 0).isCheckable()
+    def isCheckable(self, row: int, table: Table = Table.MAIN) -> bool:
+        model = self.tables[table]
+        return bool(model.flags(model.index(row, 0)) & QtCore.Qt.ItemIsUserCheckable)
 
     def setTheoryItem(self, item: Any) -> None:
         """
         Reset the theory item based on the data explorer update
         """
-        self.theory_item = item
+        self.plot_publisher.theory_item = item
 
     def showTheory(self, result: Any) -> None:
         """
-        A theory result the controller accepted: chi² (unless a fit just set it) and the plots
+        A theory result the controller accepted: chi² (a fit's, until the parameters change) and the plots
         """
-        if self.data_is_loaded:
-            # Recalculate chi2 only for manual parameter change, not after fitting
-            if not self.fitResults:
-                self.chi2 = result.chi2
-                chi2_repr = "---" if self.chi2 is None else GuiUtils.formatNumber(self.chi2, high=True)
-                self.lblChi2Value.setText(chi2_repr)
-            self.fitResults = False
+        if self.document.is_loaded():
+            chi2 = self.controller.chi2()
+            self.lblChi2Value.setText("---" if chi2 is None else GuiUtils.formatNumber(chi2, high=True))
         self.plot_publisher.publish(result)
 
     def calculateDataFailed(self, reason: Any) -> None:
@@ -1666,11 +1556,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             params=serializer.report_parameters(doc),
             dispersions={p.key[:-len(".width")]: p.dispersion.type for p in doc.parameters.by_table(Table.POLY)},
             qmin=doc.options.qmin, qmax=doc.options.qmax,
-            chi2=self.chi2,
+            chi2=self.controller.chi2(),
             smearing=(smearing.mode, smearing.accuracy, smearing.d_down, smearing.d_up),
             resolution=None if active is None else active.resolution,
-            is_batch=self.is_batch_fitting,
-            index=self.all_data[self.data_index] if self.all_data else self.theory_item,
+            is_batch=doc.mode is PageMode.BATCH,
+            index=self.all_data[self.data_index] if self.all_data else self.plot_publisher.theory_item,
             results_panel=getattr(self.parent, 'results_panel', None),
             grid_window=getattr(self.parent, 'grid_window', None))
 
@@ -1810,4 +1700,4 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Store current state for fit_page
         """
-        serializer.page_state(self.document, state, self.kernel(), self.chi2)
+        serializer.page_state(self.document, state, self.kernel(), self.controller.chi2())

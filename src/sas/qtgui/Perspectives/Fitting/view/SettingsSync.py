@@ -24,6 +24,7 @@ class SettingsSync:
 
     def __init__(self, page) -> None:
         self._page = page
+        self._applied = {"polydispersity": False, "magnetism": False, "chain_fit": False}   # side effects applied
         self.subscription = page.controller.subscribe_view(self._on_change)
 
     def _on_change(self, change) -> None:
@@ -57,14 +58,14 @@ class SettingsSync:
 
     def _flags(self) -> None:
         page, f = self._page, self._page.document.flags
-        for checkbox, value, applied, apply in (
-                (page.chkPolydispersity, f.polydispersity, page.polydispersity_widget.isActive,
-                 page.applyPolydispersity),
-                (page.chkMagnetism, f.magnetism, page.magnetism_widget.isActive, page.applyMagnetism),
-                (page.chkChainFit, f.chain_fit, page.is_chain_fitting, page.applyChainFit)):
+        for name, checkbox, apply in (("polydispersity", page.chkPolydispersity, page.applyPolydispersity),
+                                      ("magnetism", page.chkMagnetism, page.applyMagnetism),
+                                      ("chain_fit", page.chkChainFit, page.applyChainFit)):
+            value = getattr(f, name)
             if checkbox.isChecked() != value:
                 checkbox.blockSignals(True)
                 checkbox.setChecked(value)
                 checkbox.blockSignals(False)
-            if applied != value:
+            if self._applied[name] != value:
+                self._applied[name] = value
                 apply(value)

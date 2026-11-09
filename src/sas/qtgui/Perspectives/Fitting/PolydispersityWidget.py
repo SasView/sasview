@@ -1,7 +1,7 @@
 """
-The polydispersity tab. Its table is built and patched from the page's document
-(``ParameterTableAdapter``); the widget keeps the distribution choice, which may
-ask for an array file, and the polydispersity toggle.
+The polydispersity tab. Its table shows the page's document (``ParameterItemModel``, which
+the page sets as ``poly_model``); the widget keeps the distribution choice, which may ask for
+an array file.
 """
 import logging
 import os
@@ -11,7 +11,7 @@ from PySide6 import QtCore, QtWidgets
 from sasmodels.weights import MODELS as POLYDISPERSITY_MODELS
 
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
-from sas.qtgui.Perspectives.Fitting.model.parameters import ArrayDistribution, Dispersion
+from sas.qtgui.Perspectives.Fitting.model.parameters import ArrayDistribution, Dispersion, Table
 
 # Local UI
 from sas.qtgui.Perspectives.Fitting.UI.PolydispersityWidget import Ui_PolydispersityWidgetUI
@@ -22,36 +22,23 @@ logger = logging.getLogger(__name__)
 class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
     updateDataSignal = QtCore.Signal()
     deletePlotSignal = QtCore.Signal(str)
-    toggledSignal = QtCore.Signal(bool)  # Signal when polydispersity is enabled/disabled
 
     def __init__(self, parent: QtWidgets.QWidget | None = None) -> None:
         super(PolydispersityWidget, self).__init__()
 
         self.setupUi(self)
         self.lstPoly.isEnabled = True
-        self.poly_model = FittingUtilities.ToolTippedItemModel()
-        self.is2D = False
-        self.isActive = False
+        self.poly_model = None      # the page's ParameterItemModel of the polydispersity table
         self._fitting_widget = parent
-        self.has_poly_error_column = False
         FittingUtilities.setTableProperties(self.lstPoly)
         self.lstPoly.setItemDelegate(PolyViewDelegate(self))
         self.lstPoly.installEventFilter(self)
 
-        self.lstPoly.setModel(self.poly_model)
-
-        self.lstPoly.itemDelegate().combo_updated.connect(self.onPolyComboIndexChange)
         self.lstPoly.itemDelegate().filename_updated.connect(self.onPolyFilenameChange)
 
         self.lstPoly.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         # self.lstPoly.customContextMenuRequested.connect(self.showModelContextMenu)
         self.lstPoly.setAttribute(QtCore.Qt.WA_MacShowFocusRect, False)
-
-    def polyModel(self) -> FittingUtilities.ToolTippedItemModel:
-        """
-        Return the polydispersity model
-        """
-        return self.poly_model
 
     @staticmethod
     def polyNameToParam(param_name: str) -> str:
@@ -62,15 +49,6 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         param_name += '.width'
         return param_name
 
-    def togglePoly(self, isChecked: bool = True) -> None:
-        """
-        Toggle polydispersity (the kernel's widths follow the document, KernelBuilder.build)
-        """
-        self.isActive = isChecked
-
-        # Emit signal to notify parent that state changed
-        self.toggledSignal.emit(isChecked)
-
     def onPolyFilenameChange(self, row_index: int) -> None:
         """
         Respond to filename_updated signal from the delegate
@@ -79,7 +57,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         array_caption = 'array'
 
         # Get the combo box reference
-        ind = self.poly_model.index(row_index, self.lstPoly.itemDelegate().poly_function)
+        ind = self.poly_model.index(row_index, self.poly_model.column("function"))
         widget = self.lstPoly.indexWidget(ind)
 
         # Update the combo box so it displays "array"
@@ -98,7 +76,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         page = self._fitting_widget
         if page.controller.muted:
             return
-        key = page.keyAt(row_index, "poly")
+        key = page.keyAt(row_index, Table.POLY)
         if key is None:
             return
         current = page.document.parameters[key].dispersion
@@ -107,7 +85,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
                 array = self.loadPolydispArray(row_index)
             except OSError:
                 # Cancelled or unreadable: show the current distribution again
-                combo = self.lstPoly.indexWidget(self.poly_model.index(row_index, self.lstPoly.itemDelegate().poly_function))
+                combo = self.lstPoly.indexWidget(self.poly_model.index(row_index, self.poly_model.column("function")))
                 if combo is not None:
                     combo.blockSignals(True)
                     combo.setCurrentIndex(combo.findText(current.type))

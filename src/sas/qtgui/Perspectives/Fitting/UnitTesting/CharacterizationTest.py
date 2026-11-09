@@ -27,7 +27,6 @@ def page(request):
     p = g.new_page(data=g.make_data1d("d1", "data1"))
     g.select_model(p, "Cylinder", "cylinder")
     yield p
-    p.shadow_checker.assert_ok(request)
     p.close()
 
 
@@ -37,8 +36,8 @@ def rows(page) -> dict:
 
 
 def table_text(item_model) -> list[list[str]]:
-    return [[item_model.item(r, c).text() if item_model.item(r, c) else None
-             for c in range(item_model.columnCount())] for r in range(item_model.rowCount())]
+    return [[item_model.index(r, c).data() for c in range(item_model.columnCount())]
+            for r in range(item_model.rowCount())]
 
 
 def requests_during(page, action) -> int:
@@ -100,20 +99,9 @@ class TheoryTriggerTest:
 
 
 class RetentionTest:
-    """§2.6: what survives a layout change today.
+    """§2.6: what survives a layout change (from the document, register R-9)."""
 
-    onSelectModel re-reads the whole table only when a theory has been
-    computed (``model_data``), which is the normal state in the application.
-    The tests mock the computation, so they set ``model_data`` themselves.
-    """
-
-    @pytest.fixture
-    def computed(self, page):
-        page.model_data = MagicMock()
-        return page
-
-    def testModelSwitchKeepsMainValuesBoundsAndFitFlags(self, computed):
-        page = computed
+    def testModelSwitchKeepsMainValuesBoundsAndFitFlags(self, page):
         g.set_cell(page._model_model, "radius", 1, "33.0")
         g.set_cell(page._model_model, "radius", 2, "5.0")
         g.set_cell(page._model_model, "radius", 3, "90.0")
@@ -126,8 +114,7 @@ class RetentionTest:
         assert rows(page)["length"][1] == "True"
         assert page.kernel().details["radius"][1:] == [5.0, 90.0]
 
-    def testModelSwitchKeepsPolydispersity(self, computed):
-        page = computed
+    def testModelSwitchKeepsPolydispersity(self, page):
         page.chkPolydispersity.setChecked(True)
         poly = page.polydispersity_widget.poly_model
         g.set_cell(poly, "Distribution of radius", 1, "0.2")
@@ -162,13 +149,12 @@ class RetentionTest:
         assert page.cbModel.currentText() == "hollow_cylinder"
         assert rows(page)["radius"][2] == "33.0"
 
-    def testModelSwitchClearsErrors(self, computed):
-        page = computed
+    def testModelSwitchClearsErrors(self, page):
         g.set_checked(page._model_model, "radius")
         fake_fit(page, {"radius": (25.5, 0.75)})
-        assert page.has_error_column
+        assert page._model_model.has_error_column
         g.select_model(page, "Cylinder", "hollow_cylinder")
-        assert not page.has_error_column
+        assert not page._model_model.has_error_column
         assert rows(page)["radius"][:4] == ["radius", "True", "25.5", None]
 
     def testStructureFactorSwitchKeepsValues(self, page):
@@ -262,13 +248,14 @@ class FitUndoTest:
 
         page.undo_stack.undo()
         assert rows(page)["radius"][2:4] == ["20.0", None]
-        assert not page.has_error_column
+        assert not page._model_model.has_error_column
         assert page.lblChi2Value.text() == "1.5"
 
         page.undo_stack.redo()
         assert rows(page)["radius"][2:4] == ["25.5", None]
-        assert not page.has_error_column
-        assert page.chi2 == 1.5
+        assert not page._model_model.has_error_column
+        # The parameters changed since the fit: its chi2 is no longer the page's (register R-23)
+        assert page.controller.chi2() is None
 
 
 class BatchCompletionTest:

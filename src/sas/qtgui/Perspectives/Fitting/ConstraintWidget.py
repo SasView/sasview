@@ -311,7 +311,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         weights = {}
         for tab in tabs_to_fit:
             tab_object = ObjectLibrary.getObject(tab)
-            weight = FittingUtilities.getRelativeError(tab_object.data, tab_object.is2D,
+            weight = FittingUtilities.getRelativeError(tab_object.data, tab_object.document.is2D(),
                                                        flag=tab_object.document.options.theory_weighting)
             weights[tab] = weight
 
@@ -744,7 +744,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         object = ObjectLibrary.getObject(tab)
         if not isinstance(object, FittingWidget):
             return False
-        if not object.data_is_loaded:
+        if not object.document.is_loaded():
             return False
         return True
 

@@ -145,7 +145,7 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         """
         Callback for resetting qmin/qmax
         """
-        if self.parent is not None and self.parent.data_is_loaded:
+        if self.parent is not None and self.parent.document.is_loaded():
             self.qmin, self.qmax, self.npts = plots.data_range(self._data())
         else:
             self.qmin, self.qmax, self.npts = (self.QMIN_DEFAULT,

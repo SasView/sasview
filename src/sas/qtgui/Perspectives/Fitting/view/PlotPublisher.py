@@ -21,6 +21,8 @@ class PlotPublisher:
 
     def __init__(self, page) -> None:
         self._page = page
+        self.model_data = None      # the last theory curve published
+        self.theory_item = None     # the Data Explorer item of a page without data (GuiManager sets it)
 
     def publish(self, result) -> None:
         page = self._page
@@ -50,7 +52,7 @@ class PlotPublisher:
             plot.symbol = "Line"
             self._add(item, plot)
             plots.append(plot)
-        page.model_data = theory
+        self.model_data = theory
         for plot in plots:
             page.communicator.plotUpdateSignal.emit([plot])
             if one_d:

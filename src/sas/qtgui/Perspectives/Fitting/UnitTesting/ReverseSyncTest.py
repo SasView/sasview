@@ -1,11 +1,10 @@
 """
-Document to view (FW-MVC-DESIGN.md §6, Phases 4 to 7): a change written to the document reaches
-the item models (ParameterTableAdapter) and the settings widgets (SettingsSync), and every
-engine instance built from it (KernelBuilder.build) has the document's effective state.
+Document to view (FW-MVC-DESIGN.md §6, Phases 4 to 10): a change written to the document is shown
+by the tables (``ParameterItemModel``, which read the document) and the settings widgets
+(``SettingsSync``), and every engine instance built from it (``KernelBuilder.build``) has the
+document's effective state.
 
-Each test writes the document directly, as the intents do. The page invariant
-(``ShadowChecker``, after every commit and at teardown) is the oracle: the three item
-models must agree with the document.
+Each test writes the document directly, as the intents do.
 """
 from unittest.mock import MagicMock
 
@@ -14,6 +13,7 @@ from PySide6 import QtCore
 
 from sas.qtgui.Perspectives.Fitting.model.events import Origin
 from sas.qtgui.Perspectives.Fitting.model.parameters import Constraint, Dispersion, Table, ValueKind
+from sas.qtgui.Perspectives.Fitting.model.serializer import format_number
 from sas.qtgui.Perspectives.Fitting.services import constraints as constraint_service
 from sas.qtgui.Perspectives.Fitting.UnitTesting import golden_support as g
 
@@ -31,7 +31,6 @@ def case(request):
     page.undo_depth = len(page.undo_stack._undo_stack)
     yield page
     for p in pages:
-        p.shadow_checker.assert_ok()
         p.close()
     # Document-first changes are not recorded by the legacy slots: the guard mutes them
     assert len(page.undo_stack._undo_stack) == page.undo_depth
@@ -43,7 +42,7 @@ def write(page, key, **fields):
 
 
 def cell(item_model, name, column):
-    return item_model.item(g.find_row(item_model, name), column).text()
+    return item_model.index(g.find_row(item_model, name), column).data()
 
 
 @pytest.mark.parametrize("case", ["cylinder"], indirect=True)
@@ -55,18 +54,18 @@ def testValueAndBoundsReachTableAndKernel(case):
 
 
 @pytest.mark.parametrize("case", ["cylinder"], indirect=True)
-def testUnchangedNumbersKeepTheirSpelling(case):
+def testNumbersAreShownInTheCanonicalFormat(case):
+    """Register R-22 (Phase 10): the table shows the document's number, not the spelling typed."""
     g.set_cell(case._model_model, "length", 1, "400.00")
     case.undo_depth = len(case.undo_stack._undo_stack)
-    write(case, "length", value=400.0, min=0.0)
-    assert cell(case._model_model, "length", 1) == "400.00"
+    assert cell(case._model_model, "length", 1) == "400.0"
 
 
 @pytest.mark.parametrize("case", ["cylinder"], indirect=True)
 def testFitFlagReachesCheckboxAndFitLists(case):
     write(case, "length", fit=True)
     row = g.find_row(case._model_model, "length")
-    assert case._model_model.item(row, 0).checkState() == QtCore.Qt.Checked
+    assert case._model_model.index(row, 0).data(QtCore.Qt.CheckStateRole) == QtCore.Qt.Checked
     assert constraint_service.fitted_names(case.document) == ["scale", "radius", "length"]
     assert case.cmdFit.isEnabled()
 
@@ -75,13 +74,13 @@ def testFitFlagReachesCheckboxAndFitLists(case):
 def testErrorsInsertAndRemoveTheErrorColumns(case):
     write(case, "length.width", error=0.01)
     poly = case.polydispersity_widget
-    assert (case.has_error_column, poly.has_poly_error_column) == (True, True)
+    assert (case._model_model.has_error_column, poly.poly_model.has_error_column) == (True, True)
     assert cell(poly.poly_model, "Distribution of length", 2) == "0.01"
     assert cell(case._model_model, "radius", 2) == ""
-    assert case.lstParams.itemDelegate().param_value == 1 and case.lstParams.itemDelegate().param_min == 3
+    assert (case._model_model.column("value"), case._model_model.column("min")) == (1, 3)
     write(case, "length.width", error=None)
-    assert (case.has_error_column, poly.has_poly_error_column) == (False, False)
-    assert case.lstParams.itemDelegate().param_min == 2
+    assert (case._model_model.has_error_column, poly.poly_model.has_error_column) == (False, False)
+    assert case._model_model.column("min") == 2
 
 
 @pytest.mark.parametrize("case", ["polydispersity"], indirect=True)
@@ -94,8 +93,10 @@ def testDispersionReachesPolyTableKernelAndMainSubRow(case):
     assert (kernel.getParam("length.npts"), kernel.getParam("length.nsigmas")) == (21, 2.5)
     assert kernel.getParam("length.width") == 0.2
     # The width is also shown under 'length' in the main table
-    sub = case._model_model.item(g.find_row(case._model_model, "length"), 0).child(0)
-    assert (sub.child(0, 1).text(), sub.child(0, 4).text()) == ("0.200", "rectangle")
+    model = case._model_model
+    sub = model.index(0, 0, model.index(g.find_row(model, "length"), 0))
+    assert sub.data() == "Polydispersity"
+    assert (model.index(0, 1, sub).data(), model.index(0, 4, sub).data()) == ("0.200", "rectangle")
 
 
 @pytest.mark.parametrize("case", ["magnetism_2d"], indirect=True)
@@ -109,27 +110,25 @@ def testMagnetValueReachesTableAndDict(case):
 def testChoiceSetsTheComboAndTheDerivedEditability(case):
     write(case, "radius_effective_mode", value=1)
     row = g.find_row(case._model_model, "radius_effective")
-    assert not case._model_model.item(row, 1).isEditable()
-    assert not case._model_model.item(row, 0).isCheckable()
+    assert not bool(case._model_model.flags(case._model_model.index(row, 1)) & QtCore.Qt.ItemIsEditable)
+    assert not bool(case._model_model.flags(case._model_model.index(row, 0)) & QtCore.Qt.ItemIsUserCheckable)
     write(case, "radius_effective_mode", value=0)
-    assert case._model_model.item(row, 1).isEditable()
+    assert bool(case._model_model.flags(case._model_model.index(row, 1)) & QtCore.Qt.ItemIsEditable)
 
 
 @pytest.mark.parametrize("case", ["cylinder"], indirect=True)
-def testConstraintBecomesTheHiddenChildItem(case):
+def testAConstraintLocksTheRow(case):
     constraint = Constraint(param="length", func="2*M1.radius", value_ex="2*M1.radius")
     with case.document.transaction(Origin.USER) as tx:
         tx.set_constraint("length", constraint)
         tx.set_parameter("length", fit=True)
     row = g.find_row(case._model_model, "length")
-    stored = case._model_model.item(row, 1).child(0).data()
-    assert stored is not constraint and stored.func == "2*M1.radius"
-    assert not case._model_model.item(row, 1).isEditable()
+    assert not bool(case._model_model.flags(case._model_model.index(row, 1)) & QtCore.Qt.ItemIsEditable)
     assert constraint_service.complex_constraints(case.document, Table.MAIN) == [("length", "2*M1.radius")]
     with case.document.transaction(Origin.USER) as tx:
         tx.set_constraint("length", None)
     assert case.getConstraintForRow(row) is None
-    assert case._model_model.item(row, 1).isEditable()
+    assert bool(case._model_model.flags(case._model_model.index(row, 1)) & QtCore.Qt.ItemIsEditable)
 
 
 @pytest.mark.parametrize("case", ["cylinder"], indirect=True)
@@ -153,10 +152,10 @@ def testRestoringASnapshotPatchesEveryRow(case):
 
 @pytest.mark.parametrize("case", ["cylinder"], indirect=True)
 def testUserEditIsDocumentFirstAndKeepsItsSpelling(case):
-    """Phase 5: a cell edit is an intent; the cell keeps what was typed."""
+    """Phase 5: a cell edit is an intent; the cell shows the document (R-22)."""
     g.set_cell(case._model_model, "radius", 1, "36")
     assert case.document.parameters["radius"].value == 36.0 == case.kernel().getParam("radius")
-    assert cell(case._model_model, "radius", 1) == "36"
+    assert cell(case._model_model, "radius", 1) == "36.0"
     assert case.undo_stack._undo_stack[-1].new == {"value": 36.0}
     case.undo_depth += 1
 
@@ -173,3 +172,10 @@ def testEveryParameterOfEveryCase(case):
                     fields.update(min=p.min - 1.0, max=p.max + 1.0)
             if fields:
                 tx.set_parameter(p.key, **fields)
+    # Every table shows the new state
+    for model in case.tables.values():
+        for row in range(model.rowCount()):
+            key = model.key_at(row)
+            p = case.document.parameters[key] if key is not None else None
+            if p is not None and p.kind is ValueKind.FLOAT:
+                assert model.index(row, model.column("value")).data() == format_number(p.value)

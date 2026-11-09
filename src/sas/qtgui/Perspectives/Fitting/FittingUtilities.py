@@ -1,7 +1,7 @@
 import copy
 
 import numpy
-from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6 import QtWidgets
 
 from sas.qtgui.Perspectives.Fitting.model.kernel import (  # noqa: F401 (re-exported)
     fixed_choices,
@@ -17,51 +17,6 @@ from sas.qtgui.Perspectives.Fitting.model.serializer import (  # noqa: F401 (re-
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
 from sas.qtgui.Utilities import GuiUtils
 
-model_header_captions = ['Parameter', 'Value', 'Min', 'Max', 'Units']
-
-model_header_tooltips = ['Select parameter for fitting',
-                         'Enter parameter value',
-                         'Enter minimum value for parameter',
-                         'Enter maximum value for parameter',
-                         'Unit of the parameter']
-
-poly_header_captions = ['Parameter', 'PD[ratio]', 'Min', 'Max', 'Npts', 'Nsigs',
-                        'Function', 'Filename']
-
-poly_header_tooltips = ['Select parameter for fitting',
-                        'Enter polydispersity ratio (Std deviation/mean).\n'+
-                        'For angles this can be either std deviation or half width (for uniform distributions) in degrees',
-                        'Enter minimum value for parameter',
-                        'Enter maximum value for parameter',
-                        'Enter number of points for parameter',
-                        'Enter number of sigmas parameter',
-                        'Select distribution function',
-                        'Select filename with user-definable distribution']
-
-error_tooltip = 'Error value for fitted parameter'
-header_error_caption = 'Error'
-
-class ToolTippedItemModel(QtGui.QStandardItemModel):
-    """
-    Subclass from QStandardItemModel to allow displaying tooltips in
-    QTableView model.
-    """
-    def __init__(self, parent=None):
-        QtGui.QStandardItemModel.__init__(self, parent)
-
-    def headerData(self, section, orientation, role=QtCore.Qt.DisplayRole):
-        """
-        Displays tooltip for each column's header
-        :param section:
-        :param orientation:
-        :param role:
-        :return:
-        """
-        if role == QtCore.Qt.ToolTipRole:
-            if orientation == QtCore.Qt.Horizontal:
-                return str(self.header_tooltips[section])
-
-        return QtGui.QStandardItemModel.headerData(self, section, orientation, role)
 
 def parse_number(text) -> float | None:
     """A typed number in double precision (register R-12), the locale's spelling as a fallback;
@@ -75,67 +30,6 @@ def parse_number(text) -> float | None:
     except TypeError:
         return None
 
-
-def addHeadingRowToModel(model, name):
-    """adds a non-interactive top-level row to the model"""
-    header_row = [QtGui.QStandardItem() for i in range(5)]
-    header_row[0].setText(name)
-
-    font = header_row[0].font()
-    font.setBold(True)
-    header_row[0].setFont(font)
-
-    for item in header_row:
-        item.setEditable(False)
-        item.setCheckable(False)
-        item.setSelectable(False)
-
-    model.appendRow(header_row)
-
-def addHeadersToModel(model):
-    """
-    Adds predefined headers to the model
-    """
-    for i, item in enumerate(model_header_captions):
-        model.setHeaderData(i, QtCore.Qt.Horizontal, item)
-
-    model.header_tooltips = copy.copy(model_header_tooltips)
-
-def addErrorHeadersToModel(model):
-    """
-    Adds predefined headers to the model
-    """
-    model_header_error_captions = copy.copy(model_header_captions)
-    model_header_error_captions.insert(2, header_error_caption)
-    for i, item in enumerate(model_header_error_captions):
-        model.setHeaderData(i, QtCore.Qt.Horizontal, item)
-
-    model_header_error_tooltips = copy.copy(model_header_tooltips)
-    model_header_error_tooltips.insert(2, error_tooltip)
-    model.header_tooltips = copy.copy(model_header_error_tooltips)
-
-def addPolyHeadersToModel(model):
-    """
-    Adds predefined headers to the model
-    """
-    for i, item in enumerate(poly_header_captions):
-        model.setHeaderData(i, QtCore.Qt.Horizontal, item)
-
-    model.header_tooltips = copy.copy(poly_header_tooltips)
-
-
-def addErrorPolyHeadersToModel(model):
-    """
-    Adds predefined headers to the model
-    """
-    poly_header_error_captions = copy.copy(poly_header_captions)
-    poly_header_error_captions.insert(2, header_error_caption)
-    for i, item in enumerate(poly_header_error_captions):
-        model.setHeaderData(i, QtCore.Qt.Horizontal, item)
-
-    poly_header_error_tooltips = copy.copy(poly_header_tooltips)
-    poly_header_error_tooltips.insert(2, error_tooltip)
-    model.header_tooltips = copy.copy(poly_header_error_tooltips)
 
 def calculateChi2(reference_data, current_data, weight):
     """

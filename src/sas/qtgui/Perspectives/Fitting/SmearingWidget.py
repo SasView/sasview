@@ -157,7 +157,7 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         if self.has_model:
             # Only give custom smearing options after the model is defined, but always offer them
             #  regardless of the data state
-            if isinstance(self.data, Data1D) or not self.parent.is2D:
+            if isinstance(self.data, Data1D) or (self.data is None and not self.parent.document.is2D()):
                 # 1D data smearing options
                 self.cbSmearing.addItems(SMEARING_1D)
             else:

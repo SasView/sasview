@@ -2,9 +2,6 @@
 The fit page intents (FitPageController, FW-MVC-DESIGN.md §3.1, Phases 5 and 6) as the user reaches them:
 an edit in a table or a tab writes the document first, records an undoable command where the
 change is undoable, and the tables, the kernel and the widgets follow.
-
-The shadow invariant (``ShadowChecker``) checks the legacy stores against the document after
-every commit and at teardown.
 """
 from types import SimpleNamespace
 from unittest.mock import MagicMock
@@ -31,7 +28,6 @@ def page():
     g.select_model(p, "Cylinder", "cylinder")
     p.undo_stack.clear()
     yield p
-    p.shadow_checker.assert_ok()
     p.close()
 
 
@@ -44,7 +40,7 @@ def messages():
 
 
 def cell(item_model, name, column):
-    return item_model.item(g.find_row(item_model, name), column).text()
+    return item_model.index(g.find_row(item_model, name), column).data()
 
 
 def test_typed_values_keep_double_precision(page):
@@ -86,11 +82,11 @@ def test_an_array_distribution_unfits_and_disables_the_row_and_undo_restores_it(
     poly.onPolyComboIndexChange("array", row)
     p = page.document.parameters["radius.width"]
     assert (p.dispersion.type, p.fit) == ("array", False)
-    assert not poly.poly_model.item(row, 1).isEnabled() and poly.poly_model.item(row, 7).text() == "w.txt"
+    assert not bool(poly.poly_model.flags(poly.poly_model.index(row, 1)) & QtCore.Qt.ItemIsEnabled) and poly.poly_model.index(row, 7).data() == "w.txt"
     assert list(page.kernel().dispersion["radius"]["values"]) == [10.0, 20.0]
     page.undo_stack.undo()
     assert page.document.parameters["radius.width"].fit
-    assert poly.poly_model.item(row, 1).isEnabled() and poly.poly_model.item(row, 7).text() == ""
+    assert bool(poly.poly_model.flags(poly.poly_model.index(row, 1)) & QtCore.Qt.ItemIsEnabled) and poly.poly_model.index(row, 7).data() == ""
 
 
 def test_a_cancelled_array_file_keeps_the_current_distribution(page, monkeypatch):
@@ -153,7 +149,6 @@ def test_shell_count_changes_are_undoable_and_keep_the_other_values():
     assert p.document.parameters["radius"].value == 66.0
     p.undo_stack.redo()
     assert p.document.selection.multiplicity == 3 and "thickness3" in p.document.parameters
-    p.shadow_checker.assert_ok()
     p.close()
 
 
@@ -181,7 +176,6 @@ def test_the_shell_row_has_its_combo_and_the_sld_profile_button():
     assert "thickness2" in p.document.parameters and g.find_row(p._model_model, "thickness2")
     p.undo_stack.undo()
     assert "thickness2" not in p.document.parameters and _index_widget(p, "n").currentText() == "1"
-    p.shadow_checker.assert_ok()
     p.close()
 
 
@@ -195,7 +189,6 @@ def test_a_fixed_choice_is_a_combo_box_and_undoable():
     p.undo_stack.undo()
     assert _index_widget(p, "radius_effective_mode").currentIndex() == 1
     assert not p.document.parameters["radius_effective"].editable
-    p.shadow_checker.assert_ok()
     p.close()
 
 
@@ -204,11 +197,11 @@ def test_undoing_a_model_switch_brings_back_the_fit_errors_and_their_column(page
     page.onPlot = lambda: None
     g.set_checked(page._model_model, "radius")
     page.fitComplete(([[SimpleNamespace(fitness=1.0)]], 0.5))
-    assert page.has_error_column
+    assert page._model_model.has_error_column
     g.select_model(page, "Cylinder", "hollow_cylinder")
-    assert not page.has_error_column
+    assert not page._model_model.has_error_column
     page.undo_stack.undo()
-    assert page.cbModel.currentText() == "cylinder" and page.has_error_column
+    assert page.cbModel.currentText() == "cylinder" and page._model_model.has_error_column
     assert cell(page._model_model, "radius", 2) == "0.75"
 
 
@@ -216,10 +209,9 @@ def test_the_2d_view_adds_the_orientation_rows_and_undo_removes_them():
     p = g.new_page()
     g.select_model(p, "Cylinder", "cylinder")
     p.chk2DView.setChecked(True)
-    assert "theta" in p.document.parameters and p.is2D
+    assert "theta" in p.document.parameters and p.document.is2D()
     p.undo_stack.undo()
     assert "theta" not in p.document.parameters and not p.chk2DView.isChecked()
-    p.shadow_checker.assert_ok()
     p.close()
 
 
@@ -233,5 +225,4 @@ def test_loading_2d_data_lays_the_page_out_again_and_keeps_the_values():
     assert "theta" in p.document.parameters and g.find_row(p._model_model, "theta")
     assert p.document.parameters["radius"].value == 33.0
     assert not p.undo_stack.can_undo()
-    p.shadow_checker.assert_ok()
     p.close()

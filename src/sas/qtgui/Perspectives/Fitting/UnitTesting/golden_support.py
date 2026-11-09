@@ -30,6 +30,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
+from sas.qtgui.Perspectives.Fitting.model.parameters import PageMode
 from sas.qtgui.Perspectives.Fitting.ReportPageLogic import ReportPageLogic
 from sas.qtgui.Perspectives.Fitting.services import fit as fit_service
 from sas.qtgui.Perspectives.Fitting.UnitTesting.fitting_test_support import FittingWidgetMod, dummy_manager
@@ -85,19 +86,30 @@ def select_model(page, category: str, model: str | None = None, structure: str |
 
 
 def find_row(item_model, name: str) -> int:
+    """The row of the table showing *name* in its first column."""
     for row in range(item_model.rowCount()):
-        if item_model.item(row, 0).text() == name:
+        if item_model.index(row, 0).data() == name:
             return row
     raise KeyError(name)
 
 
+def cell(item_model, name: str, column: int) -> str:
+    """The text of cell (*name*, *column*)."""
+    return item_model.index(find_row(item_model, name), column).data()
+
+
 def set_cell(item_model, name: str, column: int, text: str):
-    item_model.item(find_row(item_model, name), column).setText(text)
+    """The user types *text* into cell (*name*, *column*)."""
+    item_model.setData(item_model.index(find_row(item_model, name), column), text, QtCore.Qt.EditRole)
 
 
 def set_checked(item_model, name: str, checked: bool = True):
     state = QtCore.Qt.Checked if checked else QtCore.Qt.Unchecked
-    item_model.item(find_row(item_model, name), 0).setCheckState(state)
+    item_model.setData(item_model.index(find_row(item_model, name), 0), state, QtCore.Qt.CheckStateRole)
+
+
+def checked(item_model, name: str) -> bool:
+    return item_model.index(find_row(item_model, name), 0).data(QtCore.Qt.CheckStateRole) == QtCore.Qt.Checked
 
 
 def set_combo(page, view, item_model, name: str, column: int, index: int):
@@ -107,7 +119,8 @@ def set_combo(page, view, item_model, name: str, column: int, index: int):
 
 
 def set_multiplicity(page, count: int):
-    widget = page.lstParams.indexWidget(page._model_model.index(page._n_shells_row, 1))
+    model = page._model_model
+    widget = page.lstParams.indexWidget(model.index(model.shell_row, 1))
     widget.setCurrentText(str(count))
 
 
@@ -143,7 +156,7 @@ _REPORT_MASKS = [
 def _report(page) -> str:
     original = (ReportPageLogic.getImages, ReportPageLogic.getBatchResults)
     ReportPageLogic.getImages = lambda self: []
-    ReportPageLogic.getBatchResults = lambda self: "[BATCH TABLE]" if page.is_batch_fitting else ""
+    ReportPageLogic.getBatchResults = lambda self: "[BATCH TABLE]" if page.document.mode is PageMode.BATCH else ""
     try:
         html = page.getReport().html
     finally:
@@ -205,7 +218,7 @@ class _RecordingFit:
 
 def _fit_inputs(page) -> list | None:
     """Prepare the page's fit with a recording Fit."""
-    if not page.data_is_loaded or not page.document.can_fit():
+    if not page.document.can_fit():
         return None
     original = fit_service.Fit
     fit_service.Fit = _RecordingFit
@@ -412,8 +425,6 @@ def build_and_capture(name: str) -> list[dict]:
     pages = []
     try:
         pages = CASES[name]()
-        for page in pages:
-            page.shadow_checker.assert_ok()
         return [capture(page) for page in pages]
     finally:
         for page in pages:

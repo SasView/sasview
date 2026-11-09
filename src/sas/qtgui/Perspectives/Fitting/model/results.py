@@ -38,6 +38,7 @@ class DatasetResult:
 class Results:
     per_dataset: dict[str, DatasetResult] = field(default_factory=dict)
     batch: list | None = None     # the batch fit's per-dataset results, as the grid shows them
+    fit_chi2: tuple[float, int] | None = None   # the last single fit's chi2, and the inputs revision it is for
 
     def current(self, dataset_id: str, revision: int) -> DatasetResult | None:
         """The dataset's result, if it was computed from the page's current inputs."""

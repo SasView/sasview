@@ -17,28 +17,17 @@ logger = logging.getLogger(__name__)
 
 class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
     updateDataSignal = QtCore.Signal()
-    toggledSignal = QtCore.Signal(bool)  # Signal when magnetism is enabled/disabled
 
     def __init__(self, parent: QtWidgets.QWidget | None = None) -> None:
         super(MagnetismWidget, self).__init__()
 
         self.setupUi(self)
         self.lstMagnetic.isEnabled = True
-        self._magnet_model = FittingUtilities.ToolTippedItemModel()
-        self.is2D = False
-        self.isActive = False
+        self._magnet_model = None   # the page's ParameterItemModel of the magnetism table
         self._fitting_widget = parent
-        self.has_magnet_error_column = False
-        # Magnetism widget table default index for function combobox
-        # self.orig_poly_index = 4
         FittingUtilities.setTableProperties(self.lstMagnetic)
         self.lstMagnetic.setItemDelegate(MagnetismViewDelegate(self))
         self.lstMagnetic.installEventFilter(self)
-
-        self.lstMagnetic.setModel(self._magnet_model)
-        FittingUtilities.setTableProperties(self.lstMagnetic)
-        # self.lstMagnetic.itemDelegate().combo_updated.connect(self.onPolyComboIndexChange)
-        # self.lstMagnetic.itemDelegate().filename_updated.connect(self.onPolyFilenameChange)
 
         self.lstMagnetic.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.lstMagnetic.setAttribute(QtCore.Qt.WA_MacShowFocusRect, False)
@@ -59,16 +48,3 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
         Display a simple image showing direction of magnetic angles
         """
         self.magneticAnglesWidget.show()
-
-    def toggleMagnetism(self, isChecked: bool) -> None:
-        """
-        Toggle magnetism.
-
-        Args:
-            isChecked: Whether magnetism is enabled
-        """
-        self.isActive = isChecked
-
-        # Emit signal to notify parent that state changed
-        self.toggledSignal.emit(isChecked)
-

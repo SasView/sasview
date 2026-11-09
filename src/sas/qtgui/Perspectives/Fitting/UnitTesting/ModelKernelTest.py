@@ -4,7 +4,7 @@ FW-MVC-DESIGN.md §3.2, Phase 6) and of the constraint service (``services/const
 """
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 from sas.qtgui.Perspectives.Fitting.model.events import Origin
-from sas.qtgui.Perspectives.Fitting.model.parameters import ArrayDistribution, Dispersion
+from sas.qtgui.Perspectives.Fitting.model.parameters import ArrayDistribution, Dispersion, Table
 from sas.qtgui.Perspectives.Fitting.services import constraints as service
 from sas.qtgui.Perspectives.Fitting.UnitTesting.document_fixtures import BUILDER, d1, edit, flags, page
 
@@ -72,8 +72,8 @@ class TestConstraintService:
     def test_queries(self):
         doc = self.constrained()
         assert service.active(doc) == [("length", "2*M1.radius"), ("radius.width", "M2.radius.width")]
-        assert service.complex_constraints(doc, service.TABLES["standard"]) == [("length", "2*M1.radius")]
-        assert service.full_names(doc, service.TABLES["standard"]) == [("scale", "M1.background"),
+        assert service.complex_constraints(doc, Table.MAIN) == [("length", "2*M1.radius")]
+        assert service.full_names(doc, Table.MAIN) == [("scale", "M1.background"),
                                                                        ("length", "2*M1.radius")]
 
     def test_multimodel_and_keys(self):
