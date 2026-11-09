@@ -10,7 +10,7 @@ and data ids, and ``capture`` records every legacy output of a page:
 - ``latex``       LaTeX text
 - ``serialized``  FittingPerspective.getSerializedFitpage (the project dict)
 - ``fit_state``   getCurrentFitState, written into a plain namespace
-- ``symbols``     getSymbolDict
+- ``symbols``     the document's symbol table
 - ``report``      report HTML, normalized (timestamp, versions and images masked)
 - ``theory_inputs`` the effective kernel state passed to Calc1D/Calc2D
 - ``fit_inputs``  the arguments passed to Fit.set_model / Fit.set_data, if the page can fit
@@ -28,7 +28,6 @@ from types import SimpleNamespace
 import numpy as np
 from PySide6 import QtCore, QtGui, QtWidgets
 
-from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
 from sas.qtgui.Perspectives.Fitting.ReportPageLogic import ReportPageLogic
@@ -182,7 +181,7 @@ def _theory_inputs(page) -> dict | None:
 
 
 class _RecordingFit:
-    """Stands in for BumpsFit in prepareFitters and records its inputs."""
+    """Stands in for BumpsFit in FitService.prepare and records its inputs."""
     calls: list = []
 
     def __init__(self):
@@ -205,14 +204,14 @@ class _RecordingFit:
 
 
 def _fit_inputs(page) -> list | None:
-    """Run prepareFitters with a recording Fit. Last capture: it pushes poly/magnet values into the kernel."""
-    if not page.data_is_loaded or not page.haveParamsToFit():
+    """Prepare the page's fit with a recording Fit."""
+    if not page.data_is_loaded or not page.document.can_fit():
         return None
     original = fit_service.Fit
     fit_service.Fit = _RecordingFit
     _RecordingFit.calls = []
     try:
-        page.prepareFitters()
+        page.controller.prepare_fitters()
     finally:
         fit_service.Fit = original
     return _RecordingFit.calls
@@ -227,7 +226,7 @@ def capture(page) -> dict:
         "latex": page.latex_copy_data(),
         "serialized": jsonable(FittingWindow.getSerializedFitpage(None, page)),
         "fit_state": _fit_state(page),
-        "symbols": jsonable(page.getSymbolDict()),
+        "symbols": jsonable(page.document.symbol_table()),
         "report": _report(page),
         "theory_inputs": _theory_inputs(page),
     }
@@ -388,11 +387,11 @@ def case_two_pages():
     select_model(first, "Cylinder", "cylinder")
     second = new_page(tab_id=2, data=make_data1d("d2", "data2"))
     select_model(second, "Cylinder", "cylinder")
-    # What ConstraintWidget.onTabCellEdit does on a rename
-    first.controller.rename("sample", "M1")
-    second.replaceConstraintName("M1", "sample")
-    constraint = Constraint(param="radius", func="sample.radius", value_ex="sample.radius")
-    second.addConstraintToRow(constraint, find_row(second._model_model, "radius"))
+    # Both in one perspective; what ConstraintWidget.onTabCellEdit does on a rename
+    second.parent = first.parent
+    first.parent.perspective().fit_tabs += [first, second]
+    first.coordinator.rename(first, "sample")
+    second.addConstraint(Constraint(param="radius", func="sample.radius", value_ex="sample.radius"))
     set_checked(second._model_model, "length")
     return [first, second]
 
@@ -409,9 +408,7 @@ CASES = {name[len("case_"):]: fn for name, fn in sorted(globals().items()) if na
 
 
 def build_and_capture(name: str) -> list[dict]:
-    """Build case *name* with checkConstraints disabled (no perspective to check against)."""
-    original = FittingUtilities.checkConstraints
-    FittingUtilities.checkConstraints = lambda *a, **kw: None
+    """Build case *name* and capture its pages."""
     pages = []
     try:
         pages = CASES[name]()
@@ -419,7 +416,6 @@ def build_and_capture(name: str) -> list[dict]:
             page.shadow_checker.assert_ok()
         return [capture(page) for page in pages]
     finally:
-        FittingUtilities.checkConstraints = original
         for page in pages:
             page.close()
 

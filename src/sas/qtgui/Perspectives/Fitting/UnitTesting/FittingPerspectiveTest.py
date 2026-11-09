@@ -228,44 +228,6 @@ class FittingPerspectiveTest:
         assert widget.currentFittingWidget is None
         assert widget.undo_stack is None
 
-    @pytest.mark.xfail(reason="2026-02: Mocker patching using old constraint API")
-    def testGetActiveConstraintList(self, widget, mocker):
-        '''test the active constraint getter'''
-        # Add an empty tab
-        widget.addFit(None)
-        # mock the getConstraintsForModel method of the FittingWidget tab of
-        # the first tab
-        tab = widget.tabs[0]
-        mocker.patch.object(tab, 'getConstraintsForModel',
-                            return_value=[("scale", "M2.scale +2")])
-        # mock the getConstraintsForModel method of the FittingWidget tab of
-        # the second tab
-        tab = widget.tabs[1]
-        mocker.patch.object(tab, 'getConstraintsForModel',
-                            return_value=[("scale", "M2.background +2")])
-        constraints = widget.getActiveConstraintList()
-
-        # we should have 2 constraints
-        assert len(constraints) == 2
-        assert constraints == [("M1.scale", "M2.scale +2"),
-                                       ('M2.scale', 'M2.background +2')]
-
-    def testGetSymbolDictForConstraints(self, widget, mocker):
-        '''test the symbol dict getter'''
-        # Add an empty tab
-        widget.addFit(None)
-        # mock the getSymbolDict method of the first tab
-        tab = widget.tabs[0]
-        mocker.patch.object(tab, 'getSymbolDict', return_value={"M1.scale": 1})
-        # mock the getSymbolDict method of the second tab
-        tab = widget.tabs[1]
-        mocker.patch.object(tab, 'getSymbolDict', return_value={"M2.scale": 1})
-
-        symbols = widget.getSymbolDictForConstraints()
-        # we should have 2 symbols
-        assert len(symbols) == 2
-        assert list(symbols.keys()) == ["M1.scale", "M2.scale"]
-
     def testGetConstraintTab(self, widget, qtbot):
         '''test the constraint tab getter'''
         # no constraint tab is present, should return None
@@ -320,18 +282,12 @@ class FittingPerspectiveTest:
         widget.addFit(None)
         tab1 = widget.tabs[0]
         tab2 = widget.tabs[1]
-        # mock the getRowFromName methods from both tabs
-        mocker.patch.object(tab1, 'getRowFromName', return_value=0)
-        mocker.patch.object(tab2, 'getRowFromName', return_value=1)
-        # mock the addConstraintToRow method of both tabs
-        mocker.patch.object(tab1, 'addConstraintToRow')
-        mocker.patch.object(tab2, 'addConstraintToRow')
+        # mock the addConstraint method of both tabs
+        mocker.patch.object(tab1, 'addConstraint')
+        mocker.patch.object(tab2, 'addConstraint')
         # add the constraints
         widget.updateFromConstraints(constraint_dict)
-        # check that getRowFromName was called correctly on both tabs
-        tab1.getRowFromName.assert_called_with("scale")
-        tab2.getRowFromName.assert_called_with("background")
-        # check that addConstraintToRow was called correctly
+        # check that addConstraint was called correctly
         constraint1 = Constraint(param='scale',
                                  value='scale',
                                  value_ex="M1.scale",
@@ -340,12 +296,8 @@ class FittingPerspectiveTest:
                                  value='background',
                                  value_ex="M2.background",
                                  func="M1.background")
-        tab1_call_dict = tab1.addConstraintToRow.call_args[1]
-        tab2_call_dict = tab2.addConstraintToRow.call_args[1]
-        assert vars(tab1_call_dict['constraint']) == vars(constraint1)
-        assert vars(tab2_call_dict['constraint']) == vars(constraint2)
-        assert tab1_call_dict['row'] == 0
-        assert tab2_call_dict['row'] == 1
+        assert vars(tab1.addConstraint.call_args[0][0]) == vars(constraint1)
+        assert vars(tab2.addConstraint.call_args[0][0]) == vars(constraint2)
 
     def testGetTabByName(self, widget):
         '''test getting a tab by its name'''

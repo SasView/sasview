@@ -210,7 +210,7 @@ def _magnet_rows(doc) -> list[list]:
 
 
 def fit_parameter_rows(doc) -> list[list]:
-    """``getFitParameters``: model name, parameter rows, multiplicity."""
+    """The parameter rows (Excel, LaTeX, save): model name, parameter rows, multiplicity."""
     if not len(doc.parameters):
         return []
     rows = [["model_name", doc.selection.model]]

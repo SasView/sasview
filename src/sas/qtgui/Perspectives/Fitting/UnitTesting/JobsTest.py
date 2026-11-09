@@ -15,7 +15,6 @@ from unittest.mock import MagicMock
 import numpy as np
 import pytest
 
-from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.UnitTesting import golden_support as g
 
 
@@ -41,7 +40,6 @@ class FakeJobs:
 @pytest.fixture(autouse=True)
 def _quiet(qapp, monkeypatch):
     monkeypatch.setattr("sas.qtgui.Perspectives.UndoRedo.QtWidgets.QMessageBox", MagicMock())
-    monkeypatch.setattr(FittingUtilities, "checkConstraints", lambda *a, **kw: None)
 
 
 @pytest.fixture
@@ -62,8 +60,8 @@ def result_of(page, dataset_id="d1"):
 class TheoryJobTest:
 
     def testReverseOrderCompletionKeepsTheNewest(self, page):
-        page.calculateQGridForModel()
-        page.calculateQGridForModel()
+        page.controller.compute_theory()
+        page.controller.compute_theory()
         first, second = page.jobs.requests()[-2:]
         page.jobs.complete(second)
         page.jobs.complete(first)          # older: superseded, dropped
@@ -72,27 +70,27 @@ class TheoryJobTest:
         assert page.cmdPlot.isEnabled()
 
     def testEachRequestHasItsOwnKernel(self, page):
-        page.calculateQGridForModel()
-        page.calculateQGridForModel()
+        page.controller.compute_theory()
+        page.controller.compute_theory()
         first, second = page.jobs.requests()[-2:]
         assert first.kernel is not second.kernel
         g.set_cell(page._model_model, "radius", 1, "33")
         assert first.kernel.getParam("radius") == 20.0
 
     def testAValueEditWhilePendingMakesTheResultStale(self, page):
-        page.calculateQGridForModel()
+        page.controller.compute_theory()
         request = page.jobs.requests()[-1]
         g.set_cell(page._model_model, "radius", 1, "33")
         page.jobs.complete(request)
         # Shown, as before, but not current
         assert page.model_data is result_of(page).theory
         assert page.controller.current_result() is None
-        page.calculateQGridForModel()
+        page.controller.compute_theory()
         page.jobs.complete(page.jobs.requests()[-1])
         assert page.controller.current_result() is result_of(page)
 
     def testAModelSwitchWhilePendingDropsTheOldLayout(self, page):
-        page.calculateQGridForModel()
+        page.controller.compute_theory()
         request = page.jobs.requests()[-1]
         page.controller.select_model("Cylinder", "hollow_cylinder")
         newest = page.jobs.requests()[-1]
@@ -133,7 +131,7 @@ class TheoryJobTest:
         p.close()
 
     def testClosingThePageDropsPendingResults(self, page):
-        page.calculateQGridForModel()
+        page.controller.compute_theory()
         request = page.jobs.requests()[-1]
         page.controller.close()
         page.jobs.complete(request)

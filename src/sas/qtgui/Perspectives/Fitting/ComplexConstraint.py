@@ -7,8 +7,8 @@ Widget for multi-model constraints.
 from numpy import *
 from PySide6 import QtCore, QtWidgets
 
-from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
+from sas.qtgui.Perspectives.Fitting.services import constraints as constraint_service
 
 # Local UI
 from sas.qtgui.Perspectives.Fitting.UI.ComplexConstraintUI import Ui_ComplexConstraintUI
@@ -49,7 +49,7 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         Digs into self.tabs and pulls out relevant info
         """
         self.tab_names = [tab.document.identity.mnemonic for tab in self.tabs]
-        self.params = [tab.getParamNames() for tab in self.tabs]
+        self.params = [constraint_service.parameter_names(tab.document) for tab in self.tabs]
 
     def setupSignals(self):
         """
@@ -100,10 +100,10 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         # Populate the left combobox parameter arbitrarily with the parameters
         # from the first tab if `All` option is selected
         if self.cbModel1.currentText() == "All":
-            items1 = self.tabs[1].paramsToFit()
+            items1 = constraint_service.fitted_names(self.tabs[1].document)
         else:
             tab_index1 = self.cbModel1.currentIndex()
-            items1 = self.tabs[tab_index1].paramsToFit()
+            items1 = constraint_service.fitted_names(self.tabs[tab_index1].document)
         self.cbParam1.addItems(items1)
         # Show the previously selected parameter if available
         if previous_param1 in items1:
@@ -117,7 +117,8 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         items2 = [param for param in self.params[tab_index2]]
         # The following can be used if it is judged preferable that constrained
         # parameters are not used in the definition of a new constraint
-        #items2 = [param for param in self.params[tab_index2] if not self.tabs[tab_index2].paramHasConstraint(param)]
+        #items2 = [param for param in self.params[tab_index2]
+        #          if not constraint_service.has_constraint(self.tabs[tab_index2].document, param)]
 
         self.cbParam2.addItems(items2)
         # Show the previously selected parameter if available
@@ -175,13 +176,9 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
             self.txtConstraint.setText(self.cbModel2.currentText() + "." + param2)
         # Check if any of the parameters are polydisperse
         params_list = [param1, param2]
-        all_pars = [tab.modelParameters() for tab in self.tabs]
-        is2Ds = [tab.is2D for tab in self.tabs]
         txt = self.redefining_warning
-        for pars, is2D in zip(all_pars, is2Ds):
-            if any([FittingUtilities.isParamPolydisperse(p, pars, is2D) for p in params_list]):
-                # no parameters are pd - reset the text to not show the warning
-                txt = self.warning
+        if any(constraint_service.is_polydisperse(tab.document, p) for tab in self.tabs for p in params_list):
+            txt = self.warning
         self.lblWarning.setText(txt)
 
     def onModelIndexChange(self, index):
@@ -287,7 +284,8 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         param = cons_tuple[1].param
         # get a list of all constrained parameters
         tab_index1 = self.cbModel1.currentIndex()
-        items = [param for param in self.params[tab_index1] if self.tabs[tab_index1].paramHasConstraint(param)]
+        items = [param for param in self.params[tab_index1]
+                 if constraint_service.has_constraint(self.tabs[tab_index1].document, param)]
         # loop over the list of constrained parameters to check for redefinition
         for item in items:
             if item == param:
@@ -349,8 +347,8 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         # loop over parameters in constrained model
         index1 = self.cbModel1.currentIndex()
         index2 = self.cbModel2.currentIndex()
-        items1 = self.tabs[index1].paramsToFit()
-        items2 = self.tabs[index2].paramsToFit()
+        items1 = constraint_service.fitted_names(self.tabs[index1].document)
+        items2 = constraint_service.fitted_names(self.tabs[index2].document)
         # create an empty list to store redefined constraints
         redefined_constraints = []
         for item in items1:

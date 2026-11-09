@@ -14,9 +14,6 @@ from sas.qtgui.Perspectives.Fitting.model.serializer import (  # noqa: F401 (re-
     formatParametersExcel,
     formatParametersLatex,
 )
-from sas.qtgui.Perspectives.Fitting.services.constraints import (
-    validate as checkConstraints,  # noqa: F401 (re-exported; the tests patch it)
-)
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
 from sas.qtgui.Utilities import GuiUtils
 
@@ -532,26 +529,6 @@ def isNumber(s):
         except ValueError:
             return False
     return True
-
-def isParamPolydisperse(param_name, kernel_params, is2D=False):
-    """
-    Simple lookup for polydispersity for the given param name
-    """
-    # First, check if this is a polydisperse parameter directly
-    if '.width' in param_name:
-        return True
-
-    parameters = kernel_params.form_volume_parameters
-    if is2D:
-        parameters += kernel_params.orientation_parameters
-
-    # Next, check if the parameter is included in para.polydisperse
-    has_poly = False
-    for param in parameters:
-        if param.name==param_name and param.polydisperse:
-            has_poly = True
-            break
-    return has_poly
 
 def setTableProperties(table):
     """

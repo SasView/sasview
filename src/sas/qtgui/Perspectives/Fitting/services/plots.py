@@ -133,7 +133,7 @@ def default_2d(qmax: float, qstep: int, tab_id=0) -> Data2D:
 
 
 def default_dataset(options, is2d: bool, tab_id):
-    """The theory grid for the page's options (createDefaultDataset)."""
+    """The theory grid of a page without data, for its options."""
     if is2d:
         return default_2d(options.qmax / np.sqrt(2), options.npts, tab_id)
     if options.log_points:

@@ -12,10 +12,10 @@ from unittest.mock import MagicMock
 import pytest
 from PySide6 import QtCore, QtWidgets
 
-from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 from sas.qtgui.Perspectives.Fitting.model.commands import SetParameterCommand, SnapshotCommand
 from sas.qtgui.Perspectives.Fitting.model.parameters import ArrayDistribution
+from sas.qtgui.Perspectives.Fitting.services import constraints as constraint_service
 from sas.qtgui.Perspectives.Fitting.UnitTesting import golden_support as g
 from sas.qtgui.Utilities import GuiUtils
 
@@ -23,7 +23,6 @@ from sas.qtgui.Utilities import GuiUtils
 @pytest.fixture(autouse=True)
 def _quiet(qapp, monkeypatch):
     monkeypatch.setattr("sas.qtgui.Perspectives.UndoRedo.QtWidgets.QMessageBox", MagicMock())
-    monkeypatch.setattr(FittingUtilities, "checkConstraints", lambda *a, **kw: None)
 
 
 @pytest.fixture
@@ -110,12 +109,11 @@ def test_a_cancelled_array_file_keeps_the_current_distribution(page, monkeypatch
 
 
 def test_constraints_are_document_first_and_not_undoable(page):
-    row = g.find_row(page._model_model, "length")
-    page.addConstraintToRow(Constraint(param="length", func="2*M1.radius", value_ex="2*M1.radius"), row)
+    assert page.addConstraint(Constraint(param="length", func="2*M1.radius", value_ex="2*M1.radius"))
     assert page.document.parameters["length"].constraint.func == "2*M1.radius"
     assert page.document.parameters["length"].fit
     assert not page.undo_stack.can_undo()
-    page.deleteConstraintOnParameter("length")
+    page.controller.remove_constraint("length")
     assert page.document.parameters["length"].constraint is None
 
 
@@ -124,22 +122,20 @@ def test_deleting_a_simple_constraint_restores_its_bounds(page):
                                            QtCore.QItemSelectionModel.Select | QtCore.QItemSelectionModel.Rows)
     page.addSimpleConstraint()
     assert page.document.parameters["radius"].min == pytest.approx(20.0 - 20.0 / 10000.0)
-    page.deleteConstraintOnParameter("radius")
+    page.controller.remove_constraint("radius")
     p = page.document.parameters["radius"]
     assert (p.min, p.max, p.constraint) == (0.0, float("inf"), None)
 
 
 def test_a_model_switch_keeps_constraints_that_still_resolve(page, messages):
-    row = g.find_row(page._model_model, "length")
-    page.addConstraintToRow(Constraint(param="length", func="2*M1.radius", value_ex="2*M1.radius"), row)
+    page.addConstraint(Constraint(param="length", func="2*M1.radius", value_ex="2*M1.radius"))
     g.select_model(page, "Cylinder", "hollow_cylinder")
     assert page.document.parameters["length"].constraint.func == "2*M1.radius"
-    assert page.getConstraintsForAllModels() == [("length", "2*M1.radius")]
+    assert constraint_service.active(page.document) == [("length", "2*M1.radius")]
 
 
 def test_a_model_switch_drops_constraints_that_no_longer_resolve(page, messages):
-    row = g.find_row(page._model_model, "radius")
-    page.addConstraintToRow(Constraint(param="radius", func="M1.length/20", value_ex="M1.length/20"), row)
+    page.addConstraint(Constraint(param="radius", func="M1.length/20", value_ex="M1.length/20"))
     g.select_model(page, "Sphere", "sphere")
     assert page.document.parameters["radius"].constraint is None
     assert any("Constraints on radius removed" in m for m in messages)

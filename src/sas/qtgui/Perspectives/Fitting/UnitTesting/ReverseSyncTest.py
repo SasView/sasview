@@ -12,16 +12,15 @@ from unittest.mock import MagicMock
 import pytest
 from PySide6 import QtCore
 
-from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.model.events import Origin
-from sas.qtgui.Perspectives.Fitting.model.parameters import Constraint, Dispersion, ValueKind
+from sas.qtgui.Perspectives.Fitting.model.parameters import Constraint, Dispersion, Table, ValueKind
+from sas.qtgui.Perspectives.Fitting.services import constraints as constraint_service
 from sas.qtgui.Perspectives.Fitting.UnitTesting import golden_support as g
 
 
 @pytest.fixture(autouse=True)
 def _quiet(qapp, monkeypatch):
     monkeypatch.setattr("sas.qtgui.Perspectives.UndoRedo.QtWidgets.QMessageBox", MagicMock())
-    monkeypatch.setattr(FittingUtilities, "checkConstraints", lambda *a, **kw: None)
 
 
 @pytest.fixture
@@ -68,7 +67,7 @@ def testFitFlagReachesCheckboxAndFitLists(case):
     write(case, "length", fit=True)
     row = g.find_row(case._model_model, "length")
     assert case._model_model.item(row, 0).checkState() == QtCore.Qt.Checked
-    assert case.paramsToFit() == ["scale", "radius", "length"]
+    assert constraint_service.fitted_names(case.document) == ["scale", "radius", "length"]
     assert case.cmdFit.isEnabled()
 
 
@@ -126,7 +125,7 @@ def testConstraintBecomesTheHiddenChildItem(case):
     stored = case._model_model.item(row, 1).child(0).data()
     assert stored is not constraint and stored.func == "2*M1.radius"
     assert not case._model_model.item(row, 1).isEditable()
-    assert case.getComplexConstraintsForModel("standard") == [("length", "2*M1.radius")]
+    assert constraint_service.complex_constraints(case.document, Table.MAIN) == [("length", "2*M1.radius")]
     with case.document.transaction(Origin.USER) as tx:
         tx.set_constraint("length", None)
     assert case.getConstraintForRow(row) is None
@@ -149,7 +148,7 @@ def testRestoringASnapshotPatchesEveryRow(case):
     case.document.restore_undo_state(before)
     assert cell(case._model_model, "radius", 1) == "35.5"
     assert case.kernel().getParam("radius") == 35.5
-    assert "length" not in case.paramsToFit()
+    assert "length" not in constraint_service.fitted_names(case.document)
 
 
 @pytest.mark.parametrize("case", ["cylinder"], indirect=True)

@@ -4,9 +4,8 @@ selection (category, model and structure-factor combo boxes, the 2D view), fit o
 smearing, the polydispersity, magnetism and chain-fit toggles, and the Fit button.
 
 The widgets keep their .ui files. On a document-first change the sync writes the
-widget, and the page fields the legacy readers use, and applies a toggle's side
-effects (``FittingWidget.apply*``). After a layout change the page refreshes what
-depends on it (``FittingWidget.onLayoutChanged``). Runs through ``controller.subscribe_view``.
+widget and applies a toggle's side effects (``FittingWidget.apply*``). After a layout
+change the page refreshes what depends on it (``FittingWidget.onLayoutChanged``). Runs through ``controller.subscribe_view``.
 """
 from __future__ import annotations
 
@@ -40,12 +39,10 @@ class SettingsSync:
         parameters = change.get(ParametersChanged)
         if (any(change.get(e) is not None for e in (ModelChanged, FlagsChanged, DataChanged))
                 or (parameters is not None and parameters.fields & {"fit", "fittable"})):
-            self._page.cmdFit.setEnabled(self._page.haveParamsToFit())
+            self._page.cmdFit.setEnabled(self._page.document.can_fit())
 
     def _options(self) -> None:
         page, o = self._page, self._page.document.options
-        page.q_range_min, page.q_range_max, page.npts = o.qmin, o.qmax, o.npts
-        page.log_points, page.weighting = o.log_points, o.theory_weighting
         page.options_widget.setState(o.qmin, o.qmax, o.npts, o.log_points, o.fit_weighting)
         page.lblMinRangeDef.setText(GuiUtils.formatNumber(o.qmin, high=True))
         page.lblMaxRangeDef.setText(GuiUtils.formatNumber(o.qmax, high=True))

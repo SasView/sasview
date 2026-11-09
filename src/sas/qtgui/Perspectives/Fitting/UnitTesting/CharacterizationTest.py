@@ -12,7 +12,6 @@ from unittest.mock import MagicMock
 import pytest
 from PySide6 import QtCore, QtWidgets
 
-from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.model.commands import SnapshotCommand
 from sas.qtgui.Perspectives.Fitting.services import fit as fit_service
 from sas.qtgui.Perspectives.Fitting.UnitTesting import golden_support as g
@@ -21,7 +20,6 @@ from sas.qtgui.Perspectives.Fitting.UnitTesting import golden_support as g
 @pytest.fixture(autouse=True)
 def _quiet(qapp, monkeypatch):
     monkeypatch.setattr("sas.qtgui.Perspectives.UndoRedo.QtWidgets.QMessageBox", MagicMock())
-    monkeypatch.setattr(FittingUtilities, "checkConstraints", lambda *a, **kw: None)
 
 
 @pytest.fixture
@@ -319,7 +317,7 @@ class LiveDefectRegressionTest:
 
         monkeypatch.setattr(fit_service, "Fit", Recording)
         g.set_checked(page._model_model, "radius")
-        page.prepareFitters()
+        page.controller.prepare_fitters()
         assert models and models[0] is not page.kernel()
         assert models[0].getParam("radius") == page.kernel().getParam("radius") == 20.0
         page.fitComplete(None)

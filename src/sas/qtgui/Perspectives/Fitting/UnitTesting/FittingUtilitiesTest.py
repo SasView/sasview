@@ -6,7 +6,6 @@ from sasmodels import generate, modelinfo
 
 # Tested module
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
-from sas.qtgui.Perspectives.Fitting.FittingUtilities import checkConstraints
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
 
 
@@ -164,16 +163,3 @@ class FittingUtilitiesTest:
         # We still should have only the original names
         names_from_model2 = [model2.headerData(i, QtCore.Qt.Horizontal) for i in range(len(names))]
         assert names == names_from_model2
-
-    def testCheckConstraints(self):
-        ''' Test the constraints checks'''
-        # Send a valid constraint
-        symtab = {"M1.scale": 1, "M1.background": 1}
-        constraints = [("M1.scale", "M1.background")]
-        errors = checkConstraints(symtab, constraints)
-        assert errors == []
-
-        # Send a constraint with an error
-        constraints = [("M1.foo", "M1.background")]
-        errors = checkConstraints(symtab, constraints)
-        assert isinstance(errors, str)

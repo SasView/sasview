@@ -25,7 +25,7 @@ from unittest.mock import MagicMock
 import pytest
 from PySide6 import QtCore, QtGui, QtWidgets
 
-from sas.qtgui.Perspectives.Fitting import FittingUtilities, FittingWidget
+from sas.qtgui.Perspectives.Fitting import FittingWidget
 from sas.qtgui.Perspectives.Fitting.FitThread import FitThread
 from sas.qtgui.Perspectives.Fitting.model.commands import (
     ApplyFitResultCommand,
@@ -62,7 +62,6 @@ def _suppress_message_boxes(monkeypatch):
 def widget(qapp, monkeypatch, request):
     """Create a real FittingWidget for integration testing."""
     w = FittingWidgetMod(dummy_manager())
-    monkeypatch.setattr(FittingUtilities, 'checkConstraints', lambda *a, **kw: None)
     yield w
     w.shadow_checker.assert_ok(request)
     w.close()
@@ -159,7 +158,7 @@ class TestParameterValueUndo:
         snapshot-based restore path)."""
         w = widget_with_model
         w.undo_stack.push(SetParameterCommand("radius", {"value": 10.0}, {"value": 99.0}))
-        spy = mocker.patch.object(w, "calculateQGridForModel")
+        spy = mocker.patch.object(w.controller, "compute_theory")
 
         w.undo_stack.undo()
         assert spy.call_count >= 1, "undo did not recompute the theory plot"
@@ -260,7 +259,7 @@ class TestParameterMinMaxUndo:
         TestParameterValueUndo.test_value_undo_redo_recomputes_plot)."""
         w = widget_with_model
         w.undo_stack.push(SetParameterCommand("radius", {"min": 1.0}, {"min": 5.0}))
-        spy = mocker.patch.object(w, "calculateQGridForModel")
+        spy = mocker.patch.object(w.controller, "compute_theory")
 
         w.undo_stack.undo()
         assert spy.call_count >= 1, "undo did not recompute the theory plot"
@@ -344,7 +343,7 @@ class TestFitOptionsUndo:
         assert isinstance(top_cmd, SetOptionsCommand)
         assert (top_cmd.old.qmin, top_cmd.new.qmin) != (0.01, 0.01) and top_cmd.new.qmin == 0.01
         w.undo_stack.undo()
-        assert w.q_range_min == top_cmd.old.qmin and w.document.options == top_cmd.old
+        assert w.document.options == top_cmd.old
 
     def test_options_widget_setState_round_trip(self, widget_with_model):
         """OptionsWidget.setState must restore values consistently."""

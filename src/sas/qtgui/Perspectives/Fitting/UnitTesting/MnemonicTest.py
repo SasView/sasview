@@ -7,7 +7,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from sas.qtgui.Perspectives.Fitting import FittingUtilities
+from sas.qtgui.Perspectives.Fitting.services import constraints as constraint_service
 from sas.qtgui.Perspectives.Fitting.UnitTesting import golden_support as g
 from sas.qtgui.Perspectives.Fitting.UnitTesting.fitting_test_support import dummy_manager
 from sas.qtgui.Utilities import GuiUtils
@@ -17,7 +17,6 @@ from sas.sascalc.fit.BumpsFitting import BumpsFit, ParameterExpressions, SasFitn
 @pytest.fixture(autouse=True)
 def _quiet(qapp, monkeypatch):
     monkeypatch.setattr("sas.qtgui.Perspectives.UndoRedo.QtWidgets.QMessageBox", MagicMock())
-    monkeypatch.setattr(FittingUtilities, "checkConstraints", lambda *a, **kw: None)
 
 
 @pytest.fixture
@@ -73,7 +72,7 @@ def simultaneous_fit(pages) -> dict:
     """The fit problem ConstraintWidget builds, up to the run: {page name: fitness}, constraints applied."""
     fitter, fit_id = BumpsFit(), 0
     for page in pages:
-        _, fit_id = page.prepareFitters(fitter=fitter, fit_id=fit_id)
+        _, fit_id = page.controller.prepare_fitters(fitter, fit_id)
     models = [SasFitness(model=d.get_model(), data=d.get_data(), constraints=d.constraints, fitted=d.pars)
               for d in fitter.fit_arrange_dict.values()]
     ParameterExpressions(models)()       # fails if a constraint names a page that is not in the fit
@@ -86,7 +85,7 @@ def testRenameSaveReloadFit(renamed, opened):
 
     first, second = load(project, dummy_manager(), opened)
     assert (first.kernel().name, first.document.identity.mnemonic) == ("sample", "sample")
-    assert second.getConstraintsForAllModels() == [("radius", "sample.radius")]
+    assert constraint_service.active(second.document) == [("radius", "sample.radius")]
 
     fit = simultaneous_fit([first, second])
     assert set(fit) == {"sample", "M2"}           # every page takes its saved name

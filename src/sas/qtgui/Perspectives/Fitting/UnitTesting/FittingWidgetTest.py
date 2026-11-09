@@ -1,26 +1,29 @@
-import logging
-import os
+"""
+The fit page as a view (FW-MVC-DESIGN.md §4.1, Phase 8): the wiring of its widgets to the
+controller's intents, and the enablement that follows the document.
+
+The tables are tested in ``ParameterTableAdapterTest``, and the document, the serializer and
+the constraint service without Qt (``ModelDocumentTest``, ``ModelSerializerTest``,
+``ModelKernelTest``).
+"""
 import time
-from unittest.mock import MagicMock
 
 import pytest
 from PySide6 import QtCore, QtGui, QtTest, QtWidgets
 from twisted.internet import threads
 
-# Local
 from sas import config
-from sas.qtgui.Perspectives.Fitting import FittingUtilities, FittingWidget
+from sas.qtgui.Perspectives.Fitting import FittingWidget
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
-from sas.qtgui.Perspectives.Fitting.model.parameters import ArrayDistribution, Table
 from sas.qtgui.Perspectives.Fitting.model.results import DatasetResult, Provenance
 from sas.qtgui.Perspectives.Fitting.ModelThread import Calc1D
+from sas.qtgui.Perspectives.Fitting.services import constraints as constraint_service
+from sas.qtgui.Perspectives.Fitting.UnitTesting import golden_support as g
 from sas.qtgui.Perspectives.Fitting.UnitTesting.fitting_test_support import FittingWidgetMod, dummy_manager
 from sas.qtgui.Perspectives.UndoRedo import UndoStack
-from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
+from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 from sas.qtgui.Utilities import GuiUtils
-
-logger = logging.getLogger(__name__)
 
 
 def _select(widget, category: str, model: str) -> None:
@@ -29,24 +32,19 @@ def _select(widget, category: str, model: str) -> None:
     widget.cbModel.setCurrentIndex(widget.cbModel.findText(model))
 
 
-def _poly_fitted(widget) -> list[str]:
-    """The polydispersity widths selected for fitting (the document's fit flags)."""
-    return [p.key for p in widget.document.parameters.by_table(Table.POLY) if p.fit]
+@pytest.fixture
+def widget(qapp, request, mocker):
+    """A fit page in a perspective of its own (an inconsistent constraint is not shown in a dialog)."""
+    mocker.patch.object(QtWidgets.QMessageBox, 'critical')
+    w = FittingWidgetMod(dummy_manager())
+    w.parent.perspective().fit_tabs.append(w)
+    yield w
+    w.shadow_checker.assert_ok(request)
+    w.close()
 
 
 class FittingWidgetTest:
-    """Test the fitting widget GUI"""
-
-    @pytest.fixture(autouse=True)
-    def widget(self, qapp, mocker, request):
-        '''Create/Destroy the GUI'''
-        w = FittingWidgetMod(dummy_manager())
-        mocker.patch.object(FittingUtilities, 'checkConstraints', return_value=None)
-        yield w
-        w.shadow_checker.assert_ok(request)
-        """Destroy the GUI"""
-        w.close()
-        del w
+    """The widgets, their enablement and their intents."""
 
     def testDefaults(self, widget):
         """Test the GUI in its default state"""
@@ -64,1599 +62,270 @@ class FittingWidgetTest:
         assert widget.acceptsData()
         assert not widget.data_is_loaded
 
-    def testSelectCategoryDefault(self, widget):
-        """
-        Test if model categories have been loaded properly
-        """
-        fittingWindow =  widget
-
-        #Test loading from json categories
-        category_list = list(fittingWindow.master_category_dict.keys())
-
-        for category in category_list:
-            assert fittingWindow.cbCategory.findText(category) != -1
-
-        #Test what is current text in the combobox
-        assert fittingWindow.cbCategory.currentText() == FittingWidget.CATEGORY_DEFAULT
+    def testCategoriesComeFromTheCatalog(self, widget):
+        for category in widget.catalog.categories:
+            assert widget.cbCategory.findText(category) != -1
+        assert widget.cbCategory.currentText() == FittingWidget.CATEGORY_DEFAULT
 
     def testNonExistentModels(self, widget):
-        """
-        Test for models listed in categories.json that do not exist in sasmodels.
-        """
-        default_cat = "Cylinder"
-        test_model = "capped_anything"
-        widget.master_category_dict[default_cat].append([test_model, True])
+        """Models listed in categories.json that sasmodels does not have are not offered."""
+        widget.catalog.categories["Cylinder"].append(["capped_anything", True])
         widget.catalog.regenerate()
-        new_index = widget.cbCategory.findText(default_cat)
-        if new_index != -1:
-            widget.cbCategory.setCurrentIndex(new_index)
-        assert widget.cbModel.findText(test_model) < 0
+        widget.cbCategory.setCurrentIndex(widget.cbCategory.findText("Cylinder"))
+        assert widget.cbModel.findText("capped_anything") < 0
 
     def testWidgetWithData(self, widget, mocker):
-        """
-        Test the instantiation of the widget with initial data
-        """
-        data = Data1D(x=[1,2], y=[1,2])
+        data = Data1D(x=[1, 2], y=[1, 2])
         mocker.patch.object(GuiUtils, 'dataFromItem', return_value=data)
-        item = QtGui.QStandardItem("test")
-
-        widget_with_data = FittingWidgetMod(dummy_manager(), data=item, tab_id=3)
-
+        widget_with_data = FittingWidgetMod(dummy_manager(), data=QtGui.QStandardItem("test"), tab_id=3)
         assert widget_with_data.data == data
         assert widget_with_data.data_is_loaded
-        # assert widget_with_data.cmdFit.isEnabled()
         assert not widget_with_data.acceptsData()
 
-    def testSelectPolydispersity(self, widget):
-        """
-        Test if models have been loaded properly
-        """
-        fittingWindow =  widget
-
-        assert isinstance(fittingWindow.lstPoly.itemDelegate(), QtWidgets.QStyledItemDelegate)
-        #Test loading from json categories
-        _select(fittingWindow, "Cylinder", "cylinder")
-        pd_index = fittingWindow.lstPoly.model().index(0,0)
-        assert str(pd_index.data()) == "Distribution of radius"
-        pd_index = fittingWindow.lstPoly.model().index(1,0)
-        assert str(pd_index.data()) == "Distribution of length"
-
-        # test the delegate a bit
-        delegate = fittingWindow.lstPoly.itemDelegate()
-        assert len(delegate.POLYDISPERSE_FUNCTIONS) == 5
-        assert delegate.editableParameters() == [1, 2, 3, 4, 5]
-        assert delegate.poly_function == 6
-        assert isinstance(delegate.combo_updated, QtCore.Signal)
-
-    def testSelectMagnetism(self, widget):
-        """
-        Test if models have been loaded properly
-        """
-        fittingWindow =  widget
-
-        assert isinstance(fittingWindow.lstMagnetic.itemDelegate(), QtWidgets.QStyledItemDelegate)
-        #Test loading from json categories
-        _select(fittingWindow, "Cylinder", "cylinder")
-        mag_index = fittingWindow.lstMagnetic.model().index(0,0)
-        assert mag_index.data() == "up_frac_i"
-        mag_index = fittingWindow.lstMagnetic.model().index(1,0)
-        assert mag_index.data() == "up_frac_f"
-        mag_index = fittingWindow.lstMagnetic.model().index(2,0)
-        assert mag_index.data() == "up_theta"
-        mag_index = fittingWindow.lstMagnetic.model().index(3,0)
-        assert mag_index.data() == "up_phi"
-        mag_index = fittingWindow.lstMagnetic.model().index(4,0)
-        assert mag_index.data() == "sld_M0"
-        mag_index = fittingWindow.lstMagnetic.model().index(5,0)
-        assert mag_index.data() == "sld_mtheta"
-        mag_index = fittingWindow.lstMagnetic.model().index(6,0)
-        assert mag_index.data() == "sld_mphi"
-        mag_index = fittingWindow.lstMagnetic.model().index(7,0)
-        assert mag_index.data() == "sld_solvent_M0"
-        mag_index = fittingWindow.lstMagnetic.model().index(8,0)
-        assert mag_index.data() == "sld_solvent_mtheta"
-        mag_index = fittingWindow.lstMagnetic.model().index(9,0)
-        assert mag_index.data() == "sld_solvent_mphi"
-
-        # test the delegate a bit
-        delegate = fittingWindow.lstMagnetic.itemDelegate()
-        assert delegate.editableParameters() == [1, 2, 3]
-
-    def testSelectStructureFactor(self, widget):
-        """
-        Test if structure factors have been loaded properly, including plugins also classified as a structure factor.
-        """
-        fittingWindow =  widget
-
-        #Test for existence in combobox
-        assert fittingWindow.cbStructureFactor.findText("stickyhardsphere") != -1
-        assert fittingWindow.cbStructureFactor.findText("hayter_msa") != -1
-        assert fittingWindow.cbStructureFactor.findText("squarewell") != -1
-        assert fittingWindow.cbStructureFactor.findText("hardsphere") != -1
-
-        #Test what is current text in the combobox
-        assert fittingWindow.cbCategory.currentText(), "None"
-
-    def testSignals(self, widget):
-        """
-        Test the widget emitted signals
-        """
-        pass
+    def testStructureFactorsCanBeLoaded(self, widget):
+        """Structure factors, including plugins classified as one."""
+        for name in ("stickyhardsphere", "hayter_msa", "squarewell", "hardsphere"):
+            assert widget.cbStructureFactor.findText(name) != -1
 
     def testSelectCategory(self, widget):
-        """
-        Assure proper behaviour on changing category
-        """
         widget.show()
         assert widget._previous_category_index == 0
-        # confirm the model combo contains no models
         assert widget.cbModel.count() == 0
-
-        # invoke the method by changing the index
         category_index = widget.cbCategory.findText("Shape Independent")
         widget.cbCategory.setCurrentIndex(category_index)
-        model_index = widget.cbModel.findText("be_polyelectrolyte")
-        widget.cbModel.setCurrentIndex(model_index)
-
-        # test the model combo content
+        widget.cbModel.setCurrentIndex(widget.cbModel.findText("be_polyelectrolyte"))
         assert widget.cbModel.count() == 30
-
-        # Try to change back to default
+        # Back to the default category: it bounces back to the previous one
         widget.cbCategory.setCurrentIndex(0)
-
-        # Observe no such luck - it bounces back to the previously chosen
-        # category. (Use the looked-up index rather than a hard-coded one;
-        # the category positions depend on the installed model set.)
         assert widget.cbCategory.currentIndex() == category_index
         assert widget.cbModel.count() == 30
-
-        # Set the structure factor
-        structure_index=widget.cbCategory.findText(FittingWidget.CATEGORY_STRUCTURE)
-        widget.cbCategory.setCurrentIndex(structure_index)
-        # check the enablement of controls
+        # The structure factors: the model combo box is disabled
+        widget.cbCategory.setCurrentIndex(widget.cbCategory.findText(FittingWidget.CATEGORY_STRUCTURE))
         assert not widget.cbModel.isEnabled()
         assert widget.cbStructureFactor.isEnabled()
 
-    def testSelectModel(self, widget, mocker):
-        """
-        Assure proper behaviour on changing model
-        """
+    def testSelectModelIsAnIntent(self, widget, mocker):
         widget.show()
-        # Change the category index so we have some models
-        category_index = widget.cbCategory.findText("Shape Independent")
-        widget.cbCategory.setCurrentIndex(category_index)
-        model_index = widget.cbModel.findText("be_polyelectrolyte")
-        widget.cbModel.setCurrentIndex(model_index)
-        QtWidgets.QApplication.processEvents()
-
-        # check the enablement of controls
+        widget.cbCategory.setCurrentIndex(widget.cbCategory.findText("Shape Independent"))
+        widget.cbModel.setCurrentIndex(widget.cbModel.findText("be_polyelectrolyte"))
         assert widget.cbModel.isEnabled()
         assert not widget.cbStructureFactor.isEnabled()
-
-        # set up the model update spy
-        # spy = QtSignalSpy(widget._model_model, widget._model_model.itemChanged)
-
-        # mock the tested methods
-        mocker.patch.object(widget, 'createDefaultDataset')
-        mocker.patch.object(widget, 'calculateQGridForModel')
-        #
-        # Now change the model
+        mocker.patch.object(widget.controller, 'ensure_default_dataset')
+        mocker.patch.object(widget.controller, 'compute_theory')
         widget.cbModel.setCurrentIndex(4)
         assert widget.cbModel.currentText() == 'dab'
-
-        # No data sent -> no index set, only createDefaultDataset called
-        assert widget.createDefaultDataset.called
+        # No data: only the theory grid
+        assert widget.controller.ensure_default_dataset.called
         assert widget.document.selection.model == 'dab'
         assert widget._model_model.rowCount() == len(widget.document.parameters.rows)
-        assert not widget.calculateQGridForModel.called
-
-        # Let's tell the widget that data has been loaded
+        assert not widget.controller.compute_theory.called
+        # With data, the theory is computed
         widget.data_is_loaded = True
-        # Reset the sasmodel index
         widget.cbModel.setCurrentIndex(2)
         assert widget.cbModel.currentText() == 'broad_peak'
-
-        # Observe calculateQGridForModel called
-        assert widget.calculateQGridForModel.called
+        assert widget.controller.compute_theory.called
 
     def testSelectFactor(self, widget, mocker):
-        """
-        Assure proper behaviour on changing structure factor
-        """
         widget.show()
-        # Mock the background calculation. Selecting a model/structure factor
-        # kicks off an asynchronous Q-grid calculation that briefly disables the
-        # interactive controls (incl. cmdPlot) until it completes. Mocking it
-        # keeps the control-enablement assertions below from racing that thread.
-        mocker.patch.object(widget, 'calculateQGridForModel')
-        # Change the category index so we have some models
-        category_index = widget.cbCategory.findText("Cylinder")
-        widget.cbCategory.setCurrentIndex(category_index)
-        # Change the model to one that supports structure factors
-        model_index = widget.cbModel.findText('cylinder')
-        widget.cbModel.setCurrentIndex(model_index)
-
-        # Check that the factor combo is active and the default is chosen
+        # The theory runs in a thread that briefly disables the controls
+        mocker.patch.object(widget.controller, 'compute_theory')
+        _select(widget, "Cylinder", "cylinder")
         assert widget.cbStructureFactor.isEnabled()
         assert widget.cbStructureFactor.currentText() == FittingWidget.STRUCTURE_DEFAULT
-
-        # We have this many rows in the model
         rowcount = widget._model_model.rowCount()
-        #assert widget._model_model.rowCount() == 8
-
-        # Change structure factor to something more exciting
-        structure_index = widget.cbStructureFactor.findText('squarewell')
-        widget.cbStructureFactor.setCurrentIndex(structure_index)
-
-        # We have 3 more param rows now (radius_effective is removed), and new headings
-        assert widget._model_model.rowCount() == rowcount+7
-
-        # Switch models
+        widget.cbStructureFactor.setCurrentIndex(widget.cbStructureFactor.findText('squarewell'))
+        # 3 more parameters (radius_effective is removed), and new headings
+        assert widget._model_model.rowCount() == rowcount + 7
+        # Switching models keeps the structure factor
         widget.cbModel.setCurrentIndex(0)
-
-        # Observe factor doesn't reset to None
         assert widget.cbStructureFactor.currentText() == 'squarewell'
-
-        # Switch category to structure factor
-        structure_index=widget.cbCategory.findText(FittingWidget.CATEGORY_STRUCTURE)
-        widget.cbCategory.setCurrentIndex(structure_index)
-        # Observe the correct enablement
+        # The structure factor category
+        widget.cbCategory.setCurrentIndex(widget.cbCategory.findText(FittingWidget.CATEGORY_STRUCTURE))
         assert widget.cbStructureFactor.isEnabled()
         assert not widget.cbModel.isEnabled()
         assert widget._model_model.rowCount() == 0
-
-        # Choose a structure factor with a known parameter set. hayter_msa has
-        # 6 parameters which, together with the heading row, gives 7 rows.
-        # (Don't rely on "the last factor" - the available structure factors
-        # depend on the installed sasmodels version.)
-        sf_index = widget.cbStructureFactor.findText('hayter_msa')
-        widget.cbStructureFactor.setCurrentIndex(sf_index)
-        # Do we have all the rows (incl. radius_effective & heading row)?
+        # hayter_msa: 6 parameters and the heading row
+        widget.cbStructureFactor.setCurrentIndex(widget.cbStructureFactor.findText('hayter_msa'))
         assert widget._model_model.rowCount() == 7
-
-        # Are the command buttons properly enabled?
         assert widget.cmdPlot.isEnabled()
         assert not widget.cmdFit.isEnabled()
 
-    def testReadCategoryInfo(self, widget):
-        """
-        Check the category file reader
-        """
-        # Tested in default checks
-        pass
+    def testTheFitButtonFollowsTheFitFlags(self, widget):
+        page = g.new_page(data=g.make_data1d("d1", "data1"))
+        g.select_model(page, "Cylinder", "cylinder")
+        assert not page.cmdFit.isEnabled()
+        page.controller.set_fit_flag("radius", True)
+        assert page.cmdFit.isEnabled()
+        page.controller.set_fit_flag("radius", False)
+        assert not page.cmdFit.isEnabled()
+        page.close()
 
-    def testUpdateParamsFromModel(self, widget):
-        """
-        Checks the sasmodel parameter update from QModel items
-        """
-        # Tested in default checks
-        pass
-
-    def testCreateTheoryIndex(self, widget):
-        """
-        Test the data->QIndex conversion
-        """
-        # set up the model update spy
+    def testATheoryResultIsPublished(self, widget):
+        """A page without data: the theory goes to a new theory item."""
         spy = QtSignalSpy(widget._model_model, widget.communicator.updateTheoryFromPerspectiveSignal)
-
         widget.show()
-        # Change the category index so we have some models
         widget.cbCategory.setCurrentIndex(1)
-
-        # Publish a theory curve of the page (no data: a theory item)
-        result = DatasetResult(Provenance(1, 0, 0, "theory", 0), Data1D(x=[1,2], y=[1,2]))
-        widget.plot_publisher.publish(result)
-
-        # Make sure the signal has been emitted
+        widget.plot_publisher.publish(DatasetResult(Provenance(1, 0, 0, "theory", 0), Data1D(x=[1, 2], y=[1, 2])))
         assert spy.count() == 1
-
-        # Check the argument type
         assert isinstance(spy.called()[0]['args'][0], QtGui.QStandardItem)
 
-    def testCalculateQGridForModel(self, widget, mocker):
-        """
-        Check that the fitting 1D data object is ready
-        """
-
+    def testComputeTheoryStartsTheCalculation(self, widget, mocker):
         if config.USING_TWISTED:
-            # Mock the thread creation
             mocker.patch.object(threads, 'deferToThread')
-            # Model for theory
             _select(widget, "Cylinder", "cylinder")
-            # Call the tested method
-            widget.calculateQGridForModel()
+            widget.controller.compute_theory()
             time.sleep(1)
-            # Test the mock
             assert threads.deferToThread.called
             assert threads.deferToThread.call_args_list[0][0][0].__name__ == "compute"
         else:
             mocker.patch.object(Calc1D, 'queue')
-            # Model for theory (on a theory page: the default 1D dataset)
+            # On a theory page: the default 1D dataset
             _select(widget, "Cylinder", "cylinder")
-            # Call the tested method
-            widget.calculateQGridForModel()
+            widget.controller.compute_theory()
             time.sleep(1)
-            # Test the mock
             assert Calc1D.queue.called
 
-    def testSetPolyModel(self, widget):
-        """
-        Test the polydispersity model setup
-        """
-        widget.show()
-        # Change the category index so we have a model with no poly
-        category_index = widget.cbCategory.findText("Shape Independent")
-        widget.cbCategory.setCurrentIndex(category_index)
-        model_index = widget.cbModel.findText("be_polyelectrolyte")
-        widget.cbModel.setCurrentIndex(model_index)
-
-        # Check the poly model
-        assert widget.polydispersity_widget.poly_model.rowCount() == 0
-        assert widget.polydispersity_widget.poly_model.columnCount() == 0
-
-        # Change the category index so we have a model available
-        widget.cbCategory.setCurrentIndex(2)
-        widget.cbModel.setCurrentIndex(1)
-
-        # Check the poly model
-        assert widget.polydispersity_widget.poly_model.rowCount() == 4
-        assert widget.polydispersity_widget.poly_model.columnCount() == 8
-
-        # Test the header
-        assert widget.lstPoly.horizontalHeader().count() == 8
-        assert not widget.lstPoly.horizontalHeader().stretchLastSection()
-
-        # Test tooltips
-        assert len(widget.polydispersity_widget.poly_model.header_tooltips) == 8
-
-        header_tooltips = ['Select parameter for fitting',
-                            'Enter polydispersity ratio (Std deviation/mean).\n'+
-                            'For angles this can be either std deviation or half width (for uniform distributions) in degrees',
-                            'Enter minimum value for parameter',
-                            'Enter maximum value for parameter',
-                            'Enter number of points for parameter',
-                            'Enter number of sigmas parameter',
-                            'Select distribution function',
-                            'Select filename with user-definable distribution']
-        for column, tooltip in enumerate(header_tooltips):
-             assert widget.polydispersity_widget.poly_model.headerData( column,
-                QtCore.Qt.Horizontal, QtCore.Qt.ToolTipRole) == \
-                         header_tooltips[column]
-
-        # Test presence of comboboxes in last column
-        for row in range(widget.polydispersity_widget.poly_model.rowCount()):
-            func_index = widget.polydispersity_widget.poly_model.index(row, 6)
-            assert isinstance(widget.lstPoly.indexWidget(func_index), QtWidgets.QComboBox)
-            assert 'Distribution of' in widget.polydispersity_widget.poly_model.item(row, 0).text()
-        #widget.close()
-
-    @pytest.mark.shadow_exempt("edits the polydispersity table while polydispersity is off (the tab is disabled)")
-    def testPolyModelChange(self, widget):
-        """
-        Polydispersity model changed - test all possible scenarios
-        """
-        widget.show()
-        # Change the category index so we have a model with polydisp
-        category_index = widget.cbCategory.findText("Cylinder")
-        widget.cbCategory.setCurrentIndex(category_index)
-        model_index = widget.cbModel.findText("barbell")
-        widget.cbModel.setCurrentIndex(model_index)
-
-        # click on a poly parameter checkbox
-        widget.polydispersity_widget.poly_model.index(0,0)
-
-        # Set the checbox
-        widget.polydispersity_widget.poly_model.item(0,0).setCheckState(QtCore.Qt.CheckState.Checked)
-        # Assure the parameter is added
-        assert _poly_fitted(widget) == ['radius_bell.width']
-        # Check that it's value has not changed (reproduce the polydispersity checkbox bug)
-        assert widget.document.parameters['radius_bell.width'].value == 0.0
-
-        # Add another parameter
-        widget.polydispersity_widget.poly_model.item(2,0).setCheckState(QtCore.Qt.CheckState.Checked)
-        # Assure the parameters are added
-        assert _poly_fitted(widget) == ['radius_bell.width', 'length.width']
-
-        # Change the min/max values
-        assert widget.kernel().details['radius_bell.width'][1] == 0.0
-        widget.polydispersity_widget.poly_model.item(0,2).setText("1.0")
-        assert widget.kernel().details['radius_bell.width'][1] == 1.0
-        # Check that changing the polydispersity min/max value doesn't affect the paramer min/max
-        assert widget.kernel().details['radius_bell'][1] == 0.0
-
-        #widget.show()
-        #QtWidgets.QApplication.exec_()
-
-        # Change the number of points
-        assert widget.document.parameters['radius_bell.width'].dispersion.npts == 35
-        widget.polydispersity_widget.poly_model.item(0,4).setText("22")
-        assert widget.document.parameters['radius_bell.width'].dispersion.npts == 22
-        # test that sasmodel is updated with the new value
-        assert widget.kernel().getParam('radius_bell.npts') == 22
-
-        # Change the pd value
-        assert widget.document.parameters['radius_bell.width'].value == 0.0
-        widget.polydispersity_widget.poly_model.item(0,1).setText("0.8")
-        assert widget.document.parameters['radius_bell.width'].value == pytest.approx(0.8, abs=1e-7)
-        # Polydispersity is off: the kernel keeps the width at 0, as togglePoly leaves it (Phase 5)
-        assert widget.kernel().getParam('radius_bell.width') == 0.0
-
-        # Uncheck pd in the fitting widget
-        widget.chkPolydispersity.setCheckState(QtCore.Qt.CheckState.Checked)
-        widget.chkPolydispersity.click()
-        # Should not change the value of the qt model
-        assert widget.document.parameters['radius_bell.width'].value == pytest.approx(0.8, abs=1e-7)
-        # sasmodel should be set to 0
-        assert widget.kernel().getParam('radius_bell.width') == pytest.approx(0.0, abs=1e-7)
-
-        # try something stupid
-        widget.polydispersity_widget.poly_model.item(0,4).setText("butt")
-        # see that this didn't annoy the control at all
-        assert widget.document.parameters['radius_bell.width'].dispersion.npts == 22
-
-        # Change the number of sigmas
-        assert widget.document.parameters['radius_bell.width'].dispersion.nsigmas == 3
-        widget.polydispersity_widget.poly_model.item(0,5).setText("222")
-        assert widget.document.parameters['radius_bell.width'].dispersion.nsigmas == 222
-        # try something stupid again
-        widget.polydispersity_widget.poly_model.item(0,4).setText("beer")
-        # no efect
-        assert widget.document.parameters['radius_bell.width'].dispersion.nsigmas == 222
-
-    @pytest.mark.shadow_exempt("calls the slot with functions the combo box does not show")
-    def testOnPolyComboIndexChange(self, widget, mocker):
-        """
-        Test the slot method for polydisp. combo box index change
-        """
-        widget.show()
-        # Change the category index so we have a model with polydisp
-        category_index = widget.cbCategory.findText("Cylinder")
-        widget.cbCategory.setCurrentIndex(category_index)
-        model_index = widget.cbModel.findText("barbell")
-        widget.cbModel.setCurrentIndex(model_index)
-
-        # call method with default settings
-        widget.polydispersity_widget.onPolyComboIndexChange('gaussian', 0)
-        # check values
-        assert widget.kernel().getParam('radius_bell.npts') == 35
-        assert widget.kernel().getParam('radius_bell.nsigmas') == 3
-        # Change the index
-        widget.polydispersity_widget.onPolyComboIndexChange('rectangle', 0)
-        # check values
-        assert widget.document.parameters['radius_bell.width'].dispersion.npts == 35
-        assert widget.document.parameters['radius_bell.width'].dispersion.nsigmas == pytest.approx(1.73205, abs=1e-5)
-        # Change the index
-        widget.polydispersity_widget.onPolyComboIndexChange('lognormal', 0)
-        # check values
-        assert widget.document.parameters['radius_bell.width'].dispersion.npts == 80
-        assert widget.document.parameters['radius_bell.width'].dispersion.nsigmas == 8
-        # Change the index
-        widget.polydispersity_widget.onPolyComboIndexChange('schulz', 0)
-        # check values
-        assert widget.document.parameters['radius_bell.width'].dispersion.npts == 80
-        assert widget.document.parameters['radius_bell.width'].dispersion.nsigmas == 8
-
-        # mock up file load
-        mocker.patch.object(widget.polydispersity_widget, 'loadPolydispArray',
-                            return_value=ArrayDistribution((10.0, 20.0), (0.5, 0.5), "weights.txt"))
-        # Change to 'array'
-        widget.polydispersity_widget.onPolyComboIndexChange('array', 0)
-        # See the mock fire
-        widget.polydispersity_widget.loadPolydispArray.assert_called()
-
-    def testLoadPolydispArray(self, widget, mocker):
-        """
-        Test opening of the load file dialog for 'array' polydisp. function
-        """
-
-        # open a non-existent file
-        filename = os.path.join("UnitTesting", "testdata_noexist.txt")
-        with pytest.raises(OSError):
-            os.stat(filename)
-        mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=(filename,''))
-        widget.show()
-        # Change the category index so we have a model with polydisp
-        category_index = widget.cbCategory.findText("Cylinder")
-        widget.cbCategory.setCurrentIndex(category_index)
-        model_index = widget.cbModel.findText("barbell")
-        widget.cbModel.setCurrentIndex(model_index)
-
-        widget.polydispersity_widget.onPolyComboIndexChange('array', 0)
-        # check values - unchanged since the file doesn't exist
-        assert widget.polydispersity_widget.poly_model.item(0, 1).isEnabled()
-
-        widget.polydispersity_widget.onPolyComboIndexChange('array', 0)
-        # check values - disabled control, present weights
-        assert widget.polydispersity_widget.poly_model.item(0, 1).isEnabled()
-
-    def testSetMagneticModel(self, widget):
-        """
-        Test the magnetic model setup
-        """
-        widget.show()
-        # Change the category index so we have a model available
-        category_index = widget.cbCategory.findText("Sphere")
-        widget.cbCategory.setCurrentIndex(category_index)
-        model_index = widget.cbModel.findText("core_shell_sphere")
-        widget.cbModel.setCurrentIndex(model_index)
-
-        # Check the magnetic model
-        assert widget.magnetism_widget._magnet_model.rowCount() == 13
-        assert widget.magnetism_widget._magnet_model.columnCount() == 5
-
-        # Test the header
-        assert widget.lstMagnetic.horizontalHeader().count() == 5
-        assert not widget.lstMagnetic.horizontalHeader().stretchLastSection()
-
-        #Test tooltips
-        assert len(widget.magnetism_widget._magnet_model.header_tooltips) == 5
-
-        header_tooltips = ['Select parameter for fitting',
-                           'Enter parameter value',
-                           'Enter minimum value for parameter',
-                           'Enter maximum value for parameter',
-                           'Unit of the parameter']
-        for column, tooltip in enumerate(header_tooltips):
-             assert widget.magnetism_widget._magnet_model.headerData(column,
-                QtCore.Qt.Horizontal, QtCore.Qt.ToolTipRole) == \
-                         header_tooltips[column]
-
-        # Test rows
-        for row in range(widget.magnetism_widget._magnet_model.rowCount()):
-            widget.magnetism_widget._magnet_model.index(row, 0)
-            assert '_' in widget.magnetism_widget._magnet_model.item(row, 0).text()
-
-
-    def testAddExtraShells(self, widget):
-        """
-        Test how the extra shells are presented
-        """
-        pass
-
-    def testModifyShellsInList(self, widget):
-        """
-        Test the additional rows added by modifying the shells combobox
-        """
-        widget.show()
-        # Change the model to multi shell
-        category_index = widget.cbCategory.findText("Sphere")
-        widget.cbCategory.setCurrentIndex(category_index)
-        model_index = widget.cbModel.findText("core_multi_shell")
-        widget.cbModel.setCurrentIndex(model_index)
-
-        # Assure we have the combobox available
-        cbox_row = widget._n_shells_row
-        func_index = widget._model_model.index(cbox_row, 1)
-        assert isinstance(widget.lstParams.indexWidget(func_index), QtWidgets.QComboBox)
-
-        # get number of rows before changing shell count
-        last_row = widget._model_model.rowCount()
-
-        # Change the combo box index
-        widget.lstParams.indexWidget(func_index).setCurrentIndex(3)
-
-        # Check that the number of rows increased
-        # (note that n == 1 by default in core_multi_shell so this increases index by 2)
-        more_rows = widget._model_model.rowCount() - last_row
-        assert more_rows == 4 # 4 new rows: 2 params per index
-
-        # Set to 0 (the table, and its combo box, were rebuilt for the new layout)
-        func_index = widget._model_model.index(widget._n_shells_row, 1)
-        widget.lstParams.indexWidget(func_index).setCurrentIndex(0)
-        assert widget._model_model.rowCount() == last_row - 2
-
     def testPlotTheory(self, widget):
-        """
-        See that theory item can produce a chart
-        """
-        # By default, the compute/plot button is disabled
         assert not widget.cmdPlot.isEnabled()
         assert widget.cmdPlot.text() == 'Compute/Plot'
-
-        # Assign a model
         widget.show()
-        # Change the category index so we have a model available
-        category_index = widget.cbCategory.findText("Sphere")
-        widget.cbCategory.setCurrentIndex(category_index)
-        model_index = widget.cbModel.findText("adsorbed_layer")
-        widget.cbModel.setCurrentIndex(model_index)
-
-        # Check the enablement/text
+        _select(widget, "Sphere", "adsorbed_layer")
         assert widget.cmdPlot.isEnabled()
         assert widget.cmdPlot.text() == 'Calculate'
-
-        # Spying on plot update signal
         spy = QtSignalSpy(widget, widget.communicator.plotRequestedSignal)
-
-        # Press Calculate
         QtTest.QTest.mouseClick(widget.cmdPlot, QtCore.Qt.LeftButton)
-
-        # Observe cmdPlot caption change
         assert widget.cmdPlot.text() == 'Compute/Plot'
-
-        # Make sure the signal has NOT been emitted
         assert spy.count() == 0
-
-        # Click again
         QtTest.QTest.mouseClick(widget.cmdPlot, QtCore.Qt.LeftButton)
-
-        # This time, we got the update signal
         assert spy.count() == 0
-
-    @pytest.mark.xfail(reason="2026-02 Data property is broken for the mock fitting widget")
-    def notestPlotData(self, widget):
-        """
-        See that data item can produce a chart
-        """
-        # By default, the compute/plot button is disabled
-        assert not widget.cmdPlot.isEnabled()
-        assert widget.cmdPlot.text() == 'Show Plot'
-
-        # Set data
-        test_data = Data1D(x=[1,2], y=[1,2])
-        item = QtGui.QStandardItem()
-        GuiUtils.updateModelItem(item, test_data, "test")
-        # Force same data into logic
-        widget.data = item
-
-        # Change the category index so we have a model available
-        category_index = widget.cbCategory.findText("Sphere")
-        widget.cbCategory.setCurrentIndex(category_index)
-
-        # Check the enablement/text
-        assert widget.cmdPlot.isEnabled()
-        assert widget.cmdPlot.text() == 'Show Plot'
-
-        # Spying on plot update signal
-        spy = QtSignalSpy(widget, widget.communicator.plotRequestedSignal)
-
-        # Press Calculate
-        QtTest.QTest.mouseClick(widget.cmdPlot, QtCore.Qt.LeftButton)
-
-        # Observe cmdPlot caption did not change
-        assert widget.cmdPlot.text() == 'Show Plot'
-
-        # Make sure the signal has been emitted == new plot
-        assert spy.count() == 1
-
-    @pytest.mark.xfail(reason="2026-02 Data property is broken for the mock fitting widget")
-    def testOnEmptyFit(self, widget, mocker):
-        """
-        Test a 1D/2D fit with no parameters
-        """
-        # Set data
-        test_data = Data1D(x=[1,2], y=[1,2])
-        item = QtGui.QStandardItem()
-        GuiUtils.updateModelItem(item, test_data, "test")
-        # Force same data into logic
-        widget.data = item
-
-        category_index = widget.cbCategory.findText("Sphere")
-        widget.cbCategory.setCurrentIndex(category_index)
-
-        # Test no fitting params
-        widget.main_params_to_fit = []
-
-        mocker.patch.object(logger, 'error')
-
-        widget.onFit()
-        logger.error.assert_called_with('no fitting parameters')
-        widget.close()
-
-    @pytest.mark.xfail(reason="2026-02 Data property is broken for the mock fitting widget")
-    def testOnEmptyFit2(self, widget, mocker):
-        test_data = Data2D(image=[1.0, 2.0, 3.0],
-                           err_image=[0.01, 0.02, 0.03],
-                           qx_data=[0.1, 0.2, 0.3],
-                           qy_data=[0.1, 0.2, 0.3],
-                           xmin=0.1, xmax=0.3, ymin=0.1, ymax=0.3,
-                           mask=[True, True, True])
-
-        # Force same data into logic
-        item = QtGui.QStandardItem()
-        GuiUtils.updateModelItem(item, test_data, "test")
-
-        # Force same data into logic
-        widget.data = item
-        category_index = widget.cbCategory.findText("Sphere")
-        widget.cbCategory.setCurrentIndex(category_index)
-
-        widget.show()
-
-        # Test no fitting params
-        widget.main_params_to_fit = []
-
-        mocker.patch.object(logger, 'error')
-
-        widget.onFit()
-        logger.error.assert_called_once()
-        logger.error.assert_called_with('no fitting parameters')
-        widget.close()
-
-    @pytest.mark.xfail(reason="2026-02 Data property is broken for the mock fitting widget")
-    def notestOnFit1D(self, widget, mocker):
-        """
-        Test the threaded fitting call
-        """
-        # Set data
-        test_data = Data1D(x=[1,2], y=[1,2])
-        item = QtGui.QStandardItem()
-        GuiUtils.updateModelItem(item, test_data, "test")
-        # Force same data into logic
-        widget.data = item
-        category_index = widget.cbCategory.findText("Sphere")
-        widget.cbCategory.setCurrentIndex(category_index)
-
-        widget.show()
-
-        # Assing fitting params
-        widget.main_params_to_fit = ['scale']
-
-        # Spying on status update signal
-        update_spy = QtSignalSpy(widget, widget.communicator.statusBarUpdateSignal)
-
-        mocker.patch.object(threads, 'deferToThread')
-        widget.onFit()
-        # thread called
-        assert threads.deferToThread.called
-        # thread method is 'compute'
-        assert threads.deferToThread.call_args_list[0][0][0].__name__ == 'compute'
-
-        # the fit button changed caption and got disabled
-        # could fail if machine fast enough to finish
-        #assert widget.cmdFit.text() == 'Stop fit'
-        #assert not widget.cmdFit.isEnabled()
-
-        # Signal pushed up
-        assert update_spy.count() == 1
-
-        widget.close()
-
-    @pytest.mark.xfail(reason="2026-02 Data property is broken for the mock fitting widget")
-    def notestOnFit2D(self, widget):
-        """
-        Test the threaded fitting call
-        """
-        # Set data
-        test_data = Data2D(image=[1.0, 2.0, 3.0],
-                           err_image=[0.01, 0.02, 0.03],
-                           qx_data=[0.1, 0.2, 0.3],
-                           qy_data=[0.1, 0.2, 0.3],
-                           xmin=0.1, xmax=0.3, ymin=0.1, ymax=0.3,
-                           mask=[True, True, True])
-
-        # Force same data into logic
-        item = QtGui.QStandardItem()
-        GuiUtils.updateModelItem(item, test_data, "test")
-        # Force same data into logic
-        widget.data = item
-        category_index = widget.cbCategory.findText("Sphere")
-        widget.cbCategory.setCurrentIndex(category_index)
-
-        widget.show()
-
-        # Assing fitting params
-        widget.main_params_to_fit = ['scale']
-
-        # Spying on status update signal
-        update_spy = QtSignalSpy(widget, widget.communicator.statusBarUpdateSignal)
-
-        with threads.deferToThread:
-            widget.onFit()
-            # thread called
-            assert threads.deferToThread.called
-            # thread method is 'compute'
-            assert threads.deferToThread.call_args_list[0][0][0].__name__ == 'compute'
-
-            # the fit button changed caption and got disabled
-            #assert widget.cmdFit.text() == 'Stop fit'
-            #assert not widget.cmdFit.isEnabled()
-
-            # Signal pushed up
-            assert update_spy.count() == 1
 
     def testOnHelp(self, widget, mocker):
-        """
-        Test various help pages shown in this widget
-        """
-        # Mock the parent's showHelp method
+        """The help page of each tab"""
         mocker.patch.object(widget.parent, 'showHelp', create=True)
+        for tab, page in enumerate(["fitting_help.html", "residuals_help.html", "resolution.html",
+                                    "polydispersity.html", "magnetism.html"]):
+            widget.tabFitting.setCurrentIndex(tab)
+            widget.onHelp()
+            assert widget.parent.showHelp.call_count == tab + 1
+            assert page in str(widget.parent.showHelp.call_args[0][0].absolute())
 
-        # Invoke the action on default tab
-        widget.onHelp()
-        # Check if show() got called
-        widget.parent.showHelp.assert_called()
-        # Assure the filename is correct
-        assert "fitting_help.html" in str(widget.parent.showHelp.call_args[0][0].absolute())
-
-        # Change the tab to options
-        widget.tabFitting.setCurrentIndex(1)
-        widget.onHelp()
-        # Check if show() got called
-        assert widget.parent.showHelp.call_count == 2
-        # Assure the filename is correct
-        assert "residuals_help.html" in str(widget.parent.showHelp.call_args[0][0].absolute())
-
-        # Change the tab to smearing
-        widget.tabFitting.setCurrentIndex(2)
-        widget.onHelp()
-        # Check if show() got called
-        assert widget.parent.showHelp.call_count == 3
-        # Assure the filename is correct
-        assert "resolution.html" in str(widget.parent.showHelp.call_args[0][0].absolute())
-
-        # Change the tab to poly
-        widget.tabFitting.setCurrentIndex(3)
-        widget.onHelp()
-        # Check if show() got called
-        assert widget.parent.showHelp.call_count == 4
-        # Assure the filename is correct
-        assert "polydispersity.html" in str(widget.parent.showHelp.call_args[0][0].absolute())
-
-        # Change the tab to magnetism
-        widget.tabFitting.setCurrentIndex(4)
-        widget.onHelp()
-        # Check if show() got called
-        assert widget.parent.showHelp.call_count == 5
-        # Assure the filename is correct
-        assert "magnetism.html" in str(widget.parent.showHelp.call_args[0][0].absolute())
-
-    @pytest.mark.xfail(reason="2026-02 Data property is broken for the mock fitting widget")
-    def testCurrentState(self, widget):
-        """
-        Set up the fitpage with current state
-        """
-        # Set data
-        test_data = Data1D(x=[1,2], y=[1,2])
-        item = QtGui.QStandardItem()
-        GuiUtils.updateModelItem(item, test_data, "test")
-        # Force same data into logic
-        widget.data = item
-        category_index = widget.cbCategory.findText("Sphere")
-        widget.cbCategory.setCurrentIndex(category_index)
-        model_index = widget.cbModel.findText("adsorbed_layer")
-        widget.cbModel.setCurrentIndex(model_index)
-        widget.main_params_to_fit = ['scale']
-
-        # Invoke the tested method
-        fp = widget.currentState()
-
-        # Test some entries. (Full testing of fp is done in FitPageTest)
-        assert isinstance(fp.data, Data1D)
-        assert list(fp.data.x) == [1,2]
-        assert fp.data_is_loaded
-        assert fp.current_category == "Sphere"
-        assert fp.current_model == "adsorbed_layer"
-        assert fp.main_params_to_fit == ['scale']
-
-    def testOnMainPageChange(self, widget):
-        """
-        Test update  values of modified parameters in models
-        """
-        # select model: cylinder / cylinder
-        category_index = widget.cbCategory.findText("Cylinder")
-        widget.cbCategory.setCurrentIndex(category_index)
-
-        model_index = widget.cbModel.findText("cylinder")
-        widget.cbModel.setCurrentIndex(model_index)
-
-        # modify the initial value of length (different from default)
-        # print widget.kernel_module.details['length']
-
-        new_value = "333.0"
-        widget._model_model.item(5, 1).setText(new_value)
-
-        # name of modified parameter
-        name_modified_param = str(widget._model_model.item(5, 0).text())
-
-         # Check the model
-        assert widget._model_model.rowCount() == 7
-        assert widget._model_model.columnCount() == 5
-
-        # Test the header
-        #assert widget.lstParams.horizontalHeader().count() == 5
-        #assert not widget.lstParams.horizontalHeader().stretchLastSection()
-
-        assert len(widget._model_model.header_tooltips) == 5
-        header_tooltips = ['Select parameter for fitting',
-                             'Enter parameter value',
-                             'Enter minimum value for parameter',
-                             'Enter maximum value for parameter',
-                             'Unit of the parameter']
-        for column, tooltip in enumerate(header_tooltips):
-             assert widget._model_model.headerData(column,
-                QtCore.Qt.Horizontal, QtCore.Qt.ToolTipRole) == \
-                         header_tooltips[column]
-
-        # check that the value has been modified in kernel_module
-        assert new_value == \
-                         str(widget.kernel().params[name_modified_param])
-
-        # check that range of variation for this parameter has NOT been changed
-        assert new_value not in widget.kernel().details[name_modified_param]
-
-    @pytest.mark.xfail(reason="2026-02: pytest.raises check succeeds when it should fail")
     def testModelContextMenu(self, widget):
-        """
-        Test the right click context menu in the parameter table
-        """
-        # select model: cylinder / cylinder
-        category_index = widget.cbCategory.findText("Cylinder")
-        widget.cbCategory.setCurrentIndex(category_index)
-
-        model_index = widget.cbModel.findText("cylinder")
-        widget.cbModel.setCurrentIndex(model_index)
-
-        # no rows selected
-        menu = widget.modelContextMenu([])
-        assert len(menu.actions()) == 0
-
-        # 1 row selected
-        menu = widget.modelContextMenu([1])
-        assert len(menu.actions()) == 4
-
-        # 2 rows selected
-        menu = widget.modelContextMenu([1,3])
-        assert len(menu.actions()) == 4
-
-        # 3 rows selected
-        menu = widget.modelContextMenu([1,2,3])
-        assert len(menu.actions()) == 4
-
-        # over 9000
-        with pytest.raises(AttributeError):
-            menu = widget.modelContextMenu([i for i in range(9001)])
-        assert len(menu.actions()) == 4
-
-    @pytest.mark.xfail(reason="2026-02: PyQt -> Pyside API issue")
-    def testShowModelContextMenu(self, widget, mocker):
-        # select model: cylinder / cylinder
-        category_index = widget.cbCategory.findText("Cylinder")
-        widget.cbCategory.setCurrentIndex(category_index)
-
-        model_index = widget.cbModel.findText("cylinder")
-        widget.cbModel.setCurrentIndex(model_index)
-
-        # No selection
-        mocker.patch.object(logger, 'error')
-        mocker.patch.object(widget, 'showModelDescription')
-        # Show the menu
-        widget.showModelContextMenu(QtCore.QPoint(10,20))
-
-        # Assure the description menu is shown
-        assert widget.showModelDescription.called
-        assert not logger.error.called
-
-        # "select" two rows
-        index1 = widget.lstParams.model().index(1, 0, QtCore.QModelIndex())
-        index2 = widget.lstParams.model().index(2, 0, QtCore.QModelIndex())
-        selection_model = widget.lstParams.selectionModel()
-        selection_model.select(index1, selection_model.Select | selection_model.Rows)
-        selection_model.select(index2, selection_model.Select | selection_model.Rows)
-
-        mocker.patch.object(QtWidgets.QMenu, 'exec_')
-        mocker.patch.object(logger, 'error')
-        # Show the menu
-        widget.showModelContextMenu(QtCore.QPoint(10,20))
-
-        # Assure the menu is shown
-        assert not logger.error.called
-        assert QtWidgets.QMenu.exec_.called
-
-    @pytest.mark.xfail(reason="2026-02: PyQt -> Pyside API issue")
-    def testShowMultiConstraint(self, widget, mocker):
-        """
-        Test the widget update on new multi constraint
-        """
-        # select model: cylinder / cylinder
-        category_index = widget.cbCategory.findText("Cylinder")
-        widget.cbCategory.setCurrentIndex(category_index)
-
-        model_index = widget.cbModel.findText("cylinder")
-        widget.cbModel.setCurrentIndex(model_index)
-
-        # nothing selected
-        with pytest.raises(AssertionError):
-            widget.showMultiConstraint()
-
-        # one row selected
-        index = widget.lstParams.model().index(1, 0, QtCore.QModelIndex())
-        selection_model = widget.lstParams.selectionModel()
-        selection_model.select(index, selection_model.Select | selection_model.Rows)
-        with pytest.raises(AssertionError):
-            # should also throw
-            widget.showMultiConstraint()
-
-        # two rows selected
-        index1 = widget.lstParams.model().index(1, 0, QtCore.QModelIndex())
-        index2 = widget.lstParams.model().index(3, 0, QtCore.QModelIndex())
-        selection_model = widget.lstParams.selectionModel()
-        selection_model.select(index1, selection_model.Select | selection_model.Rows)
-        selection_model.select(index2, selection_model.Select | selection_model.Rows)
-
-        # return non-OK from dialog
-        mocker.patch.object(QtWidgets.QDialog, 'exec_')
-        widget.showMultiConstraint()
-        # Check the dialog called
-        assert QtWidgets.QDialog.exec_.called
-
-        # return OK from dialog
-        mocker.patch.object(QtWidgets.QDialog, 'exec_', return_value=QtWidgets.QDialog.Accepted)
-        spy = QtSignalSpy(widget, widget.constraintAddedSignal)
-
-        widget.showMultiConstraint()
-
-        # Make sure the signal has been emitted
-        assert spy.count() == 1
-
-        # Check the argument value - should be row '1'
-        assert spy.called()[0]['args'][0] == [1]
-
-    def testGetRowFromName(self, widget):
-        """
-        Helper function for parameter table
-        """
-        # select model: cylinder / cylinder
-        category_index = widget.cbCategory.findText("Cylinder")
-        widget.cbCategory.setCurrentIndex(category_index)
-
-        model_index = widget.cbModel.findText("cylinder")
-        widget.cbModel.setCurrentIndex(model_index)
-
-        # several random parameters
-        assert widget.getRowFromName('scale') == 0
-        assert widget.getRowFromName('length') == 6
-
-    def testGetParamNames(self, widget):
-        """
-        Helper function for parameter table
-        """
-        # select model: cylinder / cylinder
-        category_index = widget.cbCategory.findText("Cylinder")
-        widget.cbCategory.setCurrentIndex(category_index)
-
-        model_index = widget.cbModel.findText("cylinder")
-        widget.cbModel.setCurrentIndex(model_index)
-
-        cylinder_params = ['scale','background','sld','sld_solvent','radius','length']
-        # assure all parameters are returned
-        assert widget.getParamNames() == cylinder_params
-
-        # Switch to another model
-        model_index = widget.cbModel.findText("pringle")
-        widget.cbModel.setCurrentIndex(model_index)
-        QtWidgets.QApplication.processEvents()
-
-        # make sure the parameters are different than before
-        assert not (widget.getParamNames() == cylinder_params)
-
-    def testAddConstraintToRow(self, widget, mocker):
-        """
-        Test the constraint row add operation
-        """
-        # select model: cylinder / cylinder
-        category_index = widget.cbCategory.findText("Cylinder")
-        widget.cbCategory.setCurrentIndex(category_index)
-
-        model_index = widget.cbModel.findText("cylinder")
-        widget.cbModel.setCurrentIndex(model_index)
-
-        # Create a constraint object
-        const = Constraint(parent=None, param="scale",value=7.0)
-        row = 3
-
-        spy = QtSignalSpy(widget, widget.constraintAddedSignal)
-
-        # Mock the modelName method
-        mocker.patch.object(widget, 'modelName', return_value='M1')
-
-        # Mock a constraint tab
-        constraint_tab = MagicMock()
-        constraint_tab.constraint_accepted = False
-        widget.parent.perspective().constraint_tab = constraint_tab
-
-        # call the method tested
-        widget.addConstraintToRow(constraint=const, row=row)
-
-        # Make sure the signal has been emitted
-        assert spy.count() == 1
-
-        # Check the argument value - should be row 'row'
-        assert spy.called()[0]['args'][0] == [row]
-
-        # Assure the row has the constraint (the table holds the document's copy)
-        assert vars(widget.getConstraintForRow(row)) == vars(const)
-        assert widget.rowHasConstraint(row)
-
-        # Check that the constraint tab flag is set to True
-        assert constraint_tab.constraint_accepted
-
-        # assign complex constraint now
-        const = Constraint(parent=None, param='radius', func='5*sld')
-        row = 5
-        # call the method tested
-        widget.addConstraintToRow(constraint=const, row=row)
-
-        # Make sure the signal has been emitted
-        assert spy.count() == 2
-
-        # Check the argument value - should be row 'row'
-        assert spy.called()[1]['args'][0] == [row]
-
-        # Assure the row has the constraint
-        assert vars(widget.getConstraintForRow(row)) == vars(const)
-        # and it is a complex constraint
-        assert widget.rowHasConstraint(row)
-
-        # Now try to add an constraint when the checking function returns an
-        # error message
-        mocker.patch.object(FittingUtilities, 'checkConstraints', return_value="foo")
-
-        # Mock the QMessagebox Warning
-        mocker.patch.object(QtWidgets.QMessageBox, 'critical')
-
-        # Call the method tested
-        widget.addConstraintToRow(constraint=const, row=row)
-
-        # Check that the messagebox was called with the right error message
-        QtWidgets.QMessageBox.critical.assert_called_with(
-            widget,
-            "Inconsistent constraint",
-            "foo",
-            QtWidgets.QMessageBox.Ok,
-        )
-
-        # Make sure no signal was emitted
-        assert spy.count() == 2
-        # Check that constraint tab flag is set to False
-        assert not constraint_tab.constraint_accepted
-
-    @pytest.mark.xfail(reason="2026-02: PyQt -> Pyside API issue")
-    def testAddSimpleConstraint(self, widget):
-        """
-        Test the constraint add operation
-        """
-        # select model: cylinder / cylinder
-        category_index = widget.cbCategory.findText("Cylinder")
-        widget.cbCategory.setCurrentIndex(category_index)
-
-        model_index = widget.cbModel.findText("cylinder")
-        widget.cbModel.setCurrentIndex(model_index)
-
-        # select two rows
-        row1 = 1
-        row2 = 4
-        index1 = widget.lstParams.model().index(row1, 0, QtCore.QModelIndex())
-        index2 = widget.lstParams.model().index(row2, 0, QtCore.QModelIndex())
-        selection_model = widget.lstParams.selectionModel()
-        selection_model.select(index1, selection_model.Select | selection_model.Rows)
-        selection_model.select(index2, selection_model.Select | selection_model.Rows)
-
-        # define the signal spy
-        spy = QtSignalSpy(widget, widget.constraintAddedSignal)
-
-        # call the method tested
-        widget.addSimpleConstraint()
-
-        # Make sure the signal has been emitted
-        assert spy.count() == 2
-
-        # Check the argument value
-        assert spy.called()[0]['args'][0] == [row1]
-        assert spy.called()[1]['args'][0] == [row2]
-
-    @pytest.mark.xfail(reason="2026-02: PyQt -> Pyside API issue")
-    def testDeleteConstraintOnParameter(self, widget):
-        """
-        Test the constraint deletion in model/view
-        """
-        # select model: cylinder / cylinder
-        category_index = widget.cbCategory.findText("Cylinder")
-        widget.cbCategory.setCurrentIndex(category_index)
-
-        model_index = widget.cbModel.findText("cylinder")
-        widget.cbModel.setCurrentIndex(model_index)
-
-        row1 = 1
-        row2 = 5
-
-        param1 = "background"
-        param2 = "radius"
-
-        #default_value1 = "0.001"
-        default_value2 = "20"
-
-        # select two rows
-        index1 = widget.lstParams.model().index(row1, 0, QtCore.QModelIndex())
-        index2 = widget.lstParams.model().index(row2, 0, QtCore.QModelIndex())
-        selection_model = widget.lstParams.selectionModel()
-        selection_model.select(index1, selection_model.Select | selection_model.Rows)
-        selection_model.select(index2, selection_model.Select | selection_model.Rows)
-
-        # add constraints
-        widget.addSimpleConstraint()
-
-        # deselect the model
-        selection_model.clear()
-
-        # select a single row
-        selection_model.select(index1, selection_model.Select | selection_model.Rows)
-
-        # delete one of the constraints
-        widget.deleteConstraintOnParameter(param=param1)
-
-        # see that the other constraint is still present
-        cons = widget.getConstraintForRow(row2)
-        assert cons.param == param2
-        assert cons.value == default_value2
-
-        # kill the other constraint
-        widget.deleteConstraint()
-
-        # see that the other constraint is still present
-        assert widget.getConstraintsForModel() == [(param2, None)]
-
-    def testGetConstraintForRow(self, widget):
-        """
-        Helper function for parameter table
-        """
-        # tested extensively elsewhere
-        pass
-
-    @pytest.mark.xfail(reason="2026-02: PyQt -> Pyside API issue")
-    def testRowHasConstraint(self, widget):
-        """
-        Helper function for parameter table
-        """
-        # select model: cylinder / cylinder
-        category_index = widget.cbCategory.findText("Cylinder")
-        widget.cbCategory.setCurrentIndex(category_index)
-
-        model_index = widget.cbModel.findText("cylinder")
-        widget.cbModel.setCurrentIndex(model_index)
-
-        row1 = 1
-        row2 = 5
-
-        # select two rows
-        index1 = widget.lstParams.model().index(row1, 0, QtCore.QModelIndex())
-        index2 = widget.lstParams.model().index(row2, 0, QtCore.QModelIndex())
-        selection_model = widget.lstParams.selectionModel()
-        selection_model.select(index1, selection_model.Select | selection_model.Rows)
-        selection_model.select(index2, selection_model.Select | selection_model.Rows)
-
-        # add constraints
-        widget.addSimpleConstraint()
-
-        con_list = [False, True, False, False, False, True, False]
-        new_list = []
-        for row in range(widget._model_model.rowCount()):
-            new_list.append(widget.rowHasConstraint(row))
-
-        assert new_list == con_list
-
-    @pytest.mark.xfail(reason="2026-02: PyQt -> Pyside API issue")
-    def testRowHasActiveConstraint(self, widget):
-        """
-        Helper function for parameter table
-        """
-        # select model: cylinder / cylinder
-        category_index = widget.cbCategory.findText("Cylinder")
-        widget.cbCategory.setCurrentIndex(category_index)
-
-        model_index = widget.cbModel.findText("cylinder")
-        widget.cbModel.setCurrentIndex(model_index)
-
-        row1 = 1
-        row2 = 5
-
-        # select two rows
-        index1 = widget.lstParams.model().index(row1, 0, QtCore.QModelIndex())
-        index2 = widget.lstParams.model().index(row2, 0, QtCore.QModelIndex())
-        selection_model = widget.lstParams.selectionModel()
-        selection_model.select(index1, selection_model.Select | selection_model.Rows)
-        selection_model.select(index2, selection_model.Select | selection_model.Rows)
-
-        # add constraints
-        widget.addSimpleConstraint()
-
-        # deactivate the first constraint
-        constraint_objects = widget.getConstraintObjectsForModel()
-        constraint_objects[0].active = False
-
-        con_list = [False, False, False, False, False, True, False]
-        new_list = []
-        for row in range(widget._model_model.rowCount()):
-            new_list.append(widget.rowHasActiveConstraint(row))
-
-        assert new_list == con_list
-
-    @pytest.mark.xfail(reason="2026-02: PyQt -> Pyside API issue")
-    def testGetConstraintsForModel(self, widget):
-        """
-        Test the constraint getter for constraint texts
-        """
-        # select model: cylinder / cylinder
-        category_index = widget.cbCategory.findText("Cylinder")
-        widget.cbCategory.setCurrentIndex(category_index)
-
-        model_index = widget.cbModel.findText("cylinder")
-        widget.cbModel.setCurrentIndex(model_index)
-
-        # no constraints
-        assert widget.getConstraintsForAllModels() == []
-
-        row1 = 1
-        row2 = 5
-
-        param1 = "background"
-        param2 = "radius"
-
-        default_value1 = "0.001"
-        default_value2 = "20"
-
-        # select two rows
-        index1 = widget.lstParams.model().index(row1, 0, QtCore.QModelIndex())
-        index2 = widget.lstParams.model().index(row2, 0, QtCore.QModelIndex())
-        selection_model = widget.lstParams.selectionModel()
-        selection_model.select(index1, selection_model.Select | selection_model.Rows)
-        selection_model.select(index2, selection_model.Select | selection_model.Rows)
-
-        # add constraints
-        widget.addSimpleConstraint()
-
-        # simple constraints
-        # assert widget.getConstraintsForModel(), [('background', '0.001') == ('radius', '20')]
-        cons = widget.getConstraintForRow(row1)
-        assert cons.param == param1
-        assert cons.value == default_value1
-        cons = widget.getConstraintForRow(row2)
-        assert cons.param == param2
-        assert cons.value == default_value2
-
-        objects = widget.getConstraintObjectsForModel()
-        assert len(objects) == 2
-        assert objects[1].value == default_value2
-        assert objects[0].param == param1
-
-        row = 0
-        param = "scale"
-        func = "5*sld"
-
-        # add complex constraint
-        const = Constraint(parent=None, param=param, func=func)
-        widget.addConstraintToRow(constraint=const, row=row)
-        #assert widget.getConstraintsForModel() == [('scale', '5*sld'), ('background', '0.001'), ('radius', None)]
-        cons = widget.getConstraintForRow(row2)
-        assert cons.param == param2
-        assert cons.value == default_value2
-
-        objects = widget.getConstraintObjectsForModel()
-        assert len(objects) == 3
-        assert objects[0].func == func
-
-    def testReplaceConstraintName(self, widget):
-        """
-        Test the replacement of constraint moniker
-        """
-        # select model: cylinder / cylinder
-        category_index = widget.cbCategory.findText("Cylinder")
-        widget.cbCategory.setCurrentIndex(category_index)
-
-        model_index = widget.cbModel.findText("cylinder")
-        widget.cbModel.setCurrentIndex(model_index)
-
-        old_name = 'M5'
-        new_name = 'poopy'
-        # add complex constraint
-        const = Constraint(parent=None, param='scale', func='%s.5*sld'%old_name)
-        row = 0
-        widget.addConstraintToRow(constraint=const, row=row)
-
-        # Replace 'm5' with 'poopy'
-        widget.replaceConstraintName(old_name, new_name)
-
-        assert widget.getConstraintsForAllModels() == [('scale', 'poopy.5*sld')]
-
-    def testRetainParametersBetweenModelChange(self, widget):
-        """
-        Test constantess of model parameters on model change
-        """
-        # select model: cylinder / cylinder
-        category_index = widget.cbCategory.findText("Cylinder")
-        widget.cbCategory.setCurrentIndex(category_index)
-
-        model_index = widget.cbModel.findText("cylinder")
-        widget.cbModel.setCurrentIndex(model_index)
-
-        # modify the initial value of radius (different from default)
-        new_value = "333.0"
-        widget._model_model.item(5, 1).setText(new_value)
-
-        # change parameter in the same category
-        model_index = widget.cbModel.findText("barbell")
-        widget.cbModel.setCurrentIndex(model_index)
-
-        # see if radius is the same as set
-        row = widget.getRowFromName("radius")
-        assert float(widget._model_model.item(row, 1).text()) == 333
-
-        # Now, change not just model but a category as well
-        # cylinder / cylinder
-        category_index = widget.cbCategory.findText("Sphere")
-        widget.cbCategory.setCurrentIndex(category_index)
-
-        model_index = widget.cbModel.findText("sphere")
-        widget.cbModel.setCurrentIndex(model_index)
-
-        # see if radius is still the same
-        row = widget.getRowFromName("radius")
-        assert float(widget._model_model.item(row, 1).text()) == 333
+        _select(widget, "Cylinder", "cylinder")
+        assert len(widget.modelContextMenu([]).actions()) == 0
+        # select, deselect, a separator, and constrain (one or three rows) or constrain mutually (two)
+        for rows in ([1], [1, 3], [1, 2, 3]):
+            assert len(widget.modelContextMenu(rows).actions()) == 4
 
     def testOnParameterPaste(self, widget, mocker):
-        """
-        Test response of the widget to clipboard content
-        paste request
-        """
         mocker.patch.object(widget.controller, 'paste')
         mocker.patch.object(widget, '_confirmModelMismatch', return_value=True)
         mocker.patch.object(QtWidgets.QMessageBox, 'exec_')
         cb = QtWidgets.QApplication.clipboard()
-
-        # test bad clipboard
+        # A bad clipboard
         cb.setText("bad clipboard")
         widget.clipboard_paste()
         QtWidgets.QMessageBox.exec_.assert_called_once()
         widget.controller.paste.assert_not_called()
-
-        # Test correct clipboard
+        # A good one
         cb.setText("sasview_parameter_values:model_name,core_shell_bicelle:scale,False,1.0,None,0.0,inf,()")
         widget.clipboard_paste()
         widget.controller.paste.assert_called_once()
 
-    @pytest.mark.shadow_exempt("mocks getConstraintForRow")
-    def testGetConstraintsForFitting(self, widget, mocker):
-        """
-        Test the deactivation of constraints when trying to fit a single page
-        with constraints relying on other pages
-        """
-        # mock the constraint getter
-        widget.getComplexConstraintsForModel = MagicMock(return_value=[
-            ('scale', 'M2.background')])
-        # mock isConstraintMultimodel so that our constraint is multi-model
-        mocker.patch.object(widget, 'isConstraintMultimodel', return_value=True)
-        # Mock a constraint tab
-        constraint_tab = MagicMock()
-        widget.parent.perspective().constraint_tab = constraint_tab
-        # instanciate a constraint
-        constraint = Constraint(parent=None, param="scale", value=7.0)
-        mocker.patch.object(widget, 'getConstraintForRow', return_value=constraint)
-        # mock the messagebox
-        mocker.patch.object(QtWidgets.QMessageBox, 'exec_')
-
-        # select a model
-        category_index = widget.cbCategory.findText("Cylinder")
-        widget.cbCategory.setCurrentIndex(category_index)
-
-        model_index = widget.cbModel.findText("cylinder")
-        widget.cbModel.setCurrentIndex(model_index)
-
-        # Call the method
-        widget.getConstraintsForFitting()
-        # Check that QMessagebox was called
-        QtWidgets.QMessageBox.exec_.assert_not_called()
-        # Constraint should be inactive
-        assert constraint.active
-        # Check that the uncheckConstraint method was called
-        constraint_tab.uncheckConstraint.assert_not_called()
-
     def testQRangeReset(self, widget, mocker):
-        ''' Test onRangeReset w/ and w/o data loaded '''
-        assert widget.options_widget.qmin == \
-                         widget.options_widget.QMIN_DEFAULT
-        assert widget.options_widget.qmax == \
-                         widget.options_widget.QMAX_DEFAULT
-        assert widget.options_widget.npts == \
-                         widget.options_widget.NPTS_DEFAULT
-        assert widget.options_widget.npts == \
-                         widget.options_widget.npts_fit
-        # Set values to non-defaults and check they updated
-        widget.options_widget.updateMinQ(0.01)
-        widget.options_widget.updateMaxQ(0.02)
-        assert float(widget.options_widget.qmin) == 0.01
-        assert float(widget.options_widget.qmax) == 0.02
-        # Click the reset range button and check the values went back to defaults
-        widget.options_widget.cmdReset.click()
-        assert widget.options_widget.qmin == \
-                         widget.options_widget.QMIN_DEFAULT
-        assert widget.options_widget.qmax == \
-                         widget.options_widget.QMAX_DEFAULT
-        assert widget.options_widget.npts == \
-                         widget.options_widget.NPTS_DEFAULT
-        # Load data into tab and check new limits
-        data = Data1D(x=[1,2], y=[1,2])
+        options = widget.options_widget
+        assert (options.qmin, options.qmax, options.npts) == (options.QMIN_DEFAULT, options.QMAX_DEFAULT,
+                                                              options.NPTS_DEFAULT)
+        assert options.npts == options.npts_fit
+        options.updateMinQ(0.01)
+        options.updateMaxQ(0.02)
+        assert (float(options.qmin), float(options.qmax)) == (0.01, 0.02)
+        options.cmdReset.click()
+        assert (options.qmin, options.qmax, options.npts) == (options.QMIN_DEFAULT, options.QMAX_DEFAULT,
+                                                              options.NPTS_DEFAULT)
+        # With data, the reset goes back to the data's range
+        data = Data1D(x=[1, 2], y=[1, 2])
         mocker.patch.object(GuiUtils, 'dataFromItem', return_value=data)
-        item = QtGui.QStandardItem("test")
-        widget_with_data = FittingWidget.FittingWidget(dummy_manager(), data=item, tab_id=3)
-        assert widget_with_data.options_widget.qmin == min(data.x)
-        assert widget_with_data.options_widget.qmax == max(data.x)
-        assert widget_with_data.options_widget.npts == len(data.x)
-        # Set values to non-defaults and check they updated
-        widget.options_widget.updateMinQ(0.01)
-        widget.options_widget.updateMaxQ(0.02)
-        assert float(widget.options_widget.qmin) == 0.01
-        assert float(widget.options_widget.qmax) == 0.02
-        # Click the reset range button and check the values went back to data values
-        widget.options_widget.cmdReset.click()
-        assert widget_with_data.options_widget.qmin == min(data.x)
-        assert widget_with_data.options_widget.qmax == max(data.x)
-        assert widget_with_data.options_widget.npts == len(data.x)
+        with_data = FittingWidget.FittingWidget(dummy_manager(), data=QtGui.QStandardItem("test"), tab_id=3)
+        options = with_data.options_widget
+        assert (options.qmin, options.qmax, options.npts) == (min(data.x), max(data.x), len(data.x))
+        options.updateMinQ(0.01)
+        options.updateMaxQ(0.02)
+        options.cmdReset.click()
+        assert (options.qmin, options.qmax, options.npts) == (min(data.x), max(data.x), len(data.x))
+
+
+class ConstraintDialogTest:
+    """The page's own constraint actions: checked by the coordinator, kept in the document."""
+
+    def testAConstraintIsCheckedAgainstEveryPage(self, widget):
+        _select(widget, "Cylinder", "cylinder")
+        assert widget.addConstraint(Constraint(param="radius", func="M1.length/20", value_ex="M1.length/20"))
+        assert widget.document.parameters["radius"].constraint.func == "M1.length/20"
+        assert widget.document.parameters["radius"].fit
+        # An unknown symbol: reported, and not added
+        assert not widget.addConstraint(Constraint(param="length", func="M9.radius", value_ex="M9.radius"))
+        assert QtWidgets.QMessageBox.critical.call_args[0][1] == "Inconsistent constraint"
+        assert widget.document.parameters["length"].constraint is None
+
+    def testAPolydispersityConstraintIsOnTheWidth(self, widget):
+        _select(widget, "Cylinder", "cylinder")
+        # A width is a constraint symbol while polydispersity is on
+        widget.chkPolydispersity.setChecked(True)
+        constraint = Constraint(param="Distribution of radius", func="M1.length/1000")
+        assert widget.addConstraint(constraint)
+        assert constraint.param == "radius.width"
+        assert widget.document.parameters["radius.width"].constraint is constraint
+
+    def testSimpleConstraintsAndTheirRemoval(self, widget):
+        _select(widget, "Cylinder", "cylinder")
+        selection = widget.lstParams.selectionModel()
+        for row in (1, 5):
+            selection.select(widget._model_model.index(row, 0),
+                             QtCore.QItemSelectionModel.Select | QtCore.QItemSelectionModel.Rows)
+        widget.addSimpleConstraint()
+        constraints = {p.key: p.constraint for p in widget.document.constrained()}
+        assert list(constraints) == ["background", "radius"]
+        assert not any(c.active for c in constraints.values())
+        assert widget.getConstraintForRow(5).value == "20.0"
+        widget.deleteConstraint()
+        assert widget.document.constrained() == []
+        assert (widget.document.parameters["radius"].min, widget.document.parameters["radius"].max) == (0.0, float("inf"))
+
+    def testASingleFitAsksAboutConstraintsOnOtherPages(self, widget, mocker):
+        _select(widget, "Cylinder", "cylinder")
+        widget.controller.set_constraint("length", Constraint(param="length", func="M1.radius*2"), fit=True)
+        widget.controller.set_constraint("scale", Constraint(param="scale", func="M2.background"), fit=True)
+        mocker.patch.object(QtWidgets.QMessageBox, 'exec_', return_value=0)
+        # Deactivate: only this page's constraint is fitted
+        assert widget.getConstraintsForFitting() == [("length", "M1.radius*2")]
+        assert QtWidgets.QMessageBox.exec_.called
+        assert not widget.document.parameters["scale"].constraint.active
+        # Cancel
+        widget.controller.set_constraint_active("scale", True)
+        QtWidgets.QMessageBox.exec_.return_value = QtWidgets.QMessageBox.RejectRole
+        with pytest.raises(ValueError):
+            widget.getConstraintsForFitting()
+        assert ("scale", "M2.background") in constraint_service.complex_constraints(widget.document)
 
 
 class FittingWidgetUndoRedoTest:
-    """Basic undo/redo integration tests (Phase 5, Step 5.3)."""
-
-    @pytest.fixture(autouse=True)
-    def widget(self, qapp, monkeypatch, request):
-        """Create/Destroy the GUI (monkeypatch variant)."""
-        w = FittingWidgetMod(dummy_manager())
-        monkeypatch.setattr(FittingUtilities, 'checkConstraints', lambda *a, **kw: None)
-        yield w
-        w.shadow_checker.assert_ok(request)
-        w.close()
+    """Undo and redo through the page."""
 
     def testWidgetHasUndoStack(self, widget):
-        """FittingWidget should own an UndoStack instance."""
-        assert hasattr(widget, 'undo_stack')
         assert isinstance(widget.undo_stack, UndoStack)
         assert not widget.undo_stack.can_undo()
         assert not widget.undo_stack.can_redo()
 
     def testParamEditUndoRedo(self, widget):
-        """Edit a parameter → undo restores old value → redo restores new value."""
-        # Load a model
-        category_index = widget.cbCategory.findText("Cylinder")
-        widget.cbCategory.setCurrentIndex(category_index)
-        model_index = widget.cbModel.findText("cylinder")
-        widget.cbModel.setCurrentIndex(model_index)
+        _select(widget, "Cylinder", "cylinder")
         widget.undo_stack.clear()
-
-        # Find the 'radius' row and edit it
-        param_col = widget.lstParams.itemDelegate().param_value
-        for row in range(widget._model_model.rowCount()):
-            if widget._model_model.item(row, 0).text() == "radius":
-                item = widget._model_model.item(row, param_col)
-                old_val = float(item.text())
-                item.setText("99.0")
-                break
-        else:
-            pytest.fail("'radius' parameter not found")
-
-        # Verify undo restores original
+        row = widget.table_adapters[0].rows()["radius"]
+        item = widget._model_model.item(row, widget.lstParams.itemDelegate().param_value)
+        old_val = float(item.text())
+        item.setText("99.0")
         assert widget.undo_stack.can_undo()
         widget.undo_stack.undo()
         assert widget.kernel().getParam("radius") == old_val
-
-        # Verify redo re-applies the edit
         assert widget.undo_stack.can_redo()
         widget.undo_stack.redo()
         assert widget.kernel().getParam("radius") == 99.0
-
-    def testUndoStackClearedOnModelChange(self, widget):
-        """Selecting a new model should not carry stale undo entries."""
-        category_index = widget.cbCategory.findText("Cylinder")
-        widget.cbCategory.setCurrentIndex(category_index)
-        model_index = widget.cbModel.findText("cylinder")
-        widget.cbModel.setCurrentIndex(model_index)
-
-        # Edit a parameter to create an undo entry
-        param_col = widget.lstParams.itemDelegate().param_value
-        for row in range(widget._model_model.rowCount()):
-            if widget._model_model.item(row, 0).text() == "radius":
-                widget._model_model.item(row, param_col).setText("99.0")
-                break
-        assert widget.undo_stack.can_undo()
-
-        # Stack should still function (undo works)
-        widget.undo_stack.undo()
-        assert not widget.undo_stack.can_undo()

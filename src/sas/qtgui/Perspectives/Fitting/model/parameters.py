@@ -211,7 +211,7 @@ class DataRef:
     id: str
     name: str                    # names may repeat
     data: Any                    # Data1D | Data2D
-    synthetic: bool = False      # the theory-only grid from createDefaultDataset
+    synthetic: bool = False      # the theory grid of a page without data
     revision: int = 0            # bumped on masking / external data updates
     resolution: str | None = None  # SmearingWidget.smear_type of the data: "Pinhole", "Slit", "Hankel Transform", ...
 

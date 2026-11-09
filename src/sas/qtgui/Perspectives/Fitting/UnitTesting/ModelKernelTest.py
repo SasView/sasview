@@ -87,3 +87,18 @@ class TestConstraintService:
         assert service.validate(symbols, [("M1.length", "2*M1.radius")]) == []
         errors = service.validate(symbols, [("M1.length", "2*M1.nothing")])
         assert "nothing" in errors and errors.startswith("<style")
+
+    def test_what_the_constraint_dialogs_offer(self):
+        """The names the dialogs list, the constrained and the polydisperse parameters."""
+        doc = self.constrained()
+        names = ["scale", "background", "sld", "sld_solvent", "radius", "length"]
+        assert service.parameter_names(doc) == names
+        flags(doc, polydispersity=True)
+        assert service.parameter_names(doc) == names + ["radius.width", "length.width"]
+        edit(doc, "radius", fit=True)
+        edit(doc, "length.width", fit=True)
+        assert service.fitted_names(doc) == ["radius", "length.width"]
+        assert service.has_constraint(doc, "length") and service.has_constraint(doc, "Distribution of radius")
+        assert not service.has_constraint(doc, "radius")
+        assert service.is_polydisperse(doc, "radius") and service.is_polydisperse(doc, "radius.width")
+        assert not service.is_polydisperse(doc, "sld") and not service.is_polydisperse(doc, "M2.radius")

@@ -28,7 +28,7 @@ LAYERED_MODELS = ['unified_power_Rg', 'core_multi_shell', 'onion', 'spherical_sl
 
 # Historic list of models with magnetic parameters. This is NOT the capability rule:
 # whether a page can have magnetism is decided from the model's own parameter metadata
-# (FittingWidget.canHaveMagnetism). Nothing reads this list for decisions.
+# (FitPageDocument.can_have_magnetism). Nothing reads this list for decisions.
 MAGNETIC_MODELS = ['sphere', 'core_shell_sphere', 'core_multi_shell', 'cylinder', 'parallelepiped']
 
 polydispersity_plot_name = "{} {} polydispersity {}"

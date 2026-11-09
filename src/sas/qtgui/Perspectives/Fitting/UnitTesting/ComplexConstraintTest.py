@@ -4,15 +4,14 @@ import numpy as np
 import pytest
 from PySide6 import QtCore, QtTest, QtWidgets
 
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.MainWindow.GuiManager import GuiManager
-from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.ComplexConstraint import ComplexConstraint
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 from sas.qtgui.Perspectives.Fitting.ConstraintWidget import ConstraintWidget
 
 # Local
 from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
+from sas.qtgui.Perspectives.Fitting.UnitTesting.fitting_test_support import dummy_manager
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 
 
@@ -20,23 +19,16 @@ class ComplexConstraintTest:
     @pytest.fixture(autouse=True)
     def widget(self, qapp, mocker):
         '''Create/Destroy the ComplexConstraint'''
-        class dummy_manager:
-            HELP_DIRECTORY_LOCATION = "html"
-            communicator = GuiUtils.communicator
-
         '''Create ComplexConstraint dialog'''
         # need to ensure that categories exist first
         GuiManager.addCategories()
 
-        # mockup tabs
-        tab1 = FittingWidget(dummy_manager())
-        tab2 = FittingWidget(dummy_manager())
-        tab3 = FittingWidget(dummy_manager())
-        # mock the constraint error mechanism
-        mocker.patch.object(FittingUtilities, 'checkConstraints', return_value=None)
-        mocker.patch.object(tab1.parent, 'perspective', create=True)
-        mocker.patch.object(tab2.parent, 'perspective', create=True)
-        mocker.patch.object(tab3.parent, 'perspective', create=True)
+        # mockup tabs, in one perspective
+        manager = dummy_manager()
+        tab1 = FittingWidget(manager)
+        tab2 = FittingWidget(manager)
+        tab3 = FittingWidget(manager)
+        manager.perspective().fit_tabs += [tab1, tab2, tab3]
 
         # set some models on tabs
         category_index = tab1.cbCategory.findText("Shape Independent")
@@ -106,7 +98,7 @@ class ComplexConstraintTest:
         assert widget.cbModel2.currentText() == 'M2'
         # add a constraint (M1:scale = M2.scale)
         model, constraint = widget.constraint()
-        widget.tabs[0].addConstraintToRow(constraint, 0)
+        assert widget.tabs[0].addConstraint(constraint)
         # scale should not appear in right combobox, should now be background
         index = widget.cbModel2.findText('M1')
         widget.cbModel2.setCurrentIndex(index)

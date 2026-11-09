@@ -60,7 +60,6 @@ from sas.qtgui.Plotting.Plotter import PlotterWidget
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
 from sas.qtgui.Utilities.BackgroundColor import BG_DEFAULT, BG_ERROR
 from sas.sascalc.fit import models
-from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
 from sas.system import HELP_SYSTEM
 
 # CRUFT: remove when new release of sasmodels is available
@@ -94,7 +93,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     """
     Main widget for selecting form and structure factor models
     """
-    constraintAddedSignal = QtCore.Signal(list, str)
     newModelSignal = QtCore.Signal()
     fittingFinishedSignal = QtCore.Signal(object, object)        # result, FitRequest
     batchFittingFinishedSignal = QtCore.Signal(object, object)   # result, FitRequest
@@ -182,22 +180,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         return doc.dataset_order.index(doc.active_id) if doc.is_loaded() else 0
 
     @property
-    def models(self) -> dict:
-        return self.catalog.models
-
-    @property
-    def master_category_dict(self) -> dict:
-        return self.catalog.categories
+    def coordinator(self):
+        """The perspective's operations across fit pages (FitPerspectiveCoordinator)."""
+        return self.parent.perspective().coordinator
 
     def kernel(self) -> Any | None:
         """A new engine instance with the document's effective state; None without a model."""
         return self.kernel_builder.build(self.document)
-
-    def modelParameters(self) -> Any | None:
-        """The sasmodels parameter table of the selected model (or structure factor)."""
-        selection = self.document.selection
-        source = selection.model if selection.model in self.models else selection.structure
-        return self.models[source]._model_info.parameters if source in self.models else None
 
     def dataItem(self, dataset_id: str) -> QtGui.QStandardItem | None:
         """The Data Explorer item of a dataset; None for the theory grid."""
@@ -264,12 +253,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.tabToList = {} # tab_id -> list widget
         self.tabToKey = {} # tab_id -> model key
 
-        # Fit options
-        self.q_range_min = OptionsWidget.QMIN_DEFAULT
-        self.q_range_max = OptionsWidget.QMAX_DEFAULT
-        self.npts = OptionsWidget.NPTS_DEFAULT
-        self.log_points = True
-        self.weighting = 0
+        # The chi² shown
         self.chi2 = None
 
         self.all_data = []
@@ -312,7 +296,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.options_widget = OptionsWidget(self)
         layout.addWidget(self.options_widget)
         self.tabOptions.setLayout(layout)
-        self.options_widget.setLogScale(self.log_points)
+        self.options_widget.setLogScale(self.document.options.log_points)
 
         # Smearing widget
         layout = QtWidgets.QGridLayout()
@@ -494,7 +478,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """ Enable/disable the polydispersity tab (SettingsSync) """
         self.tabFitting.setTabEnabled(TAB_POLY, isChecked)
         # Check if any parameters are ready for fitting
-        self.cmdFit.setEnabled(self.haveParamsToFit())
+        self.cmdFit.setEnabled(self.document.can_fit())
         self.polydispersity_widget.togglePoly(isChecked)
         self.updateData()
 
@@ -503,7 +487,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Handle polydispersity toggle signal from PolydispersityWidget: tab enablement.
         """
         self.tabFitting.setTabEnabled(TAB_POLY, isChecked)
-        self.cmdFit.setEnabled(self.haveParamsToFit())
+        self.cmdFit.setEnabled(self.document.can_fit())
 
     def toggleMagnetism(self, isChecked: bool) -> None:
         """ The magnetism checkbox: an intent """
@@ -513,7 +497,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """ Enable/disable the magnetism tab (SettingsSync) """
         self.tabFitting.setTabEnabled(TAB_MAGNETISM, isChecked)
         # Check if any parameters are ready for fitting
-        self.cmdFit.setEnabled(self.haveParamsToFit())
+        self.cmdFit.setEnabled(self.document.can_fit())
         self.magnetism_widget.isActive = isChecked
 
     def onMagnetismToggled(self, isChecked: bool) -> None:
@@ -521,7 +505,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Handle magnetism toggle signal from MagnetismWidget: tab enablement.
         """
         self.tabFitting.setTabEnabled(TAB_MAGNETISM, isChecked)
-        self.cmdFit.setEnabled(self.haveParamsToFit())
+        self.cmdFit.setEnabled(self.document.can_fit())
 
     def toggleChainFit(self, isChecked: bool) -> None:
         """ The chain-fit checkbox: an intent """
@@ -602,10 +586,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def otherSymbols(self) -> set[str]:
         """The constraint symbols of the other fit pages (retention keeps constraints that resolve)."""
-        if self.parent is None:
-            return set()
-        return {symbol for tab in self.parent.perspective().getFitTabs() if tab is not self
-                for symbol in tab.document.symbol_table()}
+        return set() if self.parent is None else set(self.coordinator.symbols(exclude=self))
 
     def keyAt(self, row: int, model_key: str = "standard") -> str | None:
         """The document key of the parameter in *row* of the table *model_key*."""
@@ -642,9 +623,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Smearing tab
         self.smearing_widget.updateData(self.data)
         # Line edits in the option tab
-        self.lblMinRangeDef.setText(GuiUtils.formatNumber(self.q_range_min, high=True))
-        self.lblMaxRangeDef.setText(GuiUtils.formatNumber(self.q_range_max, high=True))
-        self.options_widget.updateQRange(self.q_range_min, self.q_range_max, self.npts)
+        options = self.document.options
+        self.lblMinRangeDef.setText(GuiUtils.formatNumber(options.qmin, high=True))
+        self.lblMaxRangeDef.setText(GuiUtils.formatNumber(options.qmax, high=True))
+        self.options_widget.updateQRange(options.qmin, options.qmax, options.npts)
 
     def initializeSignals(self) -> None:
         """
@@ -753,8 +735,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Select for fitting
         param_string = "parameter " if num_rows == 1 else "parameters "
         to_string = "to its current value" if num_rows == 1 else "to their current values"
-        has_constraints = any([self.rowHasConstraint(i, model_key=model_key) for i in rows])
-        has_real_constraints = any([self.rowHasActiveConstraint(i, model_key=model_key) for i in rows])
+        constraints = [self.getConstraintForRow(i, model_key) for i in rows]
+        has_constraints = any(c is not None for c in constraints)
+        has_real_constraints = any(c is not None and c.active for c in constraints)
 
         self.actionSelect = QtGui.QAction(self)
         self.actionSelect.setObjectName("actionSelect")
@@ -812,14 +795,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Show the constraint widget for two selected parameters and add the constraint it returns.
         """
         current_list = self.lstParams if current_list is None else current_list
-        model_key = next((key for key, view in self.lst_dict.items() if view is current_list), "standard")
         selected_rows = current_list.selectionModel().selectedRows()
         # There have to be only two rows selected. The caller takes care of that.
         assert len(selected_rows) == 2
         params_list = [s.data() for s in selected_rows]
         mc_widget = MultiConstraint(self, params=params_list)
-        if not np.any([FittingUtilities.isParamPolydisperse(p, self.modelParameters(), is2D=self.is2D)
-                       for p in params_list]):
+        if not any(constraint_service.is_polydisperse(self.document, p) for p in params_list):
             # no parameters are pd - do not show the warning
             mc_widget.lblWarning.setText("")
         if mc_widget.exec_() != QtWidgets.QDialog.Accepted:
@@ -830,96 +811,21 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                                 func=mc_widget.txtConstraint.text().replace(param_used, f"{mnemonic}.{param_used}"),
                                 value_ex=f"{mnemonic}.{param_used}")
         constraint.validate = mc_widget.validate
-        self.addConstraintToRow(constraint=constraint, row=self.getRowFromName(constraint.param), model_key=model_key)
+        self.addConstraint(constraint)
 
-    def getModelKeyFromName(self, name: str) -> str:
+    def addConstraint(self, constraint: Constraint) -> bool:
         """
-        The table ('standard', 'poly' or 'magnet') of the parameter shown as *name*
+        Put the constraint on its parameter, after the coordinator checked it against every page.
+        An inconsistent constraint is reported and not added. Returns whether it was added.
         """
-        key = constraint_service.key_for(self.document, name)
-        if key is None:
-            return "standard"
-        table = self.document.parameters[key].table
-        return next(model_key for model_key, t in constraint_service.TABLES.items() if t is table)
-
-    def getRowFromName(self, name: str) -> int | None:
-        """
-        The row of the parameter shown as *name*, in its table
-        """
-        key = constraint_service.key_for(self.document, name)
-        if key is None:
-            return None
-        return (self._adapter(self.getModelKeyFromName(name)).rows() or {}).get(key)
-
-    def _adapter(self, model_key: str):
-        return self.table_adapters[list(constraint_service.TABLES).index(model_key)]
-
-    def getParamNames(self) -> list[str]:
-        """
-        The fittable main parameters, and the poly widths while polydispersity is on
-        """
-        return self.getParamNamesMain() + self.getParamNamesPoly()
-
-    def getParamNamesPoly(self) -> list[str]:
-        if not self.document.flags.polydispersity:
-            return []
-        return [p.key for p in self.document.parameters.by_table(Table.POLY)]
-
-    def paramsToFit(self) -> list[str]:
-        """The main (by label) and poly parameters selected for fitting (the constraint dialogs)."""
-        params = self.document.parameters
-        return [params.legacy_key(p.key) for t in (Table.MAIN, Table.POLY) for p in params.by_table(t)
-                if p.fit and p.fittable]
-
-    def getParamNamesMain(self) -> list[str]:
-        """
-        The labels of the fittable main parameters
-        """
-        return [p.label for p in self.document.parameters.by_table(Table.MAIN) if p.fittable]
-
-    def getParamNamesMagnet(self) -> list[str]:
-        """
-        The magnetic parameters, while magnetism is on
-        """
-        if not self.chkMagnetism.isChecked():
-            return []
-        return [p.key for p in self.document.parameters.by_table(Table.MAGNET) if p.fittable]
-
-    def getModelKey(self, constraint: Constraint) -> str | None:
-        """
-        The table of the parameter a constraint is on, or None if this page has no such parameter
-        """
-        if constraint_service.key_for(self.document, constraint.param) is None:
-            return None
-        return self.getModelKeyFromName(constraint.param)
-
-    def addConstraintToRow(self, constraint: Constraint | None = None, row: int = 0, model_key: str = "standard") -> None:
-        """
-        Add the constraint object to the requested row, after checking it against every page's symbols.
-        An inconsistent constraint is reported and not added.
-        """
-        assert isinstance(constraint, Constraint)
-        key = self.keyAt(row, model_key)
+        key = constraint_service.key_for(self.document, constraint.param)
         assert key is not None and self.document.parameters[key].fittable
-        if model_key == 'poly' and 'Distribution' in constraint.param:
-            constraint.param = self.polydispersity_widget.polyNameToParam(constraint.param)
-        perspective = self.parent.perspective()
-        constraint_list = perspective.getActiveConstraintList()
-        constraint_list.append((f"{self.document.identity.mnemonic}.{constraint.param}", constraint.func))
-        errors = FittingUtilities.checkConstraints(perspective.getSymbolDictForConstraints(), constraint_list)
-        constraint_tab = perspective.getConstraintTab()
+        if constraint.param.startswith("Distribution of "):
+            constraint.param = key
+        errors = self.coordinator.add_constraint(self, key, constraint)
         if errors:
             QtWidgets.QMessageBox.critical(self, "Inconsistent constraint", errors, QtWidgets.QMessageBox.Ok)
-            if constraint_tab:
-                # inform the constraint tab that the constraint was not accepted
-                constraint_tab.constraint_accepted = False
-            return
-        # The constrained parameter is fitted (it is computed from the others while fitting)
-        self.controller.set_constraint(key, constraint, fit=True)
-        self.constraintAddedSignal.emit([row], model_key)
-        self.communicator.statusBarUpdateSignal.emit('Constraint added')
-        if constraint_tab:
-            constraint_tab.constraint_accepted = True
+        return not errors
 
     def addSimpleConstraint(self) -> None:
         """
@@ -936,7 +842,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             constraint.active = False
             self.controller.set_constraint(key, constraint, min=p.value - p.value / 10000.0,
                                            max=p.value + p.value / 10000.0)
-            self.constraintAddedSignal.emit([row], model_key)
         self.communicator.statusBarUpdateSignal.emit('Constraint added')
 
     def editConstraint(self) -> None:
@@ -950,8 +855,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         assert len(params_list) == 1
         row = current_list.selectionModel().selectedRows()[0].row()
         mc_widget = MultiConstraint(self, params=params_list, constraint=self.getConstraintForRow(row, model_key))
-        if not np.any([FittingUtilities.isParamPolydisperse(p, self.modelParameters(), is2D=self.is2D)
-                       for p in params_list]):
+        if not any(constraint_service.is_polydisperse(self.document, p) for p in params_list):
             mc_widget.lblWarning.setText("")
         if mc_widget.exec_() != QtWidgets.QDialog.Accepted:
             return
@@ -959,9 +863,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         constraint = Constraint(param=mc_widget.params[0], value=param_used, func=mc_widget.txtConstraint.text(),
                                 value_ex=f"{self.document.identity.mnemonic}.{param_used}")
         constraint.validate = mc_widget.validate
-        if model_key == 'poly' and 'Distribution' in constraint.param:
-            constraint.param = self.polydispersity_widget.polyNameToParam(constraint.param)
-        self.addConstraintToRow(constraint=constraint, row=self.getRowFromName(constraint.param), model_key=model_key)
+        self.addConstraint(constraint)
 
     def deleteConstraint(self) -> None:
         """
@@ -971,31 +873,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         model_key = self.tabToKey[self.tabFitting.currentIndex()]
         for index in current_list.selectionModel().selectedRows():
             if self.isCheckable(index.row(), model_key=model_key):
-                param = index.data()
-                if model_key == 'poly':
-                    param = self.polydispersity_widget.polyNameToParam(param)
-                self.deleteConstraintOnParameter(param=param, model_key=model_key)
-
-    def deleteConstraintOnParameter(self, param: str | None = None, model_key: str = "standard") -> None:
-        """
-        Delete the constraint on *param* (every constraint of the table if None), restoring
-        the bounds a simple constraint kept.
-        """
-        rows = self._adapter(model_key).rows() or {}
-        for key, row in rows.items():
-            constraint = self.document.parameters[key].constraint
-            if constraint is None or (param and constraint.param != param):
-                continue
-            bounds = {b: FittingUtilities.parse_number(getattr(constraint, b)) for b in ("min", "max")}
-            self.controller.set_constraint(key, None, **{b: v for b, v in bounds.items() if v is not None})
-            self.constraintAddedSignal.emit([row], model_key)
-        self.communicator.statusBarUpdateSignal.emit('Constraint removed')
-
-    def setConstraintActive(self, param: str, active: bool) -> None:
-        """Activate or deactivate the constraint on *param* (the constraint tab)."""
-        key = constraint_service.key_for(self.document, param)
-        if key is not None:
-            self.controller.set_constraint_active(key, active)
+                self.controller.remove_constraint(self.keyAt(index.row(), model_key))
 
     def getConstraintForRow(self, row: int, model_key: str = "standard") -> Constraint | None:
         """
@@ -1005,30 +883,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if key is None or not self.document.parameters[key].fittable:
             return None
         return self.document.parameters[key].constraint
-
-    def allParamNames(self) -> list[str]:
-        """
-        Returns a list of all parameter names defined on the current model
-        """
-        return list(self.kernel().details)
-
-    def paramHasConstraint(self, param: str | None = None) -> bool:
-        """
-        Whether the parameter *param* has a constraint
-        """
-        key = None if param is None else constraint_service.key_for(self.document, param)
-        return key is not None and self.document.parameters[key].constraint is not None
-
-    def rowHasConstraint(self, row: int, model_key: str = "standard") -> bool:
-        return self.getConstraintForRow(row, model_key) is not None
-
-    def rowHasActiveConstraint(self, row: int, model_key: str = "standard") -> bool:
-        constraint = self.getConstraintForRow(row, model_key)
-        return constraint is not None and constraint.active
-
-    def rowHasActiveComplexConstraint(self, row: int, model_key: str = "standard") -> bool:
-        constraint = self.getConstraintForRow(row, model_key)
-        return constraint is not None and constraint.active and bool(constraint.func)
 
     def selectParameters(self) -> None:
         """
@@ -1073,49 +927,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         for row in self.selectedParameters(model_key=model_key):
             self.model_dict[model_key].item(row, 0).setCheckState(status)
 
-    def getConstraintsForAllModels(self) -> list[tuple[str, str]]:
-        """
-        (constrained parameter, expression) of the active constraints, e.g. [('sld','5*sld_solvent')]
-        """
-        return constraint_service.active(self.document)
-
-    def getComplexConstraintsForAllModels(self) -> list[tuple[str, str]]:
-        """
-        (key, expression) of the active constraints that have an expression
-        """
-        return constraint_service.complex_constraints(self.document)
-
-    def getComplexConstraintsForModel(self, model_key: str) -> list[tuple[str, str]]:
-        """
-        (key, expression) of the active constraints with an expression of one table, e.g. [('sld','5*M2.sld_solvent')]
-        """
-        return constraint_service.complex_constraints(self.document, constraint_service.TABLES[model_key])
-
-    def getFullConstraintNameListForModel(self, model_key: str) -> list[tuple[str, str]]:
-        """
-        (constrained parameter, expression) of every constraint of one table, active or not
-        """
-        return constraint_service.full_names(self.document, constraint_service.TABLES[model_key])
-
-    def getConstraintObjectsForAllModels(self) -> list[Constraint]:
-        """
-        Copies of the page's constraints (the constraint tab changes them through the page)
-        """
-        return [copy.deepcopy(p.constraint) for p in self.document.constrained()]
-
-    def getConstraintObjectsForModel(self, model_key: str) -> list[Constraint]:
-        """
-        Copies of the constraints of one table
-        """
-        return [copy.deepcopy(p.constraint) for p in self.document.constrained(constraint_service.TABLES[model_key])]
-
     def getConstraintsForFitting(self) -> list[tuple[str, str]]:
         """
         The constraints of a single-page fit. Constraints that refer to other pages are
         deactivated if the user agrees; otherwise the fit is cancelled (ValueError).
         """
-        constraints = self.getComplexConstraintsForAllModels()
-        multi_constraints = [cons for cons in constraints if self.isConstraintMultimodel(cons[1])]
+        constraints = constraint_service.complex_constraints(self.document)
+        multi_constraints = [cons for cons in constraints if constraint_service.is_multimodel(self.document, cons[1])]
         if not multi_constraints:
             return constraints
         msg = "The current fit contains constraints relying on other fit pages.\n"
@@ -1129,13 +947,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         msgbox.addButton(QtWidgets.QPushButton("Cancel"), QtWidgets.QMessageBox.RejectRole)
         if msgbox.exec_() == QtWidgets.QMessageBox.RejectRole:
             raise ValueError("Fitting cancelled")
-        constraint_tab = self.parent.perspective().getConstraintTab()
+        # (the constraint tab follows the documents)
         for key, _ in multi_constraints:
             self.controller.set_constraint_active(key, False)
-            if constraint_tab:
-                legacy_key = self.document.parameters.legacy_key(key)
-                constraint_tab.uncheckConstraint(f"{self.document.identity.mnemonic}:{legacy_key}")
-        return self.getComplexConstraintsForAllModels()
+        return constraint_service.complex_constraints(self.document)
 
     def showModelDescription(self) -> QtWidgets.QMenu:
         """
@@ -1157,12 +972,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         action.setDefaultWidget(label)
         menu.addAction(action)
         return menu
-
-    def canHaveMagnetism(self) -> bool:
-        """
-        Checks if the current model has magnetic scattering implemented
-        """
-        return self.document.can_have_magnetism()
 
     def onSelectModel(self) -> None:
         """
@@ -1230,14 +1039,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.communicator.statusBarUpdateSignal.emit("")
         if len(rows) == 1:
             # Show constraint, if present
-            row = rows[0].row()
-            if not self.rowHasConstraint(row, model_key=model_key):
+            constr = self.getConstraintForRow(rows[0].row(), model_key=model_key)
+            if constr is None:
                 return
-            constr = self.getConstraintForRow(row, model_key=model_key)
-            func = self.getConstraintForRow(row, model_key=model_key).func
             if constr.func is not None:
                 # inter-parameter constraint
-                update_text = "Active constraint: "+func
+                update_text = "Active constraint: " + constr.func
             elif constr.param == rows[0].data():
                 # current value constraint
                 update_text = "Value constrained to: " + str(constr.value)
@@ -1264,18 +1071,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.options_widget.rbWeighting3.setText("Use |sqrt(P Data)|")
         self.options_widget.rbWeighting4.setText("Use |P Data|")
 
-    def replaceConstraintName(self, old_name: str, new_name: str = "") -> None:
-        """
-        A page was renamed: the constraint expressions of this page follow
-        """
-        self.controller.replace_page_name(old_name, new_name)
-
-    def isConstraintMultimodel(self, constraint: str) -> bool:
-        """
-        Whether the constraint expression refers to another page
-        """
-        return constraint_service.is_multimodel(self.document, constraint)
-
     def updateData(self) -> None:
         """
         Helper function for recalculation of data used in plotting
@@ -1283,18 +1078,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Update the chart
         if self.data_is_loaded:
             self.cmdPlot.setText("Compute/Plot")
-            self.calculateQGridForModel()
+            self.controller.compute_theory()
         else:
             self.cmdPlot.setText("Calculate")
-            # Create default datasets if no data passed
-            self.createDefaultDataset()
+            # The theory grid, if no data passed
+            self.controller.ensure_default_dataset()
             self.theory_item = None # ensure theory is recalc. before plot, see showTheoryPlot()
-
-    def createDefaultDataset(self) -> None:
-        """
-        The theory grid of a page without data (an intent)
-        """
-        self.controller.ensure_default_dataset()
 
     def onSelectCategory(self) -> None:
         """
@@ -1335,7 +1124,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             case 0:
                 # Look at the model and if set, pull out its help page
                 # TODO: Disable plugin model documentation generation until issues can be resolved
-                plugin_names = [name for name, enabled in self.master_category_dict.get(CATEGORY_CUSTOM, {})]
+                plugin_names = [name for name, enabled in self.catalog.categories.get(CATEGORY_CUSTOM, {})]
                 kernel = self.kernel()
                 if (kernel is not None
                         and hasattr(kernel, 'name')
@@ -1456,12 +1245,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         msg = "Fitting cancelled."
         self.communicator.statusBarUpdateSignal.emit(msg)
         self.communicator.undoRedoUpdateSignal.emit()
-
-    def updateFit(self) -> None:
-        """
-        """
-        print("UPDATE FIT")
-        pass
 
     def fitFailed(self, reason: Any) -> None:
         """
@@ -1585,12 +1368,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         for plot in poly_plots:
             plot.plot_role = DataRole.ROLE_DELETABLE
 
-    def prepareFitters(self, fitter: Fit | None = None, fit_id: int = 0, weight_increase: int = 1) -> tuple[list[Fit], int]:
-        """
-        The Fit objects of the page (FitService.prepare); *fitter* is a simultaneous fit's shared one.
-        """
-        return self.controller.prepare_fitters(fitter, fit_id, weight_increase)
-
     def onPlot(self) -> None:
         """
         Plot the current set of data
@@ -1627,9 +1404,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Generate a new dataset for model
         """
         if not self.data_is_loaded:
-            self.createDefaultDataset()
+            self.controller.ensure_default_dataset()
             self.smearing_widget.updateData(self.data)
-        self.calculateQGridForModel()
+        self.controller.compute_theory()
 
     def showTheoryPlot(self) -> None:
         """
@@ -1676,12 +1453,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         if self.controller.muted:
             return
-        self.q_range_min, self.q_range_max, self.npts, self.log_points, self.weighting =             self.options_widget.state()
+        qmin, qmax, npts, log_points, weighting = self.options_widget.state()
         # set Q range labels on the main tab
-        self.lblMinRangeDef.setText(GuiUtils.formatNumber(self.q_range_min, high=True))
-        self.lblMaxRangeDef.setText(GuiUtils.formatNumber(self.q_range_max, high=True))
-        self.controller.set_options(FitOptions(self.q_range_min, self.q_range_max, self.npts, self.log_points,
-                                               self.weighting, self.options_widget.weighting))
+        self.lblMinRangeDef.setText(GuiUtils.formatNumber(qmin, high=True))
+        self.lblMaxRangeDef.setText(GuiUtils.formatNumber(qmax, high=True))
+        self.controller.set_options(FitOptions(qmin, qmax, npts, log_points, weighting, self.options_widget.weighting))
 
     def setDefaultStructureCombo(self) -> None:
         """
@@ -1689,12 +1465,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         self.cbStructureFactor.clear()
         self.cbStructureFactor.addItems(sorted([STRUCTURE_DEFAULT] + self.catalog.structure_factors()))
-
-    def haveParamsToFit(self) -> bool:
-        """
-        Finds out if there are any parameters ready to be fitted
-        """
-        return self.document.can_fit()
 
     def isCheckable(self, row: int, model_key: str = "standard") -> bool:
         model = self.model_dict[model_key]
@@ -1707,12 +1477,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Reset the theory item based on the data explorer update
         """
         self.theory_item = item
-
-    def calculateQGridForModel(self) -> None:
-        """
-        Theory for the active dataset (the controller makes the request)
-        """
-        self.controller.compute_theory()
 
     def showTheory(self, result: Any) -> None:
         """
@@ -1910,55 +1674,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             results_panel=getattr(self.parent, 'results_panel', None),
             grid_window=getattr(self.parent, 'grid_window', None))
 
-    def loadPageStateCallback(self, state: Any | None = None, datainfo: Any | None = None, format: Any | None = None) -> None:
-        """
-        This is a callback method called from the CANSAS reader.
-        We need the instance of this reader only for writing out a file,
-        so there's nothing here.
-        Until Load Analysis is implemented, that is.
-        """
-        pass
-
-    def loadPageState(self, pagestate: Any | None = None) -> None:
-        """
-        Load the PageState object and update the current widget
-        """
-        _ = self.loadAnalysisFile()
-        pass
-
-    def loadAnalysisFile(self) -> str:
-        """
-        Called when the "Open Project" menu item chosen.
-        """
-        default_name = "FitPage"+str(self.tab_id)+".fitv"
-        wildcard = "fitv files (*.fitv)"
-        kwargs = {
-            'caption'   : 'Open Analysis',
-            'directory' : default_name,
-            'filter'    : wildcard,
-            'parent'    : self,
-        }
-        filename = QtWidgets.QFileDialog.getOpenFileName(**kwargs)[0]
-        return filename
-
-    def getParameterDict(self) -> dict[str, list[str]]:
-        """
-        Gather current fitting parameters as dict
-        """
-
-        param_list = self.getFitPage()
-        param_list += self.getFitModel()
-
-        params = FittingUtilities.formatParameters(param_list)
-        lines = params.split(':')
-        # put the text into dictionary
-        line_dict = {}
-        for line in lines[1:]:
-            content = line.split(',')
-            if len(content) > 1:
-                line_dict[content[0]] = content[1:]
-        return line_dict
-
     def clipboard_copy(self) -> None:
         copy_data = self.full_copy_data()
         self.set_clipboard(copy_data)
@@ -2008,17 +1723,17 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def excel_copy_data(self) -> str:
         """ Excel format data destined for the clipboard"""
-        param_list = self.getFitParameters()
+        param_list = serializer.fit_parameter_rows(self.document)
         return FittingUtilities.formatParametersExcel(param_list[1:])
 
     def latex_copy_data(self) -> str:
         """ Latex format data destined for the clipboard"""
-        param_list = self.getFitParameters()
+        param_list = serializer.fit_parameter_rows(self.document)
         return FittingUtilities.formatParametersLatex(param_list[1:])
 
     def save_parameters(self) -> None:
         """ Save parameters to a file"""
-        param_list = self.getFitParameters()
+        param_list = serializer.fit_parameter_rows(self.document)
 
         save_dialog = QtWidgets.QFileDialog()
         save_dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptSave)
@@ -2063,12 +1778,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         return serializer.fit_page_rows(self.document)
 
-    def getFitParameters(self) -> list[list[str | tuple]]:
-        """
-        The legacy rows of the parameters
-        """
-        return serializer.fit_parameter_rows(self.document)
-
     def createPageForParameters(self, line_dict: dict[str, list[str]]) -> None:
         """
         Sets up page with requested model/str factor
@@ -2085,8 +1794,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def _loadedMnemonic(self, name: str) -> str:
         """The saved page name, or M<tab#> if another open page already uses it (R-3)."""
-        others = [] if self.parent is None else self.parent.perspective().getFitTabs()
-        if all(tab is self or tab.document.identity.mnemonic != name for tab in others):
+        if self.parent is None or self.coordinator.check_name(self, name) is None:
             return name
         msg = f"Fit page name {name} is already in use, so this page is named {self.modelName()}."
         self.communicator.statusBarUpdateSignal.emit(msg)
@@ -2103,11 +1811,3 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Store current state for fit_page
         """
         serializer.page_state(self.document, state, self.kernel(), self.chi2)
-
-    def getSymbolDict(self) -> dict[str, float]:
-        """
-        Return a dict containing a list of all the symbols used for fitting
-        and their values, e.g. {'M1.scale':1, 'M1.background': 0.001}
-        """
-        return self.document.symbol_table()
-

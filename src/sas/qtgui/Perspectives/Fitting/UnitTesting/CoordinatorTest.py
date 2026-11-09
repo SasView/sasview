@@ -7,7 +7,6 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 from sas.qtgui.Perspectives.Fitting.coordinator import FitPerspectiveCoordinator
 from sas.qtgui.Perspectives.Fitting.UnitTesting import golden_support as g
@@ -16,7 +15,6 @@ from sas.qtgui.Perspectives.Fitting.UnitTesting import golden_support as g
 @pytest.fixture(autouse=True)
 def _quiet(qapp, monkeypatch):
     monkeypatch.setattr("sas.qtgui.Perspectives.UndoRedo.QtWidgets.QMessageBox", MagicMock())
-    monkeypatch.setattr(FittingUtilities, "checkConstraints", lambda *a, **kw: None)
 
 
 @pytest.fixture
@@ -62,6 +60,42 @@ class RenameTest:
         assert first.document.identity.mnemonic == first.kernel().name == "sample"
         assert second.document.parameters["radius"].constraint.func == "sample.radius"
         assert active(second, "radius") and active(second, "length")
+
+
+class ConstraintTest:
+
+    def testSymbolsAndActiveConstraintsOfEveryPage(self, pages, coordinator):
+        first, second = pages
+        symbols = coordinator.symbols()
+        assert {"M1.radius", "M2.radius"} <= set(symbols)
+        assert not any(name.startswith("M1.") for name in coordinator.symbols(exclude=first))
+        assert coordinator.active_constraints() == [("M2.radius", "M1.radius"), ("M2.length", "M1.length")]
+
+    def testANewConstraintIsCheckedAgainstEveryPage(self, pages, coordinator):
+        first, second = pages
+        assert coordinator.add_constraint(first, "scale", Constraint(param="scale", func="M2.scale")) == []
+        assert first.document.parameters["scale"].constraint.func == "M2.scale"
+        assert first.document.parameters["scale"].fit
+        assert coordinator.messages[-1] == "Constraint added"
+        # A cycle across the pages: M1.radius = M2.radius, and M2.radius = M1.radius already
+        errors = coordinator.add_constraint(first, "radius", Constraint(param="radius", func="M2.radius"))
+        assert errors and first.document.parameters["radius"].constraint is None
+        assert "M3.sld" in coordinator.add_constraint(first, "sld", Constraint(param="sld", func="M3.sld"))
+
+    def testAChangeOfConstraintsRefreshesTheConstraintTab(self, pages, coordinator):
+        first, _ = pages
+        coordinator.changed.clear()
+        first.controller.set_constraint("scale", Constraint(param="scale", func="M2.scale"))
+        assert coordinator.changed
+        coordinator.changed.clear()
+        first.controller.remove_constraint("scale")
+        assert coordinator.changed
+
+    def testNames(self, pages, coordinator):
+        first, second = pages
+        assert coordinator.check_name(first, "M1") is None
+        assert coordinator.check_name(None, "M1") == "Please use a unique name."
+        assert coordinator.check_name(second, "") == "Please use a non-empty name."
 
 
 class InvalidationTest:

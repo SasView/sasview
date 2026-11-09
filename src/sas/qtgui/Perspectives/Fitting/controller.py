@@ -130,7 +130,7 @@ class FitPageController:
         if grid:
             self._page.recalculatePlotData()
         else:
-            self._page.calculateQGridForModel()
+            self.compute_theory()
 
     # -- parameters ---------------------------------------------------------
 
@@ -164,6 +164,15 @@ class FitPageController:
             tx.set_constraint(key, constraint)
             if fields:
                 tx.set_parameter(key, **fields)
+
+    def remove_constraint(self, key: str) -> None:
+        """Remove the constraint on *key*, restoring the bounds a simple constraint kept."""
+        constraint = self.document.parameters[key].constraint
+        if constraint is None:
+            return
+        bounds = {b: FittingUtilities.parse_number(getattr(constraint, b)) for b in ("min", "max")}
+        self.set_constraint(key, None, **{b: v for b, v in bounds.items() if v is not None})
+        self._status("Constraint removed")
 
     def set_constraint_active(self, key: str, active: bool) -> None:
         """Activate or deactivate the constraint on *key* (the constraint tab, or a single-page fit)."""

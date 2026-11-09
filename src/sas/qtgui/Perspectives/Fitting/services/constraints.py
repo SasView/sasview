@@ -31,7 +31,7 @@ def validate(symbols: dict[str, float], constraints: Sequence[tuple[str, str]]) 
 
 
 def active(doc) -> list[tuple[str, str]]:
-    """(legacy key, expression) of the active constraints (getConstraintsForAllModels)."""
+    """(legacy key, expression) of the active constraints."""
     return [(doc.parameters.legacy_key(p.key), p.constraint.func) for p in doc.constrained() if p.constraint.active]
 
 
@@ -57,3 +57,34 @@ def key_for(doc, name: str) -> str | None:
     if name in params:
         return name
     return params.key_for_legacy(name)
+
+
+# -- what the constraint dialogs offer -------------------------------------------------------
+
+def parameter_names(doc) -> list[str]:
+    """The names a constraint expression may use: the fittable main parameters (by label), and the
+    polydispersity widths while polydispersity is on."""
+    params = doc.parameters
+    names = [p.label for p in params.by_table(Table.MAIN) if p.fittable]
+    if doc.flags.polydispersity:
+        names += [p.key for p in params.by_table(Table.POLY)]
+    return names
+
+
+def fitted_names(doc) -> list[str]:
+    """The main (by legacy key) and polydispersity parameters selected for fitting: those a
+    constraint may be put on."""
+    params = doc.parameters
+    return [params.legacy_key(p.key) for t in (Table.MAIN, Table.POLY) for p in params.by_table(t)
+            if p.fit and p.fittable]
+
+
+def has_constraint(doc, name: str) -> bool:
+    key = key_for(doc, name)
+    return key is not None and doc.parameters[key].constraint is not None
+
+
+def is_polydisperse(doc, name: str) -> bool:
+    """A polydispersity width, or a parameter that has one."""
+    key = key_for(doc, name)
+    return key is not None and (key.endswith(".width") or f"{key}.width" in doc.parameters)
