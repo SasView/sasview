@@ -27,7 +27,6 @@ from sasdata.data_io.importers.import_ascii import load_data
 import sas
 
 # Perspectives
-import sas.qtgui.Perspectives as Perspectives
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
@@ -64,7 +63,6 @@ from sas.qtgui.Utilities.MuMag.MuMag import MuMag
 from sas.qtgui.Utilities.NewVersion.NewVersionAvailable import get_current_release_version
 from sas.qtgui.Utilities.OrientationViewer.OrientationViewer import show_orientation_viewer
 from sas.qtgui.Utilities.PluginManager import PluginManager
-from sas.qtgui.Utilities.Preferences.PreferencesPanel import PreferencesPanel
 from sas.qtgui.Utilities.Reports.ReportDialog import ReportDialog
 from sas.qtgui.Utilities.ResultPanel import ResultPanel
 from sas.qtgui.Utilities.SASBDB.sasbdb_loader import load_downloaded_dataset
@@ -185,9 +183,6 @@ class GuiManager:
         # Preferences Panel initialized in loadAllPerspectives()
         self.preferences = None
 
-        # Load all perspectives - Preferences panel must exist
-        self.loadAllPerspectives()
-
         # Add FileDialog widget as docked - Perspectives must be loaded to ensure default perspective is shown
         # self.filesWidget = DataExplorerWindow(self._parent, self, manager=self._data_manager)
         # TODO: Is this a good opportunity to change this name? dataExplorer would be better I think.
@@ -237,33 +232,6 @@ class GuiManager:
         self.DataOperation = DataOperationUtilityPanel(self)
         self.FileConverter = FileConverterWidget(self)
         self.WhatsNew = WhatsNewWidget(self._parent)
-
-
-    def loadAllPerspectives(self):
-        """ Load all the perspectives"""
-        # Close any existing perspectives to prevent multiple open instances
-        self.closeAllPerspectives()
-        self.preferences = PreferencesPanel(self._parent)
-        # Load all perspectives
-        loaded_dict = {} # dictionary that will ultimately keep track of all perspective instances
-        for name, perspective in Perspectives.PERSPECTIVES.items():
-            try:
-                # Instantiate perspective
-                loaded_perspective = perspective(parent=self)
-
-                # Save in main dict
-                loaded_dict[name] = loaded_perspective
-
-                # Register the perspective with the prefernce object
-                self.preferences.registerPerspectivePreferences(loaded_perspective)
-
-            except Exception as e:
-                logger.error(f"Unable to load {name} perspective.\n{e}")
-                logger.error(e, exc_info=True)
-
-        # attach loaded perspectives to this class
-        self.loadedPerspectives = loaded_dict
-
 
     def closeAllPerspectives(self):
         # Close all perspectives if they are open
