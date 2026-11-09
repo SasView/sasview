@@ -587,17 +587,23 @@ class GuiUtilsTest:
         with pytest.raises(TypeError):
             GuiUtils.parseName(value, 'p')
 
-    @pytest.mark.xfail(reason="2022-09 already broken")
     def testToDouble(self):
         '''test homemade string-> double converter'''
         #good values
         value = "1"
         assert GuiUtils.toDouble(value) == 1.0
         value = "1.2"
-        # has to be AlmostEqual due to numerical rounding
-        assert GuiUtils.toDouble(value) == pytest.approx(1.2, abs=1e-6)
-        value = "2,1"
-        assert GuiUtils.toDouble(value) == pytest.approx(2.1, abs=1e-6)
+        assert GuiUtils.toDouble(value) == 1.2
+        # full double precision, not single (#4234)
+        value = "123.456789123"
+        assert GuiUtils.toDouble(value) == 123.456789123
+        # comma as decimal separator, in a locale that uses one
+        old_locale = QtCore.QLocale()
+        QtCore.QLocale.setDefault(QtCore.QLocale('de_DE'))
+        try:
+            assert GuiUtils.toDouble("2,1") == 2.1
+        finally:
+            QtCore.QLocale.setDefault(old_locale)
 
         # bad values
         value = None
