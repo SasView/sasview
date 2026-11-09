@@ -932,7 +932,7 @@ class GuiManager:
         """
         Menu File/Load Data File(s)
         """
-        self.filesWidget.loadFile()
+        self.filesWidget.onLoadFile()
 
     def actionAdvancedLoad(self):
         self.filesWidget.onAdvancedLoad()
@@ -942,7 +942,7 @@ class GuiManager:
         """
         Menu File/Load Data Folder
         """
-        self.filesWidget.loadFolder()
+        self.filesWidget.onLoadFolder()
 
     def actionLoad_SASBDB(self):
         """
