@@ -1030,16 +1030,14 @@ def parseName(name, expression):
 
 def toDouble(value_string):
     """
-    toFloat conversion which cares deeply about user's locale
+    Locale-aware conversion of a string to a float
     """
-    # Holy shit this escalated quickly in Qt5.
-    # No more float() cast on general locales.
-    value = QtCore.QLocale().toFloat(value_string)
+    value = QtCore.QLocale().toDouble(value_string)
     if value[1]:
         return value[0]
 
     # Try generic locale
-    value = QtCore.QLocale(QtCore.QLocale('en_US')).toFloat(value_string)
+    value = QtCore.QLocale(QtCore.QLocale('en_US')).toDouble(value_string)
     if value[1]:
         return value[0]
     else:

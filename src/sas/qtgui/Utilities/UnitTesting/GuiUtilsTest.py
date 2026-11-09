@@ -594,8 +594,10 @@ class GuiUtilsTest:
         value = "1"
         assert GuiUtils.toDouble(value) == 1.0
         value = "1.2"
-        # has to be AlmostEqual due to numerical rounding
-        assert GuiUtils.toDouble(value) == pytest.approx(1.2, abs=1e-6)
+        assert GuiUtils.toDouble(value) == 1.2
+        # full double precision, not single (#4234)
+        value = "123.456789123"
+        assert GuiUtils.toDouble(value) == 123.456789123
         value = "2,1"
         assert GuiUtils.toDouble(value) == pytest.approx(2.1, abs=1e-6)
 
