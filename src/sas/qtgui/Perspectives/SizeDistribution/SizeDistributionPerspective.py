@@ -48,7 +48,7 @@ WEIGHT_PERCENT: float = 1.0
 logger = logging.getLogger(__name__)
 
 
-class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective):
+class SizeDistributionWindow(Perspective, QtWidgets.QDialog, Ui_SizeDistribution):
     """The main window for the Size Distribution perspective."""
 
     name: str = "SizeDistribution"
@@ -144,6 +144,8 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         Overrides ``Perspective.undo_stack`` (which returns ``None``).
         """
         return self._undo_stack_obj
+
+    @property
     def supports_reports(self) -> bool:
         """Tell the caller that this perspective can generate reports."""
         return True

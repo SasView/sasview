@@ -41,7 +41,7 @@ logger = logging.getLogger(__name__)
 ADJUST_EPS = 1e-7
 
 
-class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
+class CorfuncWindow(Perspective, QtWidgets.QDialog, Ui_CorfuncDialog):
     """Displays the correlation function analysis of sas data."""
 
     name = "Corfunc"
