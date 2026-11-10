@@ -58,14 +58,6 @@ hiddenimports = [
     'tccbox',
 ]
 
-# import free-form if available
-# won't be included in the build if unavailable
-try:
-    import ffsi  # noqa: F401
-    hiddenimports += collect_submodules('ffsi')
-except ImportError:
-    warnings.warn("ffsi not available; free-form inversion will not be included")
-
 hooksconfig = {
     "matplotlib": {
         "backends": [

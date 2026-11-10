@@ -18,6 +18,7 @@ import logging
 from dataclasses import dataclass
 
 import numpy as np
+import numpy.typing as npt
 
 from sasmodels.data import Data2D
 from sasmodels.resolution2d import Pinhole2D
@@ -74,10 +75,10 @@ class FreeFormDistribution:
     """One fitted parameter distribution, named in SasView terms."""
 
     param: str  # SasView parameter name, e.g. 'radius', 'length'
-    grid: np.ndarray  # bin centers
-    weights: np.ndarray  # distribution weights (sum to 1)
+    grid: npt.NDArray[np.float64]  # bin centers
+    weights: npt.NDArray[np.float64]  # distribution weights (sum to 1)
     # volume-weighted distribution; single-parameter models only, else None
-    volume_weights: np.ndarray = None
+    volume_weights: npt.NDArray[np.float64] | None = None
 
 
 @dataclass
@@ -91,12 +92,12 @@ class FreeFormResult:
     scale: float  # SasView scale (volume fraction) = xi * <V> * 1e4
     xi: float  # raw ffsi scale: I_opt = xi * Gw + background
     background: float  # b_opt
-    q: np.ndarray  # masked q the inversion ran on
-    theory: np.ndarray  # I_opt = xi * Gw + background on q
-    residuals: np.ndarray  # (theory - iq) / diq
+    q: npt.NDArray[np.float64]  # masked q the inversion ran on
+    theory: npt.NDArray[np.float64]  # I_opt = xi * Gw + background on q
+    residuals: npt.NDArray[np.float64]  # (theory - iq) / diq
     chi2: float  # sum(residuals**2) / residuals.size
     distributions: list  # list[FreeFormDistribution]
-    index: np.ndarray = None  # 2D: the fit-window pixels theory/residuals belong to
+    index: npt.NDArray[np.intp] | None = None  # 2D: the fit-window pixels theory/residuals belong to
 
     def distribution(self, param):
         """The `FreeFormDistribution` for SasView parameter `param`."""

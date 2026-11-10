@@ -628,7 +628,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         :param model_text: str of the model text to write
         """
         try:
-            with open(output_file_path, 'w') as f:
+            with open(output_file_path, 'w', encoding="utf-8") as f:
                 f.write(model_text)
         except Exception as ex:
             logger.error("Error writing model to file: %s" % ex)

@@ -15,18 +15,7 @@ Overview
 ^^^^^^^^
 
 Small Angle Scattering (SAS) — from both X-ray (SAXS) and neutron (SANS)
-sources — is used to probe the nanoscale structure of materials. A SAS
-experiment records the scattered intensity :math:`I(q)` as a function of the
-scattering vector
-
-.. math::
-
-   q = \frac{4\pi}{\lambda}\sin\left(\frac{\theta}{2}\right)
-
-where :math:`\lambda` is the radiation wavelength and :math:`\theta` is the
-scattering angle. For small angles this simplifies to
-:math:`q \approx \frac {2\pi} \lambda \theta`, i.e. the deflection angle normalised by
-the wavelength.
+sources.
 
 **Form factors (Green's functions)**
 
@@ -79,7 +68,7 @@ How to Use
    free-form tool supports the models listed above; choose one from the Model
    dropdown.
 
-2. **Set contrast parameters.** In the *Parameters* tab, ensure that ``sld``
+2. **Set contrast parameters.** In the *Parameter* column, ensure that ``sld``
    and ``sld_solvent`` have different values. The inversion uses the contrast
    :math:`\Delta\rho` to return ``scale`` as a SasView volume fraction. Other
    model parameters (e.g. background) start from whatever values are shown in
@@ -140,11 +129,22 @@ Notes and Caveats
    fit). No additional steps are required.
 
 **GPU acceleration**
-   The ``ffsi`` package uses GPU-accelerated linear algebra (via CuPy) when
-   a compatible GPU and CuPy are available in the environment, and falls back to NumPy on CPU
-   otherwise. No configuration is required; the backend is selected
-   automatically at run time. We have not added cupy as a dependency as it would
-   increase the bundle size by a lot. Enabling this GPU features on install requires further work.
+     The ``ffsi`` package can run the inversion on an NVIDIA GPU through CuPy.
+     If CuPy is importable it is used automatically. Otherwise the inversion
+     runs on the CPU with NumPy. No setting in SasView is needed.
+
+     CuPy is **not** bundled with SasView, because the correct package depends
+     on the GPU and CUDA version and would greatly increase the installer size.
+     GPU acceleration is therefore **not available in the installer
+     distributions**. The only way to enable it is to build SasView from source
+     and install CuPy into the same Python environment:
+
+     1. Build and install SasView from source by following the build
+        instructions, and activate that environment.
+     2. In the same environment, install the CuPy package that matches your
+        CUDA version, for example ``pip install cupy-cuda12x`` for CUDA 12. See
+        the CuPy installation guide for the right package.
+     3. Launch SasView from that environment with ``python -m sas``.
 
 **1D data only**
    Free-form inversion currently supports 1D averaged :math:`I(q)`
@@ -152,4 +152,4 @@ Notes and Caveats
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-| 2026-10-06 Yugal Khanal, STFC SCD
+:math:`{\text{6^th}}` Nov. 2026, Yugal Khanal, STFC SCD

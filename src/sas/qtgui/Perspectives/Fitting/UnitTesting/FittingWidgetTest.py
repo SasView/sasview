@@ -124,7 +124,7 @@ class FittingWidgetTest:
 
     @pytest.fixture(autouse=True)
     def widget(self, qapp, mocker):
-        '''Create/Destroy the GUI'''
+        """Create/Destroy the GUI"""
         w = FittingWidgetMod(dummy_manager())
         mocker.patch.object(FittingUtilities, 'checkConstraints', return_value=None)
         yield w
@@ -304,7 +304,7 @@ class FittingWidgetTest:
         widget.cbModel.setCurrentIndex(model_index)
 
         # test the model combo content
-        assert widget.cbModel.count() == 29
+        assert widget.cbModel.count() == 30
 
         # Try to change back to default
         widget.cbCategory.setCurrentIndex(0)
@@ -313,7 +313,7 @@ class FittingWidgetTest:
         # category. (Use the looked-up index rather than a hard-coded one;
         # the category positions depend on the installed model set.)
         assert widget.cbCategory.currentIndex() == category_index
-        assert widget.cbModel.count() == 29
+        assert widget.cbModel.count() == 30
 
         # Set the structure factor
         structure_index=widget.cbCategory.findText(FittingWidget.CATEGORY_STRUCTURE)
@@ -895,8 +895,7 @@ class FittingWidgetTest:
         mocker.patch.object(logger, 'error')
 
         widget.onFit()
-        logger.error.assert_called_once()
-        logger.error.assert_called_with('no fitting parameters')
+        logger.error.assert_called_once_with('no fitting parameters')
         widget.close()
 
     @pytest.mark.xfail(reason="2026-02 Data property is broken for the mock fitting widget")
@@ -1766,7 +1765,7 @@ class FittingWidgetTest:
         constraint_tab.uncheckConstraint.assert_not_called()
 
     def testQRangeReset(self, widget, mocker):
-        ''' Test onRangeReset w/ and w/o data loaded '''
+        """ Test onRangeReset w/ and w/o data loaded """
         assert widget.options_widget.qmin == \
                          widget.options_widget.QMIN_DEFAULT
         assert widget.options_widget.qmax == \

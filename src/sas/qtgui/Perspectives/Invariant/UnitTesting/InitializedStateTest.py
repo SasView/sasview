@@ -289,6 +289,7 @@ class TestInvariantDefaults:
         assert not self.window._allow_close
 
     def test_closeEvent_allows_close_with_parent(self, mocker):
+        """An accepted close leaves the hosting window to the WorkspaceManager."""
         mock_parent = mocker.MagicMock()
         mock_set_closable = mocker.patch.object(self.window, "setClosable")
         mock_set_window_state = mocker.patch.object(self.window, "setWindowState")
@@ -300,9 +301,21 @@ class TestInvariantDefaults:
         self.window.closeEvent(mock_event)
 
         mock_set_closable.assert_called_once_with(value=False)
-        mock_parent.close.assert_called_once()
+        mock_parent.close.assert_not_called()
         mock_event.accept.assert_called_once()
         mock_event.ignore.assert_not_called()
+        mock_set_window_state.assert_not_called()
+
+    def test_closeEvent_refuses_close(self, mocker):
+        """A refused close is reported to the WorkspaceManager, which minimises the window."""
+        mock_set_window_state = mocker.patch.object(self.window, "setWindowState")
+        mock_event = mocker.MagicMock()
+
+        self.window._allow_close = False
+        self.window.closeEvent(mock_event)
+
+        mock_event.ignore.assert_called_once()
+        mock_event.accept.assert_not_called()
         mock_set_window_state.assert_not_called()
 
     def test_isSerializable(self):

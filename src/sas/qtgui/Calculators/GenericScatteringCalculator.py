@@ -46,7 +46,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
     def __init__(self, parent=None):
         super(GenericScatteringCalculator, self).__init__()
         self.setupUi(self)
-        self.setFixedSize(self.minimumSizeHint())
+        self.set_polarisation_controls_visible(False)
 
         self.manager = parent
         self.communicator = GuiUtils.communicator
@@ -556,6 +556,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         # update information on which files are enabled
         self.is_nuc = self.checkboxNucData.isChecked()
         self.is_mag = self.checkboxMagData.isChecked()
+        self.set_polarisation_controls_visible(self.is_mag)
         # enable the corresponding text displays to show this to the user clearly
         self.txtNucData.setEnabled(self.is_nuc)
         self.txtMagData.setEnabled(self.is_mag)
@@ -683,6 +684,24 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.checkboxPluginModel.setChecked(False)
             self.txtFileName.setEnabled(False)
 
+    def set_polarisation_controls_visible(self, visible):
+        controls = (
+            self.label,
+            self.lblUpFracIn,
+            self.txtUpFracIn,
+            self.lblUpFracOut,
+            self.txtUpFracOut,
+            self.lblUpTheta,
+            self.txtUpTheta,
+            self.lblUpThetaUnit,
+            self.lblUpPhi,
+            self.txtUpPhi,
+            self.lblUpPhiUnit,
+        )
+
+        for control in controls:
+            control.setVisible(visible)
+
     def check_for_magnetic_controls(self):
         if self.txtMx.hasAcceptableInput() and self.txtMy.hasAcceptableInput() and self.txtMz.hasAcceptableInput():
             if (not self.is_mag) and float(self.txtMx.text()) == 0 and float(self.txtMy.text()) == 0 and float(self.txtMy.text()) == 0:
@@ -691,12 +710,14 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 self.txtUpTheta.setEnabled(False)
                 self.txtUpPhi.setEnabled(False)
                 self.set_polarisation_visible(False)
+                self.set_polarisation_controls_visible(False)
                 return
         self.txtUpFracIn.setEnabled(True)
         self.txtUpFracOut.setEnabled(True)
         self.txtUpTheta.setEnabled(True)
         self.txtUpPhi.setEnabled(True)
         self.set_polarisation_visible(True)
+        self.set_polarisation_controls_visible(True)
 
     def loadFile(self):
         """Opens a menu to choose the datafile to load

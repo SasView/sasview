@@ -186,16 +186,14 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         """
         Free-form smoothness regularization weight from the input box.
 
-        Falls back to DEFAULT_SIGMA for empty, non-numeric or negative input
-        (the validator normally prevents these, but guard defensively).
+        Falls back to DEFAULT_SIGMA for empty or non-numeric input. The
+        validator already blocks negative values.
         """
         try:
-            value = GuiUtils.toDouble(self.txtFreeFormSigma.text())
+            return GuiUtils.toDouble(self.txtFreeFormSigma.text())
         except TypeError:
+            logger.error("Invalid free-form sigma %r, using default %s", self.txtFreeFormSigma.text(), DEFAULT_SIGMA)
             return DEFAULT_SIGMA
-        if value < 0:
-            return DEFAULT_SIGMA
-        return value
 
     def getParamNamesPoly(self) -> list[str]:
         """
@@ -381,7 +379,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
             str(max),
             str(npts),
             str(nsigs),
-            "gaussian      ",
+            "gaussian",
             "",
         ]
         FittingUtilities.addCheckedListToModel(self.poly_model, checked_list)

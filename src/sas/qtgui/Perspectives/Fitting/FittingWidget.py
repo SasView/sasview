@@ -68,6 +68,10 @@ CATEGORY_CUSTOM = "Plugin Models"
 STRUCTURE_DEFAULT = "None"
 
 DEFAULT_POLYDISP_FUNCTION = 'gaussian'
+FREE_FORM_LOCK_TOOLTIP = (
+    "Free-form inversion uses every parameter, so the fit checkboxes are locked.\n"
+    "Uncheck Free Form to choose parameters individually."
+)
 
 # A list of models that are known to not work with how the GUI handles models from sasmodels
 #   NOTE: These models are correct when used directly through the sasmodels package, but how qtgui handles them is wrong
@@ -301,6 +305,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Parameters to fit
         self.main_params_to_fit = []
+        # Fit-checkbox states saved on entering free-form, restored on leaving
+        self._pre_free_form_checks = None
 
         # Fit options
         self.q_range_min = OptionsWidget.QMIN_DEFAULT
@@ -2567,18 +2573,45 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return False
         return model.item(row, 0).isCheckable()
 
+    # def applyFreeFormCheckboxLock(self) -> None:
+    #     """
+    #     In free-form every parameter takes part in the inversion, so the
+    #     per-parameter fit checkboxes are ticked, greyed out and explained by a tooltip.
+    #     """
+    #     lock = self.polydispersity_widget.free_form
+    #     for row in range(self._model_model.rowCount()):
+    #         item = self._model_model.item(row, 0)
+    #         # only fittable parameters carry a checkbox; skip headings/fixed rows
+    #         if item is not None and item.isCheckable():
+    #             item.setEnabled(not lock)
+    #             item.setToolTip(FREE_FORM_LOCK_TOOLTIP if lock else "")
+    #             item.setCheckState(QtCore.Qt.Checked if lock else QtCore.Qt.Unchecked)
+
     def applyFreeFormCheckboxLock(self) -> None:
         """
-        In free-form we fit over a fixed set of parameters.
-        Per-parameter fit checkboxes in the model pane have
-        no effect so grey it out.
+        In free-form every parameter takes part in the inversion, so the
+        per-parameter fit checkboxes are ticked, greyed out and explained by a tooltip.
         """
         lock = self.polydispersity_widget.free_form
-        for row in range(self._model_model.rowCount()):
-            item = self._model_model.item(row, 0)
-            # only fittable parameters carry a checkbox; skip headings/fixed rows
-            if item is not None and item.isCheckable():
-                item.setEnabled(not lock)
+        items = [self._model_model.item(row, 0) for row in range(self._model_model.rowCount())]
+        # only fittable parameters carry a checkbox; skip headings/fixed rows
+        items = [item for item in items if item is not None and item.isCheckable()]
+        self.lstParams.clearSelection()
+        if lock:
+            # save the state
+            if self._pre_free_form_checks is None:
+                self._pre_free_form_checks = {item.text(): item.checkState() for item in items}
+            for item in items:
+                item.setCheckState(QtCore.Qt.Checked)
+                item.setEnabled(False)
+                item.setToolTip(FREE_FORM_LOCK_TOOLTIP)
+        elif self._pre_free_form_checks is not None:
+            saved = self._pre_free_form_checks
+            self._pre_free_form_checks = None
+            for item in items:
+                item.setEnabled(True)
+                item.setToolTip("")
+                item.setCheckState(saved.get(item.text(), QtCore.Qt.Unchecked))
 
     def changeCheckboxStatus(self, row: int, checkbox_status: bool, model_key: str = "standard") -> None:
         """
