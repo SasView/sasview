@@ -328,7 +328,8 @@ class FreeFormFit(FitEngine):
             dqx, dqy = np.zeros_like(iq), np.zeros_like(iq)
             dqx[ix, iy], dqy[ix, iy] = data.dqx_data, data.dqy_data
             resolution = Pinhole2D(
-                data=Data2D(x=qx, y=qy, dx=np.diagonal(dqx).copy(), dy=np.diagonal(dqy).copy(), z=iq), index=None, nsigma=3.0
+                data=Data2D(x=qx, y=qy, dx=np.diagonal(dqx).copy(), dy=np.diagonal(dqy).copy(), z=iq), index=None, nsigma=3.0,
+                accuracy=fitdata.smearer.accuracy,
             )
             q_calc, q_calc_weights = resolution.q_calc, resolution.q_calc_weights
 
