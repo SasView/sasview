@@ -355,10 +355,10 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         nsigs = self.logic.kernel_module.getParam(param_name + '.nsigmas')
         _, min, max = self.logic.kernel_module.details[param_wname]
         if self.free_form and param_name in FREE_FORM_ANGLE_RANGES:
-            # Orientation rows (2D data) discretise the angle itself, in degrees.
-            # The width limits they would otherwise show are [0, inf], so seed
-            # the non-redundant range unless the user has already set one, and
-            # few bins: every angle bin multiplies the size of the inversion.
+            # Angle Parameter (in 2D): the row bins (discretises) the angle itself, in degrees.
+            # - Range: the usual width limits are [0, inf], which is no use for an angle. Use the
+            #   non-redundant angle range instead, unless the user has already set a finite max.
+            # - Bins: keep them few, because every extra bin makes the inversion bigger.
             if not np.isfinite(max):
                 min, max = FREE_FORM_ANGLE_RANGES[param_name]
             npts = FREE_FORM_ANGLE_BINS
