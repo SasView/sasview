@@ -55,6 +55,11 @@ Free-form inversion is currently available for the following models:
 * **ellipsoid** — recovers the joint distribution :math:`f(r_p, r_e)` over the polar
   radius :math:`r_p` and equatorial radius :math:`r_e`
 
+Both 1D and 2D data are supported. For 2D data, **cylinder** and **ellipsoid** also
+recover the orientation distribution over the angles :math:`\theta` and
+:math:`\phi`. **sphere** is 1D only, since a sphere has no orientation (see
+*2D data* below).
+
 For all models, the contrast
 :math:`\Delta\rho = \rho_\text{particle} - \rho_\text{solvent}` must be
 non-zero (i.e. ``sld`` and ``sld_solvent`` must differ).
@@ -146,10 +151,23 @@ Notes and Caveats
         the CuPy installation guide for the right package.
      3. Launch SasView from that environment with ``python -m sas``.
 
-**1D data only**
-   Free-form inversion currently supports 1D averaged :math:`I(q)`
-   data. 2D support is coming soon.
+**2D data**
+   Free-form inversion also works on 2D :math:`I(q_x, q_y)` data for the
+   **cylinder** and **ellipsoid** models.
+
+   * The *Polydispersity* table then has extra rows for the orientation angles
+     :math:`\theta` and :math:`\phi`, with Min and Max in degrees. They default
+     to :math:`\theta` 10–90° and :math:`\phi` 0–180°, which cover every
+     distinct orientation, and 5 bins each. :math:`\theta` starts at 10°
+     because the cylinder form factor is undefined at :math:`\theta = 0`.
+   * Every angle bin multiplies the size of the inversion, so keep the angle
+     bins few.
+   * Only pixels inside the q range and mask are fitted. The theory and
+     residual images are blank outside them.
+   * Resolution smearing uses the *Accuracy* setting on the *Resolution* tab.
+     Higher accuracy is much more expensive in 2D (High is about 25× Low), and
+     2D smearing assumes a regular, square detector grid.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-:math:`{\text{6^th}}` Nov. 2026, Yugal Khanal, STFC SCD
+:math:`{\text{11^th}}` Nov. 2026, Yugal Khanal, STFC SCD

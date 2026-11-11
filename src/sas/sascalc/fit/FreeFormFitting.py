@@ -3,7 +3,7 @@ FreeFormFitting is the SasView-side adapter for free-form SAS inversion. All
 of the numerics live in the external `ffsi` package, reached through its public
 API `ffsi.api.invert()`; this module only translates between SasView's
 model / data objects and that API. The model is taken from the GUI selection;
-every model ffsi supports is handled (see FREE_FORM_PARAM_MAP). 1D data.
+every model ffsi supports is handled (see FREE_FORM_PARAM_MAP). 1D and 2D data.
 
 This is a sibling of BumpsFitting: a FitEngine subclass returning FResult
 objects through the same FitThread pipeline, so the GUI drives it exactly
@@ -20,7 +20,10 @@ from dataclasses import dataclass
 import numpy as np
 import numpy.typing as npt
 
-from sas.sascalc.fit.AbstractFitEngine import FitEngine, FResult
+from sasmodels.data import Data2D
+from sasmodels.resolution2d import Pinhole2D
+
+from sas.sascalc.fit.AbstractFitEngine import FitData2D, FitEngine, FResult
 
 logger = logging.getLogger(__name__)
 
@@ -45,10 +48,16 @@ FREE_FORM_PARAM_MAP = {
     "sphere": {"radius": "r"},
     "cylinder": {"radius": "r", "length": "l"},
     "ellipsoid": {"radius_polar": "rp", "radius_equatorial": "re"},
+    # 2D data: ffsi's 2D models, with the orientation angles as extra parameters
+    "cylinder2d": {"radius": "r", "length": "l", "theta": "theta", "phi": "phi"},
+    "ellipsoid2d": {"radius_polar": "rp", "radius_equatorial": "re", "theta": "theta", "phi": "phi"},
 }
 
+# Orientation angles are in degrees in SasView, radians in ffsi.
+ANGLE_PARAMS = ("theta", "phi")
+
 # Models free-form inversion can handle (those ffsi supports).
-SUPPORTED_MODELS = frozenset(FREE_FORM_PARAM_MAP)
+SUPPORTED_MODELS = frozenset(name for name in FREE_FORM_PARAM_MAP if not name.endswith("2d"))
 
 
 def model_id(model):
@@ -88,6 +97,7 @@ class FreeFormResult:
     residuals: npt.NDArray[np.float64]  # (theory - iq) / diq
     chi2: float  # sum(residuals**2) / residuals.size
     distributions: list  # list[FreeFormDistribution]
+    index: npt.NDArray[np.intp] | None = None  # 2D: the fit-window pixels theory/residuals belong to
 
     def distribution(self, param):
         """The `FreeFormDistribution` for SasView parameter `param`."""
@@ -135,7 +145,11 @@ def invert_shape(
 
     # Translate the SasView-named bins into the ffsi names the API expects,
     # keeping only the geometric parameters the model inverts.
-    grids = {name_map[sv]: spec for sv, spec in bins.items() if sv in name_map}
+    grids = {
+        name_map[sv]: (np.deg2rad(spec[0]), np.deg2rad(spec[1]), spec[2]) if sv in ANGLE_PARAMS else spec
+        for sv, spec in bins.items()
+        if sv in name_map
+    }
     missing = set(name_map.values()) - set(grids)
     if missing:
         raise ValueError(
@@ -143,8 +157,7 @@ def invert_shape(
         )
 
     # q is passed through as-is; invert() owns the backend/dtype conversion
-    # (ffsi picks numpy vs cupy from the input arrays), keeping this adapter
-    # free of a direct numpy dependency.
+    # (ffsi picks numpy vs cupy from the input arrays).
     result = invert(
         model_name,
         q,
@@ -160,7 +173,10 @@ def invert_shape(
 
     distributions = [
         FreeFormDistribution(
-            param=ffsi_to_sasview[d.name], grid=d.grid, weights=d.weights, volume_weights=d.volume_weights
+            param=ffsi_to_sasview[d.name],
+            grid=np.rad2deg(d.grid) if d.name in ANGLE_PARAMS else d.grid,
+            weights=d.weights,
+            volume_weights=d.volume_weights,
         )
         for d in result.distributions
     ]
@@ -195,6 +211,11 @@ class FreeFormFit(FitEngine):
         self.bins = dict(bins) if bins else {}
         self.sigma = sigma
 
+    def set_data(self, data, id, smearer=None, qmin=None, qmax=None):
+        FitEngine.set_data(self, data, id, smearer=smearer, qmin=qmin, qmax=qmax)
+        # FitEngine.set_data drops the smearer for 2D data; keep it so fit() knows smearing is on
+        self.fit_arrange_dict[id].get_data().smearer = smearer
+
     def fit(self, msg_q=None, q=None, handler=None, curr_thread=None, ftol=1.49012e-8, reset_flag=False):
         # ftol/reset_flag are part of the FitThread calling convention but
         # have no meaning for the GALAHAD solve.
@@ -225,33 +246,36 @@ class FreeFormFit(FitEngine):
             if sld == sld_solvent:
                 raise ValueError("Free-form inversion needs a non-zero contrast (sld must differ from sld_solvent).")
 
-            fitdata = arrange.get_data()  # FitData1D
+            fitdata = arrange.get_data()  # FitData1D or FitData2D
             idx = fitdata.idx
 
-            # Resolution smearing rides on the smearer (set from the Resolution
-            # tab). Its sasmodels resolution exposes the extended q_calc grid and
-            # the (nq_calc, nq) weight matrix; ffsi smears the Green's tensor with
-            # them. The weight matrix is built over the full data q, so slice its
-            # columns to the qmin/qmax + nonzero-dy fit window (`idx`).
-            q_calc = resolution_weights = None
-            smearer = getattr(fitdata, "smearer", None)
-            resolution = getattr(smearer, "resolution", None)
-            if resolution is not None and getattr(resolution, "weight_matrix", None) is not None:
-                q_calc = resolution.q_calc
-                resolution_weights = resolution.weight_matrix[:, idx]
+            if isinstance(fitdata, FitData2D):
+                result = self._invert_2d(model_name, fitdata, sld, sld_solvent)
+            else:
+                # Resolution smearing rides on the smearer (set from the Resolution
+                # tab). Its sasmodels resolution exposes the extended q_calc grid and
+                # the (nq_calc, nq) weight matrix; ffsi smears the Green's tensor with
+                # them. The weight matrix is built over the full data q, so slice its
+                # columns to the qmin/qmax + nonzero-dy fit window (`idx`).
+                q_calc = resolution_weights = None
+                smearer = getattr(fitdata, "smearer", None)
+                resolution = getattr(smearer, "resolution", None)
+                if resolution is not None and getattr(resolution, "weight_matrix", None) is not None:
+                    q_calc = resolution.q_calc
+                    resolution_weights = resolution.weight_matrix[:, idx]
 
-            result = invert_shape(
-                model_name,
-                fitdata.x[idx],
-                fitdata.y[idx],
-                fitdata.dy[idx],
-                self.bins,
-                sigma=self.sigma,
-                sld=sld,
-                sld_solvent=sld_solvent,
-                q_calc=q_calc,
-                resolution_weights=resolution_weights,
-            )
+                result = invert_shape(
+                    model_name,
+                    fitdata.x[idx],
+                    fitdata.y[idx],
+                    fitdata.dy[idx],
+                    self.bins,
+                    sigma=self.sigma,
+                    sld=sld,
+                    sld_solvent=sld_solvent,
+                    q_calc=q_calc,
+                    resolution_weights=resolution_weights,
+                )
 
             fitting_result = FResult(model=model, data=fitdata, param_list=list(FREE_FORM_FIT_PARAMS))
             fitting_result.theory = result.theory
@@ -279,3 +303,52 @@ class FreeFormFit(FitEngine):
             q.put(all_results)
             return q
         return all_results
+
+    def _invert_2d(self, model_name, fitdata, sld, sld_solvent):
+        """
+        Inversion of 2D data as in ffsi's scripts/sasmodels_resolution_smearing.py:
+        ffsi's 2D models work on the regular (qx, qy) detector grid, smeared with a
+        sasmodels Pinhole2D built on the grid axes. Pixels outside the fit window
+        (q range, mask) stay on the grid with zero weight (I = 0, dI = inf).
+        """
+        if model_name + "2d" not in FREE_FORM_PARAM_MAP:
+            raise ValueError("Free-form inversion of 2D data supports the cylinder and ellipsoid models.")
+        idx = fitdata.idx
+        qx, ix = np.unique(fitdata.qx_data, return_inverse=True)
+        qy, iy = np.unique(fitdata.qy_data, return_inverse=True)
+        iq = np.zeros((len(qx), len(qy)))
+        diq = np.full((len(qx), len(qy)), np.inf)
+        iq[ix[idx], iy[idx]] = fitdata.data[idx]
+        diq[ix[idx], iy[idx]] = fitdata.res_err_data[idx]
+
+        q_calc = q_calc_weights = None
+        data = fitdata.sas_data
+        if fitdata.smearer is not None and data.dqx_data is not None and data.dqy_data is not None:
+            # Pinhole2D samples the points (qx[i], qy[i]); take their dq from the grid diagonal
+            dqx, dqy = np.zeros_like(iq), np.zeros_like(iq)
+            dqx[ix, iy], dqy[ix, iy] = data.dqx_data, data.dqy_data
+            resolution = Pinhole2D(
+                data=Data2D(x=qx, y=qy, dx=np.diagonal(dqx).copy(), dy=np.diagonal(dqy).copy(), z=iq), index=None, nsigma=3.0,
+                accuracy=fitdata.smearer.accuracy,
+            )
+            q_calc, q_calc_weights = resolution.q_calc, resolution.q_calc_weights
+
+        result = invert_shape(
+            model_name + "2d",
+            (qx, qy),
+            iq,
+            diq,
+            self.bins,
+            sigma=self.sigma,
+            sld=sld,
+            sld_solvent=sld_solvent,
+            q_calc=q_calc,
+            resolution_weights=q_calc_weights,
+        )
+        # back from the grid to the fit-window pixels; chi2 over those pixels only
+        result.q = (fitdata.qx_data[idx], fitdata.qy_data[idx])
+        result.theory = result.theory[ix[idx], iy[idx]]
+        result.residuals = result.residuals[ix[idx], iy[idx]]
+        result.chi2 = float(np.sum(result.residuals**2) / result.residuals.size)
+        result.index = idx
+        return result

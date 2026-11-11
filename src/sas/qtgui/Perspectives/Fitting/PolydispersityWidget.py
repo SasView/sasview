@@ -26,6 +26,13 @@ from sas.sascalc.fit.FreeFormFitting import DEFAULT_SIGMA
 
 DEFAULT_POLYDISP_FUNCTION = 'gaussian'
 
+# Free-form defaults for orientation rows (2D data), in degrees. The particle
+# scatters identically for theta and 180-theta, and for phi and phi+180, so
+# these ranges cover every distinct orientation. theta starts above 0, where
+# ffsi's Cylinder2D is 0/0.
+FREE_FORM_ANGLE_RANGES = {"theta": (10.0, 90.0), "phi": (0.0, 180.0)}
+FREE_FORM_ANGLE_BINS = 5
+
 logger = logging.getLogger(__name__)
 
 class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
@@ -347,6 +354,14 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         npts = self.logic.kernel_module.getParam(param_name + '.npts')
         nsigs = self.logic.kernel_module.getParam(param_name + '.nsigmas')
         _, min, max = self.logic.kernel_module.details[param_wname]
+        if self.free_form and param_name in FREE_FORM_ANGLE_RANGES:
+            # Angle Parameter (in 2D): the row bins (discretises) the angle itself, in degrees.
+            # - Range: the usual width limits are [0, inf], which is no use for an angle. Use the
+            #   non-redundant angle range instead, unless the user has already set a finite max.
+            # - Bins: keep them few, because every extra bin makes the inversion bigger.
+            if not np.isfinite(max):
+                min, max = FREE_FORM_ANGLE_RANGES[param_name]
+            npts = FREE_FORM_ANGLE_BINS
 
         # Update local param dict
         self.poly_params[param_wname] = width

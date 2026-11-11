@@ -237,7 +237,11 @@ class FittingLogic:
         """
         return_data = {"model": self.kernel_module, "data": self._data, "intermediate_results": {}, "freeform": result}
         if isinstance(self._data, Data2D):
-            return_data["image"] = result.theory
+            # the inversion ran on the fit-window pixels only; the 2D plot and
+            # residuals need a full image, NaN outside the window (as Calc2D)
+            image = np.full(len(self._data.data), np.nan)
+            image[result.index] = result.theory
+            return_data["image"] = image
             return_data["page_id"] = tab_id
         else:
             return_data["x"] = result.q
