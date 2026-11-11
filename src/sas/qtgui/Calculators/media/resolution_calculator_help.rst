@@ -28,7 +28,8 @@ Using the tool
 3) Change the default values of the instrumental parameters as required. Be
    careful to note that distances are specified in cm!
 
-4) Enter values for the source wavelength(s), $\lambda$, and its spread (= $\text{FWHM}/\lambda$).
+4) Enter values for the source wavelength(s), $\lambda$, and its spread 
+   (= $\text{FWHM}/\lambda$).
 
    For monochromatic sources, the inputs are just one value. For TOF sources,
    the minimum and maximum values should be separated by a '-' to specify a
@@ -56,7 +57,7 @@ Using the tool
    Note that the effect from the beam block/stop is ignored. So, in the small $Q$
    region near the beam block/stop
 
-   [i.e., $Q < (2 \pi \cdot \text{beam block diameter}) / (\text{sample-to-detector distance} \cdot \lambda_\text{min})$]
+   [i.e., :math:`Q < (2 \pi \cdot \text{beam block diameter}) / (\text{sample-to-detector distance} \cdot \lambda_{\text{min}})`]
 
    the variance is slightly under estimated.
 
@@ -79,13 +80,13 @@ Using the tool
       aperture (diameter) and two values separated by a comma (,) for a
       rectangular slit (side lengths)
    6) One value for one ($Qx$, $Qy$) location or more values separated by a
-      comma (,) for more locations. *Note: the $Qx$, $Qy$ input boxes should
-      have the same number of values.*
+      comma (,) for more locations. *Note: the* :math:`Qx`, :math:`Qy` *input 
+      boxes should have the same number of values*.
    7) Click on *Compute* button to start the calculation
    8) *Sigma_x* and *Sigma_y* are the components of the 2D $dQ$ at the last
       ($Qx$, $Qy$) point of inputs
    9) *Sigma_lamd* is the 2D $dQ_{\lambda}$ at the last point of inputs.
-      *Note: $dQ_{\lambda}$ has only the Qr directional component*
+      *Note:* :math:`dQ_{\lambda}` *has only the* $Qr$ *directional component*
    10) *(1D Sigma)* is the 1D $dQ$ at the last ($Qx$, $Qy$) point of inputs
    11) Plot of the result. For *TOF*, a green rectangle marks the limits of
        maximum $Q$  range accessible for the longest wavelength due to the
@@ -117,12 +118,13 @@ of the uncertainty in $Q$.
 References
 ----------
 
-D.F.R. Mildner and J.M. Carpenter
-*J. Appl. Cryst.* 17 (1984) 249-256
+| D.F.R. Mildner and J.M. Carpenter *J. Appl. Cryst.* 17 (1984) 249-256
+| https://doi.org/10.1107/S0021889884011468
 
-D.F.R. Mildner, J.M. Carpenter and D.L. Worcester
-*J. Appl. Cryst.* 19 (1986) 311-319
+| D.F.R. Mildner, J.M. Carpenter and D.L. Worcester *J. Appl. Cryst.* 19 (1986) 
+  311-319
+| https://doi.org/10.1107/S0021889886089306
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Steve King, 01May2015
+.. note::  This help document was last changed by Cristian Pilloni, 06Nov2026

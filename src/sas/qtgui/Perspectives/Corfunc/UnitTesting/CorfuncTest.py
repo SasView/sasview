@@ -13,11 +13,11 @@ from sas.qtgui.UnitTesting import base_path
 
 
 class CorfuncTest:
-    '''Test the Corfunc Interface'''
+    """Test the Corfunc Interface"""
 
     @pytest.fixture(autouse=True)
     def widget(self, qapp, mocker):
-        '''Create/Destroy the CorfuncWindow'''
+        """Create/Destroy the CorfuncWindow"""
         class MainWindow:
             def __init__(self):
                 self.model = QtGui.QStandardItemModel()
@@ -40,7 +40,7 @@ class CorfuncTest:
         w.close()
 
     def checkDefaults(self, widget):
-        '''Test the GUI in its default state'''
+        """Test the GUI in its default state"""
         assert isinstance(widget, QtWidgets.QWidget)
         assert widget.windowTitle() == "Corfunc Perspective"
         assert widget.model.columnCount() == 1
@@ -61,14 +61,12 @@ class CorfuncTest:
         assert widget.txtLongPeriod.text() == '0'
         assert widget.txtLocalCrystal.text() == '0'
 
-    # This is throwing an error. Skip for now
-    @pytest.mark.skip()
     def testOnCalculate(self, widget, mocker):
         """ Test onCompute function """
-        mocker.patch.object(widget._calculator, '_calculate_background')
+        mocker.patch.object(widget, '_run')
         widget.cmdExtract.setEnabled(True)
         QTest.mouseClick(widget.cmdExtract, QtCore.Qt.LeftButton)
-        widget._calculator._calculate_background.assert_called_once()
+        widget._run.assert_called_once()
 
     def testProcess(self, widget, mocker):
         """Test the full analysis path"""

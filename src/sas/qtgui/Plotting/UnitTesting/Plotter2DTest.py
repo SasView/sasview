@@ -20,10 +20,10 @@ from sas.qtgui.Utilities.GuiUtils import communicator
 
 
 class Plotter2DTest:
-    '''Test the Plotter 2D class'''
+    """Test the Plotter 2D class"""
     @pytest.fixture(autouse=True)
     def plotter(self, qapp):
-        '''Create/Destroy the Plotter2D'''
+        """Create/Destroy the Plotter2D"""
 
         class dummy_manager:
             def communicator(self):
@@ -61,7 +61,7 @@ class Plotter2DTest:
 
         yield p
 
-        '''destroy'''
+        """destroy"""
         # Some tests close the plot through its window, which deletes it
         if isValid(p):
             p.figure.clf()
@@ -79,7 +79,7 @@ class Plotter2DTest:
         plotter.plot.assert_called_once()
 
     def testCalculateDepth(self, plotter):
-        ''' Test the depth calculator '''
+        """ Test the depth calculator """
 
         # Default, log scale
         depth = plotter.calculateDepth()
@@ -92,7 +92,7 @@ class Plotter2DTest:
         assert depth[1] == pytest.approx(1.30103, abs=1e-5)
 
     def testOnColorMap(self, plotter, mocker):
-        ''' Respond to the color map event '''
+        """Respond to the color map event"""
         plotter.plot()
         plotter.show()
 
@@ -193,7 +193,7 @@ class Plotter2DTest:
 
     @pytest.fixture
     def workspace(self, plotter):
-        '''Host the plotter in a real workspace, as in the application'''
+        """Host the plotter in a real workspace, as in the application"""
         from types import SimpleNamespace
 
         from sas.qtgui.MainWindow.WorkspaceManager import WorkspaceManager
@@ -225,7 +225,7 @@ class Plotter2DTest:
     @pytest.mark.parametrize("detached", [False, True], ids=["attached", "detached"])
     @pytest.mark.parametrize("route", ["container", "button", "escape"])
     def testBoxSumWindowClosedByEveryRoute(self, plotter, workspace, detached, route):
-        '''The box sum panel can be closed any way, attached or detached, and reopened'''
+        """The box sum panel can be closed any way, attached or detached, and reopened"""
         self._prepareBoxSum(plotter)
         plotter.onBoxSum()
         box = plotter.boxwidget
@@ -255,7 +255,7 @@ class Plotter2DTest:
     @pytest.mark.parametrize("detached", [False, True], ids=["attached", "detached"])
     @pytest.mark.parametrize("route", ["container", "button", "escape"])
     def testSlicerParametersClosedByEveryRoute(self, plotter, workspace, detached, route):
-        '''The slicer parameter panel notifies its owner exactly once, however it is closed'''
+        """The slicer parameter panel notifies its owner exactly once, however it is closed"""
         # The panel is parented to the plot's manager and uses what the Data Explorer provides
         from types import SimpleNamespace
         explorer = QtWidgets.QWidget()
@@ -290,7 +290,7 @@ class Plotter2DTest:
 
     @pytest.mark.parametrize("detached", [False, True], ids=["attached", "detached"])
     def testHelperPanelsFollowPlotPlacement(self, plotter, workspace, detached):
-        '''Helper panels open attached or detached, matching their plot'''
+        """Helper panels open attached or detached, matching their plot"""
         from types import SimpleNamespace
         if detached:
             workspace.detach(plotter)
@@ -309,7 +309,7 @@ class Plotter2DTest:
         assert workspace.is_detached(plotter.slicer_widget) == detached
 
     def testClosingPlotClosesDetachedHelper(self, plotter, workspace):
-        '''Closing a 2D plot closes its helper panel, wherever the helper lives'''
+        """Closing a 2D plot closes its helper panel, wherever the helper lives"""
         self._prepareBoxSum(plotter)
         plotter.onBoxSum()
         box = plotter.boxwidget

@@ -21,6 +21,9 @@ class Perspective(metaclass=PerspectiveMeta):
     """
     Mixin class for all perspectives,
     all perspectives should have these methods
+
+    List this mixin *before* the Qt base class (e.g. ``class X(Perspective, QDialog)``)
+    so that its overrides of Qt virtuals, such as :meth:`reject`, take effect.
     """
 
     @classmethod
@@ -124,6 +127,14 @@ class Perspective(metaclass=PerspectiveMeta):
     def isClosable(self) -> bool:
         """ Flag that determines whether this perspective can be closed"""
         return False # TODO: refactor to closable property
+
+    def reject(self) -> None:
+        """ Ignore QDialog's Esc-to-reject behaviour
+
+        Perspectives live inside the MDI area, so the default reject()
+        would hide the widget without going through closeEvent(), leaving an
+        empty subwindow frame behind (see issue #4001).
+        """
 
     #
     # Menubar option
