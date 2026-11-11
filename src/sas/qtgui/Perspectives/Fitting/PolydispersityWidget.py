@@ -21,7 +21,18 @@ from sas.qtgui.Perspectives.Fitting.UndoRedo import (
 )
 from sas.qtgui.Perspectives.Fitting.ViewDelegate import PolyViewDelegate
 
+# Default free-form smoothness regularization weight
+from sas.sascalc.fit.FreeFormFitting import DEFAULT_SIGMA
+
 DEFAULT_POLYDISP_FUNCTION = 'gaussian'
+
+# Free-form defaults for orientation rows (2D data), in degrees. The particle
+# scatters identically for theta and 180-theta, and for phi and phi+180, so
+# these ranges cover every distinct orientation. theta starts above 0, where
+# ffsi's Cylinder2D is 0/0.
+FREE_FORM_ANGLE_RANGES = {"theta": (10.0, 90.0), "phi": (0.0, 180.0)}
+FREE_FORM_ANGLE_BINS = 5
+
 logger = logging.getLogger(__name__)
 
 class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
@@ -40,6 +51,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         self.is2D = False
         self.isActive = False
         self._fitting_widget = parent
+        self.free_form = False
         self.logic = parent.logic
         self.poly_params = {}
         self.has_poly_error_column = False
@@ -59,6 +71,15 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         self.lstPoly.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         # self.lstPoly.customContextMenuRequested.connect(self.showModelContextMenu)
         self.lstPoly.setAttribute(QtCore.Qt.WA_MacShowFocusRect, False)
+
+        # Free-form smoothness (sigma) input: non-negative float, hidden unless
+        # in free-form mode (visibility tracked by updateFreeFormColumns()).
+        sigma_validator = GuiUtils.DoubleValidator()
+        sigma_validator.setBottom(0.0)
+        self.txtFreeFormSigma.setValidator(sigma_validator)
+        self.txtFreeFormSigma.setText(str(DEFAULT_SIGMA))
+        self.txtFreeFormSigma.setVisible(False)
+        self.lblFreeFormSigma.setVisible(False)
 
     def polyModel(self) -> FittingUtilities.ToolTippedItemModel:
         """
@@ -99,6 +120,42 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
 
         FittingUtilities.addPolyHeadersToModel(self.poly_model)
         self.poly_params_to_fit = self.checkedListFromModel()
+        self.updateFreeFormColumns()
+
+    def setFreeForm(self, isChecked: bool) -> None:
+        """
+        Switch the polydispersity tab into/out of free-form (FFSAS) mode
+        and rebuild the parameter table accordingly.
+        """
+        if self.free_form == isChecked:
+            return
+        self.free_form = isChecked
+        if self.logic is not None and self.logic.model_parameters:
+            self.setPolyModel()
+
+    def updateFreeFormColumns(self) -> None:
+        """
+        Free-form only uses the Parameter/Min/Max/Npts columns; hide
+        the others and relabel Npts, which acts as the number of bins.
+        """
+        delegate = self.lstPoly.itemDelegate()
+        visible_columns = {
+            delegate.poly_parameter,
+            delegate.poly_error,
+            delegate.poly_min,
+            delegate.poly_max,
+            delegate.poly_npts,
+        }
+        for column in range(self.poly_model.columnCount()):
+            self.lstPoly.setColumnHidden(column, self.free_form and column not in visible_columns)
+
+        # The sigma box only applies to free-form inversion.
+        self.txtFreeFormSigma.setVisible(self.free_form)
+        self.lblFreeFormSigma.setVisible(self.free_form)
+
+        if self.free_form:
+            self.poly_model.setHeaderData(delegate.poly_npts, QtCore.Qt.Horizontal, "N bins")
+            self.poly_model.header_tooltips[delegate.poly_npts] = "Enter number of discretisation bins over [min, max]"
 
     @staticmethod
     def polyNameToParam(param_name: str) -> str:
@@ -106,8 +163,37 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         Translate polydisperse QTable representation into parameter name
         """
         param_name = param_name.replace('Distribution of ', '')
+        param_name = param_name.replace("Discretisation of ", "")
         param_name += '.width'
         return param_name
+
+    def freeFormBins(self) -> dict[str, tuple[float, float, int]]:
+        """
+        Free-form discretisation from the table: {param_name: (min, max, nbins)}
+        """
+        delegate = self.lstPoly.itemDelegate()
+        bins = {}
+        for row in range(self.poly_model.rowCount()):
+            name = str(self.poly_model.item(row, 0).text())
+            name = name.replace("Distribution of ", "").replace("Discretisation of ", "")
+            lo = GuiUtils.toDouble(self.poly_model.item(row, delegate.poly_min).text())
+            hi = GuiUtils.toDouble(self.poly_model.item(row, delegate.poly_max).text())
+            nbins = int(GuiUtils.toDouble(self.poly_model.item(row, delegate.poly_npts).text()))
+            bins[name] = (lo, hi, nbins)
+        return bins
+
+    def freeFormSigma(self) -> float:
+        """
+        Free-form smoothness regularization weight from the input box.
+
+        Falls back to DEFAULT_SIGMA for empty or non-numeric input. The
+        validator already blocks negative values.
+        """
+        try:
+            return GuiUtils.toDouble(self.txtFreeFormSigma.text())
+        except TypeError:
+            logger.error("Invalid free-form sigma %r, using default %s", self.txtFreeFormSigma.text(), DEFAULT_SIGMA)
+            return DEFAULT_SIGMA
 
     def getParamNamesPoly(self) -> list[str]:
         """
@@ -164,9 +250,10 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
             old_val = current_details[pos]
             current_details[pos] = value
             bound = "min" if pos == 1 else "max"
-            self._fitting_widget.undo_stack.push(
-                ParameterMinMaxCommand(parameter_name_w, bound, old_val, value)
-            )
+            if not self.free_form:
+                # in free-form mode these are the discretisation range, read
+                # off the table by freeFormBins(), not polydispersity bounds
+                self._fitting_widget.undo_stack.push(ParameterMinMaxCommand(parameter_name_w, bound, old_val, value))
 
         elif model_column == delegate.poly_function:
             # name of the function - just pass
@@ -194,10 +281,11 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
                 p_name = f"{parameter_name}.{associations.get(model_column, 'width')}"
                 old_val = self.logic.kernel_module.getParam(p_name)
                 self.poly_params[p_name] = value
-                self.logic.kernel_module.setParam(p_name, value)
-                self._fitting_widget.undo_stack.push(
-                    ParameterValueCommand(p_name, old_val, value)
-                )
+                if not self.free_form:
+                    # in free-form mode the Npts column is "N bins", consumed by
+                    # freeFormBins(); it is not the kernel's polydispersity npts
+                    self.logic.kernel_module.setParam(p_name, value)
+                    self._fitting_widget.undo_stack.push(ParameterValueCommand(p_name, old_val, value))
 
                 # Update plot
                 self.updateDataSignal.emit()
@@ -266,6 +354,14 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         npts = self.logic.kernel_module.getParam(param_name + '.npts')
         nsigs = self.logic.kernel_module.getParam(param_name + '.nsigmas')
         _, min, max = self.logic.kernel_module.details[param_wname]
+        if self.free_form and param_name in FREE_FORM_ANGLE_RANGES:
+            # Angle Parameter (in 2D): the row bins (discretises) the angle itself, in degrees.
+            # - Range: the usual width limits are [0, inf], which is no use for an angle. Use the
+            #   non-redundant angle range instead, unless the user has already set a finite max.
+            # - Bins: keep them few, because every extra bin makes the inversion bigger.
+            if not np.isfinite(max):
+                min, max = FREE_FORM_ANGLE_RANGES[param_name]
+            npts = FREE_FORM_ANGLE_BINS
 
         # Update local param dict
         self.poly_params[param_wname] = width
@@ -275,13 +371,27 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         # Construct a row with polydisp. related variable.
         # This will get added to the polydisp. model
         # Note: last argument needs extra space padding for decent display of the control
-        checked_list = ["Distribution of " + param_name, str(width),
-                        str(min), str(max),
-                        str(npts), str(nsigs), "",'']
+        row_label = "Discretisation of " if self.free_form else "Distribution of "
+        checked_list = [
+            row_label + param_name,
+            str(width),
+            str(min),
+            str(max),
+            str(npts),
+            str(nsigs),
+            "gaussian",
+            "",
+        ]
         FittingUtilities.addCheckedListToModel(self.poly_model, checked_list)
 
         all_items = self.poly_model.rowCount()
         self.poly_model.item(all_items-1,0).setData(param_wname, role=QtCore.Qt.UserRole)
+
+        # Free-form always discretises this parameter, so there is nothing to
+        # fit-select: grey out the checkbox (Min/Max/N bins stay editable) in
+        # the polydispersity tab.
+        if self.free_form:
+            self.poly_model.item(all_items - 1, 0).setEnabled(False)
 
         # All possible polydisp. functions as strings in combobox
         func = QtWidgets.QComboBox()
@@ -489,6 +599,8 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         FittingUtilities.addErrorPolyHeadersToModel(self.poly_model)
 
         self.has_poly_error_column = True
+        # the inserted column shifts the view columns, so re-apply free-form visibility
+        self.updateFreeFormColumns()
 
     def resetParameters(self) -> None:
         """

@@ -1,0 +1,173 @@
+.. free_form_pd.rst
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+.. _free_form_pd:
+
+Free-Form Polydispersity Inversion
+===================================
+
+.. note:: In Windows use [Alt]-[Cursor left] to return to the previous page
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+Overview
+^^^^^^^^
+
+Small Angle Scattering (SAS) — from both X-ray (SAXS) and neutron (SANS)
+sources.
+
+**Form factors (Green's functions)**
+
+The *form factor* :math:`F(q)` describes the intensity scattered by a *single*
+nanoparticle across the full q-range — its SAS fingerprint. For a sphere of
+radius :math:`r` the form factor is
+
+.. math::
+   F(q, r) = \left[ V(r)\Delta\rho \dfrac{3j_1(qr)}{qr} \right]^2
+
+where :math:`j_1` is the spherical Bessel function of the first kind,
+:math:`V(r)` the sphere volume, and
+:math:`\Delta\rho = \rho_\text{particle} - \rho_\text{solvent}` the
+scattering length density contrast.
+
+**Polydispersity**
+
+In a real experiment the sample contains a *population* of nanoparticles whose
+sizes (and possibly shapes) vary. This is called *polydispersity*. The
+measured intensity is then an average over the distribution :math:`w(r)`:
+
+.. math::
+
+   I(q) = \int F(q, r)\, w(r)\, dr
+
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+Supported Models
+^^^^^^^^^^^^^^^^
+
+Free-form inversion is currently available for the following models:
+
+* **sphere** — recovers the number-size distribution :math:`f(r)` over radius :math:`r`
+* **cylinder** — recovers the joint distribution :math:`f(r, L)` over radius :math:`r`
+  and length :math:`L`
+* **ellipsoid** — recovers the joint distribution :math:`f(r_p, r_e)` over the polar
+  radius :math:`r_p` and equatorial radius :math:`r_e`
+
+Both 1D and 2D data are supported. For 2D data, **cylinder** and **ellipsoid** also
+recover the orientation distribution over the angles :math:`\theta` and
+:math:`\phi`. **sphere** is 1D only, since a sphere has no orientation (see
+*2D data* below).
+
+For all models, the contrast
+:math:`\Delta\rho = \rho_\text{particle} - \rho_\text{solvent}` must be
+non-zero (i.e. ``sld`` and ``sld_solvent`` must differ).
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+How to Use
+^^^^^^^^^^
+
+1. **Load data and select a model** as usual in the Fitting panel. The
+   free-form tool supports the models listed above; choose one from the Model
+   dropdown.
+
+2. **Set contrast parameters.** In the *Parameter* column, ensure that ``sld``
+   and ``sld_solvent`` have different values. The inversion uses the contrast
+   :math:`\Delta\rho` to return ``scale`` as a SasView volume fraction. Other
+   model parameters (e.g. background) start from whatever values are shown in
+   the table.
+
+3. **Enable free-form mode.** In the *Options* panel (right-hand side of the
+   Fitting tab), check the **Free Form** checkbox. Checking *Free Form* automatically
+   enables and locks the *Polydispersity* checkbox, and switches the *Polydispersity* tab into free-form mode.
+
+4. **Configure the distribution grid** in the *Polydispersity* tab. In
+   free-form mode the table shows only three editable columns for each
+   geometric parameter:
+
+   ============  ================================================================
+   **Min**       Lower bound of the size grid (in Å)
+   **Max**       Upper bound of the size grid (in Å)
+   **N bins**    Number of discretization bins across [Min, Max]
+   ============  ================================================================
+
+   Set Min and Max to bracket the expected size range. More bins give a finer
+   distribution but increase computation time.
+
+
+5. **Set the smoothness regularization weight** in the **Smoothness**
+   (:math:`\lambda`) field below the distribution table. The default value of
+   0.25 is a reasonable starting point. Increase :math:`\lambda` for a
+   smoother (broader) distribution; decrease it to allow sharper features (at
+   the risk of over-fitting noise).
+
+6. **Click Fit.** The inversion runs using the GALAHAD optimizer. On
+   completion:
+
+   * ``scale`` and ``background`` in the *Parameters* table are updated with
+     the values returned by the inversion.
+   * The fitted theory curve is overlaid on the data plot.
+   * A residuals plot is produced in the usual way.
+   * One or more **distribution plots** appear, showing :math:`f(r)`.
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+Notes and Caveats
+^^^^^^^^^^^^^^^^^
+
+**Smoothness regularization**
+   In Free-form inversion many distributions can
+   explain the data equally well within the measurement uncertainties. The
+   smoothness parameter :math:`\lambda` stabilizes the solution by penalizing
+   rapidly varying distributions. Choosing :math:`\lambda` is a trade-off:
+
+   * Too large — the recovered distribution is over-smoothed and broad, masking
+     real features.
+   * Too small — the distribution becomes noisy and may fit measurement artefacts.
+
+   A chi-squared value near 1 indicates a good fit.
+
+**Resolution smearing**
+   If a resolution function has been set on the *Resolution* tab, it is
+   applied to the Green's tensor before inversion (exactly as for a standard
+   fit). No additional steps are required.
+
+**GPU acceleration**
+     The ``ffsi`` package can run the inversion on an NVIDIA GPU through CuPy.
+     If CuPy is importable it is used automatically. Otherwise the inversion
+     runs on the CPU with NumPy. No setting in SasView is needed.
+
+     CuPy is **not** bundled with SasView, because the correct package depends
+     on the GPU and CUDA version and would greatly increase the installer size.
+     GPU acceleration is therefore **not available in the installer
+     distributions**. The only way to enable it is to build SasView from source
+     and install CuPy into the same Python environment:
+
+     1. Build and install SasView from source by following the build
+        instructions, and activate that environment.
+     2. In the same environment, install the CuPy package that matches your
+        CUDA version, for example ``pip install cupy-cuda12x`` for CUDA 12. See
+        the CuPy installation guide for the right package.
+     3. Launch SasView from that environment with ``python -m sas``.
+
+**2D data**
+   Free-form inversion also works on 2D :math:`I(q_x, q_y)` data for the
+   **cylinder** and **ellipsoid** models.
+
+   * The *Polydispersity* table then has extra rows for the orientation angles
+     :math:`\theta` and :math:`\phi`, with Min and Max in degrees. They default
+     to :math:`\theta` 10–90° and :math:`\phi` 0–180°, which cover every
+     distinct orientation, and 5 bins each. :math:`\theta` starts at 10°
+     because the cylinder form factor is undefined at :math:`\theta = 0`.
+   * Every angle bin multiplies the size of the inversion, so keep the angle
+     bins few.
+   * Only pixels inside the q range and mask are fitted. The theory and
+     residual images are blank outside them.
+   * Resolution smearing uses the *Accuracy* setting on the *Resolution* tab.
+     Higher accuracy is much more expensive in 2D (High is about 25× Low), and
+     2D smearing assumes a regular, square detector grid.
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+:math:`{\text{11^th}}` Nov. 2026, Yugal Khanal, STFC SCD
