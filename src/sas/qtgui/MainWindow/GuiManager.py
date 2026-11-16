@@ -21,7 +21,6 @@ from PySide6.QtWidgets import (
 from shiboken6 import isValid
 from twisted.internet import reactor
 
-from sasdata.data import SasData
 from sasdata.data_io.importers.import_ascii import AsciiImporter
 
 import sas
@@ -147,15 +146,9 @@ class GuiManager:
             self.actionWhatsNew()
 
     def handleNewAssociation(self, datum1: TrackedData, datum2: TrackedData):
-        # If any perspectives have new data/lost data, then they need to be notified.
-
-        new_association_tuple = (datum1, datum2)
-        for perspective in self._data_manager.all_perspectives:
-            if perspective in new_association_tuple:
-                if isinstance(datum2, SasData):
-                    perspective.newData()
-                else:
-                    perspective.newAssocation()
+        # Associations are validated as (perspective, data), so only datum1 can be a perspective.
+        if isinstance(datum1, NewPerspective):
+            datum1.receive(datum2)
 
         self.filesWidget.tree_view.addAssociation(datum1, datum2)
 
@@ -291,8 +284,9 @@ class GuiManager:
     @Slot(QMdiSubWindow)
     def current_window_perspective_changed(self, perspective_window: QMdiSubWindow | None):
         if perspective_window is not None and isinstance(perspective_window.widget(), NewPerspective):
-            perspective = cast(Perspective, perspective_window.widget())
-            self.filesWidget.tree_view.setCurrentTrackedDatum(perspective)
+            perspective = cast(NewPerspective, perspective_window.widget())
+            # does not select the perspective in the tree to avoid wiping the user selection
+            self.filesWidget.setTargetPerspective(perspective)
 
     @Slot()
     def current_index_perspective_changed(self):
