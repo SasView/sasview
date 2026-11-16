@@ -388,10 +388,13 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         self.poly_model.item(all_items-1,0).setData(param_wname, role=QtCore.Qt.UserRole)
 
         # Free-form always discretises this parameter, so there is nothing to
-        # fit-select: grey out the checkbox (Min/Max/N bins stay editable) in
-        # the polydispersity tab.
+        # fit-select: tick and grey out the checkbox (Min/Max/N bins stay
+        # editable) in the polydispersity tab.
         if self.free_form:
-            self.poly_model.item(all_items - 1, 0).setEnabled(False)
+            item = self.poly_model.item(all_items - 1, 0)
+            item.setCheckState(QtCore.Qt.Checked)
+            item.setEnabled(False)
+            item.setToolTip(FittingUtilities.FREE_FORM_LOCK_TOOLTIP)
 
         # All possible polydisp. functions as strings in combobox
         func = QtWidgets.QComboBox()

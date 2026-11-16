@@ -68,10 +68,6 @@ CATEGORY_CUSTOM = "Plugin Models"
 STRUCTURE_DEFAULT = "None"
 
 DEFAULT_POLYDISP_FUNCTION = 'gaussian'
-FREE_FORM_LOCK_TOOLTIP = (
-    "Free-form inversion uses every parameter, so the fit checkboxes are locked.\n"
-    "Uncheck Free Form to choose parameters individually."
-)
 
 # A list of models that are known to not work with how the GUI handles models from sasmodels
 #   NOTE: These models are correct when used directly through the sasmodels package, but how qtgui handles them is wrong
@@ -2604,7 +2600,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             for item in items:
                 item.setCheckState(QtCore.Qt.Checked)
                 item.setEnabled(False)
-                item.setToolTip(FREE_FORM_LOCK_TOOLTIP)
+                item.setToolTip(FittingUtilities.FREE_FORM_LOCK_TOOLTIP)
         elif self._pre_free_form_checks is not None:
             saved = self._pre_free_form_checks
             self._pre_free_form_checks = None
