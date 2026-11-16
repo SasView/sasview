@@ -45,7 +45,15 @@ DQ = 0.05 * Q
 @pytest.fixture(autouse=True)
 def cpu_double_precision(monkeypatch):
     """Run sasmodels on the CPU, as the reference does."""
-    monkeypatch.setenv("SAS_OPENCL", "none")
+    from sasmodels.sasview_model import reset_environment
+
+    try:
+        with monkeypatch.context() as context:
+            context.setenv("SAS_OPENCL", "none")
+            reset_environment()
+            yield
+    finally:
+        reset_environment()
 
 
 @pytest.fixture(autouse=True)
