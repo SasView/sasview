@@ -37,7 +37,7 @@ class DummyPerspective(Perspective):
         return True
 
     @override
-    def newAssocation(self):
+    def newData(self):
         self.data_list.clear()
         for datum in cast(list[SasData], self.associatedData):
             self.data_list.addItem(datum.name)

@@ -1,0 +1,16 @@
+lucas new student on july 22nd
+
+user feedback for dragging onto plot tree widget items (possible or not possible)
+
+
+start 2d intensity implementing
+for 2d clicking:
+matplotlib can interact with the mouse clicks as well
+
+
+make a draft pull request and open up a directory for my files
+
+add screenshots for the 2d plots
+
+
+general plotting container where anything can be modified in any fashion?

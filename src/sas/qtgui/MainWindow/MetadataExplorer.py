@@ -1,9 +1,7 @@
-from sys import argv
 from typing import cast
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
-    QApplication,
     QDialog,
     QHBoxLayout,
     QLabel,
@@ -14,7 +12,6 @@ from PySide6.QtWidgets import (
 )
 
 from sasdata.data import SasData
-from sasdata.data_io.importers.import_xml import load_data
 from sasdata.metadata import Metadata, MetaNode
 from sasdata.quantities.quantity import Quantity
 
@@ -147,16 +144,3 @@ class MetadataExplorer(QDialog):
                 current_item = current_item.parent()
             return_value.append(current_path[::-1])
         return return_value
-
-if __name__ == "__main__":
-    app = QApplication([])
-
-    filename = argv[1]
-    data_dict = load_data(filename)
-    data = list(data_dict.items())[0][1]
-    # This is only going to work on XML files for now.
-
-    dialog = MetadataExplorer(data.metadata, data.name)
-    status = dialog.exec()
-
-    exit()
