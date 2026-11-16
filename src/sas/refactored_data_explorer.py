@@ -1,4 +1,5 @@
 import logging
+import os.path
 from collections.abc import Iterator
 
 from PySide6.QtCore import Qt, Signal, Slot
@@ -182,7 +183,8 @@ class NewDataExplorer(QWidget):
         loaded is reported together at the end."""
         if len(paths) == 0:
             return
-        measurements, failures = Importer().import_data(paths)
+        clean_paths = self._get_files_from_directories(paths)
+        measurements, failures = Importer().import_data(clean_paths)
         for measurement in measurements:
             self._data_manager.add_data(measurement)
 
@@ -192,6 +194,19 @@ class NewDataExplorer(QWidget):
                 "Data Loading Error",
                 "The following files could not be loaded:\n\n" + "\n".join(failures),
             )
+            logging.warning("The following files could not be loaded: " + "; ".join(failures))
+
+    @staticmethod
+    def _get_files_from_directories(paths):
+        new_paths = []
+        for path in paths:
+            if os.path.isdir(path):
+                with os.scandir(paths[0]) as entries:
+                    new_paths.append(
+                        sorted(entry.path for entry in entries if entry.is_file() and not entry.name.startswith(".")))
+            elif os.path.isfile(path):
+                new_paths.append(path)
+        return new_paths
 
     @staticmethod
     def _droppedPaths(event: QDragEnterEvent | QDragMoveEvent | QDropEvent) -> Iterator[str]:
