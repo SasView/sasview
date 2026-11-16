@@ -69,6 +69,12 @@ def model_categories(monkeypatch, tmp_path):
                         staticmethod(lambda: str(tmp_path / USER_FILE)))
 
 
+@pytest.fixture(autouse=True)
+def disable_automatic_calculation(monkeypatch):
+    """Keep GUI state updates, but start calculations only through compute()."""
+    monkeypatch.setattr(FittingWidget.FittingWidget, "calculateQGridForModel", lambda self: None)
+
+
 def fit_page(data, category, model, pars):
     """Open a fit page on *data*, choose *model* and type *pars* into the parameter table."""
     item = GuiUtils.createModelItemWithPlot(data, name="baseline")
