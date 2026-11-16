@@ -1,9 +1,9 @@
 import logging
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 from PySide6.QtCore import QSize, Qt, Signal
 from PySide6.QtGui import QCursor, QPalette
-from PySide6.QtWidgets import QAbstractItemView, QDialog, QTreeWidget, QTreeWidgetItem, QWidget
+from PySide6.QtWidgets import QAbstractItemView, QDialog, QTreeWidget, QTreeWidgetItem, QTreeWidgetItemIterator, QWidget
 
 from sasdata.data import SasData
 from sasdata.trend import NamedTrend, Trend
@@ -15,7 +15,12 @@ from sas.data_manager import NewDataManager as DataManager
 from sas.data_manager import TrackedData, isinstance_fix
 from sas.qtgui.MainWindow.DataViewer import DataViewer
 from sas.qtgui.MainWindow.TrendCreation import TrendCreation
-from sas.refactored import Perspective
+from sas.refactored import Perspective, TrackedPlot
+from sas.refactored_plotting.ModifierCreator import ModifierCreator
+from sas.refactored_plotting.PlotModifiers import PlotModifier
+
+if TYPE_CHECKING:
+    from sas.refactored_data_explorer import NewDataExplorer
 
 
 # TODO: Is this the right place for this?
@@ -30,6 +35,8 @@ def tracked_data_name(data: TrackedData) -> str:
         # instead log a warning.
         logging.warning("Trend doesn't have a name. This shouldn't be happening.")
         return 'Unnamed Trend'
+    elif isinstance(data, PlotModifier):
+        return data.explorer_item_name
     else:
         return data.formatName
 
@@ -53,6 +60,10 @@ class DataExplorerTree(QTreeWidget):
         _ = self.customContextMenuRequested.connect(self.showContextMenu)
         self.headerItem().setHidden(True)
         self._addLoadRow()
+
+    @property
+    def _data_explorer(self) -> "NewDataExplorer":
+        return cast( "NewDataExplorer", self.parent())
 
     def initTable(self):
         self.clear()
@@ -101,6 +112,8 @@ class DataExplorerTree(QTreeWidget):
                 item.addChild(new_assoc_item)
                 # By breaking here, we are assuming there are no more top level datum1 items in the tree.
                 break
+        # The new association may have changed some names, so update those.
+        self.updateNames()
 
     def removeAssociation(self, datum1: TrackedData, datum2: TrackedData):
         # TODO: Again, order.
@@ -110,6 +123,13 @@ class DataExplorerTree(QTreeWidget):
         item = QTreeWidgetItem([tracked_data_name(datum)])
         item.setData(0, Qt.ItemDataRole.UserRole, datum)
         self.insertTopLevelItem(self.indexOfTopLevelItem(self._load_row), item)
+
+    def updateNames(self):
+        iter = QTreeWidgetItemIterator(self)
+        while item := iter.value():
+            data = item.data(0, Qt.ItemDataRole.UserRole)
+            item.setText(0, tracked_data_name(data))
+            iter += 1
 
     def removeFromTable(
         self,
@@ -140,7 +160,9 @@ class DataExplorerTree(QTreeWidget):
         send_to = all([isinstance(datum, SasData) or isinstance(datum, Trend) for datum in self.currentTrackedData])
         view_data = len(self.currentTrackedData) == 1 and isinstance(self.currentTrackedData[0], SasData)
         make_trend = len(self.currentTrackedData) > 1 and all([isinstance_fix(datum, SasData) for datum in self.currentTrackedData])
-        menu = DataExplorerMenu(self, self._data_manager, send_to, view_data, make_trend)
+        plot = len(self.currentTrackedData) == 1 and isinstance_fix(self.currentTrackedDatum, SasData)
+        create_modifier = len(self.currentTrackedData) == 1 and isinstance(self.currentTrackedDatum, TrackedPlot)
+        menu = DataExplorerMenu(self, self._data_manager, send_to, view_data, make_trend, plot, create_modifier)
         action = menu.exec(QCursor.pos())
         # Result will be None if the user exited the menu without selecting anything.
         if action is None:
@@ -161,6 +183,17 @@ class DataExplorerTree(QTreeWidget):
                 creation_result = trend_creation_dialog.exec()
                 if creation_result == QDialog.DialogCode.Accepted:
                     self._data_manager.register_trend(trend_creation_dialog.proposed_trend)
+            case "plot":
+                self._data_explorer.onPlot()
+            case "create_modifier":
+                dialog = ModifierCreator()
+                modifier_result = dialog.exec()
+                if modifier_result == QDialog.DialogCode.Accepted:
+                    modifier = dialog.proposed_modifier
+                    self._data_manager.add_data(modifier)
+                    plot = cast(TrackedPlot, self.currentTrackedDatum)
+                    self._data_manager.make_association(plot, modifier)
+                    plot.update_plot()
 
     def sendToPerspective(self, perspective: Perspective, data: list[TrackedData]):
         """Send the given data to the given perspective. If any of the data can't be sent, show an error message instead."""

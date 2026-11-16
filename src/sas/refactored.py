@@ -1,18 +1,21 @@
 import logging
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from collections.abc import Callable
 
 # This is ugly but necessary to avoid a cyclic dependency
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from PySide6.QtWidgets import QDialog, QWidget
 
-from sasdata.data import SasData
+from sasdata.data import SasData, SasMeasurement
 from sasdata.dataset_types import DatasetType
+
+from sas.refactored_plotting.PlotModifiers import PlotModifier
+from sas.refactored_plotting.PlotWindow import PlotWindow
 
 if TYPE_CHECKING:
     from sas.data_manager import NewDataManager as DataManager
-    from sas.data_manager import TrackedData
+    from sas.data_manager import TrackedData, TrackedPlot
 
 # What a perspective can accept, written in one of two ways:
 #   - A DatasetType *instance*, e.g. one_dim: only SasData whose dataset_type is
@@ -120,11 +123,101 @@ class Perspective(QDialog):
 
     @property
     def associatedData(self) -> list["TrackedData"]:
-        return self._data_manager.get_all_associations(self)
+        """Only returns data which is specified in `supported_data`."""
+        return [data for data in self._data_manager.get_all_associations(self)
+                if any(isinstance(data, t) for t in self.supported_data)]
+
+    def _singleAssociatedItemOfType(self, expected_type: type) -> "TrackedData | None":
+        if self.supported_data != {expected_type} or self.supports_multiple_data:
+            raise ValueError(f"This property can only be used if the perspective only accepts one {expected_type.__name__} object.")
+        if len(self.associatedData) == 0:
+            return None
+        return self.associatedData[0]
+
+    @property
+    def associatedSasData(self) -> SasData | None:
+        return cast(SasData | None, self._singleAssociatedItemOfType(SasData))
+
+    @property
+    def associatedSasMeasurement(self) -> SasMeasurement | None:
+        return cast(SasMeasurement | None, self._singleAssociatedItemOfType(SasMeasurement))
+
+    @property
+    def associatedPlots(self) -> list["TrackedPlot"]:
+        return [data for data in self._data_manager.get_all_associations(self)
+                if isinstance(data, TrackedPlot)]
 
 class Theory:
     # TODO: Need to put stuff here that is unique to Theory. Right now, looking
     # at the current SasView codebase, it seems they are all just Data1Ds with
     # nothing else special.
     pass
+
+
+class FitModelParameters(ABC):
+    pass
+
+class TrackedFit:
+    _data_manager: "DataManager"
+    model_parameters: FitModelParameters
+    fit: SasMeasurement
+
+    @property
+    def data_being_fitted(self) -> SasData | None:
+        return self._data_manager.get_association_of_type(self, SasData)
+
+    @property
+    def formatName(self) -> str:
+        if self.data_being_fitted:
+            return f"Fit of {self.data_being_fitted.name}"
+        else:
+            # TODO: Could potentially return a more elaborate name of what the
+            # theory object is about.
+            return "Theory"
+
+    def __init__(self, data_manager: "DataManager", model_parameters: FitModelParameters, fit_data: SasMeasurement):
+        self._data_manager = data_manager
+        self.model_parameters = model_parameters
+        self.fit = fit_data
+
+
+class TrackedPlot:
+    _data_manager: "DataManager"
+    plot_widget: PlotWindow | None
+
+    def __init__(self, data_manager: "DataManager"):
+        self._data_manager = data_manager
+        self.plot_widget = None
+
+
+    @property
+    def to_plot(self) -> SasMeasurement | None:
+        return self._data_manager.get_association_of_type(self, SasMeasurement)
+
+    @property
+    def fit(self) -> TrackedFit | None:
+        return self._data_manager.get_association_of_type(self, TrackedFit)
+
+    @property
+    def modifiers(self) -> list[PlotModifier]:
+        return [assoc for assoc in self._data_manager.get_all_associations(self) if isinstance(assoc, PlotModifier)]
+
+    @property
+    def formatName(self) -> str:
+        if self.to_plot:
+            return f"Plot of {self.to_plot.name}"
+        else:
+            return "Empty Plot"
+
+    def update_plot(self):
+        # TODO: Check the old window, and remove it if necessary.
+        if self.to_plot:
+            new_plot_widget = PlotWindow(self)
+            if self.plot_widget:
+                self._data_manager.replace_plot.emit(self.plot_widget, new_plot_widget)
+            else:
+                self._data_manager.new_plot.emit(new_plot_widget)
+            self.plot_widget = new_plot_widget
+
+
 

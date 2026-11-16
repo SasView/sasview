@@ -123,18 +123,36 @@ class Plotter2DWidget(PlotterBase):
         else:
             self._data.append(data)
             self._masked_data.append(masked_data)
-        self.qx_data = data.qx_data
-        self.qy_data = data.qy_data
-        self.xmin = data.xmin
-        self.xmax = data.xmax
-        self.ymin = data.ymin
-        self.ymax = data.ymax
-        self.zmin = data.zmin
-        self.zmax = data.zmax
-        self.label = data.name
-        self.xLabel = "%s(%s)"%(data._xaxis, data._xunit)
-        self.yLabel = "%s(%s)"%(data._yaxis, data._yunit)
-        self.title(title=data.title)
+
+        # Set data properties depending on data type
+        # We need to account for both SasData and data2D whilst the refactoring project is integrated
+        if isinstance(data, Data2D):
+            self.qx_data = data.qx_data
+            self.qy_data = data.qy_data
+            self.xmin = data.xmin
+            self.xmax = data.xmax
+            self.ymin = data.ymin
+            self.ymax = data.ymax
+            self.zmin = data.zmin
+            self.zmax = data.zmax
+            self.label = data.name
+            self.xLabel = "%s(%s)"%(data._xaxis, data._xunit)
+            self.yLabel = "%s(%s)"%(data._yaxis, data._yunit)
+            self.title(title=data.title)
+        else:
+            self.qx_data = data.abscissae.axes[0].value
+            self.qy_data = data.abscissae.axes[1].value
+            self.xmin = data.abscissae.axes[0].value.min()
+            self.xmax = data.abscissae.axes[0].value.max()
+            self.ymin = data.abscissae.axes[1].value.min()
+            self.ymax = data.abscissae.axes[1].value.max()
+            self.zmin = data.ordinate.value.min()
+            self.zmax = data.ordinate.value.max()
+            self.label = data.name
+            self.xLabel = "%s(%s)"%(data.abscissae.axes[0].name, data.abscissae.axes[0].units)
+            self.yLabel = "%s(%s)"%(data.abscissae.axes[1].name, data.abscissae.axes[1].units)
+            self.title(title=data.name)
+
 
     def plot(self, data=None, marker=None, show_colorbar=True, update=False):
         """
@@ -149,13 +167,14 @@ class Plotter2DWidget(PlotterBase):
         if not self._data:
             return
 
+        plot_data = self.data0.data if isinstance(self.data0, Data2D) else self.data0.ordinate.value
         # Toggle the scale
         zmin_2D_temp, zmax_2D_temp = self.calculateDepth()
 
         # Prepare and show the plot
-        self.showPlot(data=self.data0.data,
-                      qx_data=self.data0.qx_data,
-                      qy_data=self.data0.qy_data,
+        self.showPlot(data=plot_data,
+                      qx_data=self.qx_data,
+                      qy_data=self.qy_data,
                       xmin=self.xmin,
                       xmax=self.xmax,
                       ymin=self.ymin, ymax=self.ymax,
@@ -762,8 +781,8 @@ class Plotter2DWidget(PlotterBase):
 
         self.slicer = BoxSumCalculator(self, self.ax, color=slicer_color, zorder=self.slicer_z)
 
-        self.ax.set_ylim(self.data0.ymin, self.data0.ymax)
-        self.ax.set_xlim(self.data0.xmin, self.data0.xmax)
+        self.ax.set_ylim(self.ymin, self.ymax)
+        self.ax.set_xlim(self.xmin, self.xmax)
         self.figure.canvas.draw()
         self.slicer.update()
 
