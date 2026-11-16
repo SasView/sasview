@@ -129,3 +129,67 @@ class DropHint(QWidget):
             f'<span style="color:{text};"><b>Choose a file</b></span>'
             f'<span style="color:{muted};">, directory, or drag it here.</span>'
         )
+
+
+class AddDataRow(QWidget):
+    """A slim "[ + ]" box that sits as the last row of the data tree, so files
+    can still be loaded from the list once it has data. Like DropHint, it
+    doesn't accept drops itself; they pass through to the explorer."""
+
+    load_requested = Signal()
+
+    def __init__(self, parent: QWidget | None = None):
+        super().__init__(parent)
+        self._hovered = False
+        self._dragging = False
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setToolTip("Load data (or drag files onto the list)")
+
+    def sizeHint(self) -> QSize:
+        return QSize(0, 28)
+
+    def setActive(self, active: bool):
+        """Highlight while files are being dragged over the explorer."""
+        self._dragging = active
+        self.update()
+
+    def enterEvent(self, event):
+        self._hovered = True
+        self.update()
+
+    def leaveEvent(self, event):
+        self._hovered = False
+        self.update()
+
+    def mousePressEvent(self, event):
+        # Accept the press so the tree underneath doesn't clear its selection.
+        event.accept()
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton and self.rect().contains(event.position().toPoint()):
+            self.load_requested.emit()
+
+    def paintEvent(self, event):
+        highlighted = self._hovered or self._dragging
+        role = QPalette.ColorRole.Highlight if highlighted else QPalette.ColorRole.PlaceholderText
+        color = self.palette().color(role)
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        # Box
+        pen = QPen(color, 1)
+        painter.setPen(pen)
+
+        # In a tree, the view places this widget after the root indentation, so
+        # it starts further from the viewport's left edge than it ends from the
+        # right. Mirror that offset on the right to keep the box centred.
+        right = max(0, self.x())
+        box = QRectF(self.rect()).adjusted(2.5, 3.5, -2.5 - right, -3.5)
+        painter.drawRoundedRect(box, 4, 4)
+        # Plus
+        pen.setWidthF(1.5)
+        pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+        painter.setPen(pen)
+        c = box.center()
+        arm = 5
+        painter.drawLine(QPointF(c.x() - arm, c.y()), QPointF(c.x() + arm, c.y()))
+        painter.drawLine(QPointF(c.x(), c.y() - arm), QPointF(c.x(), c.y() + arm))
