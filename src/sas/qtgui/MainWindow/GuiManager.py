@@ -8,16 +8,25 @@ from typing import cast
 from packaging.version import Version
 from PySide6.QtCore import QLocale, Qt, Slot
 from PySide6.QtGui import QStandardItem, QTextCursor
-from PySide6.QtWidgets import QDialog, QDockWidget, QLabel, QMdiSubWindow, QMessageBox, QProgressBar, QTextBrowser
+from PySide6.QtWidgets import (
+    QDialog,
+    QDockWidget,
+    QLabel,
+    QMdiSubWindow,
+    QMessageBox,
+    QProgressBar,
+    QTabWidget,
+    QTextBrowser,
+)
 from shiboken6 import isValid
 from twisted.internet import reactor
 
-from sasdata.data_io.importers.import_ascii import load_data
+from sasdata.data import SasData
+from sasdata.data_io.importers.import_ascii import AsciiImporter
 
 import sas
 
 # Perspectives
-import sas.qtgui.Perspectives as Perspectives
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
@@ -103,6 +112,9 @@ class GuiManager:
         self._data_manager.new_association.connect(self.handleNewAssociation)
         self._data_manager.removed_perspective.connect(self.removed_perspective)
         self._data_manager.new_perspective.connect(self.new_perspective)
+        self._data_manager.new_plot.connect(self.new_plot_window)
+        self._data_manager.removed_plot.connect(self.removed_plot)
+        self._data_manager.replace_plot.connect(self.replace_plot)
 
         # Create action triggers
         self.addTriggers()
@@ -140,7 +152,10 @@ class GuiManager:
         new_association_tuple = (datum1, datum2)
         for perspective in self._data_manager.all_perspectives:
             if perspective in new_association_tuple:
-                perspective.newAssocation()
+                if isinstance(datum2, SasData):
+                    perspective.newData()
+                else:
+                    perspective.newAssocation()
 
         self.filesWidget.tree_view.addAssociation(datum1, datum2)
 
@@ -167,10 +182,7 @@ class GuiManager:
         self._workspace.addDockWidget(Qt.BottomDockWidgetArea, self.logDockWidget)
 
         # Preferences Panel initialized in loadAllPerspectives()
-        self.preferences = None
-
-        # Load all perspectives - Preferences panel must exist
-        self.loadAllPerspectives()
+        self.preferences = PreferencesPanel(self._parent)
 
         # Add FileDialog widget as docked - Perspectives must be loaded to ensure default perspective is shown
         # self.filesWidget = DataExplorerWindow(self._parent, self, manager=self._data_manager)
@@ -222,33 +234,6 @@ class GuiManager:
         self.FileConverter = FileConverterWidget(self)
         self.WhatsNew = WhatsNewWidget(self._parent)
 
-
-    def loadAllPerspectives(self):
-        """ Load all the perspectives"""
-        # Close any existing perspectives to prevent multiple open instances
-        self.closeAllPerspectives()
-        self.preferences = PreferencesPanel(self._parent)
-        # Load all perspectives
-        loaded_dict = {} # dictionary that will ultimately keep track of all perspective instances
-        for name, perspective in Perspectives.PERSPECTIVES.items():
-            try:
-                # Instantiate perspective
-                loaded_perspective = perspective(parent=self)
-
-                # Save in main dict
-                loaded_dict[name] = loaded_perspective
-
-                # Register the perspective with the prefernce object
-                self.preferences.registerPerspectivePreferences(loaded_perspective)
-
-            except Exception as e:
-                logger.error(f"Unable to load {name} perspective.\n{e}")
-                logger.error(e, exc_info=True)
-
-        # attach loaded perspectives to this class
-        self.loadedPerspectives = loaded_dict
-
-
     def closeAllPerspectives(self):
         # Close all perspectives if they are open
         if isinstance(self.loadedPerspectives, dict):
@@ -273,6 +258,11 @@ class GuiManager:
         new_perspective.show()
         # TODO: There is inevitably other stuff to put here.
 
+    @Slot(QTabWidget)
+    def new_plot_window(self, plot_window: QTabWidget):
+        self._workspace.workspace.addSubWindow(plot_window)
+        plot_window.show()
+
 
     @Slot(QDialog)
     def removed_perspective(self, to_remove: QDialog):
@@ -281,6 +271,21 @@ class GuiManager:
             if sub_window.widget() == to_remove:
                 self._workspace.workspace.removeSubWindow(sub_window)
                 break
+
+    @Slot(QTabWidget)
+    def removed_plot(self, to_remove: QTabWidget):
+        # TODO: This repeats the function before. Probably try to merge them together.
+        for sub_window in self._workspace.workspace.subWindowList():
+            if sub_window.widget() == to_remove:
+                self._workspace.workspace.removeSubWindow(sub_window)
+
+    @Slot(QTabWidget, QTabWidget)
+    def replace_plot(self, old: QTabWidget, new: QTabWidget):
+        for sub_window in self._workspace.workspace.subWindowList():
+            if sub_window.widget() is old:
+                sub_window.setWidget(new)
+                old.deleteLater()
+                new.show()
 
 
     @Slot(QMdiSubWindow)
@@ -1765,6 +1770,6 @@ class GuiManager:
         dialog = AsciiDialog()
         status = dialog.exec()
         if status == 1:
-            loaded = load_data(dialog.params)
+            loaded = AsciiImporter.load_data(dialog.params)
             for datum in loaded:
                 logger.info(datum.summary())

@@ -45,13 +45,13 @@ class BoxSumCalculator(BaseInteractor):
         self.widget = None
 
         # when qmax is reached the selected line is reset the its previous value
-        self.qmax = min(self.data.xmax, self.data.xmin)
+        self.qmax = min(self.base.xmax, self.base.xmin)
 
         # Define the boxsum limits
-        self.xmin = -1 * 0.5 * min(numpy.fabs(self.data.xmax), numpy.fabs(self.data.xmin))
-        self.ymin = -1 * 0.5 * min(numpy.fabs(self.data.xmax), numpy.fabs(self.data.xmin))
-        self.xmax = 0.5 * min(numpy.fabs(self.data.xmax), numpy.fabs(self.data.xmin))
-        self.ymax = 0.5 * min(numpy.fabs(self.data.xmax), numpy.fabs(self.data.xmin))
+        self.xmin = -1 * 0.5 * min(numpy.fabs(self.base.xmax), numpy.fabs(self.base.xmin))
+        self.ymin = -1 * 0.5 * min(numpy.fabs(self.base.xmax), numpy.fabs(self.base.xmin))
+        self.xmax = 0.5 * min(numpy.fabs(self.base.xmax), numpy.fabs(self.base.xmin))
+        self.ymax = 0.5 * min(numpy.fabs(self.base.xmax), numpy.fabs(self.base.xmin))
         # center of the boxSum
         self.center_x = 0.0002
         self.center_y = 0.0003

@@ -1,0 +1,25 @@
+How can trends be combined with the plotting functionality?
+Residuals displayed in another subplot on the bottom. - done
+unique ID by timestamp - done, implmented with current time and fitpageindex as a sum
+
+
+
+historical:
+Plot refactoring was kicked off at code camp isis
+concrete plans where there in jan 24 during the code camp
+
+what is planned in other branches at the time:
+generic data formats
+views in addition to data formats
+- data object lives in a view
+- in addition: measurement time or detector distance are added to the view as metadata that are there for every measurement of this set
+
+trends for packaging data:
+- multiple datasets on the same instrument for different temeperatures or pressures for example
+
+
+ideas for the demo:
+tree like structure for data and plots (almost done)
+Dataviewer owns plot widget for easier dataflow (done)
+combobox instead of new window for sending to subplot (done)
+ 

@@ -1,7 +1,5 @@
 import logging
-import os
-from collections.abc import Callable, Iterator
-from os.path import basename
+from collections.abc import Iterator
 
 from PySide6.QtCore import Qt, Signal, Slot
 from PySide6.QtGui import QDragEnterEvent, QDragLeaveEvent, QDragMoveEvent, QDropEvent
@@ -17,64 +15,19 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from sasdata.data_io.importers.import_ascii import load_data as load_advanced_ascii_data
-from sasdata.data_io.importers.import_ascii import load_data_default_params as load_ascii_data
-from sasdata.data_io.importers.import_hdf5 import load_data as load_hdf5_data
-from sasdata.data_io.importers.import_xml import load_data as load_xml_data
+from sasdata.data import SasData
+from sasdata.data_io.importer import Importer
+from sasdata.data_io.importers import AsciiImporter
 
 from sas.ascii_dialog.dialog import AsciiDialog
 from sas.data_explorer_drop_hint import DropHint
-from sas.data_explorer_error_message import DataExplorerErrorMessage
+from sas.data_explorer_error_message import DataExplorerRemoveMessage
 from sas.data_explorer_tree import DataExplorerTree
 from sas.data_manager import NewDataManager as DataManager
 from sas.dummy_perspective import DummyPerspective
+from sas.qtgui.Perspectives.Inversion.InversionWidget import InversionWidget
 from sas.qtgui.Utilities.MuMag.MuMag import MuMag
-from sas.refactored import Perspective
-
-
-def _load_ascii(filename: str) -> dict:
-    # Since we're only giving the load function one filename, we can assume only
-    # one data object is being loaded.
-    return {basename(filename): load_ascii_data(filename)[0]}
-
-
-# TODO: The logic for deciding which reader to use is temporary. It won't work
-# for all file extensions, and ultimately this logic probably needs to be moved
-# into sasdata.
-# The file formats SasView can load: name -> (extensions, loader). The file
-# dialog filters and the files picked from dropped folders are both derived
-# from this.
-SUPPORTED_FORMATS: dict[str, tuple[tuple[str, ...], Callable[[str], dict]]] = {
-    "XML": ((".xml", ".cor", ".pdh"), load_xml_data),
-    "HDF5": ((".h5", ".hdf", ".nxs", ".nx", ".hdf5"), load_hdf5_data),
-    "ASCII": ((".txt", ".csv", ".dat"), _load_ascii),
-}
-
-
-def _loaders_by_extension() -> dict[str, Callable[[str], dict]]:
-    loaders = {}
-    for extensions, loader in SUPPORTED_FORMATS.values():
-        for extension in extensions:
-            loaders[extension] = loader
-    return loaders
-
-
-_LOADERS = _loaders_by_extension()
-
-
-def _loader_for(filename: str) -> Callable[[str], dict] | None:
-    return _LOADERS.get(os.path.splitext(filename)[1].lower())
-
-
-def _file_dialog_filters() -> str:
-    def patterns(extensions) -> str:
-        return " ".join(f"*{ext}" for ext in extensions)
-
-    filters = [f"All supported files ({patterns(_LOADERS)})"]
-    for name, (extensions, _) in SUPPORTED_FORMATS.items():
-        filters.append(f"{name} files ({patterns(extensions)})")
-    return ";;".join(filters)
-
+from sas.refactored import Perspective, TrackedPlot
 
 # TODO: Eventually, the values (should) never be None.
 # FIXME: Linter is complaining about DummyPew
@@ -82,7 +35,7 @@ perspectives: dict[str, None | Perspective] = {
     "Corfunc": None,
     "Fitting": None,
     "Invariant": None,
-    "Inversion": None,
+    "Inversion": InversionWidget,
     "Dummy": DummyPerspective,
     "Mumag": MuMag,
 }
@@ -121,9 +74,7 @@ class NewDataExplorer(QWidget):
 
         self.filter_row = QHBoxLayout()
         filter_names = ["Data", "Perspective", "Theory", "Plot"]
-        self.filter_buttons: dict[str, QPushButton] = {
-            name: QPushButton(name, self) for name in filter_names
-        }
+        self.filter_buttons: dict[str, QPushButton] = {name: QPushButton(name, self) for name in filter_names}
         for widget in self.filter_buttons.values():
             widget.setCheckable(True)
             self.filter_row.addWidget(widget)
@@ -150,6 +101,8 @@ class NewDataExplorer(QWidget):
         self.remove_button.setToolTip("Remove the selected data from SasView")
         self.remove_button.clicked.connect(self.onRemove)
         self.plot_button = QPushButton("Plot", self)
+        self.plot_button.setToolTip("Plot the selected data.")
+        self.plot_button.clicked.connect(self.onPlot)
 
         self.final_row.addWidget(self.remove_button)
         self.final_row.addWidget(self.plot_button)
@@ -194,15 +147,27 @@ class NewDataExplorer(QWidget):
             except ValueError as err:
                 errors.append(err)
         if len(errors) > 0:
-            box = DataExplorerErrorMessage(self, errors)
+            box = DataExplorerRemoveMessage(self, errors)
             box.show()
+
+    @Slot()
+    def onPlot(self):
+        to_plot = self.tree_view.currentTrackedDatum
+        if isinstance(to_plot, SasData):
+            plot_object = TrackedPlot(self._data_manager)
+            self._data_manager.add_data(plot_object)
+            self._data_manager.make_association(plot_object, to_plot)
+            plot_object.update_plot()
+        else:
+            QMessageBox.critical(
+                self, "Plotting Error", "The selected item is not a data object. Only data objects can be plotted."
+            )
 
     @Slot()
     def onLoadFile(self):
         filenames, _ = QFileDialog.getOpenFileNames(
             self,
             "Open Data File",
-            filter=_file_dialog_filters(),
         )
         self.loadPaths(filenames)
 
@@ -215,12 +180,11 @@ class NewDataExplorer(QWidget):
     def loadPaths(self, paths: list[str]):
         """Load files and folders into the data manager. Anything that can't be
         loaded is reported together at the end."""
-        failures: list[str] = []
-        for path in paths:
-            if os.path.isdir(path):
-                failures.extend(self._loadFolder(path))
-            elif failure := self._loadFile(path):
-                failures.append(failure)
+        if len(paths) == 0:
+            return
+        measurements, failures = Importer().import_data(paths)
+        for measurement in measurements:
+            self._data_manager.add_data(measurement)
 
         if failures:
             QMessageBox.critical(
@@ -228,50 +192,6 @@ class NewDataExplorer(QWidget):
                 "Data Loading Error",
                 "The following files could not be loaded:\n\n" + "\n".join(failures),
             )
-
-    def _loadFile(self, filename: str) -> str | None:
-        """Load a file into the data manager. Returns why it failed, if it did."""
-        loader = _loader_for(filename)
-        if loader is None:
-            return f"{basename(filename)}: unsupported file format"
-        try:
-            loaded_data = loader(filename)
-        except Exception as err:
-            logging.exception(f"Error loading {filename}")
-            return f"{basename(filename)}: {err}"
-
-        for datum in loaded_data.values():
-            self._data_manager.add_data(datum)
-        return None
-
-    def _loadFolder(self, folder: str) -> list[str]:
-        """Load the supported files directly inside a folder (not recursive).
-        Unsupported files are skipped with a warning, which brings up the log
-        window. Returns why anything failed."""
-        try:
-            supported, unsupported = self._expandFolder(folder)
-        except OSError as err:
-            logging.error(f"Could not read folder {folder}: {err}")
-            return [f"{basename(folder)}: {err.strerror or err}"]
-
-        if not supported:
-            return [f"{basename(folder)}: no supported files"]
-        if unsupported:
-            extensions = sorted({os.path.splitext(file)[1].lower() or "no extension" for file in unsupported})
-            logging.warning(f"Skipped {len(unsupported)} unsupported file(s) in {folder} ({', '.join(extensions)})")
-
-        return [failure for file in supported if (failure := self._loadFile(file))]
-
-    @staticmethod
-    def _expandFolder(folder: str) -> tuple[list[str], list[str]]:
-        """The visible files directly inside a folder (not recursive), sorted by
-        name and split into (supported, unsupported) by format. Raises OSError
-        if the folder can't be read."""
-        with os.scandir(folder) as entries:
-            files = sorted(entry.path for entry in entries if entry.is_file() and not entry.name.startswith("."))
-        supported = [file for file in files if _loader_for(file)]
-        unsupported = [file for file in files if not _loader_for(file)]
-        return supported, unsupported
 
     @staticmethod
     def _droppedPaths(event: QDragEnterEvent | QDragMoveEvent | QDropEvent) -> Iterator[str]:
@@ -320,6 +240,14 @@ class NewDataExplorer(QWidget):
         dialog = AsciiDialog()
         status = dialog.exec()
         if status == 1:
-            loaded = load_advanced_ascii_data(dialog.params)
+            try:
+                loaded = AsciiImporter(dialog.params).load_data()
+            except Exception as err:
+                # A number of errors can be thrown here, a few examples include:
+                #    TypeError: thrown when the ascii loader doesn't recognize the file
+                #    FileNotFoundError: the file wasn't accessible
+                #    ValueError: Unlikely, but could happen during loading on float() conversion
+                logging.error(err)
+                loaded = []
             for datum in loaded:
                 self._data_manager.add_data(datum)

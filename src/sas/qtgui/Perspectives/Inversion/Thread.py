@@ -22,7 +22,6 @@ class CalcPr(CalcThread):
     ):
         CalcThread.__init__(self, completefn, updatefn, yieldtime, worktime)
         self.pr: Invertor = pr
-        self.tab_id: int | None = tab_id
         self.nfunc: int = nfunc
         self.error_func: Callable | None = error_func
         self.starttime: float = 0

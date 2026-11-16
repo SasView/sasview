@@ -1,20 +1,29 @@
-from PySide6.QtCore import QObject, Signal
-from PySide6.QtWidgets import QDialog
+from typing import TypeVar
 
-from sasdata.data import SasData
+from PySide6.QtCore import QObject, Signal
+from PySide6.QtWidgets import QDialog, QTabWidget
+
+from sasdata.data import SasData, SasMeasurement
 from sasdata.trend import Trend
 
-from sas.refactored import Perspective
+from sas.refactored import Perspective, TrackedFit, TrackedPlot
+from sas.refactored_plotting.PlotModifiers import PlotModifier
 
 # TODO: Add plots to this type.
-TrackedData = SasData | Perspective | Trend
+TrackedData = SasData | SasMeasurement | Perspective | Trend | TrackedFit | TrackedPlot | PlotModifier
+
+T = TypeVar('T')
 
 # TODO: Probably want to handle order, if that is even relevant.
 valid_associations: list[tuple[str | type, str | type]] = [
     ('Perspective', SasData),
     ('Perspective', Trend),
-    (Trend, SasData)
-    # TODO: Include plots
+    ('Perspective', TrackedPlot),
+    (Trend, SasData),
+    (TrackedPlot, SasMeasurement),
+    (TrackedPlot, TrackedFit),
+    (TrackedPlot, PlotModifier),
+    (TrackedFit, SasData)
 ]
 
 # This is needed because the normal 'isinstance' builtin function annoyingly
@@ -38,6 +47,9 @@ class NewDataManager(QObject):
     new_data: Signal = Signal(object)
     data_removed: Signal = Signal(object)
     new_association: Signal = Signal(object, object)
+    new_plot: Signal = Signal(QTabWidget)
+    removed_plot: Signal = Signal(QTabWidget)
+    replace_plot: Signal = Signal(QTabWidget, QTabWidget)
     new_perspective: Signal = Signal(QDialog)
     removed_perspective: Signal = Signal(QDialog)
 
@@ -86,13 +98,14 @@ class NewDataManager(QObject):
         self.data_removed.emit(data)
         if hasattr(data, 'title'):
             self.removed_perspective.emit(data)
+        if isinstance_fix(data, TrackedPlot):
+            self.removed_plot.emit(data.plot_widget)
     # TODO: Remove data on a list. So that we could remove a perspective, and
     # data at the same time. So it doesn't matter that the perspective is
     # associated with the data becuase they will both be removed.
 
     def check_perspective_can_accept_data(self, perspective: Perspective, datum: TrackedData):
-        existing_associations = self.get_all_associations(perspective)
-        if not perspective.supports_multiple_data and len(existing_associations) > 0:
+        if not perspective.supports_multiple_data and len(perspective.associatedData) > 0:
             raise ValueError(f"{perspective.title} doesn't support multiple data being sent to it.")
         supported = False
         for supported_type in perspective.supported_data:
@@ -113,7 +126,8 @@ class NewDataManager(QObject):
         # We shouldn't have duplicate associations.
         if any([assoc == proposed_assoc for assoc in self.associations]):
             raise ValueError('An assocation of these types already exists.')
-        if isinstance_fix(data_1, Perspective):
+        # Treat plots differently for perspectives.
+        if isinstance_fix(data_1, Perspective) and not isinstance_fix(data_2, TrackedPlot):
             self.check_perspective_can_accept_data(data_1, data_2)
         self.associations.append(proposed_assoc)
         self.new_association.emit(data_1, data_2)
@@ -133,6 +147,13 @@ class NewDataManager(QObject):
 
     def get_all_associations(self, data: TrackedData) -> list[TrackedData]:
         return [assoc[0] if assoc[0] != data else assoc[1] for assoc in self.associations if data in assoc]
+
+    def get_association_of_type(self, data: TrackedData, type: type[T]) -> T | None:
+        associations = self.get_all_associations(data)
+        for assoc in associations:
+            if isinstance_fix(assoc, type):
+                return assoc
+        return None
 
     def register_trend(self, trend: Trend):
         self.add_data(trend)

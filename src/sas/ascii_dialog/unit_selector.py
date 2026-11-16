@@ -40,8 +40,13 @@ class UnitSelector(QDialog):
     def selectionChanged(self):
         self.select_button.setDisabled(False)
 
-    def __init__(self, default_group='length', allow_group_edit=True):
+    def __init__(self, default_group='length', allow_group_edit=True, quantity_name: str | None = None):
         super().__init__()
+        # Name the quantity the unit is for (e.g. a column of an ASCII file), if we know it.
+        if quantity_name:
+            self.setWindowTitle(f'Unit selection for {quantity_name}')
+        else:
+            self.setWindowTitle('Unit selection')
 
         self.unit_type_selector = QComboBox()
         self.unit_type_selector.addItems(unit_group_names)
