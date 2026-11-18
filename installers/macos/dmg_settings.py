@@ -5,7 +5,7 @@ _settings_dir = defines["settings_dir"]  # noqa: F821
 app_name = defines.get("app_name", "SasView6.app")  # noqa: F821
 staging_dir = defines["staging_dir"]  # noqa: F821
 
-format = "UDBZ"
+format = "ULFO"
 
 files = [os.path.join(staging_dir, app_name)]
 symlinks = {"Applications": "/Applications"}
