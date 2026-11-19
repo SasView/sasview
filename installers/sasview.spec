@@ -6,6 +6,8 @@ import warnings
 import platform
 import sysconfig
 
+from PyInstaller.utils.hooks import collect_submodules
+
 block_cipher = None
 PYTHON_PACKAGES = sysconfig.get_path('platlib')
 
