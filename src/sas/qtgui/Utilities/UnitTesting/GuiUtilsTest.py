@@ -721,3 +721,28 @@ class HashableStandardItemTest:
         # check the constraints in the constraint_dict
         assert constraint_dict['M1'][0] == constraint1
         assert constraint_dict['M2'][0] == constraint2
+
+    def testGetConstraintsPolydisperseAndMagnetic(self):
+        '''test that constraints on polydisperse and magnetic parameters are
+        read from a project (#2735)'''
+        # (value, param, value_ex, validate, func): parameters of M2 constrained to those of M1
+        constraint = ['radius', 'radius', 'M2.radius', True, 'M1.radius']
+        pd_constraint = ['radius.width', 'radius.width', 'M2.radius.width', True, 'M1.radius.width']
+        magnetic_constraint = ['sld_M0', 'sld_M0', 'M2.sld_M0', True, 'M1.sld_M0']
+        fit_params = {
+            'tab_name': ['M2'],
+            'radius': [True, '20.0', None, '0.0', 'inf', constraint],
+            # polydisperse: checked, value, error, min, max, npts, nsigs, function, constraint
+            'radius.width': ['True', '0.1', None, '0.0', '1.0', '35', '3', 'gaussian', pd_constraint],
+            # polydisperse parameter saved by an older version, without a constraint. Its last item is the
+            # distribution name, which must not be mistaken for a constraint even if it has 5 characters.
+            'length.width': ['False', '0.0', None, '0.0', '1.0', '35', '3', 'array'],
+            # magnetic: checked, value, error, min, max, constraint
+            'sld_M0': ['True', '1.0', None, '-inf', 'inf', magnetic_constraint],
+            'sld_mtheta': ['False', '0.0', None, '-inf', 'inf', []],
+        }
+        fit_project = {'dataset': {'fit_data': None, 'fit_params': [fit_params]}}
+
+        constraint_dict = GuiUtils.getConstraints(fit_project)
+
+        assert constraint_dict == {'M2': [constraint, pd_constraint, magnetic_constraint]}

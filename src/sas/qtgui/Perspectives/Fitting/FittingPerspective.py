@@ -227,10 +227,12 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
                     constraint.value_ex = constraint_param[2]
                     constraint.validate = constraint_param[3]
                     model_key = tab.getModelKey(constraint)
-                    tab.addConstraintToRow(constraint=constraint,
-                                           row=tab.getRowFromName(
-                                               constraint_param[1]),
-                                           model_key=model_key)
+                    row = tab.getRowFromName(constraint_param[1])
+                    if constraint.func is None:
+                        # Parameter constrained to its current value: there is no expression to check
+                        tab.addSimpleConstraintToRow(constraint=constraint, row=row, model_key=model_key)
+                    else:
+                        tab.addConstraintToRow(constraint=constraint, row=row, model_key=model_key)
 
     def closeEvent(self, event):
         """

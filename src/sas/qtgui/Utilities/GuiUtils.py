@@ -1315,10 +1315,11 @@ def getConstraints(fit_project):
                     tab_name = param_value[0]
                 # get parameters
                 elif len(param_value) >= 5:
-                    ioffset = 1 if len(param_value) > 5 else 0
-                    cons = param_value[4+ioffset]
-                    # get the constraint
-                    if cons is not None and len(cons) == 5:
+                    # The constraint, if any, is the last item for all parameters (standard, polydisperse and
+                    # magnetic). Older projects don't save it for polydisperse parameters, whose last item is then
+                    # the distribution name, so check that it really is a constraint.
+                    cons = param_value[-1]
+                    if isinstance(cons, (list, tuple)) and len(cons) == 5:
                         constraint_list.append(cons)
                 else:
                     continue

@@ -953,6 +953,14 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         self.constraint_manager.addConstraintToRow(constraint, row, model_key)
 
+    def addSimpleConstraintToRow(self, constraint: Constraint, row: int, model_key: str = "standard") -> None:
+        """
+        Restore a constraint fixing a parameter to its current value.
+
+        Delegated to ConstraintManager.
+        """
+        self.constraint_manager.addSimpleConstraintToRow(constraint, row, model_key)
+
     def addSimpleConstraint(self) -> None:
         """
         Add a constraint on a single parameter.
@@ -3744,6 +3752,14 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         param_list.append(['model_name', str(self.cbModel.currentText())])
 
+        def constraintTuple(constraint: Constraint | None) -> tuple:
+            """
+            Serialize a constraint as (value, param, value_ex, validate, func), or () if there is none.
+            """
+            if constraint is None:
+                return ()
+            return (constraint.value, constraint.param, constraint.value_ex, constraint.validate, constraint.func)
+
         def gatherParams(row):
             """
             Create list of main parameters based on _model_model
@@ -3771,16 +3787,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             except Exception:
                 pass
             # Do we have any constraints on this parameter?
-            constraint = self.getConstraintForRow(row, model_key="standard")
-            cons = ()
-            if constraint is not None:
-                value = constraint.value
-                func = constraint.func
-                value_ex = constraint.value_ex
-                param = constraint.param
-                validate = constraint.validate
-
-                cons = (value, param, value_ex, validate, func)
+            cons = constraintTuple(self.getConstraintForRow(row, model_key="standard"))
 
             param_list.append([param_name, param_checked, param_value,param_error, param_min, param_max, cons])
 
@@ -3788,13 +3795,23 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             """
             Create list of polydisperse parameters based on _poly_model
             """
-            param_list.extend(self.polydispersity_widget.gatherPolyParams(row))
+            poly_params = self.polydispersity_widget.gatherPolyParams(row)
+            # Constraints are kept by the fitting widget, so add any constraint on this parameter here.
+            cons = constraintTuple(self.getConstraintForRow(row, model_key="poly"))
+            for poly_param in poly_params:
+                poly_param.append(cons)
+            param_list.extend(poly_params)
 
         def gatherMagnetParams(row):
             """
             Create list of magnetic parameters based on _magnet_model
             """
-            param_list.extend(self.magnetism_widget.gatherMagnetParams(row))
+            magnet_params = self.magnetism_widget.gatherMagnetParams(row)
+            # Constraints are kept by the fitting widget, so replace the empty placeholder with any constraint here.
+            cons = constraintTuple(self.getConstraintForRow(row, model_key="magnet"))
+            for magnet_param in magnet_params:
+                magnet_param[-1] = cons
+            param_list.extend(magnet_params)
 
         self.iterateOverModel(gatherParams)
         if self.chkPolydispersity.isChecked():
