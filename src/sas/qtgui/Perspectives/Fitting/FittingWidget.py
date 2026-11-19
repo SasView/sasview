@@ -26,6 +26,7 @@ from sas.qtgui.Perspectives.Fitting.FitThread import FitThread
 from sas.qtgui.Perspectives.Fitting.FittingController import FittingController
 from sas.qtgui.Perspectives.Fitting.FittingLogic import FittingLogic
 from sas.qtgui.Perspectives.Fitting.FittingState import FittingState
+from sas.qtgui.Perspectives.Fitting.InViewWidget import InViewWidget, suggest_finite_bounds
 from sas.qtgui.Perspectives.Fitting.MagnetismWidget import MagnetismWidget
 from sas.qtgui.Perspectives.Fitting.ModelSelectorWidget import ModelSelectorWidget
 from sas.qtgui.Perspectives.Fitting.ModelThread import Calc1D, Calc2D
@@ -133,6 +134,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             on_fit_ready_changed=lambda can_fit: self.cmdFit.setEnabled(can_fit)
         )
 
+        self._in_view_widget = None
+
         # Main GUI setup up
         self.setupUi(self)
         self.setWindowTitle("Fitting")
@@ -196,6 +199,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         new_font = 'font-family: -apple-system, "Helvetica Neue", "Ubuntu";'
         self.label_17.setStyleSheet(new_font)
         self.label_19.setStyleSheet(new_font)
+
+        #Interactive View
+        self.cmdInView.setText("Interactive View")
+        self.updateInViewButton()
 
     @property
     def logic(self) -> FittingLogic:
@@ -524,6 +531,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 self.chkChainFit.setVisible(True)
                 # This panel is not designed to view individual fits, so disable plotting
                 self.cmdPlot.setVisible(False)
+                self.cmdInView.setEnabled(False)
             # Similarly on other tabs
             self.options_widget.setEnablementOnDataLoad()
             self.onSelectModel()
@@ -531,6 +539,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.smearing_widget.updateData(self.data)
             # Check if a model was already loaded when data is sent to the tab
             self.cmdFit.setEnabled(self.haveParamsToFit())
+            self.updateInViewButton()
 
     def acceptsData(self) -> bool:
         """ Tells the caller this widget can accept new dataset """
@@ -582,6 +591,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Check if any parameters are ready for fitting
         self.cmdFit.setEnabled(self.haveParamsToFit())
         self.polydispersity_widget.togglePoly(isChecked)
+        self.updateInViewButton()
         self.undo_stack.push(
             CheckboxToggleCommand('chkPolydispersity', not isChecked, isChecked)
         )
@@ -603,6 +613,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Check if any parameters are ready for fitting
         self.cmdFit.setEnabled(self.haveParamsToFit())
         self.magnetism_widget.isActive = isChecked
+        self.updateInViewButton()
         self.undo_stack.push(
             CheckboxToggleCommand('chkMagnetism', not isChecked, isChecked)
         )
@@ -630,8 +641,19 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """ Enable/disable the controls dependent on 1D/2D data instance """
         self.chkMagnetism.setEnabled(isChecked)
         self.is2D = isChecked
+
+        if isChecked:
+            # 2D view is toggled on, therefore disable InView button,
+            # and close InView widget if opened
+            #self.cmdInView.setEnabled(False)
+            if getattr(self, '_in_view_widget', None):
+                self._in_view_widget.close()
+       # else:
+            # 2D view is toggled off, therefore enable InView button
+            #self.cmdInView.setEnabled(True)
         # Reload the current model — suppress so the inner onSelectModel
         # doesn't push its own command; toggle2D is one atomic undo step.
+        self.updateInViewButton()
         with self.undo_stack.suppressed():
             if self.logic.kernel_module:
                 self.onSelectModel()
@@ -655,6 +677,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.cbFileNames.setVisible(False)
         self.cmdFit.setEnabled(False)
         self.cmdPlot.setEnabled(False)
+        self.cmdInView.setText("Interactive View")
+        self.updateInViewButton()
         self.chkPolydispersity.setEnabled(False)
         self.chkPolydispersity.setChecked(False)
         self.chk2DView.setEnabled(True)
@@ -690,6 +714,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.cmdFit.clicked.connect(self.onFit)
         self.cmdPlot.clicked.connect(self.onPlot)
         self.cmdHelp.clicked.connect(self.onHelp)
+        self.cmdInView.clicked.connect(self.onInView)
 
         # Respond to change in parameters from the UI
         self._model_model.dataChanged.connect(self.onMainParamsChange)
@@ -711,11 +736,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.communicator.customModelDirectoryChanged.connect(self.onCustomModelChange)
         self.smearing_widget.smearingChangedSignal.connect(self.onSmearingOptionsUpdate)
         self.polydispersity_widget.cmdFitSignal.connect(lambda: self.cmdFit.setEnabled(self.haveParamsToFit()))
+        self.polydispersity_widget.cmdFitSignal.connect(self.updateInViewButton)
         self.polydispersity_widget.updateDataSignal.connect(lambda: self.updateData())
         self.polydispersity_widget.iterateOverModelSignal.connect(lambda: self.iterateOverModel(self.updateFunctionCaption))
         self.polydispersity_widget.deletePlotSignal.connect(self.setPlotDeletable)
         self.polydispersity_widget.toggledSignal.connect(self.onPolyToggled)
         self.magnetism_widget.cmdFitSignal.connect(lambda: self.cmdFit.setEnabled(self.haveParamsToFit()))
+        self.magnetism_widget.cmdFitSignal.connect(self.updateInViewButton)
         self.magnetism_widget.updateDataSignal.connect(lambda: self.updateData())
         self.magnetism_widget.toggledSignal.connect(self.onMagnetismToggled)
 
@@ -1434,6 +1461,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Let others know
         self.newModelSignal.emit()
+        self.updateInViewButton()
 
     def onSelectCategory(self) -> None:
         """
@@ -1489,6 +1517,75 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         models_to_show = [m[0] for m in model_list if m[0] not in SUPPRESSED_MODELS and m[1]]
         self.cbModel.addItems(sorted(models_to_show))
         self.cbModel.blockSignals(False)
+
+    def onInView(self):
+        """
+        Trigers the display of 'InView'
+        """
+        if self._in_view_widget is None:
+            self._in_view_widget = InViewWidget(parent=self)
+            self._in_view_widget.destroyed.connect(lambda: setattr(self, '_in_view_widget', None))
+
+            # When InView is closed, re-enable editing and clear reference
+            def _on_inview_closed():
+                self._in_view_widget = None
+                # Enabling paramters edits
+                self.lstParams.setEnabled(True)
+                self.cbCategory.setEnabled(True)
+                self.cmdFit.setEnabled(self.haveParamsToFit())
+                self.cmdPlot.setEnabled(True)
+
+
+            self._in_view_widget.destroyed.connect(_on_inview_closed)
+
+        self.lstParams.setEnabled(False)
+        self.cbCategory.setEnabled(False)
+        self.cmdFit.setEnabled(False)
+        self.cmdPlot.setEnabled(False)
+
+        ###
+        # arameters with +/-inf bounds: suggest finite ranges the user can accept
+        params = list(self.main_params_to_fit)
+        if self.chkPolydispersity.isChecked():
+            params += list(self.polydispersity_widget.poly_params_to_fit)
+        if not suggest_finite_bounds(self, params, parent = self):
+            self._in_view_widget.deleteLater()
+            self._in_view_widget = None
+            self.lstParams.setEnabled(True)
+            self.cbCategory.setEnabled(True)
+            self.cmdFit.setEnabled(self.haveParamsToFit())
+            self.cmdPlot.setEnabled(True)
+            return
+
+        # Pushing the 1D data set to InView
+        self._in_view_widget.setData(self.logic.data)
+
+        # Construct sliders from the Fit Page
+        self._in_view_widget.initFromFitPage(self)
+
+        self._in_view_widget.show()
+        self._in_view_widget.raise_()
+        self._in_view_widget.activateWindow()
+
+    def updateInViewButton(self):
+        tooltip = ("Interactive view: opens window with slider paramere that is checked\n"
+        "moving a slider updates the model curve on the top of your data.")
+        params = list(self.main_params_to_fit)
+        if self.chkPolydispersity.isChecked():
+            params += list(self.polydispersity_widget.poly_params_to_fit)
+        reason = None
+        if not self.data_is_loaded:
+            reason = "Load 1D data into this Fit page first"
+        elif self.logic.kernel_module is None:
+            reason = "Interactive View is not available for batch fitting"
+        elif self.fit_started:
+            reason = "Wait until fit has finished"
+        elif not params:
+            reason = "Check the box of at least one parameter in the table \n to get slider for it."
+        self.cmdInView.setEnabled(reason is None)
+        if reason is not None:
+            tooltip += "\n\nCurrently disabled: " + reason
+        self.cmdInView.setToolTip(tooltip)
 
     def onHelp(self):
         """
@@ -2337,6 +2434,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if model_column == 0:
             self.checkboxSelected(item, model_key="standard")
             self.cmdFit.setEnabled(self.haveParamsToFit())
+            self.updateInViewButton()
             # Fit-checkbox toggles intentionally excluded from undo stack
             return
 
@@ -3116,6 +3214,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.fit_started = False
         self.setInteractiveElements(True)
 
+        # Re-enable InView button for 1D data
+        self.updateInViewButton()
+       # if not getattr(self, 'is2D', False):
+       #     self.cmdInView.setEnabled(True)
+
     def disableInteractiveElements(self) -> None:
         """
         Set button caption on fitting/calculate start
@@ -3127,6 +3230,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.cmdFit.setText('Stop fit')
         self.setInteractiveElements(False)
 
+        # Disable InView button and close the widget if opened
+        self.cmdInView.setEnabled(False)
+        isInView = getattr(self, '_in_view_widget', None)
+        if isInView is not None:
+            try:
+                isInView.close()
+            except Exception:
+                pass
+
     def disableInteractiveElementsOnCalculate(self) -> None:
         """
         Set button caption on fitting/calculate start
@@ -3137,6 +3249,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.cmdFit.setStyleSheet(BG_ERROR)
         self.cmdFit.setText('Running...')
         self.setInteractiveElements(False)
+
+        # Disable InView button and close the widget if opened
+        self.cmdInView.setEnabled(False)
+        isInView = getattr(self, '_in_view_widget', None)
+        if isInView is not None:
+            try:
+                isInView.close()
+            except Exception:
+                pass
 
     def readFitPage(self, fp: FitPage) -> None:
         """
