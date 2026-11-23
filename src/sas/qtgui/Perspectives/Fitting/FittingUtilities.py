@@ -32,6 +32,11 @@ poly_header_tooltips = ['Select parameter for fitting',
 error_tooltip = 'Error value for fitted parameter'
 header_error_caption = 'Error'
 
+FREE_FORM_LOCK_TOOLTIP = (
+    "Free-form inversion uses every parameter, so the fit checkboxes are locked.\n"
+    "Uncheck Free Form to choose parameters individually."
+)
+
 class ToolTippedItemModel(QtGui.QStandardItemModel):
     """
     Subclass from QStandardItemModel to allow displaying tooltips in
