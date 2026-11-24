@@ -16,7 +16,7 @@ The data manager can keep track of associations between data. This means that da
 
 For all tracked data, the Data Manager should be the **single point of truth.** Generally, copies of objects should not be kept, and all objects should refer to the Data Manager. Because of this, certain things must be avoided:
 
-+ Perspectives should not keep copies of data. Instead, they should always refer back to the Data Manager for their data. Sometimes it is useful to create a property to do this automatically (see the perspective creation tutorial).
++ **Perspectives should not keep copies of data.** Instead, they should always refer back to the Data Manager for their data. Sometimes it is useful to create a property to do this automatically (see the perspective creation tutorial).
 
 Adding data to the data manager
 ------------------------------------------------------
