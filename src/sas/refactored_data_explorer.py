@@ -1,6 +1,5 @@
 import logging
 from functools import cached_property
-from os.path import basename
 
 from PySide6.QtCore import Signal, Slot
 from PySide6.QtWidgets import (
