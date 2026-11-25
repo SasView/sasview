@@ -303,14 +303,14 @@ class FittingWidgetTest:
         widget.cbModel.setCurrentIndex(model_index)
 
         # test the model combo content
-        assert widget.cbModel.count() == 30
+        assert widget.cbModel.count() == 29
 
         # Try to change back to default
         widget.cbCategory.setCurrentIndex(0)
 
         # Observe no such luck
         assert widget.cbCategory.currentIndex() == 8
-        assert widget.cbModel.count() == 30
+        assert widget.cbModel.count() == 29
 
         # Set the structure factor
         structure_index=widget.cbCategory.findText(FittingWidget.CATEGORY_STRUCTURE)
