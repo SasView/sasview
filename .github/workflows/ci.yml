@@ -32,11 +32,13 @@ env:
   # Version of Python that will be used in the release builds
   RELEASE_PYVER: "3.13"
   # Determine if this CI is being done during the release polishing steps
+  # Note that `github.base_ref` returns the short branch name (i.e., "release"
+  # rather than "refs/head/release"), hence the change in format.
   RELEASE_BRANCH_BUILD: ${{
       (
         (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/release')) ||
         (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
-        (github.event_name == 'pull_request' && startsWith(github.base_ref, 'refs/heads/release'))
+        (github.event_name == 'pull_request' && startsWith(github.base_ref, 'release'))
       ) && 'true' || '' }}
 
   # The test-installer job can use an old existing image rather than the most
