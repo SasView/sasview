@@ -127,6 +127,10 @@ class TrackedFit:
         return self._data_manager.get_association_of_type(self, SasData)
 
     @property
+    def is_theory(self):
+        return self.data_being_fitted is None
+
+    @property
     def formatName(self) -> str:
         if self.data_being_fitted:
             return f"Fit of {self.data_being_fitted.name}"
