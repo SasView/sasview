@@ -165,13 +165,13 @@ class NewDataExplorer(QWidget):
         status = dialog.exec()
         if status == 1:
             try:
-                loaded = AsciiImporter(dialog.params).load_data()
+                loaded = AsciiImporter(params=dialog.params).load_data()
             except Exception as err:
                 # A number of errors can be thrown here, a few examples include:
                 #    TypeError: thrown when the ascii loader doesn't recognize the file
                 #    FileNotFoundError: the file wasn't accessible
                 #    ValueError: Unlikely, but could happen during loading on float() conversion
                 logging.error(err)
-                loaded = []
-            for datum in loaded:
+                loaded = {}
+            for datum in loaded.values():
                 self._data_manager.add_data(datum)
