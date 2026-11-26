@@ -127,7 +127,7 @@ class TrackedFit:
         return self._data_manager.get_association_of_type(self, SasData)
 
     @property
-    def is_theory(self):
+    def is_theory(self) -> bool:
         return self.data_being_fitted is None
 
     @property
