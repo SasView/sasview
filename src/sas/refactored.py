@@ -113,12 +113,6 @@ class Perspective(QDialog):
         return [data for data in self._data_manager.get_all_associations(self)
                 if isinstance(data, TrackedPlot)]
 
-class Theory:
-    # TODO: Need to put stuff here that is unique to Theory. Right now, looking
-    # at the current SasView codebase, it seems they are all just Data1Ds with
-    # nothing else special.
-    pass
-
 
 class FitModelParameters(ABC):
     pass
