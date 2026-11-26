@@ -1,4 +1,4 @@
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QHBoxLayout, QPushButton, QWidget
 
 from sasdata.ascii_reader_metadata import AsciiReaderMetadata
@@ -8,7 +8,7 @@ class MetadataComponentSelector(QWidget):
     # Creating a separate signal for this because the custom button may be destroyed/recreated whenever the options are
     # redrawn.
 
-    custom_button_pressed = Signal(Qt.MouseButton)
+    custom_button_pressed = Signal()
 
     def __init__(self, category: str, metadatum: str, filename: str, internal_metadata: AsciiReaderMetadata):
         super().__init__()
