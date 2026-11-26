@@ -1,8 +1,9 @@
-
-
 import logging
+import os.path
+from collections.abc import Iterator
 
-from PySide6.QtCore import Signal, Slot
+from PySide6.QtCore import Qt, Signal, Slot
+from PySide6.QtGui import QDragEnterEvent, QDragLeaveEvent, QDragMoveEvent, QDropEvent
 from PySide6.QtWidgets import (
     QComboBox,
     QFileDialog,
@@ -10,6 +11,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QMessageBox,
     QPushButton,
+    QStackedWidget,
     QVBoxLayout,
     QWidget,
 )
@@ -19,7 +21,8 @@ from sasdata.data_io.importer import Importer
 from sasdata.data_io.importers import AsciiImporter
 
 from sas.ascii_dialog.dialog import AsciiDialog
-from sas.data_explorer_error_message import DataExplorerImportMessage, DataExplorerRemoveMessage
+from sas.data_explorer_drop_hint import DropHint
+from sas.data_explorer_error_message import DataExplorerRemoveMessage
 from sas.data_explorer_tree import DataExplorerTree
 from sas.data_manager import NewDataManager as DataManager
 from sas.dummy_perspective import DummyPerspective
@@ -47,6 +50,7 @@ class NewDataExplorer(QWidget):
     def __init__(self, data_manager: DataManager, parent: QWidget | None = ...) -> None:
         super().__init__(parent)
         self._data_manager = data_manager
+        self.setAcceptDrops(True)
 
         self.layout = QVBoxLayout(self)
 
@@ -81,6 +85,16 @@ class NewDataExplorer(QWidget):
         self.tree_view = DataExplorerTree(self._data_manager, self)
         self.tree_view.current_datum_removed.connect(self.onRemove)
 
+        # While the tree is empty, show a hint that files can be loaded or dropped.
+        self.drop_hint = DropHint(self)
+        self.drop_hint.load_requested.connect(self.onLoadFile)
+        self.tree_stack = QStackedWidget(self)
+        self.tree_stack.addWidget(self.drop_hint)
+        self.tree_stack.addWidget(self.tree_view)
+        self.tree_view.model().rowsInserted.connect(self.updateDropHint)
+        self.tree_view.model().rowsRemoved.connect(self.updateDropHint)
+        self.tree_view.model().modelReset.connect(self.updateDropHint)
+
         # TODO: Is there a better name for this?
         self.final_row = QHBoxLayout()
 
@@ -97,8 +111,13 @@ class NewDataExplorer(QWidget):
         self.layout.addLayout(self.add_data_row)
         self.layout.addWidget(self.filter_label)
         self.layout.addLayout(self.filter_row)
-        self.layout.addWidget(self.tree_view)
+        self.layout.addWidget(self.tree_stack)
         self.layout.addLayout(self.final_row)
+
+    @Slot()
+    def updateDropHint(self):
+        empty = self.tree_view.topLevelItemCount() == 0
+        self.tree_stack.setCurrentWidget(self.drop_hint if empty else self.tree_view)
 
     @Slot()
     def add_perspective(self):
@@ -151,13 +170,85 @@ class NewDataExplorer(QWidget):
             self,
             "Open Data File",
         )
-        if len(filenames) == 0:
+        self.loadPaths(filenames)
+
+    @Slot()
+    def onLoadFolder(self):
+        folder = QFileDialog.getExistingDirectory(self, "Open Data Folder")
+        if folder:
+            self.loadPaths([folder])
+
+    def loadPaths(self, paths: list[str]):
+        """Load files and folders into the data manager. Anything that can't be
+        loaded is reported together at the end."""
+        if len(paths) == 0:
             return
-        measurements, errors = Importer().import_data(filenames)
+        clean_paths = self._get_files_from_directories(paths)
+        measurements, failures = Importer().import_data(clean_paths)
         for measurement in measurements:
             self._data_manager.add_data(measurement)
-        if errors:
-            DataExplorerImportMessage(self, errors).show()
+
+        if failures:
+            QMessageBox.critical(
+                self,
+                "Data Loading Error",
+                "The following files could not be loaded:\n\n" + "\n".join(failures),
+            )
+            logging.warning("The following files could not be loaded: " + "; ".join(failures))
+
+    @staticmethod
+    def _get_files_from_directories(paths):
+        new_paths = []
+        for path in paths:
+            if os.path.isdir(path):
+                with os.scandir(paths[0]) as entries:
+                    new_paths.append(
+                        sorted(entry.path for entry in entries if entry.is_file() and not entry.name.startswith(".")))
+            elif os.path.isfile(path):
+                new_paths.append(path)
+        return new_paths
+
+    @staticmethod
+    def _droppedPaths(event: QDragEnterEvent | QDragMoveEvent | QDropEvent) -> Iterator[str]:
+        """Local files and folders in a drag. Nothing is checked or opened here;
+        whatever the user drops is attempted, and problems are reported on load."""
+        for url in event.mimeData().urls():
+            if path := url.toLocalFile():
+                yield path
+
+    @classmethod
+    def _hasDroppablePaths(cls, event: QDragEnterEvent | QDragMoveEvent) -> bool:
+        return any(cls._droppedPaths(event))
+
+    def dragEnterEvent(self, event: QDragEnterEvent):
+        # Accept any drag carrying local files or folders. Only drags without
+        # any (e.g. text or web links) show the drop isn't allowed.
+        if self._hasDroppablePaths(event):
+            event.setDropAction(Qt.DropAction.CopyAction)
+            event.accept()
+            self.drop_hint.setActive(True)
+        else:
+            event.ignore()
+
+    def dragMoveEvent(self, event: QDragMoveEvent):
+        if self._hasDroppablePaths(event):
+            event.setDropAction(Qt.DropAction.CopyAction)
+            event.accept()
+        else:
+            event.ignore()
+
+    def dragLeaveEvent(self, event: QDragLeaveEvent):
+        self.drop_hint.setActive(False)
+
+    def dropEvent(self, event: QDropEvent):
+        self.drop_hint.setActive(False)
+        filenames = list(self._droppedPaths(event))
+        if not filenames:
+            event.ignore()
+            return
+        event.setDropAction(Qt.DropAction.CopyAction)
+        event.accept()
+        self.loadPaths(filenames)
 
     @Slot()
     def onAdvancedLoad(self):
