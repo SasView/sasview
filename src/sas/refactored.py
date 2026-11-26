@@ -132,12 +132,14 @@ class TrackedFit:
 
     @property
     def formatName(self) -> str:
-        if self.data_being_fitted:
-            return f"Fit of {self.data_being_fitted.name}"
-        else:
+        if self.is_theory:
             # TODO: Could potentially return a more elaborate name of what the
             # theory object is about.
             return "Theory"
+        else:
+            # data_being_fitted will definitely not be None if this is not a theory object.
+            data = cast(SasData, self.data_being_fitted)
+            return f"Fit of {data.name}"  
 
     def __init__(self, data_manager: "DataManager", model_parameters: FitModelParameters, fit_data: SasMeasurement):
         self._data_manager = data_manager
