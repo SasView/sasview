@@ -139,7 +139,7 @@ class TrackedFit:
         else:
             # data_being_fitted will definitely not be None if this is not a theory object.
             data = cast(SasData, self.data_being_fitted)
-            return f"Fit of {data.name}"  
+            return f"Fit of {data.name}"
 
     def __init__(self, data_manager: "DataManager", model_parameters: FitModelParameters, fit_data: SasMeasurement):
         self._data_manager = data_manager
