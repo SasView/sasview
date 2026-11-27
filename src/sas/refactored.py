@@ -113,12 +113,6 @@ class Perspective(QDialog):
         return [data for data in self._data_manager.get_all_associations(self)
                 if isinstance(data, TrackedPlot)]
 
-class Theory:
-    # TODO: Need to put stuff here that is unique to Theory. Right now, looking
-    # at the current SasView codebase, it seems they are all just Data1Ds with
-    # nothing else special.
-    pass
-
 
 class FitModelParameters(ABC):
     pass
@@ -133,13 +127,19 @@ class TrackedFit:
         return self._data_manager.get_association_of_type(self, SasData)
 
     @property
+    def is_theory(self) -> bool:
+        return self.data_being_fitted is None
+
+    @property
     def formatName(self) -> str:
-        if self.data_being_fitted:
-            return f"Fit of {self.data_being_fitted.name}"
-        else:
+        if self.is_theory:
             # TODO: Could potentially return a more elaborate name of what the
             # theory object is about.
             return "Theory"
+        else:
+            # data_being_fitted will definitely not be None if this is not a theory object.
+            data = cast(SasData, self.data_being_fitted)
+            return f"Fit of {data.name}"
 
     def __init__(self, data_manager: "DataManager", model_parameters: FitModelParameters, fit_data: SasMeasurement):
         self._data_manager = data_manager
