@@ -19,12 +19,11 @@ def patch_heavyweight_calculators():
     """Prevent heavyweight calculator widgets from being instantiated during tests.
 
     - MuMag: calls plt.figure() twice in __init__, causing 'too many figures' warnings.
-    - Shape2SAS: uses Q3DScatter (OpenGL), which crashes under the offscreen platform.
+
+    Shape2SAS (which crashes under the offscreen platform) is no longer built at
+    startup: the tools registry creates it on first use.
     """
-    with (
-        patch("sas.qtgui.MainWindow.GuiManager.MuMag", MagicMock),
-        patch("sas.qtgui.MainWindow.GuiManager.Shape2SAS", MagicMock),
-    ):
+    with patch("sas.qtgui.MainWindow.GuiManager.MuMag", MagicMock):
         yield
 
 

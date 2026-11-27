@@ -16,6 +16,7 @@ from sasdata.file_converter.ascii2d_loader import ASCII2DLoader
 from sasdata.file_converter.nxcansas_writer import NXcanSASWriter
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Calculators.calculator_tool import CalculatorTool
 from sas.qtgui.Utilities.FrameSelect import FrameSelect
 from sas.system import version
 
@@ -24,19 +25,15 @@ from .UI.FileConverterUI import Ui_FileConverterUI
 logger = logging.getLogger(__name__)
 
 
-class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
+class FileConverterWidget(CalculatorTool, QtWidgets.QDialog, Ui_FileConverterUI):
     """
     Class to describe the behaviour of the File Converter widget
     """
-    def __init__(self, parent=None):
-        """
-        Parent here is the GUI Manager. Required for access to
-        the help location and to the file loader.
-        """
-        super(FileConverterWidget, self).__init__()
+    help_url = "/user/qtgui/Calculators/file_converter_help.html"
 
+    def __init__(self, parent=None, **kwargs):
+        super().__init__(parent, **kwargs)
 
-        self.parent = parent
         self.setupUi(self)
 
         self.setWindowTitle("File Converter")
@@ -151,13 +148,6 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
         if self.chkLoadFile.isChecked():
             # awful climbing up the hierarchy... don't do that. please.
             GuiUtils.communicator.fileReadSignal.emit([self.ofile])
-
-    def onHelp(self):
-        """
-        Display online help related to the file converter
-        """
-        location = "/user/qtgui/Calculators/file_converter_help.html"
-        self.parent.showHelp(location)
 
     def onIFileOpen(self):
         """

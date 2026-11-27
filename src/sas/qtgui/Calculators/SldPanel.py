@@ -6,6 +6,7 @@ from pyparsing.exceptions import ParseException
 from PySide6 import QtCore, QtGui, QtWidgets
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Calculators.calculator_tool import CalculatorTool
 
 # Local UI
 from sas.qtgui.Calculators.UI.SldPanel import Ui_SldPanel
@@ -82,12 +83,11 @@ def xraySldAlgorithm(molecular_formula, mass_density, xray_wavelength):
                          scaled_xray_sld_imag)
 
 
-class SldPanel(QtWidgets.QDialog):
+class SldPanel(CalculatorTool, QtWidgets.QDialog):
+    help_url = "/user/qtgui/Calculators/sld_calculator_help.html"
 
-    def __init__(self, parent=None):
-        super(SldPanel, self).__init__()
-
-        self.manager = parent
+    def __init__(self, parent=None, **kwargs):
+        super().__init__(parent, **kwargs)
 
         self.setupUi()
         self.setFixedSize(self.minimumSizeHint())
@@ -120,7 +120,7 @@ class SldPanel(QtWidgets.QDialog):
         self.ui.editXrayWavelength.setValidator(QtGui.QRegularExpressionValidator(rx, self.ui.editXrayWavelength))
 
         # signals
-        self.ui.helpButton.clicked.connect(self.displayHelp)
+        self.ui.helpButton.clicked.connect(self.onHelp)
         self.ui.closeButton.clicked.connect(self.closePanel)
         self.ui.calculateButton.clicked.connect(self.calculateSLD)
 
@@ -248,11 +248,6 @@ class SldPanel(QtWidgets.QDialog):
         finally:
             pass
         #self.model.endResetModel()
-
-    def displayHelp(self):
-        location = "/user/qtgui/Calculators/sld_calculator_help.html"
-        self.manager.showHelp(location)
-
 
     def closePanel(self):
         """

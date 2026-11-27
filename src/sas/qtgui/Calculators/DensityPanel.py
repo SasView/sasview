@@ -2,6 +2,7 @@
 from periodictable import formula as Formula
 from PySide6 import QtCore, QtGui, QtWidgets
 
+from sas.qtgui.Calculators.calculator_tool import CalculatorTool
 from sas.qtgui.Calculators.UI.DensityPanel import Ui_DensityPanel
 
 # Local UI
@@ -30,13 +31,13 @@ def toMolarMass(formula):
         return ""
 
 
-class DensityPanel(QtWidgets.QDialog):
+class DensityPanel(CalculatorTool, QtWidgets.QDialog):
+    help_url = "/user/qtgui/Calculators/density_calculator_help.html"
 
-    def __init__(self, parent=None):
-        super(DensityPanel, self).__init__()
+    def __init__(self, parent=None, **kwargs):
+        super().__init__(parent, **kwargs)
 
         self.mode = None
-        self.manager = parent
         self.setupUi()
 
         self.setupModel()
@@ -53,7 +54,7 @@ class DensityPanel(QtWidgets.QDialog):
         self.ui.editMassDensity.setValidator(QtGui.QRegularExpressionValidator(rx, self.ui.editMassDensity))
 
         self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Reset).clicked.connect(self.modelReset)
-        self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Help).clicked.connect(self.displayHelp)
+        self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Help).clicked.connect(self.onHelp)
 
     def setupModel(self):
         self.model = QtGui.QStandardItemModel(self)
@@ -175,9 +176,5 @@ class DensityPanel(QtWidgets.QDialog):
             self.model.item(MODEL.MASS_DENSITY     ).setText("")
         finally:
             pass
-
-    def displayHelp(self):
-        location = "/user/qtgui/Calculators/density_calculator_help.html"
-        self.manager.showHelp(location)
 
 

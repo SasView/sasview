@@ -2,6 +2,7 @@
 import pytest
 from PySide6 import QtWidgets
 
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Calculators.KiessigPanel import KiessigPanel
 
 
@@ -29,12 +30,10 @@ class KiessigCalculatorTest:
 
     def testHelp(self, widget, mocker):
         """ Assure help file is shown """
-        widget.manager = QtWidgets.QWidget()
-        mocker.patch.object(widget.manager, 'showHelp', create=True)
+        show_help = mocker.patch.object(GuiUtils, 'showHelp')
         widget.onHelp()
-        widget.manager.showHelp.assert_called_once()
-        args = widget.manager.showHelp.call_args
-        assert 'kiessig_calculator_help.html' in args[0][0]
+        show_help.assert_called_once()
+        assert 'kiessig_calculator_help.html' in show_help.call_args[0][0]
 
     def testComplexEntryNumbers(self, widget):
         """ User entered compound calculations and subsequent reset"""

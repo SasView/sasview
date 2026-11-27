@@ -5,6 +5,7 @@ from PySide6.QtTest import QTest
 
 # Local
 #from sas.qtgui.Calculators.SldPanel import SldResult
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Calculators.SldPanel import SldPanel, neutronSldAlgorithm
 
 
@@ -107,9 +108,7 @@ class SLDCalculatorTest:
 
     def testHelp(self, widget, mocker):
         """ Assure help file is shown """
-        widget.manager = QtWidgets.QWidget()
-        mocker.patch.object(widget.manager, 'showHelp', create=True)
-        widget.displayHelp()
-        widget.manager.showHelp.assert_called_once()
-        args = widget.manager.showHelp.call_args
-        assert 'sld_calculator_help.html' in args[0][0]
+        show_help = mocker.patch.object(GuiUtils, 'showHelp')
+        widget.onHelp()
+        show_help.assert_called_once()
+        assert 'sld_calculator_help.html' in show_help.call_args[0][0]

@@ -88,16 +88,8 @@
      <string>Tools</string>
     </property>
     <addaction name="actionData_Operation"/>
-    <addaction name="actionFile_Converter"/>
-    <addaction name="separator"/>
-    <addaction name="actionSLD_Calculator"/>
-    <addaction name="actionDensity_Volume_Calculator"/>
-    <addaction name="actionSlit_Size_Calculator"/>
-    <addaction name="actionKeissig_Calculator"/>
-    <addaction name="actionSAS_Resolution_Estimator"/>
     <addaction name="actionMuMag_Fitter"/>
     <addaction name="actionGeneric_Scattering_Calculator"/>
-    <addaction name="actionShape2SAS_Calculator"/>
     <addaction name="separator"/>
     <addaction name="actionImage_Viewer"/>
     <addaction name="actionOrientation_Viewer"/>
@@ -385,31 +377,6 @@
     <string>Data Operation</string>
    </property>
   </action>
-  <action name="actionSLD_Calculator">
-   <property name="text">
-    <string>SLD Calculator</string>
-   </property>
-  </action>
-  <action name="actionDensity_Volume_Calculator">
-   <property name="text">
-    <string>Density/Volume Calculator</string>
-   </property>
-  </action>
-  <action name="actionSlit_Size_Calculator">
-   <property name="text">
-    <string>Slit Size Calculator</string>
-   </property>
-  </action>
-  <action name="actionSAS_Resolution_Estimator">
-   <property name="text">
-    <string>Q Resolution Estimator</string>
-   </property>
-  </action>
-  <action name="actionShape2SAS_Calculator">
-   <property name="text">
-    <string>Shape2SAS Calculator (Experimental)</string>
-   </property>
-  </action>
   <action name="actionGeneric_Scattering_Calculator">
    <property name="text">
     <string>Generic Scattering Calculator</string>
@@ -423,11 +390,6 @@
   <action name="actionImage_Viewer">
    <property name="text">
     <string>Image Viewer</string>
-   </property>
-  </action>
-  <action name="actionFile_Converter">
-   <property name="text">
-    <string>File Converter</string>
    </property>
   </action>
   <action name="actionNew_Fit_Page">
@@ -598,11 +560,6 @@
   <action name="actionLatex">
    <property name="text">
     <string>Latex</string>
-   </property>
-  </action>
-  <action name="actionKeissig_Calculator">
-   <property name="text">
-    <string>Kiessig Thickness Calculator</string>
    </property>
   </action>
   <action name="actionGPU_Options">
