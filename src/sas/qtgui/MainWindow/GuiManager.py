@@ -22,12 +22,11 @@ from shiboken6 import isValid
 from twisted.internet import reactor
 
 from sasdata.data import SasData
-from sasdata.data_io.importers.import_ascii import load_data
+from sasdata.data_io.importers.import_ascii import AsciiImporter
 
 import sas
 
 # Perspectives
-import sas.qtgui.Perspectives as Perspectives
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
@@ -177,10 +176,7 @@ class GuiManager:
         self._workspace.addDockWidget(Qt.BottomDockWidgetArea, self.logDockWidget)
 
         # Preferences Panel initialized in loadAllPerspectives()
-        self.preferences = None
-
-        # Load all perspectives - Preferences panel must exist
-        self.loadAllPerspectives()
+        self.preferences = PreferencesPanel(self._parent)
 
         # Add FileDialog widget as docked - Perspectives must be loaded to ensure default perspective is shown
         # self.filesWidget = DataExplorerWindow(self._parent, self, manager=self._data_manager)
@@ -225,33 +221,6 @@ class GuiManager:
         self.GENSASCalculator = None
         self.DataOperation = DataOperationUtilityPanel(self)
         self.WhatsNew = WhatsNewWidget(self._parent)
-
-
-    def loadAllPerspectives(self):
-        """ Load all the perspectives"""
-        # Close any existing perspectives to prevent multiple open instances
-        self.closeAllPerspectives()
-        self.preferences = PreferencesPanel(self._parent)
-        # Load all perspectives
-        loaded_dict = {} # dictionary that will ultimately keep track of all perspective instances
-        for name, perspective in Perspectives.PERSPECTIVES.items():
-            try:
-                # Instantiate perspective
-                loaded_perspective = perspective(parent=self)
-
-                # Save in main dict
-                loaded_dict[name] = loaded_perspective
-
-                # Register the perspective with the prefernce object
-                self.preferences.registerPerspectivePreferences(loaded_perspective)
-
-            except Exception as e:
-                logger.error(f"Unable to load {name} perspective.\n{e}")
-                logger.error(e, exc_info=True)
-
-        # attach loaded perspectives to this class
-        self.loadedPerspectives = loaded_dict
-
 
     def closeAllPerspectives(self):
         # Close all perspectives if they are open
@@ -1738,6 +1707,6 @@ class GuiManager:
         dialog = AsciiDialog()
         status = dialog.exec()
         if status == 1:
-            loaded = load_data(dialog.params)
+            loaded = AsciiImporter.load_data(dialog.params)
             for datum in loaded:
                 logger.info(datum.summary())
